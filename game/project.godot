@@ -11,6 +11,8 @@ run/main_scene="res://scenes/boot/Boot.tscn"
 config/version="0.1.0"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.12, 0.1, 0.18, 1)
+config/quit_on_go_back=false
+run/max_fps=60
 
 [autoload]
 
@@ -25,6 +27,9 @@ window/size/window_height_override=540
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
+window/ios/hide_home_indicator=true
+window/ios/suppress_ui_gesture=true
+window/frame_pacing/android/swappy_mode=0
 
 [input_devices]
 

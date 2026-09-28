@@ -1,0 +1,22 @@
+# Godot
+game/.godot/
+game/export/
+game/android/build/
+*.translation
+# builds
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+# local
+.DS_Store
+*.log
+# Godot Android build template (installed per export by --install-android-build-template)
+game/android/
+# signing material
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.p8

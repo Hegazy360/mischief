@@ -1,0 +1,44 @@
+; Engine configuration file.
+; Mischief Next Door — Godot 4.7 project (landscape). See ../CLAUDE.md and ../docs/.
+
+config_version=5
+
+[application]
+
+config/name="Mischief Next Door"
+config/description="Sneak around your grumpy neighbour's house and prank him on live TV."
+run/main_scene="res://scenes/boot/Boot.tscn"
+config/version="0.1.0"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.12, 0.1, 0.18, 1)
+
+[autoload]
+
+DevShot="*res://autoload/dev_shot.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1200
+window/size/window_height_override=540
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=4
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+2d/snap/snap_2d_transforms_to_pixel=false
+environment/defaults/default_clear_color=Color(0.12, 0.1, 0.18, 1)

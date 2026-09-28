@@ -1,0 +1,33 @@
+# Mischief Next Door CI: GDScript tests (headless Godot) + committed import metadata.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  godot:
+    name: Godot tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+      - name: Import metadata is committed (.import / .uid sidecars)
+        run: tools/ci/check_import_meta.sh
+      - name: GDScript test suite
+        run: tools/scripts/test_game.sh ci

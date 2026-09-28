@@ -1,0 +1,70 @@
+# Android preview build: an installable debug APK for sideloading/testing, no secrets needed.
+# Signed with a throwaway debug key generated on the runner (not for Play Store upload —
+# use android.yml for signed release builds). Download it from the run's "Artifacts" section.
+name: Android preview APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "game/**"
+      - ".github/workflows/android-preview.yml"
+      - "tools/scripts/export_android.sh"
+      - "tools/ci/export_lib.sh"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  apk:
+    name: Export debug APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK packages (Godot 4.7.2 template needs build-tools 36.1.0)
+        run: |
+          sm="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$sm" --licenses >/dev/null || true
+          "$sm" --install "platform-tools" "platforms;android-36" "build-tools;36.1.0" >/dev/null
+          ls "$ANDROID_HOME/build-tools"
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          templates: android
+
+      - name: Export debug APK (arm64-v8a + armeabi-v7a)
+        run: tools/scripts/export_android.sh
+
+      - name: Summary
+        run: |
+          apk=build/android/mischief-debug.apk
+          size=$(du -h "$apk" | cut -f1)
+          {
+            echo "### Mischief debug APK ($size)"
+            echo "Download **mischief-debug-apk** below, unzip, copy the .apk to an Android 7+ phone and open it"
+            echo "(allow installs from this source). Plays fully offline."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mischief-debug-apk
+          path: build/android/mischief-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

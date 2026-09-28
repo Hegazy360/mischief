@@ -1,0 +1,97 @@
+name: Setup Godot
+description: >-
+  Download (and cache) the official Godot editor binary, put `godot` on PATH and optionally
+  install a subset of the export templates. Linux x86_64 and macOS runners.
+inputs:
+  version:
+    description: Godot version without the "-stable" suffix.
+    default: "4.7.2"
+  templates:
+    description: >-
+      Space-separated export template groups to install: android, web, ios (empty = none).
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Resolve paths
+      id: paths
+      shell: bash
+      run: |
+        v="${{ inputs.version }}"
+        if [[ "$RUNNER_OS" == macOS ]]; then
+          echo "editor_zip=Godot_v${v}-stable_macos.universal.zip" >> "$GITHUB_OUTPUT"
+          echo "templates_dir=$HOME/Library/Application Support/Godot/export_templates/${v}.stable" >> "$GITHUB_OUTPUT"
+        else
+          echo "editor_zip=Godot_v${v}-stable_linux.x86_64.zip" >> "$GITHUB_OUTPUT"
+          echo "templates_dir=$HOME/.local/share/godot/export_templates/${v}.stable" >> "$GITHUB_OUTPUT"
+        fi
+        echo "bin_dir=$RUNNER_TOOL_CACHE/godot-${v}" >> "$GITHUB_OUTPUT"
+        groups="$(echo "${{ inputs.templates }}" | tr ' ' '\n' | sort -u | tr '\n' '-' | sed 's/-$//')"
+        echo "groups=${groups}" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Godot editor
+      id: cache-editor
+      uses: actions/cache@v6
+      with:
+        path: ${{ steps.paths.outputs.bin_dir }}
+        key: godot-editor-${{ runner.os }}-${{ inputs.version }}
+
+    - name: Download Godot editor
+      if: steps.cache-editor.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        base="https://github.com/godotengine/godot/releases/download/${{ inputs.version }}-stable"
+        zip="${{ steps.paths.outputs.editor_zip }}"
+        dir="${{ steps.paths.outputs.bin_dir }}"
+        mkdir -p "$dir" && cd "$dir"
+        curl -fsSL --retry 3 -o "$zip" "$base/$zip"
+        curl -fsSL --retry 3 -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+        grep " $zip\$" SHA512-SUMS.txt | shasum -a 512 -c -
+        unzip -q "$zip" && rm "$zip"
+        if [[ "$RUNNER_OS" == macOS ]]; then
+          ln -sf "$dir/Godot.app/Contents/MacOS/Godot" "$dir/godot"
+        else
+          mv Godot_v*_linux.x86_64 godot
+        fi
+        chmod +x "$dir/godot"
+
+    - name: Put godot on PATH
+      shell: bash
+      run: |
+        echo "${{ steps.paths.outputs.bin_dir }}" >> "$GITHUB_PATH"
+        "${{ steps.paths.outputs.bin_dir }}/godot" --version
+
+    - name: Cache export templates
+      if: inputs.templates != ''
+      id: cache-templates
+      uses: actions/cache@v6
+      with:
+        path: ${{ steps.paths.outputs.templates_dir }}
+        key: godot-templates-${{ runner.os }}-${{ inputs.version }}-${{ steps.paths.outputs.groups }}
+
+    - name: Download export templates
+      if: inputs.templates != '' && steps.cache-templates.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        base="https://github.com/godotengine/godot/releases/download/${{ inputs.version }}-stable"
+        tpz="Godot_v${{ inputs.version }}-stable_export_templates.tpz"
+        tmp="$RUNNER_TEMP/godot-tpl"; mkdir -p "$tmp" && cd "$tmp"
+        curl -fsSL --retry 3 -o "$tpz" "$base/$tpz"
+        curl -fsSL --retry 3 -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+        grep " $tpz\$" SHA512-SUMS.txt | shasum -a 512 -c -
+        pats=("templates/version.txt")
+        for g in ${{ inputs.templates }}; do
+          case "$g" in
+            android) pats+=("templates/android_*") ;;
+            web) pats+=("templates/web_*") ;;
+            ios) pats+=("templates/ios.zip") ;;
+            *) echo "unknown template group $g" >&2; exit 1 ;;
+          esac
+        done
+        unzip -q "$tpz" "${pats[@]}"
+        dest="${{ steps.paths.outputs.templates_dir }}"
+        mkdir -p "$dest" && mv templates/* "$dest"/
+        rm -rf "$tmp"
+        ls -la "$dest"

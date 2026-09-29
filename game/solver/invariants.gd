@@ -14,8 +14,8 @@
 ##  7. Bellows' non-chase speed ≤ 1.15 × walk; the `b_activity` sequence follows the loop order;
 ##  8. no `spot_start` while he is reacting or within 60 ticks after;
 ##  9. progress: his activity changes at least every 60 s (player-led gates excepted); every
-##     go/move produces movement, an arrival or a rejection within 150 ticks (or is held and runs
-##     later, before the next go/move — the Prologue's climb-in);
+##     go/move produces movement, an arrival, a rejection or a `cmd_queued` (held while Hush is busy,
+##     e.g. the Prologue's climb-in) within 150 ticks (or is held and runs later, before the next go/move);
 ## 10. at most one reaction at a time; applause never negative; prank bases sum to 700 tenths;
 ## 11. (Stage 3, only when Beryl exists) Beryl's headbutt never produces `caught`.
 class_name Invariants
@@ -30,8 +30,11 @@ const FEEDBACK_TICKS := 150
 const SPEED_STATES: PackedStringArray = ["ROUTINE", "DETOUR", "CURIOUS", "SEARCH"]
 const PROGRESS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_detour", "reaction_start",
 	"reaction_end", "chase_start", "search", "meltdown_start", "exhausted", "caught", "night_end"]
-const FEEDBACK_EVENTS: PackedStringArray = ["hush_go", "hush_arrive", "cmd_rejected", "pin", "rummage", "hide",
-	"pop_out", "hush_room", "pick_window", "caught", "night_end", "doorstep", "freeze"]
+## Events that tell the player a tap was taken: a start, an arrival, a rejection, or `cmd_queued`
+## (the go/move is held behind a busy action — the climb-in, a rummage, a rig hold — and the view
+## shows it as queued; TECH §3.5, §3.8).
+const FEEDBACK_EVENTS: PackedStringArray = ["hush_go", "hush_arrive", "cmd_rejected", "cmd_queued", "pin", "rummage",
+	"hide", "pop_out", "hush_room", "pick_window", "caught", "night_end", "doorstep", "freeze"]
 const MAX_PER_RULE := 5
 
 
@@ -373,7 +376,7 @@ static func rule9_progress(log: SolverLog) -> Array[String]:
 				out.append("rule 9: no Bellows progress for %.1f s from %s (activity '%s')" % [(t - last) / 60.0, _t(last), act])
 				break
 		last = t
-	# (b) every go/move gives feedback (movement, arrival or rejection).
+	# (b) every go/move gives feedback (movement, arrival, rejection, or held as the queued command).
 	var extra := 0
 	var prev_key := ""
 	var last_arrive := ""

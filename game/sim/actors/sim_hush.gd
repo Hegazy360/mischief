@@ -160,6 +160,14 @@ func _reject(w: SimWorld, c: String, why: String) -> void:
 	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": why})
 
 
+## A go/move while busy becomes the single queued command (a newer one replaces it, TECH §3.5) and
+## says so at once — `cmd_queued {c, why, target}`, why = "entering" during the climb-in, else
+## "busy" — so a held tap is never silent (the view shows it as queued).
+func _queue(w: SimWorld, name: String, c: Dictionary, target: String) -> void:
+	queued = c.duplicate()
+	w.emit(SimEvents.CMD_QUEUED, {"c": name, "why": "entering" if entering else "busy", "target": target})
+
+
 func _cmd_go(w: SimWorld, c: Dictionary) -> void:
 	var hid := str(c.get("hotspot", ""))
 	var hi: int = w.db.house.hotspot_index.get(hid, -1)
@@ -178,7 +186,7 @@ func _cmd_go(w: SimWorld, c: Dictionary) -> void:
 		_set_pin_hotspot(w, hi)
 		return
 	if is_busy():
-		queued = c.duplicate()
+		_queue(w, SimCmd.GO, c, hid)
 		return
 	if path != null and target_hs == hi and is_travelling():
 		if want_run and not run:
@@ -215,7 +223,7 @@ func _cmd_move(w: SimWorld, c: Dictionary) -> void:
 		_set_pin(w, r, tx)
 		return
 	if is_busy():
-		queued = c.duplicate()
+		_queue(w, SimCmd.MOVE, c, rid)
 		return
 	if path != null and target_hs < 0 and is_travelling() and path.final_room() == r and path.final_x() == tx:
 		if want_run and not run:

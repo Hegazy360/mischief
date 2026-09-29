@@ -601,6 +601,10 @@ func _run_flag(step: Dictionary, target_room: String) -> bool:
 ## release RIG, and (personas without the queue) wait until she isn't busy. True when ready.
 func _ensure_mobile(keep_spot: String = "") -> bool:
 	var mob := int(_st.get("mob", 0))
+	if mob == 0 and probe.hush_state() == "DIVING":
+		# Mid-dive (0.25 s) a go/move is not queued but pinned for after the pop-out (TECH §3.5):
+		# let her land in the spot (its `hide` event sets `_hidden`), then pop out as usual.
+		return false
 	if mob == 0:
 		_release_holds()
 		if _hidden != "" and _hidden != keep_spot:

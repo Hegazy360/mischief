@@ -1,7 +1,7 @@
 # Mischief Next Door — Build Plan (v1.0)
 
 Design: `docs/GDD.md` (binding). Contracts: `docs/TECH.md` (binding). Status: `docs/PROGRESS.md`.
-Task briefs (self-contained, one per Stage-1 task): `<scratchpad>/mnd/tasks/<key>.md`; task reports:
+Task briefs (self-contained, one per task): `<scratchpad>/mnd/tasks/<key>.md` (Stage 2: `s2-<name>.md` + `s2-index.md`); task reports:
 `<scratchpad>/mnd/reports/<key>.md`.
 
 ## 0. How we build
@@ -192,26 +192,64 @@ orchestrator in the integration pass (tasks instantiate their autoload scripts d
 ---
 
 ## 2. Stage 2 — VERTICAL SLICE (Prologue + Nights 1–2 at final polish)
-**Gate 0 — "Sneeze & Cast" (first deliverable of Stage 2):** ACHOO-RIA! end to end in the kitchen (rig, clips,
-sound, laugh, camera, lint, GIF, a debug APK route), the cast sheet, the voice A/B and crowd A/B. The owner decides:
-mime or Pip; formant baritone or talking tuba; formant crowd or fallback crowd. Mass animation starts after this.
+Briefs: `<scratchpad>/mnd/tasks/s2-<name>.md`; index (rulings, ownership, batches, Gate 0, pre-gate, request coverage,
+review findings): `<scratchpad>/mnd/tasks/s2-index.md`. Lead decision **D1** (dead air) is binding: the gate is real time
+with ⏩ (credited only where the game really runs at ×3, and for a first-timer only once the `ghost_ff` cue has taught
+it) plus *visible* Bellows micro-gag beats (edge-bubble beats ≤ ⅓ of the credit) — ideal ≤ 20 %, required ≤ 25 %,
+slow ≤ 30 %, worst gap ≤ 12 s — fixed in the data. Stage-2 rulings that shape every task (index §1): clip events own
+every sound inside a clip, `cues.json` only event-level sound (L12); sim tick 0 = the curtain starting to rise (L13);
+one clip manifest, `SliceClips` (L14); mid-batch solver checks compare against a baseline (L15); the Fun-Gate APK is a
+release-template "profile" build with the device log (L17).
+
+**Gate 0 — "Sneeze & Cast" (first deliverable of Stage 2):** ACHOO-RIA! end to end in the kitchen (rig, clips, sound,
+laugh, camera, lint, in-game capture, a debug APK route: the stage door's `g0_sneeze` — senses off, a 3-icon card first,
+and a short curtain call with **Again ▶** so the sneeze can be rewatched in seconds), the cast sheet (Hush vs Pip in
+engine), the voice A/B and crowd A/B (on desktop, and on the phone *in context*: "Play Gate 0 with voice A / B"). The
+owner decides: mime or Pip; formant baritone or talking tuba; formant crowd or fallback crowd; and whether the sneeze is
+funny. **Mass animation (batch 2) starts only after it passes.**
 
 | Key | Goal | Owns |
 |---|---|---|
-| `s2-night` | NightScene wiring sim + view + ui + audio; Boot → curtain → Prologue with warm-up under the curtain; Router routes (boot, night, results, playbill stub); retry in place; pause/back; results + Gag Reel from reaction records; Save hooks; device log timestamps (launch, first laugh, first prank) | `game/scenes/**` (except `dev/`), `game/tests/night/**` |
-| `s2-anim-bellows` | every P0 Bellows clip (GDD §9.4) + `data/anim/bellows/map.json`; the sneeze first (Gate 0) | `game/data/anim/bellows/**`, `docs/review/anim-bellows/` |
-| `s2-anim-hush` | every P0 Hush clip + map; Figgis + Stalls clips | `game/data/anim/{hush,figgis,stalls}/**` |
-| `s2-sound` | slice mix: every cue in `cues.json`, per-object SFX, voice placement, music transitions, loudness | `tools/audio/**`, `game/audio/**`, `game/data/audio/**` |
-| `s2-ftue` | Prologue director beats, Figgis cue cards + ghost fingers, hint ladder 1–3 with the ghost demo, loading cards, N1–N2 cold opens | `game/ui/ftue/**`, `game/data/anim/cold/**`, episode `director` blocks (by request to content) |
-| `s2-qa` | solver on all slice routes, fuzz 200, tuning requests, mute test pack, review-agent scoring of every gag, perf captures, the device checklist | `docs/review/slice/`, `game/tests/slice/**` |
+| `s2-sim` | D1 in sim + solver: `micro_gag` beats with visibility, the ⏩ gate (`SimFf`, personas) on restored expect keys (`warn_` form, `--baseline`), command feedback, `action_context()`, one-shot accessors + `SimOneshots`, last beats, view accessors, rules `combos`/`senses`, scenario routes, backstage/fix-up rules, lints (micro-gag cadence, coverage against `SliceClips`, hotspot, `--strict` forwarded), `--dump-cmds` | `game/sim/**`, `game/autoload/content.gd`, `game/tools/sim_run.gd`, `game/solver/**`, `game/tools/{solve,fuzz}.gd`, `game/tools/lint/**`, `game/tests/{sim,solver}/**`, `tools/scripts/{solve,fuzz,lint}.sh`, `tools/ci/lint_all.sh` |
+| `s2-content` | dead air to the D1 targets at the source (N02 first prank ≤ 25 s, N01 detours ≤ 12 s, two kettle windows, loops ≤ 60 s, timed micro-gags every 5–8 s, edge share ≤ ⅓), gates on every route, `g0_sneeze` (ending, senses off), `combos: []` in N1/N2, scenario routes, the `ghost_ff` cue, Prologue clock, hints | `game/data/{items,pranks,activities,residues,barks}.json`, `game/data/episodes/**`, `game/data/solutions/**`, `game/tests/content/**`, `tools/content/**` |
+| `s2-night` | NightScene; Boot → curtain → live Prologue (tick 0 = curtain, per-Night warm-up); Night flow, pause/back/background, retry ≤ 1.5 s, time-bound curtain call + Gag Reel, "To be continued", save hooks, Playbill stub; debug stage door (Gate-0 route + card, in-context A/B, cast); device log + overlay inside DevShot; NightScene CLI flags; e2e driver (`slice_all`, `tap_accuracy`); a real APK checked here | `game/scenes/**` (except `game/scenes/dev/**`), `game/tests/night/**`, `game/autoload/dev_shot.gd`, `game/tools/e2e.gd`, `game/tools/e2e/**`, `tools/scripts/e2e.sh`, `game/export_presets.cfg` |
+| `s2-view` | the clip contract (map-key schema, one-shot table, `clip_rules.json`, `SliceClips`); real RigPlayer clips instead of puppets; reactions + tiers + last beats + knock-on variants; temper/residue mapping; micro-gag overlays; director-cue and caught/Lecture staging; sound delays in view time; hidden eyes; stairs; PiP/Busted/`MomentRecorder` with rigs; pre-roll; queued-tap FX; haptics; every view request | `game/view/**` (except `game/view/{rig,tex}/**`), `game/art/fx/**`, `game/data/anim/clip_rules.json`, `game/tests/view/**` |
+| `s2-rig` | overlay clips, `decor` event, lints A23–A29 + `--strict`, AnimViewer flags + in-game capture (P0), the art requests to rig, ≤ 0.25 ms per character, mipmaps + lazy looks + `TexStats`, per-path atlas scale | `game/view/{rig,tex}/**`, `game/scenes/dev/**` (except `game/scenes/dev/house_preview/**`), `game/tools/anim/**`, `tools/anim/**`, `tools/scripts/{anim_sheet,capture}.sh`, `game/{data/rigs,data/anim,art/chars}/_mannequin/**`, `game/tests/rig/**` |
+| `s2-ui` | Gate-0 settings keys, `stage_door` route, CARD_ALIASES, the Stage-2 string key sets, TapAssist stacks, Hud-owned PiP, edge-bubble emotes, world ghost finger, Figgis chip rig, Script flash, curtain-call results (live buttons, why line), settings complete, MSDF, polish in the real scene | `game/ui/**` (except `game/ui/ftue/**`; incl. the fonts' MSDF import flag), `game/art/ui/**`, `game/autoload/{settings,save,haptics,router}.gd`, `game/autoload/support/**`, `game/data/ui/**`, `game/tests/ui/**` |
+| `s2-art` | `st_tea` first; Gate-0 kitchen; slice rooms final with the real characters (incl. the visible upper band + conservatory edge); hidden-eye gaps; gag props; decor frames; cold-open sets; title card; atlas hints | `game/art/house/**`, `game/art/icons/**`, `game/art/STYLE.md`, `game/data/house/**`, `tools/art/house/**`, `game/scenes/dev/house_preview/**`, `game/tests/art/test_house.gd` |
+| `s2-anim-bellows` | G: the sneeze end to end (+ rig requests, stool prop). M: every slice Bellows clip in the order the player meets them (Prologue set first, then cold opens, Night 1, Night 2) + `map.json` | `game/data/anim/bellows/**`, `game/data/rigs/bellows/**`, `game/art/chars/bellows/**`, `tools/art/bellows/**`, `game/data/reactions.json`, `game/tests/art/test_bellows_rig.gd`, `game/tests/anim/test_bellows_clips.gd` |
+| `s2-anim-hush` | G: Gate-0 Hush set + the cast sheet (+ R04/R08). M: every slice Hush clip (Prologue set first), Figgis clips, the Stalls `tiers.json` | `game/data/anim/{hush,figgis,stalls}/**`, `game/data/rigs/{hush,figgis,stalls}/**`, `game/art/chars/{hush,figgis,stalls}/**`, `tools/art/hush/**`, `game/tests/art/test_hush_rigs.gd`, `game/tests/anim/test_hush_clips.gd` |
+| `s2-sound` | G: the sneeze in context, the clip-event split (L12), `Audio.preview`, the voice/crowd A/B. M: every cue (incl. the director laughs and the title slam), per-object SFX, voice placement, music transitions, measured loudness + sync, losers deleted | `tools/audio/**`, `game/audio/**`, `game/autoload/audio.gd`, `game/data/audio/**`, `game/default_bus_layout.tres`, `tools/scripts/gen_audio.sh`, `game/tests/audio/**` |
+| `s2-ftue` | Prologue cues on screen (Figgis, ghost fingers, nudges, the ⏩ lesson), hint ladder 1–3 with the ghost demo (always on), loading-card vignettes, N1–N2 cold opens (the cue *schedule* stays content's) | `game/ui/ftue/**`, `game/data/anim/cold/**`, `game/data/ftue/**`, `game/tests/ftue/**` |
+| `s2-integrate` | alone after batch 2: every route and scenario replayed in NightScene with the real clips, 0 fallbacks per clip id, mapping/timing/staging fixed in the view, scenes and maps, in-game strips of every gag, clip requests for `s2-fix` | (alone) `game/view/**` (except rig/tex), `game/art/fx/**`, `game/scenes/**` (except dev), `game/data/anim/clip_rules.json`, `game/data/anim/{bellows,hush,figgis}/map.json`, `game/tests/{view,night}/**`, e2e files |
+| `s2-fix` | alone-running round that applies every open cross-module request (after `s2-integrate`; after each failing QA round) | exactly the files in its request table (it runs alone) |
+| `s2-qa` | `pregate.sh`, slice integration tests over whole routes, fresh-reviewer gag scores + mute test on opaque frame strips, perf charts (RigPerf medians), local APK checks, the Fun-Gate kit, TECH.md + PROGRESS.md fold-in, CI job | `game/tests/slice/**`, `game/tests/{run_tests,test_base,test_smoke}.gd`, `tools/scripts/pregate.sh`, `.github/workflows/ci.yml`, `docs/review/{s2-qa,mute_test}/**`, `docs/TECH.md`, `docs/PROGRESS.md` |
 
-**Automated pre-gate (all green):** GDD §10.4 list — routes (ideal / required / slow) on P, N1, N2; Prologue laugh
-clock; dead air < 20 %; fuzz invariants; all lints; mute test ≥ 4/6; review ≥ 3/5 per gag; 60 fps p95 ≤ 150 draw
-calls; launch → first laugh ≤ 10 s on a budget Android.
+Each task also owns `docs/review/<key>/` (and refreshes its Stage-1 review folder). The authoritative globs are in
+`s2-index.md` §3 and each brief's §2.
 
-## 3. The FUN GATE (owner, debug APK, his own phone, no coaching)
-Reviewers prepare: a clean install build, the device log exporter, a one-page "what to try" card (never read aloud
-before he plays). **Pass = all 8 checks of GDD §10.4** (first laugh ≤ 10 s and first prank ≤ 30 s from launch; ≥ 5
+**Batches:** P pre-flight (commit the CI fix; CI green) → **batch 1** (10 in parallel: sim, content, night, view, rig,
+ui, art, anim-bellows[G], anim-hush[G], sound[G]) → **Checkpoint G** (GDD fold-in of the content deviations; Gate-0 APK
+with `boot_config` = `stage_door`, owner decisions; loop on the sneeze until it passes) → **batch 2** (anim-bellows[M],
+anim-hush[M], sound[M], ftue) → **I: s2-integrate** (alone) → **F: s2-fix** (alone) → **batch 3: s2-qa** (alone, last)
+→ FAIL: s2-fix round → s2-qa re-run … → PASS: Fun-Gate profile APK (`boot_config` = `auto`).
+
+**Automated pre-gate (all green; `tools/scripts/pregate.sh`, exact rows in `s2-index.md` §6; run with nothing else in
+the container):** import metadata; full suite (skips only those listed in `allowed_skips.md`); strict lints (content
+incl. micro-gag cadence + clip coverage against `SliceClips`, hotspot, IP, anim A23–A29, rig); art + audio validators;
+every route's own expect block plus the N1/N2 star and applause bands, no `warn_` keys left; the Prologue laugh clock;
+dead air per D1 incl. edge share ≤ ⅓; planner proofs; the Gate-0 route; fuzz 200 (incl. no combo where forbidden); clip
+coverage + lengths; slice integration over the full replay of every route and scenario (0 fallbacks per clip id, 0
+puppets/greybox, 0 texture pages built during play, no doubled sound) + the APK's contents; the launch clock relative to
+the curtain (absolute desktop time reported, not gated); ≥ 6 laughs in 60 s in the real game with every director laugh
+seen and heard; 60 fps proxy p95 ≤ 150 draw calls with Gag-Cam + PiP + particles; ≤ 0.25 ms per character (RigPerf median
+of 5); retry ≤ 1.5 s, backgrounding pauses, tap accuracy ≥ 19/20, a time-bound curtain call; mute test ≥ 4/6 on frame
+strips (≥ 2 Prologue gags); reviews ≥ 4/5 funny on every Prologue gag and Night 1's first prank, ≥ 3/5 on the rest;
+audio and APK budgets (debug and profile APKs built locally).
+
+## 3. The FUN GATE (owner, the profile APK — release template with the device log —, his own phone, no coaching)
+Reviewers prepare: a clean install build, the device log exporter (plus a screen recording of the first minute from the
+app icon), a one-page "what to try" card (never read aloud before he plays). **Pass = all 8 checks of GDD §10.4** (first laugh ≤ 10 s and first prank ≤ 30 s from launch; ≥ 5
 laughs in 10 min; unprompted replay; 9/10 destination calls; no unfair catch with the ≥ 1.0 s "?" in the log; ≤ 1
 misfire in 20 taps on a 60 px target, readable ring, pan never moves Hush, never "nothing happened"; 60 fps; "funnier
 than Booby within a minute"). **Fail** → the response table in GDD §10.4; Stage 3 does not start; the slice
@@ -223,6 +261,7 @@ iterates until it passes.
 | 3A — Act I rest (N3, N4) | `s3-sim-cast` (Beryl, Delphine, panto, herding, witness — starts now so Act II isn't blocked), `s3-art-upstairs` (landing, bathroom, bedroom final art + props), `s3-anim-act1` (upstairs activities, archetypes POOF, DROP_ON, SURF_OUT, SQUEAKY_VOICE, SCARE_LEAP, STEAM_DUEL, FEATHER_BURST, IN OVER HIS HEAD, Meltdown b/c, combo beats), `s3-content-act1` (N3–N4 final + solutions), `s3-sound-act1` | owner check: Act I |
 | 3B — Act II (N5–N7) | `s3-art-beryl`, `s3-art-garden` (conservatory, garden), `s3-anim-act2` (Beryl set, garden activities, BALLOON_CHASE, HEADBUTT_LAUNCH, GOAT_KISS, GRAND EXIT, KIDDING AROUND, panto set), `s3-content-act2`, `s3-sound-act2` | owner check: Act II |
 | 3C — Act III + Gala (N8–N10, G) | `s3-art-delphine`, `s3-art-dressing` (dressing room, garden stage, spotlight), `s3-anim-act3` (Delphine set, host/tango/cloak/polish, COSTUME_BURN, SUPPRESSED, IT TAKES TWO, SPOTLIGHT STEALER, remaining cold opens), `s3-content-act3`, `s3-sound-act3` | owner check: Act III + Gala |
+
 Before 3A: record the measured cost of one prank end to end (from Stage 2) in PROGRESS.md and confirm the budget.
 
 ## 5. Stage 4 — META + FTUE + polish (only after the Fun Gate)

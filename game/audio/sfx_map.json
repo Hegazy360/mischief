@@ -824,6 +824,18 @@
    "len": 0.95,
    "cat": "sfx"
   },
+  "squelch_1": {
+   "path": "sfx/squelch_1.wav",
+   "bus": "SFX",
+   "len": 0.299,
+   "cat": "soft"
+  },
+  "squelch_2": {
+   "path": "sfx/squelch_2.wav",
+   "bus": "SFX",
+   "len": 0.3,
+   "cat": "soft"
+  },
   "stair_creak_1": {
    "path": "sfx/stair_creak_1.wav",
    "bus": "SFX",
@@ -1070,6 +1082,18 @@
    "len": 2.04,
    "cat": "voice"
   },
+  "vo_bellows_beryl_1": {
+   "path": "voice/vo_bellows_beryl_1.wav",
+   "bus": "Voice",
+   "len": 0.802,
+   "cat": "voice"
+  },
+  "vo_bellows_beryl_2": {
+   "path": "voice/vo_bellows_beryl_2.wav",
+   "bus": "Voice",
+   "len": 0.907,
+   "cat": "voice"
+  },
   "vo_bellows_crack_1": {
    "path": "voice/vo_bellows_crack_1.wav",
    "bus": "Voice",
@@ -1080,6 +1104,18 @@
    "path": "voice/vo_bellows_crack_2.wav",
    "bus": "Voice",
    "len": 1.313,
+   "cat": "voice"
+  },
+  "vo_bellows_did_not_squeak_1": {
+   "path": "voice/vo_bellows_did_not_squeak_1.wav",
+   "bus": "Voice",
+   "len": 1.268,
+   "cat": "voice"
+  },
+  "vo_bellows_did_not_squeak_2": {
+   "path": "voice/vo_bellows_did_not_squeak_2.wav",
+   "bus": "Voice",
+   "len": 1.372,
    "cat": "voice"
   },
   "vo_bellows_dizzy_babble": {
@@ -1104,6 +1140,12 @@
    "path": "voice/vo_bellows_grr_3.wav",
    "bus": "Voice",
    "len": 0.606,
+   "cat": "voice"
+  },
+  "vo_bellows_ha_ha_my_dear": {
+   "path": "voice/vo_bellows_ha_ha_my_dear.wav",
+   "bus": "Voice",
+   "len": 1.15,
    "cat": "voice"
   },
   "vo_bellows_hah_1": {
@@ -1454,6 +1496,18 @@
    "len": 2.063,
    "cat": "voice"
   },
+  "vo_bellows_tuba_beryl_1": {
+   "path": "voice/vo_bellows_tuba_beryl_1.wav",
+   "bus": "Voice",
+   "len": 0.802,
+   "cat": "voice"
+  },
+  "vo_bellows_tuba_beryl_2": {
+   "path": "voice/vo_bellows_tuba_beryl_2.wav",
+   "bus": "Voice",
+   "len": 0.922,
+   "cat": "voice"
+  },
   "vo_bellows_tuba_crack_1": {
    "path": "voice/vo_bellows_tuba_crack_1.wav",
    "bus": "Voice",
@@ -1464,6 +1518,18 @@
    "path": "voice/vo_bellows_tuba_crack_2.wav",
    "bus": "Voice",
    "len": 1.369,
+   "cat": "voice"
+  },
+  "vo_bellows_tuba_did_not_squeak_1": {
+   "path": "voice/vo_bellows_tuba_did_not_squeak_1.wav",
+   "bus": "Voice",
+   "len": 1.271,
+   "cat": "voice"
+  },
+  "vo_bellows_tuba_did_not_squeak_2": {
+   "path": "voice/vo_bellows_tuba_did_not_squeak_2.wav",
+   "bus": "Voice",
+   "len": 1.371,
    "cat": "voice"
   },
   "vo_bellows_tuba_dizzy_babble": {
@@ -1488,6 +1554,12 @@
    "path": "voice/vo_bellows_tuba_grr_3.wav",
    "bus": "Voice",
    "len": 0.592,
+   "cat": "voice"
+  },
+  "vo_bellows_tuba_ha_ha_my_dear": {
+   "path": "voice/vo_bellows_tuba_ha_ha_my_dear.wav",
+   "bus": "Voice",
+   "len": 1.13,
    "cat": "voice"
   },
   "vo_bellows_tuba_hah_1": {
@@ -1952,6 +2024,48 @@
    "len": 0.584,
    "cat": "voice"
   },
+  "vo_beryl_bleat_1": {
+   "path": "voice/vo_beryl_bleat_1.wav",
+   "bus": "Voice",
+   "len": 0.78,
+   "cat": "voice"
+  },
+  "vo_beryl_bleat_2": {
+   "path": "voice/vo_beryl_bleat_2.wav",
+   "bus": "Voice",
+   "len": 0.86,
+   "cat": "voice"
+  },
+  "vo_beryl_bleat_3": {
+   "path": "voice/vo_beryl_bleat_3.wav",
+   "bus": "Voice",
+   "len": 0.851,
+   "cat": "voice"
+  },
+  "vo_beryl_meh": {
+   "path": "voice/vo_beryl_meh.wav",
+   "bus": "Voice",
+   "len": 0.5,
+   "cat": "voice"
+  },
+  "vo_delphine_horace_1": {
+   "path": "voice/vo_delphine_horace_1.wav",
+   "bus": "Voice",
+   "len": 0.795,
+   "cat": "voice"
+  },
+  "vo_delphine_horace_2": {
+   "path": "voice/vo_delphine_horace_2.wav",
+   "bus": "Voice",
+   "len": 0.827,
+   "cat": "voice"
+  },
+  "vo_delphine_intruder": {
+   "path": "voice/vo_delphine_intruder.wav",
+   "bus": "Voice",
+   "len": 1.534,
+   "cat": "voice"
+  },
   "whoosh": {
    "path": "sfx/whoosh.wav",
    "bus": "SFX",
@@ -2105,6 +2219,10 @@
    "slipper_wood_1",
    "slipper_wood_2"
   ],
+  "squelch": [
+   "squelch_1",
+   "squelch_2"
+  ],
   "stair_creak": [
    "stair_creak_1",
    "stair_creak_2",
@@ -2132,6 +2250,14 @@
    "vo_bellows_aria_4",
    "vo_bellows_aria_5",
    "vo_bellows_aria_6"
+  ],
+  "vo_bellows_beryl": [
+   "vo_bellows_beryl_1",
+   "vo_bellows_beryl_2"
+  ],
+  "vo_bellows_did_not_squeak": [
+   "vo_bellows_did_not_squeak_1",
+   "vo_bellows_did_not_squeak_2"
   ],
   "vo_bellows_grr": [
    "vo_bellows_grr_1",
@@ -2223,6 +2349,14 @@
    "vo_bellows_tuba_aria_4",
    "vo_bellows_tuba_aria_5",
    "vo_bellows_tuba_aria_6"
+  ],
+  "vo_bellows_tuba_beryl": [
+   "vo_bellows_tuba_beryl_1",
+   "vo_bellows_tuba_beryl_2"
+  ],
+  "vo_bellows_tuba_did_not_squeak": [
+   "vo_bellows_tuba_did_not_squeak_1",
+   "vo_bellows_tuba_did_not_squeak_2"
   ],
   "vo_bellows_tuba_grr": [
    "vo_bellows_tuba_grr_1",
@@ -2349,6 +2483,15 @@
    "vo_bellows_yow_1",
    "vo_bellows_yow_2",
    "vo_bellows_yow_3"
+  ],
+  "vo_beryl_bleat": [
+   "vo_beryl_bleat_1",
+   "vo_beryl_bleat_2",
+   "vo_beryl_bleat_3"
+  ],
+  "vo_delphine_horace": [
+   "vo_delphine_horace_1",
+   "vo_delphine_horace_2"
   ]
  },
  "aliases": {
@@ -2483,8 +2626,11 @@
   "vase": "vase_smash",
   "vo_b_ahem": "vo_bellows_ahem",
   "vo_b_aria": "vo_bellows_aria",
+  "vo_b_beryl": "vo_bellows_beryl",
+  "vo_b_did_not_squeak": "vo_bellows_did_not_squeak",
   "vo_b_dizzy_babble": "vo_bellows_dizzy_babble",
   "vo_b_grr": "vo_bellows_grr",
+  "vo_b_ha_ha_my_dear": "vo_bellows_ha_ha_my_dear",
   "vo_b_hah": "vo_bellows_hah",
   "vo_b_hmph": "vo_bellows_hmph",
   "vo_b_huh": "vo_bellows_huh",
@@ -2635,6 +2781,8 @@
   "slipper_tile_2": 0.05,
   "slipper_wood_1": 0.05,
   "slipper_wood_2": 0.05,
+  "squelch_1": 0.05,
+  "squelch_2": 0.05,
   "stair_creak_1": 0.03,
   "stair_creak_2": 0.03,
   "stair_creak_3": 0.03,

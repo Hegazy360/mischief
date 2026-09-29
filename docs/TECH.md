@@ -225,10 +225,13 @@ ignored and produce a `cmd_rejected {c, why}` event (never an error).
 | `bow` | — | Take a Bow (valid after ★ from anywhere; the view calls it from the pause menu or on arrival at the front door). |
 | `hint_used` | `line: String, step: int` | Records a step-3 hint (candle) for results. |
 
-**Busy and the queue:** Hush is *busy* while rummaging (0.6 s), diving (0.25 s), squeaking (0.3 s), holding RIG
-with the ring filling, in the Lecture, or bowing. A `go`/`move` arriving while busy is stored as the single
-`queued` command (a newer one replaces it) and runs the tick the busy action ends — for a rig: when the step
-completes **or** when the hold is released. A `freeze` or `rig` command is never queued (holds are immediate).
+**Busy and the queue:** Hush is *busy* while climbing in (the episode's `hush.enter`), rummaging (0.6 s), diving
+(0.25 s), squeaking (0.3 s), holding RIG with the ring filling, on the stairs or in a door, in the Lecture, or
+bowing. A `go`/`move` arriving while busy is stored as the single `queued` command (a newer one replaces it) and
+runs the tick the busy action ends — for a rig: when the step completes **or** when the hold is released. Every
+such command emits `cmd_queued {c, why, target}` the tick it is stored (`why`: `entering` during the climb-in,
+else `busy`), so a held tap is never silent — the view shows it as queued. A `freeze` or `rig` command is never
+queued (holds are immediate); any other command during the climb-in is rejected (`cmd_rejected {why: "entering"}`).
 
 ### 3.6 Tick order (`SimWorld.step`)
 1. `tick += 1`; apply commands in array order (validation, queue).
@@ -254,7 +257,16 @@ specs_on, blinded_until, temper_q, tier, residues (sorted kinds), spot_meter, sp
 - **Routine / gates:** `Routine` holds the loop index, loop count and the detour queue. An activity is
   `WALK_TO → PERFORM(t) → DONE`. A prank that fires during PERFORM ends it unless its hook is `resume`. On DONE:
   pop the next detour, else advance the loop (wrap; `loop_count += 1`; if `rules.nerves` set temper to at least 20).
-  Gates (`until`, `plus_s`, `max_s`, `first_loop_only`) extend PERFORM.
+  Gates (`until`, `plus_s`, `max_s`, `first_loop_only`) extend PERFORM. A capped gate is a timeout: an
+  interruption (Curious, Spotted, a prank firing) ends the activity as usual. An **uncapped** gate
+  (`max_s: null`, GDD §2.3 "this step waits for the player") whose `until` is still false *holds* the loop: the
+  interruption does not complete the activity (no `b_activity_end`, the loop index stays), and once the detour,
+  reaction or chase is over he starts that activity again (a new `b_activity`), exactly as after an interrupted
+  walk. Only the player can open it. Likewise, when the loop doesn't repeat (`rules.loop_repeat: false`, the
+  Prologue) and one of the activity's `use` hooks still ahead belongs to a RIGGED prank (ACHOO-RIA! on the tea),
+  an interruption restarts the activity instead of ending it — the loop never comes back to it, so ending it would
+  lose the armed prank for good (`SimBellows.hook_pending()`). A prank firing ends its activity as usual (it is
+  FIRED by then); a looping Night keeps the plain rule (the hook comes round next loop).
 - **Bubble:** `next` = first queued detour, else the next loop activity; `ring_ticks` = remaining PERFORM ticks
   when ≤ 240 (4 s) else −1. A detour queued this tick changes `next` this tick (event `b_next`).
 - **Entry warning:** each tick in ROUTINE/DETOUR/CURIOUS, if `path.eta_to_room(hush.room)` ≤ 90 and no warning is
@@ -342,7 +354,7 @@ Every event is `{"e": String, "t": int, ...}`. Payload fields are ints/strings/b
 | Danger | `spot_start {by}`, `near_miss {by}`, `spotted {by}`, `chase_start`, `wheeze`, `door_slam`, `chase_end {why}`, `search`, `on_guard`, `bump {first}`, `face_to_face {spot}`, `caught {cause, spotted_tick, by}`, `busted_cam`, `lecture {variant}`, `doorstep`, `tomato {n}`, `hook` |
 | Comedy | `prank_fire {prank, trigger, link, tier, witnessed}`, `reaction_start {prank, archetype, variant, tier, suppressed, len, entry}`, `reaction_accent {prank}`, `reaction_end {prank}`, `knock_on {a, b}`, `fizzle {prank}`, `residue_add {kind}`, `residue_clear {kind}`, `combo {id}`, `temper_tier {tier}`, `running_gag {link, mult}`, `running_gag_end`, `meltdown_start`, `meltdown_stomp {n}`, `exhausted`, `panto_round {round, phase}`, `panto_bit`, `mirror_round {round}`, `wink {round}`, `headbutt {target, landing}` |
 | Score | `applause {delta, total, kind, label}`, `bonus {kind, amount}`, `line_done {line}`, `big_number_unsealed`, `all_lines_done`, `star {n}` |
-| Flow | `director_cue {id}`, `safety_net {on}`, `figgis_hook`, `night_end {reason}`, `cmd_rejected {c, why}` |
+| Flow | `director_cue {id}`, `safety_net {on}`, `figgis_hook`, `night_end {reason}`, `cmd_rejected {c, why}`, `cmd_queued {c, why, target}` (a go/move held as the queued command, §3.5; `why`: `entering` \| `busy`) |
 | Stage 3 | `beryl_mood {mood}`, `bleat`, `herd_start`, `herd_end`, `delphine_arrive`, `glasses {up}`, `high_c {room, x}`, `embarrassed {prank}` |
 
 `game/sim/world/sim_events.gd` MUST also expose `static func is_laugh(ev: Dictionary) -> bool` (reaction accents,
@@ -893,7 +905,8 @@ prank_interval_mean_s, hold_total_s, hash}`.
 6. No soft-lock: the planner completes all required lines after the fuzz run's state (sampled every 60 s).
 7. Bellows' non-chase speed ≤ 1.15 × walk; the `b_activity` sequence follows the loop order (detours excluded).
 8. No `spot_start` by Bellows while he is reacting or within 60 ticks after.
-9. Progress: Bellows' activity changes at least every 60 s; Hush commands produce movement or a rejection event.
+9. Progress: Bellows' activity changes at least every 60 s (uncapped player-led gates excepted); Hush's go/move
+   commands produce movement, an arrival, a rejection or a `cmd_queued` event within 150 ticks.
 10. At most one reaction active at a time; applause never negative; each Night's prank bases sum to 700 tenths.
 11. (Stage 3) Beryl's headbutt never produces `caught`.
 Fuzz bots: `random` (a random valid command every 0.2–2 s), `reckless` (straight to rig points ignoring Bellows),
@@ -1009,6 +1022,9 @@ length; 60 fps with PiP + gag burst; launch → first laugh ≤ 10 s.
   `--check`).
 - **CI jobs** (`.github/workflows/ci.yml`, solver edits): import metadata → GDScript tests → lints → solutions for
   `final` episodes → bounded fuzz → `gen_audio.py --check`. Android preview APK on every push to `main` (exists).
+  The Python job (`tools/ci/lint_all.sh --no-godot`: art validators + `gen_audio.py --check`) needs Python 3 with
+  numpy + Pillow and `rsvg-convert` from apt `librsvg2-bin` (not on the `ubuntu-24.04` runner image; the job
+  installs it) — the art validators rasterise every SVG part with it. Locally: `apt install librsvg2-bin`.
 - **Import metadata:** every new asset/script ships its `.import` / `.uid` sidecar. Agents never run Godot on
   `game/` directly; the orchestrator runs one import on the real project after each stage and commits sidecars.
 

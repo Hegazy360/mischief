@@ -18,7 +18,7 @@ const SIM_EVENTS: PackedStringArray = [
 	"residue_clear", "combo", "temper_tier", "running_gag", "running_gag_end", "meltdown_start", "meltdown_stomp",
 	"exhausted", "panto_round", "panto_bit", "mirror_round", "wink", "headbutt",
 	"applause", "bonus", "line_done", "big_number_unsealed", "all_lines_done", "star",
-	"director_cue", "safety_net", "figgis_hook", "night_end", "cmd_rejected",
+	"director_cue", "safety_net", "figgis_hook", "night_end", "cmd_rejected", "cmd_queued",
 	"beryl_mood", "bleat", "herd_start", "herd_end", "delphine_arrive", "glasses", "high_c", "embarrassed"]
 ## TECH §14 canonical ids.
 const PRANKS: PackedStringArray = [

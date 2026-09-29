@@ -135,3 +135,99 @@ func test_real_probe_reads_simworld() -> void:
 	for pid in _data.episode_pranks(ep):
 		assert_true(SolverProbe.PRANK_STATES.has(p.prank_state(pid)), "prank state of %s (%s)" % [pid, p.prank_state(pid)])
 	assert_eq(p.stars().size(), 3)
+
+
+## Fuzz seeds that once broke CI on p00_curtain_up, replayed on the real sim and data:
+## - random seed 17 (rule 9): a go issued during Hush's 3.7 s climb-in was held with no feedback and
+##   replaced before she was in → the sim now emits `cmd_queued {why: "entering"}`;
+## - hider seed 13 (rule 6): a lure / noise Curious ended the uncapped "until rigged:achoo_ria" warm-up,
+##   he brewed the tea with nothing rigged and the Prologue could no longer land the sneeze → an
+##   uncapped player-led gate now holds the loop (TECH §3.7.1). The soft-lock probe must pass.
+func test_real_fuzz_regressions_p00() -> void:
+	var why := _ready_or_why()
+	if why != "":
+		skip(why)
+		return
+	var ep := "p00_curtain_up"
+	if _data.episode(ep).is_empty():
+		skip("no %s yet" % ep)
+		return
+	var fac := SolverHooks.world_factory(_db, ep, {"invariants": true})
+	var r17 := Fuzz.run_bot(fac, _data, ep, "random", 17, {"probe": false})
+	print("  %s" % Fuzz.summary_line(r17))
+	assert_true(bool(r17["ok"]), "random 17: %s" % "\n".join(PackedStringArray(r17["invariants"])))
+	var lg: SolverLog = r17["log"]
+	var q := lg.events_named("cmd_queued", {"why": "entering"})
+	assert_false(q.is_empty(), "the climb-in go was answered with cmd_queued")
+	assert_eq(int((q[0] as Dictionary).get("t", -1)), 1, "on the tick it was tapped")
+	var r13 := Fuzz.run_bot(fac, _data, ep, "hider", 13, {"probe": true})
+	print("  %s" % Fuzz.summary_line(r13))
+	var sl: Dictionary = r13["softlock"]
+	assert_false(bool(sl.get("skipped", true)), "the probe ran (the Prologue is still on at 180 s)")
+	assert_true(bool(sl.get("ok", false)), "hider 13 soft-lock probe: %s" % sl.get("why", ""))
+	assert_true(bool(r13["ok"]), "hider 13: %s" % "\n".join(PackedStringArray(r13["invariants"])))
+	var tea_before_rig := false
+	var rigged := false
+	for ev in (r13["log"] as SolverLog).events:
+		var e := String(ev.get("e", ""))
+		if e == "rigged" and String(ev.get("prank", "")) == "achoo_ria":
+			rigged = true
+		elif e == "b_activity" and String(ev.get("id", "")) == "tea" and not rigged:
+			tea_before_rig = true
+	assert_false(tea_before_rig, "no tea before the honey is rigged: the gate waits for the player")
+
+
+## More p00 seeds past CI's 20 (found by `fuzz.sh p00_curtain_up --runs=100 --seed=21`):
+## - random seed 21 (rule 6): a lure 0.5 s into the tea, ACHOO-RIA! rigged, ended the tea before its
+##   7 s hook; the Prologue's loop never comes back, so the sneeze was lost → in a non-repeating loop an
+##   interruption restarts an activity whose rigged prank is still to come (TECH §3.7.1);
+## - hider seed 53 (rule 6, a solver false alarm): the run ends mid-dive, the probe's first go was
+##   pinned (not queued) and the executor never popped her out → it waits out a dive first.
+func test_real_fuzz_regressions_p00_tea_and_dive() -> void:
+	var why := _ready_or_why()
+	if why != "":
+		skip(why)
+		return
+	var ep := "p00_curtain_up"
+	if _data.episode(ep).is_empty():
+		skip("no %s yet" % ep)
+		return
+	var fac := SolverHooks.world_factory(_db, ep, {"invariants": true})
+	var r21 := Fuzz.run_bot(fac, _data, ep, "random", 21, {"probe": true})
+	print("  %s" % Fuzz.summary_line(r21))
+	assert_false(bool((r21["softlock"] as Dictionary).get("skipped", true)), "random 21: the probe ran")
+	assert_true(bool(r21["ok"]), "random 21: %s" % "\n".join(PackedStringArray(r21["invariants"])))
+	var lg: SolverLog = r21["log"]
+	assert_false(lg.events_named("rigged", {"prank": "achoo_ria"}).is_empty(), "random 21 rigs the honey")
+	assert_true(lg.events_named("b_activity_end", {"id": "tea"}).is_empty(),
+		"the lure mid-tea no longer ends the tea (ACHOO-RIA! still to come)")
+	var r53 := Fuzz.run_bot(fac, _data, ep, "hider", 53, {"probe": true})
+	print("  %s" % Fuzz.summary_line(r53))
+	assert_false(bool((r53["softlock"] as Dictionary).get("skipped", true)), "hider 53: the probe ran")
+	assert_true(bool(r53["ok"]), "hider 53: %s" % "\n".join(PackedStringArray(r53["invariants"])))
+
+
+## The executor on the real sim: a go step issued while Hush is mid-dive waits for her to land, pops
+## her out and walks (a go during DIVING is pinned for after the pop-out, not queued).
+func test_real_executor_go_while_diving() -> void:
+	var why := _ready_or_why()
+	if why != "":
+		skip(why)
+		return
+	var ep := "n01_throat_tea"
+	if _data.episode(ep).is_empty():
+		skip("no %s yet" % ep)
+		return
+	var w: Object = SolverHooks.make_world(_db, ep, {"invariants": true})
+	var probe := SolverProbe.new(w, _data)
+	w.call("step", [SimCmd.go("kitchen_pantry_curtain")])
+	var n := 0
+	while probe.hush_state() != "DIVING" and n < 600:
+		w.call("step", [])
+		n += 1
+	assert_eq(probe.hush_state(), "DIVING", "set-up: she is mid-dive")
+	var ex := Executor.new(w, [{"do": "go", "to": "kitchen_honey"}], "ideal", Callable(), _data, {"episode": ep})
+	var r := ex.run(900)
+	assert_true(bool(r["ok"]), "go from a dive: %s" % [r["fail"]])
+	assert_false(ex.log.events_named("pop_out").is_empty(), "she popped out")
+	assert_false(ex.log.events_named("hush_arrive", {"hotspot": "kitchen_honey"}).is_empty(), "and arrived")

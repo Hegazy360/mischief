@@ -175,6 +175,23 @@ func test_rule9_progress_and_feedback() -> void:
 	assert_eq(Invariants.rule9_progress(moved), [] as Array[String])
 
 
+func test_rule9_cmd_queued_is_feedback() -> void:
+	# The fuzz p00 random seed-17 case: a go at t=1 held behind the 3.7 s climb-in and replaced by a newer
+	# go before she is in — no movement within 150 ticks and it never runs, but the sim said "queued".
+	var cmds := [[1, {"c": "go", "hotspot": "parlour_recliner", "run": true}],
+		[160, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}]]
+	var silent := _log(400)
+	silent.cmds = cmds.duplicate(true)
+	assert_has(Invariants.rule9_progress(silent)[0], "produced no movement", "no event, no movement: a silent tap")
+	var queued := _log(400, [{"e": "cmd_queued", "t": 1, "c": "go", "why": "entering", "target": "parlour_recliner"},
+		{"e": "cmd_queued", "t": 160, "c": "go", "why": "entering", "target": "kitchen_sink_tap"}])
+	queued.cmds = cmds.duplicate(true)
+	assert_eq(Invariants.rule9_progress(queued), [] as Array[String], "cmd_queued tells the player the tap was taken")
+	var late := _log(400, [{"e": "cmd_queued", "t": 200, "c": "go", "why": "busy", "target": "parlour_recliner"}])
+	late.cmds = [[1, {"c": "go", "hotspot": "parlour_recliner", "run": true}]]
+	assert_has(Invariants.rule9_progress(late)[0], "produced no movement", "feedback must come within 150 ticks")
+
+
 func test_rule10_reactions_applause_bases() -> void:
 	var overlap := _log(10, [{"e": "reaction_start", "t": 1, "prank": "a"}, {"e": "reaction_start", "t": 2, "prank": "b"}])
 	assert_has(Invariants.rule10_reactions_applause(overlap)[0], "while a was still playing")

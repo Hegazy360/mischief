@@ -498,6 +498,33 @@ func _update_gate(w: SimWorld) -> void:
 	activity_len = end
 
 
+## True while the current loop activity is held by a player-led gate with no cap (`max_s: null`)
+## whose condition hasn't been met yet: only the player can end it, so an interruption restarts it
+## (TECH §3.7.1). A capped gate is a timeout, and an interruption may end it early like any activity.
+func gate_holds(w: SimWorld) -> bool:
+	if task_kind != T_ACTIVITY or task_loop < 0 or gate_met_t >= 0:
+		return false
+	var le: EpisodeDef.LoopEntry = w.episode.loop[task_loop]
+	if not le.has_gate or le.max_ticks >= 0 or (le.first_loop_only and w.routine.loop_count > 0):
+		return false
+	return not _gate_true(w, le.until)
+
+
+## True when ending the current loop activity now would lose an armed prank for good: the loop
+## doesn't come round again (`rules.loop_repeat: false`, the Prologue) and one of the activity's
+## `use` hooks still ahead belongs to a RIGGED prank (ACHOO-RIA! on the tea). An interruption then
+## restarts the activity like an interrupted walk, so the rigged prank still lands (TECH §3.7.1).
+## A looping Night keeps the plain rule: the hook comes round on the next loop.
+func hook_pending(w: SimWorld) -> bool:
+	if task_kind != T_ACTIVITY or task_loop < 0 or task_act < 0 or w.ctx.loop_repeat:
+		return false
+	var a := w.db.activity_list[task_act]
+	for k in range(hook_cursor, a.hook_count()):
+		if w.pranks.state[a.hooks[k * 2 + 1]] == Pranks.RIGGED:
+			return true
+	return false
+
+
 func _gate_true(w: SimWorld, until: Variant) -> bool:
 	if until == null:
 		return false
@@ -657,6 +684,13 @@ func interrupt(w: SimWorld, resume: bool) -> void:
 					resume_cursor = hook_cursor
 					resume_len = activity_len
 					resume_gate = gate_met_t
+				elif gate_holds(w) or hook_pending(w):
+					# An uncapped player-led gate the player hasn't opened holds the loop (GDD §2.3 "this
+					# step waits for the player"; "interruptions never reorder or skip the loop", §4.1),
+					# and so does a rigged prank still to come on an activity a non-repeating loop never
+					# returns to: the interruption is not the activity's end, so — like an interrupted
+					# walk — he starts it again once the detour / reaction / chase is over.
+					int_kind = INT_WALK
 				else:
 					_complete_loop_activity(w)
 					int_kind = INT_DONE

@@ -15,8 +15,10 @@ Files (bank = the id without the variant suffix):
   vo_bellows_<line>[_n]            formant (default)
   vo_bellows_tuba_<line>[_n]       the talking-tuba fallback (same bank shape)
   vo_bellows_squeaky_<line>_n      chipmunk (+12 st) aria / shout sets for the SQUEAKY residue
-
-Speaker presets (`SPEAKERS`) keep the recipe structure ready for Delphine and Beryl (S3).
+  vo_delphine_<line>[_n]           Dame Delphine (Stage 3): soprano f0 280-340 Hz, a high C with a
+                                   glass-crack tail (GDD §9.5); formant only (the A/B is Bellows')
+  vo_beryl_<line>[_n]              Beryl the goat (Stage 3): formant "mehhh" with a bleat trill plus
+                                   an FM nasal buzz on the same pitch curve (GDD §9.5)
 """
 from __future__ import annotations
 
@@ -27,8 +29,8 @@ from dataclasses import dataclass, field, replace
 import numpy as np
 
 from registry import sfx
-from synth import (SR, TAU, VOWELS, arr, burst, cents, drive, env_lin, filt, norm, ns, phase_of, reverb,
-                   smooth_noise, tt, voice, white)
+from synth import (SR, TAU, VOWELS, arr, burst, cents, drive, env_exp, env_lin, filt, fm, norm, ns, phase_of,
+                   reverb, smooth_noise, tt, voice, white)
 
 VOWELS.setdefault("l", (360, 1300, 2700, 3300))
 VOWELS.setdefault("y", (300, 2300, 3000, 3700))
@@ -433,6 +435,21 @@ def _extra(kind: str, rng) -> np.ndarray:
         mlen = ns(0.3)
         x = filt(white(mlen, rng), ("hp", 1500))
         return norm(x) * env_lin([(0, 1), (0.3, 0)], mlen) * 0.5
+    if kind == "glass_crack":
+        # Delphine's high C cracks the mirror: a sharp splitting crack, splinters, a glassy ring.
+        mlen = ns(0.62)
+        t = tt(mlen)
+        crack = filt(white(mlen, rng), ("hp", 2600, 0.7), ("peak", 5200, 1.2, 6.0)) * env_exp(
+            [(0, 1.0), (0.012, 0.5), (0.05, 0.05), (0.62, 1e-4)], mlen)
+        splinters = np.zeros(mlen)
+        for _ in range(14):
+            i = ns(rng.uniform(0.01, 0.24) ** 1.3)
+            c = burst(ns(0.006), rng, 3000, 10000, 0.0002, 0.003) * rng.uniform(0.3, 0.9)
+            splinters[i:i + len(c)] += c[: mlen - i]
+        ring = np.zeros(mlen)
+        for f, d in ((3170.0, 0.34), (4460.0, 0.26), (5910.0, 0.18), (7380.0, 0.12), (8830.0, 0.08)):
+            ring += np.sin(TAU * f * t + rng.uniform(0, TAU)) * np.exp(-6.9 * t / d) / (1.0 + f / 6000.0)
+        return norm(crack) * 0.8 + norm(splinters) * 0.45 + norm(ring) * 0.4
     raise ValueError(kind)
 
 
@@ -613,10 +630,68 @@ def lines_bellows() -> dict[str, Line]:
                               (("bl", "a", 48), ("bl", "e", 52), ("w", "a", 47), ("w", "o", 53), ("bl", "i", 50),
                                ("l", "a", 45), ("bl", "u", 51), ("w", "a", 46), ("bl", "e", 49), ("l", "o", 44))],
                              mode="spoken", tail=0.2)
+    # "I did NOT squeak!" (bit_phone: he argues with the caller) — and his voice squeaks on "squeak":
+    # the falsetto flip on the last vowel is the joke. Two takes so the bit never repeats a file.
+    L["did_not_squeak_1"] = Line([S("", "a+i", 0.15, (47, 49), lv=0.85), S("d", "ih", 0.12, 49, coda="d", lv=0.85),
+                                  S("n", "o", 0.34, ("A3", "F3"), coda="t", lv=1.2, gap=0.03),
+                                  S("skw", "i", 0.2, ("G3", "C4"), lv=1.1, gap=0.07),
+                                  S("", "i", 0.22, ("E5", "A5"), fals=True, lv=0.85, vib=0.0, coda="k")],
+                                 mode="shout", drive=1.8, tail=0.16)
+    L["did_not_squeak_2"] = Line([S("", "a+i", 0.13, (48, 50), lv=0.85), S("d", "ih", 0.11, 50, coda="d", lv=0.9),
+                                  S("n", "o", 0.42, ("Bb3", "F3"), coda="t", lv=1.25, gap=0.04),
+                                  S("skw", "i", 0.18, ("A3", "D4"), lv=1.1, gap=0.09),
+                                  S("", "i", 0.26, ("F5", "C6"), fals=True, lv=0.8, vib=0.0, coda="k")],
+                                 mode="shout", drive=1.9, tail=0.16)
+    # --- Stage 3 (Beryl, Act II; Delphine, Act III) -------------------------------------------------
+    # "BERYL!" — the blame bellow (GDD §4.8): a two-note shout that drops like PIPE DOWN!
+    L["beryl_1"] = Line([S("b", "er", 0.34, ("A3", "B3"), lv=1.15, acc=True),
+                         S("r", "ih", 0.3, ("G3", "D3"), coda="l", lv=1.1)], mode="shout", drive=2.2)
+    L["beryl_2"] = Line([S("b", "er", 0.46, ("B3", "C4"), lv=1.15, acc=True),
+                         S("r", "ih", 0.26, ("A3", "E3"), coda="l", lv=1.1, gap=0.05)], mode="shout", drive=2.3)
+    # "Ha-ha, my dear..." — the Suppressed beat (GDD §4.9): a squeezed, too-high laugh through a grin.
+    L["ha_ha_my_dear"] = Line([S("h", "a", 0.11, "D4", lv=0.9), S("h", "a", 0.13, ("E4", "D4"), lv=0.85, gap=0.04),
+                               S("m", "a+i", 0.2, ("C4", "D4"), lv=0.8, gap=0.1),
+                               S("d", "i+er", 0.42, ("E4", "B3"), lv=0.75)],
+                              mode="spoken", breath=0.28, jitter=0.028, tilt=1.4, tail=0.15)
+    return L
+
+
+def lines_delphine() -> dict[str, Line]:
+    """Dame Delphine Trill (Stage 3): a soprano f0 280-340 Hz when she speaks, the high C (C6) when
+    she spots Hush (GDD §4.9, §9.5)."""
+    L: dict[str, Line] = {}
+    # "HORACE!" — anything that happens to her is his fault. A scandalised swoop up and down.
+    L["horace_1"] = Line([S("h", "o", 0.3, ("E4", "A4"), lv=1.1, coda="r", acc=True),
+                          S("r", "e+i", 0.42, ("G4", "D4"), lv=1.05, coda="s")], mode="shout", drive=1.5, tail=0.16)
+    L["horace_2"] = Line([S("h", "o", 0.36, ("F4", "B4"), lv=1.1, coda="r", acc=True),
+                          S("r", "e+i", 0.36, ("A4", "E4"), lv=1.05, coda="s", gap=0.04)], mode="shout", drive=1.6,
+                         tail=0.16)
+    # "INTRUDER!" — the high C: "in-TRU-" spoken fast, "DEE-" scooping up to C6 (1047 Hz), the held
+    # C6 with full vibrato — and at its peak the nearest mirror cracks (the glass-crack tail rings on).
+    L["intruder"] = Line([S("", "ih", 0.1, "A4", coda="n", lv=0.9), S("tr", "u", 0.16, "C5", lv=1.0),
+                          S("d", "a", 0.2, ("G5", "C6"), lv=1.15, acc=True, vib=0.0),
+                          S("", "a", 0.85, "C6", lv=1.25, vib=1.0)],
+                         mode="sung", tail=0.7, pre=[(1.02, "glass_crack", 0.9)])
+    return L
+
+
+def lines_beryl() -> dict[str, Line]:
+    """Beryl the pygmy goat (Stage 3): bleats only (GDD §4.8, §9.5)."""
+    L: dict[str, Line] = {}
+    # "MEH!" — the indignant answer to "BERYL!": short, clipped, a fast trill.
+    L["meh"] = Line([S("m", "e", 0.36, (69, 66), lv=1.15, trill=13.0, acc=True)], mode="shout", drive=1.4, tail=0.12)
+    # "Mehhh" — the Besotted bleat every 6 s (a noise ring): three wavering takes.
+    L["bleat_1"] = Line([S("m", "e", 0.62, (67, 63), lv=1.0, trill=9.5)], mode="spoken", tail=0.14)
+    L["bleat_2"] = Line([S("m", "e", 0.5, (69, 64), lv=1.0, trill=10.5), S("", "e", 0.2, (64, 62), lv=0.7, trill=8.0)],
+                        mode="spoken", tail=0.14)
+    L["bleat_3"] = Line([S("b", "e", 0.7, (66, 62), lv=1.0, trill=8.5)], mode="spoken", tail=0.14)
     return L
 
 
 BELLOWS_LINES = lines_bellows()
+DELPHINE_LINES = lines_delphine()
+BERYL_LINES = lines_beryl()
+LINES: dict[str, dict[str, Line]] = {"bellows": BELLOWS_LINES, "delphine": DELPHINE_LINES, "beryl": BERYL_LINES}
 SQUEAKY_LINES = [k for k in BELLOWS_LINES if k.startswith(("aria_", "pipe_down_"))]
 
 
@@ -635,10 +710,27 @@ def bank_of(line_id: str) -> str:
     return ""
 
 
+def render_bleat(line: Line, spk: Speaker, rng) -> np.ndarray:
+    """Beryl: the formant "mehhh" (its trill and wide vibrato) plus an FM nasal buzz that follows the
+    same pitch curve and trill — the reedy edge of a goat."""
+    y = render_formant(line, spk, rng)
+    tl = build(line, spk)
+    n = tl.n
+    amp = tl.amp.copy()
+    if np.any(tl.trill > 0):
+        amp *= 1 - 0.6 * (tl.trill > 0) * (0.5 + 0.5 * np.sin(TAU * phase_of(np.maximum(tl.trill, 1.0), n)))
+    loud = amp / (np.max(amp) + 1e-9)
+    buzz = fm(tl.f0, n, 1.0, 1.4 + 1.6 * loud) * amp
+    buzz = filt(buzz, ("hp", 350, 0.7), ("peak", 1500, 1.2, 5.0), ("lp", 4200, 0.7))
+    return reverb(norm(y) + norm(buzz) * 0.4, spk.room, 0.3, keep_len=True)
+
+
 def render_line(speaker: str, line_id: str, style: str = "formant", squeaky: bool = False, rng=None) -> np.ndarray:
     spk = SPEAKERS[speaker]
-    line = BELLOWS_LINES[line_id]
+    line = LINES[speaker][line_id]
     rng = rng if rng is not None else np.random.default_rng(zlib.crc32(line_id.encode()))
+    if speaker == "beryl":
+        return render_bleat(line, spk, rng)
     if style == "tuba":
         return render_tuba(line, spk, rng)
     if squeaky:
@@ -652,20 +744,45 @@ LINE_LEVEL = {"sneeze_ah1": -21.0, "sneeze_ah2": -18.0, "sneeze_ah3": -15.5, "sn
               "sneeze_small": -17.0, "hum": -17.0, "the_pipes": -17.0, "wheeze": -17.5, "tut": -17.5, "pff": -17.5,
               "hmph": -15.5, "ahem": -16.0, "huh": -15.0, "pardon": -15.5, "ugh": -15.5, "dizzy_babble": -15.0,
               "pipe_down": -12.5, "wha": -12.5, "who_squeaked": -12.0, "yow": -13.0, "oof": -13.5, "hah": -13.5,
-              "lecture": -13.5, "warmup_crack": -13.5}
+              "lecture": -13.5, "warmup_crack": -13.5, "did_not_squeak": -13.0, "beryl": -12.5,
+              "ha_ha_my_dear": -16.0}
+# Delphine's shriek and high C ride over the house; Beryl's Besotted bleat (every 6 s) sits under it.
+LEVELS: dict[str, dict[str, float]] = {
+    "bellows": LINE_LEVEL,
+    "delphine": {"horace": -12.5, "intruder": -12.0},
+    "beryl": {"meh": -13.5, "bleat": -15.5},
+}
 
 
-def line_level(lid: str) -> float | None:
+def line_level(lid: str, speaker: str = "bellows") -> float | None:
+    table = LEVELS[speaker]
     b = bank_of(lid) or lid
-    return LINE_LEVEL.get(b, LINE_LEVEL.get(lid))
+    return table.get(b, table.get(lid))
+
+
+def _cap_of(line: Line) -> float:
+    dur = sum(s.d + s.gap for s in line.syls) + line.tail + 0.2
+    return round(max(0.5, dur + 0.3), 2)
 
 
 def _register() -> None:
+    for speaker in ("delphine", "beryl"):
+        for lid, line in LINES[speaker].items():
+            # a line whose tail rings on (the glass crack) keeps it through the end-trim
+            tail_tag = ("keep_tail",) if any(k == "glass_crack" for _, k, _ in line.pre) else ()
+
+            def _mk3(speaker=speaker, lid=lid, b=bank_of(lid), cap=_cap_of(line), lvl=line_level(lid, speaker),
+                     tags=("voice", speaker) + tail_tag):
+                prefix = f"vo_{speaker}_"
+                @sfx(prefix + lid, cat="voice", max_dur=cap, bank=(prefix + b) if b else "", level=lvl,
+                     desc=f"{speaker.title()} (Stage 3): {lid.replace('_', ' ')}", tags=tags)
+                def _f(rng):
+                    return render_line(speaker, lid, rng=rng)
+            _mk3()
     for lid, line in BELLOWS_LINES.items():
         b = bank_of(lid)
         lvl = line_level(lid)
-        dur = sum(s.d + s.gap for s in line.syls) + line.tail + 0.2
-        cap = round(max(0.5, dur + 0.3), 2)
+        cap = _cap_of(line)
         for style, prefix in (("formant", "vo_bellows_"), ("tuba", "vo_bellows_tuba_")):
             def _mk(lid=lid, style=style, prefix=prefix, b=b, cap=cap, lvl=lvl):
                 @sfx(prefix + lid, cat="voice", max_dur=cap, bank=(prefix + b) if b else "", level=lvl,

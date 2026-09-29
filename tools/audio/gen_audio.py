@@ -45,8 +45,11 @@ SHIPPED_MAX_BYTES = 40_000_000       # v1 total after import compression (QOA �
 LOUD_TOL_HI = 1.5                    # dB above a category target → error
 LOUD_TOL_LO = 4.5                    # dB below → error (crest-limited sounds may sit a little low)
 AB_PREFIXES = ("vo_bellows_tuba_", "crowd_fb_")
-# v1 content the slice (Prologue, N1, N2) never plays: SQUEAKY arrives with SOPRAN-OH-NO (Night 3)
-LATER_PREFIXES = ("vo_bellows_squeaky_",)
+# v1 content the slice (Prologue, N1, N2) never plays, counted apart from the 15 MB slice budget:
+# SQUEAKY arrives with SOPRAN-OH-NO (Night 3); Beryl (Act II, Night 5+) and Delphine (Act III, Night 8+)
+# are Stage 3 — their own voices plus the lines Bellows only says to them ("BERYL!", the Suppressed
+# "ha-ha, my dear"). Their tuba takes are A/B alternates (checked first, against their own cap).
+LATER_PREFIXES = ("vo_bellows_squeaky_", "vo_beryl_", "vo_delphine_", "vo_bellows_beryl", "vo_bellows_ha_ha_my_dear")
 # end-trim threshold relative to the peak, per category (a tail below it is inaudible on a phone)
 TRIM_DB = {"voice": -36.0, "sfx": -40.0, "soft": -36.0, "ui": -36.0, "sting": -46.0, "crowd": -38.0, "ambient": -36.0}
 

@@ -2,6 +2,7 @@
 # Every lint in one go: tools/scripts/lint.sh (content, hotspot, IP, anim/rig) + every
 # tools/art/*/validate*.py (and lint_*.py) + `python3 tools/audio/gen_audio.py --check`, each only
 # when it exists. Usage: tools/ci/lint_all.sh [--no-godot]   (--no-godot: only the Python checks)
+# Needs Python 3 + numpy + Pillow, and `rsvg-convert` (apt librsvg2-bin) for the art validators.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
@@ -13,6 +14,9 @@ shopt -s nullglob
 py=(tools/art/*/validate*.py tools/art/*/lint_*.py)
 if [ ${#py[@]} -eq 0 ]; then
   echo "[lint_all] art: SKIPPED — no tools/art/*/validate*.py yet"
+elif ! command -v rsvg-convert >/dev/null 2>&1; then
+  echo "[lint_all] art: rsvg-convert not found — install librsvg2-bin (apt) to run the art validators" >&2
+  rc=1
 fi
 for s in "${py[@]}"; do
   echo "[lint_all] python3 $s"

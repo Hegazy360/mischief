@@ -1,5 +1,7 @@
 # Mischief Next Door CI (TECH §12): import metadata → GDScript tests → design lints → solver routes
 # for every `final` episode → bounded fairness fuzz, plus the Python checks (art validators, audio).
+# The Python job needs numpy + Pillow and `rsvg-convert` (apt `librsvg2-bin`, not on the ubuntu-24.04
+# image): the art validators rasterise every SVG part with it to check pivots, ink and silhouettes.
 # Every step passes on an empty-but-valid repo: a module that doesn't exist yet is SKIPPED with a
 # clear log line by the script itself (solve/fuzz/lint print "SKIP: …" and exit 0).
 # The Android preview APK lives in android-preview.yml (untouched here).
@@ -65,5 +67,10 @@ jobs:
           python-version: "3.12"
       - name: Install numpy + pillow
         run: python3 -m pip install --quiet numpy pillow
+      - name: Install rsvg-convert (librsvg2-bin; the art validators rasterise SVG parts with it)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends librsvg2-bin
+          rsvg-convert --version
       - name: Art validators and gen_audio.py --check (each skipped when absent)
         run: tools/ci/lint_all.sh --no-godot

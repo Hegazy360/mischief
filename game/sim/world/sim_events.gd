@@ -92,6 +92,7 @@ const SAFETY_NET := "safety_net"            ## {on}
 const FIGGIS_HOOK := "figgis_hook"
 const NIGHT_END := "night_end"              ## {reason}
 const CMD_REJECTED := "cmd_rejected"        ## {c, why}
+const CMD_QUEUED := "cmd_queued"            ## {c, why, target} (a go/move held while busy; why: entering | busy)
 # --- Stage 3 ---
 const BERYL_MOOD := "beryl_mood"            ## {mood}
 const BLEAT := "bleat"
@@ -113,7 +114,7 @@ const ALL: Array[String] = [HUSH_GO, HUSH_ARRIVE, HUSH_ROOM, RUMMAGE, PICK_WINDO
 	COMBO, TEMPER_TIER, RUNNING_GAG, RUNNING_GAG_END, MELTDOWN_START, MELTDOWN_STOMP, EXHAUSTED,
 	PANTO_ROUND, PANTO_BIT, MIRROR_ROUND, WINK, HEADBUTT,
 	APPLAUSE, BONUS, LINE_DONE, BIG_NUMBER_UNSEALED, ALL_LINES_DONE, STAR,
-	DIRECTOR_CUE, SAFETY_NET, FIGGIS_HOOK, NIGHT_END, CMD_REJECTED,
+	DIRECTOR_CUE, SAFETY_NET, FIGGIS_HOOK, NIGHT_END, CMD_REJECTED, CMD_QUEUED,
 	BERYL_MOOD, BLEAT, HERD_START, HERD_END, DELPHINE_ARRIVE, GLASSES, HIGH_C, EMBARRASSED]
 
 

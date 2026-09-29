@@ -73,6 +73,11 @@ func test_hush_enter_is_busy_and_unseen_until_she_is_in() -> void:
 	assert_true(w.hush.is_busy())
 	log.append_array(U.step(w, [SimCmd.move("kitchen", 3500)]))
 	assert_true(U.first(log, SimEvents.CMD_REJECTED, {"c": "move"}).is_empty(), "go / move queue up")
+	var q := U.first(log, SimEvents.CMD_QUEUED, {"c": "move"})
+	assert_false(q.is_empty(), "a held move says so at once (owner check #6: never a silent tap)")
+	assert_eq(int(q.get("t", -1)), w.tick, "the same tick")
+	assert_eq(str(q.get("why", "")), "entering")
+	assert_eq(str(q.get("target", "")), "kitchen")
 	var x0 := w.hush.x_sub
 	log.append_array(U.run(w, 80))
 	assert_eq(w.hush.x_sub, x0, "she doesn't move while climbing in")
@@ -81,6 +86,27 @@ func test_hush_enter_is_busy_and_unseen_until_she_is_in() -> void:
 	log.append_array(U.run(w, 30))
 	assert_false(w.hush.entering)
 	assert_gt(w.hush.x_sub, x0, "the queued move runs once she is in")
+
+
+func test_go_during_climb_in_is_queued_with_feedback_and_newest_wins() -> void:
+	var w := U.world_patched("fx_act1", func(ep: Dictionary) -> void:
+		U.loop_patch(["tea"], "kitchen", 2900, "kitchen", 3300).call(ep)
+		ep["hush"]["enter"] = {"clip": "hush/act_climb_in", "at_s": 1.0, "busy_s": 0.5})
+	var log: Array = []
+	log.append_array(U.step(w, [SimCmd.go("kitchen_table", true)]))
+	log.append_array(U.run(w, 5))
+	log.append_array(U.step(w, [SimCmd.go("kitchen_pantry_curtain")]))
+	var qs := U.find(log, SimEvents.CMD_QUEUED, {"why": "entering"})
+	assert_eq(qs.size(), 2, "one feedback event per held tap")
+	assert_eq(str(qs[0]["target"]), "kitchen_table")
+	assert_eq(str(qs[1]["target"]), "kitchen_pantry_curtain")
+	assert_eq(str(w.hush.queued.get("hotspot", "")), "kitchen_pantry_curtain", "a newer command replaces the queued one")
+	assert_true(U.first(log, SimEvents.HUSH_GO).is_empty(), "nothing moves while she climbs in")
+	var go := U.run_until(w, SimEvents.HUSH_GO, {}, 120, log)
+	assert_false(go.is_empty())
+	assert_eq(int(go["t"]), w.ctx.hush_enter_ticks, "the held go runs the tick she is in")
+	assert_eq(str(go["target"]), "kitchen_pantry_curtain")
+	assert_true(w.hush.queued.is_empty())
 
 
 func test_curtain_calls_false_awards_no_stars() -> void:

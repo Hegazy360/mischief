@@ -244,6 +244,38 @@ for _k in (1, 2):
     _mk2()
 
 
+def _squelch(rng, k: float):
+    """SOAKED (GDD §5.4 "squelching steps"): the soggy slipper presses (a wet, falling 'shl-'), the
+    trapped water burbles out of the sponge (a wobbling jaw-harp squish), bubbles pop, and the sole
+    sucks off the boards ('-thwp'). `k` scales the pitch per take."""
+    dur = 0.36
+    n = ns(dur)
+    t = tt(n)
+    press = noise_sweep(n, rng, env_exp([(0, 2400 * k), (0.045, 900 * k), (0.16, 460 * k), (dur, 380 * k)], n),
+                        1.3, color=-1.0)
+    press *= env_lin([(0, 0), (0.005, 1.0), (0.05, 0.6), (0.15, 0.18), (0.24, 0.0), (dur, 0.0)], n)
+    f = 160.0 * k * (1.0 + 0.22 * np.sin(TAU * 31.0 * t) * np.exp(-t / 0.12))
+    form = env_exp([(0, 450 * k), (0.1, 1500 * k), (0.2, 800 * k), (dur, 600 * k)], n)
+    squish = jawharp(f, form, n, bright=0.6) * env_lin([(0, 0), (0.025, 0), (0.06, 1.0), (0.17, 0.35), (0.24, 0),
+                                                         (dur, 0)], n)
+    bubbles = place([(0.05 + rng.uniform(0, 0.17), droplet(rng, rng.uniform(420, 1050) * k, rng.uniform(0.025, 0.05)),
+                      rng.uniform(0.3, 0.75)) for _ in range(6)], dur)
+    sn = ns(0.06)
+    suck = sine(env_exp([(0, 260 * k), (0.06, 1100 * k)], sn), sn) * perc(sn, 0.006, 0.05)
+    weight = pad(thump(0.14, 115, 55, 0.1), n)
+    return (norm(press) * 0.75 + norm(squish) * 0.55 + pad(bubbles, n) * 0.6
+            + pad(place([(0.24, suck)], dur), n) * 0.45 + weight * 0.3)
+
+
+for _k, _pitch in ((1, 1.0), (2, 1.13)):
+    def _mk_sq(k=_k, pitch=_pitch):
+        @sfx(f"squelch_{k}", cat="soft", max_dur=0.45, bank="squelch", level=-18.5, vary=0.05,
+             desc=f"Bellows' SOAKED slipper: a wet squelch-and-suck step #{k}")
+        def _f(rng):
+            return _squelch(rng, pitch)
+    _mk_sq()
+
+
 for _k, (_base, _span, _dur) in enumerate(((12, 55, 0.55), (18, 80, 0.45), (9, 40, 0.7)), start=1):
     def _mk3(k=_k, base=_base, span=_span, dur=_dur):
         @sfx(f"stair_creak_{k}", cat="soft", max_dur=0.8, bank="stair_creak", level=-18.0, vary=0.03,

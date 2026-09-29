@@ -9,7 +9,7 @@ each loop's `smpl` chunk ("Detect From WAV").
 | Output | What |
 |---|---|
 | `game/audio/sfx/*.wav` | ~110 SFX (Treg-Brown kit, footsteps, doors, every slice prank prop, stealth feedback, Clarence, UI), 12 stingers `sting_*`, the Stalls `crowd_*` (formant) and `crowd_fb_*` (fallback) |
-| `game/audio/voice/*.wav` | Bellows' phrase bank: `vo_bellows_*` (formant), `vo_bellows_tuba_*` (talking-tuba fallback, same bank), `vo_bellows_squeaky_*` (+12 st, the SQUEAKY residue) |
+| `game/audio/voice/*.wav` | Bellows' phrase bank: `vo_bellows_*` (formant), `vo_bellows_tuba_*` (talking-tuba fallback, same bank), `vo_bellows_squeaky_*` (+12 st, the SQUEAKY residue); Stage 3: `vo_delphine_*` (soprano "HORACE!" ×2, the high-C "INTRUDER!" with a glass-crack tail) and `vo_beryl_*` ("MEH!", the Besotted bleat ×3: formant + FM buzz) |
 | `game/audio/music/*.wav` | `mus_sneak` + `mus_suspense` (synchronised stems), `mus_chase`, `mus_chain_1..4`, `mus_curtain` (one-shot), `mus_results` |
 | `game/audio/sfx_map.json` | `files` (id → path, bus, length), `banks` (id → variants), `aliases`, `music` (bpm, beats per bar, bars, samples per beat), `stems`, `vary` (pitch jitter) |
 
@@ -42,8 +42,9 @@ Deterministic: every recipe's RNG is seeded from its name, so a re-render is byt
    bars × beats per bar × samples per beat, and the seam has no jump; the stem set sums (with the
    shorter stem tiled) to ≤ −1 dBFS.
 6. Budgets: slice audio ≤ 15 MB of WAV (the A/B alternates `vo_bellows_tuba_*` / `crowd_fb_*` and the
-   later-Night `vo_bellows_squeaky_*` are counted separately), A/B alternates ≤ 6.5 MB, estimated shipped
-   audio ≤ 40 MB after QOA.
+   later-Night content are counted separately: `vo_bellows_squeaky_*` (Night 3) and the Stage-3 voices
+   `vo_beryl_*`, `vo_delphine_*`, `vo_bellows_beryl*`, `vo_bellows_ha_ha_my_dear` — see `LATER_PREFIXES`),
+   A/B alternates ≤ 6.5 MB, estimated shipped audio ≤ 40 MB after QOA.
 
 ## Loudness targets (categories in `registry.py`)
 
@@ -64,11 +65,12 @@ Deterministic: every recipe's RNG is seeded from its name, so a re-render is byt
 - `instruments.py` — the pit orchestra: pizzicato, bowed/tremolo strings, clarinet, bassoon, flute/piccolo,
   tuba, trombone, trumpet, horn, timpani (+ roll), woodblock, celesta, harp, xylophone, glockenspiel,
   triangle, slide whistle, kazoo, drums.
-- `sfx_foley.py` — footsteps, doors, the Treg-Brown kit, every slice prank prop.
+- `sfx_foley.py` — footsteps (incl. the SOAKED `squelch` bank), doors, the Treg-Brown kit, every slice prank prop.
 - `sfx_stealth.py` — stealth feedback, Clarence, Hush (the pit plays her), UI, flow cues.
 - `stings.py` — `sting_*`.
 - `voices.py` — the score language (`Syl`, `Line`), the formant and talking-tuba engines, `SPEAKERS`
-  (Bellows now; Delphine / Beryl presets ready for Stage 3) and Bellows' lines.
+  and every speaker's lines: `lines_bellows()`, `lines_delphine()`, `lines_beryl()` (Beryl renders through
+  `render_bleat`: the formant bleat plus an FM nasal buzz on the same pitch curve).
 - `crowd.py` — laughers, applause, whistles, stomps, chants; the formant tiers + specials and the fallback set.
 - `music.py` — the loops (`META` timing is written into the map; the autoload's bar maths read it).
 - `aliases.py` — `EXPLICIT` names, keyword `RULES`, the content scanner.
@@ -80,5 +82,6 @@ Deterministic: every recipe's RNG is seeded from its name, so a re-render is byt
   `python3 tools/audio/gen_audio.py --only name`. Variants: register `name_1..n` with `bank="name"`.
 - A new Bellows line: add a `Line` to `voices.lines_bellows()`; the formant and tuba files register
   themselves (`vo_bellows_<id>`, `vo_bellows_tuba_<id>`; `_n` suffixes form banks).
-- A new speaker (Stage 3): a `Speaker` preset in `SPEAKERS` + its own `lines_<speaker>()`.
+- A new speaker: a `Speaker` preset in `SPEAKERS`, its own `lines_<speaker>()` in `LINES` and a loudness
+  table in `LEVELS`; files register as `vo_<speaker>_<line>[_n]` (formant only — the tuba A/B is Bellows').
 - A name used by content: nothing to do if a `RULES` keyword fits; otherwise add an `EXPLICIT` alias.

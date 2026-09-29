@@ -104,9 +104,11 @@ func test_queue_rig_then_dive_when_ring_completes() -> void:
 	var e := U.step(w, [SimCmd.rig(true)])
 	assert_false(U.first(e, SimEvents.RIG_START).is_empty())
 	U.run(w, 10)
-	U.step(w, [SimCmd.go("kitchen_pantry_curtain")])
+	var eq := U.step(w, [SimCmd.go("kitchen_pantry_curtain")])
 	assert_eq(w.hush.queued.get("hotspot", ""), "kitchen_pantry_curtain")
 	assert_eq(w.hush.state, SimHush.RIGGING, "a go while busy is queued")
+	assert_false(U.first(eq, SimEvents.CMD_QUEUED, {"c": "go", "why": "busy", "target": "kitchen_pantry_curtain"}).is_empty(),
+		"the held go says so at once")
 	var log: Array = []
 	var ev := U.run_until(w, SimEvents.RIGGED, {}, 100, log)
 	assert_false(ev.is_empty())
@@ -215,8 +217,9 @@ func test_standing_squeak_is_busy_and_queues() -> void:
 	var w := U.quiet_world()
 	U.step(w, [SimCmd.squeak()])
 	assert_eq(w.hush.state, SimHush.SQUEAKING)
-	U.step(w, [SimCmd.move("kitchen", 3000)])
+	var e := U.step(w, [SimCmd.move("kitchen", 3000)])
 	assert_eq(w.hush.state, SimHush.SQUEAKING)
+	assert_false(U.first(e, SimEvents.CMD_QUEUED, {"c": "move", "why": "busy", "target": "kitchen"}).is_empty())
 	U.run(w, SimConst.SQUEAK_ARM_TICKS)
 	assert_true(w.hush.is_travelling())
 

@@ -37,7 +37,7 @@ ROOMS = [
     ("dressing", 1, 3700, 4500, False, "#6FA3A8"),
 ]
 ROOM = {r[0]: {"id": r[0], "floor": r[1], "x0": r[2], "x1": r[3], "outdoor": r[4], "wallpaper": r[5]} for r in ROOMS}
-FINAL_ROOMS = ("porch", "hall", "parlour", "kitchen")
+FINAL_ROOMS = ("porch", "hall", "parlour", "kitchen", "landing", "bathroom", "bedroom", "dressing", "conservatory")
 
 LINKS = [
     {"id": "front_door", "kind": "door", "a": "porch", "b": "hall", "x": 500},
@@ -62,7 +62,7 @@ STATIONS = [
     ("st_chaise", "parlour", 2560, 2560, -1, [], {}),
     ("st_parlour_centre", "parlour", 2150, 2150, 1, [], {}),
     # kitchen
-    ("st_tea", "kitchen", 2940, 2880, 1, ["HONEY"], {}),
+    ("st_tea", "kitchen", 2940, 3000, -1, ["HONEY"], {}),
     ("st_pickles", "kitchen", 3110, 3050, 1, [], {}),
     ("st_fridge", "kitchen", 3280, 3190, 1, [], {}),
     ("st_sink", "kitchen", 3788, 3728, 1, ["SINK"], {}),
@@ -207,6 +207,22 @@ STACKS = [
     ("garden_compost", "garden_spotlight"),
 ]
 
+# Atlas raster hints (STYLE §8 `raster`; s2-view builds room atlases with s2-rig's per-path scale): the big hiding
+# pieces, doors and the tall furniture rasterise at 1.5x instead of 2x (they are never the punch-in subject at
+# more than 1.4x), so every slice room's props + outlines fit one 2048^2 page. Outline `_ol` sprites are 1x by
+# convention (no hint needed); anything unlisted is 2x (1.5x on < 3 GB phones, as HiResTex does).
+RASTER = {
+    # hiding pieces
+    "hall_coat_cupboard": 1.5, "hall_clock_case": 1.5, "parlour_piano_back": 1.5, "parlour_chaise_back": 1.5,
+    "kitchen_pantry_curtain": 1.5, "kitchen_table": 1.5,
+    # doors, the entry window, tall furniture
+    "hall_front_door": 1.5, "kitchen_back_door": 1.5, "kitchen_window": 1.5, "hall_mirror": 1.5,
+    "parlour_gramophone": 1.5, "kitchen_fridge": 1.5, "hall_confiscated_box": 1.5, "parlour_recliner": 1.5,
+    "parlour_chandelier": 1.5, "parlour_fan": 1.5, "parlour_portrait": 1.5,
+    # soft glows / big flat decor
+    "hall_front_door_glow": 1.0, "hall_coat_stand": 1.5,
+}
+
 # Reaction landing targets per room (x only; GDD §4.8 / §5.7)
 LANDINGS = {
     "kitchen": {"sink": 3760, "table": 3450},
@@ -229,7 +245,9 @@ ENTRIES = {
 
 # Station moves vs GDD §7.1 (reported)
 MOVES = {
-    "st_tea": "2960 -> 2940 (kitchen row packed at 170 px so the back door box fits)",
+    "st_tea": "2960 -> 2940 (kitchen row packed at 170 px so the back door box fits); stand_x 3000 facing -1 "
+              "(Stage 2: he sits on the stool right of the counter, back to the pantry + sink, so the sneeze "
+              "rockets him backwards into the sink at 3760)",
     "st_pickles": "3130 -> 3110",
     "st_fridge": "3300 -> 3280",
     "st_sink": "3800 -> 3788",

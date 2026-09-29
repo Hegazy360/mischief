@@ -11,6 +11,15 @@
 ##   3. else the floor under the tap (or the nearest floor within the assist radius).
 ## Returns {"c": "go", "hotspot": id, "kind": kind, "room": room, "assisted": bool},
 ## {"c": "move", "room": room, "x": int} for the floor, or {} when nothing is near.
+##
+## Stacks (house.json `stacks`, art-house request): candidates may carry `enabled: bool`
+## (default true) and `stack: String` (the stack they share; "" = none). A DISABLED hotspot is
+## never a target itself; a tap on (or assisted to) a disabled hotspot that shares a stack with
+## an enabled one resolves to that enabled partner (the bottom stair steps without RUG BURN →
+## climb the stairs; the fridge's top door in Night 1 → open the fridge) and the result carries
+## `"via": <disabled id>`. A disabled hotspot with no enabled partner is ignored (the tap falls
+## through to the assist / the floor). Coordinates: `world_pos` and every `rect` share one space
+## (world px, or screen px with zoom 1.0).
 class_name TapAssist
 extends RefCounted
 
@@ -22,9 +31,11 @@ const PASSAGE_KINDS := ["door", "stairs", "exit"]
 static func resolve(world_pos: Vector2, candidates: Array, zoom: float) -> Dictionary:
 	var radius := GestureConfig.ASSIST_PX / maxf(zoom, 0.01)
 	var best: Dictionary = {}
+	var best_via := ""
 	var best_pri := -1
 	var best_d := INF
-	# 1. exact hits
+	var best_direct := false
+	# 1. exact hits (a disabled stacked hotspot stands in for its enabled partner)
 	for c in candidates:
 		var cd: Dictionary = c
 		if _kind(cd) == "floor":
@@ -32,14 +43,24 @@ static func resolve(world_pos: Vector2, candidates: Array, zoom: float) -> Dicti
 		var r: Rect2 = cd.get("rect", Rect2())
 		if not r.has_point(world_pos):
 			continue
-		var pri := priority_of(cd)
-		var d := world_pos.distance_to(r.get_center())
-		if pri > best_pri or (pri == best_pri and d < best_d):
-			best = cd
+		var target := cd
+		var via := ""
+		if not is_enabled(cd):
+			target = stack_partner(cd, candidates)
+			if target.is_empty():
+				continue
+			via = String(cd.get("id", ""))
+		var pri := priority_of(target)
+		var d := world_pos.distance_to((target.get("rect", Rect2()) as Rect2).get_center())
+		var direct := via == ""
+		if pri > best_pri or (pri == best_pri and (direct and not best_direct or direct == best_direct and d < best_d)):
+			best = target
+			best_via = via
 			best_pri = pri
 			best_d = d
+			best_direct = direct
 	if not best.is_empty():
-		return _go(best, false)
+		return _go(best, false, best_via)
 	# 2. assisted
 	for c in candidates:
 		var cd: Dictionary = c
@@ -48,13 +69,22 @@ static func resolve(world_pos: Vector2, candidates: Array, zoom: float) -> Dicti
 		var d := rect_distance(world_pos, cd.get("rect", Rect2()))
 		if d > radius:
 			continue
-		var pri := priority_of(cd)
+		var target := cd
+		var via := ""
+		if not is_enabled(cd):
+			target = stack_partner(cd, candidates)
+			if target.is_empty():
+				continue
+			via = String(cd.get("id", ""))
+			d = minf(d, rect_distance(world_pos, target.get("rect", Rect2())))
+		var pri := priority_of(target)
 		if pri > best_pri or (pri == best_pri and d < best_d):
-			best = cd
+			best = target
+			best_via = via
 			best_pri = pri
 			best_d = d
 	if not best.is_empty():
-		return _go(best, true)
+		return _go(best, true, best_via)
 	# 3. floor
 	best_d = INF
 	for c in candidates:
@@ -70,6 +100,33 @@ static func resolve(world_pos: Vector2, candidates: Array, zoom: float) -> Dicti
 	var fr: Rect2 = best.get("rect", Rect2())
 	return {"c": "move", "room": String(best.get("room", "")),
 		"x": int(round(clampf(world_pos.x, fr.position.x, fr.end.x)))}
+
+
+## A candidate is a target unless it says `enabled: false`.
+static func is_enabled(c: Dictionary) -> bool:
+	return bool(c.get("enabled", true))
+
+
+## The enabled candidate sharing `c`'s `stack` (highest priority, then nearest centre); {} = none.
+static func stack_partner(c: Dictionary, candidates: Array) -> Dictionary:
+	var st := String(c.get("stack", ""))
+	if st == "":
+		return {}
+	var cc := (c.get("rect", Rect2()) as Rect2).get_center()
+	var best: Dictionary = {}
+	var best_pri := -1
+	var best_d := INF
+	for o in candidates:
+		var od: Dictionary = o
+		if od == c or not is_enabled(od) or _kind(od) == "floor" or String(od.get("stack", "")) != st:
+			continue
+		var pri := priority_of(od)
+		var d := cc.distance_to((od.get("rect", Rect2()) as Rect2).get_center())
+		if pri > best_pri or (pri == best_pri and d < best_d):
+			best = od
+			best_pri = pri
+			best_d = d
+	return best
 
 
 ## A candidate's priority: its `priority` field, else 2 hotspot / 1 door-stairs-exit / 0 floor.
@@ -95,6 +152,9 @@ static func _kind(c: Dictionary) -> String:
 	return String(c.get("kind", "hotspot"))
 
 
-static func _go(c: Dictionary, assisted: bool) -> Dictionary:
-	return {"c": "go", "hotspot": String(c.get("id", "")), "kind": _kind(c), "room": String(c.get("room", "")),
+static func _go(c: Dictionary, assisted: bool, via: String = "") -> Dictionary:
+	var out := {"c": "go", "hotspot": String(c.get("id", "")), "kind": _kind(c), "room": String(c.get("room", "")),
 		"assisted": assisted}
+	if via != "":
+		out["via"] = via
+	return out

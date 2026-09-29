@@ -1,0 +1,245 @@
+{
+ "events": [
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 0,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 5,
+   "engine_frame": 14,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 14,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 16,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 16,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 20,
+   "engine_frame": 29,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 29,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 32,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 32,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 30,
+   "engine_frame": 39,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 39,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 48,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 48,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 42,
+   "engine_frame": 51,
+   "id": "bow_creak",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 51,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 64,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 64,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 80,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 80,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 96,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 96,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 5,
+   "engine_frame": 103,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 103,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 112,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 112,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 20,
+   "engine_frame": 118,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 118,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 128,
+   "id": "bellows_step",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 30,
+   "engine_frame": 128,
+   "id": "baton_swish",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "Master",
+   "engine_frame": 128,
+   "id": "Blips",
+   "player": "Blips",
+   "type": "audio"
+  }
+ ],
+ "fps": 60,
+ "frames": 130,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ]
+}

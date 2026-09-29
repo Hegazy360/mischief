@@ -32,6 +32,15 @@ PRESETS = {
 	"sneeze_build": {"eyes": "half", "brows": "worried", "mouth": "O_small", "pupils": [0, -3]},
 	"sneeze_build2": {"eyes": "squint", "brows": "worried", "mouth": "open"},
 	"sneeze_choo": {"eyes": "closed", "brows": "angry", "mouth": "scream"},
+	"sneeze_build3": {"eyes": "closed", "brows": "worried", "mouth": "O_big"},      # AHHH: eyes screwed shut
+	"sneeze_gasp": {"eyes": "wide", "brows": "up", "mouth": "O_small"},             # the snap after the false stop
+	"sniff": {"eyes": "half", "brows": "up", "mouth": "closed", "pupils": [2, 3]},  # nose over the cup
+	"sip": {"eyes": "closed", "brows": "up", "mouth": "O_small", "overlays": ["blush"]},   # pinkie-up slurp
+	"hum": {"eyes": "closed", "brows": "up", "mouth": "smug"},                      # hm-hm-hmm
+	"dazed_open": {"eyes": "spiral", "brows": "up", "mouth": "open"},
+	"kiss": {"eyes": "closed", "brows": "up", "mouth": "O_small", "overlays": ["blush"]},     # blows himself a kiss
+	"trill": {"eyes": "squint", "brows": "up", "mouth": "wavy"},                             # brrrr lip trill
+	"sly_smile": {"eyes": "half", "brows": "sly", "mouth": "smile", "pupils": [4, 3]},       # a nod to his reflection
 	# after the hit
 	"dazed": {"eyes": "spiral", "brows": "worried", "mouth": "wavy"},
 	"slow_burn": {"eyes": "half", "brows": "neutral", "mouth": "closed", "pupils": [-5, 2]},

@@ -1,0 +1,51 @@
+{
+ "version": 1,
+ "clip": "bellows/_fx_mg_preen",
+ "rig": "bellows",
+ "loop": false,
+ "length": 60,
+ "layer": "overlay",
+ "mask": "upper",
+ "blend_in": 6,
+ "blend_out": 8,
+ "tags": [
+  "micro_gag",
+  "fixture"
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 12,
+   "pose": "b_preen",
+   "ease": "out_back",
+   "face": "smug"
+  },
+  {
+   "f": 36,
+   "pose": "b_fidget_admire",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 12,
+   "type": "voice",
+   "bank": "vo_bellows_hum"
+  },
+  {
+   "f": 36,
+   "type": "decor",
+   "id": "kitchen_stool",
+   "visible": true
+  }
+ ]
+}

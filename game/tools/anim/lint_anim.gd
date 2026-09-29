@@ -4,6 +4,9 @@
 ##   … -- --clip=_mannequin/rx_take   (one clip)
 ##   … -- --file=res://tests/rig/fixtures/bad_pop.json   (a clip file outside data/anim)
 ##   … -- --no-rigs                   (clips only)
+##   … -- --strict                    (the pre-gate: every WARNING counts as an ERROR)
+## Expected lengths (A24 / A25 / A29) come from SliceClips.build() when it exists, else from
+## activities.json (the summary line says which).
 ## Prints one line per finding ("ERROR <rule> <file>:f<frame> <message>") and a summary;
 ## exit code 1 when any error-severity finding exists, else 0.
 extends SceneTree
@@ -16,11 +19,14 @@ func _initialize() -> void:
 	var file := ""
 	var all := false
 	var rigs := true
+	var strict := false
 	for a in args:
 		if a == "--all":
 			all = true
 		elif a == "--no-rigs":
 			rigs = false
+		elif a == "--strict":
+			strict = true
 		elif a.begins_with("--rig="):
 			rig_id = a.substr(6)
 		elif a.begins_with("--clip="):
@@ -51,8 +57,11 @@ func _initialize() -> void:
 			for cid in ClipLib.list(r):
 				findings.append_array(AnimLint.lint_clip(ClipLib.get_clip(cid)))
 				clips += 1
+	if strict:
+		AnimLint.make_strict(findings)
 	for f in findings:
 		print(AnimLint.format(f))
 	var errors := AnimLint.error_count(findings)
-	print("lint_anim: %d clip(s), %d error(s), %d warning(s)" % [clips, errors, findings.size() - errors])
+	print("lint_anim: %d clip(s), %d error(s), %d warning(s)%s; expected lengths from %s" % [clips, errors,
+		findings.size() - errors, " [strict]" if strict else "", AnimLint.expectations_source()])
 	quit(1 if errors > 0 else 0)

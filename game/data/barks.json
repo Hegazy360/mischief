@@ -34,7 +34,6 @@
       "bank": "vo_bellows_did_not_squeak",
       "on": "squeak_bit:bit_phone",
       "text": "I did NOT squeak!",
-      "fallback": "vo_bellows_grr",
       "stage": 1
     },
     "pardon": {
@@ -295,7 +294,6 @@
       "bank": "vo_bellows_beryl",
       "on": "blame:beryl",
       "text": "BERYL!",
-      "fallback": "vo_bellows_grr",
       "stage": 3
     },
     "meh": {
@@ -348,7 +346,9 @@
     "card_bow": {"icons": ["bow", "arrow", "res://art/ui/star.svg"]},
     "card_freeze": {"icons": ["freeze", "arrow", "specs_off"]},
     "card_specs": {"icons": ["specs_on", "arrow", "hide"]},
-    "card_fixup": {"icons": ["res://art/icons/activities/fixup_mirror.svg", "arrow", "rig"]}
+    "card_fixup": {"icons": ["res://art/icons/activities/fixup_mirror.svg", "arrow", "rig"]},
+    "ghost_ff": {"icons": ["clarence_hold", "arrow", "clock_fast"], "ghost": "clarence"},
+    "ff": {"icons": ["clarence_hold", "arrow", "clock_fast"], "ghost": "clarence"}
   },
   "line_cards": {
     "gala_the_comeback:spotlight": {

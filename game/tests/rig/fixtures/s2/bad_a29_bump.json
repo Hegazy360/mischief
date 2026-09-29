@@ -1,0 +1,29 @@
+{
+ "version": 1,
+ "clip": "_mannequin/st_bump_test",
+ "rig": "_mannequin",
+ "loop": false,
+ "length": 72,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand"
+  },
+  {
+   "f": 30,
+   "pose": "m_notice",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 52,
+   "pose": "m_notice_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 72,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

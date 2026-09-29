@@ -75,5 +75,6 @@ func test_bad_pose_references_are_reported() -> void:
 	var text := "\n".join(lib.errors)
 	assert_has(text, "unknown base 'nope'")
 	assert_has(text, "bone 'tail'")
-	assert_has(text, "unknown channel 'spin'")
 	assert_has(text, "cycle")
+	# Unknown channels are the tolerant parser's warnings (warned once, skipped).
+	assert_has("\n".join(lib.warnings), "unknown channel 'spin'")

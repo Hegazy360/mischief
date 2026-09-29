@@ -6,8 +6,10 @@
 ## Rows: BELLOWS room · BELLOWS state (reacting yellow, chase red, caught magenta, detour teal,
 ## curious orange, search pink) · HUSH room (hidden = dark stripes, frozen = white stripes) ·
 ## "?" meter (red bars, the fill line dashed) · INPUT (commands and holds) · LAUGHS (yellow;
-## prank accents full height, director cues grey) · DEAD AIR (grey) · EVENTS (rig steps green,
-## catches red, near misses orange, bow blue). A legend of room colours sits at the bottom.
+## prank accents full height, director cues grey) · BEATS (Bellows' micro-gags, D1: a thin tick per beat — room
+## green, PiP blue, edge-bubble orange, full height; invisible ones short and grey) · DEAD AIR (grey: the D1 mask,
+## visible beats count) · FF (where the persona's ⏩ is latched: those ticks weigh 1/3 in the gate) · EVENTS (rig
+## steps green, catches red, near misses orange, bow blue). Legends of the room and beat colours sit at the bottom.
 class_name SolverTimeline
 extends RefCounted
 
@@ -16,7 +18,13 @@ const ROW_H := 22
 const LABEL_W := 92
 const TOP := 26
 const ROWS: PackedStringArray = ["BELLOWS ROOM", "BELLOWS STATE", "HUSH ROOM", "? METER", "INPUT", "LAUGHS",
-	"DEAD AIR", "EVENTS"]
+	"BEATS", "DEAD AIR", "FF", "EVENTS"]
+const ROW_LAUGHS := 5
+const ROW_BEATS := 6
+const ROW_DEAD := 7
+const ROW_FF := 8
+const ROW_EVENTS := 9
+const BEAT_COLORS := {"room": "#2E9E4F", "pip": "#2F6FD0", "edge": "#F08A24", "hidden": "#C9C2B6"}
 const BG := Color("#FBF7F0")
 const INK := Color("#1B2340")
 const GRID := Color("#DDD5C8")
@@ -53,15 +61,21 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 	var n := log.size()
 	var cols := maxi(1, (n + TICKS_PER_PX - 1) / TICKS_PER_PX)
 	var w := maxi(LABEL_W + cols + 8, 760)
-	var legend_h := 34
+	var legend_h := 50
 	var h := TOP + ROWS.size() * ROW_H + legend_h
 	var img := Image.create(w, h, false, Image.FORMAT_RGB8)
 	img.fill(BG)
-	var title := "%s %s %s  %.0fS  APPLAUSE %.0f  DEAD AIR %.0f%%  MAX GAP %.0fS" % [
-		String(report.get("episode", log.episode)), String(report.get("route", log.route)),
-		"OK" if bool(report.get("ok", true)) else "FAIL", float(report.get("duration_s", n / 60.0)),
-		float(report.get("applause", 0.0)), float(report.get("dead_air_pct", 0.0)), float(report.get("max_gap_s", 0.0))]
-	_text(img, 6, 6, title.to_upper(), INK, 2)
+	var bt: Dictionary = report.get("beats", {})
+	var title := "%s %s %s  %.0fS  APPLAUSE %.0f" % [String(report.get("episode", log.episode)),
+		String(report.get("route", log.route)), "OK" if bool(report.get("ok", true)) else "FAIL",
+		float(report.get("duration_s", n / 60.0)), float(report.get("applause", 0.0))]
+	var sub := "DEAD AIR FF %.1f%% (SIM %.1f%%, NAIVE %.1f%%)   MAX GAP FF %.1fS (SIM %.1fS)   BEATS %d: ROOM %d PIP %d EDGE %d HIDDEN %d   EDGE SHARE %.0f%%" % [
+		float(report.get("dead_air_ff_pct", 0.0)), float(report.get("dead_air_sim_pct", report.get("dead_air_pct", 0.0))),
+		float(report.get("dead_air_ff_naive_pct", 0.0)), float(report.get("max_gap_ff_s", 0.0)),
+		float(report.get("max_gap_sim_s", report.get("max_gap_s", 0.0))), int(bt.get("total", 0)), int(bt.get("room", 0)),
+		int(bt.get("pip", 0)), int(bt.get("edge", 0)), int(bt.get("hidden", 0)), 100.0 * float(bt.get("edge_share", 0.0))]
+	_text(img, 6, 4, title.to_upper(), INK, 2)
+	_text(img, 6, 17, sub, INK, 1)
 	for r in ROWS.size():
 		_text(img, 4, TOP + r * ROW_H + 7, ROWS[r], INK, 1)
 		img.fill_rect(Rect2i(LABEL_W, TOP + (r + 1) * ROW_H - 1, cols, 1), GRID)
@@ -73,7 +87,8 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		if s % 30 == 0:
 			_text(img, x + 2, TOP + ROWS.size() * ROW_H + 2, "%dS" % s, INK, 1)
 		s += 10
-	var dead := Metrics.dead_air_mask(log, SolverHooks.fallback_is_laugh)
+	var dead := Metrics.dead_air_mask(log, SolverHooks.is_laugh)
+	var ffm := Metrics.ff_mask(log, SolverHooks.is_laugh)
 	var fill := maxi(1, log.fill_ticks)
 	for c in cols:
 		var i0 := c * TICKS_PER_PX
@@ -98,10 +113,12 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		var m := 0
 		var inp := false
 		var dd := false
+		var ff := false
 		for k in range(i0, i1):
 			m = maxi(m, log.spot[k])
 			inp = inp or log.input[k] == 1
 			dd = dd or dead[k] == 1
+			ff = ff or ffm[k] == 1
 		var bar := clampi(m * (ROW_H - 4) / fill, 0, ROW_H - 4)
 		if bar > 0:
 			img.fill_rect(Rect2i(x, TOP + 4 * ROW_H - 2 - bar, 1, bar), Color("#E0443A"))
@@ -110,26 +127,32 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		if inp:
 			img.fill_rect(Rect2i(x, TOP + 4 * ROW_H + 5, 1, ROW_H - 10), INK)
 		if dd:
-			_cell(img, x, 6, Color("#9A958C"))
+			_cell(img, x, ROW_DEAD, Color("#9A958C"))
+		if ff:
+			img.fill_rect(Rect2i(x, TOP + ROW_FF * ROW_H + 7, 1, ROW_H - 14), Color("#6B8FB8"))
 	var t0 := log.start_tick
 	for ev in log.events:
 		var e := SolverData.sv(ev.get("e", ""))
 		var x := LABEL_W + (int(ev.get("t", 0)) - t0 - 1) / TICKS_PER_PX
 		if x < LABEL_W or x >= w:
 			continue
-		if SolverHooks.fallback_is_laugh(ev):
+		if SolverHooks.is_laugh(ev):
 			var cue := e == "director_cue"
 			var col := Color("#9A958C") if cue else Color("#F6B21B")
 			var full := e == "reaction_accent"
 			var hh := ROW_H - 2 if full else ROW_H / 2
-			img.fill_rect(Rect2i(x - (1 if full else 0), TOP + 6 * ROW_H - 1 - hh, 3 if full else 2, hh), col)
+			img.fill_rect(Rect2i(x - (1 if full else 0), TOP + (ROW_LAUGHS + 1) * ROW_H - 1 - hh, 3 if full else 2, hh), col)
+		var bk := Metrics.beat_kind(ev)
+		if bk != "":
+			var bh := ROW_H - 4 if bk != "hidden" else ROW_H / 3
+			img.fill_rect(Rect2i(x, TOP + (ROW_BEATS + 1) * ROW_H - 2 - bh, 2, bh), Color(BEAT_COLORS[bk]))
 		match e:
 			"rig_step_done":
-				img.fill_rect(Rect2i(x, TOP + 7 * ROW_H + 3, 2, 7), Color("#2E9E4F"))
+				img.fill_rect(Rect2i(x, TOP + ROW_EVENTS * ROW_H + 3, 2, 7), Color("#2E9E4F"))
 			"caught":
-				_cross(img, x, TOP + 7 * ROW_H + 11, Color("#C8102E"))
+				_cross(img, x, TOP + ROW_EVENTS * ROW_H + 11, Color("#C8102E"))
 			"near_miss":
-				img.fill_rect(Rect2i(x, TOP + 7 * ROW_H + 12, 2, 7), Color("#F08A24"))
+				img.fill_rect(Rect2i(x, TOP + ROW_EVENTS * ROW_H + 12, 2, 7), Color("#F08A24"))
 			"night_end":
 				img.fill_rect(Rect2i(x, TOP, 2, ROWS.size() * ROW_H), Color("#2F6FD0"))
 	# Room legend.
@@ -141,6 +164,15 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		lx += 13 + String(r).length() * 4 + 12
 		if lx > w - 60:
 			break
+	lx = LABEL_W
+	ly += 16
+	for k in ["room", "pip", "edge", "hidden"]:
+		img.fill_rect(Rect2i(lx, ly, 10, 10), Color(BEAT_COLORS[k]))
+		var lab: String = "BEAT " + String(k).to_upper()
+		_text(img, lx + 13, ly + 2, lab, INK, 1)
+		lx += 13 + lab.length() * 4 + 12
+	img.fill_rect(Rect2i(lx, ly, 10, 10), Color("#6B8FB8"))
+	_text(img, lx + 13, ly + 2, "FF LATCHED (1/3)", INK, 1)
 	return img
 
 

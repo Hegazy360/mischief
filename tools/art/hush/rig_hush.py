@@ -42,7 +42,7 @@ def _hand(side):
 	tex = OrderedDict((t, ART + "hand_%s_%s.svg" % (side, t)) for t in A.HAND_TEX)
 	d = {"parent": "arm_lower_" + side, "offset": [0, round(A.ARM_LO * A.K, 1)]}
 	d.update(_c("hand"))
-	d.update({"z": Z["hand_" + side], "tex": tex, "default_tex": "open", "limits": {"rot": [-120, 120]},
+	d.update({"z": Z["hand_" + side], "tex": tex, "default_tex": "open", "limits": {"rot": [-165, 165]},
 			  "sockets": {"grip": A.cpt("hand", (12, 24)) + [90]}})
 	return d
 
@@ -82,7 +82,7 @@ def parts():
 	P["beret"] = _p("head", A.BERET_OFF, "beret", Z["beret"], spring={"channel": "rot", "k": 180, "c": 9, "clamp": 25})
 	for side, sho in (("r", A.SHO_R), ("l", A.SHO_L)):
 		P["arm_upper_" + side] = {"parent": "torso", "offset": A.S(sho), "pivot": [0, 0], "z": Z["arm_" + side],
-								  "draw": "limb:arm_" + side, "limits": {"rot": [-200, 200]}}
+								  "draw": "limb:arm_" + side, "limits": {"rot": [-300, 300]}}
 		P["arm_lower_" + side] = {"parent": "arm_upper_" + side, "offset": [0, round(A.ARM_UP * A.K, 1)],
 								  "pivot": [0, 0], "z": Z["arm_" + side], "draw": "limb:arm_" + side,
 								  "limits": {"rot": [-175, 175]}}
@@ -224,6 +224,10 @@ _F = [
 	("sneak", "open", "sly", "shh", "right", ()),
 	("curious", "open", "up", "O", "up_right", ()),
 	("phew", "closed", "worried", "smile", None, ("sweat",)),
+	# s2-anim-hush: the one blink of a held statue (freeze clips key it; takes suppress the automatic blink)
+	("statue_blink", "closed", "neutral", "smile", None, ()),
+	("determined_blink", "closed", "determined", "tongue", None, ()),
+	("frantic", "wide", "determined", "tongue", "down", ("sweat",)),
 ]
 
 

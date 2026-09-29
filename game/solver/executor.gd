@@ -152,6 +152,12 @@ func _init_log_facts() -> void:
 	log.has_beryl = probe.has_beryl()
 	log.b_walk_sub = 240 if _fallback_hooks() else SolverHooks.sim_const("B_WALK", 240)
 	log.launch_offset_s = data.launch_offset_s(ep)
+	log.ff_repress_ticks = persona.ff_repress_ticks
+	# the slow first-timer needs the ghost_ff cue — unless an earlier Night already taught ⏩
+	var cue_ix := data.cue_episode_index("ghost_ff")
+	log.ff_needs_cue = persona.ff_needs_cue and not (cue_ix >= 0 and data.episode_index(ep) > cue_ix)
+	log.enter_ticks = data.enter_ticks(ep)
+	log.combos_allowed = data.combos_rule(ep)
 	var bases := data.line_bases(ep)
 	if not bases.is_empty():
 		var s := 0
@@ -439,6 +445,8 @@ func _after_catch() -> void:
 		_i = back
 		_started = false
 		return
+	if not persona.catch_restarts:
+		return   # a scenario route wants the catch: carry on with the step
 	var step: Dictionary = steps[_i]
 	if SolverData.sv(step.get("do", "")) == "rig":
 		var p := SolverData.sv(step.get("prank", ""))

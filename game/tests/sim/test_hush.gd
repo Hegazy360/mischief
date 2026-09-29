@@ -219,7 +219,7 @@ func test_standing_squeak_is_busy_and_queues() -> void:
 	assert_eq(w.hush.state, SimHush.SQUEAKING)
 	var e := U.step(w, [SimCmd.move("kitchen", 3000)])
 	assert_eq(w.hush.state, SimHush.SQUEAKING)
-	assert_false(U.first(e, SimEvents.CMD_QUEUED, {"c": "move", "why": "busy", "target": "kitchen"}).is_empty())
+	assert_false(U.first(e, SimEvents.CMD_QUEUED, {"c": "move", "why": "busy", "target": "kitchen:3000"}).is_empty())
 	U.run(w, SimConst.SQUEAK_ARM_TICKS)
 	assert_true(w.hush.is_travelling())
 

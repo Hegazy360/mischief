@@ -2,6 +2,7 @@
 Hand-held props are drawn 'upright for a forward-pointing forearm': canvas +x = forward (along the fingers, since
 the hand sockets turn props by 90 deg), canvas -y = up. Interactable-prop line weights: 5 px outline, 3 px detail."""
 import math
+import os
 from svgk import (Part, path, circle, ellipse, rect, g, line, smooth_closed, smooth_open, shaded, highlight, bbox_pts,
 				  union, xform, f, qcurve, sample_closed, clipped_lines, clip_convex, poly_path, ellipse_pts, INK)
 import palette as P
@@ -82,7 +83,12 @@ def specs(state):
 
 # --- hand-held props (+x = forward along the fingers) --------------------------------------------
 
-def teacup():
+def teacup(state="held"):
+	"""`held`: handle at the grip, cup body forward (+x). `sip`: the same cup mirrored -- handle forward, body back
+	toward his face -- so a sip keeps the hand in front of the mouth and the pinkie clear (art-bellows weak spot)."""
+	if state == "sip":
+		p = teacup("held")
+		return Part("teacup_sip", ['<g transform="scale(-1 1)">%s</g>' % "".join(p.items)], (-44, -22, 16, 24))
 	it = []
 	# handle loop at the grip (0, 0), cup body forward (+x)
 	it.append(path("M-2 -8 C-12 -8 -12 10 -2 10", stroke=INK, stroke_width=9, stroke_linecap="round"))
@@ -265,8 +271,57 @@ def megaphone():
 	return Part("megaphone", it, (-16, -34, 84, 34))
 
 
+# --- the kitchen stool (s2-art's house decor, ridden through ACHOO-RIA!) -------------------------
+# The SAME art as the house decor `kitchen_stool` (res://art/house/props/kitchen_stool.svg, s2-art contract: canvas
+# 94 x 163, seat pivot [47, 6], floor contact [47, 156]), read at build time so a change to the house stool flows
+# into the prop. It is PRE-MIRRORED: Bellows only uses it at st_tea facing -1, where the rig mirrors its props, so the
+# prop drawn by a facing -1 rig is pixel-identical to the unmirrored house decor (the decor swap is invisible).
+# Prop pivot = the stool's centre line at PropSim's rest height: PropSim rests a launched prop when its pivot is
+# `radius` = max(canvas w, h) / 2 above the floor, so the pivot sits `radius` above the floor contact -- a stool that
+# hops home lands with its feet exactly on the floor line, where the house decor stands.
+HOUSE_STOOL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "game", "art", "house",
+						   "props", "kitchen_stool.svg")
+STOOL_SEAT = (47, 6)      # house canvas px
+STOOL_FOOT = (47, 156)    # house canvas px (floor contact)
+
+
+def _stool_src():
+	import re as _re
+	src = open(os.path.normpath(HOUSE_STOOL)).read()
+	m = _re.match(r"\s*<svg[^>]*>(.*)</svg>\s*$", src, _re.S)
+	body = m.group(1)
+	shadow = _re.match(r"(<ellipse[^>]*/>)", body)
+	no_shadow = body[len(shadow.group(1)):] if shadow else body
+	return body, no_shadow
+
+
+def stool(state, pivot_y):
+	"""`under` (on the floor, with its contact shadow) or `flying` (no shadow). Local origin = (47, pivot_y) of the
+	house canvas, mirrored in x."""
+	body, no_shadow = _stool_src()
+	markup = body if state == "under" else no_shadow
+	it = ['<g transform="translate(%s %s) scale(-1 1)">%s</g>' % (f(STOOL_SEAT[0]), f(-pivot_y), markup)]
+	x0, y0 = -STOOL_SEAT[0], -pivot_y
+	return Part("stool_" + state, it, (x0 - 1, y0 - 1, x0 + 95, y0 + 164))
+
+
+def stool_pivot_y():
+	"""The stool's pivot row in house canvas px: `radius` above the floor contact (see above)."""
+	import svgk
+	py = 80.0
+	for _ in range(4):
+		cv = svgk.shared_canvas([stool("under", py), stool("flying", py)])
+		r = max(cv[0], cv[1]) / 2.0
+		ny = STOOL_FOOT[1] - r
+		if abs(ny - py) < 0.01:
+			break
+		py = ny
+	return py
+
+
 def props():
 	"""name -> {states: {state|'_': Part}, default, socket, state_sockets, z}"""
+	spy = stool_pivot_y()
 	return {
 		"specs": {"states": {s: specs(s) for s in ["dangling", "on", "buttered", "magnifier"]}, "default": "dangling",
 				  "socket": "torso:chain", "z": 34, "visible": True,
@@ -275,7 +330,8 @@ def props():
 				  "state_z_offset": {"on": 14, "buttered": 14, "magnifier": 14},
 				  "note": "dangling hangs on its chain from torso:chain (default, visible); on/buttered/magnifier sit on "
 						  "head:specs at head z + 14 (re-attach the prop to head:specs when switching state)"},
-		"teacup": {"states": {"_": teacup()}, "socket": "hand_r:grip", "z": 66},
+		"teacup": {"states": {"held": teacup("held"), "sip": teacup("sip")}, "default": "held", "socket": "hand_r:grip",
+				   "z": 66},
 		"newspaper": {"states": {"closed": newspaper("closed"), "open": newspaper("open")}, "default": "closed",
 					  "socket": "hand_r:grip", "z": 62},
 		"comb": {"states": {"_": comb()}, "socket": "hand_r:grip", "z": 66},
@@ -287,4 +343,9 @@ def props():
 		"jelly_helmet": {"states": {"_": jelly_helmet()}, "socket": "head:hat", "z": 54},
 		"sausage_boa": {"states": {"_": sausage_boa()}, "socket": "torso:neck", "z": 28},
 		"megaphone": {"states": {"_": megaphone()}, "socket": "hand_r:grip", "z": 66},
+		"stool": {"states": {"under": stool("under", spy), "flying": stool("flying", spy)}, "default": "under",
+				  "socket": "torso:seat", "z": -1, "pivot_y": spy,
+				  "note": "the kitchen stool (house decor kitchen_stool, pre-mirrored for facing -1): torso:seat puts its "
+						  "cushion under the barrel; rides ACHOO-RIA! and hops home (PropSim launch) where the decor "
+						  "reappears on the same pixels. Hidden by default; the sneeze shows it while the decor is hidden."},
 	}

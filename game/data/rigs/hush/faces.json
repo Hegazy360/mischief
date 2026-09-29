@@ -209,6 +209,33 @@
       "blush": "none",
       "sweat": "on",
       "tear": "none"
+    },
+    "statue_blink": {
+      "eyes": "closed",
+      "brows": "neutral",
+      "mouth": "smile",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "determined_blink": {
+      "eyes": "closed",
+      "brows": "determined",
+      "mouth": "tongue",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "frantic": {
+      "eyes": "wide",
+      "brows": "determined",
+      "mouth": "tongue",
+      "pupils": "down",
+      "blush": "none",
+      "sweat": "on",
+      "tear": "none"
     }
   }
 }

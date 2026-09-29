@@ -111,6 +111,6 @@ if __name__ == "__main__":
         icon_sheet(os.path.join(ART, "icons", "activities"), os.path.join(out_dir, "activities_sheet.png"), 88, (1.0, 0.5), cols=9, bubble=True)
     import json
     house = json.load(open(os.path.join(REPO, "game", "data", "house", "house.json")))
-    for room in ("hall", "parlour", "kitchen"):
+    for room in ("hall", "parlour", "kitchen", "landing", "bathroom", "bedroom", "dressing", "conservatory"):
         prop_sheet(house, room, os.path.join(out_dir, "props_%s_states.png" % room))
     stage_sheet(os.path.join(out_dir, "stage_sheet.png"))

@@ -4,20 +4,24 @@
 ##
 ##  1. every `caught` has a preceding "?" that filled continuously for ≥ the episode's fill time
 ##     (or a `face_to_face` window ≥ 48 ticks);
-##  2. every non-chase `b_room` into Hush's room has an `entry_warning` ≥ 90 ticks earlier;
+##  2. every non-chase `b_room` into Hush's room has an `entry_warning` ≥ 90 ticks earlier (`b_room.chase`
+##     entries and his reaction travel — `b_room` while REACTING — are exempt);
 ##  3. no `caught` while Hush is in an unwatched hiding spot that is not in use;
-##  4. `b_next` shows each loop activity ≥ 240 ticks before he leaves a ≥ 4 s activity; every
-##     `b_detour` has a `b_next` on the same tick;
+##  4. `b_next` shows each loop activity ≥ 240 ticks before he leaves a ≥ 4 s activity (unless a punchline,
+##     Meltdown, chase or catch re-planned his route inside that window); every `b_detour` has a `b_next` on the
+##     same tick;
 ##  5. determinism: replaying the command log gives the same hash (`log.replay_hash`, filled by the
 ##     runner via `replay_hash()`);
 ##  6. no soft-lock: every planner probe on the run's state succeeded (`log.softlock_probes`);
 ##  7. Bellows' non-chase speed ≤ 1.15 × walk; the `b_activity` sequence follows the loop order;
 ##  8. no `spot_start` while he is reacting or within 60 ticks after;
-##  9. progress: his activity changes at least every 60 s (player-led gates excepted); every
-##     go/move produces movement, an arrival, a rejection or a `cmd_queued` (held while Hush is busy,
-##     e.g. the Prologue's climb-in) within 150 ticks (or is held and runs later, before the next go/move);
+##  9. progress: his activity changes at least every 60 s (player-led gates excepted); every go/move answers
+##     within 1 tick (movement, `hush_go`, an arrival, a pin, a rejection…); a `cmd_queued` one (held behind a
+##     busy action: the climb-in, a rummage, a rig hold, the stairs, a door, the caught hold) must run the tick
+##     that action ends, unless a newer go/move replaced it first;
 ## 10. at most one reaction at a time; applause never negative; prank bases sum to 700 tenths;
-## 11. (Stage 3, only when Beryl exists) Beryl's headbutt never produces `caught`.
+## 11. (Stage 3, only when Beryl exists) Beryl's headbutt never produces `caught`;
+## 12. no `combo` the Night's `rules.combos` does not allow (`[]` = none: ruling L4).
 class_name Invariants
 extends RefCounted
 
@@ -26,7 +30,12 @@ const FACE_TO_FACE_TICKS := 48
 const BUBBLE_TICKS := 240
 const BLIND_AFTER_TICKS := 60
 const PROGRESS_TICKS := 3600
-const FEEDBACK_TICKS := 150
+## A go/move must answer within this many ticks (TECH §3.5: the same tick; +1 for a logging boundary).
+const FEEDBACK_TICKS := 1
+## Hush states a queued go/move waits behind (+ the climb-in, `log.enter_ticks`, and FROZEN: a freeze held
+## over the busy action keeps the queue until she unfreezes).
+const HELD_STATES: PackedStringArray = ["RUMMAGE", "DIVING", "POPPING", "SQUEAKING", "RIGGING", "CAUGHT", "BOWING",
+	"STAIRS", "DOOR", "FROZEN"]
 const SPEED_STATES: PackedStringArray = ["ROUTINE", "DETOUR", "CURIOUS", "SEARCH"]
 const PROGRESS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_detour", "reaction_start",
 	"reaction_end", "chase_start", "search", "meltdown_start", "exhausted", "caught", "night_end"]
@@ -35,6 +44,12 @@ const PROGRESS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_d
 ## shows it as queued; TECH §3.5, §3.8).
 const FEEDBACK_EVENTS: PackedStringArray = ["hush_go", "hush_arrive", "cmd_rejected", "cmd_queued", "pin", "rummage",
 	"hide", "pop_out", "hush_room", "pick_window", "caught", "night_end", "doorstep", "freeze"]
+## Events that re-plan Bellows' route inside a bubble's notice window (rule 4(b)).
+const DISTURB_EVENTS: PackedStringArray = ["reaction_start", "reaction_end", "meltdown_start", "exhausted", "spotted",
+	"chase_start", "chase_end", "caught", "search", "on_guard"]
+## What a queued go/move does the tick it runs.
+const RAN_EVENTS: PackedStringArray = ["hush_go", "hush_arrive", "cmd_rejected", "pin", "caught", "night_end", "rummage",
+	"hush_room"]
 const MAX_PER_RULE := 5
 
 
@@ -52,6 +67,7 @@ static func check(log: SolverLog) -> Array[String]:
 	out.append_array(rule9_progress(log))
 	out.append_array(rule10_reactions_applause(log))
 	out.append_array(rule11_headbutt(log))
+	out.append_array(rule12_combos(log))
 	return out
 
 
@@ -138,8 +154,13 @@ static func rule2_entry_warning(log: SolverLog) -> Array[String]:
 			continue
 		if log.name_of(log.hush_state[i]) in ["CAUGHT", "BOWING"]:
 			continue
-		var chase := log.name_of(log.b_state[i]) == "CHASE" or (ip >= 0 and log.name_of(log.b_state[ip]) == "CHASE")
+		# a chase entry (the event says so; older logs: the sampled state) is exempt, and so is his reaction
+		# travel (a punchline that carries him into her room: REACTING on either side of the step)
+		var chase := bool(ev["chase"]) if ev.has("chase") else \
+			(log.name_of(log.b_state[i]) == "CHASE" or (ip >= 0 and log.name_of(log.b_state[ip]) == "CHASE"))
 		if chase:
+			continue
+		if log.name_of(log.b_state[i]) == "REACTING" or (ip >= 0 and log.name_of(log.b_state[ip]) == "REACTING"):
 			continue
 		var warned := false
 		for w in log.events_named("entry_warning", {"room": room}):
@@ -199,7 +220,7 @@ static func rule4_bubble(log: SolverLog) -> Array[String]:
 				prev = n
 		if not same and prev != null:
 			var pid := SolverData.sv((prev as Dictionary).get("id", ""))
-			var pending := bool((prev as Dictionary).get("detour", false)) or SolverData.DETOUR_IDS.has(pid)
+			var pending := bool((prev as Dictionary).get("detour", false)) or SolverData.is_detour(pid)
 			if pending:
 				for a in log.events_named("b_activity", {"id": pid}):
 					if int(a.get("t", 0)) >= int((prev as Dictionary).get("t", 0)) and int(a.get("t", 0)) < t:
@@ -215,13 +236,19 @@ static func rule4_bubble(log: SolverLog) -> Array[String]:
 	for ev in log.events:
 		var e := SolverData.sv(ev.get("e", ""))
 		var id := SolverData.sv(ev.get("id", ""))
-		if SolverData.DETOUR_IDS.has(id):
+		if SolverData.is_detour(id):
 			continue
 		if e == "b_activity":
 			acts.append([id, int(ev.get("t", 0)), -1])
 		elif e == "b_activity_end" and not acts.is_empty() and acts[acts.size() - 1][0] == id and acts[acts.size() - 1][2] < 0:
 			acts[acts.size() - 1][2] = int(ev.get("t", 0))
 	var nexts := log.events_named("b_next")
+	# a punchline, a Meltdown, a chase or a catch inside the notice window re-plans his route (a resumable
+	# activity he never gets back to): the 240-tick notice restarts from it
+	var disturb := PackedInt32Array()
+	for ev in log.events:
+		if DISTURB_EVENTS.has(SolverData.sv(ev.get("e", ""))):
+			disturb.append(int(ev.get("t", 0)))
 	for k in range(0, acts.size() - 1):
 		var cur: Array = acts[k]
 		var nxt: Array = acts[k + 1]
@@ -230,6 +257,13 @@ static func rule4_bubble(log: SolverLog) -> Array[String]:
 			continue
 		if nxt[0] == cur[0]:
 			continue   # resumed activity
+		var disturbed := false
+		for dt in disturb:
+			if dt > te - BUBBLE_TICKS and dt <= te:
+				disturbed = true
+				break
+		if disturbed:
+			continue
 		var last_n: Variant = null
 		for n in nexts:
 			if int(n.get("t", 0)) <= te:
@@ -238,7 +272,7 @@ static func rule4_bubble(log: SolverLog) -> Array[String]:
 			out.append("rule 4: no b_next before %s left %s at %s" % ["Bellows", cur[0], _t(te)])
 			continue
 		var ln: Dictionary = last_n
-		if bool(ln.get("detour", false)) or SolverData.DETOUR_IDS.has(SolverData.sv(ln.get("id", ""))):
+		if bool(ln.get("detour", false)) or SolverData.is_detour(SolverData.sv(ln.get("id", ""))):
 			continue   # a detour (fix-up, lure, search) comes first: route changes are rule 4(a)
 		if SolverData.sv(ln.get("id", "")) != SolverData.sv(nxt[0]):
 			if out.size() < MAX_PER_RULE:
@@ -301,7 +335,7 @@ static func rule7_speed_and_loop(log: SolverLog) -> Array[String]:
 	var last_id := ""
 	for ev in log.events_named("b_activity"):
 		var id := SolverData.sv(ev.get("id", ""))
-		if SolverData.DETOUR_IDS.has(id):
+		if SolverData.is_detour(id):
 			continue
 		var matched := false
 		for _guard in loop.size():
@@ -376,11 +410,22 @@ static func rule9_progress(log: SolverLog) -> Array[String]:
 				out.append("rule 9: no Bellows progress for %.1f s from %s (activity '%s')" % [(t - last) / 60.0, _t(last), act])
 				break
 		last = t
-	# (b) every go/move gives feedback (movement, arrival, rejection, or held as the queued command).
+	# (b) every go/move answers within 1 tick; a queued one runs the tick the busy action ends.
 	var extra := 0
 	var prev_key := ""
 	var last_arrive := ""
 	var ev_i := 0
+	var moves: Array = []   # ticks of every go/move (superseding)
+	for c in log.cmds:
+		var k0 := SolverData.sv((c[1] as Dictionary).get("c", ""))
+		if k0 == "go" or k0 == "move":
+			moves.append(int(c[0]))
+	var by_t := {}          # tick → [event names]
+	for ev in log.events:
+		var et := int(ev.get("t", 0))
+		if not by_t.has(et):
+			by_t[et] = []
+		(by_t[et] as Array).append(SolverData.sv(ev.get("e", "")))
 	for c in log.cmds:
 		var t: int = c[0]
 		var cmd: Dictionary = c[1]
@@ -396,7 +441,7 @@ static func rule9_progress(log: SolverLog) -> Array[String]:
 			continue
 		var key := "%s|%s|%s|%s" % [kind, cmd.get("hotspot", ""), cmd.get("room", ""), cmd.get("x", "")]
 		if key == prev_key:
-			continue
+			continue   # a repeat of the same tap (the view still ripples)
 		prev_key = key
 		if kind == "go" and SolverData.sv(cmd.get("hotspot", "")) == last_arrive:
 			continue
@@ -405,60 +450,75 @@ static func rule9_progress(log: SolverLog) -> Array[String]:
 				and absi(log.hush_x[i0] - int(cmd.get("x", 0))) <= 2:
 			continue
 		var t_end := t + FEEDBACK_TICKS
-		# A held rig queues the command until release.
-		var j := i0
-		while j >= 0 and j < log.size() and log.ticks[j] <= t_end:
-			if log.hold_rig[j] == 1:
-				t_end = log.ticks[j] + FEEDBACK_TICKS
-			j += 1
-		if _feedback(log, t, t_end, i0):
+		var queued := false
+		var answered := false
+		for u in range(t, t_end + 1):
+			for en in by_t.get(u, []):
+				if en == "cmd_queued":
+					queued = true
+				elif FEEDBACK_EVENTS.has(en):
+					answered = true
+		if not answered and not queued and _moved(log, i0, t_end):
+			answered = true
+		if answered:
 			continue
 		if t_end > log.last_tick():
 			continue   # the run ended inside the window
-		if _ran_later(log, t, cmd):
-			continue   # held (e.g. the Prologue's climb-in) and executed later: not dropped
+		if queued:
+			var why := _queued_ran(log, t, moves, by_t)
+			if why == "":
+				continue
+			if out.size() < MAX_PER_RULE + 1:
+				out.append("rule 9: %s at %s was queued but %s" % [JSON.stringify(cmd), _t(t), why])
+			else:
+				extra += 1
+			continue
 		if out.size() < MAX_PER_RULE + 1:
-			out.append("rule 9: %s at %s produced no movement, arrival or rejection within %d ticks" % [
-				JSON.stringify(cmd), _t(t), t_end - t])
+			out.append("rule 9: %s at %s produced no movement, arrival, rejection or cmd_queued within %d tick(s)" % [
+				JSON.stringify(cmd), _t(t), FEEDBACK_TICKS])
 		else:
 			extra += 1
 	return _cap(out, 9, extra)
 
 
-## The command eventually started (a `hush_go` to its target) before the next go/move command.
-static func _ran_later(log: SolverLog, t: int, cmd: Dictionary) -> bool:
-	var next_t := 1 << 30
-	for c in log.cmds:
-		var ct: int = c[0]
-		var k := SolverData.sv((c[1] as Dictionary).get("c", ""))
-		if ct > t and (k == "go" or k == "move"):
-			next_t = ct
+## "" when the go/move queued at `t` ran the tick Hush's busy action ended (or a newer go/move replaced it
+## first, or the run ended while she was still busy); else why not.
+static func _queued_ran(log: SolverLog, t: int, moves: Array, by_t: Dictionary) -> String:
+	var next_cmd := 1 << 30
+	for mt in moves:
+		if int(mt) > t:
+			next_cmd = int(mt)
 			break
-	var want := SolverData.sv(cmd.get("hotspot", cmd.get("room", "")))
-	for ev in log.events:
-		var et := int(ev.get("t", 0))
-		if et < t or et > next_t:
-			continue
-		if SolverData.sv(ev.get("e", "")) == "hush_go":
-			var tg := SolverData.sv(ev.get("target", ""))
-			if tg == want or tg.begins_with(want + ":"):
-				return true
-	return false
+	var i := log.index_of_tick(t)
+	if i < 0:
+		return ""
+	var j := i + 1
+	while j < log.size():
+		var u := log.ticks[j]
+		if u >= next_cmd:
+			return ""   # replaced by a newer tap before it could run
+		# it ran (or was answered) this tick — also on a tick that ends busy again (she starts off and is caught)
+		for en in by_t.get(u, []):
+			if RAN_EVENTS.has(en):
+				return ""
+		var held := u < log.enter_ticks or HELD_STATES.has(log.name_of(log.hush_state[j]))
+		if not held:
+			if log.hush_x[j] != log.hush_x[j - 1] or log.hush_room[j] != log.hush_room[j - 1]:
+				return ""
+			return "did not run when her busy action ended at %s" % _t(u)
+		j += 1
+	return ""
 
 
-static func _feedback(log: SolverLog, t0: int, t1: int, i0: int) -> bool:
-	for ev in log.events:
-		var t := int(ev.get("t", 0))
-		if t < t0 or t > t1:
-			continue
-		if FEEDBACK_EVENTS.has(SolverData.sv(ev.get("e", ""))):
+## True when Hush's position changed between sample `i0` and tick `t1`.
+static func _moved(log: SolverLog, i0: int, t1: int) -> bool:
+	if i0 < 0:
+		return false
+	var j := i0
+	while j < log.size() and log.ticks[j] <= t1:
+		if log.hush_x[j] != log.hush_x[i0] or log.hush_room[j] != log.hush_room[i0]:
 			return true
-	if i0 >= 0:
-		var j := i0
-		while j < log.size() and log.ticks[j] <= t1:
-			if log.hush_x[j] != log.hush_x[i0] or log.hush_room[j] != log.hush_room[i0]:
-				return true
-			j += 1
+		j += 1
 	return false
 
 
@@ -509,6 +569,22 @@ static func rule11_headbutt(log: SolverLog) -> Array[String]:
 				near = true
 		if by == "beryl" or cause.contains("headbutt") or near:
 			out.append("rule 11: Beryl's headbutt produced a catch at %s" % _t(t))
+	return out
+
+
+## Rule 12 (ruling L4): no combo the Night does not allow (`log.combos_allowed`: null = all, else the ids).
+static func rule12_combos(log: SolverLog) -> Array[String]:
+	var out: Array[String] = []
+	if not (log.combos_allowed is PackedStringArray or log.combos_allowed is Array):
+		return out
+	var allowed: Array = Array(log.combos_allowed)
+	for ev in log.events_named("combo"):
+		var id := SolverData.sv(ev.get("id", ""))
+		if not allowed.has(id):
+			out.append("rule 12: combo '%s' at %s on a Night whose rules.combos is %s" % [id, _t(int(ev.get("t", 0))),
+				JSON.stringify(allowed)])
+			if out.size() >= MAX_PER_RULE:
+				break
 	return out
 
 

@@ -1,0 +1,35 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_head_turn",
+ "rig": "bellows",
+ "loop": false,
+ "length": 60,
+ "layer": "overlay",
+ "mask": [
+  "head*"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "b_look_behind",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

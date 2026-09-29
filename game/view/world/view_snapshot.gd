@@ -75,6 +75,39 @@ class Actor:
 	var react_clip: String = ""
 	var look_back: bool = false
 	var on_guard: bool = false
+	## The reaction's knock-on entry frame (> 0: entered at B's accent − 2), the sim's last
+	## beat clip (played after the settle; its frames are inside `react_len`) and the length
+	## without it.
+	var react_entry: int = 0
+	var react_last_beat: String = ""
+	var react_base_len: int = 0
+	# One-shot (s2-sim `bellows_oneshot()` / `hush_oneshot()` {id, t, len, variant}; brief §4.1.9)
+	## Id ("" none): `bit:<bit>`, `head_turn`, `doorway_pause`, `bump`, `caught:lecture`, …
+	var oneshot: String = ""
+	## Ticks since the one-shot began, its length (−1 variable) and variant.
+	var oneshot_t: int = 0
+	var oneshot_len: int = 0
+	var oneshot_var: int = 0
+	## Hush is climbing in (the sim's `entering`, incl. the wait before the `enter` one-shot starts).
+	var entering: bool = false
+	# The current leg (s2-sim `bellows_leg()` / `hush_leg()`; derived from DOOR / STAIRS states
+	# when absent): kind "walk" | "door" | "stairs" | "", its ends (rooms, world x, floor-line y),
+	# progress 0–1000 and whether it climbs.
+	var leg_kind: String = ""
+	var leg_from_room: String = ""
+	var leg_to_room: String = ""
+	var leg_from_x: float = 0.0
+	var leg_to_x: float = 0.0
+	var leg_from_y: float = 0.0
+	var leg_to_y: float = 0.0
+	var leg_pm: int = 0
+	var leg_up: bool = false
+	# Bellows' sight from the sim (`sight_ranges()`, s2-sim §4.4; the stare strip): known, moving
+	# px (to the wall when `sight_wall`), frozen px.
+	var sight_known: bool = false
+	var sight_moving: float = 0.0
+	var sight_frozen: float = 0.0
+	var sight_wall: bool = false
 
 	## Temper in points (temper_q / 60).
 	func temper_points() -> float:
@@ -124,6 +157,27 @@ class Actor:
 		react_clip = o.react_clip
 		look_back = o.look_back
 		on_guard = o.on_guard
+		react_entry = o.react_entry
+		react_last_beat = o.react_last_beat
+		react_base_len = o.react_base_len
+		oneshot = o.oneshot
+		oneshot_t = o.oneshot_t
+		oneshot_len = o.oneshot_len
+		oneshot_var = o.oneshot_var
+		entering = o.entering
+		leg_kind = o.leg_kind
+		leg_from_room = o.leg_from_room
+		leg_to_room = o.leg_to_room
+		leg_from_x = o.leg_from_x
+		leg_to_x = o.leg_to_x
+		leg_from_y = o.leg_from_y
+		leg_to_y = o.leg_to_y
+		leg_pm = o.leg_pm
+		leg_up = o.leg_up
+		sight_known = o.sight_known
+		sight_moving = o.sight_moving
+		sight_frozen = o.sight_frozen
+		sight_wall = o.sight_wall
 
 
 ## Sorted id tables for int → id mapping (TECH §2 interning order).
@@ -168,6 +222,7 @@ var path_x: PackedFloat32Array = PackedFloat32Array()
 static var _state_maps: Dictionary = {}
 static var _id_tables: Dictionary = {}
 static var _act_cache: Dictionary = {}
+static var _house: HouseLayout = null
 
 
 ## A fresh snapshot of `world` (SimWorld or FakeWorld). Allocates; the driver uses fill().
@@ -191,6 +246,7 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 	var hb: Object = _g(world, "hush", null)
 	if hb != null:
 		hush.hidden_spot = ViewKit.id_of(_g(hb, "hidden_spot", ""), ids.hotspots)
+		hush.entering = bool(_g(hb, "entering", false))
 		hush.watched_spot = ViewKit.id_of(_g(hb, "watched_spot", ""), ids.hotspots)
 		hush.frozen = bool(_g(hb, "frozen", hush.state == "FROZEN"))
 		hush.freeze_pose_seed = int(_g(hb, "freeze_pose_seed", 0))
@@ -203,6 +259,11 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 	var bb: Object = _g(world, "bellows", null)
 	if bb != null:
 		_fill_bellows(bb, ids, world)
+	_fill_oneshot(hush, world, "hush_oneshot", hb, bb)
+	_fill_oneshot(bellows, world, "bellows_oneshot", bb, bb)
+	_fill_leg(hush, world, "hush_leg", ids, prev.hush if prev != null else null)
+	_fill_leg(bellows, world, "bellows_leg", ids, prev.bellows if prev != null else null)
+	_fill_sight(world)
 	_fill_bubble(world, ids)
 	applause_tenths = _call_int(world, "applause_tenths", 0)
 	link = _call_int(world, "link", 0)
@@ -248,7 +309,8 @@ func _fill_bellows(bb: Object, ids: IdTables, world: Object) -> void:
 		b.detour_kind = ViewKit.s(_g(det, "kind", ""))
 		b.detour_station = ViewKit.id_of(_g(det, "station", ""), ids.stations)
 	b.specs_on = bool(_g(bb, "specs_on", false))
-	b.blinded = int(_g(bb, "blinded_until", 0)) > tick
+	var bl: Variant = _g(bb, "blinded", null)
+	b.blinded = bool(bl) if bl != null else int(_g(bb, "blinded_until", 0)) > tick
 	b.temper_q = int(_g(bb, "temper_q", 0))
 	b.tier = int(_g(bb, "tier", 0))
 	b.residues = _ids_array(_g(bb, "residues", []), ids.residues, b.residues)
@@ -263,7 +325,7 @@ func _fill_bellows(bb: Object, ids: IdTables, world: Object) -> void:
 	if r is Dictionary:
 		rd = r
 	elif r is Object:
-		for k in ["prank", "archetype", "variant", "tier", "suppressed", "t", "len"]:
+		for k in ["prank", "archetype", "variant", "tier", "suppressed", "t", "len", "last_beat", "entry"]:
 			rd[k] = _g(r, k, null)
 	b.reacting = not rd.is_empty() and rd.get("prank", null) != null and ViewKit.s(rd.get("prank", "")) != "" \
 			and (b.state == "REACTING" or b.state == "")
@@ -276,11 +338,164 @@ func _fill_bellows(bb: Object, ids: IdTables, world: Object) -> void:
 		b.react_t = int(rd.get("t", 0))
 		b.react_len = int(rd.get("len", 0))
 		b.react_clip = ViewSnapshot.reaction_clip(_g(world, "db", null), b.react_archetype, b.react_variant)
+		b.react_entry = int(rd.get("entry", 0))
+		b.react_last_beat = ViewKit.s(rd.get("last_beat", ""))
+		b.react_base_len = b.react_len - ViewSnapshot.beat_frames(b.react_last_beat) if b.react_last_beat != "" else b.react_len
 	else:
 		b.react_prank = ""
 		b.react_t = 0
 		b.react_len = 0
 		b.react_clip = ""
+		b.react_entry = 0
+		b.react_last_beat = ""
+		b.react_base_len = 0
+
+
+## One-shot of an actor from `bellows_oneshot()` / `hush_oneshot()` (s2-sim §4.4b), else a
+## derivation from the sim's own bookkeeping fields for the rows that matter most before the
+## accessor lands (the caught phases, the door-slam stun, the head turn, look-back, squeak bit).
+func _fill_oneshot(a: Actor, world: Object, method: String, src: Object, b_src: Object) -> void:
+	a.oneshot = ""
+	a.oneshot_t = 0
+	a.oneshot_len = 0
+	a.oneshot_var = 0
+	if not a.present:
+		return
+	if world.has_method(method):
+		var v: Variant = world.call(method)
+		if v is Dictionary:
+			var d: Dictionary = v
+			a.oneshot = ViewKit.s(d.get("id", ""))
+			a.oneshot_t = int(d.get("t", 0))
+			a.oneshot_len = int(d.get("len", 0))
+			a.oneshot_var = int(d.get("variant", 0))
+		return
+	# Derived (soft) — the caught phases from Bellows' caught_t (TECH §3.7.1: busted cam 60 →
+	# Lecture 132 → wipe 12 → doorstep 36).
+	var caught := bellows.state == "CAUGHT_HOLD"
+	if caught and b_src != null:
+		var ct := int(_g(b_src, "caught_t", 0))
+		var hush_side := a == hush
+		if ct < 60:
+			ViewSnapshot._set_os(a, "caught:busted" if hush_side else "caught:grab", ct, 60, 0)
+		elif ct < 192:
+			ViewSnapshot._set_os(a, "caught:lecture", ct - 60, 132, int(_g(b_src, "caught_variant", 0)))
+		elif ct < 204:
+			ViewSnapshot._set_os(a, "caught:wipe", ct - 192, 12, 0)
+		else:
+			ViewSnapshot._set_os(a, "caught:doorstep", ct - 204, 36, 0)
+		return
+	if a != bellows or src == null:
+		return
+	var stun := int(_g(src, "stun_until", 0))
+	if stun > tick:
+		ViewSnapshot._set_os(a, "stun", 60 - (stun - tick), 60, 0)
+		return
+	var bit := ViewKit.s(_g(src, "bit_id", ""))
+	if bit != "" and int(_g(src, "bit_until", 0)) > tick:
+		var t0 := int(_g(src, "bit_t0", tick))
+		ViewSnapshot._set_os(a, "bit:" + bit, tick - t0, int(_g(src, "bit_until", 0)) - t0, 0)
+		return
+	var ht := int(_g(src, "head_turn_until", 0))
+	if ht > tick:
+		ViewSnapshot._set_os(a, "head_turn", 60 - (ht - tick), 60, 0)
+		return
+	var lb := int(_g(src, "look_back_until", 0))
+	if lb > tick and a.state != "REACTING":
+		ViewSnapshot._set_os(a, "look_back", 60 - (lb - tick), 60, 0)
+
+
+static func _set_os(a: Actor, id: String, t: int, n: int, variant: int) -> void:
+	a.oneshot = id
+	a.oneshot_t = maxi(0, t)
+	a.oneshot_len = n
+	a.oneshot_var = variant
+
+
+## The actor's current leg from `bellows_leg()` / `hush_leg()` (s2-sim §4.5.2), else derived
+## from Hush's DOOR / STAIRS states (room / x are already the arrival end's during a leg).
+func _fill_leg(a: Actor, world: Object, method: String, ids: IdTables, prev: Actor) -> void:
+	a.leg_kind = ""
+	a.leg_pm = 0
+	a.leg_up = false
+	if not a.present:
+		return
+	if world.has_method(method):
+		var v: Variant = world.call(method)
+		if v is Dictionary:
+			var d: Dictionary = v
+			a.leg_kind = ViewKit.s(d.get("kind", ""))
+			if a.leg_kind == "":
+				return
+			a.leg_from_room = ViewKit.id_of(d.get("from_room", a.room), ids.rooms)
+			a.leg_to_room = ViewKit.id_of(d.get("to_room", a.room), ids.rooms)
+			a.leg_from_x = ViewSnapshot._px_of(d.get("from_x", a.x))
+			a.leg_to_x = ViewSnapshot._px_of(d.get("to_x", a.x))
+			a.leg_pm = clampi(int(d.get("progress_pm", 0)), 0, 1000)
+			a.leg_from_y = -FLOOR_PITCH * float(ViewSnapshot._floor_of(d.get("from_floor", null), a.leg_from_room, a))
+			a.leg_to_y = -FLOOR_PITCH * float(ViewSnapshot._floor_of(d.get("to_floor", null), a.leg_to_room, a))
+			a.leg_up = a.leg_to_y < a.leg_from_y
+		return
+	if a.state == "DOOR":
+		a.leg_kind = "door"
+	elif a.state == "STAIRS":
+		a.leg_kind = "stairs"
+		if prev != null and prev.present and prev.leg_kind == "stairs":
+			a.leg_from_room = prev.leg_from_room
+			a.leg_from_y = prev.leg_from_y
+			a.leg_up = prev.leg_up
+		elif prev != null and prev.present:
+			a.leg_from_room = prev.room
+			a.leg_from_y = prev.y
+			a.leg_up = a.y < prev.y
+		a.leg_to_room = a.room
+		a.leg_to_y = a.y
+
+
+## The leg accessors give x in px (ints or floats).
+static func _px_of(v: Variant) -> float:
+	return float(v)
+
+
+static func _floor_of(v: Variant, room: String, a: Actor) -> int:
+	if v != null:
+		return int(v)
+	if _house == null:
+		_house = HouseLayout.load_default()
+	var r := _house.room(room)
+	return r.floor if r != null else a.floor
+
+
+## Bellows' sight ranges from `sight_ranges()` (soft; the stare strip keeps its GDD table otherwise).
+func _fill_sight(world: Object) -> void:
+	var b := bellows
+	b.sight_known = false
+	if not b.present or not world.has_method("sight_ranges"):
+		return
+	var v: Variant = world.call("sight_ranges")
+	if not (v is Dictionary):
+		return
+	var d: Dictionary = v
+	b.sight_known = true
+	b.sight_wall = bool(d.get("to_wall", false))
+	b.sight_moving = float(d.get("moving_px", 0))
+	b.sight_frozen = float(d.get("frozen_px", 0))
+	if bool(d.get("blind", false)):
+		b.sight_moving = 0.0
+		b.sight_frozen = 0.0
+
+
+## Frames of a clip in reactions.json `clip_timings` (0 when unknown): last-beat lengths.
+static func beat_frames(clip: String) -> int:
+	if clip == "":
+		return 0
+	var rx: Variant = ViewKit.json("res://data/reactions.json")
+	if not (rx is Dictionary):
+		return 0
+	var ct: Variant = (rx as Dictionary).get("clip_timings", {})
+	if ct is Dictionary and (ct as Dictionary).get(clip, null) is Dictionary:
+		return int(((ct as Dictionary)[clip] as Dictionary).get("frames", 0))
+	return 0
 
 
 func _fill_bubble(world: Object, ids: IdTables) -> void:
@@ -307,6 +522,12 @@ func _fill_bubble(world: Object, ids: IdTables) -> void:
 		bubble_bar_pct = clampf(float(bellows.activity_t) / float(bellows.activity_len), 0.0, 1.0)
 	if bubble_icon == "":
 		bubble_icon = ViewSnapshot.icon_for(bubble_next)
+
+
+## True for a bubble `next` that is a detour (fix-ups, the "?" look, search, herding) — or
+## "exit" (he leaves: the exit icon; not a detour but never an activity of the routine).
+static func is_detour(next_id: String) -> bool:
+	return next_id.begins_with("fixup_") or next_id in ["curious", "herd_beryl", "search", "hunt"]
 
 
 ## Refresh hotspot states for `ids_list` (TECH §3.4 hotspot_state).

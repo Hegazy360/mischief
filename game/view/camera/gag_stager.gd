@@ -201,18 +201,29 @@ func on_ticked(events: Array) -> void:
 				if camera != null:
 					camera.kick(Vector2.UP, 10.0)
 			"door_slam":
-				_small_gag("BONK!", 0.35)
+				_small_gag(ViewKit.word("fx.bonk", "BONK!"), 0.35)
+				var fxs := _fx()
+				if fxs != null:
+					fxs.stars_at(_bellows_head())
 			"fizzle":
 				var fx2 := _fx()
 				if fx2 != null:
-					fx2.caption("HMPH!", _bellows_head() + Vector2(0, -150), 60)
+					fx2.caption(ViewKit.word("fx.hmph", "HMPH!"), _bellows_head() + Vector2(0, -150), 60)
 			"face_to_face":
-				_small_gag("BOO!", 0.3)
+				_small_gag(ViewKit.word("fx.boo", "BOO!"), 0.3)
+			"near_miss":
+				var fxn := _fx()
+				if fxn != null and world_view != null:
+					fxn.caption(ViewKit.word("fx.near_miss", "NEAR MISS!"), world_view.hush_view.head_position() + Vector2(0, -150), 64)
+			"running_gag":
+				var fxr := _fx()
+				if fxr != null and int(d.get("link", 0)) >= 2:
+					fxr.stamp("%s ×%d" % [ViewKit.word("fx.running_gag", "RUNNING GAG"), int(d.get("link", 2))], _bellows_head() + Vector2(-260, -200))
 			"bump":
 				if bool(d.get("first", false)):
 					var fx3 := _fx()
 					if fx3 != null:
-						fx3.caption("PARDON?", _bellows_head() + Vector2(0, -150), 56)
+						fx3.caption(ViewKit.word("fx.pardon", "PARDON?"), _bellows_head() + Vector2(0, -150), 56)
 			"specs":
 				if bool(d.get("on", false)) and _fx() != null:
 					_fx().burst("sparkles", _bellows_head() + Vector2(20, 10), 6)
@@ -266,7 +277,33 @@ func on_clip_event(ev: Dictionary) -> void:
 		"fx":
 			var fx := _fx()
 			if fx != null:
-				fx.burst(ViewKit.s(ev.get("id", "sparkles")), ev.get("pos", _bellows_head()) as Vector2, int(ev.get("amount", -1)))
+				var at_dir := clip_fx_at(ev)
+				fx.burst(ViewKit.s(ev.get("id", "sparkles")), at_dir[0], int(ev.get("amount", -1)), at_dir[1])
+
+
+## Where and which way a clip `fx` event bursts (s2-fix G #16): at the event's `part` (the rig's
+## joint in world space — the CHOO's drops leave his nose, the dunk's his torso, the drip his
+## hand), else his head; its `dir` is clip-local (+x = the way he faces) and is mirrored by the
+## rig's facing. Returns [world_pos, world_dir].
+func clip_fx_at(ev: Dictionary) -> Array:
+	var actor := ViewKit.s(ev.get("actor", "bellows"))
+	var cv: Node2D = world_view.character(actor) if world_view != null and world_view.has_method("character") else null
+	var rig: Variant = cv.get("rig") if cv != null else null
+	var part := ViewKit.s(ev.get("part", ""))
+	var pos := _bellows_head() if actor == "bellows" else (ev.get("pos", Vector2.ZERO) as Vector2)
+	var facing := 1
+	if rig is Node2D:
+		if part != "" and (rig as Node2D).has_method("part_global_position"):
+			pos = (rig as Node2D).call("part_global_position", part)
+		if (rig as Node2D).has_method("facing"):
+			facing = int((rig as Node2D).call("facing"))
+	var d := Vector2.UP
+	var dv: Variant = ev.get("dir", null)
+	if dv is Array and (dv as Array).size() >= 2:
+		d = Vector2(float(dv[0]) * float(facing), float(dv[1]))
+	elif dv is Vector2:
+		d = Vector2((dv as Vector2).x * float(facing), (dv as Vector2).y)
+	return [pos, d.normalized() if d.length_squared() > 0.0 else Vector2.UP]
 
 
 # --- reactions --------------------------------------------------------------------------
@@ -278,7 +315,9 @@ func _start_reaction(d: Dictionary) -> void:
 	var p := info.prank(prank) if info != null else {"size": "M", "signature": false}
 	_react_size = ViewKit.s(p.get("size", "M"))
 	_react_rx = info.reaction(arch, variant, _react_size, int(d.get("len", 0))) if info != null else {"accent": 60, "hold1": 120}
-	_clip_driven = false
+	# A real reaction clip with its own cam / hitstop keys drives the punch, hit-stop and shake
+	# (decided now, before the accent tick: the clip's accent frame fires later in the same frame).
+	_clip_driven = _reaction_clip_drives(arch, variant, int(d.get("entry", 0)))
 	var link := maxi(driver.snapshot().link if driver != null else 0, _fire_link)
 	var z := float(_react_rx.get("zoom", 1.3))
 	if bool(p.get("signature", false)) or link >= 3:
@@ -294,6 +333,30 @@ func _start_reaction(d: Dictionary) -> void:
 		_gag_id = camera.request_gag(_bellows_head(), z, 11, hold_f, 21, 10, approach, lerpf(1.0, z, 0.4))
 		_gag_in_pip = camera.active_gag_id() == _gag_id and camera.gag_in_pip()
 	_gag_prank = prank
+
+
+## True when Bellows' rig will play this reaction from a clip carrying `cam` or `hitstop` events.
+func _reaction_clip_drives(arch: String, variant: String, entry: int) -> bool:
+	var bv := world_view.bellows_view if world_view != null else null
+	if bv == null or not bv.uses_rig:
+		return false
+	var clip := ViewSnapshot.reaction_clip(driver.world.get("db") if driver != null and driver.world != null else null, arch, variant)
+	if entry > 0 and ClipMap.clip_exists(clip + "_ko"):
+		clip += "_ko"
+	return GagStager.clip_has_events(clip, ["cam", "hitstop"])
+
+
+## True when clip `clip_id` exists and carries an event of one of `types`.
+static func clip_has_events(clip_id: String, types: Array) -> bool:
+	if not ClipMap.clip_exists(clip_id):
+		return false
+	var c: Variant = ClipLib.get_clip(clip_id)
+	if c == null:
+		return false
+	for e in (c as Object).get("events"):
+		if e is Dictionary and types.has(ViewKit.s((e as Dictionary).get("type", ""))):
+			return true
+	return false
 
 
 func _accent(d: Dictionary) -> void:
@@ -328,7 +391,7 @@ func _accent(d: Dictionary) -> void:
 			elif where == "mid":
 				pos = _bellows_feet() + Vector2(0, -200)
 			fx.burst(ViewKit.s(e[0]), pos, int(e[1]))
-	if tier >= 3:
+	if tier >= 3 and not _clip_driven:
 		var t3 := float(int(_react_rx.get("t3_prop_f", int(_react_rx.get("accent", 60)) + 20)) - int(_react_rx.get("accent", 60)))
 		_schedule(maxf(0.1, t3 / 60.0), "t3_prop", T3_PROPS[_t3_i % T3_PROPS.size()])
 		_t3_i += 1
@@ -349,6 +412,8 @@ func _bonus(d: Dictionary) -> void:
 	var kind := ViewKit.s(d.get("kind", ""))
 	var amount := int(d.get("amount", 0))
 	var label := kind.to_upper().replace("_", " ") + "!"
+	if kind == "near_miss":
+		label = ViewKit.word("fx.near_miss", label)
 	var pts := amount / 10 if amount >= 10 else amount
 	fx.stamp("%s +%d" % [label, pts], _bellows_head() + Vector2(230, -170))
 
@@ -401,7 +466,7 @@ func _meltdown_start() -> void:
 		_gag_id = camera.request_gag(_bellows_head(), 1.15, 12, 300, 30, 20)
 	var fx := _fx()
 	if fx != null:
-		fx.caption("MELTDOWN!", _bellows_head() + Vector2(0, -170), 96, _bv(), true, true)
+		fx.caption(ViewKit.word("fx.meltdown", "MELTDOWN!"), _bellows_head() + Vector2(0, -170), 96, _bv(), true, true)
 		fx.burst("steam", _bellows_head(), 24)
 
 
@@ -421,7 +486,15 @@ func _stomp(n: int) -> void:
 	if list is Array and not (list as Array).is_empty():
 		var qp: Dictionary = (list as Array)[(n - 1 + _stomp_i) % (list as Array).size()]
 		var fy := world_view.layout.room_floor_y(room)
-		fx.drop_prop(ViewKit.s(qp.get("prop", "picture_frame")), float(qp.get("x", snap.bellows.x)), fy - 600.0, INF, fy)
+		var x := float(qp.get("x", snap.bellows.x))
+		var top := fy - 600.0
+		# It falls from where its decor sprite hung (which hides as the copy drops).
+		var dr := world_view.decor.rect_of(ViewKit.s(qp.get("decor", "")))
+		if dr.size != Vector2.ZERO and world_view.decor.is_visible(ViewKit.s(qp.get("decor", ""))):
+			x = dr.get_center().x
+			top = dr.position.y
+		world_view.quake_decor(qp)
+		fx.drop_prop(ViewKit.s(qp.get("prop", "picture_frame")), x, top, INF, fy)
 	_stomp_i += 1
 
 
@@ -460,8 +533,13 @@ func advance(delta: float) -> void:
 		if camera.is_gag_active() and not camera.gag_in_pip() and camera.gag_phase() != CameraDirector.GagPhase.APPROACH:
 			pip.hide_now()
 		else:
-			var want := PipView.rule(snap, camera.visible_world_rect(), world_view.layout, world_view.entry_warning_active())
-			pip.set_visible_if(want or pip.is_escalated())
+			var vr := camera.visible_world_rect()
+			var z := maxf(0.001, camera.current_zoom())
+			if not pip.is_escalated() and PipView.on_screen(snap, vr, Vector4(0.0, PipView.HUD_TOP_PX / z, 0.0, PipView.HUD_BOTTOM_PX / z)):
+				pip.hide_now()   # he is plainly on screen: never twice (s2-fix G #19)
+			else:
+				var want := PipView.rule(snap, vr, world_view.layout, world_view.entry_warning_active())
+				pip.set_visible_if(want or pip.is_escalated())
 
 
 func _run(kind: String, arg: Variant) -> void:

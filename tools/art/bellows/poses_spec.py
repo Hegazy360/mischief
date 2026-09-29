@@ -40,6 +40,8 @@ def P(name, base=None, root=None, face=None, tags=(), sil=None, plant=True, hold
 	res = dict(RES[base]) if base else {}
 	res.setdefault("_abs", {})
 	res["_abs"] = dict(res["_abs"])
+	if root and "rot" in root:
+		res["_root_rot"] = root["rot"]
 	for part, ch in b.items():
 		if "rot" in ch:
 			if part in LEGS:
@@ -54,7 +56,7 @@ def P(name, base=None, root=None, face=None, tags=(), sil=None, plant=True, hold
 	for hold, (au, al, hand) in ((hold_r, ("arm_upper_r", "arm_lower_r", "hand_r")),
 								 (hold_l, ("arm_upper_l", "arm_lower_l", "hand_l"))):
 		if hold is not None:
-			rot = hold - 90 - (t + res.get(au, 0) + res.get(al, 0))
+			rot = hold - 90 - (res.get("_root_rot", 0) + t + res.get(au, 0) + res.get(al, 0))
 			rot = (rot + 180) % 360 - 180
 			b.setdefault(hand, {})["rot"] = round(rot, 1)
 			res[hand] = b[hand]["rot"]
@@ -373,6 +375,12 @@ SEAT = {"b_sit_read": 46}   # px above the floor (the recliner seat)
 
 MIRROR_OF = {"b_strut_contact_r": "b_strut_contact_l", "b_strut_pass_r": "b_strut_pass_l"}
 
+# ============================================================================ Stage 2 (s2-anim-bellows)
+# the stool, the sneeze, the tea / warm-up / idle poses and the generated walk cycles live in poses_s2.py
+import poses_s2  # noqa: E402
+poses_s2.define(P, SIT_Z)
+MIRROR_OF.update(poses_s2.define_standing(P))
+
 REQUIRED = ["b_stand", "b_breath_in", "b_breath_out", "b_fidget_admire", "b_strut_contact_l", "b_strut_pass_l",
 			"b_strut_contact_r", "b_strut_pass_r", "b_irked_walk_a", "b_irked_walk_b", "b_stomp_a", "b_stomp_b",
 			"b_turn_mid", "b_door_reach", "b_stairs_a", "b_stairs_b", "b_sing_breath", "b_sing_small", "b_sing_big",
@@ -388,7 +396,8 @@ REQUIRED = ["b_stand", "b_breath_in", "b_breath_out", "b_fidget_admire", "b_stru
 
 # take pairs whose bounding boxes must differ >= 15 % (GDD §9.3 / TECH §10.5)
 TAKE_PAIRS = [("b_take_antic", "b_take_accent"), ("b_sneeze_ah3", "b_sneeze_choo"), ("b_stomp_a", "b_stomp_b"),
-			  ("b_melt_stomp_up", "b_melt_stomp_down"), ("b_duck_cover", "b_take_accent"), ("b_dt_away", "b_dt_back")]
+			  ("b_melt_stomp_up", "b_melt_stomp_down"), ("b_duck_cover", "b_take_accent"), ("b_dt_away", "b_dt_back"),
+			  ("b_stool_hup", "b_stool_choo")]
 
 # preview-only prop hints (which prop a pose is drawn holding on the sheets)
 PREVIEW_PROPS = {
@@ -431,7 +440,23 @@ def _plant(poses_out):
 	return poses_out
 
 
+def _stage2(poses_out):
+	"""poses_s2 build steps: seated roots (SEAT_AT), then planting, then the arm IK (targets in char space)."""
+	import fk
+	import parts_body as B
+	rig = fk.load()
+	rig.poses_src = {"poses": poses_out, "mirror_of": MIRROR_OF}
+	poses_s2.seat(rig, poses_out, B.TORSO_SIL)
+	return rig
+
+
 def poses_json():
 	out = copy.deepcopy(POSES)
+	rig = _stage2(out)
 	out = _plant(out)
+	import parts_body as B
+	import rig_spec as R
+	lim = {p: R.LIMITS.get(p, [-360, 360]) for p in R.PARTS}
+	for w in poses_s2.ik(rig, out, B.GRIP, lim):
+		print("[poses] IK: " + w)
 	return {"version": 1, "rig": "bellows", "poses": out, "mirror_of": dict(MIRROR_OF)}

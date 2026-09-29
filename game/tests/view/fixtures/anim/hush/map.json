@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "s2-view fixture map (every schema key \u2192 a fixture clip).",
+  "idle": "hush/fx_idle",
+  "idle_fidgets": [
+    "hush/fx_fidget"
+  ],
+  "walk": {
+    "clip": "hush/fx_walk",
+    "stride_px": 67,
+    "speed_px_s": 400
+  },
+  "run": {
+    "clip": "hush/fx_run",
+    "stride_px": 144,
+    "speed_px_s": 720
+  },
+  "turn": "hush/fx_turn",
+  "door": "hush/fx_door",
+  "stairs_up": "hush/fx_stairs_up",
+  "stairs_down": "hush/fx_stairs_down",
+  "state:rummage": "hush/fx_rummage",
+  "state:pick_window": {
+    "clip": "hush/fx_rummage",
+    "loop": true
+  },
+  "state:rigging": {
+    "clip": "hush/fx_tinker_q",
+    "loop": true
+  },
+  "rigging@q": {
+    "clip": "hush/fx_tinker_q",
+    "loop": true
+  },
+  "rigging@s": {
+    "clip": "hush/fx_tinker_s",
+    "loop": true
+  },
+  "rigging@b": {
+    "clip": "hush/fx_tinker_b",
+    "loop": true
+  },
+  "state:diving": "hush/fx_dive",
+  "state:hidden": "",
+  "state:popping": "hush/fx_pop",
+  "state:squeaking": "hush/fx_squeak",
+  "state:caught": "hush/fx_busted",
+  "state:bowing": {
+    "clip": "hush/fx_bow",
+    "loop": true
+  },
+  "freeze": [
+    "hush/fx_freeze_1",
+    "hush/fx_freeze_2"
+  ],
+  "freeze_midjob": {
+    "clip": "hush/fx_freeze_mid",
+    "loop": true
+  },
+  "oneshot:enter": "hush/fx_climb",
+  "oneshot:wheeze": {
+    "clip": "hush/fx_wheeze",
+    "loop": true
+  },
+  "oneshot:caught:busted": "hush/fx_busted",
+  "oneshot:caught:lecture": "hush/fx_dangled",
+  "oneshot:caught:doorstep": {
+    "clip": "hush/fx_doorstep",
+    "then": "hush/fx_tomato"
+  },
+  "oneshot:yanked": "hush/fx_yanked",
+  "oneshot:near_miss": "hush/fx_near_miss",
+  "oneshot:wink": "hush/fx_wink",
+  "flavour:snicker": "hush/fx_snicker",
+  "flavour:glance": "hush/fx_glance",
+  "flavour:shrug": "hush/fx_shrug",
+  "flavour:pickup": "hush/fx_pickup",
+  "skin:pip": {
+    "oneshot:caught:lecture": "hush/fx_glance"
+  }
+}

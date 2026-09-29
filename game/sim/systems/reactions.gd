@@ -4,6 +4,8 @@
 ## Mirror round), `suppressed` (always false until Delphine exists), the length from ReactionDef
 ## (`frames + hold_len × (tier_scale − 100) / 100`), travel keys and the end position. Bellows is blind
 ## and deaf for the duration + 60. At the accent: temper gain, Running Gag link, the gag's Applause.
+## Last beat: T3 → `t3_last_beats[hash % n]`, every 4th non-T3 → the slow burn; its `clip_timings` frames
+## are added to the length (event `reaction_start {…, len, last_beat, beat_len}`: len includes beat_len).
 ## Knock-on: at `knock_on.frame` (tier-remapped), if B is RIGGED, A is truncated and B starts at its
 ## `accent − 2` frame. At the end: LANDED, residues (→ fix-ups, combos), line checks, then a Meltdown
 ## (temper ≥ 100), a pending trigger, Exhausted, or the routine. State lives in SimBellows' rx_* fields.
@@ -19,11 +21,23 @@ func start(w: SimWorld, p: int, trig: String, entry: int, tier: int, lk: int, kn
 	var b := w.bellows
 	var pd := w.db.prank_list[p]
 	var variant := ""
+	var hv := StateHash.mix(StateHash.mix(StateHash.mix(StateHash.OFFSET, w.ctx.seed), p), w.routine.loop_count)
 	if pd.variants.size() > 0:
-		var hv := StateHash.mix(StateHash.mix(StateHash.mix(StateHash.OFFSET, w.ctx.seed), p), w.routine.loop_count)
 		variant = pd.variants[hv % pd.variants.size()]
 	var def := w.db.reaction_for(pd, variant)
 	var t := clampi(tier, 1, 3)
+	# The last beat (GDD §9.3, ruling L5): a T3 reaction ends with one of `t3_last_beats`
+	# (hash(seed, prank, loop_count) % n); every SLOW_BURN_EVERY-th non-T3 reaction of the Night ends with the
+	# slow burn. Its frames (`clip_timings`) are part of the REACTING length, after the settle.
+	var beat := ""
+	if t == 3:
+		if not w.db.t3_last_beats.is_empty():
+			beat = w.db.t3_last_beats[hv % w.db.t3_last_beats.size()]
+	else:
+		b.rx_count += 1
+		if b.rx_count % SimConst.SLOW_BURN_EVERY == 0:
+			beat = SimConst.SLOW_BURN_CLIP
+	var beat_len := w.db.clip_len(beat) if beat != "" else 0
 	var ent := entry
 	if ent < 0:
 		ent = maxi(0, def.accent - 2)
@@ -35,7 +49,9 @@ func start(w: SimWorld, p: int, trig: String, entry: int, tier: int, lk: int, kn
 	b.rx_key = def.id
 	b.rx_tier = t
 	b.rx_suppressed = false
-	b.rx_len = def.length(t, false)
+	b.rx_len = def.length(t, false) + beat_len
+	b.rx_last_beat = beat
+	b.rx_beat_len = beat_len
 	b.rx_entry = ent
 	b.rx_t = ent
 	b.rx_accent = def.accent
@@ -76,7 +92,7 @@ func start(w: SimWorld, p: int, trig: String, entry: int, tier: int, lk: int, kn
 	b.rx_ease = def.travel_ease_id
 	active_count += 1
 	w.emit(SimEvents.REACTION_START, {"prank": pd.id, "archetype": pd.archetype, "variant": variant, "tier": t,
-		"suppressed": false, "len": b.rx_len, "entry": ent})
+		"suppressed": false, "len": b.rx_len, "entry": ent, "last_beat": beat, "beat_len": beat_len})
 	if has_end and b.rx_room1 != b.room and b.rx_room1 == w.hush.room:
 		var when := (b.rx_to_f if b.rx_has_travel else b.rx_len) - ent
 		w.emit(SimEvents.ENTRY_WARNING, {"room": w.room_id(b.rx_room1), "eta": maxi(0, when)})

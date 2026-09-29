@@ -1,0 +1,16 @@
+{"version":1,"clip":"bellows/st_bonk","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"The door-slam bonk (1 s stun; also the curtain-call bonk): pancaked on the door at f0, knocked back, reels with stars (6-60), shakes it off.","blend_in":0,"blend_out":8,"tags":["state","bonk","take"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_bonk_flat","ease":"pop","face":"shock"},
+{"f":6,"pose":"b_bonk_back","ease":"out_quad","face":"dazed"},
+{"f":16,"pose":"b_reel_a","ease":"in_out_sine"},
+{"f":28,"pose":"b_reel_b","ease":"in_out_sine"},
+{"f":40,"pose":"b_reel_a","ease":"in_out_sine"},
+{"f":52,"pose":"b_reel_c","ease":"in_out_sine"},
+{"f":60,"pose":"b_reel_c","ease":"linear"}
+],
+"events":[
+{"f":0,"type":"sfx","id":"woodblock_bonk"},
+{"f":0,"type":"shake","trauma":0.35},
+{"f":0,"type":"spring","part":"bouffant","kick":36.0},
+{"f":6,"type":"sfx","id":"dizzy_tweets","vol_db":-3.0,"sync":false}
+]}

@@ -1,0 +1,39 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_bit",
+ "rig": "bellows",
+ "loop": false,
+ "length": 90,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_sing_big",
+   "ease": "linear"
+  },
+  {
+   "f": 45,
+   "pose": "b_sing_crack",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 90,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 20,
+   "type": "voice",
+   "id": "vo_bellows_the_pipes"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

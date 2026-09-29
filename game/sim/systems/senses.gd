@@ -48,6 +48,12 @@ func update(w: SimWorld) -> void:
 		_update_f2f(w)
 		visible = false
 		return
+	if not w.ctx.senses:
+		# `rules.senses: false` (the Gate-0 scene): he never starts a "?" and never catches
+		visible = false
+		b.spot_meter = 0
+		peak = 0
+		return
 	visible = can_see(w)
 	if visible:
 		last_seen_room = w.hush.room
@@ -140,6 +146,15 @@ func sight_ranges(w: SimWorld) -> Array:
 	return [_rng_moving, _rng_frozen]
 
 
+## Allocation-free sight ranges: Vector2i(moving px (−1 = to the wall), frozen px); 0/0 when blind (asleep,
+## reacting + 60, Meltdown, eyes-shut, `rules.senses: false`).
+func sight_ranges_into(w: SimWorld) -> Vector2i:
+	if not w.ctx.senses:
+		return Vector2i.ZERO
+	_compute_ranges(w)
+	return Vector2i(_rng_moving, _rng_frozen)
+
+
 var _rng_moving: int = 0
 var _rng_frozen: int = 0
 
@@ -216,9 +231,9 @@ func reset_meter(w: SimWorld) -> void:
 	peak = 0
 
 
-## Open a face-to-face window at a hiding spot or the mirror.
+## Open a face-to-face window at a hiding spot or the mirror (never with `rules.senses: false`).
 func start_f2f(w: SimWorld, spot: int, kind: int) -> void:
-	if f2f_active():
+	if f2f_active() or not w.ctx.senses:
 		return
 	f2f_until = w.tick + w.ctx.f2f_ticks
 	f2f_spot = spot

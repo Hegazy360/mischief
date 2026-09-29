@@ -128,6 +128,20 @@
         "desc": "Hair over his eyes, he shuffles off to the mirror and bonks the door frame (titter)."
       },
       {
+        "id": "ghost_ff",
+        "when": {
+          "and": [
+            {"hush_hidden": true},
+            {"event_seen": {"event": "director_cue", "match": {"id": "laugh_doorframe"}, "after_s": 1.5}}
+          ]
+        },
+        "target": "clarence",
+        "mode": "hold",
+        "card": "ff",
+        "until": {"hush_hidden": false},
+        "desc": "The first hidden wait: he shuffles off to the hall mirror. Ghost thumb holds the ⏩ button; dismissed on the first ⏩ press or when Hush leaves her spot."
+      },
+      {
         "id": "laugh_relief",
         "when": {
           "and": [

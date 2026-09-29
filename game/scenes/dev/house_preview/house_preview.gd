@@ -1,26 +1,52 @@
-## HousePreview — dev scene (art-house): builds the whole house straight from
+## HousePreview — dev scene (art-house / s2-art): builds the whole house straight from
 ## res://data/house/house.json with plain Sprite2D nodes (rooms bg/fg, hotspot props in a chosen
-## state + their pre-baked outline sprites, decor, the stage set pieces, apron, footlights, flies,
-## proscenium) and frames it like the game camera: at zoom 1.0 one floor (640 interior + 60 slab)
-## fills the 1080 px height with 190 px of the floors above and below showing (GDD §3.7).
+## state + their pre-baked outline sprites, decor (animated `frames` at their `fps`), the stage set
+## pieces, apron, footlights, flies, proscenium) and frames it like the game camera: at zoom 1.0 one
+## floor (640 interior + 60 slab) fills the 1080 px height with the floors above and below showing
+## (GDD §3.7). It also shows the cold-open sets (res://data/house/cold_sets.json) and the title card.
 ##
 ## User args (after `--`):
 ##   --room=<id>          room to frame (default kitchen)
 ##   --zoom=1.0|0.5       camera zoom (0.5 = Overview)
-##   --x=<px>             camera centre x override (world px)
+##   --x=<px> / --y=<px>  camera centre override (world px)
 ##   --state=<s>          idle | rigged | occupied | open | spent (falls back to idle per prop)
-##   --rects              draw every hit box (+ id labels) and use points
+##   --rects              draw every hit box (+ id labels), use points and hidden-eye points
 ##   --badges             draw mock 56 px badges above the framed room's hotspots
 ##   --outline            show the pulsing outline sprites for the framed room
 ##   --locked=a,b         draw those rooms as the unlit set (dim blue-grey) + velvet ropes
-##   --chars              mock Bellows / Hush silhouettes at their real sizes (scale check)
+##   --slice=<episode>    shorthand for --locked: every room outside that Night's set (p00, n01, n02)
+##   --chars              the REAL Hush and Bellows rigs (RigPlayer static poses) at their usual
+##                        stations in the framed room (overrides: --bx= --bpose= --bface= --hx= --hpose=
+##                        --hface= --nobellows --nohush)
+##   --show=a,b|all       also draw hidden decor (the sink lip, the smashed vase, the door glow)
+##   --decor=<id>:<state> draw a decor sprite in a named state (e.g. parlour_picture_frame:falling)
+##   --cold=<set>         draw a cold-open set from cold_sets.json (+ --cold_state=<layer>:<state>,…;
+##                        --chars puts the real rigs at the set's `actors` anchors, --rects the anchors)
+##   --title              draw the title card on the curtain (+ --title_scale=0.5; bulbs chase)
+## Hidden eyes: with --state=occupied every hiding spot gets Hush's animated-eye sprite drawn at its
+## `eyes` point exactly as the view will (res://art/chars/hush/hidden_eyes.svg, pivot from rig.json).
 ## Not exported (scenes/dev/ is filtered out of release builds).
 extends Node2D
 
 const HOUSE_PATH := "res://data/house/house.json"
+const COLD_PATH := "res://data/house/cold_sets.json"
+const TITLE_PATH := "res://art/house/stage/title_card.svg"
+const RIG_PLAYER_PATH := "res://view/rig/rig_player.gd"
+const HIDDEN_EYES_PATH := "res://art/chars/hush/hidden_eyes.svg"
+const HIDDEN_EYES_PIVOT := Vector2(77, 44)
 const OUTLINE_COL := Color(1.0, 0.93, 0.62)
 const LOCKED_TINT := Color(0.46, 0.5, 0.68)
 const FLOOR_Y := {0: 0.0, 1: -700.0}
+## Rooms each slice episode opens (everything else is the unlit set).
+const SLICE_ROOMS := {"p00": ["parlour", "kitchen"], "n01": ["hall", "parlour", "kitchen", "porch"],
+	"n02": ["hall", "parlour", "kitchen", "porch"]}
+## Usual placements with the real characters: Bellows = [station, pose], Hush = [x, pose, facing].
+const CHAR_SETUPS := {
+	"kitchen": {"bellows": ["st_tea", "b_tea_sip"], "hush": [3620.0, "h_snicker_a", -1]},
+	"parlour": {"bellows": ["st_gramophone", "b_sing_big"], "hush": [2040.0, "h_tinker_s_a", -1]},
+	"hall": {"bellows": ["st_hall_mirror", "b_preen"], "hush": [1290.0, "h_freeze_3", -1]},
+	"porch": {"bellows": ["st_front_door", "b_lecture_wag_a"], "hush": [330.0, "h_doorstep_sit", 1]},
+}
 
 var house: Dictionary = {}
 var room_id: String = "kitchen"
@@ -30,20 +56,45 @@ var show_rects: bool = false
 var show_badges: bool = false
 var show_outline: bool = false
 var show_chars: bool = false
+var show_title: bool = false
+var title_scale: float = 1.0
+var cold_set: String = ""
 var locked: PackedStringArray = PackedStringArray()
+var shown: PackedStringArray = PackedStringArray()
 var cam_x_override: float = NAN
+var cam_y_override: float = NAN
+var decor_states: Dictionary = {}
+var cold_states: Dictionary = {}
+var char_over: Dictionary = {}
 
 var _rooms: Dictionary = {}
 var _outlines: Array[Sprite2D] = []
+var _anims: Array[Dictionary] = []
 var _t: float = 0.0
 var _overlay: Node2D
 var _layers: Dictionary = {}
 var _font: Font
+var _cold: Dictionary = {}
 
 
 func _ready() -> void:
 	_parse_args(OS.get_cmdline_user_args())
-	house = _load_house()
+	_font = ThemeDB.fallback_font
+	for layer_name in ["stage_back", "pieces", "rooms", "decor_back", "outlines", "props", "props_front", "decor_front",
+			"chars", "decor_over", "fg", "overlay"]:
+		var n := Node2D.new()
+		n.name = layer_name
+		add_child(n)
+		_layers[layer_name] = n
+	_overlay = _layers["overlay"]
+	_overlay.draw.connect(_draw_overlay)
+	house = _load_json(HOUSE_PATH)
+	if cold_set != "":
+		_build_cold()
+		return
+	if show_title:
+		_build_title()
+		return
 	if house.is_empty():
 		push_error("HousePreview: could not load %s" % HOUSE_PATH)
 		return
@@ -51,21 +102,12 @@ func _ready() -> void:
 		_rooms[r["id"]] = r
 	if not _rooms.has(room_id):
 		room_id = "kitchen"
-	_font = ThemeDB.fallback_font
-	for layer_name in ["stage_back", "pieces", "rooms", "decor_back", "outlines", "props", "props_front", "decor_front", "chars", "fg", "overlay"]:
-		var n := Node2D.new()
-		n.name = layer_name
-		add_child(n)
-		_layers[layer_name] = n
 	_build_stage()
 	_build_rooms()
 	_build_decor()
 	_build_props()
 	if show_chars:
-		(_layers["chars"] as Node2D).draw.connect(_draw_chars)
-		(_layers["chars"] as Node2D).queue_redraw()
-	_overlay = _layers["overlay"]
-	_overlay.draw.connect(_draw_overlay)
+		_build_chars()
 	_overlay.queue_redraw()
 	_setup_camera()
 
@@ -76,6 +118,11 @@ func _process(delta: float) -> void:
 	var a := 0.8 + 0.2 * sin(_t * TAU * 1.2)
 	for s in _outlines:
 		s.modulate = Color(OUTLINE_COL.r, OUTLINE_COL.g, OUTLINE_COL.b, a)
+	# decor `frames` at their `fps` (the view plays them the same way)
+	for an in _anims:
+		var frames: Array = an["tex"]
+		var i := int(floor(_t * float(an["fps"]))) % frames.size()
+		(an["sprite"] as Sprite2D).texture = frames[i]
 
 
 ## Parses the `--key=value` user args (see the header).
@@ -89,8 +136,33 @@ func _parse_args(args: PackedStringArray) -> void:
 			state = a.substr(8)
 		elif a.begins_with("--x="):
 			cam_x_override = float(a.substr(4))
+		elif a.begins_with("--y="):
+			cam_y_override = float(a.substr(4))
 		elif a.begins_with("--locked="):
 			locked = a.substr(9).split(",", false)
+		elif a.begins_with("--slice="):
+			var ep := a.substr(8).substr(0, 3)
+			var open: Array = SLICE_ROOMS.get(ep, [])
+			for rid in ["porch", "hall", "parlour", "kitchen", "conservatory", "garden", "landing", "bathroom", "bedroom", "dressing"]:
+				if not open.has(rid):
+					locked.append(rid)
+		elif a.begins_with("--show="):
+			shown = a.substr(7).split(",", false)
+		elif a.begins_with("--decor="):
+			var kv := a.substr(8).split(":")
+			if kv.size() == 2:
+				decor_states[kv[0]] = kv[1]
+		elif a.begins_with("--cold="):
+			cold_set = a.substr(7)
+		elif a.begins_with("--cold_state="):
+			for pair in a.substr(13).split(",", false):
+				var kv2 := pair.split(":")
+				if kv2.size() == 2:
+					cold_states[kv2[0]] = kv2[1]
+		elif a == "--title":
+			show_title = true
+		elif a.begins_with("--title_scale="):
+			title_scale = clampf(float(a.substr(14)), 0.1, 2.0)
 		elif a == "--rects":
 			show_rects = true
 		elif a == "--badges":
@@ -99,16 +171,22 @@ func _parse_args(args: PackedStringArray) -> void:
 			show_outline = true
 		elif a == "--chars":
 			show_chars = true
+		elif a == "--nobellows" or a == "--nohush":
+			char_over[a.substr(2)] = true
+		else:
+			for k in ["bx", "bpose", "bface", "hx", "hpose", "hface"]:
+				if a.begins_with("--%s=" % k):
+					char_over[k] = a.substr(k.length() + 3)
 
 
-func _load_house() -> Dictionary:
-	if not FileAccess.file_exists(HOUSE_PATH):
+func _load_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
 		return {}
 	var j := JSON.new()
-	if j.parse(FileAccess.get_file_as_string(HOUSE_PATH)) != OK:
-		push_error("HousePreview: %s line %d: %s" % [HOUSE_PATH, j.get_error_line(), j.get_error_message()])
+	if j.parse(FileAccess.get_file_as_string(path)) != OK:
+		push_error("HousePreview: %s line %d: %s" % [path, j.get_error_line(), j.get_error_message()])
 		return {}
-	return j.data as Dictionary
+	return j.data as Dictionary if j.data is Dictionary else {}
 
 
 func _tex(path: String) -> Texture2D:
@@ -145,6 +223,14 @@ func _v2(a: Variant) -> Vector2:
 	return Vector2(float(arr[0]), float(arr[1]))
 
 
+func _add_blend(s: Sprite2D) -> void:
+	if s == null:
+		return
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	s.material = mat
+
+
 # ------------------------------------------------------------------------------ building
 
 func _build_stage() -> void:
@@ -172,15 +258,11 @@ func _build_stage() -> void:
 			_sprite("fg", st[key]["art"], _v2(st[key]["world_pos"]))
 	var glow: Dictionary = st.get("footlight_glow", {})
 	if not glow.is_empty():
-		var mat := CanvasItemMaterial.new()
-		mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 		var gw := float(glow["size"][0])
 		var gh := float(glow["size"][1])
 		var x := float(glow["first_x"])
 		while x < float(glow["x1"]):
-			var s := _sprite("fg", glow["art"], Vector2(x - gw * 0.5, float(glow["bottom_y"]) - gh), Color(1, 1, 1, 0.55))
-			if s:
-				s.material = mat
+			_add_blend(_sprite("fg", glow["art"], Vector2(x - gw * 0.5, float(glow["bottom_y"]) - gh), Color(1, 1, 1, 0.55)))
 			x += float(glow["every_px"])
 
 
@@ -207,23 +289,49 @@ func _build_rooms() -> void:
 
 func _build_decor() -> void:
 	for d in house.get("decor", []):
-		if d.get("hidden", false):
+		var id: String = d["id"]
+		if bool(d.get("hidden", false)) and not (shown.has(id) or shown.has("all") or decor_states.has(id)):
 			continue
-		var layer := "decor_back" if int(d.get("z", 0)) < 0 else "decor_front"
+		var z := int(d.get("z", 0))
+		var layer := "decor_back" if z < 0 else ("decor_over" if z >= 2 else "decor_front")
 		var art: Dictionary = d.get("art", {})
-		var p: String = art.get(state, art.get("idle", ""))
-		_sprite(layer, p, Vector2(float(d["pos"][0]), _floor_y(d["room"]) + float(d["pos"][1])), _tint(d["room"]))
+		var want: String = decor_states.get(id, state)
+		var p: String = art.get(want, art.get("idle", ""))
+		var s := _sprite(layer, p, Vector2(float(d["pos"][0]), _floor_y(d["room"]) + float(d["pos"][1])), _tint(d["room"]))
+		if s == null:
+			continue
+		if str(d.get("blend", "")) == "add":
+			_add_blend(s)
+		var frames: Array = d.get("frames", [])
+		if frames.size() >= 2 and not decor_states.has(id):
+			var texs: Array[Texture2D] = []
+			for f in frames:
+				var t := _tex(str(f))
+				if t != null:
+					texs.append(t)
+			if texs.size() >= 2:
+				_anims.append({"sprite": s, "tex": texs, "fps": float(d.get("fps", 8.0))})
 
 
 func _build_props() -> void:
+	var eyes_tex: Texture2D = _tex(HIDDEN_EYES_PATH) if state == "occupied" and ResourceLoader.exists(HIDDEN_EYES_PATH) else null
 	for h in house.get("hotspots", []):
 		if not h.has("art"):
 			continue
 		var art: Dictionary = h["art"]
-		var pos := Vector2(float(h["art_pos"][0]), _floor_y(h["room"]) + float(h["art_pos"][1]))
+		var fy := _floor_y(h["room"])
+		var pos := Vector2(float(h["art_pos"][0]), fy + float(h["art_pos"][1]))
 		var p: String = art.get(state, art.get("idle", ""))
 		var layer := "props_front" if int(h.get("z", 0)) > 0 else "props"
 		_sprite(layer, p, pos, _tint(h["room"]))
+		if eyes_tex != null and art.has("occupied") and h.has("eyes"):
+			# exactly what the view draws: Hush's eye sprite centred (pivot) on the hotspot's `eyes` point
+			var e := Sprite2D.new()
+			e.texture = eyes_tex
+			e.centered = false
+			e.position = Vector2(float(h["eyes"][0]), fy + float(h["eyes"][1])) - HIDDEN_EYES_PIVOT
+			e.modulate = _tint(h["room"])
+			(_layers[layer] as Node2D).add_child(e)
 		if show_outline and h["room"] == room_id and art.has("outline"):
 			# the outline canvas is the prop canvas grown 4 px on every side (STYLE §6)
 			var o := _sprite("outlines", art["outline"], pos - Vector2(4, 4))
@@ -231,9 +339,58 @@ func _build_props() -> void:
 				_outlines.append(o)
 
 
+## The real rigs through RigPlayer static poses (soft hook: the preview still runs without the rig module).
+func _build_chars() -> void:
+	var setup: Dictionary = CHAR_SETUPS.get(room_id, CHAR_SETUPS["kitchen"])
+	var fy := _floor_y(room_id)
+	if not char_over.has("nobellows"):
+		var b: Array = setup["bellows"]
+		var bx := 0.0
+		var bface := 1
+		for s in house.get("stations", []):
+			if s["id"] == b[0]:
+				bx = float(s["stand_x"])
+				bface = int(s["facing"])
+		bx = float(char_over.get("bx", bx))
+		bface = int(char_over.get("bface", bface))
+		_make_rig("bellows", str(char_over.get("bpose", b[1])), Vector2(bx, fy), bface)
+	if not char_over.has("nohush"):
+		var hs: Array = setup["hush"]
+		_make_rig("hush", str(char_over.get("hpose", hs[1])), Vector2(float(char_over.get("hx", hs[0])), fy),
+			int(char_over.get("hface", hs[2])))
+
+
+func _make_rig(rig_id: String, pose: String, at: Vector2, facing: int, layer: String = "chars") -> Node2D:
+	if not ResourceLoader.exists(RIG_PLAYER_PATH):
+		push_warning("HousePreview: %s missing, no characters" % RIG_PLAYER_PATH)
+		return null
+	var scr: Script = load(RIG_PLAYER_PATH)
+	if scr == null or not scr.can_instantiate():
+		push_warning("HousePreview: %s does not load right now, no characters" % RIG_PLAYER_PATH)
+		return null
+	var p: Node2D = scr.new()
+	(_layers[layer] as Node2D).add_child(p)
+	if p.has_method("configure_for_tools"):
+		p.call("configure_for_tools")
+	p.call("setup", rig_id)
+	if p.get("rig") == null:
+		p.queue_free()
+		return null
+	p.set("springs_enabled", false)
+	p.set("smears_enabled", false)
+	var poses: Object = p.get("poses")
+	if poses != null and bool(poses.call("has_pose", pose)):
+		p.call("set_static_pose", poses.call("pose", pose))
+	else:
+		push_warning("HousePreview: %s has no pose %s" % [rig_id, pose])
+	p.call("set_facing", facing, false)
+	p.call("advance", 0.0)
+	p.position = at
+	return p
+
+
 func _setup_camera() -> void:
 	var r: Dictionary = _rooms[room_id]
-	var cam := Camera2D.new()
 	var cx := (float(r["x0"]) + float(r["x1"])) * 0.5 if is_nan(cam_x_override) else cam_x_override
 	# one floor (interior 640 + slab 60) centred: its middle is 290 px above the floor line
 	var cy := _floor_y(room_id) - 290.0
@@ -241,6 +398,8 @@ func _setup_camera() -> void:
 		# Overview: both floors + the roof and the apron in view (centre of the stage bounds)
 		var b: Array = house.get("stage", {}).get("bounds", [-220, -1640, 6640, 1890])
 		cy = float(b[1]) + float(b[3]) * 0.5
+	if not is_nan(cam_y_override):
+		cy = cam_y_override
 	# clamp to the stage bounds like the game camera (limits = house bounds, GDD §3.7)
 	var bounds: Array = house.get("stage", {}).get("bounds", [])
 	if bounds.size() == 4:
@@ -248,15 +407,108 @@ func _setup_camera() -> void:
 		var bx0 := float(bounds[0]) + half_w
 		var bx1 := float(bounds[0]) + float(bounds[2]) - half_w
 		cx = clampf(cx, bx0, maxf(bx0, bx1))
-	cam.position = Vector2(cx, cy)
-	cam.zoom = Vector2(zoom, zoom)
+	_place_camera(Vector2(cx, cy), zoom)
+
+
+func _place_camera(at: Vector2, z: float) -> void:
+	var cam := Camera2D.new()
+	cam.position = at
+	cam.zoom = Vector2(z, z)
 	add_child(cam)
 	cam.make_current()
+
+
+# ------------------------------------------------------------------------------ cold opens + title
+
+## A cold-open set in screen space (the 2400 x 1080 logical 20:9 frame; the camera centres it, so a
+## 16:9 phone sees its central 1920 px). Layers with z <= 0 draw behind the actors, z >= 2 over them; a
+## layer's state comes from --cold_state, else its `state` field; an empty state path hides the layer.
+func _build_cold() -> void:
+	var data := _load_json(COLD_PATH)
+	var sets: Dictionary = data.get("sets", {})
+	if not sets.has(cold_set):
+		push_error("HousePreview: cold set %s not in %s" % [cold_set, COLD_PATH])
+		return
+	_cold = sets[cold_set]
+	var states: Dictionary = _cold.get("states", {})
+	var layers: Array = (_cold.get("layers", []) as Array).duplicate()
+	layers.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.get("z", 0)) < int(b.get("z", 0)))
+	for l in layers:
+		var id: String = l["id"]
+		var path: String = l.get("art", "")
+		if states.has(id):
+			var st: Dictionary = states[id]
+			var want: String = cold_states.get(id, str(l.get("state", "")))
+			path = str(st.get(want, path))
+		if path == "":
+			continue
+		var z := int(l.get("z", 0))
+		var layer := "rooms" if z < 0 else ("props" if z < 2 else "decor_over")
+		_sprite(layer, path, _v2(l["pos"]))
+	if show_chars:
+		var anchors: Dictionary = _cold.get("anchors", {})
+		var actors: Dictionary = _cold.get("actors", {})
+		for rig_id in actors:
+			if not anchors.has(rig_id) or char_over.has("no" + str(rig_id)):
+				continue
+			var a: Dictionary = actors[rig_id]
+			var pose := str(char_over.get("bpose", a.get("pose", "")))
+			var face := int(char_over.get("bface", a.get("facing", 1)))
+			var r := _make_rig(str(rig_id), pose, _v2(anchors[rig_id]), face, "chars")
+			if r != null:
+				r.scale = Vector2.ONE * float(a.get("scale", 1.0))
+	var size: Array = _cold.get("size", [2400, 1080])
+	_overlay.queue_redraw()
+	_place_camera(Vector2(float(size[0]) * 0.5, float(size[1]) * 0.5), 1.0)
+
+
+## The title card slammed down over the curtain in its rest place (stage.title_card; `--title_scale`
+## scales it, the bulb overlays chase at `chase_hz`).
+func _build_title() -> void:
+	var st: Dictionary = house.get("stage", {})
+	var curtain: Dictionary = st.get("curtain", {})
+	for i in 2:
+		_sprite("rooms", curtain.get("art", ""), Vector2(float(i) * 1920.0 - 240.0, 0.0))
+	var spot: Dictionary = st.get("bow_spot", {})
+	if not spot.is_empty():
+		var sz: Array = spot.get("size", [900, 260])
+		_add_blend(_sprite("fg", spot["art"], Vector2(1200 - float(sz[0]) * 0.5, 1080 - float(sz[1])),
+			Color(1, 1, 1, float(spot.get("alpha", 0.8)))))
+	var tc: Dictionary = st.get("title_card", {})
+	var centre := _v2(tc.get("rest_center", [1200, 470]))
+	var tsize := _v2(tc.get("size", [1500, 790]))
+	var origin := centre - tsize * 0.5 * title_scale
+	var board := _sprite("props", str(tc.get("art", TITLE_PATH)), origin)
+	if board != null:
+		board.scale = Vector2.ONE * title_scale
+	var bulb_tex: Array[Texture2D] = []
+	var bulbs: Array = tc.get("bulbs", [])
+	for b in bulbs:
+		var t := _tex(str(b))
+		if t != null:
+			bulb_tex.append(t)
+	if bulb_tex.size() >= 2:
+		var s := _sprite("props_front", str(bulbs[0]), origin)
+		s.scale = Vector2.ONE * title_scale
+		_anims.append({"sprite": s, "tex": bulb_tex, "fps": float(tc.get("chase_hz", 6.0))})
+	_place_camera(Vector2(1200, 540), 1.0)
 
 
 # ------------------------------------------------------------------------------ overlays
 
 func _draw_overlay() -> void:
+	if cold_set != "":
+		if show_rects:
+			for k in (_cold.get("anchors", {}) as Dictionary):
+				var p := _v2(_cold["anchors"][k])
+				_overlay.draw_circle(p, 12.0, Color(1, 0.3, 0.3))
+				_overlay.draw_string(_font, p + Vector2(16, -8), str(k), HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color.WHITE)
+			var size: Array = _cold.get("size", [2400, 1080])
+			var safe := Rect2((float(size[0]) - 1920.0) * 0.5, 0, 1920, float(size[1]))
+			_overlay.draw_rect(safe, Color(1, 1, 1, 0.8), false, 4.0)
+		return
+	if house.is_empty() or show_title:
+		return
 	var fy_room := _floor_y(room_id)
 	if show_rects:
 		for h in house.get("hotspots", []):
@@ -267,6 +519,9 @@ func _draw_overlay() -> void:
 			_overlay.draw_rect(rr, Color(col.r, col.g, col.b, 0.16), true)
 			_overlay.draw_rect(rr, col, false, 4.0)
 			_overlay.draw_line(Vector2(float(h["use_x"]), fy - 14), Vector2(float(h["use_x"]), fy + 14), col, 5.0)
+			if h.has("eyes"):
+				var ep := Vector2(float(h["eyes"][0]), fy + float(h["eyes"][1]))
+				_overlay.draw_circle(ep, 7.0, Color(0.3, 0.9, 1.0))
 			var label := str(h["id"]).split("_", true, 1)
 			var txt: String = label[1] if label.size() > 1 else str(h["id"])
 			_overlay.draw_string(_font, rr.position + Vector2(6, 26), txt, HORIZONTAL_ALIGNMENT_LEFT, rr.size.x - 8, 22, Color.WHITE)
@@ -295,7 +550,7 @@ func _kind_colour(kind: String) -> Color:
 
 
 ## A mock 56 px badge: gold = usable, blue closed eye = hiding, red = in use next, grey cloud = needs
-## an item (GDD §3.5). The real badges belong to the view task.
+## an item (GDD §3.5). The real badges belong to the view / ui tasks.
 func _draw_badge(c: Vector2, h: Dictionary) -> void:
 	var kind := str(h["kind"])
 	var ink := Color("#1B2340")
@@ -321,49 +576,3 @@ func _draw_badge(c: Vector2, h: Dictionary) -> void:
 			var rad := 15.0 if i % 2 == 0 else 6.5
 			pts.append(c + Vector2(cos(ang), sin(ang)) * rad)
 		_overlay.draw_colored_polygon(pts, Color.WHITE)
-
-
-## Mock silhouettes at the real sizes (Bellows 380 px barrel + bouffant, Hush 340 px) so contrast and
-## scale can be judged before the character rigs exist.
-func _draw_chars() -> void:
-	var n: Node2D = _layers["chars"]
-	var fy := _floor_y(room_id)
-	var ink := Color("#1B2340")
-	var bx := NAN
-	for s in house.get("stations", []):
-		if s["room"] == room_id:
-			bx = float(s["stand_x"])
-			break
-	if not is_nan(bx):
-		n.draw_rect(Rect2(bx - 48, fy - 56, 96, 56), Color("#3A3050"))
-		n.draw_circle(Vector2(bx, fy - 170), 104.0, ink)
-		n.draw_circle(Vector2(bx, fy - 170), 98.0, Color("#7B3F8C"))
-		n.draw_circle(Vector2(bx + 6, fy - 312), 74.0, ink)
-		n.draw_circle(Vector2(bx + 6, fy - 312), 68.0, Color("#F4C9A8"))
-		n.draw_circle(Vector2(bx, fy - 366), 58.0, ink)
-		n.draw_circle(Vector2(bx, fy - 366), 52.0, Color("#D9DCE6"))
-		n.draw_colored_polygon(PackedVector2Array([Vector2(bx - 14, fy - 250), Vector2(bx + 14, fy - 250), Vector2(bx, fy - 200)]), Color("#E8B33A"))
-	# Hush stands at the room's hotspot furthest from Bellows (so the two never overlap)
-	var hx := float(_rooms[room_id]["x0"]) + 170.0
-	var best := -1.0
-	for h in house.get("hotspots", []):
-		if h["room"] == room_id and bool(h.get("tappable", true)):
-			var d := absf(float(h["use_x"]) - (bx if not is_nan(bx) else 0.0))
-			if d > best:
-				best = d
-				hx = float(h["use_x"])
-	n.draw_rect(Rect2(hx - 34, fy - 250, 68, 196), ink)
-	for i in 5:
-		n.draw_rect(Rect2(hx - 30, fy - 246 + i * 38, 60, 19), Color("#2B3566") if i % 2 == 0 else Color("#FFF6EA"))
-	n.draw_rect(Rect2(hx - 30, fy - 56, 60, 56), Color("#2B3566"))
-	n.draw_circle(Vector2(hx, fy - 300), 66.0, ink)
-	n.draw_circle(Vector2(hx, fy - 300), 60.0, Color("#FFF6EA"))
-	n.draw_circle(Vector2(hx - 20, fy - 306), 11.0, ink)
-	n.draw_circle(Vector2(hx + 20, fy - 306), 11.0, ink)
-	n.draw_circle(Vector2(hx - 36, fy - 282), 10.0, Color("#FF9AA2"))
-	n.draw_circle(Vector2(hx + 36, fy - 282), 10.0, Color("#FF9AA2"))
-	n.draw_colored_polygon(PackedVector2Array([Vector2(hx - 70, fy - 352), Vector2(hx + 40, fy - 380), Vector2(hx + 60, fy - 344), Vector2(hx - 50, fy - 330)]),
-		Color("#E23B4E"))
-	for sx in [-1.0, 1.0]:
-		n.draw_circle(Vector2(hx + sx * 62, fy - 150), 26.0, ink)
-		n.draw_circle(Vector2(hx + sx * 62, fy - 150), 21.0, Color.WHITE)

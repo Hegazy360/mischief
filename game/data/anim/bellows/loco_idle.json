@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/loco_idle","rig":"bellows","loop":true,"length":240,"layer":"base","mask":null,"doc":"Pompous idle: thumb in his lapel, belly breathing, a smug look; the cravat-tug fidget (two tugs).","blend_in":8,"blend_out":8,"tags":["loco","idle"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_idle_lapel","ease":"linear","face":"pompous"},
+{"f":40,"pose":"b_idle_lapel_b","ease":"in_out_sine"},
+{"f":80,"pose":"b_idle_lapel","ease":"in_out_sine"},
+{"f":120,"pose":"b_idle_lapel_b","ease":"in_out_sine","face":"smug"},
+{"f":150,"pose":"b_idle_lapel","ease":"in_out_sine","face":"pompous"},
+{"f":162,"pose":"b_idle_tug","ease":"in_out_sine"},
+{"f":170,"pose":"b_idle_tug_b","ease":"out_back"},
+{"f":178,"pose":"b_idle_tug","ease":"in_out_sine"},
+{"f":186,"pose":"b_idle_tug_b","ease":"out_back"},
+{"f":200,"pose":"b_idle_lapel_b","ease":"in_out_sine","face":"smug"},
+{"f":240,"pose":"b_idle_lapel","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":170,"type":"sfx","id":"cravat_tug","vol_db":-4.0}
+]}

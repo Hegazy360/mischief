@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "clip": "hush/idle_fidget_proud",
+  "rig": "hush",
+  "loop": false,
+  "length": 84,
+  "layer": "base",
+  "mask": null,
+  "doc": "Flavour: fists on hips by f10, two smug chin bobs.",
+  "blend_in": 4,
+  "blend_out": 6,
+  "tags": [
+    "idle",
+    "fidget",
+    "flavour"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "neutral"
+    },
+    {
+      "f": 5,
+      "pose": "h_breath_in",
+      "ease": "in_quad",
+      "face": "grin",
+      "set": {
+        "root": {
+          "sx": 1.03,
+          "sy": 0.97
+        },
+        "leg_upper_r": {
+          "rot": -9.51
+        },
+        "leg_lower_r": {
+          "rot": 11.29
+        },
+        "foot_r": {
+          "rot": -1.68
+        },
+        "leg_upper_l": {
+          "rot": 1.35
+        },
+        "leg_lower_l": {
+          "rot": 11.05
+        },
+        "foot_l": {
+          "rot": -11.7
+        }
+      }
+    },
+    {
+      "f": 10,
+      "pose": "h_fidget_proud",
+      "ease": "out_back",
+      "face": "smug",
+      "set": {
+        "root": {
+          "sx": 0.96,
+          "sy": 1.05
+        },
+        "leg_upper_r": {
+          "rot": -4.39
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 4.24
+        },
+        "leg_upper_l": {
+          "rot": 6.95
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -8.16
+        }
+      }
+    },
+    {
+      "f": 24,
+      "pose": "h_fidget_proud",
+      "ease": "in_out_sine",
+      "face": "proud",
+      "set": {
+        "torso": {
+          "rot": -12.0
+        },
+        "head": {
+          "rot": -18.0
+        },
+        "leg_upper_r": {
+          "rot": -4.25
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.74
+        },
+        "leg_upper_l": {
+          "rot": 6.71
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.22
+        }
+      }
+    },
+    {
+      "f": 34,
+      "pose": "h_fidget_proud",
+      "ease": "in_out_sine",
+      "face": "proud",
+      "set": {
+        "root": {
+          "sx": 1.02,
+          "sy": 0.98
+        },
+        "head": {
+          "rot": -12.0
+        },
+        "leg_upper_r": {
+          "rot": -4.18
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.53
+        },
+        "leg_upper_l": {
+          "rot": 6.59
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.83
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "h_fidget_proud",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "torso": {
+          "rot": -12.0
+        },
+        "head": {
+          "rot": -18.0
+        },
+        "leg_upper_r": {
+          "rot": -4.25
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.74
+        },
+        "leg_upper_l": {
+          "rot": 6.71
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.22
+        }
+      }
+    },
+    {
+      "f": 56,
+      "pose": "h_fidget_proud",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "root": {
+          "sx": 1.02,
+          "sy": 0.98
+        },
+        "head": {
+          "rot": -12.0
+        },
+        "leg_upper_r": {
+          "rot": -4.18
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.53
+        },
+        "leg_upper_l": {
+          "rot": 6.59
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.83
+        }
+      }
+    },
+    {
+      "f": 84,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "neutral"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 6,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

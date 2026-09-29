@@ -1,0 +1,836 @@
+{
+  "version": 1,
+  "clip": "hush/act_tinker_b",
+  "rig": "hush",
+  "loop": true,
+  "length": 150,
+  "layer": "base",
+  "mask": null,
+  "doc": "Rig tier B (2.5 s): hammering (6 slams), a flurry, the brow wipe at f112-128, 150 f loop.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "act",
+    "tinker",
+    "rig"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_tinker_b_a",
+      "ease": "linear",
+      "face": "frantic"
+    },
+    {
+      "f": 4,
+      "pose": "h_tinker_b_a",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "y": 22.5,
+          "sy": 1.004
+        },
+        "torso": {
+          "rot": 29.2
+        },
+        "head": {
+          "rot": 5.04
+        },
+        "arm_upper_r": {
+          "rot": 140.46
+        },
+        "arm_lower_r": {
+          "rot": -56.38
+        },
+        "hand_r": {
+          "rot": 23.7
+        },
+        "arm_upper_l": {
+          "rot": -58.72
+        },
+        "arm_lower_l": {
+          "rot": -58.86
+        },
+        "hand_l": {
+          "rot": 46.55
+        },
+        "leg_upper_r": {
+          "rot": -69.94
+        },
+        "leg_lower_r": {
+          "rot": 103.81
+        },
+        "foot_r": {
+          "rot": -0.08
+        },
+        "leg_upper_l": {
+          "rot": -17.83
+        },
+        "leg_lower_l": {
+          "rot": 95.75
+        }
+      }
+    },
+    {
+      "f": 14,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 16.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 20,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 3.0
+        }
+      }
+    },
+    {
+      "f": 28,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 21.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 34,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 8.0
+        }
+      }
+    },
+    {
+      "f": 42,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 16.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 48,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 3.0
+        }
+      }
+    },
+    {
+      "f": 56,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 21.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 62,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 8.0
+        }
+      }
+    },
+    {
+      "f": 70,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 16.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 76,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 3.0
+        }
+      }
+    },
+    {
+      "f": 84,
+      "pose": "h_tinker_b_b",
+      "ease": "in_cubic",
+      "set": {
+        "head": {
+          "rot": 21.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 88,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "root": {
+          "y": 21.62,
+          "sx": 1.03,
+          "sy": 0.97
+        },
+        "torso": {
+          "rot": 36.0
+        },
+        "head": {
+          "rot": 13.2
+        },
+        "arm_upper_r": {
+          "rot": 225.8
+        },
+        "arm_lower_r": {
+          "rot": -28.5
+        },
+        "hand_r": {
+          "rot": 14.32
+        },
+        "arm_upper_l": {
+          "rot": -55.18
+        },
+        "arm_lower_l": {
+          "rot": -51.58
+        },
+        "hand_l": {
+          "rot": 44.44
+        },
+        "leg_upper_r": {
+          "rot": -70.48
+        },
+        "leg_lower_r": {
+          "rot": 105.48
+        },
+        "foot_r": {
+          "rot": 0.59
+        },
+        "leg_upper_l": {
+          "rot": -19.28
+        },
+        "leg_lower_l": {
+          "rot": 97.9
+        },
+        "foot_l": {
+          "rot": 40.06
+        }
+      }
+    },
+    {
+      "f": 92,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "root": {
+          "y": 21.1,
+          "sx": 1.05,
+          "sy": 0.95
+        },
+        "torso": {
+          "rot": 40.0
+        },
+        "head": {
+          "rot": 18.0
+        },
+        "arm_upper_r": {
+          "rot": 276.0
+        },
+        "arm_lower_r": {
+          "rot": -12.1
+        },
+        "hand_r": {
+          "rot": 8.8
+        },
+        "arm_upper_l": {
+          "rot": -53.1
+        },
+        "arm_lower_l": {
+          "rot": -47.3
+        },
+        "hand_l": {
+          "rot": 43.2
+        },
+        "leg_upper_r": {
+          "rot": -70.83
+        },
+        "leg_lower_r": {
+          "rot": 106.49
+        },
+        "foot_r": {
+          "rot": 1.0
+        },
+        "leg_upper_l": {
+          "rot": -20.1
+        },
+        "leg_lower_l": {
+          "rot": 99.17
+        },
+        "foot_l": {
+          "rot": 40.05
+        }
+      }
+    },
+    {
+      "f": 96,
+      "pose": "h_tinker_b_a",
+      "ease": "out_quad",
+      "set": {
+        "root": {
+          "y": 21.75,
+          "sx": 1.025,
+          "sy": 0.975
+        },
+        "torso": {
+          "rot": 35.0
+        },
+        "head": {
+          "rot": 12.0
+        },
+        "arm_upper_r": {
+          "rot": 213.25
+        },
+        "arm_lower_r": {
+          "rot": -32.6
+        },
+        "hand_r": {
+          "rot": 15.7
+        },
+        "arm_upper_l": {
+          "rot": -55.7
+        },
+        "arm_lower_l": {
+          "rot": -52.65
+        },
+        "hand_l": {
+          "rot": 44.75
+        },
+        "leg_upper_r": {
+          "rot": -70.39
+        },
+        "leg_lower_r": {
+          "rot": 105.23
+        },
+        "foot_r": {
+          "rot": 0.49
+        },
+        "leg_upper_l": {
+          "rot": -19.07
+        },
+        "leg_lower_l": {
+          "rot": 97.59
+        },
+        "foot_l": {
+          "rot": 40.06
+        }
+      }
+    },
+    {
+      "f": 104,
+      "pose": "h_tinker_b_a",
+      "ease": "in_out_sine",
+      "face": "frantic",
+      "set": {
+        "root": {
+          "y": 9.4
+        },
+        "torso": {
+          "rot": 12.0
+        },
+        "head": {
+          "rot": -4.0
+        },
+        "arm_upper_r": {
+          "rot": 176.67
+        },
+        "arm_lower_r": {
+          "rot": -26.82
+        },
+        "hand_r": {
+          "rot": -36.85
+        },
+        "arm_upper_l": {
+          "rot": -6.95
+        },
+        "arm_lower_l": {
+          "rot": -74.85
+        },
+        "hand_l": {
+          "rot": 39.8
+        },
+        "leg_upper_r": {
+          "rot": -57.25
+        },
+        "leg_lower_r": {
+          "rot": 84.56
+        },
+        "foot_r": {
+          "rot": 6.69
+        },
+        "leg_upper_l": {
+          "rot": -13.12
+        },
+        "leg_lower_l": {
+          "rot": 76.59
+        },
+        "foot_l": {
+          "rot": 54.54
+        }
+      }
+    },
+    {
+      "f": 112,
+      "pose": "h_brow_wipe",
+      "ease": "out_quad",
+      "face": "phew",
+      "set": {
+        "head": {
+          "rot": -14.0
+        },
+        "arm_upper_r": {
+          "rot": 202.85,
+          "z": 11
+        },
+        "arm_lower_r": {
+          "rot": -0.54,
+          "z": 11
+        },
+        "hand_r": {
+          "rot": -96.31
+        },
+        "leg_upper_r": {
+          "rot": -42.88
+        },
+        "leg_lower_r": {
+          "rot": 60.06
+        },
+        "foot_r": {
+          "rot": 16.83
+        },
+        "leg_upper_l": {
+          "rot": -3.69
+        },
+        "leg_lower_l": {
+          "rot": 50.51
+        },
+        "foot_l": {
+          "rot": 71.19,
+          "tex": "tiptoe"
+        }
+      }
+    },
+    {
+      "f": 118,
+      "pose": "h_brow_wipe",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": -16.0
+        },
+        "arm_upper_r": {
+          "rot": 177.07,
+          "z": 11
+        },
+        "arm_lower_r": {
+          "rot": -0.54,
+          "z": 11
+        },
+        "hand_r": {
+          "rot": -74.53
+        },
+        "leg_upper_r": {
+          "rot": -42.88
+        },
+        "leg_lower_r": {
+          "rot": 60.06
+        },
+        "foot_r": {
+          "rot": 16.83
+        },
+        "leg_upper_l": {
+          "rot": -3.69
+        },
+        "leg_lower_l": {
+          "rot": 50.51
+        },
+        "foot_l": {
+          "rot": 71.19,
+          "tex": "tiptoe"
+        }
+      }
+    },
+    {
+      "f": 124,
+      "pose": "h_brow_wipe",
+      "ease": "out_quad",
+      "set": {
+        "head": {
+          "rot": -18.0
+        },
+        "arm_upper_r": {
+          "rot": 115.71
+        },
+        "arm_lower_r": {
+          "rot": -72.9
+        },
+        "hand_r": {
+          "rot": 23.19
+        },
+        "leg_upper_r": {
+          "rot": -42.88
+        },
+        "leg_lower_r": {
+          "rot": 60.06
+        },
+        "foot_r": {
+          "rot": 16.83
+        },
+        "leg_upper_l": {
+          "rot": -3.69
+        },
+        "leg_lower_l": {
+          "rot": 50.51
+        },
+        "foot_l": {
+          "rot": 71.19,
+          "tex": "tiptoe"
+        }
+      }
+    },
+    {
+      "f": 132,
+      "pose": "h_brow_wipe",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "torso": {
+          "rot": -4.0
+        },
+        "head": {
+          "rot": -10.0
+        },
+        "arm_upper_r": {
+          "rot": 29.79
+        },
+        "arm_lower_r": {
+          "rot": -75.87
+        },
+        "hand_r": {
+          "tex": "fist",
+          "rot": 90.08
+        },
+        "leg_upper_r": {
+          "rot": -42.88
+        },
+        "leg_lower_r": {
+          "rot": 60.06
+        },
+        "foot_r": {
+          "rot": 16.83
+        },
+        "leg_upper_l": {
+          "rot": -3.69
+        },
+        "leg_lower_l": {
+          "rot": 50.51
+        },
+        "foot_l": {
+          "rot": 71.19,
+          "tex": "tiptoe"
+        }
+      }
+    },
+    {
+      "f": 141,
+      "pose": "h_tinker_b_a",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "root": {
+          "y": 15.9
+        },
+        "torso": {
+          "rot": 21.5
+        },
+        "head": {
+          "rot": 2.0
+        },
+        "arm_upper_r": {
+          "rot": 120.32
+        },
+        "arm_lower_r": {
+          "rot": -58.79
+        },
+        "hand_r": {
+          "rot": 39.47
+        },
+        "arm_upper_l": {
+          "rot": -32.62
+        },
+        "arm_lower_l": {
+          "rot": -66.42
+        },
+        "hand_l": {
+          "rot": 43.05
+        },
+        "leg_upper_r": {
+          "rot": -63.69
+        },
+        "leg_lower_r": {
+          "rot": 94.7
+        },
+        "foot_r": {
+          "rot": 2.99
+        },
+        "leg_upper_l": {
+          "rot": -16.02
+        },
+        "leg_lower_l": {
+          "rot": 86.83
+        },
+        "foot_l": {
+          "rot": 47.19
+        }
+      }
+    },
+    {
+      "f": 150,
+      "pose": "h_tinker_b_a",
+      "ease": "in_out_sine",
+      "face": "frantic"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "tinker_frantic"
+    },
+    {
+      "f": 28,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 42,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 48,
+      "type": "sfx",
+      "id": "tinker_frantic"
+    },
+    {
+      "f": 56,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 70,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 84,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 92,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 118,
+      "type": "sfx",
+      "id": "hush_phew"
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

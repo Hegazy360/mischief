@@ -87,7 +87,7 @@
         "fg": "res://art/house/rooms/conservatory_fg.svg",
         "pos": [3900, -640],
         "size": [800, 700],
-        "final": false
+        "final": true
       }
     },
     {
@@ -117,7 +117,7 @@
         "fg": "res://art/house/rooms/landing_fg.svg",
         "pos": [1000, -640],
         "size": [800, 700],
-        "final": false
+        "final": true
       }
     },
     {
@@ -132,7 +132,7 @@
         "fg": "res://art/house/rooms/bathroom_fg.svg",
         "pos": [1800, -640],
         "size": [1000, 700],
-        "final": false
+        "final": true
       }
     },
     {
@@ -147,7 +147,7 @@
         "fg": "res://art/house/rooms/bedroom_fg.svg",
         "pos": [2800, -640],
         "size": [900, 700],
-        "final": false
+        "final": true
       }
     },
     {
@@ -162,7 +162,7 @@
         "fg": "res://art/house/rooms/dressing_fg.svg",
         "pos": [3700, -640],
         "size": [800, 700],
-        "final": false
+        "final": true
       }
     }
   ],
@@ -295,8 +295,8 @@
       "id": "st_tea",
       "room": "kitchen",
       "x": 2940,
-      "stand_x": 2880,
-      "facing": 1,
+      "stand_x": 3000,
+      "facing": -1,
       "kinds": ["HONEY"]
     },
     {
@@ -487,7 +487,8 @@
         "idle": "res://art/house/props/front_door.svg",
         "open": "res://art/house/props/front_door_open.svg",
         "outline": "res://art/house/props/front_door_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "hall_coat_cupboard",
@@ -497,14 +498,16 @@
       "facing": -1,
       "rect": [536, -450, 144, 470],
       "in_use_by": null,
-      "art_pos": [526, -508],
-      "art_size": [164, 509],
+      "art_pos": [523, -508],
+      "art_size": [167, 509],
       "art": {
         "idle": "res://art/house/props/coat_cupboard.svg",
         "occupied": "res://art/house/props/coat_cupboard_occupied.svg",
         "outline": "res://art/house/props/coat_cupboard_ol.svg"
       },
-      "eyes": [632, -300]
+      "eyes": [608, -300],
+      "eyes_scale": 0.85,
+      "raster": 1.5
     },
     {
       "id": "hall_confiscated_box",
@@ -520,7 +523,8 @@
         "idle": "res://art/house/props/confiscated_box.svg",
         "open": "res://art/house/props/confiscated_box_open.svg",
         "outline": "res://art/house/props/confiscated_box_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "hall_phone",
@@ -574,7 +578,8 @@
         "front": "res://art/house/props/cheval_mirror_front.svg",
         "outline": "res://art/house/props/cheval_mirror_ol.svg"
       },
-      "front_while": "hush_in_frame"
+      "front_while": "hush_in_frame",
+      "raster": 1.5
     },
     {
       "id": "hall_clock",
@@ -609,7 +614,9 @@
         "occupied": "res://art/house/props/clock_case_occupied.svg",
         "outline": "res://art/house/props/clock_case_ol.svg"
       },
-      "eyes": [1280, -300]
+      "eyes": [1280, -300],
+      "eyes_scale": 0.72,
+      "raster": 1.5
     },
     {
       "id": "stairs_rods",
@@ -659,7 +666,8 @@
         "rigged": "res://art/house/props/gramophone_rigged.svg",
         "rigged_it_takes_two": "res://art/house/props/gramophone_rigged_it_takes_two.svg",
         "outline": "res://art/house/props/gramophone_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "parlour_piano_back",
@@ -676,7 +684,8 @@
         "occupied": "res://art/house/props/piano_occupied.svg",
         "outline": "res://art/house/props/piano_ol.svg"
       },
-      "eyes": [1833, -64]
+      "eyes": [1833, -66],
+      "raster": 1.5
     },
     {
       "id": "parlour_piano_wedge",
@@ -710,7 +719,8 @@
         "idle": "res://art/house/props/recliner.svg",
         "rigged": "res://art/house/props/recliner_rigged.svg",
         "outline": "res://art/house/props/recliner_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "parlour_newspaper",
@@ -745,7 +755,8 @@
         "rigged": "res://art/house/props/chandelier_rigged.svg",
         "spent": "res://art/house/props/chandelier_spent.svg",
         "outline": "res://art/house/props/chandelier_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "parlour_bellows",
@@ -780,7 +791,8 @@
         "occupied": "res://art/house/props/chaise_occupied.svg",
         "outline": "res://art/house/props/chaise_ol.svg"
       },
-      "eyes": [2540, -210]
+      "eyes": [2578, -150],
+      "raster": 1.5
     },
     {
       "id": "parlour_tea_tray",
@@ -816,7 +828,8 @@
         "rigged": "res://art/house/props/fan_rigged.svg",
         "spent": "res://art/house/props/fan_spent.svg",
         "outline": "res://art/house/props/fan_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "kitchen_kettle",
@@ -844,8 +857,8 @@
       "rect": [2868, -530, 144, 172],
       "in_use_by": null,
       "station": "st_tea",
-      "art_pos": [2872, -495],
-      "art_size": [134, 149],
+      "art_pos": [2859, -525],
+      "art_size": [147, 179],
       "art": {
         "idle": "res://art/house/props/honey_jar.svg",
         "rigged": "res://art/house/props/honey_jar_rigged.svg",
@@ -901,7 +914,8 @@
         "idle": "res://art/house/props/fridge.svg",
         "open": "res://art/house/props/fridge_open.svg",
         "outline": "res://art/house/props/fridge_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "kitchen_table",
@@ -918,7 +932,8 @@
         "occupied": "res://art/house/props/kitchen_table_occupied.svg",
         "outline": "res://art/house/props/kitchen_table_ol.svg"
       },
-      "eyes": [3450, -46]
+      "eyes": [3450, -58],
+      "raster": 1.5
     },
     {
       "id": "kitchen_pantry_shelf",
@@ -951,7 +966,9 @@
         "occupied": "res://art/house/props/pantry_curtain_occupied.svg",
         "outline": "res://art/house/props/pantry_curtain_ol.svg"
       },
-      "eyes": [3620, -214]
+      "eyes": [3620, -214],
+      "eyes_scale": 0.85,
+      "raster": 1.5
     },
     {
       "id": "kitchen_sink_tap",
@@ -985,7 +1002,8 @@
       "art": {
         "idle": "res://art/house/props/kitchen_window.svg",
         "open": "res://art/house/props/kitchen_window_open.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "kitchen_back_door",
@@ -1003,7 +1021,8 @@
         "idle": "res://art/house/props/back_door.svg",
         "open": "res://art/house/props/back_door_open.svg",
         "outline": "res://art/house/props/back_door_ol.svg"
-      }
+      },
+      "raster": 1.5
     },
     {
       "id": "conservatory_feed_bin",
@@ -1014,8 +1033,8 @@
       "rect": [3950, -250, 144, 270],
       "in_use_by": null,
       "station": "st_feed_bin",
-      "art_pos": [3955, -197],
-      "art_size": [134, 200],
+      "art_pos": [3954, -214],
+      "art_size": [136, 217],
       "art": {
         "idle": "res://art/house/props/feed_bin.svg",
         "rigged": "res://art/house/props/feed_bin_rigged.svg",
@@ -1030,14 +1049,15 @@
       "facing": -1,
       "rect": [4118, -236, 150, 256],
       "in_use_by": null,
-      "art_pos": [4117, -201],
-      "art_size": [152, 204],
+      "art_pos": [4114, -234],
+      "art_size": [156, 237],
       "art": {
         "idle": "res://art/house/props/hamper.svg",
         "occupied": "res://art/house/props/hamper_occupied.svg",
         "outline": "res://art/house/props/hamper_ol.svg"
       },
-      "eyes": [4193, -184]
+      "eyes": [4196, -192],
+      "eyes_scale": 0.8
     },
     {
       "id": "conservatory_potting_bench",
@@ -1047,8 +1067,8 @@
       "facing": 1,
       "rect": [4548, -300, 144, 320],
       "in_use_by": null,
-      "art_pos": [4545, -245],
-      "art_size": [150, 248],
+      "art_pos": [4543, -254],
+      "art_size": [154, 257],
       "art": {
         "idle": "res://art/house/props/potting_bench.svg",
         "open": "res://art/house/props/potting_bench_open.svg",
@@ -1200,8 +1220,8 @@
       "rect": [1000, -178, 144, 198],
       "in_use_by": null,
       "link": "stairs",
-      "art_pos": [1089, -270],
-      "art_size": [40, 275],
+      "art_pos": [1080, -286],
+      "art_size": [58, 292],
       "art": {
         "idle": "res://art/house/props/stair_head.svg",
         "outline": "res://art/house/props/stair_head_ol.svg"
@@ -1216,8 +1236,8 @@
       "rect": [1176, -520, 150, 180],
       "in_use_by": null,
       "station": "st_radiator",
-      "art_pos": [1191, -537],
-      "art_size": [120, 210],
+      "art_pos": [1190, -548],
+      "art_size": [122, 219],
       "art": {
         "idle": "res://art/house/props/boiler_valve.svg",
         "rigged": "res://art/house/props/boiler_valve_rigged.svg",
@@ -1232,14 +1252,15 @@
       "facing": 1,
       "rect": [1176, -316, 150, 336],
       "in_use_by": null,
-      "art_pos": [1174, -335],
-      "art_size": [154, 336],
+      "art_pos": [1170, -357],
+      "art_size": [162, 358],
       "art": {
         "idle": "res://art/house/props/airing_cupboard.svg",
         "occupied": "res://art/house/props/airing_cupboard_occupied.svg",
         "outline": "res://art/house/props/airing_cupboard_ol.svg"
       },
-      "eyes": [1236, -210]
+      "eyes": [1282, -210],
+      "eyes_scale": 0.8
     },
     {
       "id": "bathroom_basin_spray",
@@ -1250,8 +1271,8 @@
       "rect": [1858, -348, 144, 166],
       "in_use_by": null,
       "station": "st_basin",
-      "art_pos": [1909, -351],
-      "art_size": [53, 146],
+      "art_pos": [1908, -372],
+      "art_size": [53, 168],
       "art": {
         "idle": "res://art/house/props/basin_spray.svg",
         "rigged": "res://art/house/props/basin_spray_rigged.svg",
@@ -1266,8 +1287,8 @@
       "facing": 1,
       "rect": [2038, -540, 144, 180],
       "in_use_by": null,
-      "art_pos": [2019, -533],
-      "art_size": [160, 166],
+      "art_pos": [2014, -534],
+      "art_size": [166, 168],
       "art": {
         "idle": "res://art/house/props/bathroom_cabinet.svg",
         "open": "res://art/house/props/bathroom_cabinet_open.svg",
@@ -1283,8 +1304,8 @@
       "rect": [2296, -394, 144, 164],
       "in_use_by": null,
       "station": "st_bath",
-      "art_pos": [2295, -367],
-      "art_size": [106, 182],
+      "art_pos": [2314, -370],
+      "art_size": [90, 186],
       "art": {
         "idle": "res://art/house/props/bath_taps.svg",
         "rigged": "res://art/house/props/bath_taps_rigged.svg",
@@ -1300,8 +1321,8 @@
       "rect": [2464, -394, 144, 164],
       "in_use_by": null,
       "station": "st_bath",
-      "art_pos": [2463, -293],
-      "art_size": [154, 100],
+      "art_pos": [2452, -296],
+      "art_size": [169, 104],
       "art": {
         "idle": "res://art/house/props/rubber_duck.svg",
         "rigged": "res://art/house/props/rubber_duck_rigged.svg",
@@ -1316,14 +1337,15 @@
       "facing": 1,
       "rect": [2300, -206, 306, 226],
       "in_use_by": "bath",
-      "art_pos": [2295, -231],
-      "art_size": [326, 235],
+      "art_pos": [2292, -266],
+      "art_size": [332, 271],
       "art": {
         "idle": "res://art/house/props/bath.svg",
         "occupied": "res://art/house/props/bath_occupied.svg",
         "outline": "res://art/house/props/bath_ol.svg"
       },
-      "eyes": [2458, -214]
+      "eyes": [2458, -218],
+      "eyes_scale": 0.8
     },
     {
       "id": "bathroom_laundry_basket",
@@ -1333,14 +1355,15 @@
       "facing": -1,
       "rect": [2632, -236, 144, 256],
       "in_use_by": null,
-      "art_pos": [2635, -245],
-      "art_size": [138, 248],
+      "art_pos": [2632, -262],
+      "art_size": [142, 265],
       "art": {
         "idle": "res://art/house/props/laundry_basket.svg",
         "occupied": "res://art/house/props/laundry_basket_occupied.svg",
         "outline": "res://art/house/props/laundry_basket_ol.svg"
       },
-      "eyes": [2704, -214]
+      "eyes": [2708, -222],
+      "eyes_scale": 0.8
     },
     {
       "id": "bedroom_wardrobe",
@@ -1350,14 +1373,15 @@
       "facing": 1,
       "rect": [2838, -490, 144, 510],
       "in_use_by": "dress",
-      "art_pos": [2829, -517],
-      "art_size": [162, 518],
+      "art_pos": [2827, -534],
+      "art_size": [166, 535],
       "art": {
         "idle": "res://art/house/props/wardrobe.svg",
         "occupied": "res://art/house/props/wardrobe_occupied.svg",
         "outline": "res://art/house/props/wardrobe_ol.svg"
       },
-      "eyes": [2890, -310]
+      "eyes": [2939, -310],
+      "eyes_scale": 0.8
     },
     {
       "id": "bedroom_pillow",
@@ -1368,8 +1392,8 @@
       "rect": [3012, -338, 144, 170],
       "in_use_by": null,
       "station": "st_bed",
-      "art_pos": [3044, -283],
-      "art_size": [88, 86],
+      "art_pos": [3043, -290],
+      "art_size": [92, 94],
       "art": {
         "idle": "res://art/house/props/pillow.svg",
         "rigged": "res://art/house/props/pillow_rigged.svg",
@@ -1385,8 +1409,8 @@
       "rect": [3180, -338, 144, 170],
       "in_use_by": null,
       "station": "st_bed",
-      "art_pos": [3009, -335],
-      "art_size": [320, 310],
+      "art_pos": [3008, -356],
+      "art_size": [322, 332],
       "art": {
         "idle": "res://art/house/props/bed.svg",
         "rigged": "res://art/house/props/bed_rigged.svg",
@@ -1401,14 +1425,15 @@
       "facing": 1,
       "rect": [3012, -144, 312, 164],
       "in_use_by": null,
-      "art_pos": [3015, -161],
-      "art_size": [306, 164],
+      "art_pos": [3019, -162],
+      "art_size": [306, 165],
       "art": {
         "idle": "res://art/house/props/under_bed.svg",
         "occupied": "res://art/house/props/under_bed_occupied.svg",
         "outline": "res://art/house/props/under_bed_ol.svg"
       },
-      "eyes": [3168, -66]
+      "eyes": [3168, -70],
+      "eyes_scale": 0.8
     },
     {
       "id": "bedroom_bedside",
@@ -1419,8 +1444,8 @@
       "rect": [3348, -300, 144, 190],
       "in_use_by": null,
       "station": "st_bed",
-      "art_pos": [3365, -271],
-      "art_size": [110, 273],
+      "art_pos": [3355, -273],
+      "art_size": [122, 275],
       "art": {
         "idle": "res://art/house/props/bedside.svg",
         "rigged": "res://art/house/props/bedside_rigged.svg",
@@ -1435,8 +1460,8 @@
       "facing": 1,
       "rect": [3728, -240, 144, 260],
       "in_use_by": null,
-      "art_pos": [3725, -227],
-      "art_size": [150, 230],
+      "art_pos": [3724, -230],
+      "art_size": [152, 233],
       "art": {
         "idle": "res://art/house/props/costume_trunk.svg",
         "open": "res://art/house/props/costume_trunk_open.svg",
@@ -1451,14 +1476,15 @@
       "facing": 1,
       "rect": [3906, -450, 150, 470],
       "in_use_by": null,
-      "art_pos": [3909, -437],
-      "art_size": [146, 420],
+      "art_pos": [3899, -443],
+      "art_size": [164, 444],
       "art": {
         "idle": "res://art/house/props/costume_rail.svg",
         "occupied": "res://art/house/props/costume_rail_occupied.svg",
         "outline": "res://art/house/props/costume_rail_ol.svg"
       },
-      "eyes": [3985, -150]
+      "eyes": [3992, -300],
+      "eyes_scale": 0.7
     },
     {
       "id": "dressing_trophy_shelf",
@@ -1469,8 +1495,8 @@
       "rect": [4228, -566, 144, 182],
       "in_use_by": null,
       "station": "st_trophy",
-      "art_pos": [4231, -557],
-      "art_size": [138, 156],
+      "art_pos": [4229, -558],
+      "art_size": [141, 185],
       "art": {
         "idle": "res://art/house/props/trophy_shelf.svg",
         "rigged": "res://art/house/props/trophy_shelf_rigged.svg",
@@ -1486,8 +1512,8 @@
       "rect": [4348, -360, 144, 380],
       "in_use_by": null,
       "station": "st_dummy",
-      "art_pos": [4345, -363],
-      "art_size": [144, 346],
+      "art_pos": [4348, -370],
+      "art_size": [144, 356],
       "art": {
         "idle": "res://art/house/props/cloak_dummy.svg",
         "rigged": "res://art/house/props/cloak_dummy_rigged.svg",
@@ -1608,7 +1634,7 @@
     "parlour": [
       {
         "prop": "picture_frame",
-        "x": 1588,
+        "x": 1594,
         "decor": "parlour_picture_frame"
       },
       {
@@ -1639,14 +1665,31 @@
   },
   "decor": [
     {
+      "id": "kitchen_sink_lip",
+      "room": "kitchen",
+      "pos": [3712, -256],
+      "size": [152, 62],
+      "art": {
+        "idle": "res://art/house/props/kitchen_sink_lip.svg"
+      },
+      "z": 2,
+      "hidden": true,
+      "show": "event"
+    },
+    {
       "id": "kitchen_stool",
       "room": "kitchen",
-      "pos": [2839, -162],
-      "size": [90, 169],
+      "pos": [2953, -156],
+      "size": [94, 163],
       "art": {
         "idle": "res://art/house/props/kitchen_stool.svg"
       },
-      "z": 0
+      "z": 0,
+      "pivots": {
+        "seat": [47, 6],
+        "foot": [47, 156]
+      },
+      "station": "st_tea"
     },
     {
       "id": "kitchen_pans",
@@ -1666,7 +1709,8 @@
       "art": {
         "idle": "res://art/house/props/coat_stand.svg"
       },
-      "z": -1
+      "z": -1,
+      "raster": 1.5
     },
     {
       "id": "hall_hats",
@@ -1686,18 +1730,30 @@
       "art": {
         "idle": "res://art/house/props/vase.svg"
       },
-      "z": 0
+      "z": 0,
+      "pivots": {
+        "base": [28, 100],
+        "tip_l": [16, 100]
+      },
+      "slide": {
+        "dir": -1,
+        "step_px": [10, 14],
+        "edge_x": 2192,
+        "floor_y": -8,
+        "smashed": "parlour_vase_smashed"
+      }
     },
     {
       "id": "parlour_vase_smashed",
       "room": "parlour",
-      "pos": [2166, -32],
+      "pos": [2122, -32],
       "size": [130, 37],
       "art": {
         "idle": "res://art/house/props/vase_smashed.svg"
       },
       "z": 1,
-      "hidden": true
+      "hidden": true,
+      "show": "event"
     },
     {
       "id": "parlour_portrait",
@@ -1708,17 +1764,24 @@
         "idle": "res://art/house/props/portrait.svg",
         "floured": "res://art/house/props/portrait_floured.svg"
       },
-      "z": 0
+      "z": 0,
+      "raster": 1.5
     },
     {
       "id": "parlour_picture_frame",
       "room": "parlour",
-      "pos": [1536, -632],
-      "size": [104, 114],
+      "pos": [1524, -634],
+      "size": [140, 146],
       "art": {
-        "idle": "res://art/house/props/picture_frame.svg"
+        "idle": "res://art/house/props/picture_frame.svg",
+        "falling": "res://art/house/props/picture_frame_falling.svg"
       },
-      "z": 0
+      "z": 0,
+      "pivots": {
+        "hook": [70, 8],
+        "hole": [70, 90]
+      },
+      "cue": "laugh_picture"
     },
     {
       "id": "parlour_log_basket",
@@ -1729,6 +1792,54 @@
         "idle": "res://art/house/props/log_basket.svg"
       },
       "z": 1
+    },
+    {
+      "id": "parlour_fire",
+      "room": "parlour",
+      "pos": [2263, -175],
+      "size": [134, 148],
+      "art": {
+        "idle": "res://art/house/props/parlour_fire.svg"
+      },
+      "z": -1,
+      "frames": [
+        "res://art/house/props/parlour_fire.svg",
+        "res://art/house/props/parlour_fire_f1.svg",
+        "res://art/house/props/parlour_fire_f2.svg"
+      ],
+      "fps": 8.0
+    },
+    {
+      "id": "parlour_candles",
+      "room": "parlour",
+      "pos": [2417, -404],
+      "size": [40, 42],
+      "art": {
+        "idle": "res://art/house/props/parlour_candles.svg"
+      },
+      "z": 0,
+      "frames": [
+        "res://art/house/props/parlour_candles.svg",
+        "res://art/house/props/parlour_candles_f1.svg",
+        "res://art/house/props/parlour_candles_f2.svg"
+      ],
+      "fps": 6.0
+    },
+    {
+      "id": "hall_front_door_glow",
+      "room": "hall",
+      "pos": [300, -560],
+      "size": [400, 600],
+      "art": {
+        "idle": "res://art/house/stage/front_door_glow.svg"
+      },
+      "z": 1,
+      "hidden": true,
+      "show": "bow",
+      "blend": "add",
+      "pulse_hz": 1.5,
+      "link": "front_door",
+      "raster": 1.0
     }
   ],
   "stage": {
@@ -1791,6 +1902,29 @@
       "art": "res://art/house/stage/velvet_rope.svg",
       "size": [200, 176],
       "anchor": [100, 176]
+    },
+    "bow_spot": {
+      "art": "res://art/house/stage/bow_spot.svg",
+      "size": [1100, 300],
+      "screen": true,
+      "blend": "add",
+      "anchor": "bottom_centre",
+      "alpha": 0.85
+    },
+    "title_card": {
+      "art": "res://art/house/stage/title_card.svg",
+      "bulbs": [
+        "res://art/house/stage/title_card_bulbs_a.svg",
+        "res://art/house/stage/title_card_bulbs_b.svg"
+      ],
+      "size": [1500, 790],
+      "screen": true,
+      "pivot": [750, 750],
+      "hang": [750, 0],
+      "rest_center": [1200, 395],
+      "chase_hz": 6.0,
+      "drop_s": 0.3,
+      "hold_s": 1.2
     },
     "pieces": [
       {

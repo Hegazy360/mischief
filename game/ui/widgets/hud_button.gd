@@ -54,9 +54,11 @@ func _draw() -> void:
 	var k := UiKit.PRESS_SCALE if is_pressed else 1.0 + 0.06 * sin(_pop * PI)
 	draw_set_transform(c, 0.0, Vector2(k, k))
 	var r := visual_size * 0.5
-	draw_circle(Vector2(0, 5), r, Color(UiKit.NAVY, 0.35))
 	var f := UiKit.pressed(fill) if is_pressed else fill
+	UiShapes.begin()   # shadow + disc: one draw call (s2-fix G #8)
+	UiShapes.circle(Vector2(0, 5), r, Color(UiKit.NAVY, 0.35))
 	UiKit.draw_disc(self, Vector2.ZERO, r, f, UiKit.pressed(shade) if is_pressed else shade)
+	UiShapes.flush(self)
 	var e := visual_size * icon_scale
 	UiKit.draw_icon(self, icon, Rect2(Vector2(-e, -e) * 0.5, Vector2(e, e)))
 	draw_set_transform(Vector2.ZERO)

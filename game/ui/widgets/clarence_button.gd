@@ -122,22 +122,27 @@ func _draw() -> void:
 	var r := VISUAL * 0.5
 	# lure ring (outside the visual, inside the hit circle)
 	var lr := r + 12.0
-	draw_arc(c, lr, 0.0, TAU, 64, UiKit.NAVY, LURE_W + 6.0, true)
-	draw_arc(c, lr, 0.0, TAU, 64, UiKit.GREY if lure_grey else UiKit.YELLOW, LURE_W, true)
+	# lure ring, shadow and disc: ONE triangle array (s2-fix G #8)
+	UiShapes.begin()
+	UiShapes.arc(c, lr, 0.0, TAU, LURE_W + 6.0, UiKit.NAVY, 64)
+	UiShapes.arc(c, lr, 0.0, TAU, LURE_W, UiKit.GREY if lure_grey else UiKit.YELLOW, 64)
 	var k := UiKit.PRESS_SCALE if is_pressed else 1.0
-	draw_set_transform(c, 0.0, Vector2(k, k))
-	draw_circle(Vector2(0, 6), r, Color(UiKit.NAVY, 0.35))
+	UiShapes.set_xform(Transform2D(0.0, Vector2(k, k), 0.0, c))
+	UiShapes.circle(Vector2(0, 6), r, Color(UiKit.NAVY, 0.35))
+	var ff_fill := UiKit.PLUM if not is_pressed else Color("#46325F")
 	if mode == M.FF:
-		var f := UiKit.PLUM if not is_pressed else Color("#46325F")
-		UiKit.draw_disc(self, Vector2.ZERO, r, f, Color("#1A1226"))
+		UiKit.draw_disc(self, Vector2.ZERO, r, ff_fill, Color("#1A1226"))
+	else:
+		UiKit.draw_disc(self, Vector2.ZERO, r, UiKit.CREAM if not is_pressed else UiKit.pressed(UiKit.CREAM), UiKit.CREAM_SHADE)
+	UiShapes.flush(self)
+	draw_set_transform(c, 0.0, Vector2(k, k))
+	if mode == M.FF:
 		var wob := 0.0
 		if is_pressed and not UiKit.reduce_motion():
 			wob = 6.0 * sin(float(UiKit.now_ms()) * 0.03)
 		UiKit.draw_icon(self, _tex_ff, Rect2(-40 + wob, -48, 80, 80))
 		UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(0, 38), _ff_text, UiKit.SIZE_MIN, UiKit.CREAM, 8)
 	else:
-		var fill := UiKit.CREAM if not is_pressed else UiKit.pressed(UiKit.CREAM)
-		UiKit.draw_disc(self, Vector2.ZERO, r, fill, UiKit.CREAM_SHADE)
 		# squash on press, a springy boing after the lift
 		var sx := 1.0 + 0.18 * _squash
 		var sy := 1.0 - 0.24 * _squash

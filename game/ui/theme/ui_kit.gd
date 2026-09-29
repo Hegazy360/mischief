@@ -104,11 +104,17 @@ static func font(path: String) -> Font:
 	var f: Font = null
 	if ResourceLoader.exists(path):
 		f = load(path) as Font
+		# The .ttf.import sidecars set multichannel_signed_distance_field=true (Stage 2), so the
+		# flag switch is a no-op on imported fonts; the pixel range (24, for the 12 px world
+		# outlines) and the glyph size stay runtime settings — set only when they differ.
 		var ff := f as FontFile
-		if ff != null and not ff.multichannel_signed_distance_field:
-			ff.msdf_pixel_range = 24
-			ff.msdf_size = 64
-			ff.multichannel_signed_distance_field = true
+		if ff != null:
+			if ff.msdf_pixel_range != 24:
+				ff.msdf_pixel_range = 24
+			if ff.msdf_size != 64:
+				ff.msdf_size = 64
+			if not ff.multichannel_signed_distance_field:
+				ff.multichannel_signed_distance_field = true
 	if f == null:
 		f = ThemeDB.fallback_font
 	_fonts[path] = f
@@ -143,8 +149,14 @@ static func theme() -> Theme:
 	return _theme
 
 
+## Test / demo hook: a text scale that wins over Settings (≤ 0 = use Settings).
+static var text_scale_override: float = -1.0
+
+
 ## Text scale from Settings.text_scale (1.0 or 1.2 = "Text +20 %").
 static func text_scale() -> float:
+	if text_scale_override > 0.0:
+		return clampf(text_scale_override, 1.0, 1.4)
 	return clampf(float(setting("text_scale", 1.0)), 1.0, 1.4)
 
 
@@ -233,10 +245,16 @@ static func tier_color(tier: int) -> Color:
 ## A chunky disc: navy outline ring, flat fill, one lower shade crescent.
 static func draw_disc(ci: CanvasItem, center: Vector2, radius: float, fill: Color, shade: Color,
 		outline: float = BUTTON_OUTLINE) -> void:
-	ci.draw_circle(center, radius, NAVY)
+	# one triangle array (UiShapes): one draw call instead of three (s2-fix G #8)
+	var own := not UiShapes.is_open()
+	if own:
+		UiShapes.begin()
+	UiShapes.circle(center, radius, NAVY)
 	var r := radius - outline
-	ci.draw_circle(center, r, shade)
-	ci.draw_circle(center + Vector2(0, -r * 0.1), r * 0.9, fill)
+	UiShapes.circle(center, r, shade)
+	UiShapes.circle(center + Vector2(0, -r * 0.1), r * 0.9, fill)
+	if own:
+		UiShapes.flush(ci)
 
 
 ## Draws `text` with a navy outline. `pos` is the baseline-left of the text box of `width`
@@ -274,18 +292,22 @@ static func draw_icon(ci: CanvasItem, tex: Texture2D, rect: Rect2, modulate: Col
 
 
 ## A rounded rectangle with a navy outline and a bottom shade strip (flat "chunky" card).
+## One triangle array (UiShapes: one draw call instead of three StyleBoxes, s2-fix G #8); inside a
+## caller's UiShapes.begin() … flush() it joins that batch.
 static func draw_chunky_rect(ci: CanvasItem, rect: Rect2, radius: float, fill: Color, shade: Color,
 		outline: float = BUTTON_OUTLINE, shade_px: float = 10.0) -> void:
+	var own := not UiShapes.is_open()
+	if own:
+		UiShapes.begin()
 	if outline > 0.0:
-		_sb(NAVY, radius).draw(ci.get_canvas_item(), rect)
+		UiShapes.rrect(rect, radius, NAVY)
 	var inner := rect.grow(-outline)
-	var sbs := _sb(shade, maxf(0.0, radius - outline))
-	sbs.draw(ci.get_canvas_item(), inner)
-	if shade_px <= 0.0 and fill == shade:
-		return
-	var top := Rect2(inner.position, Vector2(inner.size.x, maxf(0.0, inner.size.y - shade_px)))
-	var sbf := _sb(fill, maxf(0.0, radius - outline))
-	sbf.draw(ci.get_canvas_item(), top)
+	UiShapes.rrect(inner, maxf(0.0, radius - outline), shade)
+	if not (shade_px <= 0.0 and fill == shade):
+		var top := Rect2(inner.position, Vector2(inner.size.x, maxf(0.0, inner.size.y - shade_px)))
+		UiShapes.rrect(top, maxf(0.0, radius - outline), fill)
+	if own:
+		UiShapes.flush(ci)
 
 
 static var _sb_cache: Dictionary = {}
@@ -313,7 +335,12 @@ static func draw_ring(ci: CanvasItem, center: Vector2, radius: float, frac: floa
 	var f := minf(frac, 1.0)
 	var a0 := -PI * 0.5
 	var pts := maxi(8, int(64.0 * f))
-	ci.draw_arc(center, radius, a0, a0 + TAU * f, pts, color, width, true)
+	var own := not UiShapes.is_open()
+	if own:
+		UiShapes.begin()
+	UiShapes.arc(center, radius, a0, a0 + TAU * f, width, color, pts)
+	if own:
+		UiShapes.flush(ci)
 
 
 ## A 5-point star polygon (for sparkles); `points` must hold 10 entries (reused buffer).

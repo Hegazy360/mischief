@@ -8,6 +8,7 @@ class_name ViewKit
 extends RefCounted
 
 const HIRES_PATH := "res://view/tex/hi_res_tex.gd"
+const UI_STRINGS := "res://ui/theme/ui_strings.gd"
 const FONT_DIRS: PackedStringArray = ["res://ui/theme/fonts", "res://ui/fonts"]
 const DISPLAY_FONT_NAMES: PackedStringArray = ["LilitaOne-Regular.ttf", "LilitaOne.ttf", "lilita_one.ttf"]
 const UI_FONT_NAMES: PackedStringArray = ["Nunito-ExtraBold.ttf", "NunitoExtraBold.ttf", "nunito_extrabold.ttf"]
@@ -18,6 +19,7 @@ const CREAM := Color("#FFF4E0")
 static var _tex_cache: Dictionary = {}
 static var _script_cache: Dictionary = {}
 static var _json_cache: Dictionary = {}
+static var _words: Dictionary = {}
 static var _display_font: Font = null
 static var _ui_font: Font = null
 
@@ -72,6 +74,82 @@ static func clear_json_cache() -> void:
 	_json_cache.clear()
 
 
+## Player-facing words (s2-ui `fx.*` keys, UiStrings): the string for `key` when the key
+## exists, else `fallback` (brief §4.2.17: today's literal until the key lands). Cached.
+static func word(key: String, fallback: String) -> String:
+	if _words.has(key):
+		return _words[key]
+	var out := fallback
+	var us := soft_script(UI_STRINGS)
+	if us != null and us.has_method("has") and bool(us.call("has", key)):
+		out = ViewKit.s(us.call("t", key), fallback)
+	_words[key] = out
+	return out
+
+
+## Art scale of everything in a room that is not in tonight's episode (the unlit set, dimmed to
+## ≈ 30 %) and of the far background flats: 1× (s2-fix G #7 — texture memory; on a 1080p-tall
+## phone 1× is one texel per pixel at the play zoom).
+const LOCKED_SCALE := 1.0
+## The same for the unlit rooms on another floor than all of tonight's (s2-fix G #7): the follow
+## camera shows them only as a strip at the top (or bottom) edge, behind the HUD band, dimmed; at
+## the 0.5 overview zoom ¾× is still 1.5 texels per logical px. WorldView.room_art_scales.
+const OTHER_FLOOR_SCALE := 0.75
+## "No art at all" (a room no camera can frame tonight; WorldView.room_art_scales).
+const NO_ART := -3.0
+## Art that is always drawn at or below its 1× size gains nothing at 2× (s2-fix G #7): the
+## Prologue's title card (1500 px art drawn 1120 px wide in the 2400-px logical view) and its bulb
+## layers — 72 MB at 2×, 18 MB at 1×. tex() serves these paths at the given scale.
+## The same for soft art that gains nothing above 1× or ½×: the red Busted-Cam vignette (a blur,
+## drawn full screen), the additive footlight and door glows.
+const PATH_SCALES := {"res://art/house/stage/title_card*.svg": 1.0, "res://art/fx/vignette_*.svg": 0.5,
+	"res://art/house/stage/footlight_glow.svg": 1.0, "res://art/house/stage/front_door_glow.svg": 1.0}
+
+
+## The art scale tex() serves `path` at: its PATH_SCALES entry, else −1 (ART_SCALE).
+static func art_scale_of(path: String) -> float:
+	for g in PATH_SCALES:
+		if path.match(String(g)):
+			return float(PATH_SCALES[g])
+	return -1.0
+
+
+## Texture for an art path at an explicit art `scale` (≤ 0: ART_SCALE, i.e. tex()). Cached per
+## (path, scale).
+static func tex_at(path: String, scale: float) -> Texture2D:
+	if scale <= 0.0:
+		return tex(path)
+	if path == "":
+		return null
+	var k := "%s@%s" % [path, snappedf(scale, 0.001)]
+	if _tex_cache.has(k):
+		return _tex_cache[k]
+	var t: Texture2D = null
+	if ResourceLoader.exists(path) or FileAccess.file_exists(path):
+		var hs := soft_script(HIRES_PATH)
+		if hs != null and hs.has_method("get_texture"):
+			var v: Variant = hs.call("get_texture", path, {}, scale)
+			if v is Texture2D:
+				t = v
+		if t == null and ResourceLoader.exists(path):
+			t = load(path) as Texture2D
+	_tex_cache[k] = t
+	return t
+
+
+## Drop the texture cache and let HiResTex free every raster no node holds any more (NightScene
+## calls it before it builds, so the previous Night's art does not stay in memory). Returns how
+## many HiResTex entries were freed.
+static func release_textures() -> int:
+	for k in _tex_cache.keys():
+		if not String(k).begins_with("svg:"):
+			_tex_cache.erase(k)
+	var hs := soft_script(HIRES_PATH)
+	if hs != null and hs.has_method("trim"):
+		return int(hs.call("trim"))
+	return 0
+
+
 ## Texture for an art path: HiResTex (owner `rig`, soft) at ART_SCALE with a 1× size
 ## override when it exists, else the imported texture; null when missing. Cached.
 static func tex(path: String) -> Texture2D:
@@ -79,6 +157,11 @@ static func tex(path: String) -> Texture2D:
 		return null
 	if _tex_cache.has(path):
 		return _tex_cache[path]
+	for g in PATH_SCALES:
+		if path.match(String(g)):
+			var ts := tex_at(path, float(PATH_SCALES[g]))
+			_tex_cache[path] = ts
+			return ts
 	var t: Texture2D = null
 	if ResourceLoader.exists(path):
 		var hs := soft_script(HIRES_PATH)
@@ -100,10 +183,15 @@ static func svg_tex(key: String, svg: String, scale: float = 2.0) -> Texture2D:
 		return _tex_cache[k]
 	var img := Image.new()
 	var t: Texture2D = null
+	var ts := soft_script("res://view/tex/tex_stats.gd")
+	if ts != null and ts.has_method("note_build"):
+		ts.call("note_build", "fx")
 	if img.load_svg_from_string(svg, scale) == OK:
 		var it := ImageTexture.create_from_image(img)
 		it.set_size_override(Vector2i(int(round(img.get_width() / scale)), int(round(img.get_height() / scale))))
 		t = it
+		if ts != null and ts.has_method("track_image"):
+			ts.call("track_image", it, img, "fx", "fx:" + key)
 	else:
 		var f := Image.create_empty(8, 8, false, Image.FORMAT_RGBA8)
 		f.fill(Color.WHITE)

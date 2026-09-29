@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "clip": "hush/fx_dangled",
+ "rig": "hush",
+ "loop": false,
+ "length": 132,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_dangled_a",
+   "ease": "linear"
+  },
+  {
+   "f": 66,
+   "pose": "h_dangled_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 132,
+   "pose": "h_dangled_a",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

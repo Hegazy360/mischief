@@ -9,6 +9,13 @@
 ##     beret, the current one ringed.
 ## `setup(lines, loop, done, total)` — lines / loop exactly as HudModel.script_lines / script_loop.
 ## Tap anywhere (or Back) closes with "close".
+##
+## Flash mode (`Hud.flash_script`, curtain up — GDD §2.2): `flash_mode = true` before it enters the
+## tree. No scrim and NON-pausing: the panel itself ignores touches (they pass through to the
+## game), only the card takes them (a tap on it slides it away early). The card — the header and
+## the punchline rows only (no routine strip), full size so the lines stay at 44 px — slides down
+## from above the screen to just under the Applause-o-Meter in FLASH_IN_MS, holds, and slides back
+## up so the whole flash lasts `flash_s`; then closes with "flash_done".
 class_name ScriptPanel
 extends UiPanel
 
@@ -19,11 +26,23 @@ const ROW_H := 84.0
 const STRIP_H := 84.0
 const STAMP := 72.0
 const PAD := 28.0
+## Flash-mode card scale (1.0: the rows keep their 44 px text — GDD §3.10).
+const FLASH_SCALE := 1.0
+const FLASH_IN_MS := 300
+const FLASH_OUT_MS := 280
+## Card top below the safe-area top in flash mode (under the meter: T+16+144+16).
+const FLASH_TOP := 176.0
 
 var lines: Array = []
 var loop: Array = []
 var done_count: int = 0
 var total_count: int = 0
+## Flash mode (see the class doc); set before adding to the tree.
+var flash_mode: bool = false
+## Total flash length (s).
+var flash_s: float = 2.5
+
+var _flash_out_from: int = -1
 
 var _tex := {}
 var _title: String = ""
@@ -59,6 +78,11 @@ func setup(p_lines: Array, p_loop: Array, p_done: int = -1, p_total: int = -1) -
 
 func _build() -> void:
 	back_action = "close"
+	if flash_mode:
+		scrim = Color(0, 0, 0, 0)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
+		card.gui_input.connect(_on_flash_card_input)
 	for k in ["stamp_tick", "stamp_beret", "wax_seal", "ribbon", "candle"]:
 		_tex[k] = UiIcons.get_icon(StringName(k))
 	_title = UiStrings.t("script.title")
@@ -69,8 +93,69 @@ func _build() -> void:
 
 
 func _layout(rect: Rect2) -> void:
-	card.size = Vector2(W, H)
-	card.position = rect.get_center() - card.size * 0.5
+	card.size = Vector2(W, flash_height() if flash_mode else H)
+	if flash_mode:
+		card.pivot_offset = Vector2.ZERO
+		card.scale = Vector2(FLASH_SCALE, FLASH_SCALE)
+		card.position = Vector2(rect.get_center().x - W * FLASH_SCALE * 0.5, flash_y())
+	else:
+		card.position = rect.get_center() - card.size * 0.5
+
+
+## Flash mode: the card's height (header + one ROW_H row per line, no routine strip).
+func flash_height() -> float:
+	return HEADER_H + 8.0 + float(maxi(1, lines.size())) * ROW_H + 18.0
+
+
+## Flash mode: the card's resting top (px).
+func flash_rest_y() -> float:
+	return safe_rect().position.y + FLASH_TOP
+
+
+## Flash mode: the card's top now (slides in from above, rests, slides back out).
+func flash_y() -> float:
+	var off := -flash_height() * FLASH_SCALE - 40.0
+	var rest := flash_rest_y()
+	var t := age_ms()
+	var out_from := _flash_out_from if _flash_out_from >= 0 else int(flash_s * 1000.0) - FLASH_OUT_MS
+	if UiKit.reduce_motion():
+		return rest if t < out_from + FLASH_OUT_MS else off
+	if t < FLASH_IN_MS:
+		var k := float(t) / float(FLASH_IN_MS)
+		var e := 1.0 - pow(1.0 - k, 3.0)
+		return lerpf(off, rest, e)
+	if t < out_from:
+		return rest
+	var k2 := clampf(float(t - out_from) / float(FLASH_OUT_MS), 0.0, 1.0)
+	return lerpf(rest, off, k2 * k2)
+
+
+## Flash mode: slide away now (a tap on the card).
+func flash_dismiss() -> void:
+	if _flash_out_from < 0:
+		_flash_out_from = maxi(FLASH_IN_MS, age_ms())
+
+
+## No pop-in in flash mode (it slides).
+func pop_k() -> float:
+	return 1.0 if flash_mode else super.pop_k()
+
+
+func _tick() -> void:
+	if not flash_mode:
+		return
+	card.position.y = flash_y()
+	var out_from := _flash_out_from if _flash_out_from >= 0 else int(flash_s * 1000.0) - FLASH_OUT_MS
+	if age_ms() >= out_from + FLASH_OUT_MS:
+		close("flash_done")
+
+
+func _on_flash_card_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		card.accept_event()
+		flash_dismiss()
+	elif event is InputEventMouse:
+		card.accept_event()
 
 
 func _scrim_tap(_pos: Vector2) -> void:
@@ -98,13 +183,14 @@ func _draw_card(ci: Control) -> void:
 	var cnt := "%d/%d" % [done_count, total_count]
 	UiKit.draw_text(ci, f, Vector2(W - PAD - 110.0, HEADER_H * 0.5 + 24.0), cnt, UiKit.SIZE_HUD_NUM_S, UiKit.GOLD_LIGHT, 10)
 	# rows
-	var rh := row_height(lines.size())
+	var rh := ROW_H if flash_mode else row_height(lines.size())
 	var y := HEADER_H + 8.0
 	for i in lines.size():
 		_draw_row(ci, lines[i], Rect2(PAD, y, W - PAD * 2.0, rh), i)
 		y += rh
-	# his loop
-	_draw_loop(ci, Rect2(PAD, H - STRIP_H - 8.0, W - PAD * 2.0, STRIP_H))
+	# his loop (the panel only; the curtain-up flash is the punchlines)
+	if not flash_mode:
+		_draw_loop(ci, Rect2(PAD, H - STRIP_H - 8.0, W - PAD * 2.0, STRIP_H))
 
 
 func _draw_row(ci: Control, line: Dictionary, r: Rect2, i: int) -> void:
@@ -161,11 +247,11 @@ func _draw_row(ci: Control, line: Dictionary, r: Rect2, i: int) -> void:
 	var base_y := r.position.y + r.size.y * 0.5 + fs * 0.36
 	if big and sealed:
 		fs = mini(fs, 40)
-		base_y = r.position.y + r.size.y * 0.5 - 2.0
+		base_y = r.position.y + r.size.y * 0.5 - 8.0
 	ci.draw_string(fnt, Vector2(tx, base_y), clip_text(fnt, text, avail, fs), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	if big and sealed:
 		var s2 := fit_size(UiKit.ui_font(), _sealed, avail, UiKit.SIZE_MIN)
-		ci.draw_string(UiKit.ui_font(), Vector2(tx, base_y + 36.0), clip_text(UiKit.ui_font(), _sealed, avail, s2),
+		ci.draw_string(UiKit.ui_font(), Vector2(tx, base_y + 33.0), clip_text(UiKit.ui_font(), _sealed, avail, s2),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, s2, Color(UiKit.NAVY, 0.55))
 	if done and not big:
 		var w := minf(avail, fnt.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x)

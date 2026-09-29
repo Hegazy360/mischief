@@ -15,6 +15,17 @@
 ## * Sets are cached by key; build() with a key that exists at the same scale returns the
 ##   cached set.
 ## * All layout numbers stay in 1× px (AtlasSet.size_1x).
+## * **Per-path scale** (`scales`: path or glob → art scale, e.g. {"*_ol.svg": 1.0,
+##   "res://art/house/props/coat_cupboard*": 1.5}): matching images rasterise at that scale
+##   (never above the set's), layout unchanged — outline sprites at 1×, big hiding pieces at
+##   1.5× (the art-house atlas budget). The first matching key wins (exact paths first).
+## * **Multi-page**: whatever does not fit one page (≤ 2048² preferred) continues on the next;
+##   `AtlasSet.page_index(path)` says where each image went.
+## * **Mipmaps** (`mipmaps`, default on): pages carry mip chains, so a character drawn at the
+##   overview's 0.5× or in the PiP at 0.75× with a LINEAR_WITH_MIPMAPS filter does not shimmer
+##   (+ ⅓ memory). The 2 px padding keeps level 1 free of bleeding.
+## * Every page built is counted by TexStats ("look" for RigPlayer look pages — keys with
+##   ":look:" — else "atlas").
 class_name AtlasBuilder
 extends RefCounted
 
@@ -27,6 +38,11 @@ const BUILTINS := {"@white": Vector2i(4, 4), "@disc": Vector2i(64, 64), "@line":
 
 ## Crop transparent borders at pack time (keeps a 1 px clear margin for filtering).
 static var trim: bool = true
+## start(): rasterisation jobs of sets something will block on (rigs, the house) go ahead of the
+## warm-up's (looks) in the worker queue.
+static var _start_high: bool = false
+## Generate mip chains for every page (character atlases are drawn at 0.5–1.0×).
+static var mipmaps: bool = true
 static var _sets: Dictionary = {}    ## key → AtlasSet
 static var _warm: Dictionary = {}    ## key → _Warm
 static var _svg_sizes: Dictionary = {}   ## path → Vector2 (1× size from the SVG header)
@@ -37,13 +53,20 @@ static var _svg_sizes: Dictionary = {}   ## path → Vector2 (1× size from the 
 ## `core_count` > 0: the first `core_count` paths are packed first (page 0 when they fit), so
 ## a character's everyday look draws from ONE page and rarely-used extras (residue overlays,
 ## prop states, variants) overflow onto later pages.
-static func build(key: String, paths: PackedStringArray, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0) -> AtlasSet:
+## `scales`: per-path / glob art scales (see the class doc).
+static func build(key: String, paths: PackedStringArray, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0, scales: Dictionary = {}) -> AtlasSet:
 	var s := HiResTex.resolve_scale(scale)
 	var cached: AtlasSet = _sets.get(key, null)
 	if cached != null and is_equal_approx(cached.scale, s):
 		return cached
+	if _warm.has(key):
+		# Started earlier with start() / warm(): wait for those jobs instead of redoing them.
+		finish(key)
+		cached = _sets.get(key, null)
+		if cached != null:
+			return cached
 	var uniq := _unique(paths)
-	var jobs := _make_jobs(uniq, swaps, s)
+	var jobs := _make_jobs(uniq, swaps, s, scales)
 	if HiResTex.threaded and jobs.size() > 1:
 		var gid := WorkerThreadPool.add_group_task(_run_job_i.bind(jobs), jobs.size(), -1, false, "AtlasBuilder")
 		WorkerThreadPool.wait_for_group_task_completion(gid)
@@ -59,7 +82,7 @@ static func build(key: String, paths: PackedStringArray, scale: float = -1.0, sw
 ## returns false until the set is ready; the call that finds every job done packs the pages
 ## and uploads them (main thread, at most once). Then get_set(key) returns it. `budget_ms`
 ## bounds the main-thread time of calls that rasterise synchronously (no threads).
-static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0) -> bool:
+static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0, scales: Dictionary = {}) -> bool:
 	var s := HiResTex.resolve_scale(scale)
 	var cached: AtlasSet = _sets.get(key, null)
 	if cached != null and is_equal_approx(cached.scale, s):
@@ -68,12 +91,12 @@ static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scal
 	if w == null:
 		w = _Warm.new()
 		var uniq := _unique(paths)
-		w.jobs = _make_jobs(uniq, swaps, s)
+		w.jobs = _make_jobs(uniq, swaps, s, scales)
 		w.scale = s
 		w.core = _core_in(uniq, paths, core_count)
 		if HiResTex.threaded:
 			for j in w.jobs:
-				j.task = WorkerThreadPool.add_task(j.run, false, "AtlasBuilder")
+				j.task = WorkerThreadPool.add_task(j.run, _start_high, "AtlasBuilder")
 		_warm[key] = w
 	var t0 := Time.get_ticks_usec()
 	var all_done := true
@@ -93,9 +116,49 @@ static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scal
 				all_done = false
 	if not all_done:
 		return false
+	if HiResTex.threaded:
+		# Packing and page composition on a worker too; this thread only uploads.
+		if w.compose_task < 0:
+			w.key = key
+			# packing blocks whoever waits for the set: ahead of queued rasterisation (s2-fix G #9)
+			w.compose_task = WorkerThreadPool.add_task(w.compose, true, "AtlasBuilder compose")
+			return false
+		if not WorkerThreadPool.is_task_completed(w.compose_task):
+			return false
+		WorkerThreadPool.wait_for_task_completion(w.compose_task)
+		_warm.erase(key)
+		_sets[key] = _upload(w.composed)
+		return true
 	_warm.erase(key)
 	_sets[key] = _assemble(key, w.jobs, w.scale, w.core)
 	return true
+
+
+## Start building a set in the background (rasterisation AND packing on worker threads) so a
+## later build() / warm() of the same key only waits for it (s2-fix G #9: the NightScene starts
+## the house pages and both rig atlases at once, so they build in parallel). No-op when cached.
+static func start(key: String, paths: PackedStringArray, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0, scales: Dictionary = {}, high_priority: bool = true) -> void:
+	_start_high = high_priority
+	warm(key, paths, 0, scale, swaps, core_count, scales)
+	_start_high = false
+
+
+## Block until a started set is ready (polls its warm; the jobs run on worker threads). Returns
+## the set (null when nothing was started for `key`).
+static func finish(key: String) -> AtlasSet:
+	if _sets.has(key):
+		return _sets[key]
+	var w: _Warm = _warm.get(key, null)
+	if w == null:
+		return null
+	while not warm(key, PackedStringArray(), 1000, w.scale):
+		OS.delay_usec(250)
+	return _sets.get(key, null)
+
+
+## True while a started set is still being built.
+static func is_pending(key: String) -> bool:
+	return _warm.has(key)
 
 
 ## The cached set for `key` (null until built / warmed).
@@ -115,6 +178,8 @@ static func clear() -> void:
 		for j in w.jobs:
 			if j.task >= 0:
 				WorkerThreadPool.wait_for_task_completion(j.task)
+		if w.compose_task >= 0:
+			WorkerThreadPool.wait_for_task_completion(w.compose_task)
 	_warm.clear()
 	_sets.clear()
 
@@ -300,11 +365,14 @@ static func _best_page(sizes: Array[Vector2i], reserve: Array[Vector2i], items: 
 		total += (r.x + 2 * PAD) * (r.y + 2 * PAD)
 	min_w = mini(_ceil_to(min_w, 4), limit)
 	var max_w := mini(limit, maxi(min_w, _ceil_to(int(sqrt(float(total)) * 2.2), 4)))
+	# Coarse widths every 64 px, then (below) ±64 by 16 and ±16 by 4 around the best one: a third of
+	# the skyline passes of a 16-px sweep for the same pages (s2-fix G #9 — packing is GDScript and
+	# was ~half of a rig's atlas build).
 	var widths: Array[int] = []
 	var w := min_w
 	while w <= max_w:
 		widths.append(w)
-		w += 16
+		w += 64
 	if widths.is_empty() or widths[widths.size() - 1] != limit:
 		widths.append(limit)
 	var best: Dictionary = {}
@@ -327,18 +395,21 @@ static func _best_page(sizes: Array[Vector2i], reserve: Array[Vector2i], items: 
 			best_placed = placed.size()
 	if best.is_empty() or best_placed < items.size():
 		return best
-	# Refine ±16 px around the best width in 4 px steps.
-	var bw: int = (best["size"] as Vector2i).x
-	var fw := maxi(min_w, bw - 16)
-	while fw <= mini(limit, bw + 16):
-		if fw != bw:
-			var r2 := _skyline(sizes, reserve, items, fw, limit)
-			var placed2: Dictionary = r2["placed"]
-			var h2: int = mini(limit, _ceil_to(int(r2["height"]), 4))
-			if placed2.size() == items.size() and fw * h2 < best_area:
-				best = {"size": Vector2i(fw, h2), "placed": placed2, "reserved": r2["reserved"]}
-				best_area = fw * h2
-		fw += 4
+	# Refine around the best width: ±64 px in 16 px steps, then ±16 px in 4 px steps.
+	for pass_i in 2:
+		var span := 64 if pass_i == 0 else 16
+		var step := 16 if pass_i == 0 else 4
+		var bw: int = (best["size"] as Vector2i).x
+		var fw := maxi(min_w, bw - span)
+		while fw <= mini(limit, bw + span):
+			if fw != bw:
+				var r2 := _skyline(sizes, reserve, items, fw, limit)
+				var placed2: Dictionary = r2["placed"]
+				var h2: int = mini(limit, _ceil_to(int(r2["height"]), 4))
+				if placed2.size() == items.size() and fw * h2 < best_area:
+					best = {"size": Vector2i(fw, h2), "placed": placed2, "reserved": r2["reserved"]}
+					best_area = fw * h2
+			fw += step
 	return best
 
 
@@ -490,6 +561,12 @@ class _Warm extends RefCounted:
 	var jobs: Array = []
 	var scale: float = 1.0
 	var core: Dictionary = {}
+	var key: String = ""
+	var compose_task: int = -1
+	var composed: Array = []
+
+	func compose() -> void:
+		composed = AtlasBuilder._compose(key, jobs, scale, core)
 
 
 static func _run_job_i(i: int, jobs: Array) -> void:
@@ -514,16 +591,30 @@ static func _unique(paths: PackedStringArray) -> PackedStringArray:
 	return out
 
 
-static func _make_jobs(paths: PackedStringArray, swaps: Dictionary, s: float) -> Array:
+static func _make_jobs(paths: PackedStringArray, swaps: Dictionary, s: float, scales: Dictionary = {}) -> Array:
 	var jobs: Array = []
 	for p in paths:
 		var j := _Job.new()
 		j.path = p
 		j.swaps = swaps
-		j.scale = s
+		j.scale = scale_for_path(p, s, scales)
 		j.size_1x = svg_size(p)
 		jobs.append(j)
 	return jobs
+
+
+## The art scale `path` rasterises at in a set of scale `s` with per-path `scales` (exact
+## path keys first, then globs in key order; never above `s`).
+static func scale_for_path(path: String, s: float, scales: Dictionary) -> float:
+	if scales.is_empty():
+		return s
+	if scales.has(path):
+		return minf(s, float(scales[path]))
+	for k in scales:
+		var ks := String(k)
+		if (ks.contains("*") or ks.contains("?")) and path.match(ks):
+			return minf(s, float(scales[k]))
+	return s
 
 
 ## Rasterise one image at `scale` (SVG via HiResTex.rasterize; other images from their
@@ -573,6 +664,13 @@ static func _builtin_image(name: String) -> Image:
 
 
 static func _assemble(key: String, jobs: Array, s: float, core: Dictionary = {}) -> AtlasSet:
+	var c := _compose(key, jobs, s, core)
+	return _upload(c)
+
+
+## Pack + compose the page images (+ mip chains) — pure Image work, safe on a worker thread.
+## Returns [AtlasSet without textures, Array[Image] pages].
+static func _compose(key: String, jobs: Array, s: float, core: Dictionary = {}) -> Array:
 	var set := AtlasSet.new()
 	set.key = key
 	set.scale = s
@@ -627,7 +725,7 @@ static func _assemble(key: String, jobs: Array, s: float, core: Dictionary = {})
 		var at2 := Vector2i(place[i * 3 + 1], place[i * 3 + 2])
 		_blit_extruded(page_imgs[pg], imgs[i], at2)
 		var jb2 := job_of[i]
-		var used_scale := float(imgs[i].get_meta("scale", s))
+		var used_scale := float(imgs[i].get_meta("scale", jb2.scale))
 		var s1 := jb2.size_1x
 		if s1 == Vector2.ZERO:
 			s1 = Vector2(jb2.full_px) / used_scale
@@ -640,8 +738,24 @@ static func _assemble(key: String, jobs: Array, s: float, core: Dictionary = {})
 		set.padded_px += cells[i * 4 + 2] * cells[i * 4 + 3]
 		jb2.img = null
 	for pi2 in page_imgs.size():
-		set.pages.append(ImageTexture.create_from_image(page_imgs[pi2]))
+		if mipmaps:
+			page_imgs[pi2].generate_mipmaps()
 	set.page_sizes = page_sizes
+	set.mipmaps = mipmaps
+	return [set, page_imgs]
+
+
+## Upload composed pages as textures (main thread) and count them.
+static func _upload(composed: Array) -> AtlasSet:
+	var set: AtlasSet = composed[0]
+	var page_imgs: Array = composed[1]
+	for pi2 in page_imgs.size():
+		var pimg: Image = page_imgs[pi2]
+		var ptex := ImageTexture.create_from_image(pimg)
+		set.pages.append(ptex)
+		var bk := "look" if set.key.contains(":look:") else "atlas"
+		TexStats.note_build(bk, "%s#%d" % [set.key, pi2])
+		TexStats.track_image(ptex, pimg, bk, set.key)
 	return set
 
 

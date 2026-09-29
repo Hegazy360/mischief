@@ -5,6 +5,7 @@
 ##   --state=<name>   one of STATES (default "rig_50")
 ##   --left-handed    mirror the clusters
 ##   --safe-area=L,T,R,B   fake notch insets (logical px; SafeArea reads it)
+##   --text-big       render with "Text +20 %" (the setting, not persisted)
 ##   --cycle          step through every state (CYCLE_FRAMES apart) — pair with DevShot
 ##                    `--shot-seq=/abs/dir --every=<CYCLE_FRAMES> --count=<n>`
 ## The backdrop is a greybox parlour (or art-house's parlour art when it exists) with two
@@ -15,15 +16,33 @@ const STATES: PackedStringArray = [
 	"rig_0", "rig_50", "rig_100", "rig_dim", "freeze", "pop_green", "pop_amber", "pop_red", "go", "ff",
 	"lure_grey", "tray_highlight", "figgis_pulse", "figgis_card", "pip_steaming", "edge_bubble", "pick_strip",
 	"script", "pause", "settings", "loading", "results", "encore",
+	# Stage 2 (s2-ui §4.2)
+	"emote_sing", "emote_hum", "emote_smug", "emote_laugh", "emote_tut", "emote_sniff", "emote_yum", "emote_yawn",
+	"ghost_world", "ghost_world_hold", "ghost_follow", "figgis_arrow", "figgis_arrow_on", "figgis_proud", "dim",
+	"script_flash", "tray_arrows", "rig_dim_arrow", "pip_escalated", "results_reel", "results_prologue",
+	"results_gate0", "results_why_long", "settings_sound", "settings_comfort", "settings_debug", "loading_vignette",
+	"loading_n01", "pause_nobow",
 ]
 const CYCLE_FRAMES := 40
 const PANELS := {
 	"script": "res://ui/panels/script_panel.gd",
 	"pause": "res://ui/panels/pause_menu.gd",
+	"pause_nobow": "res://ui/panels/pause_menu.gd",
 	"settings": "res://ui/panels/settings_panel.gd",
+	"settings_sound": "res://ui/panels/settings_panel.gd",
+	"settings_comfort": "res://ui/panels/settings_panel.gd",
+	"settings_debug": "res://ui/panels/settings_panel.gd",
 	"loading": "res://ui/panels/loading_card.gd",
+	"loading_vignette": "res://ui/panels/loading_card.gd",
+	"loading_n01": "res://ui/panels/loading_card.gd",
 	"results": "res://ui/panels/results_screen.gd",
+	"results_reel": "res://ui/panels/results_screen.gd",
+	"results_prologue": "res://ui/panels/results_screen.gd",
+	"results_gate0": "res://ui/panels/results_screen.gd",
+	"results_why_long": "res://ui/panels/results_screen.gd",
 }
+## A point on the backdrop's mantelpiece candles (fraction of the viewport): the demo's "hotspot".
+const WORLD_TARGET := Vector2(0.717, 0.42)
 
 var hud: Hud
 var model: HudModel
@@ -42,6 +61,8 @@ func _ready() -> void:
 			state = a.substr(8)
 		elif a == "--cycle":
 			_cycle = true
+		elif a == "--text-big":
+			UiKit.text_scale_override = 1.2   # Settings "Text +20 %" without touching the user's file
 	_backdrop = _Backdrop.new()
 	add_child(_backdrop)
 	var stalls_layer := CanvasLayer.new()
@@ -82,7 +103,11 @@ func _enter(name_: String) -> void:
 	state = name_
 	hud.close_panels()
 	hud.ghost_finger(&"")
-	hud.figgis.hide_card()
+	hud.hide_figgis_card()
+	hud.set_dim(false)
+	if hud.script_flash != null:
+		hud.script_flash.queue_free()
+		hud.script_flash = null
 	if hud.action.is_pressed:
 		hud.action.release_touch()
 	if hud.clarence.is_pressed:
@@ -154,14 +179,41 @@ func _enter(name_: String) -> void:
 			m.pick_strip_container = "kitchen_pantry_shelf"
 			m.pick_strip_items = PackedStringArray(["flour", "sherbet", "treacle"])
 			m.pick_strip_pos = Vector2(hud.viewport_size().x * 0.55, 560)
+		"emote_sing", "emote_hum", "emote_smug", "emote_laugh", "emote_tut", "emote_sniff", "emote_yum", "emote_yawn":
+			m.edge_bubble_dir = Vector2(1, 0)
+			m.edge_bubble_label = UiStrings.t("hud.edge_room_right")
+			m.edge_bubble_emote = name_.substr(6)
+		"tray_arrows":
+			m.tray_arrows = PackedVector2Array([Vector2(1, -0.35), Vector2(-1, 0.1)])
+			m.tray_arrows_item = "kipper"
+			m.tray_highlight = -1
+		"rig_dim_arrow":
+			m.verb = HudModel.Verb.RIG_DIM
+			m.verb_item_icon = "butter"
+			m.tray_arrows = PackedVector2Array([Vector2(0, -1)])
+			m.tray_arrows_item = "butter"
+		"pip_escalated":
+			m.pip_visible = true
+			m.pip_escalated = true
+			m.pip_frame_tier = 3
+			m.pip_glyph = "stars"
+			m.verb = HudModel.Verb.RIG
+			m.verb_item_icon = "squeaker"
+			m.verb_target_icon = "tea"
+			m.ring_frac = 0.4
+		"figgis_proud":
+			m.figgis_pulse = false
+		"dim":
+			m.paused = true
 		"encore":
 			m.applause = 118
 			m.lines_done = 5
 			m.link = 3
 			m.mult_pct = 200
 			m.fuse_frac = 0.35
-		"script", "pause", "settings", "loading", "results":
-			m.paused = name_ != "loading"
+		_:
+			if PANELS.has(name_):
+				m.paused = not name_.begins_with("loading")
 	model = m
 	hud.apply(model)
 	_after_enter(name_)
@@ -177,9 +229,29 @@ func _after_enter(name_: String) -> void:
 		"ff":
 			hud.clarence.touch(true, hud.clarence.size * 0.5, 8)
 		"figgis_card":
-			hud.show_figgis_card(PackedStringArray(["clarence", "bellows"]), 60.0)
+			hud.show_figgis_card(UiIcons.card_set("figgis_psst"), 60.0)
+		"figgis_arrow":
+			# the cue card for a line whose rig point is off screen to the right
+			hud.show_figgis_card(UiIcons.card_set("ghost_honey"), 60.0, Vector2(hud.viewport_size().x + 600.0, 520.0))
+		"figgis_arrow_on":
+			hud.show_figgis_card(UiIcons.card_set("card_tray"), 60.0, _world_target())
+		"figgis_proud":
+			hud.figgis.react("proud", 60.0)
 		"rig_0":
-			hud.ghost_finger(&"action", GhostFinger.Mode.HOLD)
+			hud.ghost_finger(&"action", GhostFinger.Mode.HOLD, 1.5)
+		"ghost_world":
+			hud.ghost_finger_at(_world_target(), GhostFinger.Mode.TAP)
+		"ghost_world_hold":
+			hud.ghost_finger_at(_world_target(), GhostFinger.Mode.HOLD, 0.8)
+		"ghost_follow":
+			hud.ghost_finger_follow(_moving_target, GhostFinger.Mode.TAP)
+		"dim":
+			var vs := hud.viewport_size()
+			hud.set_dim(true, Rect2(vs.x * 0.42 - 260.0, vs.y * 0.86 - 520.0, 520.0, 560.0))
+		"script_flash":
+			hud.flash_script(model.script_lines, model.script_loop, 60.0)
+	# the curtain call is staged over the fallen curtain: NightScene hides the play HUD under it
+	hud.root.visible = not name_.begins_with("results")
 	if PANELS.has(name_):
 		_open_panel(name_)
 
@@ -189,19 +261,58 @@ func _open_panel(name_: String) -> void:
 	if not ResourceLoader.exists(path):
 		return
 	var p: Control = (load(path) as GDScript).new()
+	if name_.begins_with("loading"):
+		p.set("auto_close", false)   # a slow software-GL capture can pass the 4 s auto-start
 	match name_:
 		"script":
 			p.call("setup", model.script_lines, model.script_loop, 3, 5)
 		"pause":
 			p.call("setup", true)
+		"pause_nobow":
+			p.call("setup", false)
+		"settings_sound", "settings_comfort", "settings_debug":
+			p.set("tab", name_.substr(9))
+			p.set("show_debug", true)
 		"loading":
 			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 2}), "subtitle": "Something Fishy",
 				"text": "Hold FREEZE to be a statue. Specs off, he only spots what moves. Specs on, get out of sight.",
 				"icon": "freeze"})
+		"loading_n01":
+			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 1}), "subtitle": "Throat Tea",
+				"text": "Tap a cupboard to take what's inside. At the right spot the button shows item → target. Hold to rig.",
+				"icon": "tray"})
+		"loading_vignette":
+			# a live texture stands in for s2-ftue's 3-s rule vignette
+			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 2}), "subtitle": "Something Fishy",
+				"text": "Hold FREEZE to be a statue. Specs off, he only spots what moves.", "icon": _pip_vp.get_texture()})
 		"results":
 			p.call("setup", {"applause": 91, "stars": [true, true, false], "why": "Applause 91 — land one more prank inside a Running Gag",
-				"new": ["ACHOO-RIA!", "KETTLE DRUM"], "has_next": true, "night_title": "Night 1 · Throat Tea"})
+				"new": ["ACHOO-RIA!", "KETTLE DRUM"], "has_next": true, "night_title": "Night 1 · Throat Tea", "stage": true})
+		"results_reel", "results_why_long":
+			p.call("setup", {"applause": 128, "stars": [true, true, true], "new": ["ACHOO-RIA!"], "has_next": true,
+				"night_title": "Night 1 · Throat Tea", "repeat": name_ == "results_reel", "stage": true})
+			var why := "Standing ovation! Bravo!" if name_ == "results_reel" else \
+				"4/5 lines — Bellows still hasn't talked to a fish, and the Big Number is still sealed"
+			p.call("set_why", why)
+			p.call("set_gag_reel_texture", _pip_vp.get_texture())
+		"results_prologue":
+			p.call("setup", {"variant": "prologue", "applause": 42, "why": "", "new": ["ACHOO-RIA!"],
+				"night_title": UiStrings.t("loading.prologue"), "stage": true})
+		"results_gate0":
+			p.call("setup", {"variant": "gate0", "applause": 24, "night_title": UiStrings.t("stage_door.gate0"), "stage": true})
+			p.call("set_gag_reel_texture", _pip_vp.get_texture())
 	hud.show_panel(p)
+
+
+## The demo's world "hotspot" in screen px (the candles on the mantelpiece).
+func _world_target() -> Vector2:
+	return hud.viewport_size() * WORLD_TARGET
+
+
+## A target that drifts (a hotspot while the camera pans) for ghost_finger_follow.
+func _moving_target() -> Vector2:
+	var t := float(_frame) / 60.0
+	return _world_target() + Vector2(sin(t * 1.3) * 420.0, cos(t * 0.9) * 80.0)
 
 
 func _animate() -> void:

@@ -12,7 +12,7 @@
 class_name LineLimb
 extends RefCounted
 
-const SAMPLES := 10
+const SAMPLES := 8
 const STRIP := SAMPLES * 2
 const VERTS := STRIP * 2 + 16
 const TRIS := (SAMPLES - 1) * 4 + 8
@@ -51,6 +51,67 @@ static func curve(joints: PackedVector2Array, jn: int, out: PackedVector2Array) 
 		var d := joints[mini(k + 2, jn - 1)]
 		var t3 := t2 * t2
 		out[s] = 0.5 * ((2.0 * b) + (-a + c2) * t2 + (2.0 * a - 5.0 * b + 4.0 * c2 - d) * t3 + (-a + 3.0 * b - 3.0 * c2 + d) * t3 * t2)
+
+
+## The whole limb in one pass (the hot path): samples the curve through `joints[0..jn)` and
+## writes its VERTS positions at `at` (character space). 3 joints (arm / leg through the elbow
+## or knee) use the quadratic's analytic tangent for the normals; 2 joints a straight hose;
+## 4+ joints fall back to curve() + write_positions() through `tmp` (SAMPLES points).
+static func write_limb(joints: PackedVector2Array, jn: int, half_ink: float, half_fill: float, out: PackedVector2Array, at: int, tmp: PackedVector2Array) -> void:
+	if jn != 3 and jn != 2:
+		curve(joints, jn, tmp)
+		write_positions(tmp, half_ink, half_fill, Transform2D.IDENTITY, out, at)
+		return
+	var p0 := joints[0]
+	var p2 := joints[jn - 1]
+	var c := joints[1] * 2.0 - (p0 + p2) * 0.5 if jn == 3 else (p0 + p2) * 0.5
+	var d0 := c - p0
+	var d1 := p2 - c
+	var last := Vector2(1, 0)
+	var fb := at + STRIP + 8
+	var inv := 1.0 / float(SAMPLES - 1)
+	for s in SAMPLES:
+		var t := float(s) * inv
+		var u := 1.0 - t
+		var pt := p0 * (u * u) + c * (2.0 * u * t) + p2 * (t * t)
+		var d := d0 * u + d1 * t
+		var n := Vector2(-d.y, d.x)
+		var ln := n.length()
+		if ln > 0.0001:
+			n /= ln
+			last = n
+		else:
+			n = last
+		var ni := n * half_ink
+		var nf := n * half_fill
+		var i := at + 2 * s
+		out[i] = pt + ni
+		out[i + 1] = pt - ni
+		var j := fb + 2 * s
+		out[j] = pt + nf
+		out[j + 1] = pt - nf
+	var ki := Vector2(half_ink, half_ink)
+	var kj := Vector2(half_ink, -half_ink)
+	var fi := Vector2(half_fill, half_fill)
+	var fj := Vector2(half_fill, -half_fill)
+	var a := at + STRIP
+	out[a] = p0 - ki
+	out[a + 1] = p0 + kj
+	out[a + 2] = p0 + ki
+	out[a + 3] = p0 - kj
+	out[a + 4] = p2 - ki
+	out[a + 5] = p2 + kj
+	out[a + 6] = p2 + ki
+	out[a + 7] = p2 - kj
+	var f := at + 2 * STRIP + 8
+	out[f] = p0 - fi
+	out[f + 1] = p0 + fj
+	out[f + 2] = p0 + fi
+	out[f + 3] = p0 - fj
+	out[f + 4] = p2 - fi
+	out[f + 5] = p2 + fj
+	out[f + 6] = p2 + fi
+	out[f + 7] = p2 - fj
 
 
 ## Writes the limb's VERTS positions at `at` from the curve points `pts` (character space),
@@ -183,5 +244,15 @@ static func write_quad(xf: Transform2D, r: Rect2, uv: Rect2, col: Color, out_p: 
 	out_uv[at + 1] = Vector2(uv.end.x, uv.position.y)
 	out_uv[at + 2] = uv.end
 	out_uv[at + 3] = Vector2(uv.position.x, uv.end.y)
-	for k in 4:
-		out_c[at + k] = col
+	out_c[at] = col
+	out_c[at + 1] = col
+	out_c[at + 2] = col
+	out_c[at + 3] = col
+
+
+## Positions only of a textured quad (its uvs / colours already written and unchanged).
+static func write_quad_pos(xf: Transform2D, r: Rect2, out_p: PackedVector2Array, at: int) -> void:
+	out_p[at] = xf * r.position
+	out_p[at + 1] = xf * Vector2(r.end.x, r.position.y)
+	out_p[at + 2] = xf * r.end
+	out_p[at + 3] = xf * Vector2(r.position.x, r.end.y)

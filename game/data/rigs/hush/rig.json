@@ -185,8 +185,8 @@
       "draw": "limb:arm_r",
       "limits": {
         "rot": [
-          -200,
-          200
+          -300,
+          300
         ]
       }
     },
@@ -237,8 +237,8 @@
       "default_tex": "open",
       "limits": {
         "rot": [
-          -120,
-          120
+          -165,
+          165
         ]
       },
       "sockets": {
@@ -263,8 +263,8 @@
       "draw": "limb:arm_l",
       "limits": {
         "rot": [
-          -200,
-          200
+          -300,
+          300
         ]
       }
     },
@@ -315,8 +315,8 @@
       "default_tex": "open",
       "limits": {
         "rot": [
-          -120,
-          120
+          -165,
+          165
         ]
       },
       "sockets": {
@@ -330,7 +330,7 @@
     "leg_upper_r": {
       "parent": "pelvis",
       "offset": [
-        6.1,
+        0.0,
         5.2
       ],
       "pivot": [
@@ -395,7 +395,7 @@
     "leg_upper_l": {
       "parent": "pelvis",
       "offset": [
-        -6.1,
+        0.0,
         5.2
       ],
       "pivot": [

@@ -11,7 +11,9 @@
 ## one `new_rule` per Night (unique); loading card ≤ 25 words; captions ≤ 18 characters; fix-up
 ## station kinds exist on each floor the episode uses (unless the Night's `fixup_overrides` names the
 ## station for that kind, GDD §5.4); reactions.json covers every archetype used;
-## `time_jitter == 0` on `rx_*` clips; prank-line bases normalise to exactly 700 tenths.
+## `time_jitter == 0` on `rx_*` clips; prank-line bases normalise to exactly 700 tenths; (D1, BeatLint) every
+## activity / fix-up a final Night uses has a micro-gag at least every 8 s and never two within 5 s, and every
+## `emote` is in the edge-bubble vocabulary.
 class_name ContentLint
 extends RefCounted
 
@@ -272,6 +274,8 @@ static func lint(parts: Dictionary) -> PackedStringArray:
 	var rules_seen := {}
 	for eid in data.sorted_ids("episodes"):
 		e.append_array(_lint_episode(eid, eps[eid], data, pranks, das, combos, acts, items, residues, rules_seen))
+	# --- D1: micro-gag cadence + the edge-bubble emote vocabulary (BeatLint; coverage runs in run_lints) -----
+	e.append_array(BeatLint.lint(parts))
 	return e
 
 

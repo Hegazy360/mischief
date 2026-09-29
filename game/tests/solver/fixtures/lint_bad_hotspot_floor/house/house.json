@@ -1,0 +1,299 @@
+{
+  "version": 1,
+  "id": "mock_house",
+  "floor_pitch": 700,
+  "interior_h": 640,
+  "slab_h": 60,
+  "floors": [
+    {
+      "index": 0,
+      "y": 0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "porch",
+      "floor": 0,
+      "x0": 0,
+      "x1": 500,
+      "outdoor": true
+    },
+    {
+      "id": "hall",
+      "floor": 0,
+      "x0": 500,
+      "x1": 1500,
+      "outdoor": false
+    },
+    {
+      "id": "parlour",
+      "floor": 0,
+      "x0": 1500,
+      "x1": 2800,
+      "outdoor": false
+    },
+    {
+      "id": "kitchen",
+      "floor": 0,
+      "x0": 2800,
+      "x1": 3900,
+      "outdoor": false
+    }
+  ],
+  "links": [
+    {
+      "id": "front_door",
+      "kind": "door",
+      "a": "porch",
+      "b": "hall",
+      "x": 500
+    },
+    {
+      "id": "hall_parlour",
+      "kind": "doorway",
+      "a": "hall",
+      "b": "parlour",
+      "x": 1500
+    },
+    {
+      "id": "parlour_kitchen",
+      "kind": "doorway",
+      "a": "parlour",
+      "b": "kitchen",
+      "x": 2800
+    }
+  ],
+  "stations": [
+    {
+      "id": "st_gramophone",
+      "room": "parlour",
+      "x": 1640,
+      "stand_x": 1700,
+      "facing": -1,
+      "kinds": []
+    },
+    {
+      "id": "st_recliner",
+      "room": "parlour",
+      "x": 2080,
+      "stand_x": 2080,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_tea",
+      "room": "kitchen",
+      "x": 2960,
+      "stand_x": 2960,
+      "facing": 1,
+      "kinds": [
+        "HONEY"
+      ]
+    },
+    {
+      "id": "st_sink",
+      "room": "kitchen",
+      "x": 3800,
+      "stand_x": 3740,
+      "facing": 1,
+      "kinds": [
+        "SINK"
+      ]
+    },
+    {
+      "id": "st_hall_mirror",
+      "room": "hall",
+      "x": 1160,
+      "stand_x": 1080,
+      "facing": 1,
+      "kinds": [
+        "MIRROR"
+      ],
+      "frame_x": 1240
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hall_front_door",
+      "kind": "exit",
+      "room": "hall",
+      "use_x": 560,
+      "rect": [
+        510,
+        -300,
+        150,
+        300
+      ]
+    },
+    {
+      "id": "hall_coat_cupboard",
+      "kind": "hiding",
+      "room": "hall",
+      "use_x": 760,
+      "rect": [
+        690,
+        -300,
+        150,
+        300
+      ]
+    },
+    {
+      "id": "hall_confiscated_box",
+      "kind": "container",
+      "room": "hall",
+      "use_x": 960,
+      "rect": [
+        880,
+        -230,
+        160,
+        230
+      ]
+    },
+    {
+      "id": "hall_mirror",
+      "kind": "rig_point",
+      "room": "hall",
+      "use_x": 1160,
+      "rect": [
+        1080,
+        -330,
+        150,
+        330
+      ],
+      "station": "st_hall_mirror"
+    },
+    {
+      "id": "parlour_gramophone",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 1640,
+      "rect": [
+        1560,
+        -300,
+        150,
+        300
+      ],
+      "station": "st_gramophone"
+    },
+    {
+      "id": "parlour_piano_back",
+      "kind": "hiding",
+      "room": "parlour",
+      "use_x": 2750,
+      "rect": [
+        2700,
+        -300,
+        160,
+        300
+      ]
+    },
+    {
+      "id": "kitchen_honey",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 2920,
+      "rect": [
+        2840,
+        -330,
+        150,
+        150
+      ],
+      "station": "st_tea"
+    },
+    {
+      "id": "kitchen_kettle",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 3090,
+      "rect": [
+        3014,
+        -330,
+        150,
+        150
+      ],
+      "station": "st_tea"
+    },
+    {
+      "id": "kitchen_pantry_curtain",
+      "kind": "hiding",
+      "room": "kitchen",
+      "use_x": 3500,
+      "rect": [
+        3420,
+        -300,
+        160,
+        300
+      ]
+    },
+    {
+      "id": "kitchen_sink_tap",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 3760,
+      "rect": [
+        3690,
+        -330,
+        150,
+        150
+      ],
+      "station": "st_sink"
+    },
+    {
+      "id": "kitchen_hatch",
+      "kind": "door",
+      "room": "kitchen",
+      "use_x": 3280,
+      "facing": 1,
+      "rect": [
+        3200,
+        -620,
+        150,
+        150
+      ]
+    },
+    {
+      "id": "kitchen_window",
+      "kind": "door",
+      "room": "kitchen",
+      "use_x": 3760,
+      "facing": -1,
+      "rect": [
+        3690,
+        -600,
+        150,
+        244
+      ],
+      "tappable": false
+    }
+  ],
+  "landings": {
+    "kitchen": {
+      "sink": 3760
+    }
+  },
+  "quake_props": {},
+  "entries": {
+    "window": {
+      "room": "kitchen",
+      "x": 3800
+    },
+    "doorstep": {
+      "room": "porch",
+      "x": 350
+    }
+  },
+  "stacks": [
+    [
+      "kitchen_sink_tap",
+      "kitchen_window"
+    ],
+    [
+      "kitchen_honey",
+      "kitchen_pantry_curtain"
+    ],
+    [
+      "kitchen_kettle",
+      "ghost_prop"
+    ]
+  ]
+}

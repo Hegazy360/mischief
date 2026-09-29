@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<path d="M20 58 Q10 36 30 30 Q30 12 50 16 Q60 2 76 14 Q96 8 100 28 Q120 34 108 58 Z" fill="#D9DCE6" stroke="#1B2340" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M76 14 Q96 8 100 28 Q120 34 108 58 L96 58 Q104 36 88 30 Q84 18 76 14 Z" fill="#A9AEC0"/>
+<path d="M20 58 Q10 36 30 30 Q30 12 50 16 Q60 2 76 14 Q96 8 100 28 Q120 34 108 58 Z" fill="none" stroke="#1B2340" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="64" cy="74" rx="36" ry="38" fill="#E0605A" stroke="#1B2340" stroke-width="6"/>
+<path d="M64 112 Q100 110 100 74 Q96 100 70 104 Z" fill="#B5403E"/>
+<ellipse cx="64" cy="74" rx="36" ry="38" fill="none" stroke="#1B2340" stroke-width="6"/>
+<path d="M28 62 Q14 80 22 100 Q34 110 42 96 Q38 84 40 70 Z" fill="#D9DCE6" stroke="#1B2340" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M100 62 Q114 80 106 100 Q94 110 86 96 Q90 84 88 70 Z" fill="#D9DCE6" stroke="#1B2340" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M40 56 L60 68 M88 56 L68 68" fill="none" stroke="#1B2340" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52" cy="72" r="7" fill="#FFFFFF" stroke="#1B2340" stroke-width="4"/>
+<circle cx="76" cy="72" r="7" fill="#FFFFFF" stroke="#1B2340" stroke-width="4"/>
+<circle cx="52" cy="73" r="3" fill="#1B2340"/>
+<circle cx="76" cy="73" r="3" fill="#1B2340"/>
+<ellipse cx="64" cy="86" rx="10" ry="8" fill="#C84A48" stroke="#1B2340" stroke-width="5"/>
+<rect x="46" y="96" width="36" height="14" rx="5" fill="#FFFFFF" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M55 97 L55 109 M64 97 L64 109 M73 97 L73 109" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10 64 Q2 54 10 44 Q18 34 10 24" fill="none" stroke="#1B2340" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10 64 Q2 54 10 44 Q18 34 10 24" fill="none" stroke="#FFF4E0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M118 64 Q126 54 118 44 Q110 34 118 24" fill="none" stroke="#1B2340" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M118 64 Q126 54 118 44 Q110 34 118 24" fill="none" stroke="#FFF4E0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

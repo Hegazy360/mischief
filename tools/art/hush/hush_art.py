@@ -51,7 +51,7 @@ def cpt(key, p):
 # Skeleton geometry (px at zoom 1.0). Joint offsets are parent-joint relative; see rig_hush.py.
 ROOT_OFFSET = (0, -136)          # pelvis joint above the feet origin
 TORSO_OFF = (0, -10)             # waist joint (from pelvis)
-HIP_L, HIP_R = (-7, 6), (7, 6)   # from pelvis
+HIP_L, HIP_R = (0, 6), (0, 6)    # from pelvis; one hip joint (side view) so mirrored walks land the feet (rig lint R04)
 LEG_UP, LEG_LO = 58, 57          # thigh, shin lengths
 SHO_L, SHO_R = (-10, -70), (9, -68)   # shoulders from the waist joint
 ARM_UP, ARM_LO = 53, 51
@@ -73,6 +73,7 @@ BOX = {
 	"beret": (-72, -78, 70, 24),
 	"hand": (-46, -24, 60, 94),
 	"foot": (-28, -28, 52, 50),
+	"foot_flat": (-28, -28, 52, 22.9),
 	"face": (-46, -62, 58, 62),
 	"clarence": (-46, -132, 60, 32),
 	"hidden": (-88, -50, 90, 58),
@@ -417,7 +418,9 @@ def foot(skin, style, far):
 	it += [path(d, sw=SW)]
 	if style == "tiptoe":
 		it = [g(it, transform="rotate(%s)" % f(TIPTOE_ANG))]
-	return part("foot_%s_%s" % ("l" if far else "r", style), it, "foot")
+	# The flat shoe gets its own shorter canvas (same pivot) so its bottom edge (minus the 3 px margin) IS the
+	# sole: the rig tools read soles off the canvas bottom (RigBounds.sole_points), plant detection and lint A13.
+	return part("foot_%s_%s" % ("l" if far else "r", style), it, "foot" if style == "tiptoe" else "foot_flat")
 
 
 # ===================================================================================================

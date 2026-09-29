@@ -97,6 +97,9 @@ class Room:
 	var wallpaper: Color = Color("#C8C0B0")
 	var art_bg: String = ""
 	var art_fg: String = ""
+	## house.json `art.pos` (world x, absolute y of the canvas top-left) and `art.size`.
+	var art_pos: Vector2 = Vector2.INF
+	var art_size: Vector2 = Vector2.ZERO
 
 	func width() -> float:
 		return x1 - x0
@@ -128,6 +131,31 @@ class Hotspot:
 	var station: String = ""
 	var in_use_by: String = ""
 	var link: String = ""
+	## Hidden-eyes point (world; Vector2.INF = none), draw order among props (`z`: 1 = above
+	## the other props), and the atlas raster hint (1.0 / 1.5 / 2.0; 0 = default).
+	var eyes: Vector2 = Vector2.INF
+	var z: int = 0
+	var raster: float = 0.0
+	## house.json `tappable` (false: the kitchen window — the sim's entry prop).
+	var tappable: bool = true
+
+
+## A non-hotspot sprite the view animates (house.json `decor[]`, STYLE §8).
+class Decor:
+	var id: String = ""
+	var room: String = ""
+	## Canvas top-left (world, absolute y) and size.
+	var pos: Vector2 = Vector2.ZERO
+	var size: Vector2 = Vector2.ZERO
+	## state → texture path (`idle`, `smashed`, `falling`, …).
+	var art: Dictionary = {}
+	## < 0 behind props, 0–1 in front of props, ≥ 2 over the characters.
+	var z: int = 0
+	var hidden: bool = false
+	## Animation frames (paths) and rate (`frames` + `fps`), empty when static.
+	var frames: PackedStringArray = PackedStringArray()
+	var fps: float = 0.0
+	var raster: float = 0.0
 
 
 class Station:
@@ -154,6 +182,12 @@ var station_by_id: Dictionary = {}
 var landings: Dictionary = {}
 var quake_props: Dictionary = {}
 var entries: Dictionary = {}
+var decor: Array[Decor] = []
+var decor_by_id: Dictionary = {}
+## house.json `stage` block (STYLE §8) as read (empty for the greybox).
+var stage: Dictionary = {}
+## house.json `stacks`: lists of hotspot ids that share one screen spot.
+var stacks: Array = []
 ## "json" | "db" | "greybox".
 var source: String = "greybox"
 var _dist: Dictionary = {}
@@ -215,6 +249,12 @@ static func from_json(d: Dictionary) -> HouseLayout:
 		var art: Dictionary = rd.get("art", {}) if rd.get("art", {}) is Dictionary else {}
 		r.art_bg = ViewKit.s(art.get("bg", ""))
 		r.art_fg = ViewKit.s(art.get("fg", ""))
+		var rap: Variant = art.get("pos", null)
+		if rap is Array and (rap as Array).size() >= 2:
+			r.art_pos = Vector2(float(rap[0]), float(rap[1]) + h.floor_y(r.floor))
+		var rsz: Variant = art.get("size", null)
+		if rsz is Array and (rsz as Array).size() >= 2:
+			r.art_size = Vector2(float(rsz[0]), float(rsz[1]))
 		h._add_room(r)
 	for lv in d.get("links", []):
 		var ld: Dictionary = lv
@@ -261,7 +301,40 @@ static func from_json(d: Dictionary) -> HouseLayout:
 		hs.station = ViewKit.s(hd.get("station", "")) if hd.get("station", null) != null else ""
 		hs.in_use_by = ViewKit.s(hd.get("in_use_by", "")) if hd.get("in_use_by", null) != null else ""
 		hs.link = ViewKit.s(hd.get("link", "")) if hd.get("link", null) != null else ""
+		var ev: Variant = hd.get("eyes", null)
+		if ev is Array and (ev as Array).size() >= 2:
+			hs.eyes = Vector2(float(ev[0]), float(ev[1]) + fy)
+		hs.z = int(hd.get("z", 0))
+		hs.raster = float(hd.get("raster", 0.0)) if hd.get("raster", null) != null else 0.0
+		hs.tappable = bool(hd.get("tappable", true))
 		h._add_hotspot(hs)
+	for dv in d.get("decor", []):
+		if not (dv is Dictionary):
+			continue
+		var dd: Dictionary = dv
+		var de := Decor.new()
+		de.id = ViewKit.s(dd.get("id", ""))
+		de.room = ViewKit.s(dd.get("room", ""))
+		var dfy := h.room_floor_y(de.room)
+		var dp: Variant = dd.get("pos", [0, 0])
+		if dp is Array and (dp as Array).size() >= 2:
+			de.pos = Vector2(float(dp[0]), float(dp[1]) + dfy)
+		var ds: Variant = dd.get("size", [0, 0])
+		if ds is Array and (ds as Array).size() >= 2:
+			de.size = Vector2(float(ds[0]), float(ds[1]))
+		de.art = dd.get("art", {}) if dd.get("art", {}) is Dictionary else {}
+		de.z = int(dd.get("z", 0))
+		de.hidden = bool(dd.get("hidden", false))
+		var fr: Variant = dd.get("frames", null)
+		if fr is Array:
+			for f in fr:
+				de.frames.append(ViewKit.s(f))
+		de.fps = float(dd.get("fps", 0.0)) if dd.get("fps", null) != null else 0.0
+		de.raster = float(dd.get("raster", 0.0)) if dd.get("raster", null) != null else 0.0
+		h.decor.append(de)
+		h.decor_by_id[de.id] = de
+	h.stage = d.get("stage", {}) if d.get("stage", {}) is Dictionary else {}
+	h.stacks = d.get("stacks", []) if d.get("stacks", []) is Array else []
 	h.landings = d.get("landings", {}) if d.get("landings", {}) is Dictionary else {}
 	h.quake_props = d.get("quake_props", {}) if d.get("quake_props", {}) is Dictionary else {}
 	h.entries = d.get("entries", {}) if d.get("entries", {}) is Dictionary else {}
@@ -372,6 +445,18 @@ func station(id_: String) -> Station:
 	return station_by_id.get(id_, null)
 
 
+func decor_item(id_: String) -> Decor:
+	return decor_by_id.get(id_, null)
+
+
+## The stack a hotspot sits in ("" none): its ids joined with "+" (house.json `stacks`).
+func stack_of(hotspot_id: String) -> String:
+	for st in stacks:
+		if st is Array and (st as Array).has(hotspot_id):
+			return "+".join(PackedStringArray(st))
+	return ""
+
+
 ## World y of a floor's line (TECH §2).
 func floor_y(floor: int) -> float:
 	return -floor_pitch * float(floor)
@@ -419,6 +504,9 @@ func x_range() -> Vector2:
 ## Camera bounds: every room plus the flies above the top floor and the apron below the
 ## ground floor (GDD §3.7: limits = house bounds).
 func bounds() -> Rect2:
+	var sb: Variant = stage.get("bounds", null)
+	if sb is Array and (sb as Array).size() >= 4:
+		return Rect2(float(sb[0]), float(sb[1]), float(sb[2]), float(sb[3]))
 	var xr := x_range()
 	var top := floor_y(floor_count() - 1) - interior_h - FLIES_H
 	var bottom := slab_h + APRON_H

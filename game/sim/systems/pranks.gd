@@ -87,13 +87,16 @@ func unseal_bn(w: SimWorld) -> void:
 
 ## The prank Hush can rig at rig point `hs` right now (its current step is there), -1 if none.
 func rig_target(w: SimWorld, hs: int) -> int:
-	for p in w.db.prank_list:
-		var s := state[p.idx]
+	if hs < 0 or hs >= w.db.pranks_at_hs.size():
+		return -1
+	for pi in w.db.pranks_at_hs[hs]:
+		var s := state[pi]
 		if s != AVAILABLE and s != IN_PROGRESS:
 			continue
-		var si := step[p.idx]
+		var p := w.db.prank_list[pi]
+		var si := step[pi]
 		if si < p.steps.size() and p.steps[si].at_idx == hs:
-			return p.idx
+			return pi
 	return -1
 
 
@@ -204,7 +207,7 @@ func on_hook(w: SimWorld, p: int, trig: String) -> bool:
 	var pd := w.db.prank_list[p]
 	if not Conditions.prank_conditions(w, pd.conditions, p):
 		if pd.has_fizzle():
-			w.emit(SimEvents.FIZZLE, {"prank": pd.id})
+			_fizzle(w, pd)
 		return false
 	if Conditions.is_stand_in(pd):
 		w.bits.start_mirror(w, p)
@@ -256,7 +259,7 @@ func check_step(w: SimWorld, oroom: int, ox: int, nroom: int, nx: int, flags: in
 			continue
 		if not Conditions.prank_conditions(w, pd.conditions, p):
 			if pd.has_fizzle():
-				w.emit(SimEvents.FIZZLE, {"prank": pd.id})
+				_fizzle(w, pd)
 			continue
 		var b := w.bellows
 		b.room = h.room_idx
@@ -287,6 +290,13 @@ func fire(w: SimWorld, p: int, trig: String, entry: int = 0, tier_override: int 
 	w.reactions.start(w, p, trig, entry, tier, lk, knock_from)
 
 
+## A rigged prank's trigger came round with its conditions false: `fizzle` (it stays RIGGED) and his "huh?"
+## one-shot (SimOneshots.FIZZLE).
+func _fizzle(w: SimWorld, pd: PrankDef) -> void:
+	w.bellows.fizzle_t0 = w.tick
+	w.emit(SimEvents.FIZZLE, {"prank": pd.id})
+
+
 ## Queue a trigger that must wait for the current punchline.
 func queue_pending(_w: SimWorld, p: int, trig: String) -> void:
 	for i in pending.size():
@@ -308,7 +318,7 @@ func fire_pending(w: SimWorld, exhaust_after: bool) -> bool:
 		var pd := w.db.prank_list[p]
 		if trig != "quake" and not Conditions.prank_conditions(w, pd.conditions, p):
 			if pd.has_fizzle():
-				w.emit(SimEvents.FIZZLE, {"prank": pd.id})
+				_fizzle(w, pd)
 			continue
 		if Conditions.is_stand_in(pd):
 			continue

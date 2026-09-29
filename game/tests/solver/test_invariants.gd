@@ -167,12 +167,20 @@ func test_rule9_progress_and_feedback() -> void:
 	var heard := _log(400, [{"e": "cmd_rejected", "t": 10, "c": "go", "why": "hidden"}])
 	heard.cmds = [[10, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}]]
 	assert_eq(Invariants.rule9_progress(heard), [] as Array[String])
-	var held := _log(400, [{"e": "hush_go", "t": 222, "target": "kitchen_sink_tap", "run": false}])
+	var held := _log(400, [{"e": "cmd_queued", "t": 1, "c": "go", "why": "entering", "target": "kitchen_sink_tap"},
+		{"e": "hush_go", "t": 222, "target": "kitchen_sink_tap", "run": false}])
+	held.enter_ticks = 222
 	held.cmds = [[1, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}]]
-	assert_eq(Invariants.rule9_progress(held), [] as Array[String], "held, then run: not dropped")
-	var moved := _log(400, [], {50: {"hush_x": 3490}})
+	assert_eq(Invariants.rule9_progress(held), [] as Array[String], "queued behind the climb-in, run as it ends")
+	var unsaid := _log(400, [{"e": "hush_go", "t": 222, "target": "kitchen_sink_tap", "run": false}])
+	unsaid.cmds = [[1, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}]]
+	assert_has(Invariants.rule9_progress(unsaid)[0], "produced no movement", "held without a word: silent")
+	var moved := _log(400, [], {11: {"hush_x": 3490}})
 	moved.cmds = [[10, {"c": "move", "room": "kitchen", "x": 3000, "run": false}]]
-	assert_eq(Invariants.rule9_progress(moved), [] as Array[String])
+	assert_eq(Invariants.rule9_progress(moved), [] as Array[String], "she moves the next tick")
+	var slow := _log(400, [], {50: {"hush_x": 3490}})
+	slow.cmds = [[10, {"c": "move", "room": "kitchen", "x": 3000, "run": false}]]
+	assert_has(Invariants.rule9_progress(slow)[0], "within 1 tick(s)", "40 ticks later is not an answer")
 
 
 func test_rule9_cmd_queued_is_feedback() -> void:
@@ -184,12 +192,14 @@ func test_rule9_cmd_queued_is_feedback() -> void:
 	silent.cmds = cmds.duplicate(true)
 	assert_has(Invariants.rule9_progress(silent)[0], "produced no movement", "no event, no movement: a silent tap")
 	var queued := _log(400, [{"e": "cmd_queued", "t": 1, "c": "go", "why": "entering", "target": "parlour_recliner"},
-		{"e": "cmd_queued", "t": 160, "c": "go", "why": "entering", "target": "kitchen_sink_tap"}])
+		{"e": "cmd_queued", "t": 160, "c": "go", "why": "entering", "target": "kitchen_sink_tap"},
+		{"e": "hush_go", "t": 222, "target": "kitchen_sink_tap", "run": false}])
+	queued.enter_ticks = 222
 	queued.cmds = cmds.duplicate(true)
 	assert_eq(Invariants.rule9_progress(queued), [] as Array[String], "cmd_queued tells the player the tap was taken")
 	var late := _log(400, [{"e": "cmd_queued", "t": 200, "c": "go", "why": "busy", "target": "parlour_recliner"}])
 	late.cmds = [[1, {"c": "go", "hotspot": "parlour_recliner", "run": true}]]
-	assert_has(Invariants.rule9_progress(late)[0], "produced no movement", "feedback must come within 150 ticks")
+	assert_has(Invariants.rule9_progress(late)[0], "produced no movement", "feedback must come within 1 tick")
 
 
 func test_rule10_reactions_applause_bases() -> void:

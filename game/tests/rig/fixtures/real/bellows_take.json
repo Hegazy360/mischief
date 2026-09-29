@@ -1,0 +1,90 @@
+{
+ "version": 1,
+ "clip": "bellows/_fx_take",
+ "rig": "bellows",
+ "loop": false,
+ "length": 90,
+ "blend_in": 0,
+ "tags": [
+  "take",
+  "fixture"
+ ],
+ "smear": {
+  "auto": true
+ },
+ "beats": {
+  "anticipation": [
+   0,
+   20
+  ],
+  "accent": [
+   20,
+   23
+  ],
+  "hold": [
+   23,
+   70
+  ],
+  "settle": [
+   70,
+   90
+  ]
+ },
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "face": "neutral"
+  },
+  {
+   "f": 20,
+   "pose": "b_take_antic",
+   "ease": "in_cubic",
+   "face": "huh"
+  },
+  {
+   "f": 23,
+   "pose": "b_take_accent",
+   "ease": "pop",
+   "face": "shock"
+  },
+  {
+   "f": 45,
+   "pose": "b_take_accent",
+   "ease": "out_back",
+   "set": {
+    "root": {
+     "y": -6
+    }
+   }
+  },
+  {
+   "f": 70,
+   "pose": "b_take_accent",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 90,
+   "pose": "b_stand",
+   "ease": "out_back"
+  }
+ ],
+ "events": [
+  {
+   "f": 23,
+   "type": "sfx",
+   "id": "boing_eyes"
+  },
+  {
+   "f": 23,
+   "type": "spring",
+   "part": "bouffant",
+   "kick": 24
+  },
+  {
+   "f": 23,
+   "type": "shake",
+   "trauma": 0.3
+  }
+ ]
+}

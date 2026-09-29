@@ -6,9 +6,18 @@
 ## - `slow` (a first-timer): 0.6 s latency before each step, a 3 s dawdle at the start, one wrong
 ##   glowing tap per Night (a `go` to the nearest non-useful hotspot), tiptoes only, hides as soon as
 ##   an entry warning into her room appears, never uses pins or the queue.
+## - `scenario`: `ideal` timing for authored set pieces (caught → Lecture → doorstep, face to face, Meltdown,
+##   a chase + door slam): walks unless a step says run, and a catch does not restart the step — the
+##   route wants it. Not gated on stars, applause or D1; checked with `events_min` / `events_max`.
+## Every persona also models ⏩ for the dead-air gate (ruling L2): it holds ⏩ while hidden, loses it on every
+## `SimFf.drops` event and re-presses `ff_repress_s` later (ideal 0.5, required 1.0, slow 2.0; never during a
+## reaction); the slow first-timer uses ⏩ only once the `ghost_ff` cue has taught it (Metrics).
 ## Fuzz bots (`random`, `reckless`, `hider`, `bait`) live in `Fuzz`.
 class_name Persona
 extends RefCounted
+
+## ⏩ re-press delay per persona (seconds; ruling L2).
+const FF_REPRESS_S := {"ideal": 0.5, "required": 1.0, "slow": 2.0, "scenario": 0.5}
 
 var name: String = "ideal"
 var latency_ticks: int = 0        ## idle ticks before each step
@@ -20,6 +29,9 @@ var use_pins: bool = true         ## pop_out {to} via a pin (else pop out, then 
 var use_queue: bool = true        ## may issue go/move while busy (else waits until idle)
 var run_when_safe: bool = true    ## unspecified `run` → run when Bellows is far
 var required_only: bool = false   ## drop steps of optional lines
+var ff_repress_ticks: int = 30    ## ⏩ re-press delay (ticks)
+var ff_needs_cue: bool = false    ## uses ⏩ only after the `ghost_ff` cue (unless taught on an earlier Night)
+var catch_restarts: bool = true   ## a catch restarts the current step (not for `scenario`)
 
 
 ## A persona by name (`ideal`, `required`, `slow`); unknown names give `ideal`.
@@ -29,6 +41,9 @@ static func make(p_name: String) -> Persona:
 	match p_name:
 		"required":
 			p.required_only = true
+		"scenario":
+			p.run_when_safe = false
+			p.catch_restarts = false
 		"slow":
 			p.latency_ticks = 36
 			p.dawdle_ticks = 180
@@ -38,8 +53,10 @@ static func make(p_name: String) -> Persona:
 			p.use_pins = false
 			p.use_queue = false
 			p.run_when_safe = false
+			p.ff_needs_cue = true
 		_:
 			p.name = "ideal" if p_name == "" else p_name
+	p.ff_repress_ticks = int(round(float(FF_REPRESS_S.get(p.name, 0.5)) * 60.0))
 	return p
 
 

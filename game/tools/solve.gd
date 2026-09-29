@@ -1,9 +1,20 @@
 ## Solver CLI (TECH §8): plays every route of every `final` episode headless and checks it.
 ##
-##   tools/scripts/solve.sh [<episode>|all] [--route=ideal|required|slow|all] [--auto] [--write-auto]
+##   tools/scripts/solve.sh [<episode>|all] [--route=ideal|required|slow|<name>,…|all] [--auto] [--write-auto]
 ##                          [--report=/abs/out.json] [--strict] [--auto-gate] [--budget-ms=60000]
 ##                          [--max-macros=400] [--timeline=/abs/dir] [--dump-events=/abs/dir]
+##                          [--dump-cmds=/abs/dir] [--baseline=/abs/report.json] [--pregate]
 ##   (= tools/scripts/sandbox.sh solve -s res://tools/solve.gd -- …)
+## `--route=all` runs every route of the solution file (ideal, required, slow and the `scenario` routes; a `final`
+## episode missing one of ideal / required / slow fails, a draft one — `g0_sneeze` — runs just what its file has).
+## `--dump-cmds=/abs/dir` writes `<episode>_<route>.cmds.json` per run in the `sim_run.gd --cmds` format
+## ({"cmds": [[tick, cmd], …]} + episode, route, persona, ticks, hash): replaying it through sim_run gives the
+## same final hash (NightScene's e2e driver and ViewSandbox `--sim --cmds` replay them).
+## `--baseline=/abs/report.json` compares with a saved `--report` (ruling L15): exit 1 only when a route or an
+## expect key that passed in the baseline fails now (new routes / keys are checked absolutely); prints
+## "new failures / still failing / fixed". `warn_<key>` expect keys are evaluated and reported but never fail;
+## the summary lists every one still present. `--pregate` also fails a run on `pregate_fail` (a `warn_` key
+## left, or edge beats above 1/3 of the beat credit — ruling L1).
 ##
 ## Per route: SimWorld.create(db, episode, {invariants: true}) → Executor(route, persona) → Metrics →
 ## `expect` checks → Invariants (+ a determinism replay of the command log, + the sim's own invariant
@@ -30,9 +41,10 @@ func _initialize() -> void:
 
 func _args() -> Dictionary:
 	var a := {"episode": "all", "route": "all", "auto": false, "write_auto": false, "report": "", "strict": false,
-		"auto_gate": false, "data": "res://data", "auto_dir": "", "budget_ms": 50000, "max_macros": 400, "max_s": 900,
+		"auto_gate": false, "data": "res://data", "auto_dir": "", "budget_ms": 0, "max_macros": 400, "max_s": 900,
 		"replay": true,
-		"timeline": "", "world": "sim", "solutions": "", "dump_events": ""}
+		"timeline": "", "world": "sim", "solutions": "", "dump_events": "", "dump_cmds": "", "baseline": "",
+		"pregate": false}
 	for s in OS.get_cmdline_user_args():
 		if not s.begins_with("--"):
 			a["episode"] = s
@@ -102,6 +114,9 @@ func run(a: Dictionary) -> int:
 			failed += 1
 		var names := want_routes.duplicate()
 		if String(a["route"]) == "all":
+			# a `final` Night must have ideal / required / slow; a draft (the g0_sneeze dev scene) only what its file has
+			if SolverData.sv(data.episode(ep).get("status", "draft")) != "final":
+				names = PackedStringArray()
 			for n in sol.route_names():
 				if not names.has(n):
 					names.append(n)
@@ -133,9 +148,90 @@ func run(a: Dictionary) -> int:
 	var rp: String = a["report"]
 	if rp != "":
 		_write_report(rp, reports, autos)
+	var warn_left := PackedStringArray()
+	for rep in reports:
+		for k in rep.get("warn_keys", []):
+			warn_left.append("%s/%s: %s" % [rep.get("episode", "?"), rep.get("route", "?"), k])
+	if not warn_left.is_empty():
+		print("[solve] warn_ expect keys still present (%d; the pre-gate requires none): %s" % [warn_left.size(), ", ".join(warn_left)])
 	print("[solve] %s: %d run(s), %d failed%s" % ["OK" if failed == 0 else "FAIL", reports.size(), failed,
 		"" if rp == "" else ", report %s" % rp])
+	var bl: String = a["baseline"]
+	if bl != "":
+		var cmp := compare_baseline(SolverData.read_json(bl), reports)
+		print_baseline(cmp, bl)
+		return 1 if not (cmp["new"] as Array).is_empty() else 0
 	return 0 if failed == 0 else 1
+
+
+## Compare this run's reports with a saved `--report` JSON (`baseline`: its parsed dict). Returns
+## {new: [..], still: [..], fixed: [..], checked: n}: "episode/route" entries, or "episode/route: key" for an
+## expect key. A route passed in the baseline when its `ok` was true; a key when its `expect_results[key].ok` was
+## true (baselines written before per-key results existed count every key of a passing route as passed, and
+## none of a failing one). New routes and new keys are checked absolutely (a failure is new).
+static func compare_baseline(baseline: Variant, reports: Array) -> Dictionary:
+	var old := {}
+	if baseline is Dictionary:
+		for r in (baseline as Dictionary).get("runs", []):
+			if r is Dictionary:
+				old["%s/%s" % [r.get("episode", "?"), r.get("route", "?")]] = r
+	var out := {"new": [], "still": [], "fixed": [], "checked": 0}
+	for r in reports:
+		var id := "%s/%s" % [r.get("episode", "?"), r.get("route", "?")]
+		out["checked"] = int(out["checked"]) + 1
+		var now_ok := bool(r.get("ok", false))
+		var b: Variant = old.get(id, null)
+		if b == null:
+			if not now_ok:
+				(out["new"] as Array).append("%s (new route)" % id)
+			continue
+		var was_ok := bool((b as Dictionary).get("ok", false))
+		if was_ok and not now_ok:
+			(out["new"] as Array).append(id)
+		elif not was_ok and not now_ok:
+			(out["still"] as Array).append(id)
+		elif not was_ok and now_ok:
+			(out["fixed"] as Array).append(id)
+		var old_keys: Variant = (b as Dictionary).get("expect_results", null)
+		var now_keys: Dictionary = r.get("expect_results", {})
+		for k in now_keys:
+			var key := String(k)
+			if key.begins_with(Metrics.WARN_PREFIX):
+				continue
+			var k_now := bool((now_keys[k] as Dictionary).get("ok", false))
+			var k_was: Variant = null
+			if old_keys is Dictionary:
+				if (old_keys as Dictionary).has(k):
+					k_was = bool(((old_keys as Dictionary)[k] as Dictionary).get("ok", false))
+			else:
+				k_was = was_ok   # a baseline without per-key results: route granularity
+			if k_was == null:
+				if not k_now:
+					(out["new"] as Array).append("%s: %s (new key)" % [id, key])
+				continue
+			if bool(k_was) and not k_now:
+				(out["new"] as Array).append("%s: %s" % [id, key])
+			elif not bool(k_was) and not k_now:
+				(out["still"] as Array).append("%s: %s" % [id, key])
+			elif not bool(k_was) and k_now:
+				(out["fixed"] as Array).append("%s: %s" % [id, key])
+	return out
+
+
+## Print the baseline comparison.
+static func print_baseline(cmp: Dictionary, path: String) -> void:
+	var nw: Array = cmp["new"]
+	var st: Array = cmp["still"]
+	var fx: Array = cmp["fixed"]
+	print("[solve] baseline %s: %d new failure(s), %d still failing, %d fixed (%d run(s) checked)" % [path, nw.size(), st.size(),
+		fx.size(), int(cmp["checked"])])
+	for x in nw:
+		print("  - NEW failure: %s" % x)
+	for x in st:
+		print("  - still failing: %s" % x)
+	for x in fx:
+		print("  - fixed: %s" % x)
+	print("[solve] baseline %s" % ("OK: no new failures" if nw.is_empty() else "FAIL: new failures against the baseline"))
 
 
 ## Play one route; returns the report (Metrics fields + ok, fail, invariants, expect).
@@ -152,14 +248,33 @@ func run_route(db: Object, data: SolverData, ep: String, sol: SolutionDef, rn: S
 	var fails: Array = rep["fail"]
 	for f in ex_fail:
 		fails.append("expect: %s" % f)
+	rep["warn"] = Array(Metrics.check_warn(rep, r["expect"]))
+	var wk := PackedStringArray()
+	for k in r["expect"]:
+		if String(k).begins_with(Metrics.WARN_PREFIX):
+			wk.append(String(k))
+	rep["warn_keys"] = Array(wk)
+	rep["expect_results"] = Metrics.expect_results(rep, r["expect"])
+	rep["expect_results"]["_steps"] = {"ok": bool(rep["ok"]), "msgs": (rep["fail"] as Array).duplicate()}
+	rep["pregate_fail"] = Array(Metrics.pregate_fail(rep, r["expect"]))
+	if bool(a.get("pregate", false)):
+		for f in rep["pregate_fail"]:
+			fails.append("pre-gate: %s" % f)
 	if bool(a.get("replay", true)):
 		ex.log.replay_hash = Invariants.replay_hash(make, ex.log)
 	var inv := Invariants.check(ex.log)
 	inv.append_array(Invariants.sim_counters(world))
 	rep["invariants"] = inv
+	rep["expect_results"]["_invariants"] = {"ok": inv.is_empty(), "msgs": Array(inv)}
 	rep["expect"] = r["expect"]
 	rep["derived_from"] = r.get("derived_from", "")
-	rep["ok"] = bool(rep["ok"]) and ex_fail.is_empty() and inv.is_empty()
+	rep["ok"] = bool(rep["ok"]) and ex_fail.is_empty() and inv.is_empty() and \
+		(not bool(a.get("pregate", false)) or (rep["pregate_fail"] as Array).is_empty())
+	var dc: String = a.get("dump_cmds", "")
+	if dc != "":
+		var path := "%s/%s_%s.cmds.json" % [dc, ep, rn]
+		if write_cmds(path, ex.log, ep, rn) == OK:
+			rep["cmds_file"] = path
 	var de: String = a.get("dump_events", "")
 	if de != "":
 		DirAccess.make_dir_recursive_absolute(de)
@@ -175,6 +290,12 @@ func run_route(db: Object, data: SolverData, ep: String, sol: SolutionDef, rn: S
 		if SolverTimeline.save(ex.log, rep, png) == OK:
 			rep["timeline"] = png
 	return rep
+
+
+## Write a run's commands in the `sim_run.gd --cmds` format (SolverLog.write_cmds): {episode, route, persona,
+## ticks (the run's last tick), hash (its final state hash), cmds: [[tick, cmd], …]}. Returns OK or an error code.
+static func write_cmds(path: String, lg: SolverLog, ep: String, rn: String) -> int:
+	return lg.write_cmds(path, {"episode": ep, "route": rn})
 
 
 ## Planner proofs (+ `_auto/` output). Returns {ok, proofs, wrote}. ★★★ counts as proven when the

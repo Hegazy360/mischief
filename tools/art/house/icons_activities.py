@@ -414,7 +414,32 @@ def search():
     return out
 
 
+def exit_():
+    """The walk-out (sim `exit`, `bubble.next == "exit"`): a flight of stairs climbing to the right and his huff -
+    a steam puff blown off the top step with two speed streaks (he storms off upstairs)."""
+    out = []
+    steps = [(10, 82), (10, 68), (27, 68), (27, 54), (44, 54), (44, 40), (61, 40), (61, 26), (80, 26), (80, 82)]
+    out += blob(steps, pal.LIGHTWOOD, S, smooth=False, k=0.9)
+    nose = PB()
+    for (x, y) in ((10, 68), (27, 54), (44, 40), (61, 26)):
+        nose.M(x + 2, y + 5).L(x + 15, y + 5)
+    out.append(det(nose, 2.5))
+    rail = PB().M(22, 58).L(80, 12)
+    out += thick(rail, 4, pal.WALNUT[0])
+    for x in (36, 58):
+        y = 58 - (x - 22) * 46 / 58.0
+        out.append(path(PB().M(x, y + 4).L(x, y + 12), fill="none", sw=4, stroke=INK))
+    puff = [(16, 24, 9), (29, 17, 11), (40, 24, 8)]
+    for (x, y, r) in puff:
+        out.append(circle(x, y, r + 2.5, fill=INK))
+    for (x, y, r) in puff:
+        out.append(circle(x, y, r, fill=STEAM, sil=False))
+    out.append(path(PB().M(52, 8).L(58, 4).M(54, 18).L(62, 17), fill="none", sw=3.5, stroke=INK, sil=False))
+    return out
+
+
 ICONS = {
+    "exit": exit_,
     "warmup": warmup, "tea": tea, "pickles": pickles, "snack": snack, "rinse": rinse, "paper": paper, "fire": fire, "mirror": mirror,
     "phone": phone, "clock": clock, "piano": piano, "gargle": gargle, "bath": bath, "radiator": radiator, "dress": dress, "nap": nap,
     "feed_beryl": feed_beryl, "roses": roses, "marrow": marrow, "stroll": stroll, "polish": polish, "cloak": cloak,

@@ -126,10 +126,13 @@ def spectrogram_png(x: np.ndarray, out: Path, title: str, loop: bool = False, wi
     for o in onsets(x):
         cx = int(o / dur * width)
         dr.line([(cx, wy0), (cx, wy0 + 10)], fill=(255, 60, 60), width=2)
-    for (tm, lab) in (marks or []):
+    last_end = [-1, -1, -1]          # label rows: stagger a label down when it would overlap the previous one
+    for (tm, lab) in sorted(marks or []):
         cx = int(tm / dur * width)
         dr.line([(cx, top), (cx, wy0 + wave_h)], fill=(255, 255, 255), width=1)
-        dr.text((cx + 2, top + 2), lab, fill=(255, 255, 255))
+        row = next((r for r in range(3) if cx + 2 > last_end[r]), 0)
+        dr.text((cx + 2, top + 2 + 12 * row), lab, fill=(255, 255, 255))
+        last_end[row] = cx + 2 + 6 * len(lab)
     # axis
     ay = wy0 + wave_h
     step_s = 0.1 if dur <= 1.2 else 0.25 if dur <= 3 else 0.5 if dur <= 6 else 2.0 if dur <= 30 else 5.0
@@ -227,19 +230,13 @@ def _at(total_s: float, parts) -> np.ndarray:
 
 
 def sneeze_sequence() -> tuple[np.ndarray, list]:
-    """GDD §2.3 / §5.7 #1: ah (20 f) … ahh (24 f) … AHHH (30 f) … false stop (20 f), CHOO
-    (3 f accent) → the stool rockets back → the sink; the Stalls laugh from the hold."""
-    f = 1 / 60.0
-    ah1, ah2, ah3 = _load("vo_bellows_sneeze_ah1"), _load("vo_bellows_sneeze_ah2"), _load("vo_bellows_sneeze_ah3")
-    t_ah1, t_ah2 = 0.3, 0.3 + 20 * f + 0.25
-    t_ah3 = t_ah2 + 24 * f + 0.25
-    t_choo = t_ah3 + 30 * f + 20 * f + 0.2
-    parts = [(t_ah1, ah1, 1.0), (t_ah2, ah2, 1.0), (t_ah3, ah3, 1.0), (t_choo, _load("vo_bellows_sneeze_choo_1"), 1.0),
-             (t_choo + 0.03, _load("stool_zip"), 0.8), (t_choo + 0.3, _load("sink_splash"), 0.8),
-             (t_choo + 0.12, _load("woodblock_bonk"), 0.5), (t_choo + 0.3, _load("crowd_t2_1"), 0.7)]
-    marks = [(t_ah1, "ah"), (t_ah2, "ahh"), (t_ah3, "AHHH"), (t_ah3 + 30 * f, "false stop"), (t_choo, "CHOO!"),
-             (t_choo + 0.3, "laugh")]
-    return _at(t_choo + 2.6, parts), marks
+    """GDD §2.3 / §5.7 #1, in context: the tea's sniff and sip, then rx_sneeze_blast_a's clip events at their
+    frames (ah f0 … ahh f20 … AHHH f44 … the false stop's 'hm' f76, CHOO f94 + the 5-f hit-stop, the stool,
+    the slide whistle, the sink crash f112, 300 ms of silence, the ladle) and the Stalls' T3 laugh at the
+    hold — the same mix as docs/review/s2-sound/gate0 (tools/audio/gate0.py)."""
+    import gate0
+    m = gate0.scene_sneeze("formant", "formant")
+    return m.render(), m.marks
 
 
 def tiptoe_walk() -> np.ndarray:
@@ -309,7 +306,7 @@ def pack() -> list[str]:
 
     seq, marks = sneeze_sequence()
     _write(AB / "demo_sneeze_sequence.wav", seq)
-    png("sneeze_sequence", seq, "ACHOO-RIA! sequence: ah / ahh / AHHH / false stop / CHOO / stool / sink / laugh",
+    png("sneeze_sequence", seq, "ACHOO-RIA! in context: sniff, sip, ah / ahh / AHHH / hm / CHOO / stool / whistle / sink / ladle / T3",
         marks=marks, width=1400)
     walk = tiptoe_walk()
     _write(AB / "demo_tiptoe_walk.wav", walk)

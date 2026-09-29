@@ -47,6 +47,11 @@ static func warnings(db: ContentDB) -> PackedStringArray:
 					for k in (c as Dictionary).keys():
 						if PRANK_COND_STAGE3.has(str(k)):
 							w.append("pranks.json: %s.steps[%d].conditions '%s' is a Stage-3 condition (always false)" % [p.id, si, k])
+	for clip in db.t3_last_beats:
+		if db.clip_len(clip) <= 0:
+			w.append("reactions.json: t3_last_beats '%s' has no clip_timings frames (the sim adds 0 to the reaction)" % clip)
+	if not db.t3_last_beats.is_empty() and db.clip_len(SimConst.SLOW_BURN_CLIP) <= 0:
+		w.append("reactions.json: '%s' has no clip_timings frames (every 4th reaction's slow burn adds 0)" % SimConst.SLOW_BURN_CLIP)
 	for da in db.double_act_list:
 		if da.headbutt:
 			w.append("pranks.json: double_acts.%s is a Stage-3 headbutt Double Act (inactive)" % da.id)
@@ -164,7 +169,11 @@ static func _items(db: ContentDB, e: PackedStringArray) -> void:
 
 
 static func _activities(db: ContentDB, e: PackedStringArray) -> void:
+	for m in db.wb_errors:
+		e.append("activities.json: %s" % m)
 	for a in db.activity_list:
+		for m in a.mg_errors:
+			e.append("activities.json: %s.%s" % [a.id, m])
 		if a.station != "" and a.station_idx < 0:
 			e.append("activities.json: %s.station '%s' not in house.json" % [a.id, a.station])
 		if not a.is_detour:
@@ -336,6 +345,20 @@ static func _episode(db: ContentDB, ep: EpisodeDef, e: PackedStringArray) -> voi
 	for r in ep.rooms:
 		if not db.house.room_index.has(r):
 			e.append("%s: rooms '%s' not a room in house.json" % [f, r])
+	for r in ep.backstage:
+		if not db.house.room_index.has(r):
+			e.append("%s: backstage '%s' not a room in house.json" % [f, r])
+		elif ep.rooms.has(r):
+			e.append("%s: backstage '%s' is also one of the Night's rooms" % [f, r])
+	if ep.rules.has("combos"):
+		if typeof(ep.rules["combos"]) != TYPE_ARRAY:
+			e.append("%s: rules.combos must be a list of combo ids ([] = none)" % f)
+		else:
+			for cid in ep.combos:
+				if not db.combos.has(cid):
+					e.append("%s: rules.combos '%s' not in residues.json combos" % [f, cid])
+	if ep.rules.has("senses") and typeof(ep.rules["senses"]) != TYPE_BOOL:
+		e.append("%s: rules.senses must be true or false" % f)
 	if ep.entry != "" and not db.house.entries.has(ep.entry):
 		e.append("%s: entry '%s' not in house.json entries" % [f, ep.entry])
 	if ep.act > 0 and Fx.ticks(ep.spot_fill_s) < SimConst.SPOT_FILL_MIN:
@@ -359,6 +382,8 @@ static func _episode(db: ContentDB, ep: EpisodeDef, e: PackedStringArray) -> voi
 			e.append("%s: bellows.loop[%d] '%s' is a detour, not an activity" % [f, i, le.activity])
 		if le.has_gate:
 			_gate(db, le.until, "%s: bellows.loop[%d].gate.until" % [f, i], e)
+		elif le.hooks_after_gate:
+			e.append("%s: bellows.loop[%d] has hooks: after_gate but no gate" % [f, i])
 	var ids := {}
 	for l in ep.script_lines:
 		if l.id == "":

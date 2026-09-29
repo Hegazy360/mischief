@@ -10,6 +10,7 @@ const CONTENT_DB := "res://sim/content/content_db.gd"
 const CONDITIONS := "res://sim/systems/conditions.gd"
 const SIM_EVENTS := "res://sim/world/sim_events.gd"
 const SIM_CONST := "res://sim/core/sim_const.gd"
+const SIM_FF := "res://sim/world/sim_ff.gd"
 
 static var _cache: Dictionary = {}
 

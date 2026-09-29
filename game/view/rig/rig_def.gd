@@ -169,6 +169,10 @@ var breath_period: float = 3.2
 var look_part: int = -1
 var look_max_deg: float = 20.0
 var masks: Dictionary = {}             ## name → PackedStringArray
+## Locomotion parts (1 = in): the root part, every foot and every ancestor of a foot. An
+## overlay clip never writes them (RigPlayer), so a micro-gag over a walk keeps the walk's
+## planted feet and root exactly (s2-rig §4.1.1).
+var locomotion: PackedByteArray = PackedByteArray()
 var skins: Dictionary = {}             ## skin → {"dir": String}
 var rest: PackedFloat32Array = PackedFloat32Array()
 
@@ -288,6 +292,133 @@ func all_texture_paths(skin: String = "") -> PackedStringArray:
 	return out
 
 
+## Textures only a residue look draws (s2-rig §4.3, lazy look pages): its overlays, the part
+## variants its `tex` swaps in (never a part's rest variant), the variants of its face
+## overlay slots, and its props' state textures — minus anything the base set already has.
+## Deterministic per (kind, skin), so two players share the look's cached atlas.
+func look_texture_paths(kind: String, skin: String = "") -> PackedStringArray:
+	var out := PackedStringArray()
+	var res: RigResidue = residues.get(kind, null)
+	if res == null:
+		return out
+	var base := _base_set(skin)
+	var add := func(p: String) -> void:
+		if p == "":
+			return
+		var q := skin_path(p, skin)
+		if not base.has(q) and not out.has(q):
+			out.append(q)
+	for f in res.overlay_file:
+		add.call(f)
+	for k in res.tex_part.size():
+		var files: PackedStringArray = tex_files[res.tex_part[k]]
+		if res.tex_var[k] < files.size():
+			add.call(files[res.tex_var[k]])
+	for si in res.face_slots:
+		for f2 in tex_files[face_slot_part[si]]:
+			add.call(f2)
+	for pid in res.props:
+		var pi := int(prop_index.get(String(pid), -1))
+		if pi >= 0:
+			for f3 in (props[pi] as RigProp).state_files:
+				add.call(f3)
+	return out
+
+
+## Every texture the rig draws without any residue look (all_texture_paths minus the files
+## only residue looks use), core first: the atlas RigPlayer.setup() builds.
+func base_texture_paths(skin: String = "") -> PackedStringArray:
+	var only := _look_only(skin)
+	var out := PackedStringArray()
+	for q in core_texture_paths(skin):
+		if not only.has(q) and not out.has(q):
+			out.append(q)
+	for q2 in all_texture_paths(skin):
+		if not only.has(q2) and not out.has(q2):
+			out.append(q2)
+	return out
+
+
+## The files of `paths` that are in the base set (core-first order kept) — the count
+## AtlasBuilder packs first.
+func base_core_count(skin: String = "") -> int:
+	var only := _look_only(skin)
+	var n := 0
+	var seen := {}
+	for q in core_texture_paths(skin):
+		if not only.has(q) and not seen.has(q):
+			seen[q] = true
+			n += 1
+	return n
+
+
+var _base_cache: Dictionary = {}   ## skin → {path: true}
+var _only_cache: Dictionary = {}   ## skin → {path: true}
+
+
+func _base_set(skin: String) -> Dictionary:
+	if not _base_cache.has(skin):
+		var d := {}
+		for q in base_texture_paths(skin):
+			d[q] = true
+		_base_cache[skin] = d
+	return _base_cache[skin]
+
+
+## Files referenced ONLY by residue looks: overlays, residue-swapped part variants (never a
+## part's rest variant), the variants of face-overlay slots hidden by default (singe,
+## hiccup), and props that start hidden and that residues attach (costumes).
+func _look_only(skin: String) -> Dictionary:
+	if _only_cache.has(skin):
+		return _only_cache[skin]
+	var cand := {}
+	var res_props := {}
+	var res_slots := {}
+	for k in residues:
+		var res: RigResidue = residues[k]
+		for f in res.overlay_file:
+			cand[skin_path(f, skin)] = true
+		for t in res.tex_part.size():
+			var p := res.tex_part[t]
+			var v := res.tex_var[t]
+			if v != int(rest[ch(p, C_TEX)]) and v < tex_files[p].size():
+				cand[skin_path(tex_files[p][v], skin)] = true
+		for si in res.face_slots:
+			res_slots[si] = true
+		for pid in res.props:
+			res_props[String(pid)] = true
+	for si2 in res_slots:
+		var part := face_slot_part[si2]
+		if rest[ch(part, C_VIS)] < 0.5:
+			for f2 in tex_files[part]:
+				cand[skin_path(f2, skin)] = true
+	for pid2 in res_props:
+		var pi := int(prop_index.get(pid2, -1))
+		if pi >= 0 and (props[pi] as RigProp).hidden:
+			for f3 in (props[pi] as RigProp).state_files:
+				cand[skin_path(f3, skin)] = true
+	# Never a part's rest variant (the everyday look).
+	for i in names.size():
+		if limb_of[i] >= 0 or tex_files[i].is_empty() or rest[ch(i, C_VIS)] < 0.5:
+			continue
+		cand.erase(skin_path(tex_files[i][clampi(int(rest[ch(i, C_TEX)]), 0, tex_files[i].size() - 1)], skin))
+	# Never a variant any pose shows (the sneeze's puffed sideburns are also COMBO:poodle's):
+	# clips key poses, so those must not build a page mid-gag.
+	var lib: PoseLib = PoseLib.for_rig(id) if id != "" and _cache.get(id, null) == self else null
+	if lib != null:
+		for pn in lib.poses:
+			var pose: PackedFloat32Array = lib.poses[pn]
+			for i2 in names.size():
+				var nt := tex_files[i2].size()
+				if limb_of[i2] >= 0 or nt < 2:
+					continue
+				var v2 := int(pose[ch(i2, C_TEX)])
+				if v2 >= 0 and v2 < nt:
+					cand.erase(skin_path(tex_files[i2][v2], skin))
+	_only_cache[skin] = cand
+	return cand
+
+
 ## The textures of the everyday look (every part's and face slot's rest variant, props'
 ## default states) — AtlasBuilder packs these first so they share page 0.
 func core_texture_paths(skin: String = "") -> PackedStringArray:
@@ -371,6 +502,11 @@ func subtree(i: int) -> PackedInt32Array:
 			inside[j] = 1
 			out.append(j)
 	return out
+
+
+## True when rig.json `masks` defines `mask_name`.
+func has_mask(mask_name: String) -> bool:
+	return masks.has(mask_name)
 
 
 ## Per-part mask (1 = in) from a list of part names; `name*` adds the whole subtree, a
@@ -952,6 +1088,15 @@ func _parse_misc(d: Dictionary) -> void:
 	if mv is Dictionary:
 		for mn in mv:
 			masks[String(mn)] = PackedStringArray(mv[mn] if mv[mn] is Array else [])
+	locomotion.resize(names.size())
+	locomotion.fill(0)
+	if not names.is_empty():
+		locomotion[root_index] = 1
+	for ft2 in feet:
+		var a := ft2
+		while a >= 0:
+			locomotion[a] = 1
+			a = parent[a]
 
 
 func _build_rest() -> void:

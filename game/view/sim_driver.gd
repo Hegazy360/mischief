@@ -11,8 +11,13 @@
 ## so every view class reads plain snapshot data — never the sim (TECH §5.4). Hotspot states
 ## and the path preview are refreshed at 10 Hz, and at once on events that change them.
 ##
-## Fast-forward (×3) is honoured only while Hush is hidden, and drops to ×1 on an
-## `entry_warning` for Hush's room, a `prank_fire` or a `spot_start` (GDD §3.3).
+## Fast-forward (×3) is honoured only while Hush is hidden, and drops to ×1 through the sim's
+## one ⏩-drop rule `SimFf.drops(ev, hush_room)` (a `prank_fire`, a `spot_start`, an
+## `entry_warning` for Hush's room — GDD §3.3, ruling L2), so the game and the dead-air metric
+## agree on when the world is really at ×3.
+##
+## Scripted commands (`set_script_cmds({tick: [cmd, …]})`, a `--dump-cmds` replay) are fed to
+## the tick they were logged for, exactly like `sim_run.gd --cmds`.
 class_name SimDriver
 extends Node
 
@@ -56,6 +61,9 @@ var _hotspot_ids := PackedStringArray()
 var _since_slow := 0
 var _hotspots_dirty := true
 var _ticks_this_frame := 0
+var _script: Dictionary = {}
+static var _ff_rule: Script = null
+static var _ff_checked := false
 
 
 func _init() -> void:
@@ -84,6 +92,54 @@ func push_cmd(cmd: Dictionary) -> void:
 	_cmds.append(cmd)
 	if log_commands and world != null:
 		cmd_log.append([int(world.get("tick")) + 1, cmd])
+
+
+## Replay a command dump: `by_tick` = {tick: [cmd, …]} (the tick the sim sees them on, as in
+## `sim_run.gd --cmds`); `{"cmds": [[tick, cmd], …]}` / `[[tick, cmd], …]` are accepted too.
+func set_script_cmds(src: Variant) -> void:
+	_script = SimDriver.cmds_by_tick(src)
+
+
+## {tick: [cmd, …]} from a command dump (Dictionary with "cmds", a bare list, or already by tick).
+static func cmds_by_tick(src: Variant) -> Dictionary:
+	var list: Variant = src
+	if src is Dictionary and (src as Dictionary).has("cmds"):
+		list = (src as Dictionary)["cmds"]
+	elif src is Dictionary:
+		return src
+	var out := {}
+	if list is Array:
+		for e in list:
+			if e is Array and (e as Array).size() >= 2:
+				var t := int(e[0])
+				if not out.has(t):
+					out[t] = []
+				(out[t] as Array).append(e[1])
+	return out
+
+
+## The last tick a scripted command is fed on (−1 none).
+func script_last_tick() -> int:
+	var m := -1
+	for t in _script:
+		m = maxi(m, int(t))
+	return m
+
+
+## True when `ev` drops a held ⏩ (SimFf when the sim has it; the same table otherwise).
+static func ff_drops(ev: Dictionary, hush_room: String) -> bool:
+	if not _ff_checked:
+		_ff_checked = true
+		_ff_rule = ViewKit.soft_script("res://sim/world/sim_ff.gd")
+	if _ff_rule != null and _ff_rule.has_method("drops"):
+		return bool(_ff_rule.call("drops", ev, hush_room))
+	match String(ev.get("e", "")):
+		"prank_fire", "spot_start":
+			return true
+		"entry_warning":
+			var room := String(ev.get("room", ""))
+			return room == "" or room == hush_room
+	return false
 
 
 ## Request ×3 fast-forward (only honoured while Hush is hidden).
@@ -209,10 +265,14 @@ func step_now() -> void:
 
 func _step_once() -> void:
 	var cmds := _cmds
-	if cmds.is_empty():
+	var scripted: Variant = _script.get(int(world.get("tick")) + 1, null) if not _script.is_empty() else null
+	if cmds.is_empty() and scripted == null:
 		world.call("step", _empty)
 	else:
-		var batch := cmds.duplicate()
+		var batch: Array = []
+		if scripted is Array:
+			batch.append_array(scripted)
+		batch.append_array(cmds)
 		_cmds.clear()
 		world.call("step", batch)
 	var events: Array = world.call("drain_events")
@@ -226,15 +286,8 @@ func _scan(events: Array) -> void:
 		var e := String((ev as Dictionary).get("e", ""))
 		if HOTSPOT_EVENTS.has(e):
 			_hotspots_dirty = true
-		if not _ff:
-			continue
-		match e:
-			"prank_fire", "spot_start":
-				set_ff(false)
-			"entry_warning":
-				var room := String((ev as Dictionary).get("room", ""))
-				if room == "" or room == _snap.hush.room:
-					set_ff(false)
+		if _ff and SimDriver.ff_drops(ev, _snap.hush.room):
+			set_ff(false)
 
 
 func _take_snapshot(first: bool) -> void:

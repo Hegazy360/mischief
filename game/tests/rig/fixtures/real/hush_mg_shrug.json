@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "clip": "hush/_fx_shrug",
+ "rig": "hush",
+ "loop": false,
+ "length": 24,
+ "layer": "overlay",
+ "mask": "upper",
+ "blend_in": 4,
+ "blend_out": 6,
+ "tags": [
+  "flavour",
+  "fixture"
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_stand"
+  },
+  {
+   "f": 8,
+   "pose": "h_near_miss",
+   "ease": "out_back",
+   "face": "worried"
+  },
+  {
+   "f": 24,
+   "pose": "h_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

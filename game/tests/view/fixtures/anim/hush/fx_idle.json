@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "clip": "hush/fx_idle",
+ "rig": "hush",
+ "loop": true,
+ "length": 120,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 60,
+   "pose": "h_breath_in",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 120,
+   "pose": "h_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture",
+  "idle"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

@@ -7,6 +7,9 @@
 #   --rig    rig.png (exploded parts with pivots, rest / min / max joint limits)
 #   --residues residues.png (the stand pose with every residue look, combos included)
 #   --all    everything above for every clip of the rig
+#   overlay clips (layer overlay: mg_*) are drawn over a base, onion-style: [--base=<clip>]
+#            (default loco_idle; the blue ghost in each cell is the base alone)
+#   two rigs: [--rig2=<rig> --clip2=<clip> --x2=<px>] adds rig 2 to every cell (tag _2rig)
 # Runs in a private sandbox copy (ANIM_SANDBOX, default anim_<rig>) under xvfb + opengl3; runs
 # sharing a sandbox are serialised with a lock. Tier / suppressed sheets get a _t2 / _sup suffix.
 set -euo pipefail

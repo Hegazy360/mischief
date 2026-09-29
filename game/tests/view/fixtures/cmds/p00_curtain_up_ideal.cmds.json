@@ -1,0 +1,13 @@
+{"episode": "p00_curtain_up", "hash": 685958396, "persona": "ideal", "route": "ideal", "ticks": 3573,
+ "cmds": [
+  [230, {"c":"squeak"}],
+  [232, {"c":"go","hotspot":"kitchen_honey","run":false}],
+  [377, {"c":"rig","on":true}],
+  [425, {"c":"rig","on":false}],
+  [426, {"c":"go","hotspot":"kitchen_pantry_curtain","run":false}],
+  [1988, {"c":"pop_out","run":false}],
+  [1989, {"c":"go","hotspot":"parlour_gramophone","run":false}],
+  [2300, {"c":"rig","on":true}],
+  [2348, {"c":"rig","on":false}],
+  [2349, {"c":"go","hotspot":"parlour_piano_back","run":false}]
+]}

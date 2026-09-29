@@ -1,0 +1,552 @@
+{
+  "version": 1,
+  "clip": "hush/act_snicker",
+  "rig": "hush",
+  "loop": false,
+  "length": 60,
+  "layer": "base",
+  "mask": null,
+  "doc": "Flavour take after `rigged` (the glance at the Stalls, act_glance, follows): glove over the mouth by f9, shoulders at 8 Hz f9-47.",
+  "blend_in": 4,
+  "blend_out": 6,
+  "tags": [
+    "take",
+    "snicker",
+    "flavour"
+  ],
+  "beats": {
+    "anticipation": [
+      0,
+      6
+    ],
+    "accent": [
+      6,
+      9
+    ],
+    "hold": [
+      9,
+      47
+    ],
+    "settle": [
+      47,
+      60
+    ]
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "glance"
+    },
+    {
+      "f": 5,
+      "pose": "h_breath_in",
+      "ease": "out_quad",
+      "face": "glance",
+      "set": {
+        "root": {
+          "sx": 0.95,
+          "sy": 1.06
+        },
+        "torso": {
+          "rot": -10.0
+        },
+        "head": {
+          "rot": -15.0
+        },
+        "arm_upper_r": {
+          "rot": 16.4
+        },
+        "arm_upper_l": {
+          "rot": 31.2
+        },
+        "leg_upper_r": {
+          "rot": -4.45
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 4.39
+        },
+        "leg_upper_l": {
+          "rot": 7.05
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -8.43
+        }
+      }
+    },
+    {
+      "f": 9,
+      "pose": "h_snicker_a",
+      "ease": "out_back",
+      "face": "snicker",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 13,
+      "pose": "h_snicker_b",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.05,
+          "sy": 0.92
+        },
+        "torso": {
+          "rot": 6.4
+        },
+        "head": {
+          "rot": 6.6
+        },
+        "leg_upper_r": {
+          "rot": -12.81
+        },
+        "leg_lower_r": {
+          "rot": 18.04
+        },
+        "foot_r": {
+          "rot": -4.59
+        },
+        "leg_upper_l": {
+          "rot": -2.25
+        },
+        "leg_lower_l": {
+          "rot": 18.17
+        },
+        "foot_l": {
+          "rot": -14.03
+        }
+      }
+    },
+    {
+      "f": 17,
+      "pose": "h_snicker_a",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "torso": {
+          "rot": 10.8
+        },
+        "head": {
+          "rot": 13.2
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 20,
+      "pose": "h_snicker_b",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.05,
+          "sy": 0.92
+        },
+        "torso": {
+          "rot": 7.2
+        },
+        "head": {
+          "rot": 7.8
+        },
+        "leg_upper_r": {
+          "rot": -12.81
+        },
+        "leg_lower_r": {
+          "rot": 18.04
+        },
+        "foot_r": {
+          "rot": -4.59
+        },
+        "leg_upper_l": {
+          "rot": -2.25
+        },
+        "leg_lower_l": {
+          "rot": 18.17
+        },
+        "foot_l": {
+          "rot": -14.03
+        }
+      }
+    },
+    {
+      "f": 24,
+      "pose": "h_snicker_a",
+      "ease": "in_out_sine",
+      "face": "laugh",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "torso": {
+          "rot": 11.6
+        },
+        "head": {
+          "rot": 14.4
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 28,
+      "pose": "h_snicker_b",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.05,
+          "sy": 0.92
+        },
+        "torso": {
+          "rot": 8.0
+        },
+        "head": {
+          "rot": 9.0
+        },
+        "leg_upper_r": {
+          "rot": -12.81
+        },
+        "leg_lower_r": {
+          "rot": 18.04
+        },
+        "foot_r": {
+          "rot": -4.59
+        },
+        "leg_upper_l": {
+          "rot": -2.25
+        },
+        "leg_lower_l": {
+          "rot": 18.17
+        },
+        "foot_l": {
+          "rot": -14.03
+        }
+      }
+    },
+    {
+      "f": 32,
+      "pose": "h_snicker_a",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "torso": {
+          "rot": 12.4
+        },
+        "head": {
+          "rot": 15.6
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 35,
+      "pose": "h_snicker_b",
+      "ease": "in_out_sine",
+      "face": "snicker",
+      "set": {
+        "root": {
+          "sx": 1.05,
+          "sy": 0.92
+        },
+        "torso": {
+          "rot": 8.8
+        },
+        "head": {
+          "rot": 10.2
+        },
+        "leg_upper_r": {
+          "rot": -12.81
+        },
+        "leg_lower_r": {
+          "rot": 18.04
+        },
+        "foot_r": {
+          "rot": -4.59
+        },
+        "leg_upper_l": {
+          "rot": -2.25
+        },
+        "leg_lower_l": {
+          "rot": 18.17
+        },
+        "foot_l": {
+          "rot": -14.03
+        }
+      }
+    },
+    {
+      "f": 39,
+      "pose": "h_snicker_a",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "torso": {
+          "rot": 13.2
+        },
+        "head": {
+          "rot": 16.8
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 43,
+      "pose": "h_snicker_b",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.05,
+          "sy": 0.92
+        },
+        "torso": {
+          "rot": 9.6
+        },
+        "head": {
+          "rot": 11.4
+        },
+        "leg_upper_r": {
+          "rot": -12.81
+        },
+        "leg_lower_r": {
+          "rot": 18.04
+        },
+        "foot_r": {
+          "rot": -4.59
+        },
+        "leg_upper_l": {
+          "rot": -2.25
+        },
+        "leg_lower_l": {
+          "rot": 18.17
+        },
+        "foot_l": {
+          "rot": -14.03
+        }
+      }
+    },
+    {
+      "f": 47,
+      "pose": "h_snicker_a",
+      "ease": "in_out_sine",
+      "set": {
+        "root": {
+          "sx": 1.06,
+          "sy": 0.9
+        },
+        "torso": {
+          "rot": 14.0
+        },
+        "head": {
+          "rot": 18.0
+        },
+        "leg_upper_r": {
+          "rot": -13.9
+        },
+        "leg_lower_r": {
+          "rot": 20.28
+        },
+        "foot_r": {
+          "rot": -5.43
+        },
+        "leg_upper_l": {
+          "rot": -3.45
+        },
+        "leg_lower_l": {
+          "rot": 20.51
+        },
+        "foot_l": {
+          "rot": -14.6
+        }
+      }
+    },
+    {
+      "f": 53,
+      "pose": "h_breath_in",
+      "ease": "out_quad",
+      "face": "smug",
+      "set": {
+        "root": {
+          "sx": 0.98,
+          "sy": 1.03
+        },
+        "head": {
+          "rot": -11.0
+        },
+        "leg_upper_r": {
+          "rot": -4.34
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 4.02
+        },
+        "leg_upper_l": {
+          "rot": 6.86
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.74
+        }
+      }
+    },
+    {
+      "f": 60,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "hush_snicker"
+    },
+    {
+      "f": 6,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

@@ -11,7 +11,23 @@
 ##   swaps the top corners. Tap-to-rig (Settings.tap_to_rig) turns holds into toggles.
 ## * Panels (ScriptPanel, PauseMenu, SettingsPanel, LoadingCard, ResultsScreen) are shown on top
 ##   with `show_panel(panel)`; the HUD itself dims while `model.paused`.
-## * Teaching: `ghost_finger(target, mode)` and `show_figgis_card(icons)`.
+## * Teaching (s2-ftue, the no-FTUE fallback in NightScene):
+##     `ghost_finger(target, mode, hold_s)` — the glove over a HUD widget;
+##     `ghost_finger_at(screen_pos, mode, hold_s)` — over a fixed screen point (a world hotspot);
+##     `ghost_finger_follow(fn, mode, hold_s)` — over a moving point (`fn.call() -> Vector2`,
+##       re-read every frame, e.g. a hotspot while the camera pans; Vector2.INF hides the glove);
+##     the world glove is clamped so all of it stays inside the safe area;
+##     `show_figgis_card(icons, seconds, arrow_to)` — the cue card + an edge arrow toward an
+##       off-screen target (GDD §6.4 step 2); `set_dim(on, spotlight)` — house lights down for
+##       "show me" (the spotlight rect stays lit).
+## * Curtain up: `flash_script(lines, loop, seconds)` — the Script slides in from the top for
+##   2.5 s, non-pausing, touches outside the card pass through (`script_flash_finished`).
+## * "Where does this go?": HudModel.tray_arrows → edge arrows; HudModel.edge_bubble_emote → the
+##   edge bubble's emote face + pictogram puff (D1).
+## * The Bellows-Cam: `attach_pip(pip_view)` hands the Hud the PipView — its texture, its
+##   `shown_changed` / `pip_resized` signals drive the PipFrame (placement per HudLayout: 448 × 252
+##   top-right, the escalated Gag-Cam window anchored to the same corner); while attached the
+##   model's pip_visible / pip_escalated are ignored (tier and glyph still come from the model).
 class_name Hud
 extends CanvasLayer
 
@@ -32,8 +48,12 @@ signal pip_release()
 signal meter_tap()
 ## A panel shown with show_panel() closed (its node is freed).
 signal panel_closed(panel_name: String)
+## The curtain-up Script flash (flash_script) finished or was tapped away.
+signal script_flash_finished()
 
 const LAYER := 10
+## The ghost-finger "target" while it points at the world (ghost_finger_at / _follow).
+const GHOST_WORLD := &"@world"
 
 var root: Control
 var pause_button: PauseButton
@@ -48,6 +68,14 @@ var action: ActionButton
 var edge_bubble: EdgeBubble
 var pick_strip: PickStrip
 var ghost: GhostFinger
+## "Where does this go?" + the Figgis card arrow (never a target).
+var edge_arrows: EdgeArrows
+## House lights down (set_dim), under every widget.
+var dim: StageDim
+## Holds the curtain-up Script flash (above the widgets, below the panels).
+var flash_host: Control
+## The Script flash on screen (null when none).
+var script_flash: ScriptPanel = null
 var panel_host: Control
 
 var left_handed: bool = false
@@ -67,10 +95,17 @@ var hud_scale: float = 1.0
 var script_lines: Array = []
 var script_loop: Array = []
 
+## The attached PipView (attach_pip), or null.
+var pip_view: PipView = null
+
 var _safe: SafeArea
 var _insets: Vector4 = Vector4.ZERO
 var _ghost_target: StringName = &""
 var _ghost_mode: int = 0
+var _ghost_hold_s: float = -1.0
+var _ghost_pos: Vector2 = Vector2.ZERO
+var _ghost_fn: Callable = Callable()
+var _last_tray_tap: int = -1
 var _paused_shown: bool = false
 # last shown values
 var _c_applause := -2147483648
@@ -101,6 +136,9 @@ var _c_elabel := "\u0001"
 var _c_pick := PackedStringArray(["\u0001"])
 var _c_pickpos := Vector2(INF, INF)
 var _c_paused := -1
+var _c_emote := "\u0001"
+var _c_tarrows := PackedVector2Array([Vector2(INF, INF)])
+var _c_taitem := "\u0001"
 
 
 func _init() -> void:
@@ -135,8 +173,18 @@ func _init() -> void:
 	pick_strip.name = "PickStrip"
 	ghost = GhostFinger.new()
 	ghost.name = "GhostFinger"
-	for w in [banner, meter, pause_button, figgis, pip, overview, edge_bubble, tray, clarence, action, pick_strip, ghost]:
+	dim = StageDim.new()
+	dim.name = "Dim"
+	edge_arrows = EdgeArrows.new()
+	edge_arrows.name = "EdgeArrows"
+	for w in [dim, edge_arrows, banner, meter, pause_button, figgis, pip, overview, edge_bubble, tray, clarence, action,
+			pick_strip, ghost]:
 		root.add_child(w)
+	flash_host = Control.new()
+	flash_host.name = "Flash"
+	flash_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash_host.theme = UiKit.theme()
+	add_child(flash_host)
 	panel_host = Control.new()
 	panel_host.name = "Panels"
 	panel_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -157,6 +205,9 @@ func _ready() -> void:
 		set_tap_to_rig(bool(s.call("get_value", "tap_to_rig", false)))
 		if s.has_signal("changed"):
 			s.connect("changed", _on_setting)
+	# debug shots of the real scene: `-- --left-handed` mirrors without touching the user's settings
+	if OS.is_debug_build() and UiKit.has_flag("--left-handed"):
+		left_handed = true
 	_insets = _safe.current
 	relayout()
 
@@ -173,7 +224,7 @@ func _wire() -> void:
 	clarence.clarence_down.connect(func() -> void: clarence_down.emit())
 	clarence.clarence_hold.connect(func() -> void: clarence_hold.emit())
 	clarence.clarence_up.connect(func(ms: int) -> void: clarence_up.emit(ms))
-	tray.tray_tap.connect(func(i: int) -> void: tray_tap.emit(i))
+	tray.tray_tap.connect(_on_tray_tap)
 	tray.tray_drag.connect(func(i: int, p: Vector2) -> void: tray_drag.emit(i, p))
 	pick_strip.pick.connect(func(item: String) -> void: pick.emit(item))
 	figgis.figgis_tap.connect(func() -> void: figgis_tap.emit())
@@ -188,6 +239,11 @@ func _wire() -> void:
 func _on_action_down(v: int) -> void:
 	clarence.last_action_down_ms = UiKit.now_ms()
 	action_down.emit(v)
+
+
+func _on_tray_tap(i: int) -> void:
+	_last_tray_tap = i
+	tray_tap.emit(i)
 
 
 # --- the model --------------------------------------------------------------------------------
@@ -263,12 +319,12 @@ func apply(m: HudModel) -> void:
 		pip.set_glyph(m.pip_glyph)
 		n += 1
 	var pip_moved := false
-	if int(m.pip_escalated) != _c_pipesc:
+	if pip_view == null and int(m.pip_escalated) != _c_pipesc:
 		_c_pipesc = int(m.pip_escalated)
 		pip.set_escalated(m.pip_escalated)
 		pip_moved = true
 		n += 1
-	if int(m.pip_visible) != _c_pipv:
+	if pip_view == null and int(m.pip_visible) != _c_pipv:
 		_c_pipv = int(m.pip_visible)
 		pip.set_shown(m.pip_visible)
 		pip_moved = true
@@ -282,8 +338,17 @@ func apply(m: HudModel) -> void:
 		edge_bubble.set_target(m.edge_bubble_dir, m.edge_bubble_label)
 		edge_changed = true
 		n += 1
+	if m.edge_bubble_emote != _c_emote:
+		_c_emote = m.edge_bubble_emote
+		edge_bubble.set_emote(m.edge_bubble_emote)
+		n += 1
 	if edge_changed:
 		_place_edge_bubble()
+	if m.tray_arrows != _c_tarrows or m.tray_arrows_item != _c_taitem:
+		_c_tarrows = m.tray_arrows.duplicate()
+		_c_taitem = m.tray_arrows_item
+		edge_arrows.set_directions(m.tray_arrows, _tray_arrow_icon(m))
+		n += 1
 	if m.pick_strip_items != _c_pick or m.pick_strip_pos != _c_pickpos:
 		var items_changed := m.pick_strip_items != _c_pick
 		_c_pick = m.pick_strip_items.duplicate()
@@ -310,6 +375,9 @@ func invalidate() -> void:
 	_c_edir = Vector2(INF, INF)
 	_c_pipv = -1
 	_c_paused = -1
+	_c_emote = "\u0001"
+	_c_tarrows = PackedVector2Array([Vector2(INF, INF)])
+	_c_taitem = "\u0001"
 
 
 # --- settings -------------------------------------------------------------------------------
@@ -333,27 +401,166 @@ func set_pip_texture(tex: Texture2D) -> void:
 	pip.set_texture(tex)
 
 
+## Take over the Bellows-Cam: show `view.get_texture()` in the PipFrame and follow its
+## `shown_changed` / `pip_resized` signals (placement, escalation). Passing null detaches.
+func attach_pip(view: PipView) -> void:
+	if pip_view == view:
+		return
+	if pip_view != null and is_instance_valid(pip_view):
+		if pip_view.shown_changed.is_connected(_on_pip_shown):
+			pip_view.shown_changed.disconnect(_on_pip_shown)
+		if pip_view.pip_resized.is_connected(_on_pip_resized):
+			pip_view.pip_resized.disconnect(_on_pip_resized)
+	pip_view = view
+	if view == null:
+		pip.set_texture(null)
+		return
+	pip.set_texture(view.get_texture())
+	view.shown_changed.connect(_on_pip_shown)
+	view.pip_resized.connect(_on_pip_resized)
+	pip.set_escalated(view.is_escalated())
+	pip.set_shown(view.is_shown())
+	_place_pip()
+	_place_edge_bubble()
+
+
+func _on_pip_shown(on: bool) -> void:
+	pip.set_shown(on)
+	_place_pip()
+	_place_edge_bubble()
+
+
+func _on_pip_resized(new_size: Vector2i) -> void:
+	pip.set_escalated(new_size.x > PipFrame.SIZE_NORMAL.x)
+	_place_pip()
+
+
 ## Show the overview toggle in its "zoomed out" state.
 func set_overview(on: bool) -> void:
 	overview.set_overview(on)
 
 
-## Figgis ladder step 2: a cue card of icons (keys / item ids / paths) for `seconds`.
-func show_figgis_card(icons: PackedStringArray, seconds: float = FiggisChip.CARD_SEC) -> void:
+## Figgis ladder step 2 (GDD §6.4): a cue card of icons (UiIcons.card keys / item ids / paths —
+## e.g. `UiIcons.card_set(key)`) for `seconds`, Figgis holding up his card; with `arrow_to` (a
+## screen point, e.g. the target hotspot's centre) an arrow points at it for the same time — an
+## edge arrow while it is off screen, a bobbing arrow above it while on screen.
+func show_figgis_card(icons: PackedStringArray, seconds: float = FiggisChip.CARD_SEC,
+		arrow_to: Vector2 = Vector2.INF) -> void:
 	figgis.show_card(icons, seconds)
+	# the off-screen arrow carries the card's target (its last icon) at its tail
+	var tail: Texture2D = null
+	if arrow_to != Vector2.INF:
+		for i in range(icons.size() - 1, -1, -1):
+			if icons[i] != "" and icons[i] != "arrow":
+				tail = UiIcons.card(icons[i])
+				break
+	edge_arrows.point_at(arrow_to, seconds, tail)
 
 
-## A ghost glove tapping (mode 0) or holding (mode 1) over `target`: &"clarence", &"action",
-## &"tray" / &"tray:<i>", &"figgis", &"meter", &"pip", &"pause", &"overview"; &"" hides it.
-func ghost_finger(target: StringName, mode: int = GhostFinger.Mode.TAP) -> void:
+## Hide the cue card and its arrow now.
+func hide_figgis_card() -> void:
+	figgis.hide_card()
+	edge_arrows.point_at(Vector2.INF)
+
+
+## A ghost glove tapping (Mode.TAP) or holding (Mode.HOLD) over a HUD widget `target`:
+## &"clarence", &"action", &"tray" / &"tray:<i>", &"figgis", &"meter", &"pip", &"pause",
+## &"overview"; &"" hides it. `hold_s` = how long the HOLD ring takes to fill (the prep tier being
+## taught: Q 0.8, S 1.5, B 2.5 s; ≤ 0 keeps the last, default 1.5).
+func ghost_finger(target: StringName, mode: int = GhostFinger.Mode.TAP, hold_s: float = -1.0) -> void:
+	_ghost_fn = Callable()
 	_ghost_target = target
 	_ghost_mode = mode
+	_ghost_hold_s = hold_s
 	if target == &"":
 		ghost.stop()
 		return
-	ghost.visible = true
-	ghost.show_at(_ghost_tip(target), mode)
 	_place_ghost()
+
+
+## The ghost glove over a fixed screen point (logical px, e.g. a world hotspot's screen centre from
+## `WorldView.hotspot_rects_in_view()`), clamped so the whole glove stays inside the safe area.
+func ghost_finger_at(screen_pos: Vector2, mode: int = GhostFinger.Mode.TAP, hold_s: float = -1.0) -> void:
+	_ghost_fn = Callable()
+	_ghost_pos = screen_pos
+	_ghost_target = GHOST_WORLD
+	_ghost_mode = mode
+	_ghost_hold_s = hold_s
+	_place_ghost()
+
+
+## The ghost glove over a moving point: `fn.call()` returns its screen position (Vector2) every
+## frame — e.g. a hotspot while the camera pans; Vector2.INF (or an invalid callable) hides the glove
+## until it returns a point again. Clamped like ghost_finger_at.
+func ghost_finger_follow(fn: Callable, mode: int = GhostFinger.Mode.TAP, hold_s: float = -1.0) -> void:
+	_ghost_fn = fn
+	_ghost_target = GHOST_WORLD
+	_ghost_mode = mode
+	_ghost_hold_s = hold_s
+	_place_ghost()
+
+
+## The ghost glove's current target (&"" = hidden; GHOST_WORLD = a world point).
+func ghost_target() -> StringName:
+	return _ghost_target
+
+
+## The glove's fingertip for a screen point: clamped so the glove (120 × 150 above its tip) and
+## its tap ripple / HOLD ring round the tip (GhostFinger.TIP_REACH) stay inside the safe area
+## (pure; tests).
+func ghost_clamp(p: Vector2) -> Vector2:
+	var vs := viewport_size()
+	var s := maxf(_insets.x, _insets.z)
+	var safe := Rect2(s, _insets.y, vs.x - 2.0 * s, vs.y - _insets.y - _insets.w)
+	var half := maxf(ghost.size.x * 0.5, GhostFinger.TIP_REACH)
+	var x := clampf(p.x, safe.position.x + half, maxf(safe.position.x + half, safe.end.x - half))
+	var y := clampf(p.y, safe.position.y + ghost.size.y,
+		maxf(safe.position.y + ghost.size.y, safe.end.y - GhostFinger.TIP_REACH))
+	return Vector2(x, y)
+
+
+## House lights down (FTUE "show me"): dims the world and the Stalls under every HUD widget;
+## `spotlight` (screen rect) stays lit — call again each frame to move it. Off fades back up.
+func set_dim(on: bool, spotlight: Rect2 = Rect2()) -> void:
+	dim.set_dim(on, spotlight)
+
+
+## Curtain up (GDD §2.2): the Script slides in from the top under the meter for `seconds`
+## (non-pausing; the game keeps running and touches outside the card pass through; a tap on the
+## card slides it away early), then `script_flash_finished`. Replaces a flash already showing.
+## `lines` / `loop` as HudModel.script_lines / script_loop. Returns the ScriptPanel (flash mode).
+func flash_script(lines: Array, loop: Array, seconds: float = 2.5) -> ScriptPanel:
+	if script_flash != null and is_instance_valid(script_flash):
+		script_flash.queue_free()
+	var p := ScriptPanel.new()
+	p.name = "ScriptFlash"
+	p.flash_mode = true
+	p.flash_s = maxf(0.8, seconds)
+	p.setup(lines, loop)
+	flash_host.add_child(p)
+	p.position = Vector2.ZERO
+	p.size = viewport_size()
+	p.set_insets(_insets)
+	p.closed.connect(_on_flash_closed.bind(p), CONNECT_ONE_SHOT)
+	script_flash = p
+	return p
+
+
+func _on_flash_closed(_action: String, p: ScriptPanel) -> void:
+	if is_instance_valid(p):
+		p.queue_free()
+	if script_flash == p:
+		script_flash = null
+		script_flash_finished.emit()
+
+
+func _tray_arrow_icon(m: HudModel) -> Texture2D:
+	if m.tray_arrows.is_empty():
+		return null
+	var id := m.tray_arrows_item
+	if id == "" and _last_tray_tap >= 0 and _last_tray_tap < m.tray.size():
+		id = m.tray[_last_tray_tap]
+	return UiIcons.item(id) if id != "" else null
 
 
 # --- panels ---------------------------------------------------------------------------------
@@ -414,6 +621,18 @@ func relayout() -> void:
 	layout = HudLayout.compute(vs, ins, left_handed, hud_scale)
 	root.size = vs
 	panel_host.size = vs
+	flash_host.size = vs
+	dim.position = Vector2.ZERO
+	dim.size = vs
+	edge_arrows.position = Vector2.ZERO
+	edge_arrows.size = vs
+	edge_arrows.k = hud_scale
+	edge_arrows.safe = layout[&"safe"]
+	edge_arrows.zone = layout[&"arrow_zone"]
+	edge_arrows.queue_redraw()
+	if script_flash != null and is_instance_valid(script_flash):
+		script_flash.size = vs
+		script_flash.set_insets(ins)
 	var k := Vector2(hud_scale, hud_scale)
 	_put(pause_button, layout[&"pause"], k)
 	_put(figgis, layout[&"figgis"], k)
@@ -426,7 +645,6 @@ func relayout() -> void:
 	_put(action, layout[&"action"], k)
 	edge_bubble.scale = k
 	pick_strip.scale = k
-	pip.scale = k
 	overview.scale = k
 	_place_pip()
 	_place_edge_bubble()
@@ -460,9 +678,17 @@ func _place_pip() -> void:
 	if layout.is_empty():
 		return
 	var esc := pip.escalated
-	pip.position = (layout[&"pip_escalated"] if esc else layout[&"pip"]).position
+	var r: Rect2 = layout[&"pip_escalated"] if esc else layout[&"pip"]
+	pip.position = r.position
+	var sz := pip.frame_size()
+	pip.scale = Vector2(r.size.x / sz.x, r.size.y / sz.y)
 	var ov: Rect2 = layout[&"overview_escalated"] if (esc and pip.shown) else layout[&"overview"]
 	overview.position = ov.position
+
+
+## The PipFrame's on-screen rect (its hit box) as placed now.
+func pip_rect() -> Rect2:
+	return Rect2(pip.position, pip.size * pip.scale)
 
 
 func _place_edge_bubble() -> void:
@@ -503,15 +729,36 @@ func _ghost_tip(target: StringName) -> Vector2:
 
 
 func _place_ghost() -> void:
-	var tip := _ghost_tip(_ghost_target)
-	ghost.position = tip - Vector2(ghost.size.x * 0.5, ghost.size.y) + Vector2(10, 18)
+	if _ghost_target == &"":
+		return
+	var tip: Vector2
+	if _ghost_target == GHOST_WORLD:
+		var p := _ghost_pos
+		if _ghost_fn.is_valid():
+			var v: Variant = _ghost_fn.call()
+			p = v if v is Vector2 else Vector2.INF
+		elif not _ghost_fn.is_null():
+			p = Vector2.INF   # the followed object is gone
+		if not p.is_finite():
+			if ghost.visible:
+				ghost.stop()
+			return
+		_ghost_pos = p
+		tip = ghost_clamp(p)
+	else:
+		# widgets: the fingertip just below-right of the centre, so the glove never hides the icon
+		tip = _ghost_tip(_ghost_target) + Vector2(10, 18)
+	ghost.show_at(tip, _ghost_mode, _ghost_hold_s)
 
 
 func _set_paused(on: bool) -> void:
 	_paused_shown = on
-	root.modulate = Color(1, 1, 1, 0.45) if on else Color.WHITE
-	for w in [pause_button, figgis, meter, pip, overview, tray, clarence, action, edge_bubble, pick_strip]:
+	# the widgets fade, not the root: the dim (set_dim) keeps its own strength while paused
+	for w in [banner, pause_button, figgis, meter, pip, overview, tray, clarence, action, edge_bubble, pick_strip]:
+		(w as CanvasItem).modulate = Color(1, 1, 1, 0.45) if on else Color.WHITE
 		var tw := w as TouchWidget
+		if tw == null:
+			continue
 		tw.interactive = not on
 		if on:
 			tw.release_touch()

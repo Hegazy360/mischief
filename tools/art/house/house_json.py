@@ -68,7 +68,12 @@ def build(reg):
             for k, v in a.items():
                 if k not in ("pos", "size", "art"):
                     d[k] = [int(round(c)) for c in v] if k == "eyes" else v
+        if hid in geo.RASTER:
+            d["raster"] = geo.RASTER[hid]
         hotspots.append(d)
+    for dd in reg.decor:
+        if dd["id"] in geo.RASTER:
+            dd["raster"] = geo.RASTER[dd["id"]]
     house = {
         "version": 1,
         "id": "humdrum_7",

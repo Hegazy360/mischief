@@ -15,6 +15,9 @@ class LoopEntry:
 	## -1 = no cap.
 	var max_ticks: int = -1
 	var first_loop_only: bool = false
+	## `hooks: "after_gate"`: the activity's USE hooks (and trigger marks) wait until the gate opens —
+	## their marks count from the gate-open tick ("waits for the lever, then drops the needle").
+	var hooks_after_gate: bool = false
 
 
 var id: String = ""
@@ -24,6 +27,8 @@ var title: String = ""
 var status: String = "draft"
 var seed: int = 1
 var rooms: PackedStringArray = PackedStringArray()
+## Rooms Bellows walks through that Hush never enters (the Prologue's roped-off hall).
+var backstage: PackedStringArray = PackedStringArray()
 var entry: String = ""
 var rules: Dictionary = {}
 var spot_fill_s: float = 1.0
@@ -57,6 +62,13 @@ var exit_room: String = ""
 var exit_x_sub: int = 0
 ## Hush climbs in: busy (and out of sight) until this tick.
 var hush_enter_ticks: int = 0
+## The climb-in starts at this tick (`hush.enter.at_s`).
+var hush_enter_at_ticks: int = 0
+## `rules.combos`: the combo ids this Night allows; `combos_all` true when the key is absent (all allowed).
+var combos_all: bool = true
+var combos: PackedStringArray = PackedStringArray()
+## `rules.senses` (default true): false = Bellows never starts a "?" (sight or hearing) and never catches.
+var senses: bool = true
 ## Scripted end: a condition and its reason (director.end / director.end_when).
 var end_when: Variant = null
 var end_reason: String = "prologue_done"
@@ -77,6 +89,7 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 	e.status = ContentUtil.s(d, "status", "draft")
 	e.seed = ContentUtil.i(d, "seed", 1)
 	e.rooms = ContentUtil.strs(d, "rooms")
+	e.backstage = ContentUtil.strs(d, "backstage")
 	e.entry = ContentUtil.s(d, "entry")
 	e.rules = ContentUtil.dict(d, "rules")
 	var act_i := clampi(e.act, 0, SimConst.SPOT_FILL_S.size() - 1)
@@ -87,6 +100,10 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 	e.curtain_calls = ContentUtil.b(e.rules, "curtain_calls", true)
 	e.loop_repeat = ContentUtil.b(e.rules, "loop_repeat", true)
 	e.nerves_temper = ContentUtil.i(e.rules, "nerves_temper", SimConst.NERVES_TEMPER)
+	if e.rules.has("combos") and e.rules["combos"] != null:
+		e.combos_all = false
+		e.combos = ContentUtil.strs(e.rules, "combos")
+	e.senses = ContentUtil.b(e.rules, "senses", true)
 	e.new_rule = ContentUtil.s(d, "new_rule")
 	e.card = ContentUtil.dict(d, "card")
 	e.cold_open = ContentUtil.dict(d, "cold_open")
@@ -94,6 +111,7 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 	var hen := ContentUtil.dict(hd, "enter")
 	if not hen.is_empty():
 		e.hush_enter_ticks = Fx.ticks(ContentUtil.f(hen, "at_s", 0.0) + ContentUtil.f(hen, "busy_s", 0.0))
+		e.hush_enter_at_ticks = Fx.ticks(ContentUtil.f(hen, "at_s", 0.0))
 	e.cast = ContentUtil.dict(d, "cast")
 	var hs := ContentUtil.dict(hd, "start")
 	e.hush_room = ContentUtil.s(hs, "room")
@@ -109,6 +127,8 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 		var g := ContentUtil.dict(entry_d, "gate")
 		if not g.is_empty():
 			_apply_gate(l, g)
+		if ContentUtil.s(entry_d, "hooks") == "after_gate":
+			l.hooks_after_gate = true
 		e.loop.append(l)
 	e.fixup_overrides = ContentUtil.dict(d, "fixup_overrides")
 	for ld in ContentUtil.arr(d, "script"):
@@ -149,6 +169,8 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 
 
 static func _apply_gate(l: LoopEntry, g: Dictionary) -> void:
+	if ContentUtil.s(g, "hooks") == "after_gate":
+		l.hooks_after_gate = true
 	l.has_gate = true
 	l.until = g.get("until", null)
 	l.plus_ticks = Fx.ticks(ContentUtil.f(g, "plus_s", 0.0))

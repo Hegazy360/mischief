@@ -74,6 +74,10 @@ var portal_crossed: int = -1
 var go_from_inside: bool = true
 ## Climbing in through the entry (episode `hush.enter`): busy and out of sight while true.
 var entering: bool = false
+## One-shot starts (SimOneshots): Figgis's yank, a near-miss pop-out, the Mirror wink.
+var yank_t0: int = -1000000
+var near_miss_t0: int = -1000000
+var wink_t0: int = -1000000
 
 
 func setup(w: SimWorld) -> void:
@@ -160,12 +164,18 @@ func _reject(w: SimWorld, c: String, why: String) -> void:
 	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": why})
 
 
-## A go/move while busy becomes the single queued command (a newer one replaces it, TECH §3.5) and
+## A go/move while busy (or a POP OUT tapped mid-dive) becomes the single queued command (a newer one replaces it, TECH §3.5) and
 ## says so at once — `cmd_queued {c, why, target}`, why = "entering" during the climb-in, else
 ## "busy" — so a held tap is never silent (the view shows it as queued).
+## `target` is always a hotspot id or "<room>:<x px>" (the view anchors its queued marker there).
 func _queue(w: SimWorld, name: String, c: Dictionary, target: String) -> void:
 	queued = c.duplicate()
 	w.emit(SimEvents.CMD_QUEUED, {"c": name, "why": "entering" if entering else "busy", "target": target})
+
+
+## "<room>:<x px>" of a floor point (cmd_queued targets).
+func point_target(w: SimWorld, r: int, x: int) -> String:
+	return "%s:%d" % [w.room_id(r), Fx.to_px(x)]
 
 
 func _cmd_go(w: SimWorld, c: Dictionary) -> void:
@@ -177,6 +187,9 @@ func _cmd_go(w: SimWorld, c: Dictionary) -> void:
 	var h := w.db.house.hotspots[hi]
 	if not h.tappable:
 		_reject(w, SimCmd.GO, "not_tappable")
+		return
+	if w.ctx.is_backstage(h.room_idx) or w.ctx.is_backstage(_far_room(w, h)):
+		_reject(w, SimCmd.GO, "backstage")
 		return
 	if not w.ctx.hush_allowed(h.room_idx):
 		_reject(w, SimCmd.GO, "locked")
@@ -213,6 +226,9 @@ func _cmd_move(w: SimWorld, c: Dictionary) -> void:
 	if r < 0:
 		_reject(w, SimCmd.MOVE, "unknown_room")
 		return
+	if w.ctx.is_backstage(r):
+		_reject(w, SimCmd.MOVE, "backstage")
+		return
 	if not w.ctx.hush_allowed(r):
 		_reject(w, SimCmd.MOVE, "locked")
 		return
@@ -223,7 +239,7 @@ func _cmd_move(w: SimWorld, c: Dictionary) -> void:
 		_set_pin(w, r, tx)
 		return
 	if is_busy():
-		_queue(w, SimCmd.MOVE, c, rid)
+		_queue(w, SimCmd.MOVE, c, point_target(w, r, tx))
 		return
 	if path != null and target_hs < 0 and is_travelling() and path.final_room() == r and path.final_x() == tx:
 		if want_run and not run:
@@ -236,6 +252,13 @@ func _cmd_move(w: SimWorld, c: Dictionary) -> void:
 		return
 	target_hs = -1
 	w.emit(SimEvents.HUSH_GO, {"target": rid, "run": want_run})
+
+
+## The room on the far side of a door / stairs hotspot (-1 for other kinds): going there enters it.
+func _far_room(w: SimWorld, h: HotspotDef) -> int:
+	if (h.kind == HotspotDef.STAIRS or h.kind == HotspotDef.DOOR) and h.link_idx >= 0:
+		return w.db.house.links[h.link_idx].other(h.room_idx)
+	return -1
 
 
 ## [room, x_sub] Hush walks to for a hotspot.
@@ -393,7 +416,12 @@ func _cmd_freeze(w: SimWorld, on: bool) -> void:
 	if state == RIGGING:
 		w.emit(SimEvents.RIG_PAUSE, {"prank": w.db.prank_list[rig_prank].id})
 		rig_held = false
+	var was := state
 	_try_freeze(w)
+	if state != FROZEN and was != FROZEN:
+		# on the stairs, in a door or mid-rummage: she freezes the moment that ends — say so now
+		w.emit(SimEvents.CMD_QUEUED, {"c": SimCmd.FREEZE, "why": "entering" if entering else "busy",
+			"target": point_target(w, room, x_sub)})
 
 
 func _try_freeze(w: SimWorld) -> void:
@@ -450,12 +478,18 @@ func _cmd_pin(w: SimWorld, c: Dictionary) -> void:
 		return
 	if c.has("hotspot"):
 		var hi: int = w.db.house.hotspot_index.get(str(c["hotspot"]), -1)
+		if hi >= 0 and (w.ctx.is_backstage(w.db.house.hotspots[hi].room_idx) or w.ctx.is_backstage(_far_room(w, w.db.house.hotspots[hi]))):
+			_reject(w, SimCmd.PIN, "backstage")
+			return
 		if hi < 0 or not w.ctx.hush_allowed(w.db.house.hotspots[hi].room_idx):
 			_reject(w, SimCmd.PIN, "unknown_hotspot")
 			return
 		_set_pin_hotspot(w, hi)
 		return
 	var r := w.room_idx(str(c.get("room", "")))
+	if w.ctx.is_backstage(r):
+		_reject(w, SimCmd.PIN, "backstage")
+		return
 	if r < 0 or not w.ctx.hush_allowed(r):
 		_reject(w, SimCmd.PIN, "unknown_room")
 		return
@@ -490,6 +524,10 @@ func _go_pin(w: SimWorld, want_run: bool) -> void:
 
 
 func _cmd_pop_out(w: SimWorld, want_run: bool) -> void:
+	if state == DIVING and at_hotspot >= 0:
+		# tapped while still diving in (the button already says POP OUT): she pops out the moment the dive ends
+		_queue(w, SimCmd.POP_OUT, {"c": SimCmd.POP_OUT, "run": want_run}, w.db.house.hotspots[at_hotspot].id)
+		return
 	if state != HIDDEN:
 		_reject(w, SimCmd.POP_OUT, "not_hidden")
 		return
@@ -497,6 +535,7 @@ func _cmd_pop_out(w: SimWorld, want_run: bool) -> void:
 	if w.senses.f2f_active() and w.senses.f2f_kind == Senses.F2F_HIDING and w.senses.f2f_spot == spot:
 		w.senses.f2f_escaped = true
 		want_run = true
+		near_miss_t0 = w.tick
 	w.emit(SimEvents.POP_OUT, {"spot": w.db.house.hotspots[spot].id})
 	hidden_spot = -1
 	watched_spot = -1
@@ -729,6 +768,7 @@ func figgis_into(w: SimWorld, spot: int) -> void:
 	freeze_held = false
 	frozen = false
 	var moved_room := room != h.room_idx
+	yank_t0 = w.tick
 	room = h.room_idx
 	floor = w.db.house.rooms[room].floor
 	x_sub = h.use_sub
@@ -782,6 +822,9 @@ func copy() -> SimHush:
 	o.portal_crossed = portal_crossed
 	o.go_from_inside = go_from_inside
 	o.entering = entering
+	o.yank_t0 = yank_t0
+	o.near_miss_t0 = near_miss_t0
+	o.wink_t0 = wink_t0
 	return o
 
 
@@ -790,7 +833,8 @@ func hash_into(h: int) -> int:
 	for v in [room, floor, x_sub, facing, state, hidden_spot, watched_spot, int(frozen), freeze_pose_seed,
 			rig_prank, rig_step, last_input_tick, arm_moving_until, at_hotspot, int(run), visited_mask,
 			pin_room, pin_x, pin_hs, path_serial, target_hs, timer, int(rig_held), int(freeze_held),
-			int(frozen_by_rig), int(wheezing), wheeze_t, noise_t, pick_container, int(go_from_inside), int(entering)]:
+			int(frozen_by_rig), int(wheezing), wheeze_t, noise_t, pick_container, int(go_from_inside), int(entering),
+			yank_t0, near_miss_t0, wink_t0]:
 		h = StateHash.mix(h, v)
 	for s in carrying:
 		h = StateHash.mix_str(h, s)

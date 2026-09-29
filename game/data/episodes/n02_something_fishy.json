@@ -8,7 +8,7 @@
   "seed": 102,
   "rooms": ["porch", "hall", "parlour", "kitchen"],
   "entry": "window",
-  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false},
+  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false, "combos": []},
   "new_rule": "freeze_specs",
   "card": {
     "text": "Hold FREEZE to be a statue. Specs off, he only spots what moves. Specs on, get out of sight.",
@@ -21,8 +21,8 @@
   },
   "hush": {"start": {"room": "kitchen", "x": 3800}},
   "bellows": {
-    "start": {"room": "hall", "x": 952},
-    "loop": [{"a": "mirror"}, {"a": "phone"}, {"a": "clock"}, {"a": "paper"}, {"a": "fire"}, {"a": "snack"}]
+    "start": {"room": "parlour", "x": 2080},
+    "loop": [{"a": "paper"}, {"a": "fire"}, {"a": "snack"}, {"a": "mirror"}, {"a": "phone"}, {"a": "clock"}]
   },
   "cast": {"beryl": null, "delphine": null},
   "fixup_overrides": {},
@@ -82,18 +82,13 @@
   "director": {
     "gates": [],
     "cues": [
+      {"id": "card_specs", "when": {"tick_ge_s": 1.0}, "card": "card_specs", "once": true},
       {
         "id": "card_freeze",
-        "when": {"tick_ge_s": 1.0},
+        "when": {"event_seen": {"event": "specs", "match": {"on": false}}},
         "card": "card_freeze",
         "target": "action",
         "mode": "hold",
-        "once": true
-      },
-      {
-        "id": "card_specs",
-        "when": {"event_seen": {"event": "specs", "match": {"on": true}}},
-        "card": "card_specs",
         "once": true
       }
     ]

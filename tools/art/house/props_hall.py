@@ -76,14 +76,16 @@ def coat_cupboard(reg):
         out += box(x0, top + 4, x1 - x0, bot - top - 26, 6, wood, W, hi=False)
         dx0, dx1 = x0 + 14, x1 - 14
         if ajar:
-            # the door swung open a crack on its right: dark gap with Hush peeking, gloves on the edge
+            # the door swung wide open toward the viewer on its left hinge: the whole cupboard is a dark gap
+            # (two coats hang in it) where the view draws Hush's animated eyes at `eyes` (no baked eyes)
             out.append(rect(dx0, top + 18, dx1 - dx0, bot - top - 54, 4, fill=pal.DARK_GAP, sil=False))
-            out += hush_eyes(dx1 - 30, -300, look=1, s=0.95)
-            pb = PB().M(dx0, top + 18).L(dx1 - 44, top + 8).L(dx1 - 44, bot - 26).L(dx0, bot - 36).Z()
-            out += [path(pb, fill=wood[0], sil=False), detail(pb, D)]
-            out.append(detail(PB().rrect(dx0 + 12, top + 40, dx1 - dx0 - 72, 150, 5).rrect(dx0 + 12, top + 214, dx1 - dx0 - 72, 150, 5), 2.5))
-            out += knob(dx1 - 54, -236, 7)
-            out += glove_fingers(dx1 - 42, -262, side=1, s=0.95, n=3)
+            for (cx_, ang) in ((dx0 + 22, 4), (dx1 - 20, -5)):
+                coat = [(cx_ - 14, top + 40), (cx_ + 14, top + 40), (cx_ + 22, top + 200), (cx_ - 20, top + 204)]
+                out.append(group([path(PB().smooth(coat, True, 0.3), fill="#3A3150", sil=False)], rot=ang, cx=cx_, cy=top + 40, sil=False))
+            leaf = PB().M(dx0, top + 18).L(dx0 - 24, top + 30).L(dx0 - 24, bot - 44).L(dx0, bot - 36).Z()
+            out += [path(leaf, fill=wood[1], sil=False), path(PB().M(dx0 - 4, top + 30).L(dx0 - 18, top + 38).L(dx0 - 18, bot - 50)
+                                                            .L(dx0 - 4, bot - 46).Z(), fill=wood[0], sil=False), detail(leaf, D)]
+            out += knob(dx0 - 20, -236, 6)
         else:
             out.append(rect(dx0, top + 18, dx1 - dx0, bot - top - 54, 4, fill=wood[0], sil=False))
             out.append(detail(PB().rrect(dx0, top + 18, dx1 - dx0, bot - top - 54, 4), D))
@@ -99,7 +101,8 @@ def coat_cupboard(reg):
     hat = [(x0 + 30, top - 18), (x0 + 36, top - 44), (x0 + 60, top - 50), (x0 + 84, top - 44), (x0 + 90, top - 18)]
     for s in ("idle", "occupied"):
         p.add(s, shape(hat, "#6A7FA0", W, smooth=True), rect(x0 + 18, top - 24, 84, 8, 4, fill="#556A8C", sw=D, stroke=INK))
-    p.extra["eyes"] = [x1 - 44, -300]
+    p.extra["eyes"] = [(x0 + x1) / 2, -300]
+    p.extra["eyes_scale"] = 0.85
     emit(reg, "hall_coat_cupboard", p)
 
 
@@ -406,7 +409,7 @@ def clock(reg):
 
     # ---- case (trunk + base, hiding) -------------------------------------------------
     c = Prop("clock_case", "hall")
-    tx0, tx1 = CX - 46, CX + 46
+    tx0, tx1 = CX - 52, CX + 52
 
     def trunk(ajar=False):
         out = [shadow(CX, -8, 70, 6)]
@@ -416,25 +419,30 @@ def clock(reg):
         out += box(tx0, HOOD_BOT - 4, tx1 - tx0, -112 - HOOD_BOT + 8, 5, maho, W, hi=False)
         wy0, wy1 = HOOD_BOT + 30, -150
         if ajar:
-            out.append(rect(tx0 + 12, wy0, tx1 - tx0 - 24, wy1 - wy0, 30, fill=pal.DARK_GAP, sil=False))
-            out += hush_eyes(CX, -300, look=-1, s=0.9)
-            door = PB().M(tx1 - 12, wy0).L(tx1 + 26, wy0 + 20).L(tx1 + 26, wy1 - 12).L(tx1 - 12, wy1).Z()
-            out += [path(door, fill=maho[0], sil=False), detail(door, D)]
-            out += glove_fingers(tx0 + 20, -250, side=-1, s=0.9, n=3)
+            # the glass door swung right open on its right hinge: the trunk is a dark gap (the pendulum pushed
+            # aside) for Hush's animated eyes at `eyes`
+            out.append(rect(tx0 + 10, wy0, tx1 - tx0 - 20, wy1 - wy0, 30, fill=pal.DARK_GAP, sil=False))
+            out.append(detail(PB().M(tx0 + 22, wy0 + 6).Q(tx0 + 16, wy1 - 90, tx0 + 26, wy1 - 60), 4))
+            out += ball(tx0 + 26, wy1 - 42, 14, pal.BRASS, D + 1, hi=False)
+            door = PB().M(tx1 - 10, wy0).L(tx1 + 30, wy0 + 22).L(tx1 + 30, wy1 - 14).L(tx1 - 10, wy1).Z()
+            out += [path(door, fill=maho[0], sil=False),
+                    path(PB().M(tx1 - 2, wy0 + 20).L(tx1 + 20, wy0 + 34).L(tx1 + 20, wy1 - 26).L(tx1 - 2, wy1 - 16).Z(), fill=pal.GLASS[1], sil=False),
+                    detail(door, D)]
         else:
-            out.append(rect(tx0 + 12, wy0, tx1 - tx0 - 24, wy1 - wy0, 30, fill=pal.GLASS[1], sil=False))
+            out.append(rect(tx0 + 10, wy0, tx1 - tx0 - 20, wy1 - wy0, 30, fill=pal.GLASS[1], sil=False))
             # pendulum
             out.append(detail(PB().M(CX, wy0 + 6).L(CX, wy1 - 60), 4))
             out += ball(CX, wy1 - 42, 18, pal.BRASS, D + 1, hi=True)
             out.append(path(PB().M(tx0 + 20, wy0 + 30).L(tx0 + 30, wy0 + 16).L(tx0 + 34, wy0 + 70).L(tx0 + 24, wy0 + 90).Z(), fill="#FFFFFF",
                             fop=0.5, sil=False))
-            out.append(rect(tx0 + 12, wy0, tx1 - tx0 - 24, wy1 - wy0, 30, fill="none", sw=D, stroke=INK, sil=False))
+            out.append(rect(tx0 + 10, wy0, tx1 - tx0 - 20, wy1 - wy0, 30, fill="none", sw=D, stroke=INK, sil=False))
             out += knob(tx1 - 16, (wy0 + wy1) / 2, 5)
         return out
 
     c.add("idle", trunk())
     c.add("occupied", trunk(ajar=True))
     c.extra["eyes"] = [CX, -300]
+    c.extra["eyes_scale"] = 0.72
     emit(reg, "hall_clock_case", c)
 
 

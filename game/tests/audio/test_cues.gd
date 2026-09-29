@@ -1,12 +1,15 @@
 ## data/audio/cues.json (TECH §5.8) and audio/sfx_map.json: event keys are sim events
-## (TECH §3.8), every referenced id resolves, content keys are canonical ids (TECH §14).
+## (`SimEvents.ALL`, TECH §3.8), every referenced id resolves, content keys are canonical ids
+## (TECH §14), and ruling L12 holds: no prank fire voice, no archetype accent kit, no squeak-bit
+## line (those live in clips), no title-card cue during play, the command-feedback and the
+## Prologue director-laugh cues exist.
 extends TestBase
 
 const CUES := "res://data/audio/cues.json"
 const MAP := "res://audio/sfx_map.json"
 const AUDIO := "res://autoload/audio.gd"
 
-## TECH §3.8 — every sim event name.
+## TECH §3.8 — every sim event name (the fallback when SimEvents is not loadable).
 const SIM_EVENTS: PackedStringArray = [
 	"hush_go", "hush_arrive", "hush_room", "rummage", "pick_window", "pick", "item_home", "restock", "rig_start",
 	"rig_pause", "rig_step_done", "rigged", "hide", "pop_out", "freeze", "noise", "squeak", "pin",
@@ -65,8 +68,9 @@ func test_cues_parse() -> void:
 func test_event_keys_are_sim_events() -> void:
 	var events: Dictionary = cues.get("events", {})
 	assert_ge(events.size(), 40, "cues cover the Stage-1 events")
+	var all: Array = SimEvents.ALL
 	for k: String in events:
-		assert_true(SIM_EVENTS.has(k), "'%s' is a TECH §3.8 event" % k)
+		assert_true(all.has(k), "'%s' is in SimEvents.ALL" % k)
 	for must in ["rigged", "spot_start", "near_miss", "caught", "running_gag", "running_gag_end", "meltdown_start",
 			"entry_warning", "squeak", "squeak_bit", "spotted", "chase_start", "chase_end", "fizzle", "lecture"]:
 		assert_true(events.has(must), "cue for %s" % must)
@@ -79,8 +83,83 @@ func test_content_keys_are_canonical() -> void:
 		assert_true(ARCHETYPES.has(k), "archetype %s" % k)
 	for k: String in (cues.get("squeak_bits", {}) as Dictionary):
 		assert_true(SQUEAK_BITS.has(k), "squeak bit %s" % k)
-	for p in ["achoo_ria", "kettle_drum", "tap_dance", "allegro_go_go", "something_fishy", "times_up"]:
-		assert_true((cues.get("pranks", {}) as Dictionary).has(p), "slice prank %s has a fire cue" % p)
+	for p in ["kettle_drum", "tap_dance", "allegro_go_go", "something_fishy", "times_up"]:
+		assert_true((cues.get("pranks", {}) as Dictionary).has(p), "slice prank %s has a (prop) fire cue" % p)
+
+
+# --- ruling L12 -------------------------------------------------------------------------
+
+func test_l12_no_clip_sounds_in_event_sections() -> void:
+	for p: String in (cues.get("pranks", {}) as Dictionary):
+		var ids := _action_ids((cues["pranks"] as Dictionary)[p], "voice")
+		assert_true(ids.is_empty(), "pranks.%s.fire plays no voice line (his voice is in the clip): %s" % [p, ids])
+	for a: String in (cues.get("archetypes", {}) as Dictionary):
+		assert_false(((cues["archetypes"] as Dictionary)[a] as Dictionary).has("accent"),
+			"archetypes.%s has no accent kit (the reaction clip carries its sounds)" % a)
+	for b: String in (cues.get("squeak_bits", {}) as Dictionary):
+		assert_true(_action_ids((cues["squeak_bits"] as Dictionary)[b], "voice").is_empty(),
+			"squeak_bits.%s plays no voice line (the bit clip carries it)" % b)
+	assert_false((cues.get("pranks", {}) as Dictionary).has("achoo_ria"),
+		"the sneeze fires no event-level sound: all of it is rx_sneeze_blast_a's clip events")
+
+
+func test_no_title_card_cue_during_play() -> void:
+	var dc: Dictionary = (cues.get("events", {}) as Dictionary).get("director_cue", {})
+	var m: Dictionary = (dc.get("by", {}) as Dictionary).get("map", {})
+	assert_false(m.has("title_card"), "NightScene swallows title_card; the curtain call plays the sting")
+
+
+func test_command_feedback_cues_on_the_ui_bus() -> void:
+	var events: Dictionary = cues.get("events", {})
+	var files: Dictionary = {}
+	var m: Variant = load_json(MAP)
+	if m is Dictionary:
+		files = (m as Dictionary).get("files", {})
+	for e in ["cmd_queued", "cmd_rejected"]:
+		assert_true(events.has(e), "cue for %s" % e)
+		var ids := _action_ids(events.get(e, {}), "sfx")
+		assert_eq(ids.size(), 1, "%s plays one sound" % e)
+		for id: String in ids:
+			assert_true(audio.has_sfx(id), "%s → %s resolves" % [e, id])
+			for f: String in audio.resolve_files(id):
+				assert_eq(String((files.get(f, {}) as Dictionary).get("bus", "")), "UI", "%s is on the UI bus" % f)
+
+
+func test_director_laughs_have_a_crowd_within_0_3_s() -> void:
+	var dc: Dictionary = (cues.get("events", {}) as Dictionary).get("director_cue", {})
+	var m: Dictionary = (dc.get("by", {}) as Dictionary).get("map", {})
+	for id in ["laugh_vase", "laugh_doorframe", "laugh_relief", "laugh_picture"]:
+		assert_true(m.has(id), "director cue %s" % id)
+		var acts: Array = m.get(id, []) if m.get(id, []) is Array else [m.get(id, {})]
+		var crowd_at := -1.0
+		for a: Dictionary in acts:
+			if a.has("crowd"):
+				crowd_at = float(a.get("delay_s", 0.0))
+		assert_between(crowd_at, 0.0, 0.3, "%s: the Stalls react within 0.3 s (pre-gate row 14)" % id)
+
+
+func test_laugh_starts_at_the_hold() -> void:
+	var lt: Dictionary = cues.get("laugh_tiers", {})
+	var f := float(lt.get("hold_delay_s", 0.0)) * 60.0
+	assert_between(f, 6.0, 12.0, "the laugh starts 6–12 f after the accent (GDD §6.5)")
+	assert_almost_eq(float(lt.get("duck_under_voice_db", 0.0)), -6.0, 0.01)
+
+
+## Every id under `key` ("sfx" / "voice") anywhere in an action tree.
+func _action_ids(v: Variant, key: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	if v is Array:
+		for x in v:
+			out.append_array(_action_ids(x, key))
+	elif v is Dictionary:
+		var d: Dictionary = v
+		for k: String in d:
+			if k == key:
+				for id in (d[k] if d[k] is Array else [d[k]]):
+					out.append(String(id))
+			elif d[k] is Dictionary or d[k] is Array:
+				out.append_array(_action_ids(d[k], key))
+	return out
 
 
 func test_every_referenced_id_resolves() -> void:
@@ -90,7 +169,7 @@ func test_every_referenced_id_resolves() -> void:
 	var n := [0]
 	for sect in ["events", "pranks", "archetypes", "squeak_bits"]:
 		_walk(cues.get(sect, {}), sect, n)
-	assert_gt(n[0], 80, "checked %d references" % n[0])
+	assert_gt(n[0], 60, "checked %d references" % n[0])
 
 
 func _walk(v: Variant, where: String, n: Array) -> void:
@@ -165,3 +244,41 @@ func test_music_meta_in_map() -> void:
 		bpms.append(float((music.get("mus_chain_%d" % (i + 1), {}) as Dictionary).get("bpm", 0.0)))
 	for i in 3:
 		assert_lt(bpms[i], bpms[i + 1], "chain tempos step up")
+
+
+# --- the AudioDirector's names (view request: confirm the ids it plays) ------------------
+
+## Every id / kind `view/audio_director.gd` plays by name (its fallback footsteps, its built-in default
+## cues, its laugh path and the Stalls' specials) resolves in the Audio autoload.
+func test_audio_director_names_resolve() -> void:
+	if not FileAccess.file_exists(MAP):
+		skip("sfx_map.json not generated")
+		return
+	var ids: PackedStringArray = ["bellows_step", "rig_done", "dive", "pop_out", "clarence_squeak", "door_jiggle",
+		"door_slam_bonk", "tomato_splat", "stomp_quake", "specs_tink", "woodblock_bonk"]
+	for i in range(1, 9):
+		ids.append("step_pizz_%d" % i)
+	for id: String in ids:
+		assert_true(audio.has_sfx(id), "AudioDirector id '%s' resolves" % id)
+	for s: String in ["rigged", "bit", "spot", "near_miss", "alert", "caught", "fizzle", "combo", "meltdown"]:
+		assert_true(audio.has_sfx("sting_" + s), "sting %s" % s)
+	# laugh tiers + StallsView.special() kinds (shush is the Stalls' spelling of shh)
+	for k: String in ["t0", "t1", "t2", "t3", "t4", "relief", "gasp", "shush", "behind_you", "boo", "aww", "chant",
+			"ooh", "cheer", "bow_chant"]:
+		assert_true(audio.CROWD_KINDS.has(k), "crowd kind %s" % k)
+		audio.crowd(k)
+		var bank := "crowd_" + String(audio.CROWD_ALIASES.get(k, k))
+		assert_true(String(audio.last_pick(bank)).begins_with(bank + "_"), "crowd(%s) plays a %s take" % [k, bank])
+	# the director's laugh-tier names in clip `laugh` events
+	var names: Dictionary = (cues.get("laugh_tiers", {}) as Dictionary).get("names", {})
+	for n: String in ["titter", "chuckle", "laugh", "big", "roar"]:
+		assert_true(names.has(n), "laugh tier name %s" % n)
+
+
+## The events added in Stage 2 have cues: command feedback (event-level, UI bus) — and a micro-gag
+## has none (its sounds are the mg_<id> clip's events, L12).
+func test_stage2_event_cues() -> void:
+	var events: Dictionary = cues.get("events", {})
+	assert_true(events.has("cmd_queued") and events.has("cmd_rejected"), "command feedback cues")
+	assert_false(events.has("micro_gag"), "no event-level micro-gag sound (clip events own them)")
+	assert_false(cues.has("micro_gags"), "no cues.json micro-gag map")

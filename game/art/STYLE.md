@@ -24,12 +24,16 @@ no weapons, no gore; residue is ridiculous, never harmful.
 * **Not allowed:** `<text>` (letters are drawn as shapes — see the CONFISCATED stamp), filters / blur /
   drop shadows, masks, `clipPath`, `<image>`, `<use>`, `<pattern>`, `<style>`, `class=`, `style=`.
   Presentation **attributes** only.
-* **Gradients** only for walls, sky, stage drapes and glows (`rooms/`, `stage/`). Never on characters,
-  props, items or icons.
+* **Gradients** only for walls, sky, stage drapes and glows (`rooms/`, `stage/`, the cold-open set pieces
+  `cold/*_bg|_fg.svg`). Never on characters, props, items, icons or cold-open state sprites.
 * Transparent background except room backgrounds, stage flats and screen overlays.
 * **3 px canvas margin**: nothing (ink or outline sprite) touches the outer 3 px of a sprite canvas.
 * Compact: coordinates to 1 decimal, no editor metadata. Caps: props ≤ 48 KB, icons/items ≤ 16 KB,
-  rooms ≤ 120 KB, stage ≤ 160 KB.
+  rooms ≤ 120 KB, stage ≤ 160 KB, cold-open set pieces (`cold/*_bg|_fg.svg`) ≤ 160 KB, cold-open state
+  sprites ≤ 48 KB.
+* **Letters are shapes.** Any word or numeral in the art (the title card, the CONFISCATED stamp, the house
+  numbers, the sleeping Zs) is converted to path outlines from the project's OFL Lilita One
+  (`game/ui/theme/fonts/LilitaOne-Regular.ttf`) by `tools/art/house/lettering.py` (fontTools) — never `<text>`.
 * **≤ 10 colours per sprite** (ink and white included; all states of one prop share one palette so a
   state swap never changes a shared part's colour). The generator merges the closest colours if a
   drawing goes over — design within 10 so it never has to merge a base into its own shade.
@@ -112,8 +116,9 @@ no weapons, no gore; residue is ridiculous, never harmful.
     the spun clock, the chandelier gone, the broken recliner, the torn paper, the warped record, the
     flattened bellows, the bare fan ribs, the tipped cup, the kipper flopped by the phone). Otherwise the
     view greys the `idle` sprite;
-  * `occupied` — hiding spots with Hush's eyes (+ glove fingers) in a dark gap; the eye centre is also
-    given as `eyes: [x, y]` so the view can overlay animated eyes exactly there;
+  * `occupied` — hiding spots: a dark gap (`#241D33`, big enough for her eye pair at `eyes_scale`) with Hush's
+    glove fingertips, **no baked eyes** (Stage 2): the view draws her animated eyes (`chars/hush/hidden_eyes_*`,
+    tracking Bellows, blinking) centred on `eyes: [x, y]`, scaled by `eyes_scale` (default 1.0);
   * `front` — an overlay drawn **above** characters (the cheval mirror's empty frame for MIRROR, MIRROR).
 * **Outline sprite** `<name>_ol.svg`: the idle silhouette grown 4 px, flat white (`#FFFFFF` only); its
   canvas is the prop canvas grown 4 px on every side, so it is drawn at `art_pos − (4, 4)`. The view draws
@@ -133,42 +138,88 @@ no weapons, no gore; residue is ridiculous, never harmful.
   from −474 that swing (edge-on when closed, face-on-ish when open). `<room>_fg.svg` holds only what
   must occlude characters: the lintel lip over each doorway gap (door-jamb side casings stay in the bg —
   a vertical fg strip would slice anyone standing near a doorway, e.g. Bellows at the tea counter).
-* Final rooms (porch, hall, parlour, kitchen) carry set dressing; greybox rooms (landing, bathroom,
-  bedroom, dressing, conservatory, garden) are flat pastel blocks with correct silhouettes and doorways,
-  seen as the "unlit backstage"; the view dims locked rooms blue-grey and ropes their doorways
-  (`stage/velvet_rope.svg`).
+* Final rooms carry set dressing: the slice (porch, hall, parlour, kitchen) and, since Stage 2, every room a
+  slice shot also shows — the upper floor (landing, bathroom, bedroom, dressing room: their bottom ≈ 260 px sit
+  in every ground-floor frame) and the conservatory (its first 600 px are in every kitchen frame), props
+  included (`props_edge.py`). Only the garden is still greybox (flat pastel blocks with correct silhouettes).
+  The view dims locked rooms blue-grey as the unlit set and ropes their doorways (`stage/velvet_rope.svg`);
+  dimmed, they must still read as designed furniture.
 * Walk band calm: nothing busy between y −380 and 0 behind where characters stand.
 
 ## 8. How the engine places house art (house.json — the view's contract)
 
 * Rooms: `rooms[].art.{bg, fg}` at `art.pos = [x0, −640]` (y relative to the room's floor line;
-  floors at y 0 and −700).
+  floors at y 0 and −700); `art.final` = drawn at final quality.
 * Hotspots: `art_pos` (canvas top-left, y relative to the floor line), `art_size` (the idle canvas),
   `art.{idle, open, rigged, rigged_<prank>, spent, occupied, front, outline}` (outline at `art_pos − (4, 4)`),
-  optional `eyes`, `z`
+  optional `eyes` + `eyes_scale` (the animated hidden eyes' centre and scale), `z`
   (1 = draw above other props, e.g. an open door leaf; characters are always above props except the
   `front` overlays).
-* Decor (non-hotspot sprites the view animates): `decor[] = {id, room, pos, size, art{idle, …}, z, hidden?}`
-  — z < 0 behind props, ≥ 0 in front of props (still behind characters). `hidden: true` = shown only by
-  an event (the smashed vase shards). Meltdown drops: `quake_props[room][] = {prop, x, decor}`.
+* **`raster`** (hotspots and decor, optional; ∈ {1.0, 1.5, 2.0}, default 2.0): the atlas raster scale hint.
+  The big hiding pieces, doors, the entry window and the tall furniture are 1.5 (never the punch-in subject
+  above 1.4×), soft glows 1.0; outline `_ol` sprites are always 1× (no hint). `s2-view` builds each room atlas
+  with `s2-rig`'s per-path scale from these hints; `build_all.py --report` prints the MPx per room at them.
+* Decor (non-hotspot sprites the view animates): `decor[] = {id, room, pos, size, art{idle, …}, z, …}`:
+  * **`z`**: −1 behind the props, 0/1 in front of the props (still behind the characters), **2 = over the
+    characters** (like `art.front`: the `kitchen_sink_lip` he lands behind);
+  * `hidden: true` + `show`: drawn only when something shows it — `"event"` = a clip `decor {id, visible}` event
+    (the sink lip, the smashed vase), `"bow"` = while Take a Bow is available (the front-door glow);
+  * **`frames: [paths]` + `fps`**: a looping flicker the view plays (the parlour fire 3 × 8 fps, the mantel
+    candles 3 × 6 fps); `frames[0]` = `art.idle`, every frame on the same canvas;
+  * `pivots: {name: [x, y]}` in canvas px: `kitchen_stool.seat` / `.foot`, `parlour_vase.base` / `.tip_l`,
+    `parlour_picture_frame.hook` / `.hole`;
+  * `slide` (the vase on the mantel): `{dir, step_px: [min, max], edge_x, floor_y, smashed}` — the view slides
+    it `dir` by a step per warm-up note, tips it at `edge_x`, drops it to `floor_y` and swaps to the `smashed`
+    decor;
+  * extra states in `art` (`parlour_picture_frame.falling` for `cue: "laugh_picture"`, the portrait's
+    `floured`); `station` (the decor belongs to that station: the stool under `st_tea`); `cue` (the director
+    cue that stages it);
+  * `blend: "add"`, `pulse_hz`, `link` — additive glows (`hall_front_door_glow` round the `front_door` link,
+    pulsing at 1.5 Hz).
+  Meltdown drops: `quake_props[room][] = {prop, x, decor}`.
+* **The stool** (`kitchen_stool`, `res://art/house/props/kitchen_stool.svg`, 94 × 163): `pos` [2953, −156],
+  seat pivot [47, 6] = world (3000, −150) under `st_tea.stand_x`, foot pivot [47, 156] on the floor. The
+  Bellows stool prop rides the same file; never two stools on screen (the clip hides the decor).
 * Stage: `stage.flies` (tile along x, bottom edge at the top of the upper floor, `fill_color` above),
   `stage.apron` (tile along x at y = +60), `stage.footlight_glow` (additive, every 256 px), `stage.pieces`
   (sky flats, roofs: absolute `world_pos`), `stage.proscenium_l/_r` (absolute `world_pos`), screen-space
-  `curtain` (1920 × 1080, tile x), `curtain_valance`, `vignette_top`, and `velvet_rope` (`anchor` = its
-  bottom-centre at the doorway x on the floor line). `stage.bounds` = the world rectangle the camera may
-  show.
+  `curtain` (1920 × 1080, tile x), `curtain_valance`, `vignette_top`, `velvet_rope` (`anchor` = its
+  bottom-centre at the doorway x on the floor line), **`bow_spot`** (screen space, additive, `anchor`
+  bottom-centre on the apron, `alpha`: the curtain-call light pool) and **`title_card`**. `stage.bounds` = the
+  world rectangle the camera may show.
+* **`stage.title_card`** = `{art, bulbs: [a, b], size: [1500, 790], screen: true, pivot, hang, rest_center,
+  chase_hz, drop_s, hold_s}`: the gilded marquee (MISCHIEF / NEXT DOOR, letters as Lilita One paths, Hush
+  peeking over the top-right corner) on two fly ropes that start at the canvas top. It drops from above the
+  frame to `rest_center` (screen px in the 2400 × 1080 frame; the rope tops then sit on the frame's top edge)
+  in `drop_s`, squashes about `pivot` (the board's bottom centre) on landing and holds `hold_s`; the two
+  `bulbs` overlays (same canvas: even / odd bulbs lit) alternate at `chase_hz` over the board, whose own bulbs
+  are warm-unlit.
+* **Cold-open sets** — `game/data/house/cold_sets.json` (`tools/art/house/cold.py`):
+  `{"version": 1, "frame": [2400, 1080], "sets": {"<episode id>": {episode, time, size: [2400, 1080],
+  safe: [240, 0, 1920, 1080], layers: [{id, art, pos, size, z, state?}], anchors: {name: [x, y]},
+  actors: {rig: {facing, scale, pose, behind?}}, states: {layer: {state: path}}}}}`. Screen space: the set is
+  composed on the logical 20:9 frame, the action inside `safe` (the central 1920 px) so 16:9 loses nothing.
+  Layers with `z` ≤ 0 draw behind the actors, `z` ≥ 2 over them (`sill_no7`: his belly behind the sill);
+  a layer with `states` shows `states[layer][state]` (start = the layer's `state`; an empty path hides it);
+  `anchors.bellows` = the rig's root (feet) position, `bellows_face` the camera focus, the rest are
+  targets/focus points (`window_no9`, `crack`, `birds`, `balloon`, `string_in`, `box`, `door`, `sign`, …).
+  Files `game/art/house/cold/<set>_bg.svg` (full frame, gradients allowed), `<set>_<piece>_fg.svg` (set pieces
+  over the actors: `n01_sill_fg.svg`), state sprites (prop rules: ≤ 10 colours, 5 px ink, 3 px margin).
 
 ## 9. Icons
 
 * Items: 128 px canvas, 6 px ink, a bold single object, readable at 64 px (tray 128, pick strip 144,
   badge 56). Activities/detours: 88 px canvas, 5 px ink, one object that says "what he'll do next"
   (a teacup, a gramophone, a bath), readable at 44 px, drawn to sit inside a white thought bubble.
+  `exit` (the walk-out: a flight of stairs and his huff) is the bubble for `bubble.next == "exit"`.
 
 ## 10. Readable at phone scale — the checks (do them, look at the PNGs)
 
 1. `python3 tools/art/house/validate_svg.py` and `lint_rects.py` are green.
 2. Screenshot at 1200 × 540 (20:9 phone): `tools/scripts/shot.sh res://scenes/dev/house_preview/
-   HousePreview.tscn out.png 30 <sandbox> -- --room=<id> [--state=rigged] [--rects --badges] [--chars]`.
+   HousePreview.tscn out.png 30 <sandbox> -- --room=<id> [--state=rigged] [--rects --badges] [--chars]`
+   (`--chars` = the real Hush and Bellows rigs at their stations; `--slice=n01` dims the locked rooms;
+   `--cold=<set> [--cold_state=layer:state,…] [--chars]` a cold-open set; `--title` the title card).
 3. At that size every interactable is identifiable in one glance, every rigged tell differs from idle
    without reading text, and nothing in the walk band competes with the characters (use `--chars`: the
    plum barrel and the striped mime must be the strongest shapes on screen).

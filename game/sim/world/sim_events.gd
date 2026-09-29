@@ -40,6 +40,11 @@ const SQUEAK_BIT := "squeak_bit"            ## {bit, score}
 const HEAD_TURN := "head_turn"
 const LURE := "lure"                        ## {room, x}
 const LURE_FATIGUE := "lure_fatigue"
+## A micro-gag beat (GDD §2.1 "a micro-gag every 5–8 s"): {id, activity, room, x, len, emote, vis}.
+## `activity` = the activity or detour id ("walk" for a walk beat), `len` = clip frames, `emote` ∈
+## `EMOTES` or "" (none), `vis` = `SimVisibility.beat_vis()` at emission: "room" | "pip" | "edge" | "".
+## Not a laugh; never changes applause, temper or senses.
+const MICRO_GAG := "micro_gag"
 # --- Danger ---
 const SPOT_START := "spot_start"            ## {by}
 const NEAR_MISS := "near_miss"              ## {by}
@@ -60,7 +65,7 @@ const TOMATO := "tomato"                    ## {n}
 const HOOK := "hook"
 # --- Comedy ---
 const PRANK_FIRE := "prank_fire"            ## {prank, trigger, link, tier, witnessed}
-const REACTION_START := "reaction_start"    ## {prank, archetype, variant, tier, suppressed, len, entry}
+const REACTION_START := "reaction_start"    ## {prank, archetype, variant, tier, suppressed, len, entry, last_beat, beat_len}
 const REACTION_ACCENT := "reaction_accent"  ## {prank}
 const REACTION_END := "reaction_end"        ## {prank}
 const KNOCK_ON := "knock_on"                ## {a, b}
@@ -92,7 +97,9 @@ const SAFETY_NET := "safety_net"            ## {on}
 const FIGGIS_HOOK := "figgis_hook"
 const NIGHT_END := "night_end"              ## {reason}
 const CMD_REJECTED := "cmd_rejected"        ## {c, why}
-const CMD_QUEUED := "cmd_queued"            ## {c, why, target} (a go/move held while busy; why: entering | busy)
+## {c, why, target}: a command held behind a busy action — a go/move while busy, a FREEZE on the stairs / in a door /
+## mid-rummage, a POP OUT mid-dive; why: "entering" (the climb-in) | "busy"; target: a hotspot id or "<room>:<x px>".
+const CMD_QUEUED := "cmd_queued"
 # --- Stage 3 ---
 const BERYL_MOOD := "beryl_mood"            ## {mood}
 const BLEAT := "bleat"
@@ -107,7 +114,7 @@ const EMBARRASSED := "embarrassed"          ## {prank}
 const ALL: Array[String] = [HUSH_GO, HUSH_ARRIVE, HUSH_ROOM, RUMMAGE, PICK_WINDOW, PICK, ITEM_HOME, RESTOCK,
 	RIG_START, RIG_PAUSE, RIG_STEP_DONE, RIGGED, HIDE, POP_OUT, FREEZE, NOISE, SQUEAK, PIN,
 	B_ACTIVITY, B_ACTIVITY_END, B_NEXT, B_DETOUR, B_ROOM, ENTRY_WARNING, DOORWAY_PAUSE, SPECS, GLYPH,
-	LOOK_BACK, EAR_PIP, SQUEAK_BIT, HEAD_TURN, LURE, LURE_FATIGUE,
+	LOOK_BACK, EAR_PIP, SQUEAK_BIT, HEAD_TURN, LURE, LURE_FATIGUE, MICRO_GAG,
 	SPOT_START, NEAR_MISS, SPOTTED, CHASE_START, WHEEZE, DOOR_SLAM, CHASE_END, SEARCH, ON_GUARD, BUMP,
 	FACE_TO_FACE, CAUGHT, BUSTED_CAM, LECTURE, DOORSTEP, TOMATO, HOOK,
 	PRANK_FIRE, REACTION_START, REACTION_ACCENT, REACTION_END, KNOCK_ON, FIZZLE, RESIDUE_ADD, RESIDUE_CLEAR,
@@ -116,6 +123,21 @@ const ALL: Array[String] = [HUSH_GO, HUSH_ARRIVE, HUSH_ROOM, RUMMAGE, PICK_WINDO
 	APPLAUSE, BONUS, LINE_DONE, BIG_NUMBER_UNSEALED, ALL_LINES_DONE, STAR,
 	DIRECTOR_CUE, SAFETY_NET, FIGGIS_HOOK, NIGHT_END, CMD_REJECTED, CMD_QUEUED,
 	BERYL_MOOD, BLEAT, HERD_START, HERD_END, DELPHINE_ARRIVE, GLASSES, HIGH_C, EMBARRASSED]
+
+
+## The emotes the HUD edge bubble can draw on Bellows' 112 px face (a micro-gag's `emote`; "" = none).
+const EMOTES: Array[String] = ["sing", "hum", "smug", "laugh", "tut", "sniff", "yum", "yawn"]
+
+
+## True for any micro-gag beat (visible or not).
+static func is_beat(ev: Dictionary) -> bool:
+	return str(ev.get("e", "")) == MICRO_GAG
+
+
+## True for a micro-gag beat the player can see (`vis` != ""): in Hush's room, in the PiP, or as an
+## emote on the HUD edge bubble (D1: only these count against dead air).
+static func is_visible_beat(ev: Dictionary) -> bool:
+	return str(ev.get("e", "")) == MICRO_GAG and str(ev.get("vis", "")) != ""
 
 
 ## True for events that are laughs (TECH §3.8): reaction accents, squeak bits, panto rounds and bits,

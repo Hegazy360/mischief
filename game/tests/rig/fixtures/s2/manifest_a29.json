@@ -1,0 +1,45 @@
+{
+ "version": 1,
+ "rows": [
+  {
+   "clip": "_mannequin/st_bump_test",
+   "rig": "_mannequin",
+   "why": "oneshot:bump (sim BUMP_* 30+40+12)",
+   "expect_f": 82,
+   "tol_f": 0,
+   "loop_ok": false
+  },
+  {
+   "clip": "_mannequin/st_look_test",
+   "rig": "_mannequin",
+   "why": "oneshot:bump_look (sim \u2264 180)",
+   "expect_f": 180,
+   "tol_f": 0,
+   "loop_ok": true
+  },
+  {
+   "clip": "_mannequin/bit_test",
+   "rig": "_mannequin",
+   "why": "squeak_bits.bit_test.len_f",
+   "expect_f": 90,
+   "tol_f": 2,
+   "loop_ok": false
+  },
+  {
+   "clip": "_mannequin/mg_test",
+   "rig": "_mannequin",
+   "why": "micro_gags.test.len_f",
+   "expect_f": 60,
+   "tol_f": 12,
+   "loop_ok": false
+  },
+  {
+   "clip": "_mannequin/not_authored_yet",
+   "rig": "_mannequin",
+   "why": "coverage lint's job",
+   "expect_f": 30,
+   "tol_f": 0,
+   "loop_ok": false
+  }
+ ]
+}

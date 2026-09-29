@@ -150,24 +150,29 @@ func _draw() -> void:
 	var plate := Rect2(o + Vector2(0, top), Vector2(W, H_VIS))
 	var encore := applause > ENCORE_AT
 	var fill := UiKit.BRASS if not is_pressed else UiKit.pressed(UiKit.BRASS)
+	# plate, dial, arcs, needle and hub: ONE triangle array (s2-fix G #8: 27 draw calls → a few)
+	UiShapes.begin()
 	UiKit.draw_chunky_rect(self, plate, 34.0, fill, UiKit.BRASS_SHADE, UiKit.BUTTON_OUTLINE, 12.0)
-	draw_line(plate.position + Vector2(40, 13), plate.position + Vector2(W - 40, 13), Color(UiKit.BRASS_LIGHT, 0.8), 4.0, true)
+	UiShapes.line(plate.position + Vector2(40, 13), plate.position + Vector2(W - 40, 13), Color(UiKit.BRASS_LIGHT, 0.8), 4.0)
 	# dial
 	var dc := o + Vector2(20.0 + DIAL * 0.5, H_HIT * 0.5 + 4.0)
-	draw_circle(dc, DIAL * 0.5, UiKit.NAVY)
-	draw_circle(dc, DIAL * 0.5 - 6.0, UiKit.CREAM)
+	UiShapes.circle(dc, DIAL * 0.5, UiKit.NAVY)
+	UiShapes.circle(dc, DIAL * 0.5 - 6.0, UiKit.CREAM)
 	var r_arc := DIAL * 0.5 - 18.0
 	var a0 := -PI * 0.5 - deg_to_rad(SWEEP_DEG)
 	var a1 := -PI * 0.5 + deg_to_rad(SWEEP_DEG)
-	draw_arc(dc, r_arc, a0, a0 + (a1 - a0) * 0.34, 16, UiKit.CHERRY, 12.0, true)
-	draw_arc(dc, r_arc, a0 + (a1 - a0) * 0.34, a0 + (a1 - a0) * 0.67, 16, UiKit.YELLOW, 12.0, true)
-	draw_arc(dc, r_arc, a0 + (a1 - a0) * 0.67, a1, 16, UiKit.GREEN, 12.0, true)
-	draw_arc(dc, r_arc, a1, a1 + deg_to_rad(ENCORE_DEG), 8, UiKit.GOLD if not encore else UiKit.GOLD_LIGHT, 12.0, true)
+	UiShapes.arc(dc, r_arc, a0, a0 + (a1 - a0) * 0.34, 12.0, UiKit.CHERRY, 16)
+	UiShapes.arc(dc, r_arc, a0 + (a1 - a0) * 0.34, a0 + (a1 - a0) * 0.67, 12.0, UiKit.YELLOW, 16)
+	UiShapes.arc(dc, r_arc, a0 + (a1 - a0) * 0.67, a1, 12.0, UiKit.GREEN, 16)
+	UiShapes.arc(dc, r_arc, a1, a1 + deg_to_rad(ENCORE_DEG), 12.0, UiKit.GOLD if not encore else UiKit.GOLD_LIGHT, 8)
 	var nd := Vector2(sin(_needle), -cos(_needle))
-	draw_line(dc - nd * 8.0, dc + nd * (DIAL * 0.5 - 14.0), UiKit.NAVY, 7.0, true)
-	draw_line(dc + nd * (DIAL * 0.5 - 30.0), dc + nd * (DIAL * 0.5 - 14.0), UiKit.CHERRY, 5.0, true)
-	draw_circle(dc, 11.0, UiKit.NAVY)
-	draw_circle(dc, 6.0, UiKit.BRASS_LIGHT)
+	UiShapes.line(dc - nd * 8.0, dc + nd * (DIAL * 0.5 - 14.0), UiKit.NAVY, 7.0)
+	UiShapes.line(dc + nd * (DIAL * 0.5 - 30.0), dc + nd * (DIAL * 0.5 - 14.0), UiKit.CHERRY, 5.0)
+	UiShapes.circle(dc, 11.0, UiKit.NAVY)
+	UiShapes.circle(dc, 6.0, UiKit.BRASS_LIGHT)
+	var sx0 := o.x + 20.0 + DIAL + 18.0 + 116.0 + 10.0 + (0.0 if _layout_tomatoes else 70.0)
+	UiShapes.line(Vector2(sx0 - 12.0, o.y + top + 26.0), Vector2(sx0 - 12.0, o.y + top + H_VIS - 30.0), Color(UiKit.BRASS_SHADE, 0.9), 4.0, 0.0)
+	UiShapes.flush(self)
 	# applause number
 	var f := UiKit.display_font()
 	var nb := 1.0
@@ -183,7 +188,6 @@ func _draw() -> void:
 	var sx := o.x + 20.0 + DIAL + 18.0 + 116.0 + 10.0
 	if not _layout_tomatoes:
 		sx += 70.0
-	draw_line(Vector2(sx - 12.0, o.y + top + 26.0), Vector2(sx - 12.0, o.y + top + H_VIS - 30.0), Color(UiKit.BRASS_SHADE, 0.9), 4.0)
 	UiKit.draw_icon(self, _tex_script, Rect2(sx, o.y + H_HIT * 0.5 - 24.0, 46.0, 50.0))
 	UiKit.draw_text(self, f, Vector2(sx + 54.0, o.y + H_HIT * 0.5 + 18.0), _script_text, UiKit.SIZE_HUD_NUM_S,
 		UiKit.CREAM, 12)
@@ -196,13 +200,15 @@ func _draw_sparkles(now: int, o: Vector2) -> void:
 	if UiKit.reduce_flash():
 		return
 	var t := float(now) * 0.001
+	UiShapes.begin()
 	for i in 6:
 		var ph := t * 1.6 + float(i) * 1.047
 		var s := 0.5 + 0.5 * sin(ph * 2.0)
 		var x := o.x + 40.0 + fmod(float(i) * 97.0 + t * 30.0, W - 80.0)
 		var y := o.y + (8.0 if i % 2 == 0 else H_HIT - 8.0)
 		UiKit.star_points(_star, Vector2(x, y), 6.0 + 9.0 * s, 3.0 + 3.0 * s, ph)
-		draw_colored_polygon(_star, Color(UiKit.GOLD_LIGHT, 0.5 + 0.5 * s))
+		UiShapes.poly(_star, Color(UiKit.GOLD_LIGHT, 0.5 + 0.5 * s))
+	UiShapes.flush(self)
 	var et := float(now - _encore_ms) / 1400.0
 	if et >= 0.0 and et < 1.0:
 		# a stamp slammed across the plate (1.6 → 1.0 in the first 6th), then it fades

@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_idle",
+ "rig": "bellows",
+ "loop": true,
+ "length": 120,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 60,
+   "pose": "b_breath_in",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 120,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture",
+  "idle"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

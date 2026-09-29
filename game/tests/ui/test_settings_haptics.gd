@@ -31,9 +31,10 @@ func test_keys_and_defaults_match_tech_7() -> void:
 	var all: Dictionary = s.call("all")
 	var keys := all.keys()
 	keys.sort()
-	var want := ["crowd_vol", "haptics", "hints", "left_handed", "music_vol", "reduce_flash", "reduce_motion",
-		"relaxed", "sfx_vol", "stare_strip", "tap_to_rig", "text_scale", "voice_vol"]
-	assert_eq(keys, want, "exactly the TECH §7 keys")
+	var want := ["crowd_style", "crowd_vol", "haptics", "hints", "hush_skin", "left_handed", "music_vol",
+		"reduce_flash", "reduce_motion", "relaxed", "sfx_vol", "stare_strip", "tap_to_rig", "text_scale", "voice_style",
+		"voice_vol"]
+	assert_eq(keys, want, "exactly the TECH §7 keys + the Stage-2 Gate-0 A/B keys")
 	assert_eq(s.call("get_value", "hints"), "always", "hints default Always (GDD §3.5)")
 	assert_eq(s.call("get_value", "haptics"), true)
 	assert_eq(s.call("get_value", "stare_strip"), true)

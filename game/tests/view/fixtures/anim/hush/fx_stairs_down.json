@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "clip": "hush/fx_stairs_down",
+ "rig": "hush",
+ "loop": true,
+ "length": 60,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_stairs_b",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "h_stairs_a",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "h_stairs_b",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

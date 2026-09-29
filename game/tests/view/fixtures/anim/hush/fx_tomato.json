@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "clip": "hush/fx_tomato",
+ "rig": "hush",
+ "loop": false,
+ "length": 16,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_tomato_splat",
+   "ease": "linear"
+  },
+  {
+   "f": 16,
+   "pose": "h_tomato_splat",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

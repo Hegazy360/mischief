@@ -25,6 +25,8 @@ var scale: float = 1.0
 var pages: Array[Texture2D] = []
 ## Page pixel sizes (same order as pages).
 var page_sizes: Array[Vector2i] = []
+## True when the pages carry mip chains (AtlasBuilder.mipmaps at build time).
+var mipmaps: bool = false
 ## Paths that could not be rasterised (missing / broken files). They have no region.
 var missing: PackedStringArray = PackedStringArray()
 ## Sum of the placed images' pixel areas (unpadded, built-ins excluded).
@@ -114,6 +116,12 @@ func paths() -> PackedStringArray:
 
 
 ## Total page area in pixels.
+## Texture memory of the pages in bytes (RGBA8, + ⅓ with mipmaps).
+func memory_bytes() -> int:
+	var b := page_px() * 4
+	return b + b / 3 if mipmaps else b
+
+
 func page_px() -> int:
 	var t := 0
 	for s in page_sizes:

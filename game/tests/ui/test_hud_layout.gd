@@ -39,7 +39,12 @@ func test_positions_match_the_gdd_table() -> void:
 	assert_eq(L[&"meter"], Rect2((W - 600) / 2, 16, 600, 144))
 	assert_eq((L[&"banner"] as Rect2).position.y, 164.0)
 	assert_eq(L[&"pip"], Rect2(W - s - 472, 24, 448, 252))
-	assert_eq(L[&"pip_escalated"], Rect2(W - s - 24 - 704, 24, 704, 396), "escalated PiP keeps the top-right corner")
+	var e: Rect2 = L[&"pip_escalated"]
+	assert_eq(e.end.x, W - s - 24, "escalated PiP keeps the top-right corner")
+	assert_eq(e.position.y, 24.0)
+	assert_eq(e.position.x, (L[&"meter"] as Rect2).end.x + 24, "…and fits 24 px beside the meter (690 × 388 here)")
+	var full := HudLayout.compute(Vector2(2400, 1080), Vector4.ZERO, false, 1.0)
+	assert_eq(full[&"pip_escalated"], Rect2(2400 - 24 - 704, 24, 704, 396), "704 × 396 where it fits")
 	assert_eq((L[&"overview"] as Rect2).position, Vector2(W - s - 168, 300))
 	assert_eq(L[&"tray"], Rect2(s + 32, H - B - 200, 744, 168))
 	assert_eq(L[&"clarence"], Rect2(s + 32, H - B - 392, 168, 168))
@@ -144,6 +149,19 @@ func test_edge_bubble_positions_avoid_targets() -> void:
 			assert_true(safe.encloses(r), "edge bubble %s inside the safe area at %s" % [d, vs])
 			for key in HudLayout.TARGETS:
 				assert_ge(gap(r, L[StringName(key)]), 24.0 * k - 0.01, "edge bubble %s vs %s at %s lh=%s" % [d, key, vs, lh]))
+
+
+func test_edge_bubble_emote_puff_clear_of_targets() -> void:
+	_each(func(L: Dictionary, vs: Vector2, ins: Vector4, lh: bool, k: float) -> void:
+		var safe := Rect2(ins.x, ins.y, vs.x - ins.x - ins.z, vs.y - ins.y - ins.w)
+		for d in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT, Vector2(1, -0.3), Vector2(-1, 0.4)]:
+			var p := HudLayout.edge_bubble_pos(L, d, 144.0 * k)
+			var centre := p + Vector2(72, 72) * k
+			var pb := EdgeBubble.puff_bounds(d)
+			var r := Rect2(centre + pb.position * k, pb.size * k)
+			assert_true(safe.encloses(r), "emote puff %s inside the safe area at %s lh=%s" % [d, vs, lh])
+			for key in HudLayout.TARGETS:
+				assert_false(r.intersects(L[StringName(key)]), "emote puff %s never covers %s at %s lh=%s" % [d, key, vs, lh]))
 
 
 func test_pick_strip_clamped_clear_of_targets() -> void:

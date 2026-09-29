@@ -387,13 +387,7 @@ def fireplace(rm, cx, mantel_y):
     rm.bg.add(path(pb, fill="#3A2A36", sil=False))
     g = rm.bg.grad(Grad(rm.gid("fire"), "radial", (cx, -40, 120), [(0, "#FFC860", 0.95), (0.45, "#F08A3A", 0.6), (1, "#F08A3A", 0.0)]))
     rm.bg.add(path(pb, fill=g.url(), sil=False))
-    flames = PB().M(cx - 50, -44).Q(cx - 46, -96, cx - 26, -118).Q(cx - 24, -86, cx - 8, -80).Q(cx - 4, -130, cx + 16, -150).Q(cx + 20, -100, cx + 34, -96)
-    flames.Q(cx + 44, -120, cx + 52, -126).Q(cx + 58, -80, cx + 50, -44).Z()
-    rm.bg.add(path(flames, fill="#F7A23E", sil=False))
-    fl2 = PB().M(cx - 30, -44).Q(cx - 24, -80, cx - 10, -92).Q(cx - 4, -70, cx + 6, -66).Q(cx + 14, -104, cx + 24, -110).Q(cx + 28, -74, cx + 34, -44).Z()
-    rm.bg.add(path(fl2, fill="#FFE07A", sil=False))
-    logs = PB().rrect(cx - 62, -52, 124, 20, 10).rrect(cx - 40, -66, 90, 18, 9)
-    rm.bg.add(path(logs, fill="#7A4E36", sil=False), path(logs, fill="none", sw=SD, stroke=ARCH, sop=AOP, sil=False))
+    # the flames + logs are the animated decor `parlour_fire` (3 flicker frames, props_parlour.fire)
     rm.bg.add(path(pb, fill="none", sw=SW, stroke=ARCH, sop=AOP, sil=False))
     # glow on the floor + hearth stone
     g2 = rm.bg.grad(Grad(rm.gid("hearthglow"), "radial", (cx, -10, 220), [(0, "#FFC870", 0.35), (1, "#FFC870", 0.0)]))
@@ -401,11 +395,10 @@ def fireplace(rm, cx, mantel_y):
     rm.bg.add(sbox(rm, x0 - 16, -30, x1 - x0 + 32, 16, 5, sm("#BFB3AE", wall, 0.1, 0.9), bx=0, by=5))
     # mantel shelf
     rm.bg.add(sbox(rm, x0 - 14, mantel_y - 4, x1 - x0 + 28, 20, 6, marble, bx=0, by=6))
-    # candlesticks on the right end of the mantel
+    # candlesticks on the right end of the mantel (their flames are the animated decor `parlour_candles`)
     for i, (kx, h) in enumerate([(x1 - 34, 54), (x1 - 12, 44)]):
         rm.bg.add(rect(kx - 6, mantel_y - 4 - 16, 12, 16, 3, fill=sm(pal.GOLD, wall, 0.2)[0], sw=SD, stroke=ARCH, sop=AOP, sil=False))
         rm.bg.add(rect(kx - 5, mantel_y - 20 - h, 10, h, 4, fill="#FFF6E6", sw=SD, stroke=ARCH, sop=AOP, sil=False))
-        rm.bg.add(ellipse(kx, mantel_y - 30 - h, 5, 9, fill="#FFD05A", sil=False))
 
 
 def ceiling_rose(rm, cx):

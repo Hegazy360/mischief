@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_act_tea",
+ "rig": "bellows",
+ "loop": true,
+ "length": 120,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_tea_pour",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "b_tea_spoon",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "b_tea_sniff",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 90,
+   "pose": "b_tea_sip",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 120,
+   "pose": "b_tea_pour",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

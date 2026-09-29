@@ -474,31 +474,6 @@ def pepper_shake(rng):
     return place([(0, shake()), (0.19, shake(), 0.9), (0.38, shake(), 1.0)], 0.6)
 
 
-@sfx("stool_zip", desc="stool rockets backwards: castor squeal + zip")
-def stool_zip(rng):
-    dur = 0.65
-    n = ns(dur)
-    t = tt(n)
-    f = env_lin([(0, 2600), (0.4, 1900), (dur, 1500)], n) * (1 + 0.04 * smooth_noise(n, 40, rng))
-    squeal = (sine(f, n) + 0.3 * sine(2 * f, n)) * (0.55 + 0.45 * np.abs(np.sin(TAU * 31 * t)))
-    squeal *= env_lin([(0, 0), (0.02, 0.7), (0.45, 0.5), (dur, 0)], n)
-    rumble = filt(brown(n, rng), ("lp", 400), ("hp", 60)) * env_lin([(0, 0), (0.03, 1), (dur, 0)], n)
-    air = whoosh_shape(rng, dur, 400, 3000, 0.2, 1.0)
-    return norm(squeal) * 0.45 + norm(rumble) * 0.5 + norm(air) * 0.7
-
-
-@sfx("sink_splash", max_dur=1.3, desc="into the sink: metal bong + splash")
-def sink_splash(rng):
-    dur = 1.1
-    n = ns(dur)
-    bong = metal_hit(rng, 260, 0.9, (1.0, 2.1, 3.3, 4.6), decay=0.6)
-    impact = filt(white(n, rng), ("lp", 6000), ("hp", 200)) * perc(n, 0.0005, 0.08)
-    body = noise_sweep(n, rng, env_exp([(0, 2500), (0.3, 900), (dur, 700)], n), 1.4) * perc(n, 0.002, 0.6)
-    drops = place([(rng.uniform(0.05, 0.8) ** 1.5, droplet(rng, rng.uniform(900, 2400), rng.uniform(0.03, 0.07)),
-                    rng.uniform(0.2, 0.6)) for _ in range(26)], dur)
-    return pad(bong, n) * 0.6 + norm(impact) * 0.7 + norm(body) + pad(drops, n) * 0.5 + pad(thump(0.25, 120, 55), n) * 0.5
-
-
 @sfx("spray_blast", max_dur=0.95, desc="spray tap twisted: eek + high-pressure face blast")
 def spray_blast(rng):
     dur = 1.0

@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "clip": "hush/fx_freeze_2",
+ "rig": "hush",
+ "loop": true,
+ "length": 60,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_freeze_2",
+   "ease": "linear"
+  },
+  {
+   "f": 60,
+   "pose": "h_freeze_2",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

@@ -8,7 +8,7 @@
   "seed": 101,
   "rooms": ["porch", "hall", "parlour", "kitchen"],
   "entry": "window",
-  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false},
+  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false, "combos": []},
   "new_rule": "items",
   "card": {
     "text": "Your tray carries things. Glowing spots take them. Do the Script, then take a bow at the front door.",
@@ -26,8 +26,9 @@
       {"a": "warmup", "gate": {"until": "first_rig", "plus_s": 2, "max_s": 25, "first_loop_only": true}},
       {"a": "tea"},
       {"a": "pickles"},
-      {"a": "paper"},
-      {"a": "rinse"}
+      {"a": "rinse"},
+      {"a": "tea"},
+      {"a": "paper"}
     ]
   },
   "cast": {"beryl": null, "delphine": null},

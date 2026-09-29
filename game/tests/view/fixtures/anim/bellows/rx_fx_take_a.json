@@ -1,0 +1,106 @@
+{
+ "version": 1,
+ "clip": "bellows/rx_fx_take_a",
+ "rig": "bellows",
+ "loop": false,
+ "length": 120,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 0,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 18,
+   "pose": "b_take_antic",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 30,
+   "pose": "b_take_accent",
+   "ease": "pop"
+  },
+  {
+   "f": 90,
+   "pose": "b_take_accent",
+   "ease": "hold"
+  },
+  {
+   "f": 120,
+   "pose": "b_stand",
+   "ease": "out_back"
+  }
+ ],
+ "events": [
+  {
+   "f": 30,
+   "type": "mark",
+   "name": "accent"
+  },
+  {
+   "f": 30,
+   "type": "cam",
+   "op": "punch",
+   "zoom": 1.4
+  },
+  {
+   "f": 30,
+   "type": "hitstop",
+   "frames": 5
+  },
+  {
+   "f": 31,
+   "type": "shake",
+   "trauma": 0.4
+  },
+  {
+   "f": 30,
+   "type": "sfx",
+   "id": "sneeze_choo"
+  },
+  {
+   "f": 30,
+   "type": "decor",
+   "id": "kitchen_stool",
+   "visible": false
+  },
+  {
+   "f": 36,
+   "type": "laugh",
+   "tier": "auto"
+  },
+  {
+   "f": 110,
+   "type": "decor",
+   "id": "kitchen_stool",
+   "visible": true
+  }
+ ],
+ "tags": [
+  "fixture",
+  "take"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content.",
+ "beats": {
+  "anticipation": [
+   18,
+   30
+  ],
+  "accent": [
+   30,
+   33
+  ],
+  "hold": [
+   33,
+   90
+  ],
+  "settle": [
+   90,
+   120
+  ]
+ }
+}

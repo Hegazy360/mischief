@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_turn",
+ "rig": "bellows",
+ "loop": false,
+ "length": 6,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 3,
+   "pose": "b_turn_mid",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 6,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

@@ -1,0 +1,307 @@
+{
+ "frames": 131,
+ "onsets": [
+  14,
+  29,
+  32,
+  39,
+  48,
+  51,
+  64,
+  79,
+  96,
+  103,
+  112,
+  118,
+  127
+ ],
+ "worst_offset_f": 2,
+ "no_onset_within_6f": 2,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ],
+ "events": [
+  {
+   "engine_frame": 0,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 0,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 14,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 5,
+   "onset": 14,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 14,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 14,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 16,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 14,
+   "offset_f": -2
+  },
+  {
+   "engine_frame": 16,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 14,
+   "offset_f": -2
+  },
+  {
+   "engine_frame": 29,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 20,
+   "onset": 29,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 29,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 29,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 32,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 32,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 32,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 32,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 39,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 30,
+   "onset": 39,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 39,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 39,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 48,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 48,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 48,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 48,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 51,
+   "type": "sfx",
+   "id": "bow_creak",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 42,
+   "onset": 51,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 51,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 51,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 64,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 64,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 64,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 64,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 80,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 79,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 80,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 79,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 96,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 96,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 96,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 96,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 103,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 5,
+   "onset": 103,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 103,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 103,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 112,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 112,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 112,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 112,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 118,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 20,
+   "onset": 118,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 118,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 118,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 128,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 127,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 128,
+   "type": "sfx",
+   "id": "baton_swish",
+   "clip": "bellows/mg_conduct_air",
+   "clip_frame": 30,
+   "onset": 127,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 128,
+   "type": "audio",
+   "id": "Blips",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 127,
+   "offset_f": -1
+  }
+ ]
+}

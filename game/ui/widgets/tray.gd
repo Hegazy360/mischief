@@ -140,35 +140,47 @@ func _process(delta: float) -> void:
 		set_process(false)
 
 
+## Slot `i`'s draw transform: its centre (risen), the press squash and the arrival pop.
+func _slot_xform(i: int, now: int) -> Transform2D:
+	var c := slot_rect(i).get_center() - Vector2(0, _rise[i])
+	var pressed := is_pressed and i == _press_slot and not _dragging
+	var k := UiKit.PRESS_SCALE if pressed else 1.0
+	var at := float(now - _arrive_ms[i]) / 260.0
+	if at >= 0.0 and at < 1.0 and not UiKit.reduce_motion():
+		k *= 1.0 + 0.25 * sin(at * PI) * (1.0 - at)
+	return Transform2D(0.0, Vector2(k, k), 0.0, c)
+
+
 func _draw() -> void:
 	var now := UiKit.now_ms()
+	var half := VISUAL * 0.5
+	var vr := Rect2(-half, -half, VISUAL, VISUAL)
+	# pass 1: every slot's plate / glow / empty ring in ONE triangle array (s2-fix G #8: 16 draw
+	# calls → 1 + one per item icon); pass 2: the icons on top.
+	UiShapes.begin()
 	for i in SLOTS:
-		var hr := slot_rect(i)
-		var c := hr.get_center() - Vector2(0, _rise[i])
 		var pressed := is_pressed and i == _press_slot and not _dragging
-		var k := UiKit.PRESS_SCALE if pressed else 1.0
-		var at := float(now - _arrive_ms[i]) / 260.0
-		if at >= 0.0 and at < 1.0 and not UiKit.reduce_motion():
-			k *= 1.0 + 0.25 * sin(at * PI) * (1.0 - at)
-		draw_set_transform(c, 0.0, Vector2(k, k))
-		var half := VISUAL * 0.5
-		var vr := Rect2(-half, -half, VISUAL, VISUAL)
+		UiShapes.set_xform(_slot_xform(i, now))
 		if i == highlight:
 			var g := 0.5 + 0.5 * sin(float(now) * 0.001 * TAU * 1.5)
 			var glow := vr.grow(12.0 + 5.0 * g)
 			UiKit.draw_chunky_rect(self, glow.grow(4.0), 40.0, Color(UiKit.GOLD, 0.45 + 0.3 * g), Color(UiKit.GOLD, 0.45 + 0.3 * g), 0.0, 0.0)
 			UiKit.draw_chunky_rect(self, glow, 36.0, Color(UiKit.GOLD_LIGHT, 0.85), Color(UiKit.GOLD_LIGHT, 0.85), 0.0, 0.0)
-		var filled := _has_item(i)
-		if filled:
+		if _has_item(i):
 			var fill := UiKit.CREAM if not pressed else UiKit.pressed(UiKit.CREAM)
 			UiKit.draw_chunky_rect(self, vr, 28.0, fill, UiKit.CREAM_SHADE if not pressed else UiKit.pressed(UiKit.CREAM_SHADE))
-			if not (_dragging and i == _press_slot):
-				UiKit.draw_icon(self, _tex[i], Rect2(vr.position + Vector2(14, 10), vr.size - Vector2(28, 28)))
-			else:
-				UiKit.draw_icon(self, _tex[i], vr.grow(-16.0), Color(1, 1, 1, 0.3))
 		else:
 			UiKit.draw_chunky_rect(self, vr, 28.0, Color(UiKit.NAVY, 0.42), Color(UiKit.NAVY, 0.42), 0.0, 0.0)
-			draw_arc(Vector2.ZERO, 22.0, 0.0, TAU, 24, Color(UiKit.CREAM, 0.28), 5.0, true)
+			UiShapes.arc(Vector2.ZERO, 22.0, 0.0, TAU, 5.0, Color(UiKit.CREAM, 0.28), 24)
+	UiShapes.flush(self)
+	for i in SLOTS:
+		if not _has_item(i):
+			continue
+		draw_set_transform_matrix(_slot_xform(i, now))
+		if not (_dragging and i == _press_slot):
+			UiKit.draw_icon(self, _tex[i], Rect2(vr.position + Vector2(14, 10), vr.size - Vector2(28, 28)))
+		else:
+			UiKit.draw_icon(self, _tex[i], vr.grow(-16.0), Color(1, 1, 1, 0.3))
 	draw_set_transform(Vector2.ZERO)
 	if _dragging and _has_item(_press_slot):
 		var gr := Rect2(_drag_pos - Vector2(64, 64), Vector2(128, 128))

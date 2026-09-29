@@ -13,9 +13,10 @@ theatre room with a murmur bed. Tiers, all with ≥ 3 variants:
 
 Specials: ooh, gasp, aww, shh, behind_you (chanted), chant ("PIPE-DOWN!" ×2), bow_chant,
 boo (playful), relief, cheer. The fallback set `crowd_fb_*` (applause, whistles, 'ooh', a
-kazoo "ha-ha" choir) covers the laughter tiers and the laugh-like specials; the autoload
-falls back to the formant file for kinds the fallback doesn't re-voice (gasp, shh, the
-chants), which contain no laughter.
+kazoo "ha-ha" choir) covers the laughter tiers, the laugh-like specials and — so every crowd
+sound of the Gate-0 scene exists in both styles — BEHIND YOU! (a kazoo choir blaring the
+rhythm) and the gasp; the autoload falls back to the formant file for kinds the fallback
+doesn't re-voice (shh, the chants), which contain no laughter.
 """
 from __future__ import annotations
 
@@ -489,6 +490,33 @@ def fb_special(rng, kind: str) -> np.ndarray:
     if kind == "ooh":
         return room(norm(sum(pad(I.kazoo(np.geomspace(midi(p), midi(p + 2), ns(0.7)), 0.7, 0.8, rng, "u"), ns(0.9))
                              for p in (64, 68, 71))))
+    if kind == "behind_you":
+        # the panto warning with no voices: a kazoo choir blares the BE-HIND-YOU! rhythm (short,
+        # long, falling) in thirds, two whistles on the top, a clap on each syllable
+        dur = 1.25
+        n = ns(dur)
+        notes = [(0.0, 0.12, 62.0, 62.0), (0.15, 0.3, 67.0, 67.0), (0.49, 0.42, 65.0, 59.0)]
+        y = np.zeros(n)
+        for part, off in enumerate((0.0, -4.0, -7.0, 5.0)):
+            for (s0, d, a, b) in notes:
+                f = np.geomspace(midi(a + off), midi(b + off), ns(d)) * 2 ** (rng.uniform(-0.12, 0.12) / 12)
+                x = I.kazoo(f, d, 0.9 - 0.12 * part, rng, "a" if part % 2 else "u")
+                i0 = ns(s0 + rng.uniform(0, 0.015))
+                y[i0:i0 + len(x)] += x[: n - i0]
+        claps = np.zeros(n)
+        for c in (0.0, 0.15, 0.49):
+            a = applause(rng, 0.12, 16, (8.0, 9.0), [(0, 1.0), (0.12, 0.0)])
+            i0 = ns(c)
+            claps[i0:i0 + len(a)] += a[: n - i0]
+        wh = place([(0.14, whistle(rng, 0.35, 2600.0)), (0.5, whistle(rng, 0.45, 2300.0))], dur)
+        return room(norm(y) + norm(claps) * 0.35 + pad(wh, n) * 0.25, 0.22)
+    if kind == "gasp":
+        # a sharp intake from the pit: kazoos squeeze up a third, a quick timpani tap under it
+        dur = 0.6
+        n = ns(dur)
+        y = sum(pad(I.kazoo(np.geomspace(midi(p), midi(p + 4), ns(0.3)), 0.3, 0.85, rng, "u"), n) for p in (66, 70, 73))
+        tap = pad(I.timpani(midi(45), 0.4, 0.5, rng), n)
+        return room(norm(y) + tap * 0.3, 0.22)
     raise ValueError(kind)
 
 
@@ -504,7 +532,7 @@ for _kind in TIERS:
         _mk3()
 
 for _kind, _cap, _lvl in (("relief", 1.5, -15.5), ("cheer", 2.5, -13.0), ("aww", 1.3, -15.0), ("boo", 1.4, -15.0),
-                          ("ooh", 1.1, -15.0)):
+                          ("ooh", 1.1, -15.0), ("behind_you", 1.6, -13.0), ("gasp", 0.8, -15.0)):
     def _mk4(kind=_kind, cap=_cap, lvl=_lvl):
         @sfx(f"crowd_fb_{kind}_1", cat="crowd", max_dur=cap, level=lvl, bank=f"crowd_fb_{kind}",
              desc=f"fallback Stalls: {kind}", tags=("crowd", "fallback"))

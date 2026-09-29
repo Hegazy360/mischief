@@ -1,0 +1,39 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_lec_c",
+ "rig": "bellows",
+ "loop": false,
+ "length": 132,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_lecture_hold",
+   "ease": "linear"
+  },
+  {
+   "f": 66,
+   "pose": "b_lecture_wag_a",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 132,
+   "pose": "b_lecture_hold",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 24,
+   "type": "voice",
+   "id": "vo_bellows_lecture_c"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

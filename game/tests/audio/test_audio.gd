@@ -168,8 +168,9 @@ func test_bus_volume_mapping() -> void:
 
 
 func test_settings_keys_drive_volumes() -> void:
-	if tree.root.get_node_or_null("Settings") != null:
-		skip("a real Settings autoload is registered")
+	var real := tree.root.get_node_or_null("Settings")
+	if real != null and not real.has_meta("fake_settings"):
+		_settings_volumes_real(real)
 		return
 	audio.free()
 	var sc := GDScript.new()
@@ -191,6 +192,30 @@ func test_settings_keys_drive_volumes() -> void:
 	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "changed() re-applies")
 	fake.emit_signal("changed", "haptics", false)
 	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001)
+
+
+## The same against the registered Settings autoload (values restored afterwards).
+func _settings_volumes_real(real: Node) -> void:
+	var keys := ["music_vol", "sfx_vol", "voice_vol", "crowd_vol"]
+	var saved := {}
+	for k: String in keys:
+		saved[k] = real.call("get_value", k)
+	for kv: Array in [["music_vol", 0.25], ["sfx_vol", 0.5], ["voice_vol", 0.75], ["crowd_vol", 0.0]]:
+		real.call("set_value", kv[0], kv[1])
+	audio.free()
+	audio = _make()
+	assert_almost_eq(audio.bus_volume("Music"), 0.25, 0.0001, "music_vol applied on ready")
+	assert_almost_eq(audio.bus_volume("SFX"), 0.5, 0.0001)
+	assert_almost_eq(audio.bus_volume("UI"), 0.5, 0.0001, "UI follows sfx_vol")
+	assert_almost_eq(audio.bus_volume("Voice"), 0.75, 0.0001)
+	assert_true(AudioServer.is_bus_mute(AudioServer.get_bus_index("Crowd")), "crowd_vol 0 mutes")
+	real.call("set_value", "music_vol", 1.0)
+	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "changed() re-applies")
+	real.call("set_value", "haptics", not bool(real.call("get_value", "haptics")))
+	real.call("set_value", "haptics", not bool(real.call("get_value", "haptics")))
+	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "a non-volume key changes nothing")
+	for k: String in keys:
+		real.call("set_value", k, saved[k])
 
 
 # --- ducking -------------------------------------------------------------------------------
@@ -355,8 +380,12 @@ func test_voice_and_crowd_styles() -> void:
 	audio.crowd("t1")
 	assert_true(audio.last_pick("crowd_t1").begins_with("crowd_fb_t1_"), audio.last_pick("crowd_t1"))
 	audio.advance(3.0)
-	audio.crowd("gasp")
-	assert_true(audio.last_pick("crowd_gasp").begins_with("crowd_gasp_"), "no fallback gasp → formant")
+	audio.crowd("shh")
+	assert_true(audio.last_pick("crowd_shh").begins_with("crowd_shh_"), "no fallback shh → formant")
+	audio.advance(3.0)
+	audio.crowd("behind_you")
+	assert_true(audio.last_pick("crowd_behind_you").begins_with("crowd_fb_behind_you_"),
+		"BEHIND YOU! exists in both styles (it plays in the Gate-0 scene)")
 	audio.set_crowd_style("formant")
 	audio.advance(3.0)
 	audio.crowd("t1")
@@ -383,7 +412,7 @@ func test_sfx_pool_caps_and_steals() -> void:
 		skip("sfx_map.json not generated")
 		return
 	var ids := ["woodblock_bonk", "boing_small", "boing_med", "boing_big", "slide_up", "slide_down", "whoosh", "zip",
-		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_zip", "sink_splash"]
+		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_scrape", "sink_crash"]
 	for i in ids.size():
 		audio.play_sfx(ids[i], -1.0 + 2.0 * float(i) / float(ids.size() - 1))
 		audio.advance(0.04)

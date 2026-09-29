@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schema": "events.<sim event> = action | [action]. action = {sfx: id|[ids], voice: bank, sting: id (Audio.sting), crowd: kind (Audio.crowd), music: state (Audio.music_state), chain: n|'link' (Audio.chain_section, 'link' = payload link clamped 1..4), delay_s, vol_db, pan: 'source'|'hush'|'bellows'|'center' (default source), when: condition id evaluated by the AudioDirector (hush_exposed, hush_in_room, bellows_on_screen, first_in_night), by: {field: payload key, map: {'<value as text>': action|[action]}, default: action}, then: [action]}. pranks.<id>.fire plays on prank_fire; archetypes.<archetype>.accent plays on reaction_accent (only when the clip carries no sfx events; ooh=true plays crowd ooh on reaction_start); squeak_bits.<bit> plays on squeak_bit; laugh_tiers picks the laugh from applause deltas (tenths).",
+  "schema": "events.<sim event> = action | [action]. action = {sfx: id|[ids], voice: bank, sting: id (Audio.sting), crowd: kind (Audio.crowd), music: state (Audio.music_state), chain: n|'link' (Audio.chain_section, 'link' = payload link clamped 1..4), delay_s (view time: JuiceClock-scaled, a hit-stop holds it), vol_db, pan: 'source'|'hush'|'bellows'|'center' (default source), when: condition id evaluated by the AudioDirector (hush_exposed, hush_in_room, bellows_on_screen, first_in_night), by: {field: payload key, map: {'<value as text>': action|[action]}, default: action}, then: [action]}. pranks.<id>.fire plays on prank_fire (the prop's sound, never his voice); archetypes.<archetype>.ooh=true plays crowd ooh on reaction_start; squeak_bits.<bit> plays on squeak_bit; laugh_tiers picks the laugh from applause deltas (tenths). Ruling L12: this file holds only event-level sounds (stingers, the crowd, music, UI and props the view stages); every sound inside a clip is a clip event (docs/review/s2-sound/clip_events.md) and never also appears here.",
   "events": {
     "rummage": {"by": {"field": "container", "map": {
       "hall_confiscated_box": {"sfx": "cupboard"},
@@ -8,17 +8,13 @@
       "kitchen_pantry_shelf": {"sfx": "cupboard"}}, "default": {"sfx": "cupboard"}}},
     "pick": {"sfx": "zip", "vol_db": -8.0, "pan": "hush"},
     "item_home": {"sfx": "whoosh", "vol_db": -6.0, "pan": "hush"},
+    "rig_start": {"by": {"field": "prank", "map": {"achoo_ria": {"sfx": "pepper_shake", "pan": "hush", "vol_db": -4.0}}}},
     "rig_step_done": {"sfx": "rig_done"},
     "rigged": [{"sting": "rigged"}, {"crowd": "t0", "delay_s": 0.35}],
-    "hide": {"by": {"field": "watched", "map": {
-      "true": [{"sfx": "dive", "pan": "hush"}, {"crowd": "gasp"}]}, "default": {"sfx": "dive", "pan": "hush"}}},
-    "pop_out": {"sfx": "pop_out", "pan": "hush"},
-    "freeze": {"by": {"field": "on", "map": {"true": {"sfx": "freeze_clack", "pan": "hush"}}}},
+    "hide": {"by": {"field": "watched", "map": {"true": {"crowd": "gasp"}}}},
     "squeak": {"sfx": "clarence_squeak", "pan": "hush"},
     "pin": {"sfx": "ui_tick"},
     "b_activity": {"by": {"field": "id", "map": {
-      "warmup": {"voice": "vo_bellows_warmup", "pan": "bellows"},
-      "tea": {"voice": "vo_bellows_hum", "pan": "bellows"},
       "pickles": {"voice": "vo_bellows_hum", "pan": "bellows"},
       "snack": {"sfx": "door_back", "vol_db": -6.0, "pan": "bellows"},
       "paper": {"sfx": "paper_rustle", "pan": "bellows"},
@@ -28,8 +24,7 @@
       "clock": {"sfx": "cupboard", "vol_db": -6.0, "pan": "bellows"},
       "hunt": {"voice": "vo_bellows_hmph", "pan": "bellows"}}}},
     "b_detour": {"voice": "vo_bellows_hmph", "pan": "bellows"},
-    "entry_warning": [{"sfx": "door_jiggle", "pan": "source"}, {"sfx": "slipper_wood", "delay_s": 0.5, "pan": "source"},
-      {"sfx": "slipper_wood", "delay_s": 0.95, "vol_db": 2.0, "pan": "source"},
+    "entry_warning": [{"sfx": "door_jiggle", "pan": "source"},
       {"crowd": "behind_you", "delay_s": 0.3, "when": "hush_exposed"}],
     "doorway_pause": {"voice": "vo_bellows_ahem", "pan": "bellows"},
     "specs": {"by": {"field": "on", "map": {"true": {"sfx": "specs_tink", "pan": "bellows"}}}},
@@ -43,7 +38,7 @@
     "spotted": [{"sting": "alert"}, {"voice": "vo_bellows_wha", "delay_s": 0.1, "pan": "bellows"}],
     "chase_start": {"music": "chase"},
     "wheeze": {"voice": "vo_bellows_wheeze", "pan": "bellows"},
-    "door_slam": [{"sfx": "door_slam_bonk", "pan": "source"}, {"crowd": "t1", "delay_s": 0.3}],
+    "door_slam": [{"sfx": "door_slam", "pan": "source"}, {"crowd": "t1", "delay_s": 0.3}],
     "chase_end": {"music": "sneak"},
     "search": {"voice": "vo_bellows_hmph", "pan": "bellows"},
     "bump": {"by": {"field": "first", "map": {
@@ -81,17 +76,20 @@
     "all_lines_done": {"crowd": "bow_chant", "delay_s": 0.5},
     "star": {"sting": "new"},
     "director_cue": {"by": {"field": "id", "map": {
-      "laugh_vase": [{"sfx": "vase_smash", "pan": "source"}, {"crowd": "t0", "delay_s": 0.35}],
+      "laugh_vase": [{"sfx": "vase_smash", "pan": "source"}, {"crowd": "t0", "delay_s": 0.25}],
+      "laugh_doorframe": {"crowd": "t0", "delay_s": 0.2},
+      "laugh_relief": {"crowd": "relief"},
+      "laugh_picture": [{"sfx": "picture_fall", "pan": "source"}, {"crowd": "t0", "delay_s": 0.28}],
       "figgis_psst": {"sfx": "figgis_psst"},
-      "sparkle_lever": {"sfx": "sparkle", "pan": "source"},
-      "title_card": {"music": "curtain"}}}},
+      "sparkle_lever": {"sfx": "sparkle", "pan": "source"}}}},
     "safety_net": {"by": {"field": "on", "map": {"true": {"sfx": "whoosh", "vol_db": -6.0}}}},
     "figgis_hook": [{"sfx": "zip"}, {"crowd": "t1", "delay_s": 0.3}],
     "night_end": [{"sfx": "curtain_fall"}, {"crowd": "cheer", "delay_s": 0.4}, {"sfx": "roses_thrown", "delay_s": 1.0},
-      {"music": "results", "delay_s": 1.6}]
+      {"music": "results", "delay_s": 1.6}],
+    "cmd_queued": {"sfx": "ui_queued", "pan": "center"},
+    "cmd_rejected": {"sfx": "ui_nuh_uh", "pan": "center"}
   },
   "pranks": {
-    "achoo_ria": {"fire": {"voice": "vo_bellows_sneeze_ah1", "pan": "bellows"}},
     "kettle_drum": {"fire": {"sfx": "kettle_melody", "pan": "source"}},
     "tap_dance": {"fire": {"sfx": "spray_blast", "pan": "source"}},
     "in_a_pickle": {"fire": {"sfx": "jar_strain", "pan": "source"}},
@@ -100,41 +98,16 @@
     "lift_off": {"fire": {"sfx": "recliner_twang", "pan": "source"}},
     "eye_popping_news": {"fire": {"sfx": "paper_rustle", "pan": "source"}},
     "something_fishy": {"fire": {"sfx": "phone_ring", "pan": "source"}},
-    "times_up": {"fire": {"sfx": "clock_chimes", "pan": "source"}},
-    "mirror_mirror": {"fire": {"voice": "vo_bellows_hum", "pan": "bellows"}}
+    "times_up": {"fire": {"sfx": "clock_chimes", "pan": "source"}}
   },
   "archetypes": {
-    "sneeze_blast": {"ooh": false, "accent": [{"voice": "vo_bellows_sneeze_choo"}, {"sfx": "stool_zip", "delay_s": 0.05},
-      {"sfx": "sink_splash", "delay_s": 0.3}]},
-    "drench": {"ooh": false, "accent": [{"sfx": "spray_blast"}, {"voice": "vo_bellows_yow", "delay_s": 0.1},
-      {"sfx": "hose_wrestle", "delay_s": 0.35}]},
-    "sing_crack": {"ooh": false, "accent": [{"voice": "vo_bellows_warmup_crack"}, {"sfx": "lid_boink", "delay_s": 0.5}]},
-    "strain_slip": {"ooh": true, "accent": [{"sfx": "onion_pop"}, {"sfx": "pinball_bonk", "delay_s": 0.15},
-      {"sfx": "pinball_bonk", "delay_s": 0.3}, {"sfx": "pinball_bonk", "delay_s": 0.45}, {"sfx": "slip_whoosh", "delay_s": 0.7},
-      {"sfx": "slip_thud", "delay_s": 0.95}, {"voice": "vo_bellows_oof", "delay_s": 1.0}]},
-    "avalanche_helmet": {"ooh": true, "accent": [{"sfx": "fridge_avalanche"}, {"sfx": "jelly_splat", "delay_s": 0.5},
-      {"voice": "vo_bellows_oof", "delay_s": 0.55}]},
-    "dizzy_spin": {"ooh": false, "accent": [{"sfx": "gramophone_babble"}, {"sfx": "coatstand_spin", "delay_s": 0.4},
-      {"sfx": "dizzy_tweets", "delay_s": 1.4}]},
-    "launch_ceiling": {"ooh": true, "accent": [{"sfx": "catapult_whoosh"}, {"voice": "vo_bellows_wha", "delay_s": 0.05},
-      {"sfx": "chandelier_jingle", "delay_s": 0.6}, {"sfx": "logbasket_crash", "delay_s": 1.3}]},
-    "blind_bumble": {"ooh": false, "accent": [{"sfx": "eye_boing"}, {"voice": "vo_bellows_huh", "delay_s": 0.4}]},
-    "fish_slap": {"ooh": true, "accent": [{"sfx": "fish_flop"}, {"sfx": "fish_slap", "delay_s": 0.3},
-      {"sfx": "fish_slap", "delay_s": 0.6}]},
-    "jackhammer_cling": {"ooh": true, "accent": [{"sfx": "clock_chimes"}, {"voice": "vo_bellows_dizzy_babble", "delay_s": 0.1},
-      {"sfx": "pendulum_smack", "delay_s": 1.2}]},
-    "sig_mirror_mirror": {"ooh": false, "accent": [{"voice": "vo_bellows_yow"}, {"sfx": "coatstand_spin", "delay_s": 0.25},
-      {"sfx": "crash_tail", "delay_s": 1.2}]},
-    "suppressed": {"ooh": false, "accent": {"voice": "vo_bellows_ahem"}}
+    "strain_slip": {"ooh": true},
+    "avalanche_helmet": {"ooh": true},
+    "launch_ceiling": {"ooh": true},
+    "fish_slap": {"ooh": true},
+    "jackhammer_cling": {"ooh": true}
   },
-  "squeak_bits": {
-    "bit_warmup": [{"voice": "vo_bellows_warmup_crack"}, {"voice": "vo_bellows_the_pipes", "delay_s": 1.6}],
-    "bit_tea": [{"sfx": "spray_blast", "vol_db": -10.0}, {"voice": "vo_bellows_ugh", "delay_s": 0.1}],
-    "bit_paper": {"sfx": "paper_rip"},
-    "bit_mirror": [{"sfx": "zip"}, {"voice": "vo_bellows_wha", "delay_s": 0.1}],
-    "bit_phone": [{"voice": "vo_bellows_pardon"}, {"voice": "vo_bellows_grr", "delay_s": 0.8}],
-    "bit_livid": {"voice": "vo_bellows_who_squeaked"}
-  },
+  "squeak_bits": {},
   "laugh_tiers": {
     "t1_max": 120,
     "t2_max": 240,
@@ -143,7 +116,7 @@
     "t4_on": ["meltdown_start", "signature"],
     "kinds": {"bit": "t1", "combo": "t3", "panto_bit": "t3", "meltdown": "t4", "rig": "t0"},
     "names": {"titter": "t0", "chuckle": "t1", "laugh": "t2", "big": "t3", "roar": "t4"},
-    "hold_delay_s": 0.12,
+    "hold_delay_s": 0.15,
     "duck_under_voice_db": -6.0
   },
   "music": {

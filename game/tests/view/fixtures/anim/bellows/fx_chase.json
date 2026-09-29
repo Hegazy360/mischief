@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_chase",
+ "rig": "bellows",
+ "loop": true,
+ "length": 32,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_chase_a",
+   "ease": "linear"
+  },
+  {
+   "f": 16,
+   "pose": "b_chase_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 32,
+   "pose": "b_chase_a",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content.",
+ "stride_px": 160
+}

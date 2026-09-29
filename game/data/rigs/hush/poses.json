@@ -1689,7 +1689,7 @@
       "base": "h_stand",
       "root": {
         "rot": 12,
-        "y": -22.5
+        "y": -21.2
       },
       "bones": {
         "torso": {
@@ -2534,11 +2534,11 @@
         },
         "hand_r": {
           "tex": "open",
-          "rot": 24.3
+          "rot": 21.0
         },
         "hand_l": {
           "tex": "open",
-          "rot": -6.5
+          "rot": -2.8
         },
         "leg_upper_r": {
           "rot": -70
@@ -2561,13 +2561,13 @@
           "tex": "flat"
         },
         "arm_upper_r": {
-          "rot": 0.1
+          "rot": 5.8
         },
         "arm_lower_r": {
-          "rot": -64.5
+          "rot": -66.7
         },
         "arm_upper_l": {
-          "rot": -21.4
+          "rot": -25.2
         },
         "arm_lower_l": {
           "rot": -12.1
@@ -2587,7 +2587,7 @@
       "base": "h_stand",
       "root": {
         "rot": -8,
-        "y": -6.3
+        "y": -5.4
       },
       "bones": {
         "torso": {
@@ -2760,7 +2760,7 @@
       "base": "h_stand",
       "root": {
         "rot": -3,
-        "y": -3.8
+        "y": -3.4
       },
       "bones": {
         "torso": {

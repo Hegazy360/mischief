@@ -2,6 +2,8 @@
 # Design lints (TECH §10.5): content + hotspot + IP (res://tools/lint/run_lints.gd -- --all), then the
 # animation / rig lints (res://tools/anim/lint_anim.gd -- --all) when that module exists.
 # Usage: tools/scripts/lint.sh [--strict] [--json=/abs/out.json]   Env: SANDBOX (default "lint").
+# Both flags reach both runners: --strict makes content clip-coverage warnings and every anim WARNING errors (the
+# pre-gate); --json writes out.json (content/hotspot/ip) and out_anim.json (lint_anim, when it supports --json).
 # Exit 1 if any lint fails.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -19,8 +21,17 @@ rc=0
 import_sandbox "$SB_NAME" lint || rc=1
 NO_IMPORT=1 "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" -s res://tools/lint/run_lints.gd -- --all \
   "--gdd=$ROOT/docs/GDD.md" "$@" || rc=1
+# lint_anim takes --strict (every WARNING an error; the pre-gate) and --json=… as well
+anim_args=()
+for a in "$@"; do
+  case "$a" in
+    --strict) anim_args+=("--strict") ;;
+    --json=*) j="${a#--json=}"; anim_args+=("--json=${j%.json}_anim.json") ;;
+  esac
+done
 if [ -f "$ROOT/game/tools/anim/lint_anim.gd" ]; then
-  NO_IMPORT=1 "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" -s res://tools/anim/lint_anim.gd -- --all || rc=1
+  NO_IMPORT=1 "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" -s res://tools/anim/lint_anim.gd -- --all \
+    ${anim_args[@]+"${anim_args[@]}"} || rc=1
 else
   echo "[lint] anim: SKIPPED — game/tools/anim/lint_anim.gd not built yet"
 fi

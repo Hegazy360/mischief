@@ -6,7 +6,7 @@
       "frames": 165,
       "scale": "big",
       "marks": {"antic": 74, "accent": 94, "hold": [97, 145], "release": 165, "knock_on": 112},
-      "travel": {"from_f": 94, "to_f": 112, "ease": "out_cubic", "arc_px": 60},
+      "travel": {"from_f": 94, "to_f": 112, "ease": "linear", "arc_px": 60},
       "t3_prop_f": 114,
       "cam": {"zoom": 1.4, "hitstop": 5},
       "beats": {

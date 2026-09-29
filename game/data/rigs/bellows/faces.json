@@ -291,6 +291,114 @@
       "steam_l": "none",
       "steam_r": "none"
     },
+    "sneeze_build3": {
+      "eyes": "closed",
+      "brows": "worried",
+      "mouth": "O_big",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sneeze_gasp": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "O_small",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sniff": {
+      "eyes": "half",
+      "brows": "up",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sip": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "O_small",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "on",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "hum": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "smug",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "dazed_open": {
+      "eyes": "spiral",
+      "brows": "up",
+      "mouth": "open",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "kiss": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "O_small",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "on",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "trill": {
+      "eyes": "squint",
+      "brows": "up",
+      "mouth": "wavy",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sly_smile": {
+      "eyes": "half",
+      "brows": "sly",
+      "mouth": "smile",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
     "dazed": {
       "eyes": "spiral",
       "brows": "worried",
@@ -460,6 +568,14 @@
     "sneeze_build": [
       0,
       -3
+    ],
+    "sniff": [
+      2,
+      3
+    ],
+    "sly_smile": [
+      4,
+      3
     ],
     "slow_burn": [
       -5,

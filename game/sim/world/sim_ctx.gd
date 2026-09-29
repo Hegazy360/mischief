@@ -50,8 +50,17 @@ var end_event_only: bool = false
 var end_reason: String = "prologue_done"
 ## Nerves floor (q).
 var nerves_q: int = SimConst.NERVES_TEMPER * SimConst.TEMPER_Q
-## Hush is busy climbing in until this tick.
+## Hush is busy climbing in until this tick; the climb-in starts at `hush_enter_at`.
 var hush_enter_ticks: int = 0
+var hush_enter_at: int = 0
+## Backstage rooms (bit per room idx): Bellows walks there, Hush never enters (`cmd_rejected {why: backstage}`).
+var backstage_mask: int = 0
+## Rooms whose stations may serve a fix-up: the Night's rooms + backstage (bit per room idx; −1 = any).
+var fixup_mask: int = -1
+## Per combo idx: 1 when `rules.combos` allows it (all 1 when the key is absent; all 0 for `[]`).
+var combo_ok: PackedByteArray = PackedByteArray()
+## `rules.senses` (false: Bellows never starts a "?" by sight or hearing and never catches — the Gate-0 scene).
+var senses: bool = true
 ## Bellows' scripted exit (after an activity) and whether the loop repeats.
 var exit_after: String = ""
 var exit_room: int = -1
@@ -80,10 +89,24 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 	c.cant_fail = ep.cant_fail
 	c.nerves = ep.nerves
 	var h := p_db.house
+	for rid in ep.backstage:
+		var bi: int = h.room_index.get(rid, -1)
+		if bi >= 0:
+			c.backstage_mask |= 1 << bi
 	for rid in ep.rooms:
 		var ri: int = h.room_index.get(rid, -1)
-		if ri >= 0:
+		if ri >= 0 and (c.backstage_mask & (1 << ri)) == 0:
 			c.hush_mask |= 1 << ri
+	if not ep.rooms.is_empty():
+		c.fixup_mask = c.backstage_mask
+		for rid in ep.rooms:
+			var fi: int = h.room_index.get(rid, -1)
+			if fi >= 0:
+				c.fixup_mask |= 1 << fi
+	c.combo_ok.resize(p_db.combo_list.size())
+	for cb in p_db.combo_list:
+		c.combo_ok[cb.idx] = 1 if (ep.combos_all or ep.combos.has(cb.id)) else 0
+	c.senses = ep.senses
 	var ds: Variant = h.entries.get("doorstep", null)
 	if typeof(ds) == TYPE_DICTIONARY:
 		c.doorstep_room = int(h.room_index.get(ContentUtil.s(ds, "room"), -1))
@@ -91,7 +114,8 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 	if c.doorstep_room < 0:
 		c.doorstep_room = int(h.room_index.get(ep.hush_room, 0))
 		c.doorstep_x = ep.hush_x_sub
-	c.hush_mask |= 1 << c.doorstep_room
+	if (c.backstage_mask & (1 << c.doorstep_room)) == 0:
+		c.hush_mask |= 1 << c.doorstep_room
 	var np := p_db.prank_list.size()
 	c.prank_in_ep.resize(np)
 	c.prank_bn_only.resize(np)
@@ -160,6 +184,7 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 	c.end_reason = ep.end_reason
 	c.nerves_q = ep.nerves_temper * SimConst.TEMPER_Q
 	c.hush_enter_ticks = ep.hush_enter_ticks
+	c.hush_enter_at = mini(ep.hush_enter_at_ticks, ep.hush_enter_ticks)
 	c.exit_after = ep.exit_after
 	c.exit_room = p_db.house.room_index.get(ep.exit_room, -1) if ep.exit_room != "" else -1
 	c.exit_x = ep.exit_x_sub
@@ -170,3 +195,13 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 ## True when Hush may be in room `r`.
 func hush_allowed(r: int) -> bool:
 	return r >= 0 and (hush_mask & (1 << r)) != 0
+
+
+## True when room `r` is backstage this Night.
+func is_backstage(r: int) -> bool:
+	return r >= 0 and (backstage_mask & (1 << r)) != 0
+
+
+## True when a station in room `r` may serve a fix-up this Night.
+func fixup_room_ok(r: int) -> bool:
+	return fixup_mask < 0 or (r >= 0 and (fixup_mask & (1 << r)) != 0)

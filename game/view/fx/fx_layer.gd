@@ -52,6 +52,9 @@ var props: FxFallingProps = null
 var screen: CanvasLayer = null
 var busted: FxBustedOverlay = null
 var freeze: FxFreezeFrame = null
+var cane_fx: FxCane = null
+var stars: FxStars = null
+var wipe_fx: FxWipe = null
 var _captions: Array[FxCaption] = []
 var _stamps: Array[FxStamp] = []
 var _next_caption := 0
@@ -65,6 +68,11 @@ var _pend_clamp := true
 var _next_stamp := 0
 var _sight: _SightLine = null
 var _unit := 1.0
+## Screen-space rects (viewport px) that captions must never overlap — NightScene hands in the
+## HUD's top band (meter ∪ banner) and the PiP while it shows (s2-fix G #2). Returns Array[Rect2].
+var avoid_screen_fn: Callable = Callable()
+var _avoid_world: Array[Rect2] = []
+var _no_avoid: Array[Rect2] = []
 
 
 func _init() -> void:
@@ -127,6 +135,10 @@ func warm() -> void:
 	particles.warm()
 	props = FxFallingProps.new()
 	add_child(props)
+	cane_fx = FxCane.new()
+	add_child(cane_fx)
+	stars = FxStars.new()
+	add_child(stars)
 	screen = CanvasLayer.new()
 	screen.name = "FxScreen"
 	screen.layer = SCREEN_LAYER
@@ -135,6 +147,8 @@ func warm() -> void:
 	screen.add_child(busted)
 	freeze = FxFreezeFrame.new()
 	screen.add_child(freeze)
+	wipe_fx = FxWipe.new()
+	screen.add_child(wipe_fx)
 	var st := ViewKit.autoload("Settings")
 	if st != null and st.has_signal("changed"):
 		st.connect("changed", _on_setting)
@@ -229,9 +243,44 @@ func burst(kind: String, world_pos: Vector2, amount: int = -1, dir: Vector2 = Ve
 	return particles.burst(kind, world_pos, amount, dir)
 
 
-func ripple(world_pos: Vector2) -> void:
+## Tap ripple; `grey` = a rejected tap (`cmd_rejected`).
+func ripple(world_pos: Vector2, grey: bool = false) -> void:
 	warm()
-	ripples.ripple(world_pos)
+	ripples.ripple(world_pos, grey)
+
+
+## A held command (`cmd_queued`): the pulsing destination marker with its "…" badge.
+func queued_marker(world_pos: Vector2) -> void:
+	warm()
+	ripples.queued(world_pos)
+
+
+## The held command ran: back to a normal marker (the dotted path follows).
+func queued_done() -> void:
+	warm()
+	ripples.queued_done()
+
+
+func is_queued() -> bool:
+	return ripples != null and ripples.is_queued()
+
+
+## Figgis's cane sweeping in toward `target` (world).
+func cane(target: Vector2, from_right: bool) -> void:
+	warm()
+	cane_fx.start(target, from_right)
+
+
+## Stars orbiting a point (a bonk).
+func stars_at(world_pos: Vector2) -> void:
+	warm()
+	stars.spin(world_pos)
+
+
+## The caught sequence's ink iris wipe around a screen fraction.
+func wipe(centre_frac: Vector2 = Vector2(0.5, 0.45)) -> void:
+	warm()
+	wipe_fx.start(centre_frac)
 
 
 func path_dots(points: PackedVector2Array) -> void:
@@ -354,6 +403,8 @@ func clear() -> void:
 	entry.stop()
 	ripples.clear()
 	rings.clear()
+	cane_fx.stop()
+	stars.clear()
 	end_busted()
 	set_freeze_frame(false)
 
@@ -388,8 +439,11 @@ func advance(real_dt: float) -> void:
 			var at := f.global_position + _pend_pos if f != null else _pend_pos
 			_show_caption(_pend_text, at, _pend_size, f, _pend_clamp)
 			_pend_follow = null
+	_update_avoid()
 	for c in _captions:
-		c.keep_in = view if c.active and bool(c.get_meta("clamp", true)) else Rect2()
+		var clamp_c := c.active and bool(c.get_meta("clamp", true))
+		c.keep_in = view if clamp_c else Rect2()
+		c.avoid = _avoid_world if clamp_c else _no_avoid
 		c.tick(real_dt, _unit)
 	for s in _stamps:
 		s.keep_in = view if s.active else Rect2()
@@ -403,8 +457,28 @@ func advance(real_dt: float) -> void:
 	strip.tick(real_dt)
 	entry.tick(vdt, _unit)
 	props.tick(vdt)
+	cane_fx.tick(vdt, _unit)
+	stars.tick(vdt, _unit)
 	_sight.tick(real_dt, _unit)
 	particles.set_speed(clampf(rate, 0.0, 3.0))
+
+
+## The avoid rects in world space for this frame's camera (only while a caption is live).
+func _update_avoid() -> void:
+	_avoid_world.clear()
+	if not avoid_screen_fn.is_valid() or not is_inside_tree():
+		return
+	var live := false
+	for c in _captions:
+		live = live or c.active
+	if not live:
+		return
+	var inv := get_viewport().get_canvas_transform().affine_inverse()
+	var rects: Variant = avoid_screen_fn.call()
+	if rects is Array:
+		for r in rects:
+			if r is Rect2 and (r as Rect2).has_area():
+				_avoid_world.append(inv * (r as Rect2))
 
 
 func _clamp_x(p: Vector2, half_w: float) -> Vector2:

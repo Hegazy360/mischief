@@ -49,13 +49,25 @@ AB_PREFIXES = ("vo_bellows_tuba_", "crowd_fb_")
 # SQUEAKY arrives with SOPRAN-OH-NO (Night 3); Beryl (Act II, Night 5+) and Delphine (Act III, Night 8+)
 # are Stage 3 — their own voices plus the lines Bellows only says to them ("BERYL!", the Suppressed
 # "ha-ha, my dear"). Their tuba takes are A/B alternates (checked first, against their own cap).
-LATER_PREFIXES = ("vo_bellows_squeaky_", "vo_beryl_", "vo_delphine_", "vo_bellows_beryl", "vo_bellows_ha_ha_my_dear")
+# The aria bank (6 public-domain phrases) has no slice trigger (barks.json `aria.on` = null): it is Gala /
+# rehearse material, so it counts as later-Night too.
+LATER_PREFIXES = ("vo_bellows_squeaky_", "vo_beryl_", "vo_delphine_", "vo_bellows_beryl", "vo_bellows_ha_ha_my_dear",
+                  "vo_bellows_aria_")
 # end-trim threshold relative to the peak, per category (a tail below it is inaudible on a phone)
 TRIM_DB = {"voice": -36.0, "sfx": -40.0, "soft": -36.0, "ui": -36.0, "sting": -46.0, "crowd": -38.0, "ambient": -36.0}
 
 
 def is_ab_alternate(name: str) -> bool:
     return name.startswith(AB_PREFIXES)
+
+
+def ab_twin(name: str) -> str:
+    """The formant file an A/B alternate replaces (vo_bellows_tuba_x → vo_bellows_x, crowd_fb_x → crowd_x)."""
+    if name.startswith("vo_bellows_tuba_"):
+        return "vo_bellows_" + name[len("vo_bellows_tuba_"):]
+    if name.startswith("crowd_fb_"):
+        return "crowd_" + name[len("crowd_fb_"):]
+    return ""
 
 
 def music_states() -> tuple[str, ...]:
@@ -72,6 +84,7 @@ def is_later(name: str) -> bool:
 def load_recipes():
     import registry
     import sfx_foley  # noqa: F401
+    import sfx_slice  # noqa: F401
     import sfx_stealth  # noqa: F401
     import stings  # noqa: F401
     import voices  # noqa: F401
@@ -241,7 +254,15 @@ def build_map(files: dict[str, Path]) -> tuple[dict, list[str]]:
         fmap[fid] = entry
     bnk = {b: [m for m in members if m in files] for b, members in registry.banks().items()}
     bnk = {b: m for b, m in bnk.items() if m}
-    known = set(fmap) | set(bnk)
+    import sequences
+    cycles = {}
+    for cid, c in sorted(sequences.CYCLES.items()):
+        members = [m for m in c["members"] if m in fmap]
+        if len(members) != len(c["members"]):
+            notes.append(f"ERROR cycle {cid}: missing members {sorted(set(c['members']) - set(members))}")
+        cycles[cid] = dict(c, members=members)
+    seqs = {sid: parts for sid, parts in sorted(sequences.sequences().items())}
+    known = set(fmap) | set(bnk) | set(cycles) | set(seqs)
     refs = scan_refs(DATA)
     aliases: dict[str, str] = {}
     for nm, target in sorted(EXPLICIT.items()):
@@ -281,6 +302,8 @@ def build_map(files: dict[str, Path]) -> tuple[dict, list[str]]:
         "music": mus,
         "stems": music.STEM_SETS,
         "vary": dict(sorted(vary.items())),
+        "cycles": cycles,
+        "sequences": seqs,
     }
     return doc, notes
 
@@ -291,6 +314,10 @@ def resolve_ids(name: str, doc: dict, depth: int = 0) -> list[str]:
         return [name]
     if name in doc["banks"]:
         return list(doc["banks"][name])
+    if name in doc.get("cycles", {}):
+        return list(doc["cycles"][name]["members"])
+    if name in doc.get("sequences", {}):
+        return [f for _, part in doc["sequences"][name] for f in resolve_ids(part, doc, depth + 1)]
     if depth > 6 or name not in doc["aliases"]:
         return []
     return resolve_ids(doc["aliases"][name], doc, depth + 1)
@@ -352,7 +379,7 @@ def check(verbose: bool = True) -> int:
             errors.append(f"stale file {files[fid].relative_to(OUT)} (no recipe)")
     # 2. the map is current and self-consistent
     fresh, _ = build_map(files)
-    for key in ("files", "banks", "music", "stems", "vary"):
+    for key in ("files", "banks", "music", "stems", "vary", "cycles", "sequences"):
         if doc.get(key) != fresh.get(key):
             errors.append(f"sfx_map.json '{key}' is stale — run gen_audio.py --map-only")
     for k, v in doc.get("aliases", {}).items():
@@ -362,6 +389,44 @@ def check(verbose: bool = True) -> int:
         for m in members:
             if m not in doc["files"]:
                 errors.append(f"bank {b}: member {m} is not a file")
+    known = set(doc["files"]) | set(doc["banks"]) | set(doc.get("aliases", {}))
+    for cid, c in doc.get("cycles", {}).items():
+        if cid in known:
+            errors.append(f"cycle {cid} shadows a file / bank / alias")
+        if not c.get("members") or any(m not in doc["files"] for m in c["members"]):
+            errors.append(f"cycle {cid}: members must be files ({c.get('members')})")
+    for sid, parts in doc.get("sequences", {}).items():
+        if sid in known:
+            errors.append(f"sequence {sid} shadows a file / bank / alias")
+        for t_s, part in parts:
+            if not resolve_ids(part, doc):
+                errors.append(f"sequence {sid}: part '{part}' at {t_s}s does not resolve")
+    # the Gate-0 A/B pairs (data/audio/ab.json): every side resolves, and in its own style
+    ab_path = DATA / "audio" / "ab.json"
+    if ab_path.exists():
+        try:
+            ab = json.loads(ab_path.read_text())
+        except ValueError as e:
+            ab = {}
+            errors.append(f"ab.json does not parse: {e}")
+        for sect, styles in (("voice", ("formant", "tuba")), ("crowd", ("formant", "fallback"))):
+            for pair in ab.get(sect, []):
+                for side in ("a", "b"):
+                    sd = pair.get(side) or {}
+                    sid, st = sd.get("id", ""), sd.get("style", "")
+                    if st not in styles:
+                        errors.append(f"ab.json {sect}.{pair.get('id')}.{side}: style '{st}' not in {styles}")
+                    for part in ([p_[1] for p_ in doc.get("sequences", {}).get(sid, [])] or [sid]):
+                        if not resolve_ids(part, doc):
+                            errors.append(f"ab.json {sect}.{pair.get('id')}.{side}: '{part}' does not resolve")
+                        elif st == "tuba" and not resolve_ids("vo_bellows_tuba_" + part[len("vo_bellows_"):], doc):
+                            errors.append(f"ab.json {sect}.{pair.get('id')}.{side}: no tuba take of '{part}'")
+                        elif st == "fallback" and not resolve_ids("crowd_fb_" + part[len("crowd_"):], doc):
+                            errors.append(f"ab.json {sect}.{pair.get('id')}.{side}: no fallback take of '{part}'")
+    # the clip-event frame table (L12) is generated from the same lengths
+    import clip_events
+    for e in clip_events.check():
+        errors.append(f"clip events: {e}")
     # 3. content + cue references resolve
     for nm, where in sorted(scan_refs(DATA).items()):
         if not resolve_ids(nm, doc):
@@ -395,6 +460,7 @@ def check(verbose: bool = True) -> int:
     ab_bytes = 0
     later_bytes = 0
     frames_total = 0
+    twin_bytes = {"voice": [0, 0], "crowd": [0, 0]}     # [formant twins, alternates] per A/B side
     ceil = 10 ** (PEAK_MAX_DB / 20) + 1.5e-4
     for fid, p in sorted(files.items()):
         try:
@@ -404,6 +470,11 @@ def check(verbose: bool = True) -> int:
             continue
         if is_ab_alternate(fid):
             ab_bytes += w["size"]
+            twin = ab_twin(fid)
+            if twin in files and not is_later(twin):
+                side = "voice" if fid.startswith("vo_") else "crowd"
+                twin_bytes[side][1] += w["size"]
+                twin_bytes[side][0] += files[twin].stat().st_size
         elif is_later(fid):
             later_bytes += w["size"]
         else:
@@ -477,8 +548,10 @@ def check(verbose: bool = True) -> int:
     # 6. budgets
     other = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file() and p.suffix == ".json")
     shipped_est = int(frames_total * 0.41) + other   # QOA ≈ 3.2 bits/sample + frame headers
-    if slice_bytes > SLICE_MAX_BYTES:
-        errors.append(f"slice audio {slice_bytes / 1e6:.2f} MB WAV exceeds {SLICE_MAX_BYTES / 1e6:.1f} MB")
+    # after Gate 0 the losing side of each A/B pair is deleted: the slice must fit whichever side wins
+    worst = slice_bytes + sum(max(0, alt - form) for form, alt in twin_bytes.values())
+    if worst > SLICE_MAX_BYTES:
+        errors.append(f"slice audio {worst / 1e6:.2f} MB WAV (worst Gate-0 pick) exceeds {SLICE_MAX_BYTES / 1e6:.1f} MB")
     if ab_bytes > AB_MAX_BYTES:
         errors.append(f"A/B alternates {ab_bytes / 1e6:.2f} MB WAV exceed {AB_MAX_BYTES / 1e6:.1f} MB")
     if shipped_est > SHIPPED_MAX_BYTES:
@@ -489,7 +562,8 @@ def check(verbose: bool = True) -> int:
         for e in errors:
             print("ERROR:", e)
         print(f"check: {len(files)} files ({len(doc.get('banks', {}))} banks, {len(doc.get('aliases', {}))} aliases); "
-              f"slice {slice_bytes / 1e6:.2f} MB + A/B alternates {ab_bytes / 1e6:.2f} MB + later-Night "
+              f"slice {slice_bytes / 1e6:.2f} MB (worst Gate-0 pick {worst / 1e6:.2f}) + A/B alternates "
+              f"{ab_bytes / 1e6:.2f} MB + later-Night "
               f"{later_bytes / 1e6:.2f} MB WAV; "
               f"≈{shipped_est / 1e6:.1f} MB after QOA import → {'FAIL' if errors else 'PASS'} "
               f"({len(errors)} errors, {len(warns)} warnings)")
@@ -600,6 +674,9 @@ def main() -> int:
     MAP_PATH.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
     for nline in notes:
         print(nline)
+    import clip_events
+    for e in clip_events.write():
+        print("ERROR clip events:", e)
     print(f"wrote {MAP_PATH.relative_to(ROOT)} ({len(doc['files'])} files, {len(doc['banks'])} banks, "
           f"{len(doc['aliases'])} aliases)")
     return check()

@@ -1,0 +1,84 @@
+{
+ "version": 1,
+ "clip": "hush/_fx_take",
+ "rig": "hush",
+ "loop": false,
+ "length": 80,
+ "blend_in": 0,
+ "tags": [
+  "take",
+  "fixture"
+ ],
+ "smear": {
+  "auto": true
+ },
+ "beats": {
+  "anticipation": [
+   0,
+   16
+  ],
+  "accent": [
+   16,
+   19
+  ],
+  "hold": [
+   19,
+   60
+  ],
+  "settle": [
+   60,
+   80
+  ]
+ },
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_stand",
+   "face": "neutral"
+  },
+  {
+   "f": 16,
+   "pose": "h_busted_antic",
+   "ease": "in_cubic"
+  },
+  {
+   "f": 19,
+   "pose": "h_busted",
+   "ease": "pop",
+   "face": "shock"
+  },
+  {
+   "f": 40,
+   "pose": "h_busted",
+   "ease": "out_back",
+   "set": {
+    "root": {
+     "y": -4
+    }
+   }
+  },
+  {
+   "f": 60,
+   "pose": "h_busted",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 80,
+   "pose": "h_stand",
+   "ease": "out_back"
+  }
+ ],
+ "events": [
+  {
+   "f": 19,
+   "type": "sfx",
+   "id": "woodblock"
+  },
+  {
+   "f": 19,
+   "type": "spring",
+   "part": "beret",
+   "kick": 20
+  }
+ ]
+}

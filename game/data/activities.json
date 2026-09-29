@@ -4,7 +4,7 @@
     "warmup": {
       "name": "Warm-up",
       "station": "st_gramophone",
-      "dur_s": 10,
+      "dur_s": 8,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -16,12 +16,42 @@
       "clip": "bellows/act_warmup",
       "icon": "res://art/icons/activities/warmup.svg",
       "desc": "Sings scales at the gramophone, back to the kitchen.",
-      "micro_gags": ["admire_reflection_horn", "trill", "conduct_air"]
+      "micro_gags": [
+        {
+          "id": "admire_reflection_horn",
+          "at_s": 2.0,
+          "len_f": 60,
+          "emote": "smug",
+          "gag": "Leans into the gramophone horn, sees his face bloom huge in the brass, blows it a kiss."
+        },
+        {
+          "id": "trill",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "sing",
+          "gag": "A trill so high the teacups on the mantel rattle; he taps his throat, delighted."
+        },
+        {
+          "id": "conduct_air",
+          "at_s": 12.0,
+          "len_f": 60,
+          "emote": "smug",
+          "gag": "Conducts an invisible orchestra with his pinkie as a baton, then bows to it."
+        },
+        {
+          "id": "hum",
+          "at_s": 17.0,
+          "len_f": 48,
+          "emote": "hum",
+          "gag": "Hums along to his own record, eyes shut, swaying like a metronome."
+        }
+      ],
+      "mg_cycle_s": 20.0
     },
     "tea": {
       "name": "Tea",
       "station": "st_tea",
-      "dur_s": 10,
+      "dur_s": 8,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -33,12 +63,27 @@
       "clip": "bellows/act_tea",
       "icon": "res://art/icons/activities/tea.svg",
       "desc": "Brews honey tea: kettle, spoon, stir, sniff, sip.",
-      "micro_gags": ["admire_in_kettle", "hum", "pinkie_up"]
+      "micro_gags": [
+        {
+          "id": "admire_in_kettle",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Catches his reflection in the kettle, pats his bouffant, winks at it."
+        },
+        {
+          "id": "pinkie_up",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "yum",
+          "gag": "A long sip with the pinkie cocked so high it wobbles; eyes shut: 'Ahhh.'"
+        }
+      ]
     },
     "pickles": {
       "name": "Pickles",
       "station": "st_pickles",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -50,12 +95,20 @@
       "clip": "bellows/act_pickles",
       "icon": "res://art/icons/activities/pickles.svg",
       "desc": "Fetches the pickled-onion jar from the shelf.",
-      "micro_gags": ["sniff_jar"]
+      "micro_gags": [
+        {
+          "id": "sniff_jar",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "sniff",
+          "gag": "Unscrews the jar an inch, sniffs, his eyes water, screws it back tight."
+        }
+      ]
     },
     "snack": {
       "name": "Snack",
       "station": "st_fridge",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -67,7 +120,15 @@
       "clip": "bellows/act_snack",
       "icon": "res://art/icons/activities/snack.svg",
       "desc": "Raids the fridge for a midnight-style snack.",
-      "micro_gags": ["lick_lips"]
+      "micro_gags": [
+        {
+          "id": "lick_lips",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "yum",
+          "gag": "Holds a wobbling trifle up to the fridge light and licks his lips; a drool drop falls."
+        }
+      ]
     },
     "rinse": {
       "name": "Rinse",
@@ -84,12 +145,20 @@
       "clip": "bellows/act_rinse",
       "icon": "res://art/icons/activities/rinse.svg",
       "desc": "Rinses his cup at the sink under the window.",
-      "micro_gags": ["gargle_hum"]
+      "micro_gags": [
+        {
+          "id": "gargle_hum",
+          "at_s": 2.0,
+          "len_f": 60,
+          "emote": "hum",
+          "gag": "Gargles a tune with the rinse water: a bubbly high note, then spits it out proudly."
+        }
+      ]
     },
     "paper": {
       "name": "Newspaper",
       "station": "st_recliner",
-      "dur_s": 12,
+      "dur_s": 8,
       "facing": 1,
       "specs": true,
       "awareness": "normal",
@@ -101,12 +170,27 @@
       "clip": "bellows/act_paper",
       "icon": "res://art/icons/activities/paper.svg",
       "desc": "Sits in the recliner reading his reviews, specs on.",
-      "micro_gags": ["tut", "turn_page", "chuckle_at_own_photo"]
+      "micro_gags": [
+        {
+          "id": "tut",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "tut",
+          "gag": "Reads a bad review: 'Tut. Tut. TUT!' and flicks the page at it."
+        },
+        {
+          "id": "chuckle_at_own_photo",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "laugh",
+          "gag": "Finds his own photo, kisses it, and chuckles behind the paper."
+        }
+      ]
     },
     "fire": {
       "name": "Fire",
       "station": "st_fireplace",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -118,12 +202,20 @@
       "clip": "bellows/act_fire",
       "icon": "res://art/icons/activities/fire.svg",
       "desc": "Pumps the fireplace bellows to stoke the fire.",
-      "micro_gags": ["warm_hands"]
+      "micro_gags": [
+        {
+          "id": "warm_hands",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Warms his hands, then turns and warms his bottom, eyes rolling in bliss."
+        }
+      ]
     },
     "mirror": {
       "name": "Mirror",
       "station": "st_hall_mirror",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -135,7 +227,15 @@
       "clip": "bellows/act_mirror",
       "icon": "res://art/icons/activities/mirror.svg",
       "desc": "Preens and combs his bouffant at the cheval mirror.",
-      "micro_gags": ["kiss_reflection", "comb_flourish"]
+      "micro_gags": [
+        {
+          "id": "kiss_reflection",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Kisses his reflection, then jealously polishes the lip mark off with his sleeve."
+        }
+      ]
     },
     "phone": {
       "name": "Phone",
@@ -152,7 +252,22 @@
       "clip": "bellows/act_phone",
       "icon": "res://art/icons/activities/phone.svg",
       "desc": "Takes a call from his agent, pompously.",
-      "micro_gags": ["pompous_laugh", "twirl_cord"]
+      "micro_gags": [
+        {
+          "id": "pompous_laugh",
+          "at_s": 2.0,
+          "len_f": 60,
+          "emote": "laugh",
+          "gag": "Throws his head back at his agent's joke: 'HA-ha-HAAA!' - the receiver at arm's length."
+        },
+        {
+          "id": "twirl_cord",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Twirls the phone cord round his finger and gets it knotted round his wrist."
+        }
+      ]
     },
     "clock": {
       "name": "Clock",
@@ -169,7 +284,15 @@
       "clip": "bellows/act_clock",
       "icon": "res://art/icons/activities/clock.svg",
       "desc": "Winds the grandfather clock.",
-      "micro_gags": ["check_pocket_watch"]
+      "micro_gags": [
+        {
+          "id": "check_pocket_watch",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "tut",
+          "gag": "Checks his pocket watch against the clock, tuts, and shakes the watch."
+        }
+      ]
     },
     "piano": {
       "name": "Piano",
@@ -186,7 +309,22 @@
       "clip": "bellows/act_piano",
       "icon": "res://art/icons/activities/piano.svg",
       "desc": "Accompanies himself at the piano, fortissimo.",
-      "micro_gags": ["hair_flick", "cross_hands"]
+      "micro_gags": [
+        {
+          "id": "hair_flick",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Flicks his bouffant back mid-arpeggio like a concert pianist."
+        },
+        {
+          "id": "cross_hands",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Crosses his hands for a flourish and gets his fingers tangled."
+        }
+      ]
     },
     "gargle": {
       "name": "Gargle",
@@ -203,7 +341,15 @@
       "clip": "bellows/act_gargle",
       "icon": "res://art/icons/activities/gargle.svg",
       "desc": "Gargles and sprays his throat at the basin.",
-      "micro_gags": ["check_teeth"]
+      "micro_gags": [
+        {
+          "id": "check_teeth",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Bares his teeth at the basin mirror and taps one: ping!"
+        }
+      ]
     },
     "bath": {
       "name": "Bath",
@@ -220,7 +366,23 @@
       "clip": "bellows/act_bath",
       "icon": "res://art/icons/activities/bath.svg",
       "desc": "Sings in a deep bubble bath with his rubber duck.",
-      "micro_gags": ["duck_duet", "loofah_conduct"]
+      "micro_gags": [
+        {
+          "id": "duck_duet",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "sing",
+          "gag": "Sings a duet with his rubber duck, giving it the high part."
+        },
+        {
+          "id": "loofah_conduct",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "sing",
+          "gag": "Conducts the bubbles with the loofah; foam flies onto his nose."
+        }
+      ],
+      "mg_cycle_s": 10.0
     },
     "radiator": {
       "name": "Radiator",
@@ -237,7 +399,15 @@
       "clip": "bellows/act_radiator",
       "icon": "res://art/icons/activities/radiator.svg",
       "desc": "Bleeds the landing radiator, humming.",
-      "micro_gags": ["tap_pipe"]
+      "micro_gags": [
+        {
+          "id": "tap_pipe",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "hum",
+          "gag": "Taps the pipe and hums back at its clank, note for note."
+        }
+      ]
     },
     "dress": {
       "name": "Dress",
@@ -271,8 +441,17 @@
       "clip": "bellows/act_nap",
       "icon": "res://art/icons/activities/nap.svg",
       "desc": "Naps; specs on the bedside table until he wakes.",
-      "micro_gags": ["snore_whistle"],
-      "specs_at": "bedroom_bedside"
+      "micro_gags": [
+        {
+          "id": "snore_whistle",
+          "at_s": 2.0,
+          "len_f": 60,
+          "emote": "yawn",
+          "gag": "Snores a high whistle that flutters his moustache."
+        }
+      ],
+      "specs_at": "bedroom_bedside",
+      "mg_cycle_s": 5.0
     },
     "feed_beryl": {
       "name": "Feed Beryl",
@@ -289,7 +468,15 @@
       "clip": "bellows/act_feed_beryl",
       "icon": "res://art/icons/activities/feed_beryl.svg",
       "desc": "Bends to fill Beryl's feed bin: 'my little prima donna'.",
-      "micro_gags": ["coo_at_goat"]
+      "micro_gags": [
+        {
+          "id": "coo_at_goat",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "laugh",
+          "gag": "Coos at Beryl in baby talk; she chews his cravat."
+        }
+      ]
     },
     "roses": {
       "name": "Roses",
@@ -306,7 +493,15 @@
       "clip": "bellows/act_roses",
       "icon": "res://art/icons/activities/roses.svg",
       "desc": "Waters his prize roses with the hose.",
-      "micro_gags": ["sniff_rose"]
+      "micro_gags": [
+        {
+          "id": "sniff_rose",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "sniff",
+          "gag": "Sniffs a prize rose, sneezes a petal off."
+        }
+      ]
     },
     "marrow": {
       "name": "Marrow",
@@ -323,7 +518,15 @@
       "clip": "bellows/act_marrow",
       "icon": "res://art/icons/activities/marrow.svg",
       "desc": "Bends to polish his prize marrow.",
-      "micro_gags": ["pat_marrow"]
+      "micro_gags": [
+        {
+          "id": "pat_marrow",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Pats his prize marrow like a baby's bottom."
+        }
+      ]
     },
     "stroll": {
       "name": "Stroll",
@@ -340,7 +543,15 @@
       "clip": "bellows/act_stroll",
       "icon": "res://art/icons/activities/stroll.svg",
       "desc": "Strolls down the garden path, surveying his estate.",
-      "micro_gags": ["hands_behind_back"],
+      "micro_gags": [
+        {
+          "id": "hands_behind_back",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "hum",
+          "gag": "Hands behind his back, surveys his estate like a general."
+        }
+      ],
       "path": {"room": "garden", "from_x": 5260, "to_x": 5560}
     },
     "polish": {
@@ -358,7 +569,15 @@
       "clip": "bellows/act_polish",
       "icon": "res://art/icons/activities/polish.svg",
       "desc": "Polishes his trophies, specs on.",
-      "micro_gags": ["breathe_on_trophy"]
+      "micro_gags": [
+        {
+          "id": "breathe_on_trophy",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Breathes on a trophy, polishes it, admires his face in it."
+        }
+      ]
     },
     "cloak": {
       "name": "Cloak",
@@ -393,7 +612,15 @@
       "clip": "bellows/act_answer_door",
       "icon": "res://art/icons/activities/answer_door.svg",
       "desc": "Answers the doorbell: Dame Delphine arrives.",
-      "micro_gags": ["straighten_cravat"]
+      "micro_gags": [
+        {
+          "id": "straighten_cravat",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Straightens his cravat and checks his breath in his palm."
+        }
+      ]
     },
     "host_tea": {
       "name": "Host Tea",
@@ -410,7 +637,22 @@
       "clip": "bellows/act_host_tea",
       "icon": "res://art/icons/activities/host_tea.svg",
       "desc": "Serves Dame Delphine tea on the chaise.",
-      "micro_gags": ["pinkie_up", "simper"]
+      "micro_gags": [
+        {
+          "id": "pinkie_up",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "yum",
+          "gag": "Pinkie-up sip, matching Delphine's pinkie inch for inch."
+        },
+        {
+          "id": "simper",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "laugh",
+          "gag": "Simpers at Delphine's compliment and fans himself with a biscuit."
+        }
+      ]
     },
     "tango": {
       "name": "Tango",
@@ -427,7 +669,15 @@
       "clip": "bellows/act_tango",
       "icon": "res://art/icons/activities/tango.svg",
       "desc": "Tangos with Delphine to their song.",
-      "micro_gags": ["rose_in_teeth"]
+      "micro_gags": [
+        {
+          "id": "rose_in_teeth",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Rose in his teeth; a thorn; a muffled 'ow'."
+        }
+      ]
     },
     "rehearse": {
       "name": "Rehearse",
@@ -444,7 +694,22 @@
       "clip": "bellows/act_rehearse",
       "icon": "res://art/icons/activities/rehearse.svg",
       "desc": "Rehearses his comeback aria on the garden stage.",
-      "micro_gags": ["bow_to_nobody", "vocal_run"]
+      "micro_gags": [
+        {
+          "id": "bow_to_nobody",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Bows deeply to the empty garden seats."
+        },
+        {
+          "id": "vocal_run",
+          "at_s": 7.0,
+          "len_f": 48,
+          "emote": "sing",
+          "gag": "A vocal run up the scale that startles a pigeon off the stage."
+        }
+      ]
     },
     "hunt": {
       "name": "Hunt",
@@ -461,7 +726,15 @@
       "clip": "bellows/act_hunt",
       "icon": "res://art/icons/activities/hunt.svg",
       "desc": "Specs on, hunts the parlour for the squeaker (Prologue only).",
-      "micro_gags": [],
+      "micro_gags": [
+        {
+          "id": "peer_under_piano",
+          "at_s": 2.5,
+          "len_f": 60,
+          "emote": null,
+          "gag": "Specs on, he bends to peer under the piano as he passes - nose an inch from Hush's hiding spot - and straightens: nothing."
+        }
+      ],
       "path": {"room": "parlour", "from_x": 2350, "to_x": 1650},
       "searching": true
     }
@@ -475,7 +748,16 @@
       "clip": "bellows/act_fixup_dry",
       "specs": false,
       "desc": "Steams himself dry at the nearest DRY station (fireplace, radiator, sun lounger).",
-      "icon": "res://art/icons/activities/fixup_dry.svg"
+      "icon": "res://art/icons/activities/fixup_dry.svg",
+      "micro_gags": [
+        {
+          "id": "steam_sideburns",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Fluffs his dripping sideburns in the heat; they spring out like poodle ears."
+        }
+      ]
     },
     "fixup_sink": {
       "name": "Wash up",
@@ -485,7 +767,16 @@
       "clip": "bellows/act_fixup_sink",
       "specs": false,
       "desc": "Scrubs off flour or treacle at the nearest SINK (kitchen sink, bathroom basin).",
-      "icon": "res://art/icons/activities/fixup_sink.svg"
+      "icon": "res://art/icons/activities/fixup_sink.svg",
+      "micro_gags": [
+        {
+          "id": "scrub_nose",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "tut",
+          "gag": "Scrubs his face so hard his nose squeaks like a balloon."
+        }
+      ]
     },
     "fixup_honey": {
       "name": "Soothe throat",
@@ -495,7 +786,16 @@
       "clip": "bellows/act_fixup_honey",
       "specs": false,
       "desc": "Squeaky voice: a spoon of honey at the kitchen tea counter.",
-      "icon": "res://art/icons/activities/fixup_honey.svg"
+      "icon": "res://art/icons/activities/fixup_honey.svg",
+      "micro_gags": [
+        {
+          "id": "honey_test_note",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "sing",
+          "gag": "A spoon of honey, a test note: perfect pitch, smug nod."
+        }
+      ]
     },
     "fixup_mirror": {
       "name": "Tidy up",
@@ -505,7 +805,16 @@
       "clip": "bellows/act_fixup_mirror",
       "specs": false,
       "desc": "Fixes his hair, feathers or costume at the nearest MIRROR.",
-      "icon": "res://art/icons/activities/fixup_mirror.svg"
+      "icon": "res://art/icons/activities/fixup_mirror.svg",
+      "micro_gags": [
+        {
+          "id": "comb_flourish",
+          "at_s": 2.0,
+          "len_f": 48,
+          "emote": "smug",
+          "gag": "Combs the bouffant back up with a flourish and tucks the comb behind his ear."
+        }
+      ]
     },
     "curious": {
       "name": "Curious",
@@ -536,7 +845,42 @@
       "specs": true,
       "desc": "Lost her: specs on, searches the room.",
       "icon": "res://art/icons/activities/search.svg"
+    },
+    "exit": {
+      "name": "Exit",
+      "desc": "The scripted walk-off (Prologue, bellows.exit): 'Hmph!' He stomps off toward the stairs. No hooks; the walk beats play on the way.",
+      "kind": null,
+      "dur_s": 0,
+      "mark_s": null,
+      "clip": "bellows/loco_stomp",
+      "specs": false,
+      "icon": "res://art/icons/activities/exit.svg",
+      "micro_gags": []
     }
+  },
+  "walk_beats": {
+    "min_leg_s": 5.0,
+    "every_s": 4.0,
+    "ids": [
+      {
+        "id": "walk_hum",
+        "len_f": 48,
+        "emote": "hum",
+        "gag": "Hums a march in time with his strut, chin up, arms swinging."
+      },
+      {
+        "id": "cravat_tug",
+        "len_f": 48,
+        "emote": "smug",
+        "gag": "Tugs his cravat and puffs his chest out mid-stride."
+      },
+      {
+        "id": "walk_scale",
+        "len_f": 48,
+        "emote": "sing",
+        "gag": "Sings 'do-re-mi' a note per footfall, stepping on the beat."
+      }
+    ]
   },
   "squeak_bits": {
     "bit_warmup": {

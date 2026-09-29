@@ -1,0 +1,6 @@
+{"episode": "p00_curtain_up", "note": "an eager first-timer taps the honey jar and SQUEAK while Hush is still climbing in (s2-sim review)", "ticks": 600,
+ "cmds": [
+  [60, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
+  [120, {"c": "squeak"}],
+  [150, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}]
+]}

@@ -64,7 +64,7 @@ func on_squeak(w: SimWorld, room: int, x: int, heard: bool) -> void:
 		var d := Fx.signi(x - b.x_sub) if room == b.room else -b.facing
 		b.head_turn_dir = d if d != 0 else b.facing
 		w.emit(SimEvents.HEAD_TURN)
-	if pips.size() >= SimConst.EAR_PIPS_MAX:
+	if pips.size() >= SimConst.EAR_PIPS_MAX and w.ctx.senses:
 		pips = PackedInt32Array()
 		b.ear_pips = 0
 		_trim_lures(w)
@@ -90,6 +90,8 @@ func _play_bit(w: SimWorld, a: ActivityDef) -> void:
 	var info: Dictionary = w.db.squeak_bits.get(bit, {})
 	var length: int = int(info.get("len", SimConst.BIT_DEFAULT_TICKS))
 	b.bit_until = w.tick + length
+	b.bit_id = bit
+	b.bit_t0 = w.tick
 	b.visit_bits += 1
 	var n: int = w.scoring.bit_plays.get(bit, 0)
 	var score: int = SimConst.BIT_SCORES[n] if n < SimConst.BIT_SCORES.size() else 0
@@ -131,6 +133,8 @@ func lure_ready(w: SimWorld) -> bool:
 ## A noise (run, big rig) at (room, x): he investigates if within 500 px on his floor.
 func on_noise(w: SimWorld, room: int, x: int) -> void:
 	var b := w.bellows
+	if not w.ctx.senses:
+		return
 	if b.state != SimBellows.ROUTINE and b.state != SimBellows.DETOUR and b.state != SimBellows.CURIOUS:
 		return
 	if b.asleep or w.tick < b.blind_after_until:
@@ -161,6 +165,7 @@ func update_mirror(w: SimWorld) -> void:
 	if not Conditions.hush_in_frame_frozen(w, mirror_prank):
 		var r := mirror_round
 		mirror_active = false
+		w.hush.wink_t0 = w.tick
 		w.emit(SimEvents.WINK, {"round": r})
 		w.pranks.fire(w, mirror_prank, "use", 0, r)
 		return

@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_double_take",
+ "rig": "bellows",
+ "loop": false,
+ "length": 18,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_dt_away",
+   "ease": "linear"
+  },
+  {
+   "f": 18,
+   "pose": "b_dt_back",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

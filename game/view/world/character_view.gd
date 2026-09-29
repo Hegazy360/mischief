@@ -1,54 +1,135 @@
-## CharacterView — one actor on stage (TECH §5.4). Reads a ViewSnapshot.Actor every frame,
-## interpolates its position between ticks with `SimDriver.alpha()`, and maps its state to a
-## clip through ClipMap (`data/anim/<rig>/map.json`, else `view/world/default_maps/`).
+## CharacterView — one actor on stage (TECH §5.4, s2-view brief §4.1). Reads a
+## ViewSnapshot.Actor every frame, interpolates its position between ticks with
+## `SimDriver.alpha()` (stairs on the stair diagonal from the sim's leg), and maps its state to
+## clips through ClipMap (`data/anim/<rig>/map.json` over the default map, the map-key schema).
 ##
-## * With the rig system (`res://view/rig/rig_player.gd`, owner `rig`, soft) and the actor's
-##   rig data, a RigPlayer plays the clips; reactions are frame-locked to the sim
-##   (`set_external_frame(react_t + alpha)`), tint follows temper, residues and specs follow
-##   the snapshot. Missing rig data falls back to the `_mannequin` stand-in rig.
-## * Without it, a FallbackPuppet (flat sprites + squash / stretch / lean / tremble, with the
-##   reaction beats taken from reactions.json marks) keeps the view alive and readable.
-## * Hush hidden: the body is not drawn; her eyes blink in the hiding spot and track Bellows.
+## * **Real rigs everywhere.** When the rig loads, a RigPlayer (`res://view/rig/rig_player.gd`,
+##   soft) draws the actor — never a puppet. A clip the map wants but nobody authored yet falls
+##   through to the next rule (ClipMap), and when nothing at all is authored the rig holds its
+##   stand pose; every such fallback is counted (`counts()` → `WorldView.fallback_counts()`) and
+##   logged once. Only a rig that fails to load uses the FallbackPuppet (counted as a puppet).
+## * **Frame locks.** Reactions (`react_t + alpha`, tier / suppressed remap, the `_ko` knock-on
+##   variant, the sim's `last_beat` after the settle) and base one-shots (`oneshot_t + alpha`) are
+##   driven with `set_external_frame`; the JuiceClock owns hit-stop (`self_hitstop = false`).
+## * **Overlays** (`mg:<id>` micro-gags, `cue:<id>` director cues, overlay one-shots and Hush's
+##   shrug / pickup) play on the rig's masked overlay layer over whatever the base is doing and
+##   stop on any state change or reaction. A missing micro-gag clip flashes the emote's face
+##   preset instead (+ notes for sing / hum).
+## * **View flavours** (Hush): snicker → glance after `rigged`, shrug on `cmd_rejected`, pickup
+##   on `pick`, idle fidgets after 3 s idle, the standing turn — all stop within one frame of any
+##   Hush state change (the flavour rule: a tap never waits for them).
+## * **His body is the meter** (Bellows): tint tier + sideburns per tier, specs on the nose when
+##   `specs_on` or Livid, the bouffant flipped while blinded, residue looks (`COSTUME:<look>`),
+##   combos only after the sim's `combo` event (where a Night forbids combos both residues stay
+##   on together).
+## * **Driverless** (`show_explicit`): the Busted Cam / Gag Reel / curtain call pose it from a
+##   recorded Moment; it re-emits the clips' sound events on `sound_event`.
 class_name CharacterView
 extends Node2D
 
-## Clip events (sfx, voice, laugh, fx, cam, shake, hitstop, …) from the RigPlayer, with
-## `"actor"` and `"pos"` (world) added.
+## Clip events (sfx, voice, laugh, fx, cam, shake, hitstop, prop, decor, …) from the RigPlayer,
+## with `"actor"` and `"pos"` (world) added. One reused Dictionary: do not keep it.
 signal clip_event(ev: Dictionary)
+## The clips' sound events only (sfx / voice / laugh) — also while driven by `show_explicit`,
+## so a re-staging (Gag Reel) can play them at −6 dB. Not emitted while `mute_sounds`.
+signal sound_event(ev: Dictionary)
 
 const RIG_PLAYER := "res://view/rig/rig_player.gd"
 const HEIGHTS := {"hush": 340.0, "bellows": 380.0}
 const TURN_FRAMES := 6.0
-const STRIDES := {"hush": 58.0, "bellows": 46.0}
+## Puppet-only stride (the rig derives its stride from the clip's `stride_px`).
+const PUPPET_STRIDES := {"hush": 58.0, "bellows": 46.0}
+const FIDGET_AFTER_S := 3.0
+const MG_FALLBACK_F := 90.0
+## Micro-gag emote → Bellows face preset (the fallback when `mg_<id>` is not authored).
+const EMOTE_FACE := {"sing": "sing_mid", "hum": "hum", "smug": "smug", "laugh": "blissful", "tut": "disdain",
+	"sniff": "sniff", "yum": "blissful", "yawn": "asleep"}
+## Temper tier → sideburn texture (art-bellows request: flat, bristle, bristle, puffed).
+const SIDEBURN_BY_TIER: PackedStringArray = ["flat", "bristle", "bristle", "puffed"]
+const STATIC_CLIP := "#static"
+const TOMATO_S := 4.0
 
 var actor: String = "hush"
 var rig_id: String = ""
+## Settings `hush_skin` ("" | "pip"): Hush's rig skin and both maps' `skin:<skin>` blocks.
+var skin: String = ""
 var info: ContentInfo = null
 var layout: HouseLayout = null
+## The FX layer (micro-gag fallback notes); set by WorldView.
+var fx: FxLayer = null
 var map: Dictionary = {}
 ## True when a RigPlayer draws this actor.
 var uses_rig: bool = false
 var rig: Node2D = null
 var puppet: FallbackPuppet = null
-## Where Hush's hidden eyes look (Bellows' head, world).
-var look_target: Vector2 = Vector2.ZERO
-## Overrides for the Busted Cam replay (set by WorldView).
+## Where the actor looks (world; Vector2.INF = no gaze) and how strongly (0–1). Set by
+## WorldView every frame (§4.1.5).
+var look_target: Vector2 = Vector2.INF
+var look_weight: float = 0.0
+## Driven from outside (Busted Cam / re-staging): `apply()` does nothing.
 var replay: bool = false
+## Drop the clips' sound events (pre-roll, seeks).
+var mute_sounds: bool = false
+## View-side ClipMap flags (flavours, fidgets, turns, micro-gags, cues).
+var ctx: ClipMap.Ctx = ClipMap.Ctx.new()
+## Combos the sim has formed this Night (`combo` events).
+var combos_formed: PackedStringArray = PackedStringArray()
+
+## Fallback counters (WorldView.fallback_counts()).
+var clip_fallbacks: int = 0
+var puppets: int = 0
+var fallback_by_clip: Dictionary = {}
+
+static var _logged: Dictionary = {}
 
 var _pick := ClipMap.Pick.new()
 var _clip := ""
+var _clip_sig := ""
+var _sig_tier := 1
+var _sig_supp := false
+var _sig_rx := false
 var _frame := 0.0
+var _ov_clip := ""
+var _ov_face := ""
 var _flip := 1.0
 var _walk_phase := 0.0
 var _t := 0.0
-var _eyes: _HiddenEyes = null
 var _last_x := 0.0
-var _residues := PackedStringArray()
-var _tier := -1
-var _specs := -1
+var _view_dt := 0.0
 var _rx_info: Dictionary = {}
 var _rx_key := ""
-var _view_dt := 0.0
+var _ev: Dictionary = {}
+var _has: Dictionary = {}
+# Meter state last applied to the rig.
+var _tier := -1
+var _specs := ""
+var _looks := PackedStringArray()
+var _looks_key := ""
+var _costume := ""
+var _sideburn := ""
+var _bouffant := ""
+# Flavour / fidget / turn / overlay clocks.
+var _state := ""
+var _reacting := false
+var _moving := false
+var _facing := 0
+var _idle_s := 0.0
+var _fidget_n := 0
+var _flavour_pending := ""
+var _ov_flavour_pending := ""
+var _flavour_state := ""
+var _mg_len := 0.0
+var _mg_state := ""
+var _mg_pending: Dictionary = {}
+var _cue_len := 0.0
+var _last_wanted := ""
+var _last_ov_wanted := ""
+var _last_prank := ""
+var _static_pose := PackedFloat32Array()
+var _tomato_s := 0.0
+var _prep_key := ""
+var _prep := ""
+var _prep_step := -1
 
 
 func _init() -> void:
@@ -61,6 +142,10 @@ func setup(actor_id: String, rig_id_: String = "", force_fallback: bool = false)
 	actor = actor_id
 	rig_id = rig_id_ if rig_id_ != "" else actor_id
 	name = "Char_" + actor
+	skin = ViewKit.s(ViewKit.setting("hush_skin", ""))
+	ctx.rig = actor
+	ctx.skin = skin
+	ctx.activity_clip_fn = _activity_clip
 	map = ClipMap.load_map(rig_id)
 	if not force_fallback:
 		_try_rig()
@@ -68,9 +153,7 @@ func setup(actor_id: String, rig_id_: String = "", force_fallback: bool = false)
 		puppet = FallbackPuppet.new()
 		puppet.kind = actor
 		add_child(puppet)
-	_eyes = _HiddenEyes.new()
-	_eyes.visible = false
-	add_child(_eyes)
+		puppets = 1
 
 
 func _try_rig() -> void:
@@ -78,7 +161,7 @@ func _try_rig() -> void:
 	if s == null:
 		return
 	var use_id := rig_id
-	if not ResourceLoader.exists("res://data/rigs/%s/rig.json" % use_id) and not FileAccess.file_exists("res://data/rigs/%s/rig.json" % use_id):
+	if not FileAccess.file_exists("res://data/rigs/%s/rig.json" % use_id):
 		var stand_in := ViewKit.s(map.get("stand_in", "_mannequin"))
 		if not FileAccess.file_exists("res://data/rigs/%s/rig.json" % stand_in):
 			return
@@ -91,27 +174,68 @@ func _try_rig() -> void:
 		return
 	rig = n
 	add_child(rig)
-	rig.call("setup", use_id)
-	# A rig whose data failed to load (missing / half-authored), or that has no clips yet (not
-	# even its idle), falls back to the puppet: an invisible character is never acceptable.
+	rig.call("setup", use_id, skin if actor == "hush" else "")
 	var loaded := rig.get("rig") != null and rig.get("poses") != null and rig.get("atlas") != null
-	var idle := ViewKit.s(map.get("idle", ""))
-	if not loaded or not ClipMap.clip_exists(idle):
-		push_warning("CharacterView: rig '%s' %s; using the stand-in puppet" % [use_id,
-			"did not load" if not loaded else "has no clips yet (%s)" % idle])
+	if not loaded:
+		push_warning("CharacterView: rig '%s' did not load; using the stand-in puppet" % use_id)
 		rig.queue_free()
 		rig = null
 		map = ClipMap.load_map(rig_id)
 		return
+	for m in ["set_external_frame", "set_speed", "set_facing", "set_tint_tier", "set_prop_state", "set_residue",
+			"set_face", "look_toward", "stop_layer", "set_static_pose", "set_part_texture", "socket_global_transform",
+			"layer_clip", "layer_frame", "current_frame", "reset_layers"]:
+		_has[m] = rig.has_method(m)
+	rig.set("self_hitstop", false)
+	# Combos appear only when the sim forms one (`combo` event): L4 forbids them in N01 / N02.
+	if "auto_combos" in rig:
+		rig.set("auto_combos", false)
 	if rig.has_signal("clip_event"):
 		rig.connect("clip_event", _on_rig_event)
+	_static_pose = _stand_pose(use_id)
 	uses_rig = true
 
 
+## The rig's stand pose (poses.json `<x>_stand`, else the first pose) for the no-clip fallback.
+func _stand_pose(use_id: String) -> PackedFloat32Array:
+	var lib: Variant = rig.get("poses")
+	if not (lib is Object) or not (lib as Object).has_method("pose"):
+		return PackedFloat32Array()
+	var nv: Variant = (lib as Object).get("names")
+	var names: PackedStringArray = nv if nv is PackedStringArray else PackedStringArray()
+	var want := ViewKit.s(map.get("stand_pose", ""))
+	if want == "":
+		for nm in names:
+			if nm.ends_with("_stand"):
+				want = nm
+				break
+	if want == "" and not names.is_empty():
+		want = names[0]
+	if want == "":
+		return PackedFloat32Array()
+	var p: Variant = (lib as Object).call("pose", want)
+	return p if p is PackedFloat32Array else PackedFloat32Array()
+
+
+func _activity_clip(id: String) -> String:
+	if info == null or info.world == null:
+		return ""
+	var ai := ViewSnapshot.activity_info(info.world, id)
+	return ViewKit.s(ai.get("clip", "")) if ai.get("clip", null) != null else ""
+
+
 func _on_rig_event(ev: Dictionary) -> void:
-	ev["actor"] = actor
-	ev["pos"] = global_position
-	clip_event.emit(ev)
+	var t := ViewKit.s(ev.get("type", ""))
+	var sound := t == "sfx" or t == "voice" or t == "laugh"
+	if sound and mute_sounds:
+		return
+	_ev.clear()
+	_ev.merge(ev, true)
+	_ev["actor"] = actor
+	_ev["pos"] = global_position
+	clip_event.emit(_ev)
+	if sound:
+		sound_event.emit(_ev)
 
 
 ## Character height (feet to head top, world px).
@@ -132,13 +256,126 @@ func top_position() -> Vector2:
 	return global_position + Vector2(0, -height_px())
 
 
+## Global transform of a rig socket ("part:socket"); the node's transform without a rig.
+func socket_transform(socket_name: String) -> Transform2D:
+	if uses_rig and bool(_has.get("socket_global_transform", false)):
+		return rig.call("socket_global_transform", socket_name)
+	return global_transform
+
+
 func current_clip() -> String:
 	return _clip
+
+
+## The drawn facing (±1).
+func get_facing() -> int:
+	return 1 if _flip >= 0.0 else -1
 
 
 func current_frame() -> float:
 	return _frame
 
+
+## The overlay clip playing ("" none) and its frame.
+func overlay_clip() -> String:
+	return _ov_clip
+
+
+func overlay_frame() -> float:
+	if uses_rig and bool(_has.get("layer_frame", false)) and _ov_clip != "":
+		return float(rig.call("layer_frame", "overlay"))
+	return 0.0
+
+
+## The last ClipMap pick (read-only; tests and staging).
+func pick() -> ClipMap.Pick:
+	return _pick
+
+
+## The face preset showing as a micro-gag fallback ("" none).
+func fallback_face() -> String:
+	return _ov_face
+
+
+## Rig looks currently switched on (residues, costume, combos, the blind sub-look).
+func looks() -> PackedStringArray:
+	return _looks
+
+
+## {clip_fallbacks, puppets, by_clip}.
+func counts() -> Dictionary:
+	return {"clip_fallbacks": clip_fallbacks, "puppets": puppets, "by_clip": fallback_by_clip.duplicate()}
+
+
+## Forget the fallback counters (retry).
+func reset_counts() -> void:
+	clip_fallbacks = 0
+	fallback_by_clip.clear()
+	_last_wanted = ""
+	_last_ov_wanted = ""
+
+
+## Retry: drop flavours, overlays, combos and the meter cache.
+func reset() -> void:
+	ctx.flavour = ""
+	ctx.ov_flavour = ""
+	ctx.fidget_i = -1
+	ctx.mg = ""
+	ctx.cue = ""
+	ctx.turn_f = -1.0
+	ctx.state_var = 0
+	combos_formed.clear()
+	_flavour_pending = ""
+	_ov_flavour_pending = ""
+	_mg_pending = {}
+	_idle_s = 0.0
+	_clip = ""
+	_clip_sig = ""
+	_ov_clip = ""
+	_ov_face = ""
+	_tier = -1
+	_specs = ""
+	_looks_key = "#"
+	if uses_rig and bool(_has.get("reset_layers", false)):
+		rig.call("reset_layers")
+
+
+# --- sim events (forwarded by WorldView) ----------------------------------------------------
+
+## A sim event that concerns this actor's view flavours (WorldView forwards every tick's events).
+func on_event(ev: Dictionary) -> void:
+	var e := ViewKit.s(ev.get("e", ""))
+	if actor == "hush":
+		match e:
+			"rigged":
+				_flavour_pending = "snicker"
+			"cmd_rejected":
+				_ov_flavour_pending = "shrug"
+			"pick":
+				_ov_flavour_pending = "pickup"
+	elif actor == "bellows":
+		match e:
+			"micro_gag":
+				_mg_pending = ev.duplicate()
+			"meltdown_start":
+				ctx.state_var = int(ev.get("variant", 0))
+			"combo":
+				var id := ViewKit.s(ev.get("id", ""))
+				if id != "" and not combos_formed.has(id):
+					combos_formed.append(id)
+			"prank_fire":
+				_last_prank = ViewKit.s(ev.get("prank", ""))
+
+
+## Stage a director cue's overlay clip (`cue:<id>`) for `len_f` frames (≤ 0: the clip's length).
+func play_cue(id: String, len_f: float = 0.0) -> void:
+	ctx.cue = id
+	ctx.cue_f = 0.0
+	var clip := ClipMap.clip_of(ClipMap.entry(map, "cue:" + id, skin))
+	_cue_len = len_f if len_f > 0.0 else float(maxi(1, ClipMap.clip_length(clip)))
+
+
+# --- per frame -------------------------------------------------------------------------------
 
 ## Update from the snapshot actors (`prev` → `cur` at `alpha`). `view_dt` = view-time delta.
 func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view_dt: float) -> void:
@@ -149,65 +386,401 @@ func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view
 		return
 	_t += view_dt
 	_view_dt = view_dt
-	var x := cur.x
-	var y := cur.y
-	if prev != null and prev.present and prev.room == cur.room and prev.floor == cur.floor:
-		x = lerpf(prev.x, cur.x, alpha)
-	y = _stairs_y(cur, x, y)
-	position = Vector2(x, y)
+	var vf := view_dt * 60.0
+	position = CharacterView.stage_position(prev, cur, alpha)
 	_update_facing(float(cur.facing), view_dt)
-	var hidden := actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != "")
-	_update_eyes(hidden, cur, view_dt)
-	ClipMap.resolve(map, cur, alpha, _pick)
+	_update_ctx(cur, vf)
+	ClipMap.resolve(map, cur, alpha, _pick, ctx)
+	_note_fallbacks()
+	var hidden := _pick.hidden or (actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != ""
+		or (cur.entering and cur.oneshot != "enter")))   # not in the room before she climbs in (s2-fix G #14)
 	if uses_rig:
 		_drive_rig(cur, hidden)
 	else:
 		_drive_puppet(cur, hidden, view_dt)
-	_last_x = x
+	_last_x = position.x
 
 
-## Pose from a Busted Cam frame (replay: positions and clips from the ring buffer).
-func pose_replay(pos: Vector2, facing: int, clip: String, frame: float, state: String, view_dt: float) -> void:
+## Where the actor stands this frame: x lerped between ticks inside one room; on a stairs leg the
+## stair diagonal from the leg's ends by progress (monotonic across the leg); else the floor line.
+static func stage_position(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float) -> Vector2:
+	if cur.leg_kind == "stairs":
+		var u1 := float(cur.leg_pm) / 1000.0
+		var u := u1
+		if prev != null and prev.present and prev.leg_kind == "stairs" and prev.leg_from_x == cur.leg_from_x:
+			u = lerpf(float(prev.leg_pm) / 1000.0, u1, alpha)
+		return Vector2(lerpf(cur.leg_from_x, cur.leg_to_x, u), lerpf(cur.leg_from_y, cur.leg_to_y, u))
+	var x := cur.x
+	if prev != null and prev.present and prev.room == cur.room and prev.floor == cur.floor and prev.leg_kind != "stairs":
+		x = lerpf(prev.x, cur.x, alpha)
+	return Vector2(x, cur.y)
+
+
+func _update_ctx(cur: ViewSnapshot.Actor, vf: float) -> void:
+	var changed := cur.state != _state or cur.reacting != _reacting
+	var started_moving := cur.moving and not _moving
+	# The flavour rule: any state change (or setting off) ends every view flavour at once.
+	if changed or started_moving:
+		ctx.flavour = ""
+		ctx.ov_flavour = ""
+		ctx.fidget_i = -1
+		_idle_s = 0.0
+	# Micro-gag / cue overlays stop on any Bellows state change or reaction.
+	if ctx.mg != "" and (cur.state != _mg_state or cur.reacting):
+		ctx.mg = ""
+	if ctx.cue != "" and cur.reacting:
+		ctx.cue = ""
+	_state = cur.state
+	_reacting = cur.reacting
+	_moving = cur.moving
+	# Start pending flavours (after the state-change check, so the event's own tick keeps them).
+	if _flavour_pending != "":
+		ctx.flavour = _flavour_pending
+		ctx.flavour_f = 0.0
+		_flavour_state = cur.state
+		_flavour_pending = ""
+	if _ov_flavour_pending != "":
+		ctx.ov_flavour = _ov_flavour_pending
+		ctx.ov_flavour_f = 0.0
+		_ov_flavour_pending = ""
+	if not _mg_pending.is_empty():
+		ctx.mg = ViewKit.s(_mg_pending.get("id", ""))
+		ctx.mg_f = 0.0
+		ctx.mg_emote = ViewKit.s(_mg_pending.get("emote", ""))
+		_mg_len = float(_mg_pending.get("len", 0))
+		if _mg_len <= 0.0:
+			_mg_len = MG_FALLBACK_F
+		_mg_state = cur.state
+		_mg_pending = {}
+		if ctx.mg != "" and fx != null and not ClipMap.clip_exists(ClipMap.clip_of(ClipMap.entry(map, "mg:" + ctx.mg, skin))):
+			if ctx.mg_emote == "sing" or ctx.mg_emote == "hum":
+				fx.burst("notes", head_position() + Vector2(40.0 * _flip, -20.0), 4, Vector2(0.4 * _flip, -1.0))
+	# Clocks (view frames: hit-stop freezes them).
+	if ctx.flavour != "":
+		ctx.flavour_f += vf
+		var fl := _clip_len(ClipMap._k("flavour:", ctx.flavour))
+		if ctx.flavour_f >= fl:
+			var nxt := ViewKit.s(ClipRules.row("flavour:" + ctx.flavour, actor).get("then_key", ""))
+			if nxt.begins_with("flavour:") and cur.state == _flavour_state:
+				ctx.flavour = nxt.substr(8)
+				ctx.flavour_f = 0.0
+			else:
+				ctx.flavour = ""
+	if ctx.ov_flavour != "":
+		ctx.ov_flavour_f += vf
+		if ctx.ov_flavour_f >= _clip_len(ClipMap._k("flavour:", ctx.ov_flavour)):
+			ctx.ov_flavour = ""
+	if ctx.mg != "":
+		ctx.mg_f += vf
+		if ctx.mg_f >= _mg_len:
+			ctx.mg = ""
+	if ctx.cue != "":
+		ctx.cue_f += vf
+		if ctx.cue_f >= _cue_len:
+			ctx.cue = ""
+	# Idle fidgets (maps with `idle_fidgets`: Hush).
+	var idle := cur.state == "IDLE" and not cur.moving and ctx.flavour == "" and cur.oneshot == "" and not cur.reacting
+	if idle and map.has("idle_fidgets"):
+		if ctx.fidget_i < 0:
+			_idle_s += vf / 60.0
+			if _idle_s >= FIDGET_AFTER_S:
+				var n := ClipMap.clips_of(map["idle_fidgets"]).size()
+				if n > 0:
+					ctx.fidget_i = (_fidget_n * 7 + 3) % n
+					ctx.fidget_f = 0.0
+					_fidget_n += 1
+				_idle_s = 0.0
+		else:
+			ctx.fidget_f += vf
+			var fid := ClipMap.clip_of(map["idle_fidgets"], ctx.fidget_i)
+			if ctx.fidget_f >= float(maxi(1, ClipMap.clip_length(fid))):
+				ctx.fidget_i = -1
+	elif not idle:
+		ctx.fidget_i = -1
+		_idle_s = 0.0
+	# Standing turn.
+	if cur.facing != _facing and _facing != 0 and not cur.moving and map.has("turn"):
+		ctx.turn_f = 0.0
+	elif ctx.turn_f >= 0.0:
+		ctx.turn_f += vf
+		if cur.moving or ctx.turn_f >= _clip_len("turn"):
+			ctx.turn_f = -1.0
+	_facing = cur.facing
+	# Hush's rigging tier for `rigging@q|s|b`.
+	ctx.rig_tier = ""
+	if cur.state == "RIGGING" and info != null and cur.rig_prank != "":
+		if cur.rig_prank != _prep_key or cur.rig_step != _prep_step:
+			_prep_key = cur.rig_prank
+			_prep_step = cur.rig_step
+			_prep = info.step_prep(cur.rig_prank, cur.rig_step)
+		ctx.rig_tier = _prep
+
+
+## A key's clip length in frames (≥ 1; 1 when the clip is missing, so a flavour never waits).
+func _clip_len(key: String) -> float:
+	var e: Variant = ClipMap.entry(map, key, skin)
+	var c := ClipMap.clip_of(e, 0)
+	return float(maxi(1, ClipMap.clip_length(c)))
+
+
+func _note_fallbacks() -> void:
+	if _pick.wanted != _last_wanted:
+		_last_wanted = _pick.wanted
+		if _pick.wanted != "":
+			_count(_pick.wanted, _pick.wanted_key)
+	var ow := _pick.ov_wanted
+	if ow != _last_ov_wanted:
+		_last_ov_wanted = ow
+		if ow != "":
+			_count(ow, _pick.ov_wanted_key)
+
+
+func _count(clip: String, key: String) -> void:
+	clip_fallbacks += 1
+	fallback_by_clip[clip] = int(fallback_by_clip.get(clip, 0)) + 1
+	if not _logged.has(clip):
+		_logged[clip] = true
+		print_verbose("[view] clip fallback: %s wants '%s' (%s)" % [actor, clip, key])
+
+
+func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
+	rig.visible = not hidden
+	var real := get_process_delta_time()
+	rig.set("time_scale", clampf(_view_dt / real, 0.0, 4.0) if real > 0.0 else 1.0)
+	_play_base(cur)
+	_play_overlay()
+	if bool(_has.get("set_facing", false)):
+		if actor == "hush" and cur.entering:
+			rig.call("set_facing", 1, false)   # the climb-in is authored facing +1: never flipped (s2-fix G #14)
+		else:
+			rig.call("set_facing", cur.facing, true)
+	if bool(_has.get("look_toward", false)):
+		rig.call("look_toward", look_target if look_target != Vector2.INF else global_position, look_weight if look_target != Vector2.INF else 0.0)
+	if actor == "bellows":
+		_apply_meter(cur)
+	else:
+		_apply_hush_looks(cur)
+
+
+## Hush's TOMATO look: on from the doorstep splat until 4 s after control returns.
+func _apply_hush_looks(cur: ViewSnapshot.Actor) -> void:
+	if cur.oneshot == "caught:doorstep" and cur.oneshot_t >= CaughtStager.DOORSTEP_KNOCK_F + 6:
+		_tomato_s = TOMATO_S
+	elif _tomato_s > 0.0:
+		_tomato_s -= _view_dt
+	var on := _tomato_s > 0.0
+	if on != _looks.has("TOMATO") and bool(_has.get("set_residue", false)):
+		rig.call("set_residue", "TOMATO", on)
+		if on:
+			_looks.append("TOMATO")
+		else:
+			_looks.remove_at(_looks.find("TOMATO"))
+
+
+func _play_base(cur: ViewSnapshot.Actor) -> void:
+	if _pick.clip == "":
+		if _clip != STATIC_CLIP and bool(_has.get("set_static_pose", false)) and not _static_pose.is_empty():
+			rig.call("set_static_pose", _static_pose)
+		_clip = STATIC_CLIP
+		_clip_sig = STATIC_CLIP
+		_frame = 0.0
+		return
+	# Restart only when the clip (or, for a reaction, its tier / suppressed plan) changes; no
+	# string building per frame.
+	var rx := _pick.key == "reaction"
+	var changed := _pick.clip != _clip_sig or (rx and (_pick.tier != _sig_tier or _pick.suppressed != _sig_supp or not _sig_rx))
+	if changed:
+		_clip_sig = _pick.clip
+		_sig_tier = _pick.tier
+		_sig_supp = _pick.suppressed
+		_sig_rx = rx
+		_clip = _pick.clip
+		var opts := {"loop": _pick.loop}
+		if _pick.stride:
+			opts["speed"] = maxf(1.0, cur.speed_px_s)
+		else:
+			opts["rate"] = _pick.speed
+		if _pick.key == "reaction" or _pick.key == "reaction_fallback" or _pick.key == "reaction:last_beat":
+			opts["blend_in"] = 0
+			opts["tier"] = _pick.tier
+			opts["suppressed"] = _pick.suppressed
+			if _pick.last_beat != "":
+				opts["last_beat"] = _pick.last_beat
+		rig.call("play", _clip, opts)
+	if _pick.external and bool(_has.get("set_external_frame", false)):
+		rig.call("set_external_frame", _pick.frame)
+		_frame = _pick.frame
+	else:
+		if _pick.stride and cur.moving and bool(_has.get("set_speed", false)):
+			rig.call("set_speed", maxf(1.0, cur.speed_px_s))
+		_frame = float(rig.call("current_frame")) if bool(_has.get("current_frame", false)) else 0.0
+
+
+func _play_overlay() -> void:
+	var want := _pick.ov_clip
+	if want != "" and want != _ov_clip:
+		var mask := ClipRules.mask_of(_pick.ov_key, actor)
+		rig.call("play", want, {"layer": "overlay", "mask": mask if mask != "" else "upper", "blend_in": 6})
+		_ov_clip = want
+	elif want == "" and _ov_clip != "":
+		if bool(_has.get("stop_layer", false)):
+			rig.call("stop_layer", "overlay", 6)
+		_ov_clip = ""
+	var face := ViewKit.s(EMOTE_FACE.get(_pick.ov_face, "")) if _pick.ov_face != "" else ""
+	if face != _ov_face:
+		_ov_face = face
+		if face != "" and bool(_has.get("set_face", false)):
+			rig.call("set_face", face)
+		elif face == "":
+			var fs: Variant = rig.get("face")
+			if fs is Object and (fs as Object).has_method("clear"):
+				(fs as Object).call("clear")
+
+
+## Temper tint + sideburns, specs, the blind bouffant, residue / costume / combo looks.
+func _apply_meter(cur: ViewSnapshot.Actor) -> void:
+	var tier := clampi(cur.tier, 0, 3)
+	if tier != _tier:
+		_tier = tier
+		if bool(_has.get("set_tint_tier", false)):
+			rig.call("set_tint_tier", tier)
+		var sb := SIDEBURN_BY_TIER[tier]
+		if sb != _sideburn and bool(_has.get("set_part_texture", false)):
+			_sideburn = sb
+			rig.call("set_part_texture", "sideburn_l", sb)
+			rig.call("set_part_texture", "sideburn_r", sb)
+	var specs := CharacterView.specs_state(cur.specs_on, cur.tier)
+	if specs != _specs and bool(_has.get("set_prop_state", false)):
+		_specs = specs
+		rig.call("set_prop_state", "specs", specs)
+	if cur.residues.has("COSTUME") and _costume == "" and info != null:
+		_costume = info.costume_look(cur.react_prank if cur.react_prank != "" else _last_prank)
+	elif not cur.residues.has("COSTUME"):
+		_costume = ""
+	var key := "%s|%s|%s|%s" % [",".join(cur.residues), ",".join(combos_formed), "b" if cur.blinded else "", _costume]
+	if key != _looks_key:
+		_looks_key = key
+		var want := CharacterView.rig_looks(cur.residues, combos_formed, cur.blinded, _costume)
+		if bool(_has.get("set_residue", false)):
+			for r in _looks:
+				if not want.has(r):
+					rig.call("set_residue", r, false)
+			for r2 in want:
+				if not _looks.has(r2):
+					rig.call("set_residue", r2, true)
+		_looks = want
+		# Blinded without a residue sub-look: flip the bouffant directly (soft rig API).
+		var bf := "flipped" if cur.blinded and not want.has("FRAZZLED:blind") else ""
+		if bf != _bouffant and bool(_has.get("set_part_texture", false)):
+			_bouffant = bf
+			rig.call("set_part_texture", "bouffant", bf)
+
+
+## Specs prop state: on the nose when the sim says so or when Livid (tier 3), else dangling.
+static func specs_state(specs_on: bool, tier: int) -> String:
+	return "on" if specs_on or tier >= 3 else "dangling"
+
+
+## The rig looks for a set of sim residues (brief §4.1.3): each residue kind; COSTUME adds
+## `COSTUME:<look>`; blinded FRAZZLED adds `FRAZZLED:blind` (the flipped bouffant); a formed
+## combo whose residues are all present adds `COMBO:<id>` (the rig hides the two it replaces).
+## Unformed combos add nothing, so SOAKED + FRAZZLED with combos forbidden stay two looks.
+static func rig_looks(residues: PackedStringArray, formed: PackedStringArray, blinded: bool, costume: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for r in residues:
+		out.append(r)
+		if r == "COSTUME" and costume != "":
+			out.append("COSTUME:" + costume)
+		if r == "FRAZZLED" and blinded:
+			out.append("FRAZZLED:blind")
+	if not formed.is_empty():
+		var rj: Variant = ViewKit.json("res://data/residues.json")
+		var combos: Dictionary = (rj as Dictionary).get("combos", {}) if rj is Dictionary else {}
+		for id in formed:
+			var c: Variant = combos.get(id, null)
+			var of: Array = (c as Dictionary).get("of", []) if c is Dictionary else []
+			var all := not of.is_empty()
+			for k in of:
+				if not residues.has(ViewKit.s(k)):
+					all = false
+			if all:
+				out.append("COMBO:" + id)
+	return out
+
+
+# --- driverless (Busted Cam, Gag Reel, curtain call) ------------------------------------------
+
+## Pose the actor from a recorded / scripted frame without a SimDriver: world position, facing,
+## base clip + frame (frame-locked; its events between the previous frame and this one fire and
+## sound events go out on `sound_event`), visibility, residue looks, tint tier and an optional
+## overlay clip + frame.
+func show_explicit(pos: Vector2, facing: int, clip: String, frame: float, shown: bool,
+		looks_on: PackedStringArray = PackedStringArray(), tier: int = -1, ov_clip: String = "", ov_frame: float = 0.0) -> void:
 	visible = true
 	position = pos
-	_update_facing(float(facing), view_dt)
-	_t += view_dt
+	_flip = float(facing)
 	if uses_rig and rig != null:
-		if clip != "" and clip != _clip:
+		rig.visible = shown
+		if clip != "" and clip != _clip and ClipMap.clip_exists(clip):
 			_clip = clip
-			rig.call("play", clip, {"blend_in": 0})
-		if rig.has_method("set_external_frame"):
+			_clip_sig = clip
+			rig.call("play", clip, {"blend_in": 0, "start_frame": frame})
+		elif clip == "" and _clip != STATIC_CLIP and not _static_pose.is_empty():
+			_clip = STATIC_CLIP
+			_clip_sig = STATIC_CLIP
+			rig.call("set_static_pose", _static_pose)
+		if bool(_has.get("set_external_frame", false)) and _clip != STATIC_CLIP:
 			rig.call("set_external_frame", frame)
-		rig.visible = state != "HIDDEN"
-		if rig.has_method("set_facing"):
+		_frame = frame
+		if ov_clip != _ov_clip:
+			if ov_clip != "" and ClipMap.clip_exists(ov_clip):
+				rig.call("play", ov_clip, {"layer": "overlay", "blend_in": 0, "start_frame": ov_frame})
+			elif bool(_has.get("stop_layer", false)):
+				rig.call("stop_layer", "overlay", 4)
+			_ov_clip = ov_clip
+		if bool(_has.get("set_facing", false)):
 			rig.call("set_facing", facing, false)
+		if tier >= 0 and tier != _tier and bool(_has.get("set_tint_tier", false)):
+			_tier = tier
+			rig.call("set_tint_tier", tier)
+		if looks_on != _looks and bool(_has.get("set_residue", false)):
+			for r in _looks:
+				if not looks_on.has(r):
+					rig.call("set_residue", r, false)
+			for r2 in looks_on:
+				if not _looks.has(r2):
+					rig.call("set_residue", r2, true)
+			_looks = looks_on.duplicate()
+			_looks_key = "#explicit"
 	elif puppet != null:
-		puppet.visible = state != "HIDDEN"
-		var p := "stand"
-		if state == "FROZEN":
-			p = "freeze"
-		elif state == "SPOTTED" or state == "CHASE":
-			p = "shock"
-		elif state == "WALK" or state == "RUN" or (actor == "bellows" and state in ["ROUTINE", "DETOUR", "CURIOUS"] and fmod(frame, 28.0) < 14.0):
-			p = "step" if fmod(frame, 20.0) < 10.0 else "stand"
-		puppet.pose = p
+		puppet.visible = shown
+		_clip = clip
+		_frame = frame
+		puppet.pose = "shock" if clip.contains("busted") or clip.contains("double_take") or clip.contains("grab") else \
+				("step" if fmod(frame, 20.0) < 10.0 and (clip.contains("walk") or clip.contains("strut") or clip.contains("run")) else "stand")
 		puppet.set_motion(Vector2.ONE, 0.0, Vector2.ZERO, _flip)
-	_eyes.visible = false
 
 
-func _stairs_y(cur: ViewSnapshot.Actor, x: float, y: float) -> float:
-	if cur.state != "STAIRS" or layout == null:
-		return y
-	for l in layout.links:
-		if l.kind != "stairs":
-			continue
-		var ra := layout.room(l.a)
-		var rb := layout.room(l.b)
-		if ra == null or rb == null or absf(l.bx - l.ax) < 1.0:
-			continue
-		var u := clampf((x - l.ax) / (l.bx - l.ax), 0.0, 1.0)
-		return lerpf(layout.floor_y(ra.floor), layout.floor_y(rb.floor), u)
-	return y
+## Stage-1 name of `show_explicit` for the Busted Cam replay buffer (state "HIDDEN" hides).
+func pose_replay(pos: Vector2, facing: int, clip: String, frame: float, state: String, _view_dt_: float) -> void:
+	show_explicit(pos, facing, clip, frame, state != "HIDDEN")
+
+
+## Pre-roll (ruling L13): advance the clips by `dt` seconds of real time without a new snapshot
+## (the curtain rises on a Bellows already mid-note); sound events stay muted.
+func preroll(dt: float) -> void:
+	if not uses_rig or rig == null:
+		return
+	var was := mute_sounds
+	mute_sounds = true
+	if _pick.external and bool(_has.get("set_external_frame", false)):
+		_pick.frame += dt * 60.0
+		rig.call("set_external_frame", _pick.frame)
+		_frame = _pick.frame
+	elif rig.has_method("advance"):
+		rig.call("advance", dt)
+		_frame = float(rig.call("current_frame")) if bool(_has.get("current_frame", false)) else _frame
+	mute_sounds = was
 
 
 func _update_facing(target: float, dt: float) -> void:
@@ -215,61 +788,7 @@ func _update_facing(target: float, dt: float) -> void:
 	_flip = move_toward(_flip, target, step)
 
 
-func _update_eyes(hidden: bool, cur: ViewSnapshot.Actor, dt: float) -> void:
-	if _eyes == null:
-		return
-	_eyes.visible = hidden
-	if not hidden:
-		return
-	var spot := layout.hotspot(cur.hidden_spot) if layout != null else null
-	var c := global_position + Vector2(0, -150)
-	if spot != null:
-		c = spot.rect.get_center() + Vector2(0, -spot.rect.size.y * 0.12)
-	_eyes.global_position = c
-	_eyes.look = (look_target - c).normalized() if look_target != Vector2.ZERO else Vector2.ZERO
-	_eyes.tick(dt)
-
-
-func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
-	rig.visible = not hidden and _pick.clip != ""
-	var real := get_process_delta_time()
-	rig.set("time_scale", clampf(_view_dt / real, 0.0, 4.0) if real > 0.0 else 1.0)
-	if _pick.clip != "" and _pick.clip != _clip:
-		_clip = _pick.clip
-		var opts := {"loop": _pick.loop}
-		if _pick.stride:
-			opts["speed"] = maxf(1.0, cur.speed_px_s)
-		else:
-			opts["rate"] = _pick.speed
-		if _pick.external:
-			opts["blend_in"] = 0
-			opts["tier"] = cur.react_tier
-			opts["suppressed"] = cur.react_suppressed
-		rig.call("play", _clip, opts)
-	if _pick.external and rig.has_method("set_external_frame"):
-		rig.call("set_external_frame", _pick.frame)
-	elif _pick.stride and cur.moving and rig.has_method("set_speed"):
-		rig.call("set_speed", maxf(1.0, cur.speed_px_s))
-	_frame = _pick.frame if _pick.external else (float(rig.call("current_frame")) if rig.has_method("current_frame") else 0.0)
-	if rig.has_method("set_facing"):
-		rig.call("set_facing", cur.facing, true)
-	if actor == "bellows":
-		if cur.tier != _tier and rig.has_method("set_tint_tier"):
-			_tier = cur.tier
-			rig.call("set_tint_tier", cur.tier)
-		var sp := 1 if cur.specs_on else 0
-		if sp != _specs and rig.has_method("set_prop_state"):
-			_specs = sp
-			rig.call("set_prop_state", "specs", "on" if cur.specs_on else "dangling")
-		if cur.residues != _residues and rig.has_method("set_residue"):
-			for r in _residues:
-				if not cur.residues.has(r):
-					rig.call("set_residue", r, false)
-			for r in cur.residues:
-				if not _residues.has(r):
-					rig.call("set_residue", r, true)
-			_residues = cur.residues.duplicate()
-
+# --- the stand-in puppet (only when the rig fails to load) ----------------------------------
 
 func _drive_puppet(cur: ViewSnapshot.Actor, hidden: bool, dt: float) -> void:
 	puppet.visible = not hidden
@@ -283,9 +802,9 @@ func _drive_puppet(cur: ViewSnapshot.Actor, hidden: bool, dt: float) -> void:
 	var lean := 0.0
 	var off := Vector2.ZERO
 	var pose := "stand"
-	var stride := float(STRIDES.get(actor, 50.0))
-	if cur.moving:
-		_walk_phase += absf(position.x - _last_x) / stride
+	var stride := float(PUPPET_STRIDES.get(actor, 50.0))
+	if cur.moving or cur.leg_kind == "stairs":
+		_walk_phase += maxf(absf(position.x - _last_x), 2.0 if cur.leg_kind == "stairs" else 0.0) / stride
 		pose = "step" if int(_walk_phase) % 2 == 1 else "stand"
 		var b := absf(sin(_walk_phase * PI))
 		off.y = -b * (7.0 if actor == "hush" else 4.0)
@@ -367,39 +886,3 @@ func _reaction_pose(cur: ViewSnapshot.Actor) -> Array:
 	var u3 := clampf((f - hold1) / maxf(1.0, release - hold1), 0.0, 1.0)
 	var over := sin(u3 * PI) * 0.06
 	return ["stand", Vector2(1.0 + over, 1.0 - over), 0.0, Vector2.ZERO]
-
-
-## Hush's eyes in the dark gap of a hiding spot: blink every 2–4 s, pupils track Bellows.
-class _HiddenEyes extends Node2D:
-	var look := Vector2.ZERO
-	var _blink_t := 2.2
-	var _blink := 0.0
-	var _eyes: Texture2D = null
-	var _dot: Texture2D = null
-	var _seed := 7
-
-	func _ready() -> void:
-		_eyes = FxArt.sprite("fallback/eyes")
-		_dot = FxArt.sprite("dot")
-		z_index = 3
-
-	func tick(dt: float) -> void:
-		_blink_t -= dt
-		if _blink_t <= 0.0:
-			_blink = 0.1
-			_seed = (_seed * 1103515245 + 12345) & 0x7fffffff
-			_blink_t = 2.0 + float(_seed % 2000) / 1000.0
-		_blink = maxf(0.0, _blink - dt)
-		queue_redraw()
-
-	func _draw() -> void:
-		var sy := 0.12 if _blink > 0.0 else 1.0
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, sy))
-		draw_rect(Rect2(-40, -22, 80, 44), Color(0.05, 0.05, 0.1, 0.55))
-		if _eyes != null:
-			draw_texture(_eyes, Vector2(-32, -16))
-		if _dot != null and sy > 0.5:
-			var o := look * 5.0
-			draw_texture_rect(_dot, Rect2(Vector2(-14 - 5, -5) + o - Vector2(0, 0), Vector2(10, 10)), false, ViewKit.INK)
-			draw_texture_rect(_dot, Rect2(Vector2(14 - 5, -5) + o, Vector2(10, 10)), false, ViewKit.INK)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

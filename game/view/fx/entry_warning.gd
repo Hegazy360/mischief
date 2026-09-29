@@ -1,6 +1,8 @@
 ## FxEntryWarning — "he's coming" ≥ 1.5 s before Bellows enters Hush's room (GDD §3.9, §4.2):
 ## at a door the handle jiggles with rattle marks; at an open doorway footprint chevrons
-## pulse in from his side; on the stairs his legs appear stepping down at the stair top.
+## pulse in from his side; on the stairs his own legs (the real rig, drawn on the stair diagonal
+## by CharacterView) come down at the top of the screen — the stand-in legs sprite is only the
+## fallback when `own_legs` is false (no rig), plus amber step marks at the stair top either way.
 ## One warning at a time; it lasts the event's `eta` (≈ 90 ticks) in view time.
 class_name FxEntryWarning
 extends Node2D
@@ -17,6 +19,8 @@ var _len := 1.5
 var _unit := 1.0
 var _handle: Texture2D = null
 var _legs: Texture2D = null
+## True when Bellows' real rig is drawn on the stairs (WorldView): no stand-in legs sprite.
+var own_legs: bool = false
 
 
 func _init() -> void:
@@ -125,7 +129,13 @@ func _draw() -> void:
 				draw_line(tip, tip + Vector2(-_dir * 26.0, -h), Color(AMBER, a), 8.0)
 				draw_line(tip, tip + Vector2(-_dir * 26.0, h), Color(AMBER, a), 8.0)
 		Kind.STAIRS:
-			if _legs != null:
+			var c2 := Color(AMBER, 0.85 * fade)
+			for i2 in 3:
+				var ph2 := fmod(_t * 1.6 + float(i2) * 0.33, 1.0)
+				var sp := _pos + Vector2(-30.0 + ph2 * 60.0, 40.0 + ph2 * 60.0)
+				draw_line(sp, sp + Vector2(22, 0), Color(ViewKit.INK, 0.7 * sin(ph2 * PI) * fade), 11.0)
+				draw_line(sp, sp + Vector2(22, 0), Color(c2, c2.a * sin(ph2 * PI)), 6.0)
+			if _legs != null and not own_legs:
 				var u2 := clampf(_t / _len, 0.0, 1.0)
 				var step := int(_t * 3.5) % 2
 				var y := _pos.y - 150.0 + u2 * 120.0 + (6.0 if step == 1 else 0.0)

@@ -3,8 +3,11 @@
 ## `goto(key, params, transition)` swaps the current scene: the transition covers the screen
 ## while the scene loads on a background thread, the new scene is instantiated, `setup(params)`
 ## is called on its root BEFORE it enters the tree (if defined), then the transition reveals it.
-## Routes: `boot`, `night` (Stage 2's NightScene), `playbill` (Stage 4; until then — and for any
-## route whose scene is missing — a generated ComingSoonScreen with a Back button).
+## Routes: `boot`, `night` (Stage 2's NightScene), `playbill` (the slice stub; for any route
+## whose scene is missing — a generated ComingSoonScreen with a Back button), and in DEBUG builds
+## only `stage_door` (the Gate-0 / dev menu, ruling L8) — in a release build (incl. the L17
+## profile APK) the key is absent: `has_route("stage_door")` is false and `goto` shows nothing
+## but the Coming-soon screen.
 ## Transitions: "curtain" (CurtainTransition: the red curtain drops / rises), "fade"
 ## (FadeTransition), "none".
 ## Scene hooks (optional, on the scene root):
@@ -23,6 +26,10 @@ const SCENES := {
 	"night": "res://scenes/night/NightScene.tscn",
 	"playbill": "res://scenes/playbill/Playbill.tscn",
 }
+## Routes that exist only in debug builds (`OS.is_debug_build()`).
+const DEBUG_SCENES := {
+	"stage_door": "res://scenes/stage_door/StageDoor.tscn",
+}
 const TRANSITIONS: PackedStringArray = ["curtain", "fade", "none"]
 const NO_HISTORY: PackedStringArray = ["boot"]
 const MAX_HISTORY := 16
@@ -37,6 +44,8 @@ var instant: bool = false
 var scene_overrides: Dictionary = {}
 ## Back requests handled (tests).
 var back_count: int = 0
+## Whether the debug-only routes exist (defaults to `OS.is_debug_build()`; tests flip it).
+var debug_routes: bool = OS.is_debug_build()
 
 var _layer: CanvasLayer
 var _fade: FadeTransition
@@ -59,11 +68,28 @@ func _ready() -> void:
 
 # --- public API ------------------------------------------------------------------------------
 
+## Every route key → scene path for a build (`debug` adds DEBUG_SCENES).
+static func routes_for(debug: bool) -> Dictionary:
+	var r := SCENES.duplicate()
+	if debug:
+		r.merge(DEBUG_SCENES)
+	return r
+
+
+## Is `key` a route in this build (a scene may still be missing — see has_scene)?
+func has_route(key: String) -> bool:
+	return scene_overrides.has(key) or SCENES.has(key) or (debug_routes and DEBUG_SCENES.has(key))
+
+
 ## Scene path for a route key ("" when unknown).
 func scene_path_for(key: String) -> String:
 	if scene_overrides.has(key):
 		return String(scene_overrides[key])
-	return String(SCENES.get(key, ""))
+	if SCENES.has(key):
+		return String(SCENES[key])
+	if debug_routes and DEBUG_SCENES.has(key):
+		return String(DEBUG_SCENES[key])
+	return ""
 
 
 ## Does the route have a real scene file?

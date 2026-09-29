@@ -178,6 +178,37 @@ func test_rig_system_loads_hush_and_figgis() -> void:
 			assert_ge((lib.get("names") as PackedStringArray).size(), 40, "PoseLib resolves every Hush pose")
 
 
+## s2-anim-hush Phase G (rig requests RIG-9 / RIG-10): the rig lint is clean for Hush — no R04 (mirror partners
+## with different offsets: mirrored walks would not land the feet) and no R08 (poses outside joint limits).
+func test_rig_lint_clean_r04_r08() -> void:
+	var findings: Array = RigLint.lint_all("hush")
+	var lines := PackedStringArray()
+	for f in findings:
+		lines.append(AnimLint.format(f))
+	assert_eq(findings.size(), 0, "rig lint for hush: %s" % "; ".join(lines))
+	var parts: Dictionary = _hush().get("parts", {})
+	for pair in [["leg_upper_l", "leg_upper_r"], ["foot_l", "foot_r"], ["hand_l", "hand_r"]]:
+		var a: Array = (parts.get(pair[0], {}) as Dictionary).get("offset", [])
+		var b: Array = (parts.get(pair[1], {}) as Dictionary).get("offset", [])
+		assert_eq(a.size(), 2, "%s offset" % pair[0])
+		if a.size() == 2 and b.size() == 2:
+			assert_almost_eq(float(a[0]), -float(b[0]), 0.01, "%s / %s x-symmetric (R04)" % pair)
+			assert_almost_eq(float(a[1]), float(b[1]), 0.01, "%s / %s same height (R04)" % pair)
+	for side in ["l", "r"]:
+		var lim: Array = ((parts.get("hand_" + side, {}) as Dictionary).get("limits", {}) as Dictionary).get("rot", [])
+		assert_eq(lim.size(), 2, "hand_%s rot limits" % side)
+		if lim.size() == 2:
+			assert_ge(float(lim[1]), 160.2, "hand_%s allows the tiptoe paws (R08: up to 160.2)" % side)
+			assert_le(float(lim[0]), -160.2, "hand_%s symmetric limit" % side)
+
+
+func test_statue_blink_presets() -> void:
+	var presets: Dictionary = (load_json(HUSH + "faces.json") as Dictionary).get("presets", {})
+	for n in ["statue_blink", "determined_blink", "frantic"]:
+		assert_has(presets, n, "clip preset %s (s2-anim-hush)" % n)
+	assert_eq(String((presets.get("statue_blink", {}) as Dictionary).get("eyes", "")), "closed", "a statue blinks")
+
+
 # --- helpers ---------------------------------------------------------------------------------------
 func _collect_paths(rig: Variant) -> PackedStringArray:
 	var out := PackedStringArray()

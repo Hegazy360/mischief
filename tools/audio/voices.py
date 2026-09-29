@@ -589,12 +589,17 @@ def lines_bellows() -> dict[str, Line]:
         for v in range(3):
             L[f"{kind}_{v + 1}"] = nonverbal(kind, v)
     # --- the sneeze (rule of three, then CHOO) -----------------------------------------------
-    L["sneeze_ah1"] = Line([S("h", "a", 0.3, (43, 46), lv=0.6)], mode="spoken", breath=0.45, tail=0.08,
+    # Cut to rx_sneeze_blast_a's beats (reactions.json): ah f0-20, ahh f20-44, AHHH f44-74, the
+    # false stop f74-94 (a relieved "hm..." then near-silence), CHOO on f94. Each "ah" ends before
+    # the next beat and rises in pitch and loudness (LINE_LEVEL); the inhale starts on the beat.
+    L["sneeze_ah1"] = Line([S("h", "a", 0.22, (43, 46), lv=0.6)], mode="spoken", breath=0.45, tail=0.05,
+                           pre=[(0.0, "inhale", 0.9)])
+    L["sneeze_ah2"] = Line([S("h", "a", 0.28, (45, 50), lv=0.8)], mode="spoken", breath=0.4, tail=0.05,
                            pre=[(0.0, "inhale", 1.0)])
-    L["sneeze_ah2"] = Line([S("h", "a", 0.36, (45, 49), lv=0.8)], mode="spoken", breath=0.4, tail=0.08,
-                           pre=[(0.0, "inhale", 1.0)])
-    L["sneeze_ah3"] = Line([S("h", "a", 0.46, (47, 55), lv=1.0, trill=8.0)], mode="sung", breath=0.35, tail=0.1,
+    L["sneeze_ah3"] = Line([S("h", "a", 0.4, (47, 56), lv=1.0, trill=8.0)], mode="sung", breath=0.35, tail=0.07,
                            pre=[(0.0, "inhale", 1.2)])
+    # the false stop: the itch is gone... a relieved, smiling little "hm."
+    L["sneeze_hm"] = Line([S("h", "m", 0.12, (46, 44), lv=0.55)], mode="spoken", breath=0.3, tail=0.04)
     L["sneeze_choo_1"] = Line([S("tsh", "u", 0.32, (58, 48), lv=1.2)], mode="shout", drive=2.6, tail=0.15,
                               pre=[(0.0, "blast", 1.0), (0.03, "spray", 1.3)])
     L["sneeze_choo_2"] = Line([S("tsh", "u", 0.38, (60, 47), lv=1.2)], mode="shout", drive=2.8, tail=0.15,
@@ -610,6 +615,24 @@ def lines_bellows() -> dict[str, Line]:
                       tail=0.15)
     L["hum_4"] = Line([S("", "m", 0.3, "A2", lv=0.7), S("", "m", 0.45, "D3", lv=1.0, acc=True),
                        S("", "m", 0.3, "A2", lv=0.7)], tail=0.15)
+    # --- micro-gags (warm-up / tea) ------------------------------------------------------------
+    # mg_trill (warm-up, 48 f): "a trill so high the teacups on the mantel rattle" — a falsetto
+    # coloratura trill (C5 <-> D5 at ~11 Hz), a little run up to G5 and a delighted drop back to the
+    # chest voice ("hm!"). A vocal flourish, not a sung *line*: the ≤ 1 sung line per 6 s rule counts
+    # the warm-up phrases (clip_events.py places the phrases clear of every micro-gag's voice).
+    L["trill"] = Line([S("", "i", 0.046, 72 + 2 * (k % 2), fals=True, vib=0.0, lv=0.75 + 0.02 * k)
+                       for k in range(10)]
+                      + [S("", "i", 0.07, 76, fals=True, vib=0.0, lv=0.95), S("", "i", 0.16, (79, 80), fals=True,
+                                                                             vib=0.4, lv=1.0),
+                         S("h", "m", 0.14, (50, 47), lv=0.7, gap=0.05)], tail=0.08)
+    # mg_admire_*: pleased with himself, "mm-HM!"
+    L["smug_1"] = Line([S("m", "m", 0.12, (45, 47), lv=0.7), S("h", "m", 0.22, (50, 45), lv=0.9, gap=0.04)],
+                       mode="spoken", tail=0.1)
+    L["smug_2"] = Line([S("m", "m", 0.1, (46, 48), lv=0.7), S("h", "m", 0.26, (52, 46), lv=0.9, gap=0.05)],
+                       mode="spoken", tail=0.1)
+    # mg_pinkie_up (tea, 48 f, emote yum): eyes shut after the long sip — a contented, falling "Ahhh."
+    L["bliss"] = Line([S("h", "a", 0.42, (49, 44), lv=0.85, vib=0.3)], mode="spoken", breath=0.35, tail=0.1,
+                      pre=[(0.0, "sigh", 0.5)])
     # --- shaped words -----------------------------------------------------------------------
     L["the_pipes_1"] = Line([S("th", "uh", 0.12, 44, lv=0.6), S("p", "a+i", 0.34, (45, 41), coda="ps", lv=0.85)],
                             mode="spoken", breath=0.35, fry=0.6, jitter=0.02, tail=0.15, pre=[(0.0, "sigh", 1.0)])
@@ -740,7 +763,8 @@ def render_line(speaker: str, line_id: str, style: str = "formant", squeaky: boo
 
 # Per-line loudness (loudest 50 ms, phone-weighted dBFS): the sneeze builds, shouts are
 # loud, mutters and hums sit under the action. Default = the voice category (−14).
-LINE_LEVEL = {"sneeze_ah1": -21.0, "sneeze_ah2": -18.0, "sneeze_ah3": -15.5, "sneeze_choo": -11.5,
+LINE_LEVEL = {"sneeze_ah1": -17.5, "sneeze_ah2": -15.5, "sneeze_ah3": -13.5, "sneeze_choo": -10.5,
+              "sneeze_hm": -19.0, "trill": -16.5, "smug": -16.0, "bliss": -18.0,
               "sneeze_small": -17.0, "hum": -17.0, "the_pipes": -17.0, "wheeze": -17.5, "tut": -17.5, "pff": -17.5,
               "hmph": -15.5, "ahem": -16.0, "huh": -15.0, "pardon": -15.5, "ugh": -15.5, "dizzy_babble": -15.0,
               "pipe_down": -12.5, "wha": -12.5, "who_squeaked": -12.0, "yow": -13.0, "oof": -13.5, "hah": -13.5,

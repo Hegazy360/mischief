@@ -42,6 +42,8 @@ var _escalated := false
 var _frame := 0
 var _pos := Vector2.ZERO
 var _snap := true
+var _renders := 0
+var _warm_frames := 0
 
 
 func _init() -> void:
@@ -108,6 +110,23 @@ func is_escalated() -> bool:
 	return _escalated
 
 
+## One hidden render on request (NightScene warms it under the curtain so the first real show
+## never hitches: the viewport texture, the rig atlases and the room pages are built now).
+## The PiP stays hidden (`is_shown()` false); returns true when a render was scheduled.
+func warm() -> bool:
+	if target != null and is_instance_valid(target):
+		_pos = target.global_position + Vector2(0, -BODY_UP)
+		cam.position = _pos
+	_warm_frames += 1
+	render_target_update_mode = SubViewport.UPDATE_ONCE
+	return true
+
+
+## Renders requested so far (shown frames at 30 Hz + warm-ups; tests / perf).
+func renders() -> int:
+	return _renders + _warm_frames
+
+
 ## True while the PiP is on screen (HudModel.pip_visible).
 func is_shown() -> bool:
 	return _shown
@@ -146,6 +165,26 @@ func advance(delta: float) -> void:
 	_frame += 1
 	if not half_rate or _frame % 2 == 0:
 		render_target_update_mode = SubViewport.UPDATE_ONCE
+		_renders += 1
+
+
+## HUD bands (logical screen px) the main view loses to the HUD: the top row (meter, banner, the
+## PiP itself) and the bottom clusters (tray, action button).
+const HUD_TOP_PX := 280.0
+const HUD_BOTTOM_PX := 220.0
+
+
+## True while Bellows is plainly on the main screen (s2-fix G #19): at least half his body inside
+## `view_rect` shrunk by `margins` (left, top, right, bottom, world px — the HUD bands at the current
+## zoom). The PiP then hides at once instead of holding its 2 s, so he is never on screen twice.
+static func on_screen(snap: ViewSnapshot, view_rect: Rect2, margins: Vector4 = Vector4.ZERO) -> bool:
+	var b := snap.bellows
+	if not b.present or view_rect.size.x <= 0.0:
+		return false
+	var body := Rect2(b.x - 90.0, b.y - 390.0, 180.0, 390.0)
+	var inner := view_rect.grow_individual(-margins.x, -margins.y, -margins.z, -margins.w)
+	var hit := inner.intersection(body)
+	return hit.size.x * hit.size.y >= body.size.x * body.size.y * 0.5
 
 
 ## The GDD §3.7 rule. `view_rect` = the main camera's visible world rect; `layout` gives room

@@ -74,7 +74,15 @@ Deterministic: every recipe's RNG is seeded from its name, so a re-render is byt
 - `crowd.py` — laughers, applause, whistles, stomps, chants; the formant tiers + specials and the fallback set.
 - `music.py` — the loops (`META` timing is written into the map; the autoload's bar maths read it).
 - `aliases.py` — `EXPLICIT` names, keyword `RULES`, the content scanner.
-- `gen_audio.py` — render / map / check / report. `review.py` — PNGs and the Gate-0 pack.
+- `gen_audio.py` — render / map / check / report. `review.py` — PNGs and the Stage-1 A/B pack.
+- `sfx_slice.py` — the Stage-2 sounds that live inside clips (the sneeze foley, the tea, the warm-up, micro-gags,
+  last beats, Hush's tinkering) + the command-feedback UI ticks.
+- `clip_events.py` — the clip-event frame table (ruling L12): writes `docs/review/s2-sound/clip_events.md` and
+  `game/data/audio/clip_events.json` (rewritten after every render; `--check` fails when stale, when a voice line
+  would overlap another inside a clip, or when an activity's voice collides with its micro-gag overlays).
+- `sequences.py` — `cycles` (Hush's `step_pizz_up` walks up the scale) and preview `sequences` (the sneeze pair).
+- `gate0.py` — the Gate-0 in-context A/B pack `docs/review/s2-sound/gate0/` (mixes built like the game plays
+  them: clip rows at their frames + hit-stop, event-level crowd, bus defaults, ducking, limiter; LUFS / true peak).
 
 ## Adding sounds
 

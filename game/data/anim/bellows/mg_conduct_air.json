@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/mg_conduct_air","rig":"bellows","loop":false,"length":60,"layer":"overlay","mask":"upper","doc":"Conducts an invisible orchestra with his pinkie as a baton, then bows his head to it.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_mg_conduct_up","ease":"linear","face":"sing_small"},
+{"f":5,"pose":"b_mg_conduct_down","ease":"out_quad"},
+{"f":15,"pose":"b_mg_conduct_up","ease":"in_out_sine"},
+{"f":20,"pose":"b_mg_conduct_down","ease":"out_quad"},
+{"f":30,"pose":"b_mg_conduct_flourish","ease":"out_back","face":"smug"},
+{"f":42,"pose":"b_mg_bow_head","ease":"in_out_sine","face":"pompous"},
+{"f":52,"pose":"b_mg_bow_head","ease":"linear"},
+{"f":60,"pose":"b_warm_rest","ease":"in_out_sine","face":"smug"}
+],
+"events":[
+{"f":5,"type":"sfx","id":"baton_swish"},
+{"f":20,"type":"sfx","id":"baton_swish","vol_db":-2.0},
+{"f":30,"type":"sfx","id":"baton_swish"},
+{"f":42,"type":"sfx","id":"bow_creak","vol_db":-4.0}
+]}

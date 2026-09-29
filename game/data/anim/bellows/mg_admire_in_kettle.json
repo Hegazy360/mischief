@@ -1,0 +1,15 @@
+{"version":1,"clip":"bellows/mg_admire_in_kettle","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Catches his reflection in the kettle, pats his bouffant with his cup hand, winks at it.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stool_cup","ease":"linear","face":"smug"},
+{"f":8,"pose":"b_mg_kettle_peek","ease":"out_quad","face":"admiring"},
+{"f":16,"pose":"b_mg_kettle_pat","ease":"in_out_sine"},
+{"f":21,"pose":"b_mg_kettle_pat_b","ease":"out_quad"},
+{"f":26,"pose":"b_mg_kettle_pat","ease":"in_out_sine"},
+{"f":31,"pose":"b_mg_kettle_pat_b","ease":"out_quad"},
+{"f":38,"pose":"b_mg_kettle_wink","ease":"in_out_sine","face":"sly_smile"},
+{"f":48,"pose":"b_stool_cup","ease":"in_out_sine","face":"smug"}
+],
+"events":[
+{"f":6,"type":"sfx","id":"glint","sync":false},
+{"f":14,"type":"voice","id":"vo_bellows_smug"}
+]}

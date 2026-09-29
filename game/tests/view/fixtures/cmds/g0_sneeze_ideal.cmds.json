@@ -1,0 +1,7 @@
+{"episode": "g0_sneeze", "hash": 897714287, "persona": "ideal", "route": "ideal", "ticks": 1414,
+ "cmds": [
+  [62, {"c":"go","hotspot":"kitchen_honey","run":false}],
+  [164, {"c":"rig","on":true}],
+  [212, {"c":"rig","on":false}],
+  [213, {"c":"go","hotspot":"kitchen_pantry_curtain","run":false}]
+]}

@@ -21,7 +21,8 @@
 ## 5. Proofs (`prove`): each line alone, the whole Script, ★★★ reachable, a soft-lock check (3 forced
 ##    catches at seeded random ticks, re-plan the remaining lines, must still reach ★).
 ## 6. Budget: `max_macros` candidate executions (deterministic; default 400) and, as a safety cap,
-##    `budget_ms` of wall time (default 60 s; 0 = none). When it runs low the search narrows, and when
+##    `budget_ms` of wall time (default 60 s; 0 = none — solve.sh --auto passes 0 since s2-fix G #13, so a
+##    proof no longer depends on the machine's speed). When it runs low the search narrows, and when
 ##    it is spent the best node is finished greedily.
 class_name Planner
 extends RefCounted
@@ -712,7 +713,7 @@ func prove(factory: Callable, opts: Dictionary = {}) -> Dictionary:
 		(out["notes"] as Array).append(n)
 	# Each line alone (a Big Number needs the required lines first; a director-led Prologue plays its
 	# lines in Script order, so there "alone" means with the lines before it): 30 % split.
-	var linear := data.episode(episode).get("director", null) is Dictionary
+	var linear := script_order(data.episode(episode))
 	var per_line := maxi(1, 30 / maxi(1, lines.size()))
 	var prefix := PackedStringArray()
 	for l in lines:
@@ -722,6 +723,12 @@ func prove(factory: Callable, opts: Dictionary = {}) -> Dictionary:
 			out["line_alone"][l] = {"ok": false, "why": "budget exhausted"}
 			continue
 		var ids := PackedStringArray([l]) if not linear else prefix.duplicate()
+		if linear and (whole.get("lines", []) as Array).has(l):
+			# The Prologue plays its lines in Script order (director-led): "alone" = with the lines
+			# before it, which the whole-Script plan already proves when it landed this one
+			# (s2-fix G #13; the Big Number rule below is the same argument).
+			out["line_alone"][l] = {"ok": true, "why": "", "via": "whole Script (Script order)"}
+			continue
 		var ld := data.line(episode, l)
 		if bool(ld.get("big_number", false)):
 			# The Big Number needs the required lines first; the whole-Script plan already proves
@@ -742,6 +749,13 @@ func prove(factory: Callable, opts: Dictionary = {}) -> Dictionary:
 	out["max_macros"] = max_macros
 	out["expanded"] = expanded
 	return out
+
+
+## True when an episode plays its Script in order: the Prologue (act 0: its director leads the
+## player through the lines, an uncapped player-led gate). Every other Night's `director` block is
+## timing (cues, the launch offset), not order, so its lines are proved alone (s2-fix G #13). Pure.
+static func script_order(ep: Dictionary) -> bool:
+	return ep.get("director", null) is Dictionary and int(ep.get("act", 1)) == 0
 
 
 ## Inject up to `n` forced catches at seeded random ticks along `whole`'s route, re-planning the

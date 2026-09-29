@@ -182,9 +182,9 @@ route and "first player laugh ≤ 10 s, first prank ≤ 30 s, ≥ 4 laughs by 75
 2. **Sim tick 0 is the frame the curtain starts to rise.** Under the curtain the simulation is paused at tick 0
    and no sim event fires; the view pre-rolls Bellows's clips (he is already mid-"MI-MI-MIIII" when the curtain
    lifts, sounds muted) without advancing the sim.
-3. The rise starts ≈ 2.3 s after process start (`director.launch_offset_s`): as soon as the Night is warm, never
-   before 2.0 s and at the latest at 3.0 s — then on 1× textures, anything still cold being finished under the
-   curtain on that frame, never during play.
+3. The rise starts at `director.launch_offset_s` after process start (2.3 s; the value is clamped to 2.0–3.0 s)
+   or, if the Night is not warm by then, the moment it is — and at 3.0 s at the latest, then on 1× textures, anything
+   still cold being finished under the curtain on that frame, never during play.
 4. On the rise frame the `curtain_rise` sting plays, the music goes curtain → sneak, the sim unpauses and the device
    log stamps `sim_start`. Input is live when the curtain is half up (0.4 s after tick 0).
 5. Nights 1 and 2 keep the same contract after their cold open and loading card (tick 0 = the curtain rise; their
@@ -406,14 +406,15 @@ Each Night gives Bellows an ordered **loop of 4–6 activities** (§7.2). An act
   Night 1 58.7 s, Night 2 55.4 s — the draft Nights 3–4 are re-measured against it in Stage 3, §7.2), Act II
   80–95 s, Act III and Gala 90–120 s.
 - **Micro-gags** (timed, D1): every activity and fix-up detour a Night uses carries authored beats
-  `{id, at_s, len_f, emote}` in `activities.json` (table and one-line gags: `docs/review/s2-content/micro_gags.md`;
-  ids are stable — add, never rename):
+  `{id, at_s, len_f, emote, gag}` in `activities.json` (`at_s` from the activity's start; `gag` is the one-line
+  joke the animator builds from; table: `docs/review/s2-content/micro_gags.md`; ids are stable — add, never rename):
   1. The first beat lands 2–3 s into the activity, then one every 5–8 s, never two within 5 s. A gated or long
      activity repeats its list every `mg_cycle_s` (20 s on the warm-up) while he keeps performing.
   2. A non-chase walk longer than 5 s plays a walk beat every 4 s (`walk_hum`, `cravat_tug`, `walk_scale`).
-  3. Each beat is a ≤ 1 s joke readable at 50 px (48–60 f: admires himself in the kettle, trills, conducts the
-     air), overlaid on the activity clip, with an **emote** (sing, hum, smug, laugh, tut, sniff, yum, yawn) that
-     the HUD edge bubble draws when he is off-screen.
+  3. Each beat is a ≈ 1 s joke readable at 50 px (36–72 f; the slice uses 48–60 f: admires himself in the kettle,
+     trills, conducts the air), overlaid on the activity clip, with an **emote** (sing, hum, smug, laugh, tut, sniff,
+     yum, yawn) that the HUD edge bubble draws when he is off-screen. The emote is null only where the gag has no
+     face (`peer_under_piano`: his head is under the piano); such a beat never plays in the edge bubble.
   4. Beats never change Applause, temper or senses. They are dropped, not deferred, while he reacts, plays a squeak
      bit, is Curious, Searching, Spotted, chasing, melting down or Exhausted, pauses at a doorway, bumps into Hush,
      or during a face-to-face or the Mirror rounds.

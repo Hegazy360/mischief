@@ -91,6 +91,10 @@ static func word(key: String, fallback: String) -> String:
 ## ≈ 30 %) and of the far background flats: 1× (s2-fix G #7 — texture memory; on a 1080p-tall
 ## phone 1× is one texel per pixel at the play zoom).
 const LOCKED_SCALE := 1.0
+## The same for the unlit rooms on another floor than all of tonight's (s2-fix G #7): the follow
+## camera shows them only as a strip at the top (or bottom) edge, behind the HUD band, dimmed; at
+## the 0.5 overview zoom ¾× is still 1.5 texels per logical px. WorldView.room_art_scales.
+const OTHER_FLOOR_SCALE := 0.75
 ## "No art at all" (a room no camera can frame tonight; WorldView.room_art_scales).
 const NO_ART := -3.0
 ## Art that is always drawn at or below its 1× size gains nothing at 2× (s2-fix G #7): the

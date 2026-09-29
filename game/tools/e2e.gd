@@ -223,6 +223,8 @@ static func check(s: String, rep: Dictionary, p_strict: bool) -> PackedStringArr
 		out.append("draw calls p95 %.0f > %d" % [float(rep["draw_p95"]), int(t["draw_p95_max"])])
 	if t.has("draw_max") and float(rep.get("draw_max", 0)) > float(t["draw_max"]):
 		out.append("draw calls max %.0f > %d" % [float(rep["draw_max"]), int(t["draw_max"])])
+	if t.has("tex_mb_peak_max") and float(rep.get("tex_mb_peak", 0.0)) > float(t["tex_mb_peak_max"]):
+		out.append("texture memory peak %.1f MB > %d MB" % [float(rep["tex_mb_peak"]), int(t["tex_mb_peak_max"])])
 	if t.has("pages_in_play_max") and int(rep.get("pages_built_in_play", 0)) > int(t["pages_in_play_max"]):
 		out.append("%d texture pages built during PLAY" % int(rep["pages_built_in_play"]))
 	if int((rep.get("doubles", []) as Array).size()) > int(t.get("doubles_max", 0)):
@@ -279,7 +281,7 @@ func _finish() -> void:
 func _print_summary() -> void:
 	var keys := ["night_build_ms", "warm_ms", "curtain_up_ms", "sim_start_ms", "input_live_s", "first_input_s", "first_player_laugh_s", "first_prank_s",
 		"first_player_laugh_ms", "first_prank_ms", "laughs", "laughs_by_60", "end_reason", "end_tick", "draw_p95", "draw_max",
-		"pages_built_in_play", "retry_ms"]
+		"tex_mb_peak", "pages_built_in_play", "retry_ms"]
 	var parts := PackedStringArray()
 	for k in keys:
 		if report.has(k):

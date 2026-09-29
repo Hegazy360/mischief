@@ -60,6 +60,10 @@ static var _used: Dictionary = {}
 
 ## ART_SCALE for this device: 2.0, or 1.5 when the phone reports < 3 GB of RAM.
 static func _pick_art_scale() -> float:
+	# `-- --art-scale=1.5`: measure a 3 GB phone's path on a bigger box (s2-fix G #7; tools only).
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--art-scale=") and a.substr(12).to_float() > 0.0:
+			return a.substr(12).to_float()
 	var mi := OS.get_memory_info()
 	var phys := int(mi.get("physical", -1))
 	if phys > 0 and phys < 3 * 1024 * 1024 * 1024:

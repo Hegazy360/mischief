@@ -151,16 +151,22 @@ func _episode_list(ep: Variant, key: String) -> PackedStringArray:
 ## Art scale per room tonight (s2-fix G #7 — texture memory): the Night's rooms at ART_SCALE
 ## (−1); rooms the camera can still see — the unlit set within `REACH_PX` of tonight's rooms or
 ## backstage (the follow camera stops `stage_margin` 600 px past the lit rooms; Bellows walks
-## the backstage) — at LOCKED_SCALE (1×); rooms it can never frame get no art at all
-## (ViewKit.NO_ART).
+## the backstage) — at LOCKED_SCALE (1×), or OTHER_FLOOR_SCALE (¾×) on a floor none of tonight's
+## rooms is on; rooms it can never frame get no art at all (ViewKit.NO_ART).
 func room_art_scales() -> Dictionary:
 	var reach := reach_x_range()
+	var lit_floors := {}
+	for r in layout.rooms:
+		if unlocked.has(r.id) or backstage.has(r.id):
+			lit_floors[r.floor] = true
 	var out := {}
 	for r in layout.rooms:
 		if unlocked.has(r.id):
 			out[r.id] = -1.0
 		elif r.x1 >= reach.x and r.x0 <= reach.y:
-			out[r.id] = ViewKit.LOCKED_SCALE
+			# the unlit set on tonight's floor at 1×; on another floor (a strip at the screen's edge,
+			# under the HUD band) at ¾×
+			out[r.id] = ViewKit.LOCKED_SCALE if lit_floors.is_empty() or lit_floors.has(r.floor) else ViewKit.OTHER_FLOOR_SCALE
 		else:
 			out[r.id] = ViewKit.NO_ART
 	return out

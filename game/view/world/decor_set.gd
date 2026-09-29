@@ -51,7 +51,8 @@ func build(h: HouseLayout, locked_rooms: PackedStringArray, room_scales: Diction
 		s.name = "Decor_" + d.id
 		s.centered = false
 		# The unlit set's decor at 1× (s2-fix G #7), else the item's raster hint.
-		var ras := ViewKit.LOCKED_SCALE if locked_rooms.has(d.room) else d.raster
+		var rsc := float(room_scales.get(d.room, -1.0))
+		var ras := (rsc if rsc > 0.0 else ViewKit.LOCKED_SCALE) if locked_rooms.has(d.room) else d.raster
 		if float(room_scales.get(d.room, -1.0)) == ViewKit.NO_ART:
 			ras = ViewKit.NO_ART
 		_ras[d.id] = ras

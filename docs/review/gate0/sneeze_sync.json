@@ -1,0 +1,2217 @@
+{
+ "frames": 2401,
+ "onsets": [
+  85,
+  95,
+  105,
+  109,
+  126,
+  135,
+  145,
+  165,
+  189,
+  195,
+  205,
+  215,
+  266,
+  276,
+  296,
+  306,
+  316,
+  331,
+  334,
+  367,
+  383,
+  390,
+  415,
+  431,
+  446,
+  463,
+  479,
+  488,
+  495,
+  502,
+  512,
+  523,
+  528,
+  534,
+  538,
+  543,
+  558,
+  575,
+  591,
+  604,
+  615,
+  635,
+  651,
+  671,
+  695,
+  705,
+  714,
+  718,
+  727,
+  745,
+  778,
+  783,
+  800,
+  822,
+  835,
+  839,
+  859,
+  867,
+  895,
+  924,
+  931,
+  938,
+  952,
+  968,
+  981,
+  1008,
+  1037,
+  1065,
+  1077,
+  1093,
+  1097,
+  1121,
+  1153,
+  1167,
+  1239,
+  1243,
+  1288,
+  1528,
+  1559,
+  1573,
+  1758,
+  1779,
+  1798,
+  1839,
+  1898,
+  1918,
+  1959,
+  1998,
+  2019,
+  2059,
+  2119,
+  2139,
+  2178,
+  2219,
+  2259,
+  2318,
+  2338,
+  2358,
+  2378
+ ],
+ "worst_offset_f": 6,
+ "no_onset_within_6f": 89,
+ "worst_audio_offset_f": 2,
+ "events_without_a_sound": 3,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/boot/Boot.tscn"
+  },
+  {
+   "engine_frame": 3,
+   "scene": "res://scenes/night/NightScene.tscn"
+  }
+ ],
+ "events": [
+  {
+   "engine_frame": 0,
+   "type": "audio",
+   "id": "house_lights_dim",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 4,
+   "type": "voice",
+   "id": "vo_bellows_warmup_1",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 4,
+   "type": "audio",
+   "id": "curtain_rise",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 4,
+   "type": "audio",
+   "id": "mus_curtain",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 9,
+   "type": "sfx",
+   "id": "vase_nudge",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 5,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 9,
+   "type": "audio",
+   "id": "vase_nudge_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 19,
+   "type": "sfx",
+   "id": "vase_nudge",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 15,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": null
+  },
+  {
+   "engine_frame": 29,
+   "type": "sfx",
+   "id": "vase_nudge",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 25,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": null
+  },
+  {
+   "engine_frame": 39,
+   "type": "sfx",
+   "id": "vase_nudge",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 35,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": null
+  },
+  {
+   "engine_frame": 50,
+   "type": "sfx",
+   "id": "vase_nudge",
+   "clip": "bellows/act_warmup",
+   "clip_frame": 46,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 2
+  },
+  {
+   "engine_frame": 52,
+   "type": "audio",
+   "id": "Music0",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 66,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 66,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 75,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 75,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 85,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "onset": 85,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 85,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 85,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 95,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 30,
+   "onset": 95,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 95,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 95,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 105,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 40,
+   "onset": 105,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 105,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 105,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 115,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 50,
+   "onset": 109,
+   "offset_f": -6,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 115,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 109,
+   "offset_f": -6
+  },
+  {
+   "engine_frame": 125,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 60,
+   "onset": 126,
+   "offset_f": 1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 125,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 126,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 130,
+   "type": "sfx",
+   "id": "glint",
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 6,
+   "onset": 126,
+   "offset_f": -4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 130,
+   "type": "audio",
+   "id": "glint",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 126,
+   "offset_f": -4
+  },
+  {
+   "engine_frame": 135,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 70,
+   "onset": 135,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 135,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 135,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 138,
+   "type": "voice",
+   "id": "vo_bellows_smug",
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 14,
+   "onset": 135,
+   "offset_f": -3,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 138,
+   "type": "audio",
+   "id": "vo_bellows_smug_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 135,
+   "offset_f": -3
+  },
+  {
+   "engine_frame": 145,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "onset": 145,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 145,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 145,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 155,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 155,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 165,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "onset": 165,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 165,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 165,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 166,
+   "type": "sfx",
+   "id": "kiss_smack",
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 42,
+   "onset": 165,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 166,
+   "type": "audio",
+   "id": "kiss_smack",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 165,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 168,
+   "type": "audio",
+   "id": "pepper_shake",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 165,
+   "offset_f": -3
+  },
+  {
+   "engine_frame": 173,
+   "type": "sfx",
+   "id": "tinker",
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 6,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 173,
+   "type": "audio",
+   "id": "tinker_3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 189,
+   "type": "sfx",
+   "id": "tinker",
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 22,
+   "onset": 189,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 189,
+   "type": "audio",
+   "id": "tinker_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 189,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 205,
+   "type": "sfx",
+   "id": "tinker",
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 38,
+   "onset": 205,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 205,
+   "type": "audio",
+   "id": "tinker_3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 205,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 215,
+   "type": "sfx",
+   "id": "hush_snicker",
+   "clip": "hush/act_snicker",
+   "clip_frame": 0,
+   "onset": 215,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 215,
+   "type": "audio",
+   "id": "rig_done",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 215,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 215,
+   "type": "audio",
+   "id": "sting_rigged",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 215,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 215,
+   "type": "audio",
+   "id": "hush_snicker",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 215,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 217,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "onset": 215,
+   "offset_f": -2,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 217,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 215,
+   "offset_f": -2
+  },
+  {
+   "engine_frame": 226,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 226,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 236,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 236,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 236,
+   "type": "audio",
+   "id": "crowd_t0_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 246,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 30,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 246,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 256,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 40,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 256,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 266,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 50,
+   "onset": 266,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 266,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 266,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 276,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 60,
+   "onset": 276,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 276,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 276,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 286,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 70,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 286,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 296,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "onset": 296,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 296,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 296,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 306,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "onset": 306,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 306,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 306,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 316,
+   "type": "sfx",
+   "id": "step_pizz_up",
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "onset": 316,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 316,
+   "type": "audio",
+   "id": "step_pizz_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 316,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 319,
+   "type": "sfx",
+   "id": "dive",
+   "clip": "hush/act_dive",
+   "clip_frame": 0,
+   "onset": 316,
+   "offset_f": -3,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 319,
+   "type": "audio",
+   "id": "dive",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 316,
+   "offset_f": -3
+  },
+  {
+   "engine_frame": 336,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 334,
+   "offset_f": -2,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 336,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 334,
+   "offset_f": -2
+  },
+  {
+   "engine_frame": 351,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 351,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 367,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 367,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 367,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 367,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 383,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 383,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 383,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 383,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 399,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 399,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 415,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 415,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 415,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 415,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 431,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 431,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 431,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 431,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 447,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 446,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 447,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 446,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 463,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 463,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 463,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 463,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 479,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 479,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 479,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 479,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 495,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 495,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 495,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 495,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 511,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 512,
+   "offset_f": 1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 511,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 512,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 513,
+   "type": "audio",
+   "id": "door_jiggle",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 512,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 527,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 528,
+   "offset_f": 1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 527,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 528,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 543,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 543,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 543,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 543,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 559,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 558,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 559,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 558,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 575,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 575,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 575,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 575,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 591,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 591,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 591,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 591,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 604,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 604,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 604,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 604,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 619,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 615,
+   "offset_f": -4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 619,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 615,
+   "offset_f": -4
+  },
+  {
+   "engine_frame": 635,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "onset": 635,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 635,
+   "type": "audio",
+   "id": "slipper_wood_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 635,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 651,
+   "type": "sfx",
+   "id": "bellows_step",
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "onset": 651,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 651,
+   "type": "audio",
+   "id": "slipper_wood_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 651,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 693,
+   "type": "sfx",
+   "id": "kettle_pour",
+   "clip": "bellows/act_tea",
+   "clip_frame": 40,
+   "onset": 695,
+   "offset_f": 2,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 693,
+   "type": "audio",
+   "id": "kettle_pour",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 695,
+   "offset_f": 2
+  },
+  {
+   "engine_frame": 778,
+   "type": "sfx",
+   "id": "glint",
+   "clip": "bellows/mg_admire_in_kettle",
+   "clip_frame": 6,
+   "onset": 778,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 778,
+   "type": "audio",
+   "id": "glint",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 778,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 786,
+   "type": "voice",
+   "id": "vo_bellows_smug",
+   "clip": "bellows/mg_admire_in_kettle",
+   "clip_frame": 14,
+   "onset": 783,
+   "offset_f": -3,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 786,
+   "type": "audio",
+   "id": "vo_bellows_smug_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 783,
+   "offset_f": -3
+  },
+  {
+   "engine_frame": 822,
+   "type": "sfx",
+   "id": "spoon_clink",
+   "clip": "bellows/act_tea",
+   "clip_frame": 169,
+   "onset": 822,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 822,
+   "type": "audio",
+   "id": "spoon_clink_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 822,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 835,
+   "type": "sfx",
+   "id": "tea_stir",
+   "clip": "bellows/act_tea",
+   "clip_frame": 182,
+   "onset": 835,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 835,
+   "type": "audio",
+   "id": "tea_stir",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 835,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 896,
+   "type": "sfx",
+   "id": "spoon_clink",
+   "clip": "bellows/act_tea",
+   "clip_frame": 243,
+   "onset": 895,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 896,
+   "type": "audio",
+   "id": "spoon_clink_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 895,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 923,
+   "type": "sfx",
+   "id": "tea_sniff",
+   "clip": "bellows/act_tea",
+   "clip_frame": 270,
+   "onset": 924,
+   "offset_f": 1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 923,
+   "type": "audio",
+   "id": "tea_sniff",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 924,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 1041,
+   "type": "sfx",
+   "id": "tea_slurp",
+   "clip": "bellows/act_tea",
+   "clip_frame": 388,
+   "onset": 1037,
+   "offset_f": -4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1041,
+   "type": "audio",
+   "id": "tea_slurp",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1037,
+   "offset_f": -4
+  },
+  {
+   "engine_frame": 1073,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "onset": 1077,
+   "offset_f": 4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1073,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1077,
+   "offset_f": 4
+  },
+  {
+   "engine_frame": 1093,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 20,
+   "onset": 1093,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1093,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1093,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1117,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 44,
+   "onset": 1121,
+   "offset_f": 4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1117,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1121,
+   "offset_f": 4
+  },
+  {
+   "engine_frame": 1149,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 76,
+   "onset": 1153,
+   "offset_f": 4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1149,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1153,
+   "offset_f": 4
+  },
+  {
+   "engine_frame": 1167,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_choo",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "onset": 1167,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1167,
+   "type": "audio",
+   "id": "sting_link3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1167,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1167,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_choo_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1167,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1167,
+   "type": "audio",
+   "id": "mus_chain_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1167,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1168,
+   "type": "sfx",
+   "id": "stool_scrape",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 95,
+   "onset": 1167,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1168,
+   "type": "audio",
+   "id": "stool_scrape",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1167,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 1169,
+   "type": "sfx",
+   "id": "slide_up_flight",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "onset": 1167,
+   "offset_f": -2,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1169,
+   "type": "audio",
+   "id": "slide_up_flight",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1167,
+   "offset_f": -2
+  },
+  {
+   "engine_frame": 1176,
+   "type": "audio",
+   "id": "crowd_t3_3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1185,
+   "type": "sfx",
+   "id": "sink_crash",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1185,
+   "type": "audio",
+   "id": "sink_crash",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1227,
+   "type": "sfx",
+   "id": "ladle_spin",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 154,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1227,
+   "type": "audio",
+   "id": "ladle_spin",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1238,
+   "type": "audio",
+   "id": "stamp_thunk",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1239,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 1238,
+   "type": "audio",
+   "id": "vo_bellows_hmph_3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1239,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 1239,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": 1239,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1239,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1239,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1250,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1250,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1261,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1261,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1268,
+   "type": "audio",
+   "id": "crowd_bow_chant_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1273,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1273,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1284,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": 1288,
+   "offset_f": 4,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1284,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1288,
+   "offset_f": 4
+  },
+  {
+   "engine_frame": 1296,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1296,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1307,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1307,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1318,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1318,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1330,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1330,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1341,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1341,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1353,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1353,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1364,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1364,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1376,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1376,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1387,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1387,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1398,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1398,
+   "type": "audio",
+   "id": "slipper_scuff_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1410,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1410,
+   "type": "audio",
+   "id": "slipper_scuff_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1418,
+   "type": "audio",
+   "id": "curtain_fall",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1418,
+   "type": "audio",
+   "id": "crowd_t2_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1418,
+   "type": "audio",
+   "id": "mus_results",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1419,
+   "type": "audio",
+   "id": "ui_tick",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1420,
+   "type": "audio",
+   "id": "ui_tick",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1421,
+   "type": "audio",
+   "id": "ui_tick",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1422,
+   "type": "audio",
+   "id": "ui_tick",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1425,
+   "type": "audio",
+   "id": "ui_tick",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1426,
+   "type": "audio",
+   "id": "sting_new",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1442,
+   "type": "audio",
+   "id": "crowd_cheer_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1478,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1478,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1498,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 20,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1498,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1522,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 44,
+   "onset": 1528,
+   "offset_f": 6,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1522,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1528,
+   "offset_f": 6
+  },
+  {
+   "engine_frame": 1554,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 76,
+   "onset": 1559,
+   "offset_f": 5,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1554,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1559,
+   "offset_f": 5
+  },
+  {
+   "engine_frame": 1572,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_choo",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "onset": 1573,
+   "offset_f": 1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1572,
+   "type": "audio",
+   "id": "sting_link3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1573,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 1572,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_choo_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1573,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 1573,
+   "type": "sfx",
+   "id": "stool_scrape",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 95,
+   "onset": 1573,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1573,
+   "type": "audio",
+   "id": "stool_scrape",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1573,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 1574,
+   "type": "sfx",
+   "id": "slide_up_flight",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "onset": 1573,
+   "offset_f": -1,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1574,
+   "type": "audio",
+   "id": "slide_up_flight",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1573,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 1581,
+   "type": "audio",
+   "id": "crowd_t3_2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1590,
+   "type": "sfx",
+   "id": "sink_crash",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1590,
+   "type": "audio",
+   "id": "sink_crash",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1632,
+   "type": "sfx",
+   "id": "ladle_spin",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 154,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 1632,
+   "type": "audio",
+   "id": "ladle_spin",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1643,
+   "type": "audio",
+   "id": "stamp_thunk",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  },
+  {
+   "engine_frame": 1643,
+   "type": "audio",
+   "id": "vo_bellows_hmph_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  }
+ ]
+}

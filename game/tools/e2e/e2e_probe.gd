@@ -47,6 +47,8 @@ var _play_from_frame: int = -1
 ## probe's own handler sees that tick (s2-fix G #4).
 var _staged_early: Dictionary = {}
 var _tex_max: float = 0.0
+## The same over every phase of the Night (build, curtain, PLAY, the curtain call and results).
+var _tex_peak: float = 0.0
 
 
 ## Hook a NightScene (its driver, view and audio director).
@@ -76,6 +78,7 @@ func _process(delta: float) -> void:
 	if night == null or not is_instance_valid(night):
 		return
 	_read_sounds()
+	_tex_peak = maxf(_tex_peak, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED))
 	if _rise_t >= 0.0 and _live_t < 0.0 and bool(night.get("_live_input")):
 		_live_t = _t - _rise_t
 	var ph := String(night.call("phase_name"))
@@ -273,12 +276,13 @@ func summary() -> Dictionary:
 				in_play.append(r)
 	out["pages_in_play_recent"] = in_play
 	out["tex_mb_max"] = snappedf(_tex_max / 1048576.0, 0.1)
+	out["tex_mb_peak"] = snappedf(_tex_peak / 1048576.0, 0.1)
 	var mr: Variant = tex_stats_call_1("memory_report", get_tree().root if is_inside_tree() else null)
 	out["tex_mb_by_kind"] = (mr as Dictionary).get("tracked", {}) if mr is Dictionary else {}
 	out["tex_mb_total_end"] = (mr as Dictionary).get("total", -1.0) if mr is Dictionary else -1.0
 	out["tex_mb_tracked_actual_end"] = (mr as Dictionary).get("tracked_sum", -1.0) if mr is Dictionary else -1.0
 	out["tex_mb_untracked_end"] = (mr as Dictionary).get("untracked", -1.0) if mr is Dictionary else -1.0
-	var big: Variant = tex_stats_call_1("biggest", 30)
+	var big: Variant = tex_stats_call_1("biggest", 80)
 	out["tex_biggest"] = big if big is Array else []
 	return out
 

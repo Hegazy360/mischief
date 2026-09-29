@@ -76,3 +76,19 @@ func test_a_real_double_is_still_reported() -> void:
 	var d := E2eProbe.doubles(p._sounds)
 	assert_eq(d.size(), 1)
 	assert_almost_eq(float(d[0]["dt"]), 0.05, 0.001)
+
+
+## The texture-memory gate (s2-fix G #7): every route fails above 256 MB over the whole Night on a
+## rendered run; a headless run (peak 0) is not judged.
+func test_texture_peak_gate() -> void:
+	assert_eq(int(E2eScenarios.thresholds("n01_caught").get("tex_mb_peak_max", -1)), 256)
+	assert_eq(int(E2eScenarios.thresholds("g0_sneeze").get("tex_mb_peak_max", -1)), 256)
+	var e2e: Script = load("res://tools/e2e.gd")
+	var over: PackedStringArray = e2e.call("check", "n01_caught", {"tex_mb_peak": 275.1, "end_reason": "bow"}, false)
+	var hit := false
+	for f in over:
+		hit = hit or f.begins_with("texture memory peak")
+	assert_true(hit, "275 MB fails: %s" % [over])
+	for rep in [{"tex_mb_peak": 250.0}, {"tex_mb_peak": 0.0}]:
+		for f in e2e.call("check", "n01_caught", rep, false):
+			assert_false(String(f).begins_with("texture memory"), "%s passes the gate" % [rep])

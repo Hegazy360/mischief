@@ -53,8 +53,10 @@ func setup(hs: HouseLayout.Hotspot, h: HouseLayout, is_locked: bool, front_paren
 		if is_locked and not LOCKED_STATES.has(ks):
 			continue
 		if p is String and ViewKit.s(p) != "" and (STATES.has(ks) or ks.begins_with("rigged_")):
-			# Outlines at 1×; props in the unlit set at 1× (s2-fix G #7), else the prop's raster hint.
-			var t := PropView._tex_for(ViewKit.s(p), 1.0 if ks == "outline" or is_locked else hs.raster)
+			# Outlines at 1×; props in the unlit set at their room's scale (1× / ¾×, s2-fix G #7), else the
+			# prop's raster hint.
+			var lk := art_scale if art_scale > 0.0 else ViewKit.LOCKED_SCALE
+			var t := PropView._tex_for(ViewKit.s(p), 1.0 if ks == "outline" else (lk if is_locked else hs.raster))
 			if t != null:
 				_tex[ks] = t
 	_grey_rect = _greybox_rect()

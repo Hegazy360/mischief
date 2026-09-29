@@ -57,15 +57,6 @@ func _init() -> void:
 
 func _ready() -> void:
 	_rose_tex = UiIcons.get_icon(&"rose")
-	if ResourceLoader.exists(TITLE_ART):
-		_title_tex = ViewKit.tex(TITLE_ART)
-		if _title_tex == null:
-			_title_tex = load(TITLE_ART) as Texture2D
-	for b in [BULBS_A, BULBS_B]:
-		if ResourceLoader.exists(b):
-			var t := ViewKit.tex(b)
-			if t != null:
-				_bulbs.append(t)
 	if ResourceLoader.exists(VALANCE_ART):
 		_valance_tex = load(VALANCE_ART) as Texture2D
 	hush = CharacterView.new()
@@ -111,12 +102,32 @@ func rain_roses() -> void:
 
 ## The Prologue title card slams down.
 func slam_title() -> void:
+	_load_title()
 	title_on = true
 	_title_t = 0.0
 
 
 func show_title(on: bool) -> void:
+	if on:
+		_load_title()
 	title_on = on
+
+
+## The title card and its bulb layers, loaded the first time the card shows: only the Prologue's call
+## slams it (NightWarm rasterises them under that Night's curtain, so this is a cache hit there), and
+## every other curtain call no longer holds 3 × 4.5 MB of art it never draws (s2-fix G #7).
+func _load_title() -> void:
+	if _title_tex != null or not ResourceLoader.exists(TITLE_ART):
+		return
+	_title_tex = ViewKit.tex(TITLE_ART)
+	if _title_tex == null:
+		_title_tex = load(TITLE_ART) as Texture2D
+	_bulbs.clear()
+	for b in [BULBS_A, BULBS_B]:
+		if ResourceLoader.exists(b):
+			var t := ViewKit.tex(b)
+			if t != null:
+				_bulbs.append(t)
 
 
 ## Bellows wanders on (the reel); `residues` = the looks he ended the Night in.

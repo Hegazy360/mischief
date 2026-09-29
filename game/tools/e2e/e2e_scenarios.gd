@@ -65,7 +65,7 @@ static func slice_all() -> PackedStringArray:
 ## The pass thresholds of a scenario (the pre-gate rows it feeds). Keys:
 ## `input_live_s_max`, `first_laugh_s_max`, `first_prank_s_max` (from tick 0), `tick0_frames_max`,
 ## `laughs_by_60_min` (launch-relative), `cue_crowd_s_max`, `draw_p95_max`, `draw_max`,
-## `pages_in_play_max`, `doubles_max`, `ends_with`, `fallbacks_max` (strict runs only).
+## `pages_in_play_max`, `doubles_max`, `ends_with`, `fallbacks_max` (strict runs only), `tex_mb_peak_max`.
 static func thresholds(s: String) -> Dictionary:
 	var t := {"tick0_frames_max": 1, "doubles_max": 0, "errors_max": 0}
 	match s:
@@ -84,4 +84,7 @@ static func thresholds(s: String) -> Dictionary:
 			t["pages_in_play_max"] = 0
 	if is_route(s):
 		t["fallbacks_max"] = 0
+		# texture memory over the whole Night (build → curtain call), RENDER_TEXTURE_MEM_USED: a 3 GB
+		# phone (s2-fix G #7; checked on rendered runs only — headless reports 0)
+		t["tex_mb_peak_max"] = 256
 	return t

@@ -85,13 +85,14 @@ static func plan(layout: HouseLayout, room_scales: Dictionary) -> Dictionary:
 				continue
 			if locked and not PropView.LOCKED_STATES.has(ks):
 				continue
-			var sc := 1.0 if ks == "outline" or locked else (minf(hs.raster, art) if hs.raster > 0.0 else art)
+			# the unlit set at its room's scale (1× / ¾×), outlines at 1×, else the raster hint
+			var sc := rs if locked else (1.0 if ks == "outline" else (minf(hs.raster, art) if hs.raster > 0.0 else art))
 			_add(out, String(p), sc, hs.room)
 	for d in layout.decor:
 		var ds := float(room_scales.get(d.room, -1.0))
 		if ds == ViewKit.NO_ART:
 			continue
-		var dsc := ViewKit.LOCKED_SCALE if ds > 0.0 else (minf(d.raster, art) if d.raster > 0.0 else art)
+		var dsc := ds if ds > 0.0 else (minf(d.raster, art) if d.raster > 0.0 else art)
 		for k in d.art:
 			var dp: Variant = d.art[k]
 			if dp is String and String(dp).ends_with(".svg"):

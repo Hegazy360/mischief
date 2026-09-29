@@ -1,0 +1,2293 @@
+{
+ "events": [
+  {
+   "bus": "SFX",
+   "engine_frame": 0,
+   "id": "house_lights_dim",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_idle",
+   "clip_frame": 0,
+   "engine_frame": 4,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_idle",
+   "clip_frame": 0,
+   "engine_frame": 4,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 0,
+   "engine_frame": 4,
+   "id": "vo_bellows_warmup_1",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 4,
+   "id": "curtain_rise",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "bus": "Music",
+   "engine_frame": 4,
+   "id": "mus_curtain",
+   "player": "Music1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 5,
+   "engine_frame": 9,
+   "id": "vase_nudge",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 9,
+   "id": "vase_nudge_2",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 15,
+   "engine_frame": 19,
+   "id": "vase_nudge",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 25,
+   "engine_frame": 29,
+   "id": "vase_nudge",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 35,
+   "engine_frame": 39,
+   "id": "vase_nudge",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/act_warmup",
+   "clip_frame": 46,
+   "engine_frame": 50,
+   "id": "vase_nudge",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "Music",
+   "engine_frame": 52,
+   "id": "Music0",
+   "player": "Music0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 66,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 66,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 66,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 66,
+   "id": "step_pizz_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "engine_frame": 75,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 75,
+   "id": "step_pizz_1",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "engine_frame": 85,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 85,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 30,
+   "engine_frame": 95,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 95,
+   "id": "step_pizz_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 40,
+   "engine_frame": 105,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 105,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 50,
+   "engine_frame": 115,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 115,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 60,
+   "engine_frame": 125,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 125,
+   "id": "step_pizz_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 6,
+   "engine_frame": 130,
+   "id": "glint",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 130,
+   "id": "glint",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 70,
+   "engine_frame": 135,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 135,
+   "id": "step_pizz_1",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 14,
+   "engine_frame": 138,
+   "id": "vo_bellows_smug",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice_PanL",
+   "engine_frame": 138,
+   "id": "vo_bellows_smug_2",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 145,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 145,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 145,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 145,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "engine_frame": 155,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 155,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "engine_frame": 165,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 165,
+   "id": "step_pizz_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_admire_reflection_horn",
+   "clip_frame": 42,
+   "engine_frame": 166,
+   "id": "kiss_smack",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 166,
+   "id": "kiss_smack",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 0,
+   "engine_frame": 168,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 0,
+   "engine_frame": 168,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 168,
+   "id": "pepper_shake",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 6,
+   "engine_frame": 173,
+   "id": "tinker",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 173,
+   "id": "tinker_3",
+   "player": "Sfx4",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 22,
+   "engine_frame": 189,
+   "id": "tinker",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 189,
+   "id": "tinker_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_tinker_q",
+   "clip_frame": 38,
+   "engine_frame": 205,
+   "id": "tinker",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 205,
+   "id": "tinker_3",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_snicker",
+   "clip_frame": 0,
+   "engine_frame": 215,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/act_snicker",
+   "clip_frame": 0,
+   "engine_frame": 215,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/act_snicker",
+   "clip_frame": 0,
+   "engine_frame": 215,
+   "id": "hush_snicker",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 215,
+   "id": "rig_done",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 215,
+   "id": "sting_rigged",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 215,
+   "id": "hush_snicker",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 217,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 217,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 217,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 217,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "engine_frame": 226,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 226,
+   "id": "step_pizz_1",
+   "player": "Sfx4",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "engine_frame": 236,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 236,
+   "id": "step_pizz_1",
+   "player": "Sfx5",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 236,
+   "id": "crowd_t0_1",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 30,
+   "engine_frame": 246,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 246,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 40,
+   "engine_frame": 256,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 256,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 50,
+   "engine_frame": 266,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 266,
+   "id": "step_pizz_1",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 60,
+   "engine_frame": 276,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 276,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 70,
+   "engine_frame": 286,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 286,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 296,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 296,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 296,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 296,
+   "id": "step_pizz_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 10,
+   "engine_frame": 306,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 306,
+   "id": "step_pizz_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 20,
+   "engine_frame": 316,
+   "id": "step_pizz_up",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 316,
+   "id": "step_pizz_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_dive",
+   "clip_frame": 0,
+   "engine_frame": 319,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/act_dive",
+   "clip_frame": 0,
+   "engine_frame": 319,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/act_dive",
+   "clip_frame": 0,
+   "engine_frame": 319,
+   "id": "dive",
+   "player": "@Node2D@241",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/act_dive",
+   "clip_frame": 1,
+   "engine_frame": 319,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "smear"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 319,
+   "id": "dive",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "hush/act_dive",
+   "clip_frame": 4,
+   "engine_frame": 322,
+   "id": "",
+   "player": "@Node2D@241",
+   "type": "smear"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 335,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 335,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 336,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 336,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 351,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 351,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 367,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 367,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 383,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 383,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 399,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 399,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 415,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 415,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 431,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 431,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 447,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 447,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 463,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 463,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 479,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 479,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 495,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 495,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 511,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 511,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "bus": "SFX_PanL2",
+   "engine_frame": 513,
+   "id": "door_jiggle",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 527,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 527,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 543,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 543,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 559,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 559,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 575,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 575,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 591,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 591,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 603,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 603,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 604,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 604,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 619,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 619,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 0,
+   "engine_frame": 635,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 635,
+   "id": "slipper_wood_2",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_strut",
+   "clip_frame": 16,
+   "engine_frame": 651,
+   "id": "bellows_step",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 651,
+   "id": "slipper_wood_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 654,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 654,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 40,
+   "engine_frame": 693,
+   "id": "kettle_pour",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 693,
+   "id": "kettle_pour",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_admire_in_kettle",
+   "clip_frame": 6,
+   "engine_frame": 778,
+   "id": "glint",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 778,
+   "id": "glint",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/mg_admire_in_kettle",
+   "clip_frame": 14,
+   "engine_frame": 786,
+   "id": "vo_bellows_smug",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice_PanL",
+   "engine_frame": 786,
+   "id": "vo_bellows_smug_1",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 169,
+   "engine_frame": 822,
+   "id": "spoon_clink",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 822,
+   "id": "spoon_clink_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 182,
+   "engine_frame": 835,
+   "id": "tea_stir",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 835,
+   "id": "tea_stir",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 243,
+   "engine_frame": 896,
+   "id": "spoon_clink",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 896,
+   "id": "spoon_clink_1",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 270,
+   "engine_frame": 923,
+   "id": "tea_sniff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 923,
+   "id": "tea_sniff",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 388,
+   "engine_frame": 1041,
+   "id": "tea_slurp",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanL1",
+   "engine_frame": 1041,
+   "id": "tea_slurp",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1073,
+   "id": "vo_bellows_sneeze_ah1",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1073,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1073,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1073,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1073,
+   "id": "kitchen_stool",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "bus": "Voice_PanL",
+   "engine_frame": 1073,
+   "id": "vo_bellows_sneeze_ah1",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 1,
+   "engine_frame": 1074,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 20,
+   "engine_frame": 1093,
+   "id": "vo_bellows_sneeze_ah2",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1093,
+   "id": "vo_bellows_sneeze_ah2",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 44,
+   "engine_frame": 1117,
+   "id": "vo_bellows_sneeze_ah3",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1117,
+   "id": "vo_bellows_sneeze_ah3",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 76,
+   "engine_frame": 1149,
+   "id": "vo_bellows_sneeze_hm",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1149,
+   "id": "vo_bellows_sneeze_hm",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "vo_bellows_sneeze_choo",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "accent",
+   "player": "@Node2D@242",
+   "type": "mark"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "hitstop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "cam"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1167,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1167,
+   "id": "sting_link3",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1167,
+   "id": "vo_bellows_sneeze_choo_2",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "bus": "Music",
+   "engine_frame": 1167,
+   "id": "mus_chain_1",
+   "player": "Music1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 95,
+   "engine_frame": 1168,
+   "id": "stool_scrape",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1168,
+   "id": "stool_scrape",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "engine_frame": 1169,
+   "id": "slide_up_flight",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "engine_frame": 1169,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "smear"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1169,
+   "id": "slide_up_flight",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 1176,
+   "id": "crowd_t3_3",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 111,
+   "engine_frame": 1184,
+   "id": "kitchen_sink_lip",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1185,
+   "id": "sink_crash",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1185,
+   "id": "knock_on",
+   "player": "@Node2D@242",
+   "type": "mark"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1185,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1185,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1185,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1185,
+   "id": "sink_crash",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 113,
+   "engine_frame": 1186,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 142,
+   "engine_frame": 1215,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 147,
+   "engine_frame": 1220,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 150,
+   "engine_frame": 1223,
+   "id": "kitchen_sink_lip",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 151,
+   "engine_frame": 1224,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 154,
+   "engine_frame": 1227,
+   "id": "ladle_spin",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1227,
+   "id": "ladle_spin",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 158,
+   "engine_frame": 1231,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 158,
+   "engine_frame": 1231,
+   "id": "kitchen_stool",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1238,
+   "id": "stamp_thunk",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "Voice_PanR",
+   "engine_frame": 1238,
+   "id": "vo_bellows_hmph_3",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1239,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1239,
+   "id": "slipper_scuff_2",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1250,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1250,
+   "id": "slipper_scuff_1",
+   "player": "Sfx4",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1261,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1261,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 1268,
+   "id": "crowd_bow_chant_1",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1273,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1273,
+   "id": "slipper_scuff_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1284,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1284,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1296,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1296,
+   "id": "slipper_scuff_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1307,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1307,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1318,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1318,
+   "id": "slipper_scuff_1",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1330,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1330,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1341,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1341,
+   "id": "slipper_scuff_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1353,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1353,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1364,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1364,
+   "id": "slipper_scuff_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1376,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1376,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1387,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1387,
+   "id": "slipper_scuff_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 0,
+   "engine_frame": 1398,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1398,
+   "id": "slipper_scuff_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/loco_blind_shuffle",
+   "clip_frame": 12,
+   "engine_frame": 1410,
+   "id": "slipper_scuff",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1410,
+   "id": "slipper_scuff_1",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1418,
+   "id": "curtain_fall",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 1418,
+   "id": "crowd_t2_1",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "bus": "Music",
+   "engine_frame": 1418,
+   "id": "mus_results",
+   "player": "Music0",
+   "type": "audio"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 1419,
+   "id": "ui_tick",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 1420,
+   "id": "ui_tick",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 1421,
+   "id": "ui_tick",
+   "player": "Sfx4",
+   "type": "audio"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 1422,
+   "id": "ui_tick",
+   "player": "Sfx5",
+   "type": "audio"
+  },
+  {
+   "bus": "UI",
+   "engine_frame": 1425,
+   "id": "ui_tick",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1426,
+   "id": "sting_new",
+   "player": "Sfx3",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 1442,
+   "id": "crowd_cheer_1",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 1467,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/act_tea",
+   "clip_frame": 0,
+   "engine_frame": 1467,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1478,
+   "id": "vo_bellows_sneeze_ah1",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1478,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1478,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1478,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "engine_frame": 1478,
+   "id": "kitchen_stool",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "bus": "Voice_PanL",
+   "engine_frame": 1478,
+   "id": "vo_bellows_sneeze_ah1",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 1,
+   "engine_frame": 1479,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 20,
+   "engine_frame": 1498,
+   "id": "vo_bellows_sneeze_ah2",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1498,
+   "id": "vo_bellows_sneeze_ah2",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 44,
+   "engine_frame": 1522,
+   "id": "vo_bellows_sneeze_ah3",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1522,
+   "id": "vo_bellows_sneeze_ah3",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 76,
+   "engine_frame": 1554,
+   "id": "vo_bellows_sneeze_hm",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1554,
+   "id": "vo_bellows_sneeze_hm",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "vo_bellows_sneeze_choo",
+   "player": "@Node2D@242",
+   "type": "voice"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "accent",
+   "player": "@Node2D@242",
+   "type": "mark"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "hitstop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "cam"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "engine_frame": 1572,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1572,
+   "id": "sting_link3",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 1572,
+   "id": "vo_bellows_sneeze_choo_1",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 95,
+   "engine_frame": 1573,
+   "id": "stool_scrape",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1573,
+   "id": "stool_scrape",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "engine_frame": 1574,
+   "id": "slide_up_flight",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "engine_frame": 1574,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "smear"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1574,
+   "id": "slide_up_flight",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "Crowd",
+   "engine_frame": 1581,
+   "id": "crowd_t3_2",
+   "player": "Crowd0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 111,
+   "engine_frame": 1589,
+   "id": "kitchen_sink_lip",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1590,
+   "id": "sink_crash",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1590,
+   "id": "knock_on",
+   "player": "@Node2D@242",
+   "type": "mark"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1590,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1590,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "engine_frame": 1590,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1590,
+   "id": "sink_crash",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 113,
+   "engine_frame": 1591,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 142,
+   "engine_frame": 1620,
+   "id": "drops",
+   "player": "@Node2D@242",
+   "type": "fx"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 147,
+   "engine_frame": 1625,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 150,
+   "engine_frame": 1628,
+   "id": "kitchen_sink_lip",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 151,
+   "engine_frame": 1629,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 154,
+   "engine_frame": 1632,
+   "id": "ladle_spin",
+   "player": "@Node2D@242",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX_PanR1",
+   "engine_frame": 1632,
+   "id": "ladle_spin",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 158,
+   "engine_frame": 1636,
+   "id": "",
+   "player": "@Node2D@242",
+   "type": "prop"
+  },
+  {
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 158,
+   "engine_frame": 1636,
+   "id": "kitchen_stool",
+   "player": "@Node2D@242",
+   "type": "decor"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 1643,
+   "id": "stamp_thunk",
+   "player": "Sfx2",
+   "type": "audio"
+  },
+  {
+   "bus": "Voice_PanR",
+   "engine_frame": 1643,
+   "id": "vo_bellows_hmph_1",
+   "player": "Voice0",
+   "type": "audio"
+  }
+ ],
+ "fps": 60,
+ "frames": 2400,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/boot/Boot.tscn"
+  },
+  {
+   "engine_frame": 3,
+   "scene": "res://scenes/night/NightScene.tscn"
+  }
+ ]
+}

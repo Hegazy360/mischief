@@ -41,7 +41,7 @@ func _initialize() -> void:
 
 func _args() -> Dictionary:
 	var a := {"episode": "all", "route": "all", "auto": false, "write_auto": false, "report": "", "strict": false,
-		"auto_gate": false, "data": "res://data", "auto_dir": "", "budget_ms": 50000, "max_macros": 400, "max_s": 900,
+		"auto_gate": false, "data": "res://data", "auto_dir": "", "budget_ms": 0, "max_macros": 400, "max_s": 900,
 		"replay": true,
 		"timeline": "", "world": "sim", "solutions": "", "dump_events": "", "dump_cmds": "", "baseline": "",
 		"pregate": false}

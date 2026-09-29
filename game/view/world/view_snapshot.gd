@@ -88,6 +88,8 @@ class Actor:
 	var oneshot_t: int = 0
 	var oneshot_len: int = 0
 	var oneshot_var: int = 0
+	## Hush is climbing in (the sim's `entering`, incl. the wait before the `enter` one-shot starts).
+	var entering: bool = false
 	# The current leg (s2-sim `bellows_leg()` / `hush_leg()`; derived from DOOR / STAIRS states
 	# when absent): kind "walk" | "door" | "stairs" | "", its ends (rooms, world x, floor-line y),
 	# progress 0–1000 and whether it climbs.
@@ -162,6 +164,7 @@ class Actor:
 		oneshot_t = o.oneshot_t
 		oneshot_len = o.oneshot_len
 		oneshot_var = o.oneshot_var
+		entering = o.entering
 		leg_kind = o.leg_kind
 		leg_from_room = o.leg_from_room
 		leg_to_room = o.leg_to_room
@@ -243,6 +246,7 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 	var hb: Object = _g(world, "hush", null)
 	if hb != null:
 		hush.hidden_spot = ViewKit.id_of(_g(hb, "hidden_spot", ""), ids.hotspots)
+		hush.entering = bool(_g(hb, "entering", false))
 		hush.watched_spot = ViewKit.id_of(_g(hb, "watched_spot", ""), ids.hotspots)
 		hush.frozen = bool(_g(hb, "frozen", hush.state == "FROZEN"))
 		hush.freeze_pose_seed = int(_g(hb, "freeze_pose_seed", 0))

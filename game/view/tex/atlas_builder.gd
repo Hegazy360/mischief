@@ -38,6 +38,9 @@ const BUILTINS := {"@white": Vector2i(4, 4), "@disc": Vector2i(64, 64), "@line":
 
 ## Crop transparent borders at pack time (keeps a 1 px clear margin for filtering).
 static var trim: bool = true
+## start(): rasterisation jobs of sets something will block on (rigs, the house) go ahead of the
+## warm-up's (looks) in the worker queue.
+static var _start_high: bool = false
 ## Generate mip chains for every page (character atlases are drawn at 0.5–1.0×).
 static var mipmaps: bool = true
 static var _sets: Dictionary = {}    ## key → AtlasSet
@@ -56,6 +59,12 @@ static func build(key: String, paths: PackedStringArray, scale: float = -1.0, sw
 	var cached: AtlasSet = _sets.get(key, null)
 	if cached != null and is_equal_approx(cached.scale, s):
 		return cached
+	if _warm.has(key):
+		# Started earlier with start() / warm(): wait for those jobs instead of redoing them.
+		finish(key)
+		cached = _sets.get(key, null)
+		if cached != null:
+			return cached
 	var uniq := _unique(paths)
 	var jobs := _make_jobs(uniq, swaps, s, scales)
 	if HiResTex.threaded and jobs.size() > 1:
@@ -87,7 +96,7 @@ static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scal
 		w.core = _core_in(uniq, paths, core_count)
 		if HiResTex.threaded:
 			for j in w.jobs:
-				j.task = WorkerThreadPool.add_task(j.run, false, "AtlasBuilder")
+				j.task = WorkerThreadPool.add_task(j.run, _start_high, "AtlasBuilder")
 		_warm[key] = w
 	var t0 := Time.get_ticks_usec()
 	var all_done := true
@@ -111,7 +120,8 @@ static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scal
 		# Packing and page composition on a worker too; this thread only uploads.
 		if w.compose_task < 0:
 			w.key = key
-			w.compose_task = WorkerThreadPool.add_task(w.compose, false, "AtlasBuilder compose")
+			# packing blocks whoever waits for the set: ahead of queued rasterisation (s2-fix G #9)
+			w.compose_task = WorkerThreadPool.add_task(w.compose, true, "AtlasBuilder compose")
 			return false
 		if not WorkerThreadPool.is_task_completed(w.compose_task):
 			return false
@@ -122,6 +132,33 @@ static func warm(key: String, paths: PackedStringArray, budget_ms: int = 4, scal
 	_warm.erase(key)
 	_sets[key] = _assemble(key, w.jobs, w.scale, w.core)
 	return true
+
+
+## Start building a set in the background (rasterisation AND packing on worker threads) so a
+## later build() / warm() of the same key only waits for it (s2-fix G #9: the NightScene starts
+## the house pages and both rig atlases at once, so they build in parallel). No-op when cached.
+static func start(key: String, paths: PackedStringArray, scale: float = -1.0, swaps: Dictionary = {}, core_count: int = 0, scales: Dictionary = {}, high_priority: bool = true) -> void:
+	_start_high = high_priority
+	warm(key, paths, 0, scale, swaps, core_count, scales)
+	_start_high = false
+
+
+## Block until a started set is ready (polls its warm; the jobs run on worker threads). Returns
+## the set (null when nothing was started for `key`).
+static func finish(key: String) -> AtlasSet:
+	if _sets.has(key):
+		return _sets[key]
+	var w: _Warm = _warm.get(key, null)
+	if w == null:
+		return null
+	while not warm(key, PackedStringArray(), 1000, w.scale):
+		OS.delay_usec(250)
+	return _sets.get(key, null)
+
+
+## True while a started set is still being built.
+static func is_pending(key: String) -> bool:
+	return _warm.has(key)
 
 
 ## The cached set for `key` (null until built / warmed).
@@ -328,11 +365,14 @@ static func _best_page(sizes: Array[Vector2i], reserve: Array[Vector2i], items: 
 		total += (r.x + 2 * PAD) * (r.y + 2 * PAD)
 	min_w = mini(_ceil_to(min_w, 4), limit)
 	var max_w := mini(limit, maxi(min_w, _ceil_to(int(sqrt(float(total)) * 2.2), 4)))
+	# Coarse widths every 64 px, then (below) ±64 by 16 and ±16 by 4 around the best one: a third of
+	# the skyline passes of a 16-px sweep for the same pages (s2-fix G #9 — packing is GDScript and
+	# was ~half of a rig's atlas build).
 	var widths: Array[int] = []
 	var w := min_w
 	while w <= max_w:
 		widths.append(w)
-		w += 16
+		w += 64
 	if widths.is_empty() or widths[widths.size() - 1] != limit:
 		widths.append(limit)
 	var best: Dictionary = {}
@@ -355,18 +395,21 @@ static func _best_page(sizes: Array[Vector2i], reserve: Array[Vector2i], items: 
 			best_placed = placed.size()
 	if best.is_empty() or best_placed < items.size():
 		return best
-	# Refine ±16 px around the best width in 4 px steps.
-	var bw: int = (best["size"] as Vector2i).x
-	var fw := maxi(min_w, bw - 16)
-	while fw <= mini(limit, bw + 16):
-		if fw != bw:
-			var r2 := _skyline(sizes, reserve, items, fw, limit)
-			var placed2: Dictionary = r2["placed"]
-			var h2: int = mini(limit, _ceil_to(int(r2["height"]), 4))
-			if placed2.size() == items.size() and fw * h2 < best_area:
-				best = {"size": Vector2i(fw, h2), "placed": placed2, "reserved": r2["reserved"]}
-				best_area = fw * h2
-		fw += 4
+	# Refine around the best width: ±64 px in 16 px steps, then ±16 px in 4 px steps.
+	for pass_i in 2:
+		var span := 64 if pass_i == 0 else 16
+		var step := 16 if pass_i == 0 else 4
+		var bw: int = (best["size"] as Vector2i).x
+		var fw := maxi(min_w, bw - span)
+		while fw <= mini(limit, bw + span):
+			if fw != bw:
+				var r2 := _skyline(sizes, reserve, items, fw, limit)
+				var placed2: Dictionary = r2["placed"]
+				var h2: int = mini(limit, _ceil_to(int(r2["height"]), 4))
+				if placed2.size() == items.size() and fw * h2 < best_area:
+					best = {"size": Vector2i(fw, h2), "placed": placed2, "reserved": r2["reserved"]}
+					best_area = fw * h2
+			fw += step
 	return best
 
 
@@ -707,8 +750,12 @@ static func _upload(composed: Array) -> AtlasSet:
 	var set: AtlasSet = composed[0]
 	var page_imgs: Array = composed[1]
 	for pi2 in page_imgs.size():
-		set.pages.append(ImageTexture.create_from_image(page_imgs[pi2]))
-		TexStats.note_build("look" if set.key.contains(":look:") else "atlas", "%s#%d" % [set.key, pi2])
+		var pimg: Image = page_imgs[pi2]
+		var ptex := ImageTexture.create_from_image(pimg)
+		set.pages.append(ptex)
+		var bk := "look" if set.key.contains(":look:") else "atlas"
+		TexStats.note_build(bk, "%s#%d" % [set.key, pi2])
+		TexStats.track_image(ptex, pimg, bk, set.key)
 	return set
 
 

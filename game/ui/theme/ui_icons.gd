@@ -170,6 +170,15 @@ static func barks() -> Dictionary:
 	return _barks
 
 
+## Texture-memory accounting (TexStats, soft: the UI kit never depends on the view).
+static func _track(t: Texture2D, img: Image, path: String) -> void:
+	if not ResourceLoader.exists("res://view/tex/tex_stats.gd"):
+		return
+	var ts: Script = load("res://view/tex/tex_stats.gd")
+	if ts != null and ts.has_method("track_image"):
+		ts.call("track_image", t, img, "ui", "res://ui/" + path.get_file() if not path.begins_with("res://art/") else path)
+
+
 static func _art_exists(path: String) -> bool:
 	return FileAccess.file_exists(path) or ResourceLoader.exists(path)
 
@@ -188,6 +197,7 @@ static func texture(path: String, scale: float = RASTER_SCALE) -> Texture2D:
 				img.generate_mipmaps()
 				t = ImageTexture.create_from_image(img)
 				stats["raster"] += 1
+				_track(t, img, path)
 	if t == null and ResourceLoader.exists(path):
 		t = load(path) as Texture2D
 		if t != null:

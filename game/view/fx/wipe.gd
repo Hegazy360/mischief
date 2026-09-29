@@ -50,30 +50,56 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if not active():
 		return
-	var s := size
-	var diag := s.length()
-	var c := Vector2(_centre.x * s.x, _centre.y * s.y)
-	var r := iris() * diag * 0.75
-	# Ink everywhere outside the iris: a ring polygon (outer square corners + inner circle).
-	var pts := PackedVector2Array()
-	var n := 40
-	for i in n + 1:
-		var a := TAU * float(i) / float(n)
-		pts.append(c + Vector2(cos(a), sin(a)) * maxf(r, 1.0))
-	var outer := PackedVector2Array([Vector2(-10, -10), Vector2(s.x + 10, -10), Vector2(s.x + 10, s.y + 10), Vector2(-10, s.y + 10), Vector2(-10, -10)])
-	# Two polygons: left and right halves of the ring, so neither self-intersects.
-	for side in 2:
-		var poly := PackedVector2Array()
-		var x_edge := -10.0 if side == 0 else s.x + 10.0
-		poly.append(Vector2(c.x, -10))
-		poly.append(Vector2(x_edge, -10))
-		poly.append(Vector2(x_edge, s.y + 10))
-		poly.append(Vector2(c.x, s.y + 10))
-		var half := n / 2
-		for k in half + 1:
-			var idx := (n / 4 + k) if side == 0 else (n / 4 - k + n) % n
-			poly.append(pts[idx % n])
-		if poly.size() >= 3:
-			draw_colored_polygon(poly, ViewKit.INK)
+	for poly in ring_polygons(size, Vector2(_centre.x * size.x, _centre.y * size.y), iris() * size.length() * 0.75):
+		draw_colored_polygon(poly, ViewKit.INK)
+
+
+## The ink outside an iris of radius `r` around `c` on a screen of `s` (s2-fix G #5), as simple
+## polygons: nothing when the iris covers the whole screen, the full rect when r < 2, else the
+## screen split at c.x into two halves, each clipped by the circle (Geometry2D.clip_polygons), so
+## no polygon has a hole or self-intersects ("triangulation failed" at iris 1 before). Pure.
+static func ring_polygons(s: Vector2, c: Vector2, r: float, n: int = 48) -> Array[PackedVector2Array]:
+	var out: Array[PackedVector2Array] = []
+	var m := 10.0
+	var outer := Rect2(-m, -m, s.x + 2.0 * m, s.y + 2.0 * m)
 	if r < 2.0:
-		draw_rect(Rect2(outer[0], s + Vector2(20, 20)), ViewKit.INK)
+		out.append(PackedVector2Array([outer.position, Vector2(outer.end.x, outer.position.y), outer.end, Vector2(outer.position.x, outer.end.y)]))
+		return out
+	var far := 0.0
+	for corner in [outer.position, Vector2(outer.end.x, outer.position.y), outer.end, Vector2(outer.position.x, outer.end.y)]:
+		far = maxf(far, c.distance_to(corner))
+	if r >= far:
+		return out
+	var circle := PackedVector2Array()
+	for i in n:
+		var a := TAU * float(i) / float(n)
+		circle.append(c + Vector2(cos(a), sin(a)) * r)
+	var cx := clampf(c.x, outer.position.x + 1.0, outer.end.x - 1.0)
+	var halves := [
+		PackedVector2Array([outer.position, Vector2(cx, outer.position.y), Vector2(cx, outer.end.y), Vector2(outer.position.x, outer.end.y)]),
+		PackedVector2Array([Vector2(cx, outer.position.y), Vector2(outer.end.x, outer.position.y), outer.end, Vector2(cx, outer.end.y)]),
+	]
+	for h in halves:
+		var parts := Geometry2D.clip_polygons(h, circle)
+		# A half minus a circle centred on its edge has no hole; should one appear anyway (a centre
+		# off screen), keep only the polygons wound like the biggest one (the boundary).
+		var big_cw := false
+		var big_a := -1.0
+		for poly in parts:
+			var a := absf(_area(poly))
+			if a > big_a:
+				big_a = a
+				big_cw = Geometry2D.is_polygon_clockwise(poly)
+		for poly in parts:
+			if poly.size() >= 3 and Geometry2D.is_polygon_clockwise(poly) == big_cw:
+				out.append(poly)
+	return out
+
+
+static func _area(poly: PackedVector2Array) -> float:
+	var a := 0.0
+	for i in poly.size():
+		var p0 := poly[i]
+		var p1 := poly[(i + 1) % poly.size()]
+		a += p0.x * p1.y - p1.x * p0.y
+	return a * 0.5

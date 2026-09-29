@@ -168,6 +168,25 @@ func advance(delta: float) -> void:
 		_renders += 1
 
 
+## HUD bands (logical screen px) the main view loses to the HUD: the top row (meter, banner, the
+## PiP itself) and the bottom clusters (tray, action button).
+const HUD_TOP_PX := 280.0
+const HUD_BOTTOM_PX := 220.0
+
+
+## True while Bellows is plainly on the main screen (s2-fix G #19): at least half his body inside
+## `view_rect` shrunk by `margins` (left, top, right, bottom, world px — the HUD bands at the current
+## zoom). The PiP then hides at once instead of holding its 2 s, so he is never on screen twice.
+static func on_screen(snap: ViewSnapshot, view_rect: Rect2, margins: Vector4 = Vector4.ZERO) -> bool:
+	var b := snap.bellows
+	if not b.present or view_rect.size.x <= 0.0:
+		return false
+	var body := Rect2(b.x - 90.0, b.y - 390.0, 180.0, 390.0)
+	var inner := view_rect.grow_individual(-margins.x, -margins.y, -margins.z, -margins.w)
+	var hit := inner.intersection(body)
+	return hit.size.x * hit.size.y >= body.size.x * body.size.y * 0.5
+
+
 ## The GDD §3.7 rule. `view_rect` = the main camera's visible world rect; `layout` gives room
 ## distances; `heading_extra` = an entry warning for Hush's room is live.
 static func rule(snap: ViewSnapshot, view_rect: Rect2, layout: HouseLayout, heading_extra: bool = false) -> bool:

@@ -25,6 +25,7 @@ var _steps: Array = []
 var _t0: int = 0
 var _primer: Node2D = null
 var _tex_i: int = 0
+var _tex_items: Array = []
 var _blocking: bool = false
 ## Lazy textures rasterised so far (tests, the report).
 var textures_warmed: int = 0
@@ -40,6 +41,7 @@ func start(p_list: Dictionary, wv: Node, p_pip: Node, p_primer_parent: Node) -> 
 	ran = PackedStringArray()
 	_t0 = Time.get_ticks_msec()
 	_tex_i = 0
+	_tex_items = []
 	_steps = [["looks_bellows", _warm_looks.bind("bellows")], ["looks_hush", _warm_looks.bind("hush")],
 		["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
 		["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer]]
@@ -125,18 +127,25 @@ func _warm_pip() -> void:
 		pip.call("warm")
 
 
-## Rasterise the lazy view textures (ViewKit.tex caches them) a few per frame. False until done.
+## Rasterise the lazy view textures: all of them start on worker threads at once (HiResTex.warm)
+## and finish within the frame budget (s2-fix G #9 — one blocking SVG per frame made this step
+## ~1 s); then ViewKit's cache is filled from the finished rasters. False until done.
 func _warm_textures() -> bool:
 	var paths: Variant = list.get("textures", PackedStringArray())
 	if not (paths is PackedStringArray):
 		return true
 	var arr: PackedStringArray = paths
+	if _tex_items.is_empty() and not arr.is_empty():
+		for p in arr:
+			_tex_items.append({"path": p, "scale": ViewKit.art_scale_of(p)})
+	if HiResTex.warm(_tex_items, BUDGET_MS) > 0:
+		return false
 	var t := Time.get_ticks_msec()
 	while _tex_i < arr.size():
 		ViewKit.tex(arr[_tex_i])
 		_tex_i += 1
 		textures_warmed += 1
-		if Time.get_ticks_msec() - t >= BUDGET_MS:
+		if Time.get_ticks_msec() - t >= BUDGET_MS and not _blocking:
 			return _tex_i >= arr.size()
 	return true
 

@@ -142,6 +142,30 @@ func test_facing_turn_is_a_six_frame_squash() -> void:
 	assert_almost_eq(p._fsx, 1.0, 0.0001, "instant flip without animation")
 
 
+## CharacterView calls set_facing(cur.facing, true) every frame: the running turn must finish
+## (s2-fix G #1 — Bellows stayed 72 % wide on the old side and faced away from the kettle).
+func test_facing_every_frame_still_finishes_the_turn() -> void:
+	p.play("_mannequin/loco_walk", {"loop": true})
+	p.set_facing(1, true)
+	_step(10)
+	p.play("_mannequin/loco_idle", {"loop": true})
+	var done_at := -1
+	for i in 40:
+		p.set_facing(-1, true)
+		p.advance(DT)
+		if done_at < 0 and is_equal_approx(p._fsx, -1.0):
+			done_at = i + 1
+	assert_eq(p.facing(), -1)
+	assert_almost_eq(p._fsx, -1.0, 0.0001, "ends on the new side")
+	assert_between(done_at, 1, int(RigPlayer.TURN_FRAMES) + 1, "done within TURN_FRAMES (got %d)" % done_at)
+	# A new direction mid-turn restarts it; a snap mid-turn ends it.
+	p.set_facing(1, true)
+	p.advance(DT)
+	assert_true(p._fsx > -1.0 and p._fsx < 1.0, "a new direction starts a turn")
+	p.set_facing(1, false)
+	assert_almost_eq(p._fsx, 1.0, 0.0001, "a snap with the same direction ends the running turn")
+
+
 func test_walk_rate_matches_speed_over_stride() -> void:
 	p.play("_mannequin/loco_walk", {"speed": 360.0})
 	var c := ClipLib.get_clip("_mannequin/loco_walk")

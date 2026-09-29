@@ -392,7 +392,8 @@ func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view
 	_update_ctx(cur, vf)
 	ClipMap.resolve(map, cur, alpha, _pick, ctx)
 	_note_fallbacks()
-	var hidden := _pick.hidden or (actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != ""))
+	var hidden := _pick.hidden or (actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != ""
+		or (cur.entering and cur.oneshot != "enter")))   # not in the room before she climbs in (s2-fix G #14)
 	if uses_rig:
 		_drive_rig(cur, hidden)
 	else:
@@ -549,7 +550,10 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 	_play_base(cur)
 	_play_overlay()
 	if bool(_has.get("set_facing", false)):
-		rig.call("set_facing", cur.facing, true)
+		if actor == "hush" and cur.entering:
+			rig.call("set_facing", 1, false)   # the climb-in is authored facing +1: never flipped (s2-fix G #14)
+		else:
+			rig.call("set_facing", cur.facing, true)
 	if bool(_has.get("look_toward", false)):
 		rig.call("look_toward", look_target if look_target != Vector2.INF else global_position, look_weight if look_target != Vector2.INF else 0.0)
 	if actor == "bellows":

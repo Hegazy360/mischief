@@ -125,3 +125,16 @@ func test_prove_on_mock() -> void:
 	var sd := SolutionDef.from_dict(sol)
 	assert_eq(sd.validate(U.data()), PackedStringArray(), "the _auto solution validates")
 	assert_eq(sd.route_names(), PackedStringArray(["auto"]))
+
+
+## Script order (lines proved "with the lines before them") only for the Prologue — not for every
+## Night with a `director` block (s2-fix G #13: N01's lines-alone proof failed on tap / sneeze / bn).
+func test_script_order_only_for_the_prologue() -> void:
+	for id in ["p00_curtain_up", "n01_throat_tea", "n02_something_fishy"]:
+		var ep: Variant = TestBase.load_json("res://data/episodes/%s.json" % id)
+		assert_true(ep is Dictionary, id)
+		var want := int((ep as Dictionary).get("act", 1)) == 0
+		assert_eq(Planner.script_order(ep), want, "%s: Script order %s" % [id, want])
+	assert_true(Planner.script_order({"act": 0, "director": {}}))
+	assert_false(Planner.script_order({"act": 1, "director": {}}), "a director block is timing, not order")
+	assert_false(Planner.script_order({"act": 0}), "no director: free order")

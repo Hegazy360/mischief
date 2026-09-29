@@ -10,7 +10,8 @@
 ## `{id, build: "debug"|"profile", model, os, gpu, ram_mb, clock: "proc"|"engine",
 ##   process_start_to_boot_ms, boot_ms, curtain_up_ms, sim_start_ms, first_input_ms, first_squeak_ms,
 ##   first_player_laugh_ms, first_prank_ms, retry_ms: [..], laughs: [{ms, kind, tier}],
-##   catches: [{ms, spot_fill_s, cause}], perf: [{t_s, fps_p50, fps_p95, frame_ms_p95, draw_calls_p95}],
+##   catches: [{ms, spot_fill_s, cause}], perf: [{t_s, fps_p50, fps_p95, frame_ms_p95, draw_calls_p95, tex_mb}],
+##   tex_mb_peak, values: {night_build_ms, warm_ms, tex_mb_by_kind: {room, house, rig, look, …}},
 ##   marks: {name: ms}}` — every time in ms from **process start**: on Android (and Linux) from
 ## `/proc/self/stat` starttime vs `/proc/uptime`, so the activity start and splash the engine never
 ## sees are counted; elsewhere from engine start (`clock: "engine"`). −1 = not reached.
@@ -190,9 +191,12 @@ static func _summarise() -> void:
 		f.sort()
 		m.sort()
 		d.sort()
+		var tex_mb := int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0)
+		_session["tex_mb_peak"] = maxi(int(_session.get("tex_mb_peak", 0)), tex_mb)
 		(_session["perf"] as Array).append({"t_s": snappedf(_total_t, 0.1), "frames": _n,
 			"fps_p50": snappedf(percentile(f, 0.5), 0.1), "fps_p95": snappedf(percentile(f, 0.05), 0.1),
-			"frame_ms_p95": snappedf(percentile(m, 0.95), 0.01), "draw_calls_p95": int(percentile(d, 0.95))})
+			"frame_ms_p95": snappedf(percentile(m, 0.95), 0.01), "draw_calls_p95": int(percentile(d, 0.95)),
+			"tex_mb": tex_mb})
 		if (_session["perf"] as Array).size() > 180:
 			(_session["perf"] as Array).pop_front()
 		_dirty = true

@@ -173,11 +173,26 @@ func test_pools_stable_with_rigs_over_600_frames() -> void:
 	# The view's per-frame hot path (two rigs, FX, PiP, Stalls, audio) allocates nothing that
 	# survives: 600 frames with the world held still.
 	sb.driver.set_paused(true)
-	var n0 := Performance.get_monitor(Performance.OBJECT_COUNT)
-	for i2 in 600:
+	# warm the paused state first (first-time lazies, frees queued by earlier tests), then measure; a
+	# real leak grows in every window, a one-off does not — pass when a window is flat (s2-fix G #6:
+	# delta 27 depending on test order)
+	for iw in 120:
 		sb._process(1.0 / 60.0)
-	var n1 := Performance.get_monitor(Performance.OBJECT_COUNT)
-	assert_between(n1 - n0, -2.0, 2.0, "objects stable over 600 view frames with two rigs")
+	var deltas: Array[float] = []
+	var n0 := 0.0
+	var n1 := 0.0
+	for win in 2:
+		n0 = Performance.get_monitor(Performance.OBJECT_COUNT)
+		for i2 in 600:
+			sb._process(1.0 / 60.0)
+		n1 = Performance.get_monitor(Performance.OBJECT_COUNT)
+		deltas.append(n1 - n0)
+		if absf(n1 - n0) <= 2.0:
+			break
+	var flat := false
+	for dv in deltas:
+		flat = flat or absf(dv) <= 2.0
+	assert_true(flat, "objects stable over 600 view frames with two rigs (deltas %s)" % [deltas])
 	# Tick-driven growth (first-time textures, lazy residue looks, bubble icons) — reported.
 	sb.driver.set_paused(false)
 	var n2 := Performance.get_monitor(Performance.OBJECT_COUNT)

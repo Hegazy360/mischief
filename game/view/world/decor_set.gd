@@ -32,12 +32,17 @@ var _wobble: Dictionary = {}
 var _forced: Dictionary = {}
 var _t := 0.0
 
+## Decor id → the art scale it was built at (reset() restores the same texture).
+var _ras: Dictionary = {}
 
-## Build every decor sprite of `h`. `locked_rooms` get the unlit-set tint.
-func build(h: HouseLayout, locked_rooms: PackedStringArray) -> void:
+
+## Build every decor sprite of `h`. `locked_rooms` get the unlit-set tint (and 1× art);
+## `room_scales` (WorldView.room_art_scales) NO_ART = the room is never on camera tonight: no art.
+func build(h: HouseLayout, locked_rooms: PackedStringArray, room_scales: Dictionary = {}) -> void:
 	layout = h
 	items.clear()
 	sprites.clear()
+	_ras.clear()
 	for d in h.decor:
 		var parent := back if d.z < 0 else (over if d.z >= 2 else front)
 		if parent == null:
@@ -45,7 +50,12 @@ func build(h: HouseLayout, locked_rooms: PackedStringArray) -> void:
 		var s := Sprite2D.new()
 		s.name = "Decor_" + d.id
 		s.centered = false
-		s.texture = _tex(ViewKit.s(d.art.get("idle", "")), d.raster)
+		# The unlit set's decor at 1× (s2-fix G #7), else the item's raster hint.
+		var ras := ViewKit.LOCKED_SCALE if locked_rooms.has(d.room) else d.raster
+		if float(room_scales.get(d.room, -1.0)) == ViewKit.NO_ART:
+			ras = ViewKit.NO_ART
+		_ras[d.id] = ras
+		s.texture = _tex(ViewKit.s(d.art.get("idle", "")), ras)
 		s.position = d.pos
 		s.visible = not d.hidden
 		if locked_rooms.has(d.room):
@@ -60,7 +70,7 @@ func build(h: HouseLayout, locked_rooms: PackedStringArray) -> void:
 		if d.frames.size() >= 2 and d.fps > 0.0:
 			var texs: Array[Texture2D] = []
 			for f in d.frames:
-				var t := _tex(f, d.raster)
+				var t := _tex(f, ras)
 				if t != null:
 					texs.append(t)
 			if texs.size() >= 2:
@@ -82,8 +92,11 @@ func _raw(id: String) -> Dictionary:
 
 
 static func _tex(path: String, raster: float) -> Texture2D:
-	if path == "":
+	if path == "" or raster == ViewKit.NO_ART:
 		return null
+	var packed := HouseArt.tex(path, HouseArt.want_scale(raster, false))
+	if packed != null:
+		return packed
 	if raster > 0.0:
 		var hs := ViewKit.soft_script(ViewKit.HIRES_PATH)
 		if hs != null and hs.has_method("get_texture") and ResourceLoader.exists(path):
@@ -124,7 +137,7 @@ func set_state(id: String, state: String) -> void:
 		return
 	_state[id] = state
 	var p := ViewKit.s(d.art.get(state, d.art.get("idle", "")))
-	s.texture = _tex(p, d.raster)
+	s.texture = _tex(p, float(_ras.get(id, d.raster)))
 
 
 func state_of(id: String) -> String:
@@ -221,7 +234,7 @@ func reset() -> void:
 		s.position = d.pos
 		s.rotation = 0.0
 		_state[d.id] = "idle"
-		s.texture = _tex(ViewKit.s(d.art.get("idle", "")), d.raster)
+		s.texture = _tex(ViewKit.s(d.art.get("idle", "")), float(_ras.get(d.id, d.raster)))
 
 
 ## Visibility bits of every decor item (MomentRecorder), into a preallocated array.

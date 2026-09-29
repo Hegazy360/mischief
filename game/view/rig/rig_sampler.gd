@@ -280,12 +280,15 @@ static func solve(rig: RigDef, pose: PackedFloat32Array, out: Array[Transform2D]
 		out.resize(n)
 	var root := Transform2D(deg_to_rad(pose[RigDef.R_ROT]), Vector2(pose[RigDef.R_SX], pose[RigDef.R_SY]), 0.0,
 		Vector2(pose[RigDef.R_X], pose[RigDef.R_Y]))
+	var offs := rig.offset
+	var pars := rig.parent
+	var i := RC
 	for p in n:
-		var i := RC + p * ST
 		var local := Transform2D(deg_to_rad(pose[i]), Vector2(pose[i + 3], pose[i + 4]), 0.0,
-			rig.offset[p] + Vector2(pose[i + 1], pose[i + 2]))
-		var par := rig.parent[p]
+			offs[p] + Vector2(pose[i + 1], pose[i + 2]))
+		var par := pars[p]
 		out[p] = (out[par] if par >= 0 else root) * local
+		i += ST
 
 
 ## Copy `src` into `dst` (same size).

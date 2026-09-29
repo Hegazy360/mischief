@@ -42,6 +42,11 @@ var _pages_now: int = -1
 var _play_frames: int = 0
 var _curtain_up_ms: int = -1
 var _play_from_frame: int = -1
+## cue id → probe time of a `cue_staged` that arrived before the cue was recorded: WorldView is
+## connected to SimDriver.ticked before the probe, so it stages the cue of a tick before the
+## probe's own handler sees that tick (s2-fix G #4).
+var _staged_early: Dictionary = {}
+var _tex_max: float = 0.0
 
 
 ## Hook a NightScene (its driver, view and audio director).
@@ -79,6 +84,7 @@ func _process(delta: float) -> void:
 		if perf:
 			_draws.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 			_objects.append(Performance.get_monitor(Performance.OBJECT_COUNT))
+		_tex_max = maxf(_tex_max, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED))
 		var pg := pages_built()
 		if _pages_at_play < 0:
 			_pages_at_play = pg
@@ -125,7 +131,12 @@ func _on_ticked(events: Array) -> void:
 			_first_prank_tick = tk
 			_first_prank_ms = DeviceLog.process_ms()
 		if e == "director_cue" and String(d.get("id", "")).begins_with("laugh_"):
-			_cues.append({"id": String(d.get("id", "")), "tick": tk, "t": _t, "staged_t": -1.0, "crowd_t": -1.0})
+			var cid := String(d.get("id", ""))
+			var st := -1.0
+			if _staged_early.has(cid) and absf(float(_staged_early[cid]) - _t) < 0.0005:
+				st = float(_staged_early[cid])
+			_staged_early.erase(cid)
+			_cues.append({"id": cid, "tick": tk, "t": _t, "staged_t": st, "crowd_t": -1.0})
 
 
 func _on_cue_staged(id: String, _kind: String) -> void:
@@ -133,6 +144,8 @@ func _on_cue_staged(id: String, _kind: String) -> void:
 		if String(c["id"]) == id and float(c["staged_t"]) < 0.0:
 			c["staged_t"] = _t
 			return
+	# Staged in this tick before the probe recorded the cue (see _staged_early).
+	_staged_early[id] = _t
 
 
 func _read_sounds() -> void:
@@ -140,13 +153,22 @@ func _read_sounds() -> void:
 	if not (ad is Object):
 		return
 	var calls: Array = (ad as Object).get("calls")
+	var times: Variant = (ad as Object).get("call_times")
+	var now: Variant = (ad as Object).get("_now")
 	while _calls_i < calls.size():
 		var row: Array = calls[_calls_i]
+		var i := _calls_i
 		_calls_i += 1
 		var m := String(row[0])
 		if m == "play_sfx" or m == "play_voice" or m == "crowd" or m == "sting":
 			var id := String(row[1]) if row.size() > 1 else ""
-			_sounds.append([_t, m, id])
+			# The director's own clock at the call, mapped to probe time: a call made after the
+			# probe's _process in frame N is read in frame N+1, which made a 100 ms gap read as
+			# 83–94 ms (s2-fix G #15, the "step_pizz_up twice" row).
+			var at := _t
+			if times is PackedFloat32Array and i < (times as PackedFloat32Array).size() and now is float:
+				at = _t - (float(now) - (times as PackedFloat32Array)[i])
+			_sounds.append([at, m, id])
 			if m == "crowd":
 				for c in _cues:
 					if float(c["crowd_t"]) < 0.0 and _t >= float(c["t"]) - 0.02:
@@ -250,7 +272,25 @@ func summary() -> Dictionary:
 			if r is Dictionary and int((r as Dictionary).get("frame", -1)) >= _play_from_frame and _play_from_frame >= 0:
 				in_play.append(r)
 	out["pages_in_play_recent"] = in_play
+	out["tex_mb_max"] = snappedf(_tex_max / 1048576.0, 0.1)
+	var mr: Variant = tex_stats_call_1("memory_report", get_tree().root if is_inside_tree() else null)
+	out["tex_mb_by_kind"] = (mr as Dictionary).get("tracked", {}) if mr is Dictionary else {}
+	out["tex_mb_total_end"] = (mr as Dictionary).get("total", -1.0) if mr is Dictionary else -1.0
+	out["tex_mb_tracked_actual_end"] = (mr as Dictionary).get("tracked_sum", -1.0) if mr is Dictionary else -1.0
+	out["tex_mb_untracked_end"] = (mr as Dictionary).get("untracked", -1.0) if mr is Dictionary else -1.0
+	var big: Variant = tex_stats_call_1("biggest", 30)
+	out["tex_biggest"] = big if big is Array else []
 	return out
+
+
+## Call a static TexStats method with one argument softly (null when the class is missing).
+static func tex_stats_call_1(method: String, arg: Variant) -> Variant:
+	for c in ProjectSettings.get_global_class_list():
+		if String((c as Dictionary).get("class", "")) == "TexStats":
+			var s: Variant = load(String((c as Dictionary)["path"]))
+			if s is Script and (s as Script).has_method(method):
+				return (s as Script).call(method, arg)
+	return null
 
 
 func _sound_ids() -> Dictionary:

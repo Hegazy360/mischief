@@ -89,6 +89,14 @@ var springs_enabled: bool = true
 var clamp_to_limits: bool = true
 ## Atlas raster scale (-1 = HiResTex.ART_SCALE).
 var art_scale: float = -1.0
+## Derive combos from residues (rig.json `combos`: all of a combo's residues on → its look). False
+## (CharacterView in the game, ruling L4): only an explicit set_residue("COMBO:<id>", true) — the
+## sim's `combo` event — shows a combo; SOAKED + FRAZZLED stay two looks where a Night forbids it.
+var auto_combos: bool = true:
+	set(v):
+		auto_combos = v
+		if rig != null and not _res_kinds.is_empty():
+			_refresh_residues()
 
 var _pose: PackedFloat32Array = PackedFloat32Array()
 var _a: PackedFloat32Array = PackedFloat32Array()
@@ -297,6 +305,9 @@ class _Run extends RefCounted:
 	var attr_dirty: bool = true
 	var qslot: PackedInt32Array = PackedInt32Array()   ## per item: slot + ghost flag last written
 	var qcol: PackedColorArray = PackedColorArray()     ## per item: colour last written
+	## Per quad item: what its 12 vertices hold — 0 unknown (write all), 1 main quad written with
+	## its ghosts collapsed, 2 all collapsed (hidden). Lets a steady quad write positions only.
+	var qstate: PackedByteArray = PackedByteArray()
 	## The run's own canvas item (reused with the run across layouts) and its identity.
 	var ci: RID = RID()
 	var sig: String = ""
@@ -403,9 +414,35 @@ static func base_atlas_key(p_rig_id: String, p_skin: String, s: float) -> String
 	return "rig:%s:%s:%.2f" % [p_rig_id, p_skin, s]
 
 
+## Start building a rig's base atlas on worker threads (AtlasBuilder.start) so a later setup()
+## only waits for it (NightScene starts both characters while it packs the house; s2-fix G #9).
+static func start_base(p_rig_id: String, p_skin: String = "", p_art_scale: float = -1.0) -> void:
+	var r := RigDef.for_id(p_rig_id)
+	if r == null:
+		return
+	var s := HiResTex.resolve_scale(p_art_scale)
+	AtlasBuilder.start(base_atlas_key(p_rig_id, p_skin, s), r.base_texture_paths(p_skin), s, {}, r.base_core_count(p_skin))
+
+
 ## The AtlasBuilder key of a residue look's page.
 static func look_atlas_key(p_rig_id: String, p_skin: String, s: float, kind: String) -> String:
 	return "rig:%s:%s:%.2f:look:%s" % [p_rig_id, p_skin, s, kind]
+
+
+## Start building the look pages of `kinds` on worker threads before any player exists (NightScene
+## hands its warm list to WorldView, which starts them right after the build's own jobs, so they
+## rasterise while the main thread builds nodes; s2-fix G #9). warm_looks() later only polls.
+static func start_looks(p_rig_id: String, p_skin: String, kinds: PackedStringArray, p_art_scale: float = -1.0) -> void:
+	var r := RigDef.for_id(p_rig_id)
+	if r == null:
+		return
+	var s := HiResTex.resolve_scale(p_art_scale)
+	for k in kinds:
+		if not r.residues.has(k):
+			continue
+		var paths := r.look_texture_paths(k, p_skin)
+		if not paths.is_empty():
+			AtlasBuilder.start(look_atlas_key(p_rig_id, p_skin, s, k), paths, s, {}, 0, {}, false)
 
 
 ## Build the look pages of `keys` (residue kinds: "SOAKED", "COSTUME:jelly_helmet",
@@ -551,6 +588,7 @@ func _register_set(st: AtlasSet) -> void:
 	_slots_ver += 1
 	for r in _runs:
 		r.qslot.fill(-1)
+		r.qstate.fill(0)
 		r.attr_dirty = true
 	_part_rec.fill(-1)
 	_prop_rec.fill(-1)
@@ -679,9 +717,11 @@ func set_external_frame(frame: float) -> void:
 
 
 ## Face right (1) or left (-1); `animate` = the 6-frame squash turn.
+## Calling it every frame with the same direction is a no-op: a running turn finishes and
+## only a new direction restarts it. `animate = false` snaps (and ends a running turn).
 func set_facing(dir: int, animate: bool = true) -> void:
 	var d := 1 if dir >= 0 else -1
-	if d == _facing and _turn_t < 0.0:
+	if d == _facing and (animate or _turn_t < 0.0):
 		return
 	if animate and rig != null:
 		_turn_from = 1 if _fsx >= 0.0 else -1
@@ -738,7 +778,7 @@ func _refresh_residues() -> void:
 	var on := _res_user.duplicate()
 	for i in _res_kinds.size():
 		var res: RigDef.RigResidue = rig.residues[_res_kinds[i]]
-		if res.combo_of.is_empty():
+		if res.combo_of.is_empty() or not auto_combos:
 			continue
 		var all := true
 		for k in res.combo_of:
@@ -2054,6 +2094,8 @@ func _rebuild_layout() -> void:
 		run.qslot.fill(-1)
 		run.qcol.resize(run.items.size())
 		run.qcol.fill(Color(-1, -1, -1, -1))
+		run.qstate.resize(run.items.size())
+		run.qstate.fill(0)
 		run.attr_dirty = true
 		var w := 0
 		var line_uv := _page_set[run.page].builtin_uv(AtlasSet.LINE, _page_local[run.page])
@@ -2116,6 +2158,8 @@ func _apply_layout() -> void:
 
 
 func _fill_run(run: _Run, cx: Transform2D) -> void:
+	var pose := _pose
+	var ident := cx == Transform2D.IDENTITY
 	for j in run.items.size():
 		var code := run.items[j]
 		var i := code & 0xFFFF
@@ -2125,42 +2169,53 @@ func _fill_run(run: _Run, cx: Transform2D) -> void:
 			var jn := lb.joints.size()
 			if _joints.size() < jn:
 				_joints.resize(jn)
-			if _pose[RigDef.ROOT_CH + lb.joints[0] * RigDef.STRIDE + RigDef.C_VIS] <= 0.5:
+			if pose[RigDef.ROOT_CH + lb.joints[0] * RigDef.STRIDE + RigDef.C_VIS] <= 0.5:
 				LineLimb.collapse(run.pts, vb, LineLimb.VERTS)
 				continue
 			for k in jn:
 				_joints[k] = _xf[lb.joints[k]].origin
-			if cx == Transform2D.IDENTITY:
+			if ident:
 				LineLimb.write_limb(_joints, jn, lb.width * 0.5 + lb.outline, lb.width * 0.5, run.pts, vb, _curve)
 			else:
 				LineLimb.curve(_joints, jn, _curve)
 				LineLimb.write_positions(_curve, lb.width * 0.5 + lb.outline, lb.width * 0.5, cx, run.pts, vb)
 		else:
 			var b := RigDef.ROOT_CH + i * RigDef.STRIDE
-			var alpha := _pose[b + RigDef.C_ALPHA]
-			if _pose[b + RigDef.C_VIS] < 0.5 or alpha <= 0.001:
-				LineLimb.collapse(run.pts, vb, LineLimb.QUAD_VERTS)
+			var alpha := pose[b + RigDef.C_ALPHA]
+			if pose[b + RigDef.C_VIS] < 0.5 or alpha <= 0.001:
+				if run.qstate[j] != 2:
+					LineLimb.collapse(run.pts, vb, LineLimb.QUAD_VERTS)
+					run.qstate[j] = 2
 				continue
-			var slot := _slot0[i] + clampi(int(_pose[b + RigDef.C_TEX]), 0, rig.tex_files[i].size() - 1)
+			var slot := _slot0[i] + clampi(int(pose[b + RigDef.C_TEX]), 0, rig.tex_files[i].size() - 1)
 			var r: Rect2 = _slot_draw[slot]
-			var uv: Rect2 = _slot_uv[slot]
 			var col := _part_color(i, alpha)
-			var main := _part_xf(i)
-			var qk := slot * 2 + (1 if _smear_t[i] > 0.0 else 0)
-			if qk != run.qslot[j] or col != run.qcol[j]:
+			var smear := _smear_t[i] > 0.0
+			var qk := slot * 2 + (1 if smear else 0)
+			var attrs := qk != run.qslot[j] or col != run.qcol[j]
+			if attrs:
 				run.qslot[j] = qk
 				run.qcol[j] = col
 				run.attr_dirty = true
-			if _smear_t[i] > 0.0:
+			if smear:
+				var uv: Rect2 = _slot_uv[slot]
 				var c2 := col
 				c2.a *= GHOST_ALPHA_2
 				LineLimb.write_quad(_flip(i, _g2[i]), r, uv, c2, run.pts, run.uvs, run.cols, vb)
 				var c1 := col
 				c1.a *= GHOST_ALPHA_1
 				LineLimb.write_quad(_flip(i, _g1[i]), r, uv, c1, run.pts, run.uvs, run.cols, vb + 4)
-			else:
+				LineLimb.write_quad(_part_xf(i), r, uv, col, run.pts, run.uvs, run.cols, vb + 8)
+				run.qstate[j] = 0
+				continue
+			# Steady quad (the common case): positions only; uvs / colours only when they changed.
+			var main := _xf[i] if _nomirror[i] == 0 or _fsx >= 0.0 else _flip(i, _xf[i])
+			if attrs or run.qstate[j] != 1:
 				LineLimb.collapse(run.pts, vb, 8)
-			LineLimb.write_quad(main, r, uv, col, run.pts, run.uvs, run.cols, vb + 8)
+				LineLimb.write_quad(main, r, _slot_uv[slot], col, run.pts, run.uvs, run.cols, vb + 8)
+				run.qstate[j] = 1
+			else:
+				LineLimb.write_quad_pos(main, r, run.pts, vb + 8)
 
 
 ## Part transform with smear stretch and the no_mirror counter-flip (character space).

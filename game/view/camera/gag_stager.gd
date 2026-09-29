@@ -277,7 +277,33 @@ func on_clip_event(ev: Dictionary) -> void:
 		"fx":
 			var fx := _fx()
 			if fx != null:
-				fx.burst(ViewKit.s(ev.get("id", "sparkles")), ev.get("pos", _bellows_head()) as Vector2, int(ev.get("amount", -1)))
+				var at_dir := clip_fx_at(ev)
+				fx.burst(ViewKit.s(ev.get("id", "sparkles")), at_dir[0], int(ev.get("amount", -1)), at_dir[1])
+
+
+## Where and which way a clip `fx` event bursts (s2-fix G #16): at the event's `part` (the rig's
+## joint in world space — the CHOO's drops leave his nose, the dunk's his torso, the drip his
+## hand), else his head; its `dir` is clip-local (+x = the way he faces) and is mirrored by the
+## rig's facing. Returns [world_pos, world_dir].
+func clip_fx_at(ev: Dictionary) -> Array:
+	var actor := ViewKit.s(ev.get("actor", "bellows"))
+	var cv: Node2D = world_view.character(actor) if world_view != null and world_view.has_method("character") else null
+	var rig: Variant = cv.get("rig") if cv != null else null
+	var part := ViewKit.s(ev.get("part", ""))
+	var pos := _bellows_head() if actor == "bellows" else (ev.get("pos", Vector2.ZERO) as Vector2)
+	var facing := 1
+	if rig is Node2D:
+		if part != "" and (rig as Node2D).has_method("part_global_position"):
+			pos = (rig as Node2D).call("part_global_position", part)
+		if (rig as Node2D).has_method("facing"):
+			facing = int((rig as Node2D).call("facing"))
+	var d := Vector2.UP
+	var dv: Variant = ev.get("dir", null)
+	if dv is Array and (dv as Array).size() >= 2:
+		d = Vector2(float(dv[0]) * float(facing), float(dv[1]))
+	elif dv is Vector2:
+		d = Vector2((dv as Vector2).x * float(facing), (dv as Vector2).y)
+	return [pos, d.normalized() if d.length_squared() > 0.0 else Vector2.UP]
 
 
 # --- reactions --------------------------------------------------------------------------
@@ -440,7 +466,7 @@ func _meltdown_start() -> void:
 		_gag_id = camera.request_gag(_bellows_head(), 1.15, 12, 300, 30, 20)
 	var fx := _fx()
 	if fx != null:
-		fx.caption("MELTDOWN!", _bellows_head() + Vector2(0, -170), 96, _bv(), true, true)
+		fx.caption(ViewKit.word("fx.meltdown", "MELTDOWN!"), _bellows_head() + Vector2(0, -170), 96, _bv(), true, true)
 		fx.burst("steam", _bellows_head(), 24)
 
 
@@ -507,8 +533,13 @@ func advance(delta: float) -> void:
 		if camera.is_gag_active() and not camera.gag_in_pip() and camera.gag_phase() != CameraDirector.GagPhase.APPROACH:
 			pip.hide_now()
 		else:
-			var want := PipView.rule(snap, camera.visible_world_rect(), world_view.layout, world_view.entry_warning_active())
-			pip.set_visible_if(want or pip.is_escalated())
+			var vr := camera.visible_world_rect()
+			var z := maxf(0.001, camera.current_zoom())
+			if not pip.is_escalated() and PipView.on_screen(snap, vr, Vector4(0.0, PipView.HUD_TOP_PX / z, 0.0, PipView.HUD_BOTTOM_PX / z)):
+				pip.hide_now()   # he is plainly on screen: never twice (s2-fix G #19)
+			else:
+				var want := PipView.rule(snap, vr, world_view.layout, world_view.entry_warning_active())
+				pip.set_visible_if(want or pip.is_escalated())
 
 
 func _run(kind: String, arg: Variant) -> void:

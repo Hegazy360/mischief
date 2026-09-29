@@ -30,8 +30,10 @@ func _init() -> void:
 	z_index = -20
 
 
-## Build for `r`. `fg_parent` receives the foreground node (above the characters).
-func setup(r: HouseLayout.Room, house: HouseLayout, is_locked: bool, fg_parent: Node2D) -> void:
+## Build for `r`. `fg_parent` receives the foreground node (above the characters). `art_scale`:
+## −1 = ART_SCALE (tonight's rooms), > 0 = that scale, ViewKit.NO_ART = no art (a room no camera
+## can frame tonight: the greybox is drawn, culled off screen). −2 (default) = by `is_locked`.
+func setup(r: HouseLayout.Room, house: HouseLayout, is_locked: bool, fg_parent: Node2D, art_scale: float = -2.0) -> void:
 	room = r
 	layout = house
 	locked = is_locked
@@ -42,14 +44,16 @@ func setup(r: HouseLayout.Room, house: HouseLayout, is_locked: bool, fg_parent: 
 			continue
 		_door_xs.append(l.x - r.x0)
 		_door_kinds.append(l.kind)
-	var bt := ViewKit.tex(r.art_bg)
+	# Tonight's rooms at ART_SCALE; the unlit set at 1× (dimmed, s2-fix G #7).
+	var sc := art_scale if art_scale != -2.0 else (ViewKit.LOCKED_SCALE if is_locked else -1.0)
+	var bt := ViewKit.tex_at(r.art_bg, sc) if sc != ViewKit.NO_ART else null
 	if bt != null:
 		bg = Sprite2D.new()
 		bg.texture = bt
 		bg.centered = false
 		bg.position = Vector2(0, -INTERIOR_H)
 		add_child(bg)
-	var ft := ViewKit.tex(r.art_fg)
+	var ft := ViewKit.tex_at(r.art_fg, sc) if sc != ViewKit.NO_ART else null
 	if ft != null and fg_parent != null:
 		var s := Sprite2D.new()
 		s.texture = ft

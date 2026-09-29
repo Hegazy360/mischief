@@ -21,6 +21,8 @@ const OUTLINE_TINT := {"kitchen": Color("#FFC93C"), "hall": Color("#FFC93C"), "c
 	"bedroom": Color("#FFF4E0"), "dressing": Color("#FFF4E0"), "garden": Color("#FFF4E0")}
 const STATES: PackedStringArray = ["idle", "open", "rigged", "spent", "occupied", "outline", "front"]
 
+## The art states a prop in the unlit set can show (s2-fix G #7).
+const LOCKED_STATES: PackedStringArray = ["idle", "open", "front"]
 var hotspot: HouseLayout.Hotspot = null
 var layout: HouseLayout = null
 var locked: bool = false
@@ -38,16 +40,21 @@ func _init() -> void:
 
 
 ## Build for `hs`. `front_parent` receives the `front` overlay (drawn above the characters).
-func setup(hs: HouseLayout.Hotspot, h: HouseLayout, is_locked: bool, front_parent: Node2D = null) -> void:
+## `art_scale` ViewKit.NO_ART = no art (its room is never on camera tonight: greybox, culled).
+func setup(hs: HouseLayout.Hotspot, h: HouseLayout, is_locked: bool, front_parent: Node2D = null, art_scale: float = -1.0) -> void:
 	hotspot = hs
 	layout = h
 	locked = is_locked
 	name = "Prop_" + hs.id
-	for k in hs.art:
+	for k in (hs.art if art_scale != ViewKit.NO_ART else {}):
 		var ks := ViewKit.s(k)
 		var p: Variant = hs.art[k]
+		# A prop in the unlit set is never rigged, hidden in or highlighted: idle / open / front only.
+		if is_locked and not LOCKED_STATES.has(ks):
+			continue
 		if p is String and ViewKit.s(p) != "" and (STATES.has(ks) or ks.begins_with("rigged_")):
-			var t := PropView._tex_for(ViewKit.s(p), 1.0 if ks == "outline" else hs.raster)
+			# Outlines at 1×; props in the unlit set at 1× (s2-fix G #7), else the prop's raster hint.
+			var t := PropView._tex_for(ViewKit.s(p), 1.0 if ks == "outline" or is_locked else hs.raster)
 			if t != null:
 				_tex[ks] = t
 	_grey_rect = _greybox_rect()
@@ -87,6 +94,10 @@ static func outline_tint(room: String) -> Color:
 
 
 static func _tex_for(path: String, raster: float) -> Texture2D:
+	# Tonight's shared house pages first (one texture for the band: batched draws, s2-fix G #8).
+	var packed := HouseArt.tex(path, HouseArt.want_scale(raster, false))
+	if packed != null:
+		return packed
 	if raster > 0.0 and ResourceLoader.exists(path):
 		var hs := ViewKit.soft_script(ViewKit.HIRES_PATH)
 		if hs != null and hs.has_method("get_texture"):

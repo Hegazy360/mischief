@@ -100,3 +100,28 @@ func test_cull_mask_drops_the_fx_layer_and_rendering_only_while_shown() -> void:
 			once += 1
 	assert_eq(once, 5, "30 Hz: every other frame")
 	p.free()
+
+
+## Bellows plainly inside the main view (after the HUD bands) → the PiP hides at once; at the very
+## edge or under the HUD band only → the normal rule and its 2 s hold (s2-fix G #19: a doubled
+## Bellows in the n01_notch / n01_lh shots).
+func test_on_screen_inside_the_hud_insets() -> void:
+	var view := Rect2(2600, -830, 2400, 1080)
+	var m := Vector4(0.0, PipView.HUD_TOP_PX, 0.0, PipView.HUD_BOTTOM_PX)
+	var s := _snap("kitchen", 3300, "kitchen", 3500)
+	assert_true(PipView.on_screen(s, view, m), "in the middle of the view")
+	assert_false(PipView.rule(s, view, _layout), "and the rule agrees: no PiP")
+	s.bellows.x = 2600 - 60.0   # two thirds of him past the left edge
+	assert_false(PipView.on_screen(s, view, m), "mostly off screen: not 'on screen'")
+	s.bellows.x = 1700
+	assert_false(PipView.on_screen(s, view, m), "next room: off screen")
+	# a PiP already up for him hides at once when he walks into view
+	var p := PipView.new()
+	tree.root.add_child(p)
+	p.set_visible_if(true)
+	assert_true(p.is_shown())
+	s.bellows.x = 3500
+	if PipView.on_screen(s, view, m):
+		p.hide_now()
+	assert_false(p.is_shown(), "no 2 s hold with him on screen")
+	p.free()

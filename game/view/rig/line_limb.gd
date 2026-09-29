@@ -248,3 +248,11 @@ static func write_quad(xf: Transform2D, r: Rect2, uv: Rect2, col: Color, out_p: 
 	out_c[at + 1] = col
 	out_c[at + 2] = col
 	out_c[at + 3] = col
+
+
+## Positions only of a textured quad (its uvs / colours already written and unchanged).
+static func write_quad_pos(xf: Transform2D, r: Rect2, out_p: PackedVector2Array, at: int) -> void:
+	out_p[at] = xf * r.position
+	out_p[at + 1] = xf * Vector2(r.end.x, r.position.y)
+	out_p[at + 2] = xf * r.end
+	out_p[at + 3] = xf * Vector2(r.position.x, r.end.y)

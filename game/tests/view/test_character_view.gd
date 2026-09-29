@@ -250,3 +250,30 @@ func test_one_shot_bump_is_frame_locked_to_the_sim() -> void:
 	cv.apply(a, a, 0.25, 1.0 / 60.0)
 	assert_eq(cv.current_clip(), "bellows/fx_bump")
 	assert_almost_eq(cv.current_frame(), 30.25, 0.001)
+
+
+## Hush is not drawn in the room before her climb-in starts, and the climb-in never flips (it is
+## authored facing +1) — s2-fix G #14: the Prologue's first frames showed her standing by the
+## window ~100 ticks before `act_climb_in`.
+func test_hush_hidden_before_the_climb_in_and_never_flipped_during_it() -> void:
+	var cv := _cv("hush")
+	if not cv.uses_rig:
+		skip("hush rig did not load")
+		return
+	var a := _actor("IDLE")
+	a.entering = true
+	a.oneshot = ""
+	a.facing = -1
+	cv.apply(a, a, 0.0, 1.0 / 60.0)
+	assert_false(cv.rig.visible, "entering, climb-in not started yet: not drawn")
+	a.oneshot = "enter"
+	a.oneshot_t = 10
+	for i in 8:
+		cv.apply(a, a, 0.0, 1.0 / 60.0)
+	assert_true(cv.rig.visible, "the climb-in plays")
+	assert_eq(int(cv.rig.call("facing")), 1, "the climb-in keeps its authored facing +1")
+	a.entering = false
+	a.oneshot = ""
+	for i in 12:
+		cv.apply(a, a, 0.0, 1.0 / 60.0)
+	assert_eq(int(cv.rig.call("facing")), -1, "after it, the sim's facing again")

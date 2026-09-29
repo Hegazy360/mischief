@@ -8,7 +8,7 @@
 class_name DebugOverlay
 extends Control
 
-const PANEL := Vector2(760, 420)
+const PANEL := Vector2(760, 470)
 ## A path, not StageDoor.SCENE: the DevShot autoload loads this script, and must never depend on the
 ## whole game's class graph (a broken view script would take the autoload down with it).
 const STAGE_DOOR_SCENE := "res://scenes/stage_door/StageDoor.tscn"
@@ -31,7 +31,7 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_fps.resize(WINDOW)
-	_lines.resize(6)
+	_lines.resize(7)
 
 
 func _ready() -> void:
@@ -120,6 +120,21 @@ func _refresh(delta: float) -> void:
 	var start := int(s.get("sim_start_ms", -1))
 	var rel := "%.1f s" % (float(first - start) / 1000.0) if first >= 0 and start >= 0 else "–"
 	_lines[5] = "%s %d · 1st %s" % [UiStrings.t("overlay.laugh_clock"), laughs, rel]
+	_lines[6] = _tex_line()
+
+
+## The three biggest texture-memory kinds (TexStats, soft: the autoload never depends on the view).
+static func _tex_line() -> String:
+	const TS := "res://view/tex/tex_stats.gd"
+	if not ResourceLoader.exists(TS):
+		return ""
+	var kinds: Dictionary = (load(TS) as Script).call("live_bytes_by_kind")
+	var ks := kinds.keys()
+	ks.sort_custom(func(a: Variant, b: Variant) -> bool: return int(kinds[a]) > int(kinds[b]))
+	var parts := PackedStringArray()
+	for i in mini(3, ks.size()):
+		parts.append("%s %.0f" % [ks[i], float(kinds[ks[i]]) / 1048576.0])
+	return " · ".join(parts)
 
 
 func _draw() -> void:

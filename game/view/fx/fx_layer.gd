@@ -68,6 +68,11 @@ var _pend_clamp := true
 var _next_stamp := 0
 var _sight: _SightLine = null
 var _unit := 1.0
+## Screen-space rects (viewport px) that captions must never overlap — NightScene hands in the
+## HUD's top band (meter ∪ banner) and the PiP while it shows (s2-fix G #2). Returns Array[Rect2].
+var avoid_screen_fn: Callable = Callable()
+var _avoid_world: Array[Rect2] = []
+var _no_avoid: Array[Rect2] = []
 
 
 func _init() -> void:
@@ -434,8 +439,11 @@ func advance(real_dt: float) -> void:
 			var at := f.global_position + _pend_pos if f != null else _pend_pos
 			_show_caption(_pend_text, at, _pend_size, f, _pend_clamp)
 			_pend_follow = null
+	_update_avoid()
 	for c in _captions:
-		c.keep_in = view if c.active and bool(c.get_meta("clamp", true)) else Rect2()
+		var clamp_c := c.active and bool(c.get_meta("clamp", true))
+		c.keep_in = view if clamp_c else Rect2()
+		c.avoid = _avoid_world if clamp_c else _no_avoid
 		c.tick(real_dt, _unit)
 	for s in _stamps:
 		s.keep_in = view if s.active else Rect2()
@@ -453,6 +461,24 @@ func advance(real_dt: float) -> void:
 	stars.tick(vdt, _unit)
 	_sight.tick(real_dt, _unit)
 	particles.set_speed(clampf(rate, 0.0, 3.0))
+
+
+## The avoid rects in world space for this frame's camera (only while a caption is live).
+func _update_avoid() -> void:
+	_avoid_world.clear()
+	if not avoid_screen_fn.is_valid() or not is_inside_tree():
+		return
+	var live := false
+	for c in _captions:
+		live = live or c.active
+	if not live:
+		return
+	var inv := get_viewport().get_canvas_transform().affine_inverse()
+	var rects: Variant = avoid_screen_fn.call()
+	if rects is Array:
+		for r in rects:
+			if r is Rect2 and (r as Rect2).has_area():
+				_avoid_world.append(inv * (r as Rect2))
 
 
 func _clamp_x(p: Vector2, half_w: float) -> Vector2:

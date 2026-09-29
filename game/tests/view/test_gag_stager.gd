@@ -86,3 +86,26 @@ func test_clip_cam_keys_only_time_his_reaction() -> void:
 	assert_eq(_sb.cam.gag_phase(), CameraDirector.GagPhase.APPROACH, "Hush's clip does not punch")
 	_sb.stager.on_clip_event({"type": "cam", "op": "punch", "actor": "bellows"})
 	assert_ne(_sb.cam.gag_phase(), CameraDirector.GagPhase.APPROACH, "his reaction clip punches")
+
+
+## Clip `fx` events burst at their `part` in their (facing-mirrored) `dir` (s2-fix G #16): the
+## sneeze's CHOO drops leave his nose, not his feet.
+func test_clip_fx_bursts_at_the_part_in_the_facing_dir() -> void:
+	_sb._seek(640)
+	_sb._process(DT)
+	var bv := _sb.world_view.bellows_view
+	if bv == null or not bv.uses_rig:
+		skip("no Bellows rig")
+		return
+	var rig: Node2D = bv.rig
+	var ev := {"type": "fx", "id": "drops", "part": "head", "dir": [1.0, 0.25], "amount": 22, "actor": "bellows",
+		"pos": bv.global_position}
+	var got: Array = _sb.stager.clip_fx_at(ev)
+	var want: Vector2 = rig.call("part_global_position", "head")
+	assert_almost_eq((got[0] as Vector2).distance_to(want), 0.0, 0.5, "at the part's joint, not his feet")
+	var facing := int(rig.call("facing"))
+	assert_eq(signf((got[1] as Vector2).x), float(facing), "the clip's +x is the way he faces")
+	assert_almost_eq((got[1] as Vector2).length(), 1.0, 0.001)
+	ev.erase("part")
+	got = _sb.stager.clip_fx_at(ev)
+	assert_true((got[0] as Vector2).y < bv.global_position.y - 100.0, "no part: his head")

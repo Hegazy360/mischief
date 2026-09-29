@@ -147,7 +147,9 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	audio.sort()
 	var all_captions := captions.duplicate()
 	all_captions.append_array(STAMP_TEXTS)
-	var textures := lazy_textures(data_root)
+	# The title card (+ bulbs) only for the Night whose curtain call slams it (the Prologue): 72 MB
+	# at 2× on every other Night otherwise (s2-fix G #7).
+	var textures := lazy_textures(data_root, CurtainCall.kind_for(episode_id, "") == CurtainCall.KIND_PROLOGUE)
 	# Per rig: every look page its rig.json defines that tonight can show — basic residues (+ their
 	# `blind` variant), the Night's costumes, the combos `rules.combos` allows (a rig look the rules
 	# forbid is not warmed: it must not appear, TECH L4).
@@ -186,7 +188,9 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 ## Textures the view loads lazily (HiResTex rasters through ViewKit.tex): the awareness glyphs and
 ## badges, every activity / detour icon the thought bubble can show (+ exit), the falling / quake
 ## props and the particle sprites. Rasterised under the curtain so none is built on a gag.
-static func lazy_textures(data_root: String = "res://data") -> PackedStringArray:
+## `with_title`: the Prologue's title card and its bulb layers (CurtainApron draws them through
+## ViewKit.tex). The valance is drawn from its imported 1× texture, so it is never warmed here.
+static func lazy_textures(data_root: String = "res://data", with_title: bool = true) -> PackedStringArray:
 	var out := PackedStringArray()
 	for g in ["specs_off", "specs_on", "blinded", "asleep", "stars"]:
 		_add_if(out, "res://art/ui/glyph_%s.svg" % g)
@@ -199,9 +203,10 @@ static func lazy_textures(data_root: String = "res://data") -> PackedStringArray
 		var icon := String((ad as Dictionary).get("icon", "")) if ad is Dictionary and (ad as Dictionary).get("icon") != null else ""
 		_add_if(out, icon if icon != "" else "res://art/icons/activities/%s.svg" % String(id))
 	_add_if(out, "res://art/icons/activities/exit.svg")
-	# the curtain call's art (the title card slams after the Prologue; the valance drops on him)
-	for f in ["title_card.svg", "title_card_bulbs_a.svg", "title_card_bulbs_b.svg", "curtain_valance.svg"]:
-		_add_if(out, "res://art/house/stage/" + f)
+	# the curtain call's art (the title card slams after the Prologue)
+	if with_title:
+		for f in ["title_card.svg", "title_card_bulbs_a.svg", "title_card_bulbs_b.svg"]:
+			_add_if(out, "res://art/house/stage/" + f)
 	for d in ["res://art/icons/activities", "res://art/house/props", "res://art/fx/props", "res://art/fx/particles"]:
 		var files := DirAccess.get_files_at(d) if DirAccess.dir_exists_absolute(d) else PackedStringArray()
 		for f in files:

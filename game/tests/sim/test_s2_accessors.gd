@@ -135,27 +135,9 @@ func test_action_context_costs_under_5_us() -> void:
 		per = minf(per, float(Time.get_ticks_usec() - t0) / 1000.0)
 	# the budget is for a free core: on an oversubscribed box (10 agents share 4 cores while Stage 2 builds) it
 	# scales with the 1-minute load per core, read from /proc/loadavg where there is one
-	var scale := maxf(1.0, _load_per_core())
+	var scale := TestBase.cpu_load_scale()
 	assert_le(per, 5.0 * scale, "action_context %.2f µs per call (budget 5 µs × load %.1f)" % [per, scale])
 
-
-func _load_per_core() -> float:
-	# procfs files report size 0, so FileAccess reads nothing: ask `cat` (Linux boxes only; elsewhere 1.0)
-	if OS.get_name() != "Linux":
-		return 1.0
-	var out: Array = []
-	if OS.execute("cat", ["/proc/loadavg"], out) != 0 or out.is_empty():
-		return 1.0
-	var parts := str(out[0]).split(" ", false)
-	if parts.is_empty():
-		return 1.0
-	var cores := 0
-	var cpu: Array = []
-	if OS.execute("nproc", [], cpu) == 0 and not cpu.is_empty():
-		cores = int(str(cpu[0]).strip_edges())
-	if cores <= 0:
-		cores = OS.get_processor_count()
-	return float(parts[0]) / maxf(1.0, float(cores))
 
 
 # --- one-shots -----------------------------------------------------------------------------------------

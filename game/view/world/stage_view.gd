@@ -24,6 +24,17 @@ var _fill := BACKDROP
 var _flies_bottom := 0.0
 ## Front pieces (proscenium, glows) drawn above the rooms.
 var front: Node2D = null
+## World x range the follow camera frames tonight (lit rooms ± reach) and the widest range any
+## camera can show (+ backstage): stage art outside `lit_x` is drawn at 1×, outside `reach_x` not
+## at all (s2-fix G #7). WorldView sets both before setup(); unbounded by default.
+var lit_x: Vector2 = Vector2(-INF, INF)
+var reach_x: Vector2 = Vector2(-INF, INF)
+## Art scales of the set around the house (s2-fix G #7; a piece's own `raster` wins): the sky flats
+## are soft painted backdrops (¾×); the roofs, and the flies while tonight plays downstairs, show
+## only in a zoomed-out view (½× = 1:1 at the 0.5 overview zoom); the gilded proscenium 1.5×.
+const SKY_SCALE := 0.75
+const FAR_SCALE := 0.5
+const FRAME_SCALE := 1.5
 
 
 func _init() -> void:
@@ -58,22 +69,34 @@ func _build_from(st: Dictionary) -> void:
 		_flies_bottom = float(flies.get("bottom_y", -1340))
 		if flies.get("fill_color", null) is String:
 			_fill = Color(ViewKit.s(flies["fill_color"]))
+		# The flies hang above the upper floor: only a zoomed-out view sees them unless tonight
+		# plays upstairs (1× then; s2-fix G #7).
 		_tiled(ViewKit.s(flies.get("art", "")), float(flies.get("x0", _bounds.position.x)), float(flies.get("x1", _bounds.end.x)),
-			_flies_bottom - sz.y, self, 0)
+			_flies_bottom - sz.y, self, 0, -1.0 if _upstairs_tonight() else FAR_SCALE)
 	var apron: Dictionary = st.get("apron", {}) if st.get("apron", {}) is Dictionary else {}
 	if not apron.is_empty():
 		_tiled(ViewKit.s(apron.get("art", "")), float(apron.get("x0", 0)), float(apron.get("x1", _bounds.end.x)),
 			float(apron.get("top_y", 60)), self, 1)
+	# The set pieces (sky flats, roofs) are far background flats behind the house (65 MB at 2×):
+	# SKY_SCALE / FAR_SCALE unless the piece asks for more with `raster` (s2-fix G #7).
 	for piece in st.get("pieces", []):
 		if not (piece is Dictionary):
 			continue
-		var s := _sprite(ViewKit.s((piece as Dictionary).get("art", "")), _v2((piece as Dictionary).get("world_pos", [0, 0])), self)
+		var pz := int((piece as Dictionary).get("z", 0))
+		var ras := float((piece as Dictionary).get("raster", SKY_SCALE if pz <= -2 else FAR_SCALE))
+		var wp := _v2((piece as Dictionary).get("world_pos", [0, 0]))
+		if _scale_at(wp.x, wp.x + _v2((piece as Dictionary).get("size", [0, 0])).x) == ViewKit.NO_ART:
+			continue
+		var s := _sprite(ViewKit.s((piece as Dictionary).get("art", "")), wp, self, ras)
 		if s != null:
 			s.z_index = 2 + int((piece as Dictionary).get("z", 0))
 	for key in ["proscenium_l", "proscenium_r"]:
 		var pd: Variant = st.get(key, null)
 		if pd is Dictionary:
-			_sprite(ViewKit.s((pd as Dictionary).get("art", "")), _v2((pd as Dictionary).get("world_pos", [0, 0])), front)
+			var pp := _v2((pd as Dictionary).get("world_pos", [0, 0]))
+			var sc := _scale_at(pp.x, pp.x + _v2((pd as Dictionary).get("size", [0, 0])).x)
+			if sc != ViewKit.NO_ART:
+				_sprite(ViewKit.s((pd as Dictionary).get("art", "")), pp, front, FRAME_SCALE if sc < 0.0 else sc)
 	var glow: Dictionary = st.get("footlight_glow", {}) if st.get("footlight_glow", {}) is Dictionary else {}
 	if not glow.is_empty():
 		var gsz := _v2(glow.get("size", [512, 220]))
@@ -92,9 +115,29 @@ func _build_from(st: Dictionary) -> void:
 			x += every
 
 
+## The art scale of stage art spanning world x [x0, x1] tonight: ART_SCALE (−1) where the follow
+## camera frames it, 1× where only a far view can, NO_ART where no camera can.
+func _scale_at(x0: float, x1: float) -> float:
+	if x1 >= lit_x.x and x0 <= lit_x.y:
+		return -1.0
+	if x1 >= reach_x.x and x0 <= reach_x.y:
+		return ViewKit.LOCKED_SCALE
+	return ViewKit.NO_ART
+
+
+## True when one of tonight's rooms is on an upper floor.
+func _upstairs_tonight() -> bool:
+	if layout == null:
+		return true
+	for r in layout.rooms:
+		if unlocked.has(r.id) and r.floor >= 1:
+			return true
+	return unlocked.is_empty()
+
+
 ## A row of the same texture from x0 to x1 as ONE sprite with a repeating region.
-func _tiled(path: String, x0: float, x1: float, y: float, parent: Node2D, z: int) -> void:
-	var t := ViewKit.tex(path)
+func _tiled(path: String, x0: float, x1: float, y: float, parent: Node2D, z: int, scale: float = -1.0) -> void:
+	var t := ViewKit.tex_at(path, scale)
 	if t == null or x1 <= x0:
 		return
 	var s := Sprite2D.new()
@@ -108,8 +151,8 @@ func _tiled(path: String, x0: float, x1: float, y: float, parent: Node2D, z: int
 	parent.add_child(s)
 
 
-func _sprite(path: String, pos: Vector2, parent: Node2D) -> Sprite2D:
-	var t := ViewKit.tex(path)
+func _sprite(path: String, pos: Vector2, parent: Node2D, scale: float = -1.0) -> Sprite2D:
+	var t := ViewKit.tex_at(path, scale)
 	if t == null:
 		return null
 	var s := Sprite2D.new()

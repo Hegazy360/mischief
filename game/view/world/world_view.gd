@@ -47,6 +47,10 @@ var cam: CameraDirector = null:
 var source: Object = null
 var world: Object = null
 var unlocked: PackedStringArray = PackedStringArray()
+## Tonight's backstage rooms (Bellows walks them; still unlit).
+var backstage: PackedStringArray = PackedStringArray()
+## How far past tonight's rooms a camera can frame (CameraDirector.stage_margin 600 + slack).
+const REACH_PX := 680.0
 ## Skip the rig system (tests / `--puppets`).
 var force_puppets: bool = false
 ## Draw both characters with this rig instead of their own (e.g. "_mannequin" to exercise
@@ -118,7 +122,9 @@ func setup(db_or_null: Variant, episode_or_null: Variant, snapshot_source: Objec
 	else:
 		layout = HouseLayout.load_default()
 	info = ContentInfo.of(world)
-	unlocked = _episode_rooms(episode_or_null if episode_or_null != null else (world.get("episode") if world != null else null))
+	var ep_v: Variant = episode_or_null if episode_or_null != null else (world.get("episode") if world != null else null)
+	unlocked = _episode_rooms(ep_v)
+	backstage = _episode_list(ep_v, "backstage")
 	_build()
 	if source != null and source.has_signal("ticked"):
 		source.connect("ticked", on_ticked)
@@ -126,6 +132,86 @@ func setup(db_or_null: Variant, episode_or_null: Variant, snapshot_source: Objec
 		_own_snap = ViewSnapshot.from_sim(world)
 		_own_prev = ViewSnapshot.from_sim(world)
 	built.emit()
+
+
+## `rooms` / `backstage` style id lists of the episode (empty when absent).
+func _episode_list(ep: Variant, key: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	var rv: Variant = null
+	if ep is Dictionary:
+		rv = (ep as Dictionary).get(key, null)
+	elif ep is Object:
+		rv = (ep as Object).get(key)
+	if rv is Array or rv is PackedStringArray:
+		for r in rv:
+			out.append(ViewKit.id_of(r, layout.sorted_room_ids()))
+	return out
+
+
+## Art scale per room tonight (s2-fix G #7 — texture memory): the Night's rooms at ART_SCALE
+## (−1); rooms the camera can still see — the unlit set within `REACH_PX` of tonight's rooms or
+## backstage (the follow camera stops `stage_margin` 600 px past the lit rooms; Bellows walks
+## the backstage) — at LOCKED_SCALE (1×); rooms it can never frame get no art at all
+## (ViewKit.NO_ART).
+func room_art_scales() -> Dictionary:
+	var reach := reach_x_range()
+	var out := {}
+	for r in layout.rooms:
+		if unlocked.has(r.id):
+			out[r.id] = -1.0
+		elif r.x1 >= reach.x and r.x0 <= reach.y:
+			out[r.id] = ViewKit.LOCKED_SCALE
+		else:
+			out[r.id] = ViewKit.NO_ART
+	return out
+
+
+## The Night's warm list (NightWarm.list) when NightScene hands it over before setup(): its look
+## pages and lazy textures start on worker threads right after the build's own jobs, so they
+## rasterise while this thread builds nodes and the warm-up only collects them (s2-fix G #9).
+var warm_hint: Dictionary = {}
+
+
+func _start_warm_hint(skin: String) -> void:
+	if warm_hint.is_empty():
+		return
+	var looks: Dictionary = warm_hint.get("looks", {}) if warm_hint.get("looks") is Dictionary else {}
+	for actor in looks:
+		var kinds: Variant = looks[actor]
+		if kinds is PackedStringArray:
+			RigPlayer.start_looks(String(actor), skin if String(actor) == "hush" else "", kinds)
+	var tex: Variant = warm_hint.get("textures", PackedStringArray())
+	if tex is PackedStringArray:
+		var items: Array = []
+		for p in tex:
+			items.append({"path": p, "scale": ViewKit.art_scale_of(p)})
+		HiResTex.warm(items, 0)
+
+
+## [{path, scale}] of every room bg / fg layer tonight draws (HiResTex.warm items).
+func room_warm_list(scales: Dictionary) -> Array:
+	var out: Array = []
+	for r in layout.rooms:
+		var sc := float(scales.get(r.id, -1.0))
+		if sc == ViewKit.NO_ART:
+			continue
+		for p in [r.art_bg, r.art_fg]:
+			if String(p) != "":
+				out.append({"path": String(p), "scale": sc})
+	return out
+
+
+## World x range any camera can show tonight: tonight's rooms + backstage ± REACH_PX.
+func reach_x_range() -> Vector2:
+	var lo := INF
+	var hi := -INF
+	for r in layout.rooms:
+		if unlocked.has(r.id) or backstage.has(r.id):
+			lo = minf(lo, r.x0)
+			hi = maxf(hi, r.x1)
+	if lo >= hi:
+		return Vector2(-INF, INF)
+	return Vector2(lo - REACH_PX, hi + REACH_PX)
 
 
 func _episode_rooms(ep: Variant) -> PackedStringArray:
@@ -157,8 +243,20 @@ func _build() -> void:
 		c.queue_free()
 	props.clear()
 	rooms.clear()
+	var scales := room_art_scales()
+	# Rasterise the big room layers on worker threads while the house pages pack (s2-fix G #9):
+	# the RoomViews below then only wait for finished jobs instead of rasterising one by one.
+	HiResTex.warm(room_warm_list(scales), 0)
+	var skin := ViewKit.s(ViewKit.setting("hush_skin", ""))
+	RigPlayer.start_base("bellows")
+	RigPlayer.start_base("hush", skin)
+	_start_warm_hint(skin)
+	HouseArt.prepare(layout, scales)
 	stage = StageView.new()
 	add_child(stage)
+	var lit := lit_x_range()
+	stage.lit_x = Vector2(lit.x - REACH_PX, lit.y + REACH_PX) if lit.x > -INF else lit
+	stage.reach_x = reach_x_range()
 	stage.setup(layout, unlocked)
 	rooms_node = _layer("Rooms", -20)
 	decor_back_node = _layer("DecorBack", -12)
@@ -174,7 +272,7 @@ func _build() -> void:
 		var rv := RoomView.new()
 		rv.z_index = 0
 		rooms_node.add_child(rv)
-		rv.setup(r, layout, not unlocked.has(r.id), fg_node)
+		rv.setup(r, layout, not unlocked.has(r.id), fg_node, float(scales.get(r.id, -1.0)))
 		rooms[r.id] = rv
 		if not unlocked.has(r.id):
 			locked.append(r.id)
@@ -189,15 +287,14 @@ func _build() -> void:
 	for hs in layout.hotspots:
 		var pv := PropView.new()
 		(props_top_node if hs.z > 0 else props_node).add_child(pv)
-		pv.setup(hs, layout, not unlocked.has(hs.room), front_node)
+		pv.setup(hs, layout, not unlocked.has(hs.room), front_node, float(scales.get(hs.room, -1.0)))
 		props[hs.id] = pv
 		_hotspot_ids.append(hs.id)
 		fx.badges.register(hs.id, pv.badge_anchor(), hs.room)
 	decor.back = decor_back_node
 	decor.front = decor_front_node
 	decor.over = decor_over_node
-	decor.build(layout, locked)
-	var skin := ViewKit.s(ViewKit.setting("hush_skin", ""))
+	decor.build(layout, locked, scales)
 	eyes = HiddenEyes.new()
 	eyes.z_index = 1
 	props_top_node.add_child(eyes)

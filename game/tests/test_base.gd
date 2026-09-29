@@ -126,6 +126,28 @@ static func load_json(path: String) -> Variant:
 	return j.data
 
 
+## Budget multiplier for wall-clock ceilings on a shared box (s2-fix G #6): the 1-minute load
+## average (+ this test process) per core from /proc/loadavg and `nproc`, never below 1 (idle box
+## or no procfs: 1.0). Timing tests take the fastest of several blocks AND scale their budget by this,
+## so a CI runner or a box shared with other agents measures the code, not the scheduler.
+static func cpu_load_scale() -> float:
+	if OS.get_name() != "Linux":
+		return 1.0
+	var out: Array = []
+	if OS.execute("cat", ["/proc/loadavg"], out) != 0 or out.is_empty():
+		return 1.0
+	var parts := str(out[0]).split(" ", false)
+	if parts.is_empty() or not parts[0].is_valid_float():
+		return 1.0
+	var cores := 0
+	var cpu: Array = []
+	if OS.execute("nproc", [], cpu) == 0 and not cpu.is_empty():
+		cores = int(str(cpu[0]).strip_edges())
+	if cores <= 0:
+		cores = OS.get_processor_count()
+	return maxf(1.0, (parts[0].to_float() + 1.0) / maxf(1.0, float(cores)))
+
+
 # --- runner interface (used by run_tests.gd) ------------------------------------------
 
 ## Reset per-test state. Called by the runner.

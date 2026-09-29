@@ -1,10 +1,20 @@
-# Mischief Next Door — Game Design Document (v1.0, BINDING)
+# Mischief Next Door — Game Design Document (v1.1, BINDING)
 
 *"A silent comedy for a very loud man."*
 
 Status: final, binding design for v1. Built on the panel's winning proposal ("The Comedy Sandbox"), with the
 judges' grafts from "Snackable" and "Classic" and every must-fix resolved (traceability table in Appendix A).
 Technical contracts: `docs/TECH.md`. Build plan: `docs/PLAN.md`. Status: `docs/PROGRESS.md`.
+
+**Changelog.**
+- **v1.1 (2026-09-29, Stage 2 Checkpoint G).** Folded in the Stage-1 content resolutions ("GDD ambiguities" 1–8),
+  every Stage-2 D1 data change (`docs/review/s2-content/d1_changes.md`), lead decision D1 (the dead-air gate, with
+  rulings L1/L2/L4), the sim-clock / Boot contract (L13) and the curtain-call step table. Changed: §0 laugh clock;
+  §2.1; §2.2; §2.3 (measured Prologue clock, cue ids, the ⏩ lesson, Boot and the sim clock); **new §2.4** (dead
+  air); §3.3; §4.1 + §4.1.1 (D1 durations, tea faces left, timed micro-gags, the `exit` detour); §5.4 (fix-up rooms
+  and overrides, residue clears, `rules.combos`); §5.7 (#1, #2, #32); §6.2 (Big Number re-arm, curtain call); §7.1
+  (porch); §7.2 (rooms, loops, rules, card cues); §7.3; §8; §10.4; §10.5 R6.
+- v1.0 — the panel's binding design.
 
 **Conventions.** All sizes are logical px at the 1920×1080 base (`canvas_items` + `expand`; ≈17 px per mm on
 every phone). Times are seconds of game time; animation frames are at 60 fps (1 frame = 1 sim tick).
@@ -30,7 +40,7 @@ A content lint (TECH §10.5) rejects banned terms.
 | **Audience** | **The Stalls**: a strip of silhouetted theatre heads that laughs in 5 tiers, gasps, shushes and shouts "BEHIND YOU!". Score is **Applause** (0–100+); stars are **Curtain Calls**. |
 | **Fairness** | You can always read where he goes next (thought bubble + ring), what he can see (awareness glyph + stare strip on the floor), and when he's coming (1.5 s door jiggle + footsteps + PiP). Every catch starts with a ≥ 0.8 s "?" window and is replayed by the **Busted Cam**. |
 | **Failure** | **The Lecture**: a 4-second sung scolding, then Hush lands on the doorstep and takes a tomato. Every rig and every laugh is kept. Three tomatoes bring **the Hook** (from Night 4; never in Relaxed). Retry in place in ≤ 1.5 s. |
-| **Laugh clock** | ≈ 5 s a vase smashes behind him · **≤ 10 s from app launch the player's first squeak cracks his high note** · ≈ 26 s first prank (ACHOO-RIA!) · ≈ 44 s first Running Gag · six laughs in the first 60 s. |
+| **Laugh clock** | ≈ 5 s a vase smashes behind him · **≤ 10 s from app launch the player's first squeak cracks his high note** · ≈ 25–28 s first prank (ACHOO-RIA!, ≤ 30 s) · ≈ 47–50 s his first Running Gag link (ALLEGRO-GO-GO! ×1.5) · six laughs in the first 60 s (launch-relative, §2.3). |
 | **Length** | ≈ 60 min to clear once; 3–4 h for all Curtain Calls; Encores and the Programme (Stage 4) extend it. |
 
 **Pillars (in priority order):**
@@ -103,50 +113,115 @@ A stage farce, not television: there are no cameras, viewers, ratings, channels,
 | 22–26 s | **Payoff.** | Punch-in, hit-stop, a 2–4 s reaction, a pun caption, a tiered laugh, the Applause needle jumps. |
 | 26–30 s | **Decide**: he's fuming (Running Gag fuse burning) and his bubble shows where he'll go to clean up. Rig that spot, squeak to keep him simmering, or back off because his specs just went on. | His body is the meter: face colour, sideburns, steam. The fuse bar drains under the Applause-o-Meter. |
 
-A skilled run lands a laugh every 15–25 s and a prank every 40–60 s. No stretch of 10 s may pass without
-player input or a gag (solver dead-air metric < 20 %, TECH §8).
+A skilled run lands a laugh every 15–25 s and a prank every 40–60 s. No stretch of more than 12 s of real time
+may pass without player input, a laugh or a *visible* micro-gag, and dead air stays within the gate of §2.4
+(TECH §8.5).
 
 ### 2.2 The Night
 1. **Cold open** (5 s, tap skips after the first viewing): Bellows being awful.
-2. **Loading card** on the curtain: one new rule, ≤ 25 words, one icon. Tap or 4 s.
-3. Curtain up. **The Script** slides in from the top for 2.5 s: 3–6 punchline lines + a sealed **Big Number**.
+2. **Loading card** on the curtain: one new rule, ≤ 25 words, one icon. Tap or 4 s. (The Prologue has none: its
+   rule, `basics`, is taught by ghost fingers.)
+3. Curtain up — **sim tick 0 is the frame the curtain starts to rise** (§2.3, Boot and the sim clock). **The
+   Script** slides in from the top for 2.5 s: 3–6 punchline lines + a sealed **Big Number**.
 4. Play until the required lines are done (★). The Big Number unseals: a 2–3-room chain finale.
 5. **Take a Bow** at the front door (or from the pause menu) any time after ★. When every line is done, the
    Stalls chant "BOW! BOW!" and the front door flashes.
-6. **Curtain call** results with the **Gag Reel** of your 3 best moments. "Next Night ▶" is the default button.
+6. **Curtain call** results with the **Gag Reel** of your 3 best moments — a fixed sequence of ≤ 12.8 s
+   unskipped, ≤ 7.5 s on a repeat viewing (§6.2). "Next Night ▶" is the default button.
 
 There is no clock and no Bedtime in v1: nothing punishes watching and planning. Pranks score once per Night
 (a landed prank's station greys out), squeak bits diminish to zero, so Applause is naturally bounded.
 
 ### 2.3 The first 60 seconds — Prologue "Curtain Up"
 Rooms: **parlour + kitchen** only (the hall doorway is roped off "backstage"; Bellows goes through it, the PiP
-follows him). No menus before play. Times are **from app launch** on a mid-range Android.
+follows him). No menus before play. Times are **from app launch** on a mid-range Android: launch-relative =
+sim time + 2.3 s (Boot and the sim clock, below). Where the *ideal* and the *slow first-timer* routes differ, t
+gives the range ideal–slow (solver-measured at Checkpoint G, `docs/review/s2-content/prologue_clock.md`).
+Director cue ids are in `code`; they are binding for the FTUE, the view and the sound.
 
 | t (s) | Beat | Player | Laugh |
 |---|---|---|---|
-| 0.0–2.3 | Engine splash (background colour only) → Boot shows the **red curtain** immediately (a 1× pre-rasterised SVG) with a house-lights-dimming hum. HiResTex warms the Prologue's textures under the curtain (≤ 2.0 s budget; if not warm at 3.0 s the curtain rises anyway on 1× textures that swap to 2× later). | — | — |
-| 2.3–3.1 | Curtain rises (0.8 s). Parlour (left) and kitchen (right). Bellows stands at the gramophone, back to the kitchen, singing "MI-MI-MIIII". Each note nudges a vase along the mantel. Input is live from here. | may tap | — |
-| 4.6 | The vase smashes behind him. He doesn't notice and sings on. | — | titter (1) |
-| 5.0 | The kitchen window creaks; Hush climbs in on an invisible mime ladder, finger to her lips. The Stalls shush each other. | — | giggle |
-| 6.0 | Figgis pops up in his top-left chip: "psst!" + cue card *chicken → Bellows*. A **ghost finger** pulses on Clarence (left thumb). | — | — |
-| ≈ 7–9 | **SQUEAK.** His high note cracks into a yodel; he clutches his throat: "…the pipes." (squeak bit, teaches the squeak) | tap Clarence | **laugh (2) — first player-caused laugh ≤ 10 s from launch** |
-| +1.0 after the squeak (or 15.0 if none) | He hums "Hm-hm-hmm… TEA." Bubble: teacup → kitchen. The **honey jar** (with the pepper pot beside it) glows; ghost finger taps it. **This step waits for the player** (no cap): he keeps warming up with micro-gags; after 8 s idle Figgis nudges again. | tap jar, Hush tiptoes 2 s | — |
-| ≈ 12 | Action button inflates to RIG (pepper → honey); ghost thumb shows *hold*. Hold 0.8 s: ding, Hush snickers at the Stalls. (teaches move + hold) | hold 0.8 s | titter |
-| rig + 2.0 | He leaves the gramophone for the kitchen. 1.5 s entry warning: footsteps, door jiggle, the Stalls shout "BEHIND YOU!". The pantry curtain pulses; ghost finger. **Safety net:** if Hush isn't hidden 1.5 s before he enters, time drops to 0.5× and the pantry pulses harder. (teaches hide) | tap pantry | gasp |
-| ≈ 17–22 | He brews honey tea (kettle, spoon, stir, sniff). "ah… (20 f) ahh… (24 f) AHHH… (30 f)" — false stop, relieved smile (20 f)… | watch | — |
-| **≈ 26** | **"CHOO!"** He rockets backwards on his stool into the sink; bouffant flipped over his face. Punch-in 1.4×, 5 f hit-stop, caption **ACHOO-RIA!**, Applause +35. | — | **laugh + applause (3) — first prank ≤ 30 s** |
-| ≈ 29 | Hair over his eyes (FRAZZLED), he shuffles to the hall mirror, bonking the door frame. Bubble shows the mirror at once. "RUNNING GAG" banner + fuse appear. After 8 s without a rig, the gramophone's speed lever sparkles (no ghost finger — the first unguided step). | tap lever, hold 0.8 s, tap piano to hide (the command queue dives her in when the ring completes) | titter |
-| ≈ 38 | He returns combed and drops the needle. ×3 speed: he babbles, spins like a top and collapses dizzy. **"ALLEGRO-GO-GO! RUNNING GAG ×1.5"**. The Stalls rise. | — | roar (4) |
-| ≈ 46 | Livid, he **jams his specs on** (tink!) and hunts the parlour for 6 s, passing the piano while Hush's eyes dart in the dark. He finds nothing: she hid unseen. (shows "specs on = danger" and the glyph) | hold breath | relief laugh (5) |
-| ≈ 54 | "Hmph!" He stomps out toward the stairs; a picture falls on his head in the doorway. | — | titter (6) |
-| ≈ 58–70 | The curtain falls. Hush pops out and bows; roses fly. Only now the **title card** slams down: MISCHIEF NEXT DOOR. Applause total, the Gag Reel (the sneeze), then **"Night 1 ▶"**. | tap | cheer |
+| 0.0–2.3 | Engine splash (background colour only) → Boot shows the **red curtain** on its first frame (a 1× pre-rasterised SVG) with a house-lights-dimming hum. The Night is built and warmed under the curtain (≤ 2.0 s budget) while the sim waits at tick 0 and Bellows's warm-up clip pre-rolls. | — | — |
+| 2.3–3.1 | **Tick 0:** the curtain rises (0.8 s). Parlour (left) and kitchen (right). Bellows stands at the gramophone, back to the kitchen, singing "MI-MI-MIIII". Each note nudges a vase along the mantel. Input is live from half-up (≈ 2.7). | may tap | — |
+| 4.6 | The vase smashes behind him (`laugh_vase`). He doesn't notice and sings on. | — | titter (1) |
+| 5.0 | The kitchen window creaks; Hush climbs in on an invisible mime ladder, finger to her lips (3.7 s; a tap during it is queued, with instant feedback). The Stalls shush each other. | — | giggle |
+| 6.0 | Figgis pops up in his top-left chip: "psst!" + cue card *chicken → Bellows* (`figgis_psst`). A **ghost finger** pulses on Clarence (left thumb, `ghost_squeak`). | — | — |
+| ≈ 6–7 | **SQUEAK.** His high note cracks into a yodel; he clutches his throat: "…the pipes." (squeak bit, teaches the squeak) | tap Clarence | **laugh (2) — first player-caused laugh ≤ 10 s from launch** |
+| +1.0 after the squeak (or 15.0 if none) | He hums "Hm-hm-hmm… TEA." Bubble: teacup → kitchen. The **honey jar** (with the pepper pot beside it) glows; ghost finger taps it (`ghost_honey`). **This step waits for the player** (no cap): he keeps warming up with micro-gags; after 8 s idle Figgis nudges again. | tap jar, Hush tiptoes 2 s | — |
+| ≈ 9–12 | Action button inflates to RIG (pepper → honey); ghost thumb shows *hold* (`ghost_hold`). Hold 0.8 s: ding, Hush snickers at the Stalls. (teaches move + hold) | hold 0.8 s | titter |
+| rig + 2.0 | He leaves the gramophone for the kitchen (≈ 4.5 s walk). 1.5 s entry warning before he enters (≈ 14–17): footsteps, door jiggle, the Stalls shout "BEHIND YOU!". The pantry curtain pulses; ghost finger (`ghost_hide`). **Safety net:** if Hush isn't hidden 1.5 s before he enters, time drops to 0.5× and the pantry pulses harder. (teaches hide) | tap pantry | gasp |
+| CHOO − 7 | He brews honey tea at the counter (8 s), **facing left** — the pantry and the sink behind his back (kettle, spoon, stir, sniff; he admires himself in the kettle). "ah… (20 f) ahh… (24 f) AHHH… (30 f)" — false stop, relieved smile (20 f)… | watch | — |
+| **≈ 25–28** | **"CHOO!"** He rockets backwards on his stool into the sink; bouffant flipped over his face. Punch-in 1.4×, 5 f hit-stop, caption **ACHOO-RIA!**, Applause +35. | — | **laugh + applause (3) — first prank ≤ 30 s** |
+| ≈ 30–33 | Hair over his eyes (FRAZZLED), he shuffles blind toward the hall mirror, bonking the door frame (`laugh_doorframe`). Bubble shows the mirror at once. "RUNNING GAG" banner + fuse appear. | — | titter |
+| ≈ 32–35 | **The ⏩ lesson** (`ghost_ff`, Hush's first hidden wait, 1.5 s after the bonk): Figgis's card *Clarence held → clock fast* and a ghost thumb holding ⏩, until Hush presses ⏩ or leaves her spot. Never during the sneeze build-up. | hold ⏩ | — |
+| mirror detour + 8 s (≈ 34–37) | The gramophone's speed lever sparkles (`sparkle_lever`, counted from the moment the mirror detour is queued, if the lever isn't rigged yet; no ghost finger — the first unguided step). He combs himself off-stage (≈ 11 s round trip). | tap lever, hold 0.8 s, tap piano to hide (the command queue dives her in when the ring completes) | — |
+| ≈ 47–50 | He returns combed and drops the needle. ×3 speed: he babbles, spins like a top and collapses dizzy. **"ALLEGRO-GO-GO! RUNNING GAG ×1.5"**. The Stalls rise. | — | roar (4) |
+| ≈ 50–53 | Livid, he **jams his specs on** (tink!) and hunts the parlour for 6 s, walking 2350 → 1650 past the piano; he bends to peer under it, nose an inch from Hush's eyes darting in the dark. (shows "specs on = danger" and the glyph) | hold breath | — |
+| ≈ 56–59 | He finds nothing: she hid unseen (`laugh_relief`). | — | relief laugh (5) |
+| ≈ 57–60 | "Hmph!" He stomps out toward the stairs (the bubble shows the exit icon); a picture falls on his head in the doorway (`laugh_picture`). | — | titter (6) |
+| ≈ 61–64 | The curtain falls (`title_card`, 4 s after the picture; the Prologue ends 1 s later). The Prologue curtain call (§6.2): Hush pops out and bows; roses fly. Only now the **title card** slams down: MISCHIEF NEXT DOOR. Applause total, the Gag Reel (the sneeze), then **"Night 1 ▶"**. | tap | cheer |
 
 Prologue rules: it **cannot be failed** (the "?" window is 2.0 s; if it ever fills, Figgis's hook yanks Hush
-into the nearest hiding spot — "the show must go on!"). No Curtain Calls are awarded (the Prologue is the
-overture, marked "Seen" on the Playbill); Applause is shown. If the player never rigs the gramophone, he
-warms up again, the fuse runs out, and the Prologue still ends after the hunt (ALLEGRO fires on his next
-warm-up if rigged later). The solver MUST reproduce "6 laughs in 60 s" on the *ideal* route and "first
-player laugh ≤ 10 s, first prank ≤ 30 s, ≥ 4 laughs by 75 s" on the *slow first-timer* route (TECH §8.5).
+into the nearest hiding spot — "the show must go on!"). No loading card, no Big Number and no Curtain Calls (the
+Prologue is the overture, marked "Seen" on the Playbill); Applause is shown. If the player never rigs the
+gramophone, he warms up again (at most 25 s), the fuse runs out, and the Prologue still ends after the hunt
+(ALLEGRO fires on his next warm-up if rigged later). The solver MUST reproduce "6 laughs in 60 s" on the *ideal*
+route and "first player laugh ≤ 10 s, first prank ≤ 30 s, ≥ 4 laughs by 75 s" on the *slow first-timer* route
+(TECH §8.5; Checkpoint G: ideal 7 laughs by 60 s; slow 6.6 s / 28.2 s / 7 laughs by 75 s). **ALLEGRO lands at
+≈ 47–50 s, not the v1.0 sketch's ≈ 38 s:** the blind round trip to the hall mirror is ≈ 11 s of walking; the
+6-laughs-in-60-s script still holds, so this is accepted.
+
+**Director cues (binding ids, in firing order):** `laugh_vase` · `figgis_psst` + `ghost_squeak` · `ghost_honey` ·
+`ghost_hold` · `ghost_hide` · `laugh_doorframe` · `ghost_ff` · `sparkle_lever` · `laugh_relief` · `laugh_picture` ·
+`title_card`. Every `laugh_*` cue MUST produce a visible prop or clip change **and** a crowd sound within 0.3 s.
+`title_card` stages nothing during play: the title slams only in the curtain call, after the fall.
+
+**Boot and the sim clock (binding, every Night).**
+1. Boot draws the red curtain (the 1× SVG, no warm-up wait) on its **first frame**, plays the house-lights hum and
+   builds the Night underneath it. No menus before play.
+2. **Sim tick 0 is the frame the curtain starts to rise.** Under the curtain the simulation is paused at tick 0
+   and no sim event fires; the view pre-rolls Bellows's clips (he is already mid-"MI-MI-MIIII" when the curtain
+   lifts, sounds muted) without advancing the sim.
+3. The rise starts ≈ 2.3 s after process start (`director.launch_offset_s`): as soon as the Night is warm, never
+   before 2.0 s and at the latest at 3.0 s — then on 1× textures, anything still cold being finished under the
+   curtain on that frame, never during play.
+4. On the rise frame the `curtain_rise` sting plays, the music goes curtain → sneak, the sim unpauses and the device
+   log stamps `sim_start`. Input is live when the curtain is half up (0.4 s after tick 0).
+5. Nights 1 and 2 keep the same contract after their cold open and loading card (tick 0 = the curtain rise; their
+   clocks have no launch offset); Gate 0 after its stage-door card.
+6. Every Night warms its own list under its curtain, cold open or card — both rigs' atlases, its rooms and props,
+   every look it can show (residues, blinded, costumes, the combos it allows), its FX, the fonts at play sizes, one
+   PiP frame, its sounds. **No texture page is built during play.**
+7. Acceptance: tick 0 = the rise frame ± 1 frame; 0 sim events before it; input live ≤ 0.4 s (+ 1 frame) after
+   tick 0; on the slow route the first player laugh ≤ 7.7 s and the first prank ≤ 27.7 s after tick 0. Process
+   start → curtain up is reported (target 3.1 s, TECH §9) and measured by the device log on the phone.
+
+### 2.4 Dead air — the waiting gate (lead decision D1)
+Waiting is the genre's most common complaint (`docs/research/`), so dead air is a gate, not a guideline. It binds every
+non-scenario route (ideal, required, slow) of every `final` Night and of Gate 0; the solver checks it (TECH §8.5).
+1. **A dead moment:** the player gave no command in the previous 3 s, nothing got a laugh and no *visible*
+   micro-gag played in the previous 5 s, and Bellows isn't reacting.
+2. **Visible beats only.** A micro-gag (§4.1) counts only when the player can see it: Bellows is in Hush's room
+   (hidden: her spot's room); or the PiP shows him (adjacent room, heading to her room, or she is rigging, §3.7);
+   or — only for a gag with an emote — the HUD edge bubble plays it. **Edge-bubble beats MAY carry at most ⅓ of
+   the beat credit on any route.**
+3. **Real time with ⏩.** The gate counts the time the player really waits: a tick at ⏩ weighs ⅓, and ⏩ counts
+   only where the game would really run at ×3 — Hush hidden and ⏩ held, dropped by the game's own rule (a prank
+   fires, a "?" starts, an entry warning for her room; §3.3), re-pressed after the persona's delay (ideal 0.5 s,
+   required 1.0 s, slow 2.0 s; never during a reaction). The slow first-timer uses ⏩ only once the Prologue's
+   `ghost_ff` lesson has taught it. The Stage-1 formula (every hidden tick at ⅓) is reported beside it, for
+   information only.
+4. **Targets (MUST):** dead air ≤ 20 % on the ideal route, ≤ 25 % on the required-lines route, ≤ 30 % on the slow
+   first-timer route, and the worst gap ≤ 12 s on every route. Scenario routes (caught, chase, Meltdown,
+   face-to-face) are exempt.
+5. **Fixed at the source, never by pressure on the player** (no timer, no penalty — §2.2): every Act I loop is
+   ≤ 60 s with Hush idle (walking included); Nights 1 and 2 land their first prank ≤ 25 s on the ideal and required
+   routes (≤ 30 s slow); Night 1 has two kettle windows per loop and each of its fix-up detours takes ≤ 12 s from
+   queued to done; every activity and fix-up detour has a micro-gag every 5–8 s (§4.1); no activity lasts under 5 s
+   (the bubble ring must read).
+6. Checkpoint G (ideal / required / slow): Prologue 3.0 / 1.8 / 5.9 %, Night 1 7.9 / 4.8 / 2.1 %, Night 2
+   6.9 / 1.9 / 1.6 %, Gate 0 8.1 %; worst gap 5.5 s; edge share ≤ 0.22; loops 58.7 s (N1) and 55.4 s (N2); N1
+   detours ≤ 10.0 s; first prank N1 17.5 / 18.7 / 24.4 s, N2 19.4 s on all three.
 
 ---
 
@@ -198,7 +273,8 @@ Visual 128 px, hit 168 px, directly above the tray's left end. Centre distance t
   60 s (lure fatigue, §5.6). The squeak itself still works and is still funny.
 - **While hidden, the button becomes ⏩** (hold = world ×3). ⏩ drops to ×1 instantly on an entry warning for
   Hush's room, a prank trigger, a "?" or release. **Hush can never squeak from a hiding spot**, so a stray
-  press can't break "hidden = safe".
+  press can't break "hidden = safe". The Prologue teaches ⏩ once, at Hush's first hidden wait (`ghost_ff`, §2.3);
+  this drop rule is the one the dead-air gate models (§2.4).
 
 ### 3.4 Hiding
 - Hiding is a **world tap on a hiding spot** (blue closed-eye badge), like any hotspot: Hush walks there and
@@ -326,8 +402,22 @@ Each Night gives Bellows an ordered **loop of 4–6 activities** (§7.2). An act
 `{id, station, room, duration, facing, specs, awareness, squeak_bit, panto, hooks[], bend}` (activity library
 §4.1.1). He walks to the station, performs, and moves on; after the last activity the loop repeats.
 
-- **Loop length:** Act I 60–85 s, Act II 80–95 s, Act III and Gala 90–120 s (measured by the solver).
-- **Micro-gags** every 5–8 s inside activity loops (admires himself in the kettle, trills, conducts the air).
+- **Loop length** (measured by the solver with Hush idle, walking included): **Act I ≤ 60 s** (D1, §2.4 rule 5;
+  Night 1 58.7 s, Night 2 55.4 s — the draft Nights 3–4 are re-measured against it in Stage 3, §7.2), Act II
+  80–95 s, Act III and Gala 90–120 s.
+- **Micro-gags** (timed, D1): every activity and fix-up detour a Night uses carries authored beats
+  `{id, at_s, len_f, emote}` in `activities.json` (table and one-line gags: `docs/review/s2-content/micro_gags.md`;
+  ids are stable — add, never rename):
+  1. The first beat lands 2–3 s into the activity, then one every 5–8 s, never two within 5 s. A gated or long
+     activity repeats its list every `mg_cycle_s` (20 s on the warm-up) while he keeps performing.
+  2. A non-chase walk longer than 5 s plays a walk beat every 4 s (`walk_hum`, `cravat_tug`, `walk_scale`).
+  3. Each beat is a ≤ 1 s joke readable at 50 px (48–60 f: admires himself in the kettle, trills, conducts the
+     air), overlaid on the activity clip, with an **emote** (sing, hum, smug, laugh, tut, sniff, yum, yawn) that
+     the HUD edge bubble draws when he is off-screen.
+  4. Beats never change Applause, temper or senses. They are dropped, not deferred, while he reacts, plays a squeak
+     bit, is Curious, Searching, Spotted, chasing, melting down or Exhausted, pauses at a doorway, bumps into Hush,
+     or during a face-to-face or the Mirror rounds.
+  5. A beat is "not dead air" only when the player can see it (§2.4 rule 2).
 - **Speeds (px/s):** Bellows walks **240** (Irked +5 %, Steaming +10 %, Livid +15 % — never more), chases
   **600**. Hush tiptoes **400** (silent) and runs **720** (noisy). Doors: Hush 0.35 s, Bellows 0.5 s.
   Stairs: Hush 1.0 s, Bellows 1.8 s.
@@ -342,14 +432,14 @@ Each Night gives Bellows an ordered **loop of 4–6 activities** (§7.2). An act
 #### 4.1.1 Activity library (v1)
 | id | Station (room) | Dur. | Specs | Awareness | Hooks (prank → mark) | Squeak bit |
 |---|---|---|---|---|---|---|
-| `warmup` | gramophone (parlour), faces left | 10 s | off | normal | ALLEGRO-GO-GO! @0.5 s (drops needle) | note cracks into a yodel; "…the pipes." |
-| `tea` | tea counter (kitchen), faces right | 10 s | off | normal | KETTLE DRUM @3 s (resume) · ACHOO-RIA! @7 s (sip) · SOPRAN fix-up target | tea goes up his nose |
-| `pickles` | pickle shelf (kitchen) | 6 s | off | normal | IN A PICKLE @1 s | — |
-| `snack` | fridge (kitchen) | 6 s | off | normal | COLD OPEN @1 s | — |
+| `warmup` | gramophone (parlour), faces left | **8 s** | off | normal | ALLEGRO-GO-GO! @0.5 s (drops needle) | note cracks into a yodel; "…the pipes." |
+| `tea` | tea counter (kitchen), **faces left**: he stands right of the counter (≈ 3000) with the pantry and the sink behind his back, so ACHOO-RIA! and HOT & COLD blast him backwards into the sink | **8 s** | off | normal | KETTLE DRUM @3 s (resume) · ACHOO-RIA! @7 s (sip) · SOPRAN fix-up target | tea goes up his nose |
+| `pickles` | pickle shelf (kitchen) | **5 s** | off | normal | IN A PICKLE @1 s | — |
+| `snack` | fridge (kitchen) | **5 s** | off | normal | COLD OPEN @1 s | — |
 | `rinse` | sink (kitchen) | 5 s | off | normal | TAP DANCE @1 s | — |
-| `paper` | recliner (parlour), sits facing right | 12 s | **on** | normal | LIFT-OFF @1 s (pulls lever) · EYE-POPPING NEWS @2 s (opens paper) | rips the paper in half |
-| `fire` | fireplace (parlour) | 6 s | off | normal | BELLOWS BLOWS @2 s | — |
-| `mirror` | cheval mirror (hall), faces right | 6 s | off | normal | MIRROR, MIRROR @0.5 s | his comb flies off |
+| `paper` | recliner (parlour), sits facing right | **8 s** | **on** | normal | LIFT-OFF @1 s (pulls lever) · EYE-POPPING NEWS @2 s (opens paper) | rips the paper in half |
+| `fire` | fireplace (parlour) | **5 s** | off | normal | BELLOWS BLOWS @2 s | — |
+| `mirror` | cheval mirror (hall), faces right | **5 s** (the three MIRROR, MIRROR rounds run inside the reaction) | off | normal | MIRROR, MIRROR @0.5 s | his comb flies off |
 | `phone` | phone table (hall) | 8 s | off | normal | SOMETHING FISHY @1 s (answers) | argues with the caller: "I did NOT squeak!" |
 | `clock` | grandfather clock (hall) | 5 s | off | normal; uses the clock case (in-use) | TIME'S UP @1 s | — |
 | `piano` | piano (parlour), faces left | 12 s | off | normal; **panto** | GRAND EXIT @2 s (fortissimo) | BONG — wrong chord, glares at the piano |
@@ -368,10 +458,19 @@ Each Night gives Bellows an ordered **loop of 4–6 activities** (§7.2). An act
 | `host_tea` | chaise (parlour), with Delphine | 14 s | off | normal | SPIT TAKE @3 s · FAN MAIL @8 s | — |
 | `tango` | gramophone floor (parlour), with Delphine | 12 s | off | normal | IT TAKES TWO @4 s | — |
 | `rehearse` | garden stage (Gala) | 14 s | off | normal; **panto** | SPOTLIGHT STEALER @2 s | — |
-| `hunt` | walks the parlour (Prologue only, scripted) | 6 s | **on** | searching | — | — |
+| `hunt` | walks the parlour 2350 → 1650, past the piano (Prologue only, scripted) | 6 s | **on** | searching | — | — |
 | *any, while Livid* | — | — | — | — | — | "WHO SQUEAKED?!" rage aria at the ceiling (once per Night) |
 
 That is exactly **10 squeak bits**.
+
+- **Durations in bold are the D1 values** (v1.1, `d1_changes.md` ALL-1): they bring the Act I loops to ≤ 60 s and
+  every hook mark still fits (KETTLE DRUM @3 s and the ACHOO-RIA! sip @7 s in an 8 s tea; LIFT-OFF @1 s and
+  EYE-POPPING NEWS @2 s in an 8 s paper). The draft Nights share them. **No activity lasts under 5 s**, so the
+  bubble's ring always reads. A gated activity (§4.1 player-led gates) keeps performing past its duration.
+- **Detours** (not loop activities; shown in the bubble the tick they are queued): the fix-ups `fixup_dry`,
+  `fixup_sink`, `fixup_honey`, `fixup_mirror` (4 s at the station, one micro-gag each, §5.4); `curious`, `search`,
+  `herd_beryl` (no micro-gags); and **`exit`** — the Prologue's scripted walk-off after the hunt: the bubble shows
+  the exit icon, he stomps toward the stairs, no hooks, only the walk beats play.
 
 ### 4.2 Telegraphs (the readability triad)
 1. **What he'll do next:** the thought bubble (§3.9) with a ring that starts ≥ 4 s before he leaves; route
@@ -576,6 +675,17 @@ override. The detour lasts 4 s at the station; its `fixup` hooks fire at 1 s. **
 and the fix-up becomes the next link.** A prank that fires during a fix-up interrupts it and the residue stays —
 that's how combos form. Several residues queue fix-ups oldest first. The Running Gag fuse pauses during fix-ups.
 
+1. **Fix-up stations MUST lie in the Night's rooms or its backstage rooms** — never in a room the Night keeps
+   closed. Hush never enters a backstage room.
+2. **Overrides** (`fixup_overrides`, per Night): one named station for a kind, and it MUST be a station of that
+   kind. v1 uses three: **Night 1 DRY → parlour fireplace** (otherwise the nearest DRY is the sun lounger in the
+   closed conservatory); **Night 3 HONEY → kitchen tea counter** (SQUEAKY's trip downstairs); **Night 9 DRY →
+   landing radiator** (SPIT TAKE's soak sends him upstairs, past RUG BURN, to PIPE DOWN!).
+3. **A reaction may clear residues** (`clears`) as part of the joke: **TAP DANCE clears FRAZZLED** — the drench
+   flattens a flipped bouffant into dripping spaniel ears, so HOT & COLD leaves only SOAKED and one fix-up (the
+   parlour fireplace, ≈ 10 s from queued to done in Night 1) instead of two; the frizz is still seen for the second
+   the Double Act takes. MIRROR, MIRROR clears FRAZZLED, FEATHERED and COSTUME (he flees).
+
 | Residue | Look (overlay) | Fix-up station kind | Stations (v1) | Chains into |
 |---|---|---|---|---|
 | **SOAKED** | drips, spaniel-ear sideburns, squelching steps | DRY | parlour fireplace · landing radiator · conservatory sun lounger | BELLOWS BLOWS, PIPE DOWN! |
@@ -594,6 +704,11 @@ that's how combos form. Several residues queue fix-ups oldest first. The Running
 | **POODLE** | SOAKED + FRAZZLED | His bouffant balls into a pom-pom; his "PIPE DOWN!" comes out as a yap. |
 | **CHICKEN** | STICKY + FEATHERED | Feathers stick: every sung note clucks; Clarence squeaks back, smitten (heart). |
 | **MAD MAESTRO** | FRAZZLED + SQUEAKY | A wild-haired chipmunk tenor, conducting furiously at nobody. |
+
+**Combo rule per Night** (`rules.combos`: the allowed combo ids; absent = all): **Nights 1 and 2 allow none
+(`[]`)** — POODLE stays Night 3's Big Number, in any order of play (TAP DANCE then ACHOO-RIA! or LIFT-OFF, or the
+reverse). A disallowed pair keeps both residues and their fix-ups, but shows no combo look and plays no combo beat,
+event or score. The fairness fuzz checks it, and the curtain call never suggests a combo on such a Night.
 
 ### 5.5 Double Acts and Chase Trips
 A **Double Act** is an authored knock-on: A's reaction physically carries him into a rigged B as one continuous
@@ -647,10 +762,12 @@ Format: **#n `id` CAPTION** (size) · rig point · needs ← source · prep · t
 **Kitchen**
 - **#1 `achoo_ria` ACHOO-RIA!** (M) · tea counter · free (the pepper pot beside the honey) · Q · USE `tea` @7 s,
   also HONEY fix-ups → rule-of-three sneeze: "ah (20 f)… ahh (24 f)… AHHH (30 f)…", false stop (20 f), CHOO
-  (3 f accent, 5 f hit-stop); he rockets backwards on his stool into the sink, bouffant flipped over his face
+  (3 f accent, 5 f hit-stop); he faces left at the counter (§4.1.1), so he rockets backwards on his stool into the
+  sink behind him, bouffant flipped over his face
   *(SNEEZE_BLAST)* · FRAZZLED (blinded) · P, 1, 3, 5, 8.
 - **#2 `tap_dance` TAP DANCE** (S) · sink · free (twist the spray tap) · Q · USE `rinse` @1 s, also SINK fix-ups,
-  also DA HOT & COLD → a face blast; he wrestles the hose like a python and loses *(DRENCH)* · SOAKED · 1.
+  also DA HOT & COLD → a face blast; he wrestles the hose like a python and loses *(DRENCH)* · SOAKED; clears
+  FRAZZLED (the drench flattens the flipped bouffant, §5.4) · 1.
 - **#3 `kettle_drum` KETTLE DRUM** (M) · kettle · squeaker ← CONFISCATED box · Q · USE `tea` @3 s (`resume`),
   also HONEY fix-ups → the kettle squeaks a melody; he harmonises, cracks on the high note, the lid pops onto his
   nose — then pours his tea anyway *(SING_CRACK)* · — · 1.
@@ -764,7 +881,8 @@ Format: **#n `id` CAPTION** (size) · rig point · needs ← source · prep · t
 - **#32 `spotlight_stealer` SPOTLIGHT STEALER** (★) · the old stage spotlight in the garden-stage wings · free
   (aim it at the apron) · B · USE `rehearse` @2 s → he steps into the light and can't help himself: he bows to the
   real Stalls and launches into his aria; they pelt him with tomatoes (and a few roses); he slips on a tomato into
-  the pond *(signature, fourth wall)* · SOAKED · G (BN).
+  the pond *(signature, fourth wall)* · SOAKED · G. A **required** line of the Gala, not its Big Number: the
+  Big Number is the CURTAIN CALL Double Act that grows out of it (§5.5, §7.2).
 
 Sizes: 1 S, 18 M, 7 L, 6 signatures. Signatures (bespoke 4–7 s clips, unique sting, 0.5× approach, 45–60 f
 paper-bordered freeze-frame): #11, #12, #15, #19, #23, #32.
@@ -849,16 +967,50 @@ and the joke are different. The framing has no TV, cameras, viewers, rating %, s
   a red ribbon. Undiscovered optional lines show "???" until Hush has seen their rig point. The Big Number
   unseals (with a drum roll) when the required lines are done. A line solved after a step-3 hint gets a small
   candle icon — the only hint penalty.
+- **The Big Number can never be soft-locked.** A chain Big Number (a Double Act, a combo, a witnessed prank, a
+  link count) that the player achieves while it is still sealed counts the moment it unseals. The landed pranks
+  it needs are **re-armed on unseal** (`rearm_on_unseal`; they score no base the second time) — without this,
+  landing ACHOO-RIA! alone in Night 1 would make HOT & COLD impossible. Re-armed in v1: N1 ACHOO-RIA!, TAP DANCE ·
+  N2 TIME'S UP (the frazzle → mirror fix-up → MIRROR, MIRROR link) · N3 SNAP DECISION, PIPE DOWN! · N5 MARROW
+  ESCAPE · N8 SPIT TAKE, BELLOWS BLOWS · N9 TUTU MUCH · N10 IT TAKES TWO, FAN MAIL, IN OVER HIS HEAD, TUTU MUCH ·
+  Gala SPOTLIGHT STEALER.
 - **Curtain Calls** (independent, shown as three stars):
   - ★ **Opening Night** — every required line. Unlocks Take a Bow and the next Night.
   - ★★ **Full Script** — every line, Big Number included.
   - ★★★ **Standing Ovation** — Applause ≥ 100 when the curtain falls.
-- **The curtain call (results):** Hush bows, roses rain; the Applause counts up; the Curtain Calls stamp in; one
-  line says exactly why anything was missed ("Applause 91 — land one more prank inside a Running Gag",
-  "4/5 lines — Bellows still hasn't talked to a fish"); the **Gag Reel** re-stages your 3 best moments from
-  reaction records (≤ 8 s, skippable); Bellows wanders on in his residue, sees the audience, slow-burns, and the
-  curtain drops on his head. Buttons: **Next Night ▶** (default, 240 px), **Retry** (in place ≤ 1.5 s), Playbill.
-  "+NEW!" flags reactions never seen before.
+- **The curtain call (results)** is a fixed, time-bound sequence played by the Night itself (no scene change):
+  1. **Next Night ▶** (default, 240 px) and **Retry** (in place ≤ 1.5 s) are live from the call's **first frame**;
+     **Playbill** is the third button. A tap anywhere else skips the current step.
+  2. The steps, unskipped (a *repeat viewing* = the Save already holds a result for this Night):
+
+     | Step | First viewing (s) | Repeat viewing (s) |
+     |---|---|---|
+     | The curtain falls | 0.8 | 0.8 |
+     | Hush steps out on the apron and bows; roses rain | 1.6 | 0.8 |
+     | Results: the Applause counts up with the needle; a stamp per Curtain Call (0.3 s each); the why-missed line; "+NEW!" chips on reactions (prank × tier × variant), bits and combos never seen before | 2.4 | 1.9 |
+     | The **Gag Reel** (the 3 best moments; on a repeat, the best one plus any "+NEW!"), while Bellows wanders on in his residue on the stage band behind the panel, double-takes at the audience, slow-burns, and the curtain drops on his head | 8.0 | 4.0 |
+     | **Total** | **12.8** | **7.5** |
+
+  3. **Prologue** (no Curtain Calls): fall 0.8 → Hush bows, roses 1.6 → the **title card** slams down (a 0.3 s
+     drop with a squash on landing, the marquee bulbs chase, the `title_slam` sting; held 1.2 s) 1.5 → the Applause
+     total 1.5 → the Gag Reel (the sneeze) 5.0 = **10.4 s**. "Night 1 ▶" is live from the fall. The title card
+     never appears during play.
+  4. **Gate 0** (the debug stage door's sneeze test, `g0_sneeze`; it ends 3 s after the sneeze's reaction): fall
+     0.8 → the sneeze's Gag Reel 5.0 = **5.8 s**, with **Again ▶** (default; retry ≤ 1.5 s) and **Stage door**, both
+     live from the first frame.
+  5. **The why-missed line** — one line, the first that applies: (1) a required line missed ("4/5 lines — Bellows
+     still hasn't talked to a fish"); (2) the Big Number still sealed or open; (3) an optional line missed;
+     (4) Applause < 100 → the first hint the Night can offer and the player hasn't maxed, in the order: one more
+     Running Gag link ("Applause 91 — land one more prank inside a Running Gag"), a Meltdown, near misses, bits, a
+     combo, EMBARRASSED!; (5) catches that cost Applause; (6) ★★★ → the standing-ovation line. The Prologue has its
+     own line. A Night never suggests what it can't offer: no combo where `rules.combos` is `[]`, no
+     Meltdown where none can happen, no EMBARRASSED! without Delphine.
+  6. **The Gag Reel** scores moments by Applause (ties: the higher tier, then the later); a knock-on chain is one
+     moment. Each moment is re-staged in the real set by replaying the deterministic Night from a snapshot, so every
+     prop, residue, launch and camera move is the one the player saw, framed like the live punch-in.
+  7. The Stalls' "BOW! BOW!" chant plays only on Nights that end with a bow (not the Prologue or Gate 0).
+  8. After the last Night a build contains (Night 2 in the slice), Next ▶ shows "To be continued…" (2 s, tap
+     skips), then the Playbill with the next Night locked. Next ▶ never loads a draft episode.
 
 ### 6.3 Failure and retry
 Soft failure only (§4.6): the Lecture, tomatoes, the Hook from Night 4. No restart from zero, no energy, no
@@ -914,7 +1066,7 @@ GROUND (y 0) ┌ PORCH 500 ┬ HALL 1000 ─stairs┬ PARLOUR 1300 ┬ KITCHEN 1
 
 | Room (x range) | Stations, left → right (approx x) | Hiding spots | Opens |
 |---|---|---|---|
-| Porch (0–500) | doorstep (caught Hush lands here, 350) | — | P |
+| Porch (0–500) | doorstep (caught Hush lands here, 350) | — | N1 (in every Night from Night 1: the doorstep and the RUG BURN exit; the Prologue can't be failed) |
 | Hall (500–1500) | front door 520 · coat cupboard 600 · CONFISCATED box 790 · phone table + piggy bank 980 · cheval mirror 1160 · grandfather clock 1340 · stair foot 1450 | coat cupboard; clock case (in use at `clock`) | N1 |
 | Parlour (1500–2800) | gramophone 1640 · piano 1840 · recliner + newspaper 2080 · fireplace + bellows + log basket 2330 (chandelier above) · chaise 2560 with a side table (tea tray, Delphine's fan; Act III) | behind the piano; behind the chaise (Act III) | P |
 | Kitchen (2800–3900) | tea counter (kettle, honey, pepper) 2960 · pickle shelf 3130 · fridge 3300 · table 3470 · pantry 3640 · sink + window 3800 · back door 3900 | pantry curtain; under the table | P |
@@ -935,12 +1087,22 @@ Each Night: rooms, the one new rule and its loading card, the cold open, his loo
 O = optional, BN = Big Number), pranks (new in **bold**), tomatoes, "?" fill time and the first-clear target.
 Loops are listed as activities; walking time is added by the sim and measured by the solver.
 
-**PROLOGUE — "Curtain Up"** (parlour, kitchen) — §2.3. New: squeak, move, hold, hide (ghost finger each).
-Loop (scripted, player-led): `warmup` (waits for the first squeak, max 15 s) → `warmup` (waits until the honey is
-rigged, then +2 s) → `tea` → [FRAZZLED → hall mirror, off-stage] → `warmup` (waits for the lever rig, then +2 s,
-or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** · R **ALLEGRO-GO-GO!** (lines as
-"Bellows sneezes up a storm", "Bellows gets in a spin"). No Curtain Calls; unlimited tomatoes; "?" 2.0 s;
-60–75 s.
+Rules for every Night (v1.1):
+1. **The porch is in every Night from Night 1** (the doorstep a caught Hush lands on, the RUG BURN exit); the room
+   lists below leave it out.
+2. Loop times are solver-measured with Hush idle, walking included; the slice Nights (Prologue, 1, 2) are `final`
+   and MUST pass the dead-air gate of §2.4 on every route; Nights 3–Gala are `draft` until Stage 3 retunes them.
+3. Where a Night departs from the defaults, its **Rules** line says so: fix-up overrides and `rules.combos` (§5.4),
+   and the Figgis **card cues**, which fire by id (`card_*`) and are presented by the FTUE. Every Night's Big
+   Number re-arms are listed in §6.2.
+
+**PROLOGUE — "Curtain Up"** (parlour, kitchen; the hall is backstage) — §2.3. New: squeak, move, hold, hide
+(ghost finger each), and ⏩ once. No loading card (its new rule is `basics`) and no Big Number. Loop (scripted,
+player-led): `warmup` (waits for the first squeak, then +1 s, max 15 s) → `warmup` (waits until the honey is
+rigged, then +2 s; no cap) → `tea` → [FRAZZLED → hall mirror, off-stage] → `warmup` (waits for the lever rig, then
++2 s, or 25 s) → `hunt` (specs on, 6 s, walks 2350 → 1650) → the exit detour upstairs (bubble: the exit icon).
+Script: R **ACHOO-RIA!** · R **ALLEGRO-GO-GO!** (lines as "Bellows sneezes up a storm", "Bellows gets in a spin").
+No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–70 s launch-relative).
 
 **ACT I — "The Tenor at Home"**
 
@@ -948,8 +1110,13 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
 - New: **carrying items in the tray, the Script, Take a Bow.** Card: *"Your tray carries things. Glowing spots take
   them. Do the Script, then take a bow at the front door."*
 - Cold open: at dawn he sings through a megaphone out of his window; Hush's window at No. 9 cracks.
-- Loop (~65 s): `warmup` (first-loop gate: ends 2 s after the first rig, or 25 s) → `tea` → `pickles` → `paper`
-  (specs on) → `rinse`.
+- Loop (~59 s; the first loop ≈ 76 s): `warmup` (first-loop gate: ends 2 s after the first rig, or 25 s) → `tea`
+  → `pickles` → `rinse` → `tea` → `paper` (specs on). Two kettle windows per loop (D1): the squeaker round trip to
+  the hall box, which is safe while he reads the paper, no longer costs a whole loop.
+- Rules: no combos (`rules.combos: []`); fix-up override DRY → parlour fireplace; TAP DANCE clears FRAZZLED, so
+  HOT & COLD queues one fix-up (≈ 10 s); on unseal ACHOO-RIA! and TAP DANCE re-arm. Figgis card cues: `card_script`
+  at 1 s, `card_tray` at the first pick-up, `card_bow` when every required line is done. First prank ≤ 25 s, every
+  fix-up detour ≤ 12 s (§2.4).
 - Script: R "Bellows sings a duet with his kettle" (**KETTLE DRUM**) · R "Bellows gets a face wash" (**TAP DANCE**)
   · R "Bellows loses a fight with a jar" (**IN A PICKLE**) · O "Bellows reads the paper in orbit" (**LIFT-OFF**) ·
   O "Bellows sneezes up a storm" (ACHOO-RIA!) · BN **HOT & COLD** — "Sneeze him into the sink" (Double Act).
@@ -959,7 +1126,13 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
 - New: **FREEZE and the specs rule** (stare strip appears). Card: *"Hold FREEZE to be a statue. Specs off, he only
   spots what moves. Specs on, get out of sight."*
 - Cold open: he pops a child's balloon with his conductor's baton and drops the string in the CONFISCATED box.
-- Loop (~70 s): `mirror` → `phone` → `clock` → `paper` (specs on) → `fire` → `snack`.
+- Loop (~55 s; he starts in his recliner, parlour x 2080): `paper` (specs on) → `fire` → `snack` → `mirror` →
+  `phone` → `clock`. The v1.0 cycle, rotated to open kitchen-side (D1): he reaches the fridge at ≈ 18 s, so the
+  first prank (COLD OPEN) lands at ≈ 19 s instead of ≈ 49 s, and the hall is never sealed in the first 30 s. COLD
+  OPEN's two fix-ups (the sink, then the hall mirror, ≈ 21 s) are the window for rigging the phone and the clock.
+- Rules: no combos (`rules.combos: []`); on unseal TIME'S UP re-arms. Figgis card cues: `card_specs` at 1 s (he
+  opens reading with specs on, so *specs on → get out of sight* is true on screen), then `card_freeze` the moment
+  his specs first come off. First prank ≤ 25 s (§2.4).
 - Script: R "Bellows talks to a fish" (**SOMETHING FISHY**) · R "Bellows rides the grandfather clock"
   (**TIME'S UP**) · R "Bellows wears his dinner" (**COLD OPEN**) · O "Bellows reads the news up close"
   (**EYE-POPPING NEWS**) · BN "Be his reflection" (**MIRROR, MIRROR**). (TIME'S UP frazzles him → the mirror
@@ -970,8 +1143,10 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
 - New: **residue → fix-up.** Card: *"Soaked, floury or frazzled? He goes to fix it, and his bubble shows where. Rig
   that spot first."*
 - Cold open: 6 a.m. scales through the bathroom window; Hush's alarm clock shakes itself off her shelf.
-- Loop (~75 s, upstairs): `gargle` → `bath` → `radiator` → `dress` → `nap`. (Items come from downstairs: carry them
-  up.)
+- Loop (~75 s, upstairs; draft, above the Act-I 60 s target of §2.4, re-measured in Stage 3): `gargle` → `bath` →
+  `radiator` → `dress` → `nap`. (Items come from downstairs: carry them up.)
+- Rules: fix-up override HONEY → kitchen tea counter (SQUEAKY's trip downstairs); combos allowed (POODLE is the Big
+  Number); on unseal SNAP DECISION and PIPE DOWN! re-arm. Figgis card cue `card_fixup`.
 - Script: R "Bellows sings soprano" (**SOPRAN-OH-NO**) · R "Bellows meets the bath croc" (**SNAP DECISION**) ·
   R "Bellows argues with the plumbing" (**PIPE DOWN!**) · O "Bellows has a pillow fight" (**PILLOW TALK**) ·
   O "Bellows serenades the hat stand" (**BUTTER-FINGERS**) · O "Bellows sneezes up a storm" (ACHOO-RIA!, reached via
@@ -982,7 +1157,8 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
 - New: **MELTDOWN**; tomatoes count from tonight. Card: *"Keep him fuming, prank after prank. At full temper he
   melts down, then sulks blind for 8 s. Tomatoes count now."*
 - Cold open: he confiscates a kite and snaps it over his knee.
-- Loop (~90 s): `warmup` → `paper` (specs on) → `fire` → `bath` (upstairs) → `nap`.
+- Loop (~90 s; draft, above the Act-I 60 s target of §2.4, re-measured in Stage 3): `warmup` → `paper` (specs on)
+  → `fire` → `bath` (upstairs) → `nap`.
 - Script: R "Bellows surfs the stairs" (**RUG BURN** — he must be Steaming, or chasing Hush, going up) ·
   R "Bellows gets in a spin" (ALLEGRO-GO-GO!) · R "Bellows throws a tantrum" (MELTDOWN) · O "Bellows dances in the
   chandelier" (**PRIMA BALLERINA**, Meltdown in the parlour) · O "Bellows turns into a ghost" (**BELLOWS BLOWS**) ·
@@ -1003,7 +1179,7 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
   BN "Chase the marrow into the goat" (**MARROW MAYHEM**, Double Act).
 - Tomatoes 3 · "?" 0.8 s · 5 min.
 
-**Night 6 — "Behind You!"** (ground floor, conservatory, garden)
+**Night 6 — "Behind You!"** (ground floor, conservatory, garden; no upstairs, so RUG BURN comes only through DA ENCORE!)
 - New: **the panto bit.** Card: *"Squeak behind his back, then FREEZE before he turns. Survive three rounds and the
   Stalls go wild."*
 - Cold open: he conducts the dawn chorus to be quiet — "PIPE DOWN!" — and the offended birds leave in a huff; a
@@ -1027,7 +1203,7 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
 
 **ACT III — "Company's Coming"**
 
-**Night 8 — "Company's Coming"** (ground floor + upstairs)
+**Night 8 — "Company's Coming"** (ground floor + upstairs, and the conservatory and garden: FAN MAIL's feathers come from the potting bench)
 - New: **Dame Delphine** (opera glasses, high C, EMBARRASSED!). Card: *"Dame Delphine sees nothing without her
   opera glasses. Prank him in front of her: he's EMBARRASSED, and the Stalls love it."*
 - Cold open: he rehearses his bow to a cardboard cut-out of Delphine, then hides it as the doorbell rings.
@@ -1049,6 +1225,8 @@ or 25 s) → `hunt` (specs on, 6 s) → exit upstairs. Script: R **ACHOO-RIA!** 
   for it! Trip him mid-chase" (any Chase Trip) · O "Bellows surfs the stairs" (RUG BURN) · O "Bellows argues with
   the plumbing" (PIPE DOWN!) · O "Delphine gives him a spray" (SPIT TAKE) · BN "Take the tutu to tea" (TUTU MUCH
   witnessed by Delphine).
+- Rules: fix-up override DRY → landing radiator (SPIT TAKE's soak sends him upstairs, past RUG BURN, to PIPE
+  DOWN!).
 - Tomatoes 3 · "?" 0.8 s · 6–7 min.
 
 **Night 10 — "It Takes Two"** (whole house) — Act III finale
@@ -1079,7 +1257,7 @@ nerves, a new Double Act).
 | Lever | Prologue | Act I | Act II | Act III + Gala |
 |---|---|---|---|---|
 | "?" fill | 2.0 s | 1.0 s | 0.8 s | 0.8 s (never lower) |
-| Loop | scripted | 65–90 s | 85–95 s | 100–120 s |
+| Loop | scripted | ≤ 60 s (N1–2, D1); ~75–90 s (N3–4, draft) | 85–95 s | 100–120 s |
 | Required lines | 2 | 3 | 3 | 3–4 |
 | Characters | Bellows | Bellows | + Beryl | + Delphine (+ Beryl in the Gala) |
 | Tomatoes | ∞ | ∞ N1–3, 3 from N4 | 3 | 3 |
@@ -1097,7 +1275,7 @@ first clear exceeds 8 min is split or trimmed.
 **Until the owner's fun gate passes, only three meta hooks exist** (the Booby lesson: meta comes last):
 1. **"Next Night ▶"** is the default results button and teases the next Night's new prop as a silhouette
    ("Tomorrow night: Bellows takes a bath…").
-2. **The Gag Reel** — your 3 best moments, re-staged from reaction records.
+2. **The Gag Reel** — your 3 best moments, re-staged in the set from a replay of the Night (§6.2).
 3. **Near-miss nudges** on the results screen ("Applause 91 — one more link…", "4/5 — the kettle is still out
    there…").
 
@@ -1257,7 +1435,8 @@ left-handed, volumes). Left out: Beryl, Delphine, upstairs, the garden, the pant
 ### 10.4 The fun gate (the owner plays the debug APK on his own phone)
 **Automated pre-checks (all must pass before he sees it):** the solver clears the Prologue, N1 and N2 on the
 *ideal* (★★★), *required-only* (★) and *slow first-timer* routes; Prologue: 6 laughs in 60 s (ideal) and first
-player laugh ≤ 10 s / first prank ≤ 30 s from launch (slow); dead air < 20 %; the fairness fuzz is green; every
+player laugh ≤ 10 s / first prank ≤ 30 s from launch (slow); dead air within the §2.4 gate (ideal ≤ 20 %,
+required ≤ 25 %, slow ≤ 30 %, worst gap ≤ 12 s, edge beats ≤ ⅓ of the beat credit); the fairness fuzz is green; every
 clip passes the animation lint; hotspot, content and IP lints pass; the **mute test** — at least 4 of 6 silent
 reaction GIFs read as jokes to a review agent that doesn't know the prank; review scores ≥ 3/5 on every gag;
 60 fps p95 with the Gag-Cam, PiP and particles at ≤ 150 draw calls; launch to first laugh ≤ 10 s on a budget
@@ -1291,7 +1470,7 @@ Android (measured from app launch).
 | R3 | **Emergence breaks fairness** | Deterministic sim, authored landing tables, one punchline at a time, fairness fuzz, solution replays per Night. |
 | R4 | **The mime divides people** | Cast sheet + the sneeze GIF to the owner at Gate 0; Pip fallback kept rig-compatible. |
 | R5 | **Synthesised singing / laughter sounds robotic or creepy** | Week-1 A/B: formant baritone vs talking tuba; formant crowd vs applause/kazoo crowd. Owner picks. |
-| R6 | **Waiting** | Loops ≤ 90 s in Act I, ⏩ while hidden, lures, micro-gags every 5–8 s; dead air < 20 %. |
+| R6 | **Waiting** | Act I loops ≤ 60 s in the slice, ⏩ while hidden (taught in the Prologue), lures, timed micro-gags every 5–8 s; the §2.4 dead-air gate (real time with ⏩, visible beats only) on every route. |
 | R7 | **Touch misreads** | Touch-up activation, 144 px hit boxes, 90 px assist, verb latch, queue, idempotent taps; on-device 19/20 test. |
 | R8 | **Performance / startup** | Runtime atlases (≈ 1–3 draw calls per character), PiP at 30 Hz, ≤ 8 particle emitters; HiResTex warm hidden under the curtain; measured on a budget Android in Stage 2. |
 | R9 | **Content cost** | 22 archetypes + procedural tiers; one prank timed end to end before Stage 3; per-Act owner checks; cut order in PLAN.md. |

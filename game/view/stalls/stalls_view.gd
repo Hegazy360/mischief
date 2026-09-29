@@ -29,6 +29,10 @@ const SPRING_C := 13.0
 const BAND_LEFT := 800.0
 const BAND_RIGHT := 312.0
 const BALLOON_S := 1.6
+## The silhouettes are drawn at ≤ 0.8× their 1× size (front row 0.8, back row 0.62) in one flat
+## fill: the atlas is rasterised at 0.8× (lossless on screen; s2-fix G #7: 17.7 → 11.3 MB). Regions
+## are atlas px, destination rects stay in 1× px, so drawing is unchanged.
+const ATLAS_SCALE := 0.8
 const TUMBLE_F_PER_FRAME := 8
 ## Motion per laugh tier (the GDD §6.5 table as data; tiers.json overrides key by key).
 const DEFAULT_TIERS := {
@@ -310,7 +314,7 @@ func _atlas_from_json() -> bool:
 			if ti != null:
 				imgs.append(ti)
 				nt += 1
-				_tumble_size = _v2((tf as Dictionary).get("size", [ti.get_width(), ti.get_height()]))
+				_tumble_size = _v2((tf as Dictionary).get("size", [ti.get_width() / ATLAS_SCALE, ti.get_height() / ATLAS_SCALE]))
 				_tumble_pivot = _v2((tf as Dictionary).get("pivot", [_tumble_size.x * 0.5, _tumble_size.y]))
 	var rects := _pack(imgs)
 	if rects.is_empty():
@@ -322,7 +326,7 @@ func _atlas_from_json() -> bool:
 		_laugh.append(rects[src * 4 + 1])
 		_lean.append(rects[src * 4 + 2])
 		_point.append(rects[src * 4 + 3])
-		var sz := _v2(hd2.get("size", [rects[src * 4].size.x, rects[src * 4].size.y]))
+		var sz := _v2(hd2.get("size", [rects[src * 4].size.x / ATLAS_SCALE, rects[src * 4].size.y / ATLAS_SCALE]))
 		_size.append(sz)
 		_pivot.append(_v2(hd2.get("pivot", [sz.x * 0.5, sz.y])))
 		_face[i] = float(hd2.get("face_dir", 1))
@@ -343,7 +347,19 @@ static func _v2(v: Variant) -> Vector2:
 func _image_of(path: String) -> Image:
 	if path == "":
 		return null
-	var t := ViewKit.tex(path)
+	# The atlas is packed in 1× px: rasterise the SVG at 1× straight into an Image (s2-fix G #7 —
+	# going through ViewKit.tex left ~100 unused 2× textures alive, 65 MB).
+	var hs := ViewKit.soft_script(ViewKit.HIRES_PATH)
+	if hs != null and hs.has_method("rasterize") and path.get_extension().to_lower() == "svg":
+		var raw: Variant = hs.call("rasterize", path, {}, ATLAS_SCALE)
+		if raw is Image and not (raw as Image).is_empty():
+			var ri := raw as Image
+			if ri.get_format() != Image.FORMAT_RGBA8:
+				ri.convert(Image.FORMAT_RGBA8)
+			return ri
+	if not ResourceLoader.exists(path):
+		return null
+	var t := load(path) as Texture2D
 	if t == null:
 		return null
 	var img := t.get_image()
@@ -352,10 +368,9 @@ func _image_of(path: String) -> Image:
 	if img.is_compressed():
 		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
-	# Keep layout in 1× px: scale down hi-res rasters to the texture's reported size.
-	var sz := t.get_size()
+	var sz := t.get_size() * ATLAS_SCALE
 	if img.get_width() != int(sz.x) and sz.x > 0.0:
-		img.resize(int(sz.x), int(sz.y), Image.INTERPOLATE_BILINEAR)
+		img.resize(maxi(1, int(sz.x)), maxi(1, int(sz.y)), Image.INTERPOLATE_BILINEAR)
 	return img
 
 
@@ -384,6 +399,8 @@ func _pack(imgs: Array[Image]) -> Array[Rect2]:
 	var ts := ViewKit.soft_script("res://view/tex/tex_stats.gd")
 	if ts != null and ts.has_method("note_build"):
 		ts.call("note_build", "stalls")
+	if ts != null and ts.has_method("track_image"):
+		ts.call("track_image", _atlas, atlas, "stalls", "stalls:atlas")
 	return out
 
 

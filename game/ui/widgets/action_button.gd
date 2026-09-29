@@ -308,13 +308,13 @@ func _draw() -> void:
 	if is_pressed or _toggled:
 		k *= UiKit.PRESS_SCALE
 	draw_set_transform(c, 0.0, Vector2(k, k))
-	draw_circle(Vector2(0, 8), VISUAL * 0.5, Color(UiKit.NAVY, 0.35))
+	# each face = one triangle array (shadow, disc, rim) + its icons (s2-fix G #8)
 	var ft := float(now - _fade_from_ms) / float(FADE_MS)
 	if ft >= 0.0 and ft < 1.0 and _prev_verb >= 0:
-		_draw_face(_prev_verb, 1.0 - ft)
+		_draw_face(_prev_verb, 1.0 - ft, true)
 		_draw_face(shown_verb, ft)
 	else:
-		_draw_face(shown_verb, 1.0)
+		_draw_face(shown_verb, 1.0, true)
 	draw_set_transform(c, 0.0, Vector2.ONE)
 	if shown_verb == V.RIG:
 		_draw_ring(now)
@@ -322,7 +322,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 
-func _draw_face(v: int, a: float) -> void:
+func _draw_face(v: int, a: float, with_shadow: bool = false) -> void:
 	var r := VISUAL * 0.5
 	var down := is_pressed or _toggled
 	var fill: Color
@@ -347,16 +347,24 @@ func _draw_face(v: int, a: float) -> void:
 		fill = UiKit.pressed(fill)
 		shade = UiKit.pressed(shade)
 	var m := Color(1, 1, 1, a)
-	draw_circle(Vector2.ZERO, r, Color(UiKit.NAVY, a))
-	draw_circle(Vector2.ZERO, r - UiKit.BUTTON_OUTLINE, Color(shade, a))
-	draw_circle(Vector2(0, -r * 0.08), (r - UiKit.BUTTON_OUTLINE) * 0.9, Color(fill, a))
+	UiShapes.begin()
+	if with_shadow:
+		UiShapes.circle(Vector2(0, 8), VISUAL * 0.5, Color(UiKit.NAVY, 0.35))
+	UiShapes.circle(Vector2.ZERO, r, Color(UiKit.NAVY, a))
+	UiShapes.circle(Vector2.ZERO, r - UiKit.BUTTON_OUTLINE, Color(shade, a))
+	UiShapes.circle(Vector2(0, -r * 0.08), (r - UiKit.BUTTON_OUTLINE) * 0.9, Color(fill, a))
+	if v == V.POP_OUT or not (v == V.RIG or v == V.RIG_DIM or v == V.FREEZE):
+		_draw_rim(r, a)
+	UiShapes.flush(self)
 	match v:
 		V.RIG:
 			var main: Texture2D = _item_tex if _item_tex != null else _tex_hand
 			if _target_tex != null:
 				UiKit.draw_icon(self, main, Rect2(-62, -64, ICON, ICON), m)
-				draw_circle(Vector2(38, 34), 38, Color(UiKit.NAVY, a))
-				draw_circle(Vector2(38, 34), 33, Color(UiKit.CREAM, a))
+				UiShapes.begin()
+				UiShapes.circle(Vector2(38, 34), 38, Color(UiKit.NAVY, a))
+				UiShapes.circle(Vector2(38, 34), 33, Color(UiKit.CREAM, a))
+				UiShapes.flush(self)
 				UiKit.draw_icon(self, _target_tex, Rect2(12, 8, 52, 52), m)
 				_draw_arrow(a)
 			else:
@@ -368,16 +376,17 @@ func _draw_face(v: int, a: float) -> void:
 		V.FREEZE:
 			UiKit.draw_icon(self, _tex_freeze, Rect2(-ICON * 0.5 - 2, -ICON * 0.5 - 8, ICON + 4, ICON + 4), m)
 		V.POP_OUT:
-			_draw_rim(r, a)
 			UiKit.draw_icon(self, _tex_pop, Rect2(-ICON * 0.5, -ICON * 0.5 - 4, ICON, ICON), m)
 		_:
-			_draw_rim(r, a)
 			UiKit.draw_icon(self, _tex_pin, Rect2(-26, -76, 52, 52), m)
 			var f := UiKit.display_font()
 			UiKit.draw_text_centered(self, f, Vector2(-22, 26), _go_text, 56, Color(UiKit.CREAM, a), 10,
 				Color(UiKit.NAVY, a))
-			draw_colored_polygon(GO_TRI, Color(UiKit.CREAM, a))
-			draw_polyline(GO_TRI_LINE, Color(UiKit.NAVY, a), 5.0, true)
+			UiShapes.begin()
+			UiShapes.poly(GO_TRI, Color(UiKit.CREAM, a))
+			for i in GO_TRI_LINE.size() - 1:
+				UiShapes.line(GO_TRI_LINE[i], GO_TRI_LINE[i + 1], Color(UiKit.NAVY, a), 5.0)
+			UiShapes.flush(self)
 
 
 func _draw_rim(r: float, a: float) -> void:
@@ -385,21 +394,27 @@ func _draw_rim(r: float, a: float) -> void:
 	var w := 14.0
 	if rim == HudModel.Rim.RED and not UiKit.reduce_flash():
 		w += 4.0 * (0.5 + 0.5 * sin(float(UiKit.now_ms()) * 0.001 * TAU * 2.0))
-	draw_arc(Vector2.ZERO, r - UiKit.BUTTON_OUTLINE - w * 0.5 + 1.0, 0.0, TAU, 64, Color(col, a), w, true)
+	UiShapes.arc(Vector2.ZERO, r - UiKit.BUTTON_OUTLINE - w * 0.5 + 1.0, 0.0, TAU, w, Color(col, a), 64)
 
 
 func _draw_arrow(a: float) -> void:
-	draw_polyline(ARROW_PTS, Color(UiKit.NAVY, a), 9.0, true)
-	draw_polyline(ARROW_PTS, Color(UiKit.CREAM, a), 4.0, true)
+	UiShapes.begin()
+	for w in [9.0, 4.0]:
+		var col := Color(UiKit.NAVY if w > 5.0 else UiKit.CREAM, a)
+		for i in ARROW_PTS.size() - 1:
+			UiShapes.line(ARROW_PTS[i], ARROW_PTS[i + 1], col, w)
+			UiShapes.circle(ARROW_PTS[i + 1], w * 0.5, col)
+	UiShapes.flush(self)
 
 
 func _draw_ring(now: int) -> void:
-	draw_arc(Vector2.ZERO, RING_R, 0.0, TAU, 72, Color(UiKit.NAVY, 0.55), RING_W + 8.0, true)
-	if ring_frac <= 0.0:
-		return
-	var col := ring_color(ring_frac)
-	var s := ring_pulse(ring_frac, now)
-	UiKit.draw_ring(self, Vector2.ZERO, RING_R, ring_frac, RING_W + 5.0 * s, col.lightened(0.25 * s))
+	UiShapes.begin()
+	UiShapes.arc(Vector2.ZERO, RING_R, 0.0, TAU, RING_W + 8.0, Color(UiKit.NAVY, 0.55), 72)
+	if ring_frac > 0.0:
+		var col := ring_color(ring_frac)
+		var s := ring_pulse(ring_frac, now)
+		UiKit.draw_ring(self, Vector2.ZERO, RING_R, ring_frac, RING_W + 5.0 * s, col.lightened(0.25 * s))
+	UiShapes.flush(self)
 
 
 ## The RIG ring's colour at `frac`: yellow → green (GDD §3.2).

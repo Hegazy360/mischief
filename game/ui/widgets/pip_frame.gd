@@ -125,8 +125,10 @@ func _draw() -> void:
 	if ft >= 0.0 and ft < 1.0 and not UiKit.reduce_flash():
 		col = col.lerp(UiKit.WHITE, 0.6 * (1.0 - ft))
 	var a := _show_k
+	UiShapes.begin()   # the frame: one triangle array (s2-fix G #8)
 	UiKit.draw_chunky_rect(self, r.grow(INK), 14.0, Color(UiKit.NAVY, a), Color(UiKit.NAVY, a), 0.0, 0.0)
 	UiKit.draw_chunky_rect(self, r, 10.0, Color(col, a), Color(col, a), 0.0, 0.0)
+	UiShapes.flush(self)
 	var inner := r.grow(-BORDER)
 	if texture != null:
 		draw_texture_rect(texture, inner, false, Color(1, 1, 1, a))
@@ -134,8 +136,10 @@ func _draw() -> void:
 		draw_rect(inner, Color(UiKit.PLUM, a))
 	draw_rect(inner, Color(UiKit.NAVY, a), false, 3.0)
 	var gc := inner.position + Vector2(GLYPH * 0.5 + 8.0, inner.size.y - GLYPH * 0.5 - 8.0)
-	draw_circle(gc, GLYPH * 0.5 + 6.0, Color(UiKit.NAVY, a))
-	draw_circle(gc, GLYPH * 0.5 + 1.0, Color(UiKit.CREAM, a))
+	UiShapes.begin()
+	UiShapes.circle(gc, GLYPH * 0.5 + 6.0, Color(UiKit.NAVY, a))
+	UiShapes.circle(gc, GLYPH * 0.5 + 1.0, Color(UiKit.CREAM, a))
+	UiShapes.flush(self)
 	UiKit.draw_icon(self, _glyph_tex, Rect2(gc - Vector2(GLYPH, GLYPH) * 0.42, Vector2(GLYPH, GLYPH) * 0.84),
 		Color(1, 1, 1, a))
 	draw_set_transform(Vector2.ZERO)

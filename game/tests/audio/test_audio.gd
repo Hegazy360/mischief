@@ -412,7 +412,7 @@ func test_sfx_pool_caps_and_steals() -> void:
 		skip("sfx_map.json not generated")
 		return
 	var ids := ["woodblock_bonk", "boing_small", "boing_med", "boing_big", "slide_up", "slide_down", "whoosh", "zip",
-		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_scrape", "sink_splash"]
+		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_scrape", "sink_crash"]
 	for i in ids.size():
 		audio.play_sfx(ids[i], -1.0 + 2.0 * float(i) / float(ids.size() - 1))
 		audio.advance(0.04)

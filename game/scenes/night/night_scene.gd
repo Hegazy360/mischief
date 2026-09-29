@@ -184,6 +184,9 @@ func _exit_tree() -> void:
 # --- build --------------------------------------------------------------------------------------
 
 func _build() -> void:
+	# The previous Night's art that no node holds any more is freed before this one is built
+	# (texture memory, s2-fix G #7).
+	ViewKit.release_textures()
 	var content := ViewKit.autoload("Content")
 	db = content.get("db") if content != null else null
 	var sw := ViewKit.soft_script("res://sim/world/sim_world.gd")
@@ -217,6 +220,8 @@ func _build() -> void:
 		return
 	world_view.cam = cam
 	add_child(world_view)
+	_warm_list = NightWarm.list(episode_id)
+	world_view.warm_hint = _warm_list
 	world_view.setup(db, world.get("episode"), driver)
 	add_child(cam)
 	cam.setup(world_view.layout)
@@ -252,6 +257,8 @@ func _build() -> void:
 		hud.call("attach_pip", pip)
 	else:
 		hud.set_pip_texture(pip.get_texture())
+	if world_view.fx != null:
+		world_view.fx.avoid_screen_fn = _caption_avoid
 	var hd := ViewKit.soft_script(HAPTICS_DIRECTOR)
 	if hd != null:
 		haptics_dir = hd.new()
@@ -275,6 +282,27 @@ func _build() -> void:
 	add_child(warmer)
 	reel_log.clone_every = CLONE_EVERY
 	_set_phase(Phase.BUILD)
+
+
+var _avoid_buf: Array[Rect2] = []
+## NightWarm.list(episode) computed once at build (WorldView starts its jobs early; the warmer
+## works through it).
+var _warm_list: Dictionary = {}
+
+
+## Screen rects a pun caption must clear (s2-fix G #2): the HUD's top band — the meter and the
+## Running-Gag banner — and the PiP while it shows.
+func _caption_avoid() -> Array[Rect2]:
+	_avoid_buf.clear()
+	if hud == null:
+		return _avoid_buf
+	var l: Dictionary = hud.layout
+	for key in [&"meter", &"banner"]:
+		if l.has(key):
+			_avoid_buf.append(l[key])
+	if pip != null and pip.is_shown():
+		_avoid_buf.append(hud.pip_rect())
+	return _avoid_buf
 
 
 func _wire_input() -> void:
@@ -356,7 +384,7 @@ func episode_raw() -> Dictionary:
 
 
 func _begin_flow() -> void:
-	warmer.start(NightWarm.list(episode_id), world_view, pip, curtain_layer)
+	warmer.start(_warm_list if not _warm_list.is_empty() else NightWarm.list(episode_id), world_view, pip, curtain_layer)
 	var skip := bool(params.get("skip_intro", false))
 	if not skip and _try_cold_open():
 		return
@@ -486,6 +514,8 @@ func start_rise(rise_s: float = NightCurtain.RISE_S) -> void:
 			a.call("music_state", "curtain")
 	curtain.rise(rise_s)
 	DeviceLog.mark("sim_start")
+	if DeviceLog.active() and not _retrying:
+		DeviceLog.note("tex_mb_by_kind", TexStats.memory_report(null).get("tracked", {}))
 	curtain_rose.emit()
 	if hud.has_method("flash_script") and not _retrying and episode_id != PROLOGUE and episode_id != G0_EPISODE:
 		presenter.refresh_script()
@@ -528,7 +558,7 @@ func _set_live_input(on: bool) -> void:
 
 ## CLI: no curtain, no card; optional seek + hold.
 func _start_cli_now() -> void:
-	warmer.start(NightWarm.list(episode_id), world_view, pip, curtain_layer)
+	warmer.start(_warm_list if not _warm_list.is_empty() else NightWarm.list(episode_id), world_view, pip, curtain_layer)
 	warmer.finish_now()
 	curtain.set_up()
 	rise_frame = frame_n

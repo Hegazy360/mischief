@@ -40,6 +40,8 @@ def P(name, base=None, root=None, face=None, tags=(), sil=None, plant=True, hold
 	res = dict(RES[base]) if base else {}
 	res.setdefault("_abs", {})
 	res["_abs"] = dict(res["_abs"])
+	if root and "rot" in root:
+		res["_root_rot"] = root["rot"]
 	for part, ch in b.items():
 		if "rot" in ch:
 			if part in LEGS:
@@ -54,7 +56,7 @@ def P(name, base=None, root=None, face=None, tags=(), sil=None, plant=True, hold
 	for hold, (au, al, hand) in ((hold_r, ("arm_upper_r", "arm_lower_r", "hand_r")),
 								 (hold_l, ("arm_upper_l", "arm_lower_l", "hand_l"))):
 		if hold is not None:
-			rot = hold - 90 - (t + res.get(au, 0) + res.get(al, 0))
+			rot = hold - 90 - (res.get("_root_rot", 0) + t + res.get(au, 0) + res.get(al, 0))
 			rot = (rot + 180) % 360 - 180
 			b.setdefault(hand, {})["rot"] = round(rot, 1)
 			res[hand] = b[hand]["rot"]

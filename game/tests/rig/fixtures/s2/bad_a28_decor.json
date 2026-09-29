@@ -1,0 +1,37 @@
+{
+ "version": 1,
+ "clip": "_mannequin/decor_test",
+ "rig": "_mannequin",
+ "loop": false,
+ "length": 40,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 20,
+   "pose": "m_notice",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 40,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 0,
+   "type": "decor",
+   "id": "no_such_decor",
+   "visible": false
+  },
+  {
+   "f": 20,
+   "type": "decor",
+   "id": "kitchen_stool"
+  }
+ ]
+}

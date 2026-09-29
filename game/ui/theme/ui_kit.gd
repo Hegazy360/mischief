@@ -104,11 +104,17 @@ static func font(path: String) -> Font:
 	var f: Font = null
 	if ResourceLoader.exists(path):
 		f = load(path) as Font
+		# The .ttf.import sidecars set multichannel_signed_distance_field=true (Stage 2), so the
+		# flag switch is a no-op on imported fonts; the pixel range (24, for the 12 px world
+		# outlines) and the glyph size stay runtime settings — set only when they differ.
 		var ff := f as FontFile
-		if ff != null and not ff.multichannel_signed_distance_field:
-			ff.msdf_pixel_range = 24
-			ff.msdf_size = 64
-			ff.multichannel_signed_distance_field = true
+		if ff != null:
+			if ff.msdf_pixel_range != 24:
+				ff.msdf_pixel_range = 24
+			if ff.msdf_size != 64:
+				ff.msdf_size = 64
+			if not ff.multichannel_signed_distance_field:
+				ff.multichannel_signed_distance_field = true
 	if f == null:
 		f = ThemeDB.fallback_font
 	_fonts[path] = f

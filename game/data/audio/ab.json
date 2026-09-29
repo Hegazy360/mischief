@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "_comment": "Gate-0 A/B pairs (owner s2-sound). The stage door's Voice A/B and Crowd A/B pages play a / b with Audio.preview(id, style) and 'use this' sets Settings voice_style / crowd_style. label = the English fallback, label_key = the UiStrings key when it exists. After Gate 0 the losing side is deleted and this file shrinks to what is still useful.",
+  "voice": [
+    {"id": "warmup", "label": "The warm-up: MI-MI-MIIII", "label_key": "stage_door.ab_warmup",
+     "a": {"id": "vo_bellows_warmup_1", "style": "formant"}, "b": {"id": "vo_bellows_warmup_1", "style": "tuba"}},
+    {"id": "sneeze", "label": "The sneeze: ah... ahh... AHHH... hm. CHOO!", "label_key": "stage_door.ab_sneeze",
+     "a": {"id": "vo_bellows_sneeze_seq", "style": "formant"}, "b": {"id": "vo_bellows_sneeze_seq", "style": "tuba"}},
+    {"id": "pipe_down", "label": "PIPE DOWN!", "label_key": "stage_door.ab_pipe_down",
+     "a": {"id": "vo_bellows_pipe_down_1", "style": "formant"}, "b": {"id": "vo_bellows_pipe_down_1", "style": "tuba"}},
+    {"id": "lecture_a", "label": "The Lecture (A)", "label_key": "stage_door.ab_lecture_a",
+     "a": {"id": "vo_bellows_lecture_a", "style": "formant"}, "b": {"id": "vo_bellows_lecture_a", "style": "tuba"}},
+    {"id": "the_pipes", "label": "...the pipes.", "label_key": "stage_door.ab_the_pipes",
+     "a": {"id": "vo_bellows_the_pipes_1", "style": "formant"}, "b": {"id": "vo_bellows_the_pipes_1", "style": "tuba"}}
+  ],
+  "crowd": [
+    {"id": "t2", "label": "A laugh (T2)", "label_key": "stage_door.ab_t2",
+     "a": {"id": "crowd_t2_1", "style": "formant"}, "b": {"id": "crowd_t2_1", "style": "fallback"}},
+    {"id": "sneeze_t3", "label": "The sneeze's laugh + applause (T3)", "label_key": "stage_door.ab_sneeze_t3",
+     "a": {"id": "crowd_t3_1", "style": "formant"}, "b": {"id": "crowd_t3_1", "style": "fallback"}},
+    {"id": "t4", "label": "The roar (T4)", "label_key": "stage_door.ab_t4",
+     "a": {"id": "crowd_t4_1", "style": "formant"}, "b": {"id": "crowd_t4_1", "style": "fallback"}},
+    {"id": "relief", "label": "Relief (a near miss)", "label_key": "stage_door.ab_relief",
+     "a": {"id": "crowd_relief_1", "style": "formant"}, "b": {"id": "crowd_relief_1", "style": "fallback"}},
+    {"id": "behind_you", "label": "BEHIND YOU!", "label_key": "stage_door.ab_behind_you",
+     "a": {"id": "crowd_behind_you_1", "style": "formant"}, "b": {"id": "crowd_behind_you_1", "style": "fallback"}}
+  ]
+}

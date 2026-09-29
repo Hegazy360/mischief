@@ -103,16 +103,32 @@ def honey(reg):
         return group(items, rot=ang, cx=x, cy=y) if ang else group(items)
 
     p.add("idle", jar(), pepper(cx + 56, base))
-    # rigged: the cap is off, pepper pot tipped into the jar mouth, a black heap on the dipper + falling specks
-    p.add("rigged", jar(cap=False))
-    p.add("rigged", pepper(cx + 36, base - 92, ang=-118))
+    # rigged (ACHOO-RIA!): the cloth cap flung off beside the jar, the pepper pot upside down and stuck in
+    # the jar mouth, a black volcano of pepper heaped out of the honey with specks running down the glass and
+    # a pepper-dust puff above it - the silhouette changes on both sides at phone scale (no text needed)
+    p.add("rigged", jar(cap=False, dipper_in=False))
+    heap = PB().M(cx - 30, base - 76).Q(cx - 22, base - 96, cx - 8, base - 104).Q(cx + 2, base - 112, cx + 12, base - 104)
+    heap.Q(cx + 26, base - 96, cx + 32, base - 76).Q(cx, base - 70, cx - 30, base - 76).Z()
+    p.add("rigged", path(heap, fill=pal.PEPPER, sil=True), path(heap, fill="none", sw=D, stroke=INK, sil=True))
+    runs = PB()
+    for (rx, ry, rl) in [(cx - 20, base - 72, 22), (cx + 4, base - 70, 34), (cx + 22, base - 72, 16)]:
+        runs.M(rx - 4, ry).L(rx + 4, ry).L(rx + 3, ry + rl).Q(rx, ry + rl + 6, rx - 3, ry + rl).Z()
+    p.add("rigged", path(runs, fill=pal.PEPPER, sil=False))
     specks = PB()
-    for i, (sx, sy) in enumerate([(cx - 2, base - 82), (cx + 8, base - 84), (cx - 10, base - 80), (cx + 2, base - 88),
-                                  (cx - 6, base - 90), (cx + 14, base - 90), (cx - 16, base - 86)]):
-        specks.circle(sx, sy, 3.2 if i % 2 else 2.6)
-    p.add("rigged", path(PB().M(cx - 22, base - 80).Q(cx, base - 100, cx + 20, base - 80).Z(), fill=pal.PEPPER, sil=False))
+    for i, (sx, sy) in enumerate([(cx - 14, base - 40), (cx + 16, base - 30), (cx - 4, base - 22), (cx + 26, base - 52),
+                                  (cx - 26, base - 56), (cx + 6, base - 48)]):
+        specks.circle(sx, sy, 3.0 if i % 2 else 2.4)
     p.add("rigged", path(specks, fill=pal.PEPPER, sil=False))
-    p.add("rigged", sparkle(cx - 40, base - 96, 11, col=pal.HONEY[2]))
+    p.add("rigged", pepper(cx + 6, base - 126, ang=172))
+    dust = PB().circle(cx - 34, base - 128, 11).circle(cx - 46, base - 146, 8).circle(cx + 38, base - 136, 9) \
+        .circle(cx + 50, base - 154, 6.5).circle(cx - 26, base - 160, 6)
+    p.add("rigged", path(dust, fill=pal.PEPPER, fop=0.35, sil=False))
+    # the flung cap, lying crumpled where the pepper pot stood
+    cap = [(cx + 36, base), (cx + 40, base - 16), (cx + 58, base - 26), (cx + 78, base - 20), (cx + 86, base),
+           (cx + 70, base - 6), (cx + 52, base - 4)]
+    p.add("rigged", shape(cap, pal.PINK[0], W, smooth=True, t=0.4))
+    p.add("rigged", detail(PB().M(cx + 50, base - 20).L(cx + 54, base - 4).M(cx + 66, base - 22).L(cx + 70, base - 4), 2.5))
+    p.add("rigged", sparkle(cx - 52, base - 96, 12, col=pal.HONEY[2]))
     emit(reg, "kitchen_honey", p)
 
 
@@ -357,11 +373,12 @@ def table(reg):
                         fill=cloth[1], fop=0.5, sil=False))
         out.append(detail(PB().M(cx - 50, top_y + 16).Q(cx - 56, -90, cx - 52, hem).M(cx + 30, top_y + 16).Q(cx + 36, -90, cx + 32, hem), 2.5))
         if peek:
-            # the hem lifted in the middle: dark gap with Hush's eyes and glove fingers
-            gp = PB().M(cx - 44, hem - 6).Q(cx, -92, cx + 44, hem - 6).Z()
+            # the cloth hem lifted in a wide arch: a dark gap under the table for Hush's animated eyes
+            gp = PB().M(cx - 84, hem - 4).L(cx - 80, -74).Q(cx - 74, -106, cx - 40, -108).L(cx + 40, -108)
+            gp.Q(cx + 74, -106, cx + 80, -74).L(cx + 84, hem - 4).Z()
             out.append(path(gp, fill=pal.DARK_GAP, sil=False))
-            out += hush_eyes(cx, -46, look=-1, s=0.9)
-            out += glove_fingers(cx + 30, -72, side=-1, s=0.9, n=2)
+            fold = PB().M(cx - 86, -70).Q(cx - 80, -112, cx - 40, -114).L(cx + 40, -114).Q(cx + 80, -112, cx + 86, -70)
+            out.append(path(fold, fill="none", sw=D + 1, stroke=INK, sil=False))
         out.append(ink(pb))
         # table top edge (the cloth drapes over it)
         out.append(rect(x0 - 10, top_y - 10, x1 - x0 + 20, 12, 6, fill=lift(cloth[0], 0.7), sw=W, stroke=INK))
@@ -371,7 +388,7 @@ def table(reg):
 
     p.add("idle", base())
     p.add("occupied", base(peek=True))
-    p.extra["eyes"] = [cx, -46]
+    p.extra["eyes"] = [cx, -58]
     emit(reg, "kitchen_table", p)
 
 
@@ -457,23 +474,32 @@ def pantry(reg):
         out += box(PX0 - 8, ya2 - 4, PX1 - PX0 + 16, 12, 6, pal.BRASS, D + 1, hi=False)
         halves = []
         mid = (PX0 + PX1) / 2
-        for side in (-1, 1):
-            xa = PX0 + 4 if side < 0 else mid + (6 if peek else 0)
-            xb = mid - (6 if peek else 0) if side < 0 else PX1 - 4
-            pb = PB().M(xa, ya2 + 8).L(xb, ya2 + 8)
-            # wavy hem
-            pb.L(xb + side * 3, yb2 - 6)
-            nn = 3
-            for i in range(nn):
-                x_a = xb - (i + 0.5) * (xb - xa) / nn
-                x_b = xb - (i + 1) * (xb - xa) / nn
-                pb.Q(x_a, yb2 + 6, x_b, yb2 - 6)
-            pb.Z()
-            halves.append((pb, xa, xb))
         if peek:
-            gap = PB().M(mid - 8, ya2 + 12).L(mid + 8, ya2 + 12).L(mid + 26, yb2 - 4).L(mid - 26, yb2 - 4).Z()
+            # both halves hauled apart at head height (a lens-shaped dark gap for Hush's animated eyes)
+            ey = -214
+            gap = PB().M(mid - 6, ya2 + 12).Q(mid - 34, ey - 76, mid - 58, ey).Q(mid - 54, ey + 90, mid - 30, yb2 - 4)
+            gap.L(mid + 30, yb2 - 4).Q(mid + 54, ey + 90, mid + 58, ey).Q(mid + 34, ey - 76, mid + 6, ya2 + 12).Z()
             out.append(path(gap, fill=pal.DARK_GAP, sil=False))
-            out += hush_eyes(mid, -214, look=-1, s=0.85)
+            for side in (-1, 1):
+                xo = PX0 + 4 if side < 0 else PX1 - 4
+                pb = PB().M(xo, ya2 + 8).L(mid + side * 6, ya2 + 8).Q(mid + side * 34, ey - 76, mid + side * 58, ey)
+                pb.Q(mid + side * 54, ey + 90, mid + side * 30, yb2 - 6)
+                pb.Q(mid + side * 30 + (xo - mid - side * 30) * 0.5, yb2 + 6, xo + side * 3, yb2 - 6).Z()
+                halves.append((pb, PX0 + 4 if side < 0 else mid + 62, mid - 62 if side < 0 else PX1 - 4))
+        else:
+            for side in (-1, 1):
+                xa = PX0 + 4 if side < 0 else mid
+                xb = mid if side < 0 else PX1 - 4
+                pb = PB().M(xa, ya2 + 8).L(xb, ya2 + 8)
+                # wavy hem
+                pb.L(xb + side * 3, yb2 - 6)
+                nn = 3
+                for i in range(nn):
+                    x_a = xb - (i + 0.5) * (xb - xa) / nn
+                    x_b = xb - (i + 1) * (xb - xa) / nn
+                    pb.Q(x_a, yb2 + 6, x_b, yb2 - 6)
+                pb.Z()
+                halves.append((pb, xa, xb))
         for pb, xa, xb in halves:
             out.append(path(pb, fill=fab[0]))
             # stripes (ticking) + folds
@@ -484,8 +510,6 @@ def pantry(reg):
                 x += 16
             out.append(path(st, fill="none", sw=3, stroke=fab[1], sil=False))
             out.append(ink(pb))
-        if peek:
-            out += glove_fingers(mid - 24, -190, side=-1, s=0.9, n=3)
         # tie-back sash hint on the rail rings
         rings = PB()
         x = PX0 + 8
@@ -498,6 +522,7 @@ def pantry(reg):
     c.add("idle", curtain())
     c.add("occupied", curtain(peek=True))
     c.extra["eyes"] = [(PX0 + PX1) / 2, -214]
+    c.extra["eyes_scale"] = 0.85
     emit(reg, "kitchen_pantry_curtain", c)
 
 
@@ -556,9 +581,8 @@ def sink(reg):
 
     def basin_and_tap(twisted=False, flop=False):
         out = []
-        # Belfast basin sitting on the worktop
-        out += box(SX0 + 6, top - 50, SX1 - SX0 - 12, 50, 10, pal.PORCELAIN, W, hi=True)
-        out.append(detail(PB().M(SX0 + 20, top - 38).L(SX1 - 20, top - 38), 2.5))
+        # Belfast basin sitting on the worktop (its front face is also the kitchen_sink_lip decor)
+        out += basin(top)
         # tap column at the back
         tx = cx + 34
         col = PB().M(tx, top - 52).L(tx, top - 112).Q(tx, top - 140, tx - 28, top - 140).L(tx - 46, top - 140)
@@ -588,6 +612,18 @@ def sink(reg):
     p.add("rigged", basin_and_tap(twisted=True))
     p.add("rigged", sparkle(cx - 56, top - 176, 12))
     emit(reg, "kitchen_sink_tap", p)
+    # the basin front drawn OVER the characters while he sits in the sink (ACHOO-RIA! / HOT & COLD / TAP DANCE):
+    # the same porcelain box as the prop, pixel-for-pixel, so his backside disappears behind the rim
+    lip = Prop("kitchen_sink_lip", "kitchen")
+    lip.add("idle", basin(top))
+    emit_decor(reg, "kitchen_sink_lip", lip, z=2, hidden=True, show="event")
+
+
+def basin(top):
+    """The Belfast basin on the sink worktop (x SX0+6 .. SX1-6, y top-50 .. top), shared by the prop and the lip."""
+    out = box(SX0 + 6, top - 50, SX1 - SX0 - 12, 50, 10, pal.PORCELAIN, W, hi=True)
+    out.append(detail(PB().M(SX0 + 20, top - 38).L(SX1 - 20, top - 38), 2.5))
+    return out
 
 
 def drops(pts):
@@ -617,15 +653,22 @@ def window(reg):
         out = []
         out += box(x0, ya, x1 - x0, yb - ya, 6, frame, W, hi=False)
         if open_:
-            # lower sash pushed up over the upper one: the lower half is an open hole to the garden
-            out += outside(mid + 4, yb - 12)
-            out += outside(ya + 12, mid - 4)
-            out.append(path(PB().M(x0 + 20, ya + 20).L(x0 + 50, ya + 20).L(x0 + 30, mid - 10).L(x0 + 16, mid - 10).Z(), fill="#FFFFFF",
-                            fop=0.55, sil=False))
-            # both sashes stacked at the top
-            out.append(rect(x0 + 6, ya + 6, x1 - x0 - 12, mid - ya + 6, 4, fill="none", sw=D + 2, stroke=INK, sil=False))
-            out.append(rect(x0 + 10, mid - 6, x1 - x0 - 20, 14, 4, fill=frame[1], sw=D, stroke=INK, sil=False))
-            out.append(rect(x0 + 10, ya + 44, x1 - x0 - 20, 12, 3, fill=frame[1], sw=D, stroke=INK, sil=False))
+            # Hush's climb-in: the lower sash shoved right up behind the upper one, so the top quarter is a
+            # double frame (two meeting rails, the lift handles hanging under it) and everything below is a
+            # clean hole to the garden - no glass, no glints, a breeze curling in over the sill
+            stack = ya + 62
+            out += outside(ya + 12, yb - 12)
+            out.append(path(PB().M(x0 + 18, ya + 18).L(x0 + 40, ya + 18).L(x0 + 28, stack - 12).L(x0 + 16, stack - 12).Z(),
+                            fill="#FFFFFF", fop=0.55, sil=False))
+            out.append(rect(x0 + 6, ya + 6, x1 - x0 - 12, stack - ya + 6, 4, fill="none", sw=D + 2, stroke=INK, sil=False))
+            out.append(rect(x0 + 8, stack - 8, x1 - x0 - 16, 16, 4, fill=frame[1], sw=D, stroke=INK, sil=False))
+            out.append(rect(x0 + 8, ya + 30, x1 - x0 - 16, 12, 3, fill=frame[1], sw=D, stroke=INK, sil=False))
+            for hx in (x0 + 34, x1 - 34):
+                out.append(path(PB().M(hx - 7, stack + 8).L(hx - 7, stack + 16).Q(hx, stack + 22, hx + 7, stack + 16).L(hx + 7, stack + 8),
+                                fill="none", sw=D, stroke=INK, sil=False))
+            breeze = PB().M(x0 + 22, yb - 40).Q(x0 + 52, yb - 60, x0 + 70, yb - 42).Q(x0 + 84, yb - 30, x0 + 72, yb - 24)
+            breeze.M(x0 + 30, yb - 78).Q(x0 + 60, yb - 96, x0 + 82, yb - 80)
+            out.append(path(breeze, fill="none", sw=D, stroke="#FFFFFF", sil=False))
         else:
             out += outside(ya + 12, yb - 12)
             out.append(path(PB().M(x0 + 20, ya + 20).L(x0 + 50, ya + 20).L(x0 + 30, mid - 10).L(x0 + 16, mid - 10).Z(), fill="#FFFFFF",
@@ -698,19 +741,30 @@ def back_door(reg):
 
 
 # =============================================================================== decor
+STOOL_X = 3000        # = st_tea stand_x: he sits on it facing -1 (house.json decor kitchen_stool, STYLE §8)
+STOOL_SEAT_Y = -150   # top of the seat cushion (world y): the seat pivot the Bellows stool prop rides on
+
+
 def stool(reg):
+    """The tea stool under st_tea. ONE SVG shared with s2-anim-bellows' stool prop (same look), so its
+    canvas carries two documented pivots: `seat` (top-centre of the cushion, where his backside sits) and
+    `foot` (floor contact centre, for squash / hop-back). The view hides this decor while his own is out."""
     p = Prop("kitchen_stool", "kitchen")
-    cx = 2884
+    cx = STOOL_X
     wood = pal.LIGHTWOOD
-    out = [shadow(cx, -4, 40, 5)]
-    for (a, b) in [((cx - 22, -140), (cx - 34, -4)), ((cx + 22, -140), (cx + 34, -4)), ((cx - 6, -140), (cx - 10, -8))]:
+    out = [shadow(cx, -4, 42, 5)]
+    for (a, b) in [((cx - 22, STOOL_SEAT_Y + 16), (cx - 36, -4)), ((cx + 22, STOOL_SEAT_Y + 16), (cx + 36, -4)),
+                   ((cx - 4, STOOL_SEAT_Y + 16), (cx - 8, -8))]:
         pb = PB().M(*a).L(*b)
         out += [path(pb, fill="none", sw=15, stroke=INK), path(pb, fill="none", sw=7, stroke=wood[0], sil=False)]
-    rung = PB().M(cx - 28, -60).L(cx + 28, -60)
+    rung = PB().M(cx - 29, -58).L(cx + 29, -58)
     out += [path(rung, fill="none", sw=11, stroke=INK), path(rung, fill="none", sw=4, stroke=wood[1], sil=False)]
-    out += box(cx - 38, -156, 76, 18, 8, ("#E07F5C", "#C0633F", "#F6B8A0"), W, hi=True)
+    out += box(cx - 40, STOOL_SEAT_Y, 80, 20, 9, ("#E07F5C", "#C0633F", "#F6B8A0"), W, hi=True)
     p.add("idle", out)
-    emit_decor(reg, "kitchen_stool", p, z=0)
+    pos, size = emit_decor(reg, "kitchen_stool", p, z=0)
+    d = reg.decor[-1]
+    d["pivots"] = {"seat": [int(cx - pos[0]), int(STOOL_SEAT_Y - pos[1])], "foot": [int(cx - pos[0]), int(0 - pos[1])]}
+    d["station"] = "st_tea"
 
 
 def pan_rail(reg):

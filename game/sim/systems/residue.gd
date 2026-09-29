@@ -80,6 +80,9 @@ func _check_combos(w: SimWorld) -> void:
 	for c in w.db.combo_list:
 		if combo_done[c.idx] == 1 or c.of.is_empty():
 			continue
+		# `rules.combos` (ruling L4): a disallowed pair simply keeps both residues — no combo, no score
+		if c.idx < w.ctx.combo_ok.size() and w.ctx.combo_ok[c.idx] == 0:
+			continue
 		var all := true
 		for k in c.of:
 			if not kinds.has(k):
@@ -107,12 +110,16 @@ func fixup_station(w: SimWorld, kind: String) -> int:
 	var b := w.bellows
 	var best := -1
 	var best_cost := 1 << 40
-	for pass_i in 2:
+	# passes: his floor among the Night's rooms + backstage, any floor among them, then (no such station at
+	# all — a content error the lint reports) anywhere, so a residue never stays for good
+	for pass_i in 4:
 		for si in cands:
 			var st := house.stations[si]
 			if st.room_idx < 0:
 				continue
-			if pass_i == 0 and house.rooms[st.room_idx].floor != b.floor:
+			if pass_i < 2 and not w.ctx.fixup_room_ok(st.room_idx):
+				continue
+			if (pass_i == 0 or pass_i == 2) and house.rooms[st.room_idx].floor != b.floor:
 				continue
 			var c := w.db.nav.cost(b.room, b.x_sub, st.room_idx, st.stand_sub, SimConst.MOVER_B_WALK)
 			if c >= 0 and c < best_cost:

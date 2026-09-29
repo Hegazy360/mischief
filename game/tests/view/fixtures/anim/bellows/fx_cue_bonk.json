@@ -1,0 +1,44 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_cue_bonk",
+ "rig": "bellows",
+ "loop": false,
+ "length": 36,
+ "layer": "overlay",
+ "mask": [
+  "head*",
+  "arm_upper_l*",
+  "arm_upper_r*",
+  "cravat"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 18,
+   "pose": "b_bonk_door",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 36,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 4,
+   "type": "sfx",
+   "id": "woodblock_bonk"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

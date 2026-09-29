@@ -1,0 +1,35 @@
+{
+ "version": 1,
+ "clip": "hush/fx_pickup",
+ "rig": "hush",
+ "loop": false,
+ "length": 30,
+ "layer": "overlay",
+ "mask": [
+  "torso*"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 15,
+   "pose": "h_pickup",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 30,
+   "pose": "h_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

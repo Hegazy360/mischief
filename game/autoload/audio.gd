@@ -16,8 +16,15 @@
 ##
 ## Gate-0 A/B: `set_voice_style("formant" | "tuba")` maps vo_bellows_* banks to
 ## vo_bellows_tuba_*; `set_crowd_style("formant" | "fallback")` maps crowd_* to crowd_fb_*
-## where a fallback file exists. `set_voice_squeaky(true)` (the SQUEAKY residue) maps
-## aria / shout banks to their +12 st vo_bellows_squeaky_* variants.
+## where a fallback file exists. Both follow the Settings keys `voice_style` / `crowd_style`
+## (on ready and on `changed`). `preview(id, style)` plays one voice / crowd id (or a timed
+## preview sequence) in a given style on its own players without touching Settings or the
+## current styles — the stage door's A/B pair buttons. `set_voice_squeaky(true)` (the SQUEAKY
+## residue) maps aria / shout banks to their +12 st vo_bellows_squeaky_* variants.
+##
+## Cycles (sfx_map.json "cycles"): an id whose members play in order — Hush's `step_pizz_up`
+## tiptoe walks up the E-minor scale and back down, and starts at the bottom again after
+## `reset_s` without a step.
 ##
 ## Volumes follow the Settings keys music_vol, sfx_vol (also the UI bus), voice_vol and
 ## crowd_vol when a Settings autoload exists (soft hook). Fades and ducks run on wall-clock
@@ -39,7 +46,14 @@ const SETTING_KEYS := {"Music": "music_vol", "SFX": "sfx_vol", "UI": "sfx_vol", 
 const MUSIC_STATES: PackedStringArray = ["curtain", "sneak", "suspense", "chase", "results", "silence"]
 ## crowd(kind) kinds → priority (a busy crowd player is only stolen by an equal or higher one).
 const CROWD_KINDS := {"t0": 0, "t1": 1, "t2": 2, "t3": 3, "t4": 4, "ooh": 2, "gasp": 2, "aww": 2, "shh": 1,
-	"behind_you": 3, "chant": 3, "bow_chant": 3, "boo": 2, "relief": 2, "cheer": 3}
+	"shush": 1, "behind_you": 3, "chant": 3, "bow_chant": 3, "boo": 2, "relief": 2, "cheer": 3}
+## crowd(kind) spellings that play another kind's files (the Stalls say "shush" too).
+const CROWD_ALIASES := {"shush": "shh"}
+const VOICE_STYLES: PackedStringArray = ["formant", "tuba"]
+const CROWD_STYLES: PackedStringArray = ["formant", "fallback"]
+## Dedicated preview players (the A/B page) and the timed parts a preview sequence may queue.
+const PREVIEW_POOL := 3
+const PREVIEW_QUEUE := 16
 ## music state track → file id (chain tracks are "chain_1".."chain_4").
 const TRACK_FILES := {"sneak": "mus_sneak", "chase": "mus_chase", "curtain": "mus_curtain",
 	"results": "mus_results", "chain_1": "mus_chain_1", "chain_2": "mus_chain_2", "chain_3": "mus_chain_3",
@@ -85,6 +99,10 @@ var _aliases: Dictionary = {}        # name → name
 var _music: Dictionary = {}          # file id → {bpm, beats_per_bar, bars, spb, loop, path, len}
 var _stems: Dictionary = {}          # "sneak" → [base, layer...]
 var _vary: Dictionary = {}           # file id → pitch jitter fraction
+var _cycles: Dictionary = {}         # cycle id → {members, mode, reset_s}
+var _sequences: Dictionary = {}      # preview sequence id → [[t_s, id], ...]
+var _cycle_step: Dictionary = {}     # cycle id → steps taken in the current run
+var _cycle_last: Dictionary = {}     # cycle id → clock time of the last step
 var _streams: Dictionary = {}        # file id → AudioStream (null = missing)
 var _last_pick: Dictionary = {}      # bank id → last file id picked
 var _last_play: Dictionary = {}      # file id → clock time of its last start
@@ -109,6 +127,11 @@ var _crowd_players: Array[AudioStreamPlayer] = []
 var _crowd_started: PackedFloat64Array = []
 var _crowd_prio: PackedInt32Array = []
 var _crowd_ends: PackedFloat64Array = []
+var _preview: Array[AudioStreamPlayer] = []
+var _preview_next: int = 0
+var _preview_q_t: PackedFloat32Array = []      # seconds until the queued part plays (< 0 = free)
+var _preview_q_file: PackedStringArray = []
+var _preview_last: PackedStringArray = []      # the files the last preview() plays, in order (tests)
 
 # music
 var _mus: Array[AudioStreamPlayer] = []
@@ -143,6 +166,11 @@ func _ready() -> void:
 		_crowd_started.append(-1.0)
 		_crowd_prio.append(-1)
 		_crowd_ends.append(-1.0)
+	for i in PREVIEW_POOL:
+		_preview.append(_make_player("Preview%d" % i, "Voice"))
+	for i in PREVIEW_QUEUE:
+		_preview_q_t.append(-1.0)
+		_preview_q_file.append("")
 	for i in 2:
 		var p := _make_player("Music%d" % i, "Music")
 		p.volume_db = SILENT_DB
@@ -171,7 +199,8 @@ func play_sfx(id: String, pan := 0.0, vol_db := 0.0, pitch := 1.0) -> void:
 	if files.is_empty():
 		_warn(id)
 		return
-	var fid := _pick(_canonical(id), files)
+	var key := _canonical(id)
+	var fid := _cycle_next(key) if _cycles.has(key) else _pick(key, files)
 	var bus := String((_files[fid] as Dictionary).get("bus", "SFX"))
 	if bus == "Voice":
 		_play_voice_file(fid, vol_db, pan, pitch)
@@ -219,11 +248,12 @@ func crowd(kind: String) -> void:
 	if not CROWD_KINDS.has(kind):
 		_warn("crowd:" + kind)
 		return
-	var files := _styled_files("crowd_" + kind)
+	var k := String(CROWD_ALIASES.get(kind, kind))
+	var files := _styled_files("crowd_" + k)
 	if files.is_empty():
-		_warn("crowd_" + kind)
+		_warn("crowd_" + k)
 		return
-	var fid := _pick(_canonical("crowd_" + kind), files)
+	var fid := _pick(_canonical("crowd_" + k), files)
 	_play_crowd_file(fid, int(CROWD_KINDS[kind]), 0.0)
 
 
@@ -338,6 +368,95 @@ func set_crowd_style(style: String) -> void:
 		_warn("crowd_style:" + style)
 
 
+## Stage-door A/B: play one voice id (style "formant" | "tuba") or crowd id / kind (style
+## "formant" | "fallback") — or a preview sequence (sfx_map.json "sequences", e.g.
+## `vo_bellows_sneeze_seq`) — in exactly that style, on dedicated players, without touching
+## Settings or the current `voice_style` / `crowd_style`. A bank previews its first member
+## so both sides of a pair play the same take. A new preview cuts the previous one.
+func preview(id: String, style: String) -> void:
+	stop_preview()
+	var plan := _preview_plan(id, style)
+	_preview_last = PackedStringArray()
+	if plan.is_empty():
+		_warn("preview:" + id)
+		return
+	var qi := 0
+	for step: Array in plan:
+		var t := float(step[0])
+		var fid := String(step[1])
+		_preview_last.append(fid)
+		if t <= 0.0:
+			_play_preview_file(fid)
+		elif qi < PREVIEW_QUEUE:
+			_preview_q_t[qi] = t
+			_preview_q_file[qi] = fid
+			qi += 1
+
+
+## True when `preview(id, …)` has something to play (a preview sequence or any resolvable id).
+func has_preview(id: String) -> bool:
+	return _sequences.has(id) or has_sfx(id) or (CROWD_KINDS.has(id) and has_sfx("crowd_" + id))
+
+
+## The files `preview(id, style)` plays, in order (empty = nothing to play).
+func preview_files(id: String, style: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for step: Array in _preview_plan(id, style):
+		out.append(String(step[1]))
+	return out
+
+
+## [[t_s, file id], …] a preview plays: a sequence's parts (or the id itself at 0 s), each
+## resolved in `style` (a voice style for voice ids, a crowd style for crowd ids / kinds;
+## the other axis keeps its current style), the first member of a bank.
+func _preview_plan(id: String, style: String) -> Array:
+	var out: Array = []
+	var parts: Array = _sequences.get(id, [[0.0, id]])
+	var vs := style if VOICE_STYLES.has(style) else voice_style
+	var cs := style if CROWD_STYLES.has(style) else crowd_style
+	for part in parts:
+		var pid := String((part as Array)[1])
+		if CROWD_KINDS.has(pid):
+			pid = "crowd_" + String(CROWD_ALIASES.get(pid, pid))
+		var files := _styled_files_as(_canonical(pid), vs, cs, false)
+		if not files.is_empty():
+			out.append([float((part as Array)[0]), files[0]])
+	return out
+
+
+## Stop a running preview and drop its queued parts.
+func stop_preview() -> void:
+	for p: AudioStreamPlayer in _preview:
+		p.stop()
+	for i in PREVIEW_QUEUE:
+		_preview_q_t[i] = -1.0
+		_preview_q_file[i] = ""
+
+
+## True while a preview is sounding or has parts queued.
+func is_previewing() -> bool:
+	for p: AudioStreamPlayer in _preview:
+		if p.playing:
+			return true
+	for i in PREVIEW_QUEUE:
+		if _preview_q_t[i] >= 0.0:
+			return true
+	return false
+
+
+## The files the last `preview()` call plays, in order (tests / the A/B page's label).
+func last_preview_files() -> PackedStringArray:
+	return _preview_last
+
+
+## Cut Bellows' voice (a reaction or bit interrupting a line mid-phrase): fades nothing, just
+## stops the voice players and lifts the crowd duck.
+func stop_voice() -> void:
+	for p: AudioStreamPlayer in _voice:
+		p.stop()
+	_voice_until = -1.0
+
+
 # =============================================================================== additions
 
 ## SQUEAKY residue on/off: arias and shouts come out +12 semitones.
@@ -348,7 +467,7 @@ func set_voice_squeaky(on: bool) -> void:
 ## Pause menu: pauses one-shots, voices and the crowd; ducks the music.
 func set_paused(on: bool) -> void:
 	_paused = on
-	for arr in [_sfx, _voice, _crowd_players]:
+	for arr in [_sfx, _voice, _crowd_players, _preview]:
 		for p: AudioStreamPlayer in arr:
 			p.stream_paused = on and p.playing
 
@@ -390,6 +509,11 @@ func resolve_files(id: String) -> PackedStringArray:
 			for f: String in _banks[name]:
 				if _files.has(f):
 					out.append(f)
+			return out
+		if _cycles.has(name):
+			for f in (_cycles[name] as Dictionary).get("members", []):
+				if _files.has(String(f)):
+					out.append(String(f))
 			return out
 		if not _aliases.has(name):
 			return out
@@ -465,6 +589,7 @@ func advance(dt: float) -> void:
 			_fire_pending()
 	_advance_music(dt)
 	_advance_ducks(dt)
+	_advance_preview(dt)
 
 
 # =============================================================================== pure helpers
@@ -504,6 +629,18 @@ static func pick_index(count: int, last: int, roll: int) -> int:
 		return roll % count
 	var i := roll % (count - 1)
 	return i + 1 if i >= last else i
+
+
+## Member index of step `step` (0 = the first) of a cycle of `count` members: "pingpong" walks
+## up and back down without repeating the ends (0 1 … n−1 n−2 … 1 0 1 …), anything else wraps.
+static func cycle_index(step: int, count: int, mode: String) -> int:
+	if count <= 1:
+		return 0
+	if mode == "pingpong":
+		var period := 2 * count - 2
+		var k := step % period
+		return k if k < count else period - k
+	return step % count
 
 
 ## Seconds per bar for a tempo.
@@ -561,6 +698,8 @@ func _load_map() -> void:
 	_music = doc.get("music", {}) as Dictionary
 	_stems = doc.get("stems", {}) as Dictionary
 	_vary = doc.get("vary", {}) as Dictionary
+	_cycles = doc.get("cycles", {}) as Dictionary
+	_sequences = doc.get("sequences", {}) as Dictionary
 
 
 ## Read the four volume keys from a Settings autoload (soft hook). False when there is none.
@@ -577,15 +716,31 @@ func _apply_settings() -> bool:
 			var v: Variant = s.call("get_value", String(SETTING_KEYS[bus]), 1.0)
 			if v is float or v is int:
 				set_bus_volume(bus, float(v))
+		for key: String in ["voice_style", "crowd_style"]:
+			_apply_style(key, s.call("get_value", key, voice_style if key == "voice_style" else crowd_style))
 	return true
 
 
 func _on_setting_changed(key: String, value: Variant) -> void:
+	if key == "voice_style" or key == "crowd_style":
+		_apply_style(key, value)
+		return
 	if not (value is float or value is int):
 		return
 	for bus: String in SETTING_KEYS:
 		if String(SETTING_KEYS[bus]) == key:
 			set_bus_volume(bus, float(value))
+
+
+## Settings `voice_style` / `crowd_style` → the style switches (unknown values are ignored).
+func _apply_style(key: String, value: Variant) -> void:
+	if not (value is String or value is StringName):
+		return
+	var v := String(value)
+	if key == "voice_style" and VOICE_STYLES.has(v):
+		set_voice_style(v)
+	elif key == "crowd_style" and CROWD_STYLES.has(v):
+		set_crowd_style(v)
 
 
 func _apply_bus(bus: String) -> void:
@@ -614,19 +769,23 @@ func _canonical(id: String) -> String:
 
 ## resolve_files() after the voice / crowd style and squeaky mappings.
 func _styled_files(id: String) -> PackedStringArray:
-	var c := _canonical(id)
+	return _styled_files_as(_canonical(id), voice_style, crowd_style, voice_squeaky)
+
+
+## resolve_files() of canonical id `c` in the given styles.
+func _styled_files_as(c: String, vstyle: String, cstyle: String, squeaky: bool) -> PackedStringArray:
 	if c.begins_with("vo_bellows_") and not c.begins_with("vo_bellows_tuba_") \
 			and not c.begins_with("vo_bellows_squeaky_"):
 		var rest := c.substr(11)
-		if voice_squeaky and voice_style == "formant":
+		if squeaky and vstyle == "formant":
 			var sq := resolve_files("vo_bellows_squeaky_" + rest)
 			if not sq.is_empty():
 				return sq
-		if voice_style == "tuba":
+		if vstyle == "tuba":
 			var tb := resolve_files("vo_bellows_tuba_" + rest)
 			if not tb.is_empty():
 				return tb
-	elif c.begins_with("crowd_") and not c.begins_with("crowd_fb_") and crowd_style == "fallback":
+	elif c.begins_with("crowd_") and not c.begins_with("crowd_fb_") and cstyle == "fallback":
 		var fb := resolve_files("crowd_fb_" + c.substr(6))
 		if not fb.is_empty():
 			return fb
@@ -647,6 +806,51 @@ func _pick(key: String, files: PackedStringArray) -> String:
 	var f := files[pick_index(files.size(), last, _rng.randi() & 0x7FFFFFFF)]
 	_last_pick[key] = f
 	return f
+
+
+## The next member of cycle `key` (a new run starts after `reset_s` without a step).
+func _cycle_next(key: String) -> String:
+	var c: Dictionary = _cycles[key]
+	var members: Array = c.get("members", [])
+	if members.is_empty():
+		return ""
+	var step := int(_cycle_step.get(key, -1)) + 1
+	if _clock - float(_cycle_last.get(key, -1000.0)) > float(c.get("reset_s", 0.8)):
+		step = 0
+	_cycle_step[key] = step
+	_cycle_last[key] = _clock
+	var f := String(members[cycle_index(step, members.size(), String(c.get("mode", "wrap")))])
+	_last_pick[key] = f
+	return f
+
+
+func _play_preview_file(fid: String) -> void:
+	var stream := _stream(fid)
+	if stream == null:
+		_warn(fid)
+		return
+	var p := _preview[_preview_next]
+	_preview_next = (_preview_next + 1) % PREVIEW_POOL
+	p.stop()
+	p.stream = stream
+	var bus := String((_files.get(fid, {}) as Dictionary).get("bus", "Voice"))
+	p.bus = bus if BUSES.has(bus) else "Voice"
+	p.volume_db = 0.0
+	p.pitch_scale = 1.0
+	p.play()
+
+
+func _advance_preview(dt: float) -> void:
+	for i in PREVIEW_QUEUE:
+		if _preview_q_t[i] < 0.0:
+			continue
+		_preview_q_t[i] -= dt
+		if _preview_q_t[i] <= 0.0:
+			_preview_q_t[i] = -1.0
+			var fid := _preview_q_file[i]
+			_preview_q_file[i] = ""
+			if fid != "":
+				_play_preview_file(fid)
 
 
 func _stream(fid: String) -> AudioStream:

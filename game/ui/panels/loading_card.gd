@@ -1,23 +1,30 @@
 ## LoadingCard — the rule card on the curtain before each Night (GDD §2.2): the red curtain
 ## backdrop (art-house curtain.svg, procedural velvet fallback), a playbill card with the Night's
-## title, ONE 160 px icon and the ≤ 25-word rule at 52 px. "tap to start" appears after
-## TAP_AFTER_SEC; a tap after that, or AUTO_SEC, closes with "start". Taps before 1 s are ignored
-## (a stray tap never skips the rule). Back = start.
+## title, ONE icon (160 px for an icon key; a live vignette texture is framed at VIGNETTE_H) and the
+## ≤ 25-word rule at 44 px. "tap to start" appears after TAP_AFTER_SEC; a tap after that, or
+## AUTO_SEC, closes with "start". Taps before 1 s are ignored (a stray tap never skips the rule).
+## Back = start.
 ## `setup({title, subtitle, text, icon})` — icon: a UiIcons.card key (tray, freeze, squeak, hide,
-## specs, …), an item id or a res:// path.
+## specs, …), an item id, a res:// path, or a **Texture2D** (s2-ftue's 3-s rule vignette, a
+## ViewportTexture: the card redraws every frame while it shows one).
 class_name LoadingCard
 extends UiPanel
 
 const TAP_AFTER_SEC := 1.0
 const AUTO_SEC := 4.0
 const ICON := 160.0
+## A Texture2D icon (the rule vignette) is framed this tall, its width by aspect (≤ VIGNETTE_MAX_W).
+const VIGNETTE_H := 240.0
+const VIGNETTE_MAX_W := 480.0
 const CARD_W := 1320.0
-const TEXT_SIZE := 52
+const TEXT_SIZE := UiKit.SIZE_PLAY
 
 var title: String = ""
 var subtitle: String = ""
 var text: String = ""
 var icon_key: String = ""
+## The icon as given when it was a texture (null for keys).
+var icon_texture: Texture2D = null
 ## Test hook: disable the automatic close.
 var auto_close: bool = true
 
@@ -31,7 +38,9 @@ func setup(d: Dictionary) -> void:
 	title = String(d.get("title", ""))
 	subtitle = String(d.get("subtitle", ""))
 	text = String(d.get("text", ""))
-	icon_key = String(d.get("icon", ""))
+	var ic: Variant = d.get("icon", "")
+	icon_texture = ic as Texture2D if ic is Texture2D else null
+	icon_key = "" if icon_texture != null else String(ic if ic != null else "")
 	if is_inside_tree():
 		_prepare()
 		_relayout()
@@ -52,7 +61,10 @@ func _build() -> void:
 
 
 func _prepare() -> void:
-	_icon = UiIcons.card(icon_key) if icon_key != "" else null
+	if icon_texture != null:
+		_icon = icon_texture
+	else:
+		_icon = UiIcons.card(icon_key) if icon_key != "" else null
 	_lines = wrap_lines(UiKit.ui_font(), text, CARD_W - 120.0, UiKit.text_size(TEXT_SIZE))
 
 
@@ -61,9 +73,20 @@ func word_count() -> int:
 	return text.split(" ", false).size()
 
 
+## The icon's box size (a key: ICON square; a vignette texture: VIGNETTE_H tall by its aspect).
+func icon_box() -> Vector2:
+	if _icon == null:
+		return Vector2.ZERO
+	if icon_texture == null:
+		return Vector2(ICON, ICON)
+	var ts := _icon.get_size()
+	var asp := ts.x / ts.y if ts.y > 0.0 else 1.0
+	return Vector2(minf(VIGNETTE_MAX_W, VIGNETTE_H * asp), VIGNETTE_H)
+
+
 func _layout(rect: Rect2) -> void:
 	var lh := float(UiKit.text_size(TEXT_SIZE)) * 1.22
-	var h := 70.0 + 110.0 + ICON + 30.0 + float(maxi(1, _lines.size())) * lh + 60.0
+	var h := 70.0 + 110.0 + icon_box().y + 30.0 + float(maxi(1, _lines.size())) * lh + 60.0
 	card.size = Vector2(minf(CARD_W, rect.size.x - 64.0), minf(h, rect.size.y - 90.0))
 	card.position = Vector2(rect.get_center().x - card.size.x * 0.5, rect.position.y + (rect.size.y - card.size.y - 70.0) * 0.5)
 
@@ -71,7 +94,7 @@ func _layout(rect: Rect2) -> void:
 func _tick() -> void:
 	if auto_close and float(age_ms()) >= AUTO_SEC * 1000.0:
 		close("start")
-	if float(age_ms()) >= TAP_AFTER_SEC * 1000.0:
+	if float(age_ms()) >= TAP_AFTER_SEC * 1000.0 or icon_texture != null:
 		card.queue_redraw()
 
 
@@ -92,7 +115,13 @@ func _draw_card(ci: Control) -> void:
 	if subtitle != "":
 		UiKit.draw_text_centered(ci, df, Vector2(r.size.x * 0.5, 136.0), subtitle, UiKit.SIZE_BANNER, UiKit.NAVY, 0)
 	y = 180.0
-	if _icon != null:
+	if _icon != null and icon_texture != null:
+		var box := icon_box()
+		var ir := Rect2(r.size.x * 0.5 - box.x * 0.5, y, box.x, box.y)
+		UiKit.draw_chunky_rect(ci, ir.grow(12.0), 26.0, UiKit.GOLD, UiKit.GOLD_SHADE, UiKit.BUTTON_OUTLINE, 6.0)
+		ci.draw_texture_rect(_icon, ir, false)
+		y += box.y + 30.0
+	elif _icon != null:
 		ci.draw_circle(Vector2(r.size.x * 0.5, y + ICON * 0.5), ICON * 0.5 + 18.0, Color(UiKit.GOLD, 0.35))
 		UiKit.draw_icon(ci, _icon, Rect2(r.size.x * 0.5 - ICON * 0.5, y, ICON, ICON))
 		y += ICON + 30.0

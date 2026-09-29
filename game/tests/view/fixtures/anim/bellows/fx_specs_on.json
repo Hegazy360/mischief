@@ -1,0 +1,39 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_specs_on",
+ "rig": "bellows",
+ "loop": false,
+ "length": 12,
+ "layer": "overlay",
+ "mask": [
+  "head*",
+  "arm_upper_l*",
+  "arm_upper_r*",
+  "cravat"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 12,
+   "pose": "b_specs_lift",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 10,
+   "type": "sfx",
+   "id": "specs_tink"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

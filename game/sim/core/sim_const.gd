@@ -276,12 +276,34 @@ const RING_TICKS := 240
 ## Nerves (Night 10): every loop starts at least Irked. GDD §7.2.
 const NERVES_TEMPER := 20
 
+# --- one-shots the view plays (SimOneshots; lengths the clips must match, ruling L14 / lint A29) ------
+## `specs {on: true}`: the specs-on flick (0.2 s).
+const SPECS_ON_TICKS := 12
+## CURIOUS: the first second is the "?" stop before he walks to look.
+const CURIOUS_STOP_TICKS := 60
+## A fizzle (conditions false on a rigged trigger): his "huh?" (0.5 s).
+const FIZZLE_TICKS := 30
+## Figgis's hook yanks Hush into a hiding spot (0.6 s).
+const FIGGIS_YANK_TICKS := 36
+## Mirror, Mirror: Hush's wink as she breaks the stand-in (0.5 s).
+const WINK_TICKS := 30
+
+# --- micro-gags (GDD §2.1, lead decision D1) -----------------------------------------------------
+## Never two micro-gag beats within this many ticks (3 s).
+const MG_MIN_GAP := 180
+## Every 4th non-T3 reaction of a Night ends with a slow burn (GDD §9.3 "one reaction in four").
+const SLOW_BURN_EVERY := 4
+## The slow-burn last beat's clip.
+const SLOW_BURN_CLIP := "bellows/beat_slow_burn"
+
 # --- misc ----------------------------------------------------------------------------------------
 ## Bow: Hush is busy while bowing; the Night ends when it is accepted.
 const BOW_TICKS := 1
 ## Episode `rules` keys that may override defaults.
+## `combos`: the combo ids this Night allows (absent = all, [] = none; ruling L4). `senses: false`: Bellows
+## never starts a "?" and never catches (the Gate-0 scene).
 const RULE_KEYS: Array[String] = ["spot_fill_s", "tomatoes", "cant_fail", "nerves", "nerves_temper", "curtain_calls",
-	"loop_repeat", "max_minutes"]
+	"loop_repeat", "max_minutes", "combos", "senses"]
 
 
 ## Walk speed at a temper tier (0..3), sub-px per tick. TECH §3.7.1.

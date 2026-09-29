@@ -24,7 +24,7 @@ ART = os.path.join(REPO, "game", "art", "house")
 DATA = os.path.join(REPO, "game", "data", "house", "house.json")
 
 PROP_MODULES = ["props_kitchen", "props_hall", "props_parlour", "props_grey"]
-ROOM_MODULES = ["rooms_final", "rooms_grey"]
+ROOM_MODULES = ["rooms_final", "rooms_grey", "rooms_upper"]   # later modules replace earlier ones
 
 
 def clean(sub):
@@ -83,7 +83,9 @@ def build(report=False):
         len(house["hotspots"])))
     if report:
         for room, area in sorted(props_base.AREAS.items()):
-            print("  props %-12s %5.2f MPx (states @2x + outlines @1x; one 2048^2 page = 4.19 MPx)" % (room, area / 1e6))
+            page = 2048 * 2048
+            print("  props %-12s %5.2f MPx (states @ raster hint (default 2x) + outlines @1x; one 2048^2 page = %.2f MPx, "
+                  "%3.0f %%)" % (room, area / 1e6, page / 1e6, 100.0 * area / page))
     return house
 
 

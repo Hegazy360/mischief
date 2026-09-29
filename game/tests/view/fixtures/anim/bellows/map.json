@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "rig": "bellows",
+  "doc": "s2-view fixture map (every schema key \u2192 a fixture clip).",
+  "idle": "bellows/fx_idle",
+  "walk": {
+    "clip": "bellows/fx_strut",
+    "stride_px": 60,
+    "speed_px_s": 240
+  },
+  "walk@tier2": {
+    "clip": "bellows/fx_irked",
+    "stride_px": 60,
+    "speed_px_s": 264
+  },
+  "walk@tier3": {
+    "clip": "bellows/fx_stomp",
+    "stride_px": 62,
+    "speed_px_s": 276
+  },
+  "walk@blind": {
+    "clip": "bellows/fx_blind",
+    "stride_px": 48,
+    "speed_px_s": 240
+  },
+  "run": {
+    "clip": "bellows/fx_chase",
+    "stride_px": 160,
+    "speed_px_s": 600
+  },
+  "turn": "bellows/fx_turn",
+  "door": "bellows/fx_door",
+  "stairs_up": "bellows/fx_stairs_up",
+  "stairs_down": "bellows/fx_stairs_down",
+  "reaction": "<from sim>",
+  "reaction_fallback": "bellows/fx_double_take",
+  "state:spotted": "bellows/fx_double_take",
+  "state:chase": {
+    "clip": "bellows/fx_chase",
+    "stride_px": 160,
+    "speed_px_s": 600
+  },
+  "state:search": {
+    "clip": "bellows/fx_look",
+    "loop": true
+  },
+  "state:meltdown": [
+    "bellows/fx_melt_a",
+    "bellows/fx_melt_b",
+    "bellows/fx_melt_c"
+  ],
+  "state:exhausted": {
+    "clip": "bellows/fx_exhausted",
+    "loop": true
+  },
+  "activity:tea": "bellows/fx_act_tea",
+  "activity:warmup": "bellows/fx_act_tea",
+  "bit:*": "bellows/fx_bit",
+  "mg:*": "bellows/fx_mg",
+  "oneshot:head_turn": "bellows/fx_head_turn",
+  "oneshot:specs_on": "bellows/fx_specs_on",
+  "oneshot:doorway_pause": {
+    "clip": "bellows/fx_cravat",
+    "loop": true
+  },
+  "oneshot:look_back": "bellows/fx_head_turn",
+  "oneshot:bump": "bellows/fx_bump",
+  "oneshot:bump_look": {
+    "clip": "bellows/fx_look",
+    "loop": true
+  },
+  "oneshot:curious_stop": "bellows/fx_suspicious",
+  "oneshot:curious_look": {
+    "clip": "bellows/fx_look",
+    "loop": true
+  },
+  "oneshot:chase_wheeze": "bellows/fx_wheeze",
+  "oneshot:stun": "bellows/fx_bonk",
+  "oneshot:face_to_face": "bellows/fx_double_take",
+  "oneshot:fizzle": "bellows/fx_smirk",
+  "oneshot:caught:grab": "bellows/fx_grab",
+  "oneshot:caught:lecture": [
+    "bellows/fx_lec_a",
+    "bellows/fx_lec_b",
+    "bellows/fx_lec_c"
+  ],
+  "oneshot:caught:doorstep": "bellows/fx_door_slam",
+  "cue:laugh_doorframe": "bellows/fx_cue_bonk",
+  "cue:laugh_picture": "bellows/fx_cue_bonk",
+  "skin:pip": {
+    "oneshot:caught:lecture": [
+      "bellows/fx_grab",
+      "bellows/fx_grab",
+      "bellows/fx_grab"
+    ]
+  }
+}

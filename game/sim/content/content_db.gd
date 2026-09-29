@@ -23,6 +23,16 @@ var activities: Dictionary = {}
 var activity_list: Array[ActivityDef] = []
 ## bit id → {"clip": String, "len": ticks}
 var squeak_bits: Dictionary = {}
+## Walk beats (`activities.json` root `walk_beats`, optional): during a non-chase walk whose planned
+## length exceeds `wb_min_leg` ticks a micro-gag plays every `wb_every` ticks, cycling these ids.
+var wb_min_leg: int = 0
+var wb_every: int = 0
+var wb_ids: PackedStringArray = PackedStringArray()
+var wb_len: PackedInt32Array = PackedInt32Array()
+var wb_emote: PackedStringArray = PackedStringArray()
+var wb_errors: PackedStringArray = PackedStringArray()
+## `reactions.json clip_timings`: clip id → frames (last beats and other fixed-length clips the sim times).
+var clip_frames: Dictionary = {}
 var pranks: Dictionary = {}
 var prank_list: Array[PrankDef] = []
 var double_acts: Dictionary = {}
@@ -146,6 +156,7 @@ func _parse(files: Dictionary) -> void:
 		var a2: ActivityDef = activities[k]
 		a2.idx = activity_list.size()
 		activity_list.append(a2)
+	_parse_walk_beats(ContentUtil.dict(acd, "walk_beats"))
 	var bits_d := ContentUtil.dict(acd, "squeak_bits")
 	for k in ContentUtil.sorted_keys(bits_d):
 		var bd: Variant = bits_d[k]
@@ -178,6 +189,11 @@ func _parse(files: Dictionary) -> void:
 	meltdown_clips = ContentUtil.strs(rxd, "meltdown")
 	lecture_clips = ContentUtil.strs(rxd, "lecture")
 	t3_last_beats = ContentUtil.strs(rxd, "t3_last_beats")
+	var ct := ContentUtil.dict(rxd, "clip_timings")
+	for k in ContentUtil.sorted_keys(ct):
+		var cv: Variant = ct[k]
+		if typeof(cv) == TYPE_DICTIONARY:
+			clip_frames[k] = maxi(0, ContentUtil.i(cv, "frames", 0))
 	var rsd := _obj(files, "residues")
 	var res_d := ContentUtil.dict(rsd, "residues")
 	for k in ContentUtil.sorted_keys(res_d):
@@ -206,6 +222,35 @@ func _parse(files: Dictionary) -> void:
 		if typeof(ed) == TYPE_DICTIONARY:
 			var e := EpisodeDef.from_dict(ed)
 			episodes[e.id] = e
+
+
+func _parse_walk_beats(wb: Dictionary) -> void:
+	if wb.is_empty():
+		return
+	wb_min_leg = Fx.ticks(ContentUtil.f(wb, "min_leg_s", 5.0))
+	wb_every = Fx.ticks(ContentUtil.f(wb, "every_s", 6.0))
+	if wb_every <= 0:
+		wb_errors.append("walk_beats.every_s must be > 0")
+		wb_every = 0
+	var i := 0
+	for e in ContentUtil.arr(wb, "ids"):
+		var g: Dictionary = e if typeof(e) == TYPE_DICTIONARY else {"id": str(e)}
+		var gid := ContentUtil.s(g, "id")
+		if gid == "":
+			wb_errors.append("walk_beats.ids[%d] has no id" % i)
+		var em: Variant = g.get("emote", null)
+		var em_s := "" if em == null else str(em)
+		if em_s != "" and not SimEvents.EMOTES.has(em_s):
+			wb_errors.append("walk_beats.ids[%d] (%s) emote '%s' not in %s" % [i, gid, em_s, ", ".join(SimEvents.EMOTES)])
+		wb_ids.append(gid)
+		wb_len.append(maxi(1, ContentUtil.i(g, "len_f", ActivityDef.MG_LEGACY_LEN_F)))
+		wb_emote.append(em_s)
+		i += 1
+
+
+## Frames of a fixed-length clip from `reactions.json clip_timings` (0 when unknown).
+func clip_len(clip_id: String) -> int:
+	return int(clip_frames.get(clip_id, 0))
 
 
 func _obj(files: Dictionary, key: String) -> Dictionary:

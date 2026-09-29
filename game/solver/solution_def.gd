@@ -14,9 +14,11 @@ extends RefCounted
 
 const STEP_KINDS: PackedStringArray = ["go", "move", "pick", "rig", "hide", "pop_out", "freeze", "squeak",
 	"stand_in", "panto", "wait", "wait_event", "idle", "bow"]
-const EXPECT_KEYS: PackedStringArray = ["stars", "applause", "lines", "catches_max", "duration_s",
-	"first_player_laugh_s_max", "first_prank_s_max", "laughs_by_s", "dead_air_pct_max", "max_gap_s_max"]
-const PERSONAS: PackedStringArray = ["ideal", "required", "slow"]
+## Expect keys: Metrics.EXPECT_KEYS, each also as `warn_<key>` (evaluated and reported, never failing).
+const EXPECT_KEYS: PackedStringArray = Metrics.EXPECT_KEYS
+## `scenario`: authored set pieces (caught → Lecture → doorstep, face to face, Meltdown, chase + door slam),
+## not gated on stars / applause / D1; checked with `events_min` / `events_max`.
+const PERSONAS: PackedStringArray = ["ideal", "required", "slow", "scenario"]
 const ROUTE_KEYS: PackedStringArray = ["persona", "steps", "expect", "note", "description"]
 ## Optional keys any step may carry: max_s (timeout), run, soft (timeout = done), since (wait_event
 ## scope), note (free text).
@@ -157,7 +159,7 @@ func validate(data: SolverData = null) -> PackedStringArray:
 				out.append("%s: %s step %d: %s" % [_src(), name, i + 1, e])
 		var ex: Dictionary = r.get("expect", {})
 		for k in ex:
-			if not EXPECT_KEYS.has(String(k)):
+			if not Metrics.known_key(String(k)):
 				out.append("%s: route '%s' expect has unknown key '%s'" % [_src(), name, k])
 		for e in _validate_expect(ex):
 			out.append("%s: route '%s' expect: %s" % [_src(), name, e])
@@ -268,6 +270,14 @@ static func _validate_expect(ex: Dictionary) -> PackedStringArray:
 					out.append("laughs_by_s entries must be [s, n]")
 	if ex.has("lines") and not (ex["lines"] is Array):
 		out.append("lines must be an array of line ids")
+	for k in ["events_min", "events_max", "warn_events_min", "warn_events_max"]:
+		if ex.has(k):
+			if not (ex[k] is Dictionary):
+				out.append("%s must be {event: n}" % k)
+			else:
+				for e in ex[k]:
+					if not (ex[k][e] is int or ex[k][e] is float):
+						out.append("%s.%s must be a number" % [k, e])
 	return out
 
 

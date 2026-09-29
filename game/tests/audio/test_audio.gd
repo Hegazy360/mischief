@@ -355,8 +355,12 @@ func test_voice_and_crowd_styles() -> void:
 	audio.crowd("t1")
 	assert_true(audio.last_pick("crowd_t1").begins_with("crowd_fb_t1_"), audio.last_pick("crowd_t1"))
 	audio.advance(3.0)
-	audio.crowd("gasp")
-	assert_true(audio.last_pick("crowd_gasp").begins_with("crowd_gasp_"), "no fallback gasp → formant")
+	audio.crowd("shh")
+	assert_true(audio.last_pick("crowd_shh").begins_with("crowd_shh_"), "no fallback shh → formant")
+	audio.advance(3.0)
+	audio.crowd("behind_you")
+	assert_true(audio.last_pick("crowd_behind_you").begins_with("crowd_fb_behind_you_"),
+		"BEHIND YOU! exists in both styles (it plays in the Gate-0 scene)")
 	audio.set_crowd_style("formant")
 	audio.advance(3.0)
 	audio.crowd("t1")
@@ -383,7 +387,7 @@ func test_sfx_pool_caps_and_steals() -> void:
 		skip("sfx_map.json not generated")
 		return
 	var ids := ["woodblock_bonk", "boing_small", "boing_med", "boing_big", "slide_up", "slide_down", "whoosh", "zip",
-		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_zip", "sink_splash"]
+		"crash_tail", "record_scratch", "dizzy_tweets", "stamp_thunk", "pepper_shake", "stool_scrape", "sink_splash"]
 	for i in ids.size():
 		audio.play_sfx(ids[i], -1.0 + 2.0 * float(i) / float(ids.size() - 1))
 		audio.advance(0.04)

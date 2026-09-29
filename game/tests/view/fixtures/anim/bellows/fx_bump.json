@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_bump",
+ "rig": "bellows",
+ "loop": false,
+ "length": 82,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_pardon_pat",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "b_strut_pass_l",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 70,
+   "pose": "b_dt_away",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 82,
+   "pose": "b_dt_back",
+   "ease": "pop"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

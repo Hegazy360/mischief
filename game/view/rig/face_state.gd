@@ -8,6 +8,13 @@
 ## * Overrides: `set_face(preset)` / `set_slot(slot, variant)` hold until `clear()` or the
 ##   clip's next keyed face change (the player calls `on_clip_face_changed()`).
 ## * `apply(pose)` writes overrides, the blink and the pupil offset into the face parts.
+## * Pupils hide in BOTH blink phases (half and closed) and whenever the eyes variant is one
+##   that bakes its own pupils (rig `face.slots.pupils.hide_with` / `eyes.no_pupils`).
+## * Runtime eye changes (`set_slot("eyes", v)`, `set_face`, blinks) bring their paired lids
+##   variant (rig `face.slots.eyes.lids`: Bellows' half / angry eyes).
+## * The active preset's faces.json `gaze` ([dx, dy] px) is the resting pupil offset (Bellows'
+##   slow burn stares at the Stalls); `look` adds on top. The active preset is the runtime
+##   override (`set_face`) or the clip's keyed face (`clip_preset`, set by the player).
 ## Frames are 60 fps "face time" advanced by the player (view time). Allocation-free.
 class_name FaceState
 extends RefCounted
@@ -24,6 +31,10 @@ var suppressed: bool = false
 var blinks_enabled: bool = true
 ## Pupil look (−1..1 per axis; scaled by the slot range when applied).
 var look: Vector2 = Vector2.ZERO
+## The clip's keyed face preset at the current frame (the player keeps it current).
+var clip_preset: String = ""
+## The preset set with set_face() ("" = none / cleared).
+var override_preset: String = ""
 ## Frames of face time since setup.
 var time_f: float = 0.0
 ## Frame the next blink starts (face time).
@@ -72,8 +83,10 @@ func reseed(seed: int) -> void:
 ## Override every slot a preset names (until clear() or the clip's next face key).
 func set_face(preset: String) -> void:
 	_override.fill(-1)
+	override_preset = ""
 	if lib == null or not lib.presets.has(preset):
 		return
+	override_preset = preset
 	var arr: PackedInt32Array = lib.presets[preset]
 	for s in arr.size():
 		_override[s] = arr[s]
@@ -97,11 +110,18 @@ func set_slot(slot: String, variant: String) -> void:
 ## Drop every override.
 func clear() -> void:
 	_override.fill(-1)
+	override_preset = ""
 
 
 ## The clip's keyed face changed: overrides yield to it.
 func on_clip_face_changed() -> void:
 	_override.fill(-1)
+	override_preset = ""
+
+
+## The face preset in charge of the gaze: the runtime override, else the clip's keyed face.
+func active_preset() -> String:
+	return override_preset if override_preset != "" else clip_preset
 
 
 ## True when any slot is overridden.
@@ -171,7 +191,8 @@ func apply(pose: PackedFloat32Array) -> void:
 			var vi := _half if ph == 1 else _closed
 			if vi >= 0:
 				pose[be + RigDef.C_TEX] = float(vi)
-				if rig.pupils_part >= 0 and ph == 2:
+				if rig.pupils_part >= 0:
+					# Both phases: pupils over a half-shut lid flicker for 4 frames otherwise.
 					pose[RigDef.ROOT_CH + rig.pupils_part * RigDef.STRIDE + RigDef.C_VIS] = 0.0
 	# Paired lids (Bellows' half / angry eyes) follow runtime eye changes; pupils hide behind
 	# shut or lidded eyes (rig `hide_with` / `no_pupils`) — keyed faces and blinks alike.
@@ -187,10 +208,17 @@ func apply(pose: PackedFloat32Array) -> void:
 				pose[lb + RigDef.C_VIS] = 0.0
 		if rig.pupils_part >= 0 and rig.pupils_hide.has(ev):
 			pose[RigDef.ROOT_CH + rig.pupils_part * RigDef.STRIDE + RigDef.C_VIS] = 0.0
-	if rig.pupils_part >= 0 and look != Vector2.ZERO:
-		var bp := RigDef.ROOT_CH + rig.pupils_part * RigDef.STRIDE
-		pose[bp + RigDef.C_X] += clampf(look.x, -1.0, 1.0) * rig.pupil_range.x
-		pose[bp + RigDef.C_Y] += clampf(look.y, -1.0, 1.0) * rig.pupil_range.y
+	if rig.pupils_part >= 0:
+		var g := Vector2.ZERO
+		if lib != null and not lib.gaze.is_empty():
+			var ap := active_preset()
+			if ap != "":
+				g = lib.gaze_of(ap)
+		if look != Vector2.ZERO or g != Vector2.ZERO:
+			var bp := RigDef.ROOT_CH + rig.pupils_part * RigDef.STRIDE
+			var r := rig.pupil_range
+			pose[bp + RigDef.C_X] += clampf(g.x + clampf(look.x, -1.0, 1.0) * r.x, -r.x * 1.5, r.x * 1.5)
+			pose[bp + RigDef.C_Y] += clampf(g.y + clampf(look.y, -1.0, 1.0) * r.y, -r.y * 1.5, r.y * 1.5)
 
 
 func _next() -> int:

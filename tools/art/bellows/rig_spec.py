@@ -70,7 +70,27 @@ SOCKETS = {
 	"hand_r": {"grip": None},   # filled from parts_body.GRIP per texture (default: grip texture)
 	"hand_l": {"grip": None},
 	"head": {"specs": [34, -72, 0], "hat": [-8, -188, 0]},
-	"torso": {"chain": [22, -112, 0], "neck": [18, -140, 0]},
+	"torso": {"chain": [22, -112, 0], "neck": [18, -140, 0], "seat": None},   # seat: filled by build.py from the stool
+}
+
+# The seat point on the barrel (joint-relative, torso frame): the lowest point of the barrel outline (TORSO_SIL
+# (0, 25)), directly below the hip joint. The stool prop's seat pivot sits here (socket `torso:seat`).
+SEAT_POINT = (0, 25)
+# House stool: seat height above the floor (house.json decor kitchen_stool pivots.seat, s2-art contract).
+STOOL_SEAT_H = 150
+
+# Rig requests (rig report): breathing on the belly (+-2.5 % over 4 s), the additive look on the head, and the
+# overlay masks micro-gags use (`upper` never touches the feet, the root or the torso).
+BREATH = {"part": "belly", "amp": 0.025, "period_s": 4.0}
+LOOK = {"part": "head", "max_deg": 20}
+FACE_SLOT_PARTS = ["face_eyes", "face_pupils", "face_lids", "face_brows", "face_mouth", "face_blush", "face_sweat",
+				   "face_vein", "face_steam_l", "face_steam_r", "face_singe", "face_pinch", "face_hiccup"]
+ARMS = ["arm_upper_r", "arm_lower_r", "hand_r", "arm_upper_l", "arm_lower_l", "hand_l"]
+HEAD = ["head", "nose", "bouffant", "sideburn_r", "sideburn_l"]
+MASKS = {
+	"upper": HEAD + ["cravat"] + ARMS + FACE_SLOT_PARTS,
+	"arms": list(ARMS),
+	"head": HEAD + FACE_SLOT_PARTS,
 }
 
 FACE_ANCHOR = "head"

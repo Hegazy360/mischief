@@ -62,6 +62,13 @@ var seen_n: Dictionary = {}
 ## Events emitted so far this Night (lets the Director skip re-evaluating event-only cues; not hashed —
 ## it only gates a cache whose results are identical either way).
 var emit_serial: int = 0
+# Reused accessor results (allocation-free per call; callers must not keep them across ticks).
+var _ac: Dictionary = {}
+var _b1: Dictionary = {}
+var _h1: Dictionary = {}
+var _sr: Dictionary = {}
+var _bl: Dictionary = {}
+var _hl: Dictionary = {}
 var _record_every: int = 0
 var _invariants: bool = false
 var _last_hush_room_for_inv: int = -1
@@ -266,6 +273,150 @@ func bellows_path_preview(ticks: int) -> PackedInt32Array:
 func hush_can_see(hotspot_id: String) -> bool:
 	var h := db.house.hotspot(hotspot_id)
 	return h != null and h.room_idx >= 0 and (hush.visited_mask & (1 << h.room_idx)) != 0
+
+
+## What the action button shows (GDD §3.2), so the HUD never re-derives rules. One reused Dictionary:
+## {verb: "rig"|"rig_dim"|"freeze"|"pop_out"|"go"|"none", prank, step, item_needed, item_have: bool,
+##  target_icon, ring_pm (0–1000, the current step), tier_ticks (Q 48 / S 90 / B 150), container (holds the
+##  missing item), danger: "green"|"amber"|"red"}. RIG at an available rig point with what it needs (dimmed
+## when the item is missing); FREEZE everywhere else while not hidden; POP OUT when hidden (GO with a pin);
+## `none` while caught, bowing or climbing in. Danger rim: red = he is in her room; amber = next door or
+## heading here; green otherwise.
+func action_context() -> Dictionary:
+	var o := _ac
+	o["verb"] = "none"
+	o["prank"] = ""
+	o["step"] = 0
+	o["item_needed"] = ""
+	o["item_have"] = false
+	o["target_icon"] = ""
+	o["ring_pm"] = 0
+	o["tier_ticks"] = 0
+	o["container"] = ""
+	o["danger"] = _danger_rim()
+	var hu := hush
+	if ended or hu.entering or hu.state == SimHush.CAUGHT or hu.state == SimHush.BOWING:
+		return o
+	if hu.state == SimHush.HIDDEN or hu.state == SimHush.DIVING:
+		o["verb"] = "go" if (hu.pin_room >= 0 or hu.pin_hs >= 0) else "pop_out"
+		return o
+	o["verb"] = "freeze"
+	var hs := hu.at_hotspot
+	if hs < 0 or hu.path != null or db.house.hotspots[hs].kind != HotspotDef.RIG_POINT:
+		return o
+	if not (hu.state == SimHush.IDLE or hu.state == SimHush.PICK_WINDOW or hu.state == SimHush.RIGGING
+			or hu.state == SimHush.SQUEAKING or (hu.state == SimHush.FROZEN and hu.frozen_by_rig)):
+		return o
+	var pi := hu.rig_prank if hu.state == SimHush.RIGGING or hu.frozen_by_rig else pranks.rig_target(self, hs)
+	if pi < 0:
+		return o
+	var pd := db.prank_list[pi]
+	var si: int = pranks.step[pi]
+	if si >= pd.steps.size():
+		return o
+	var st := pd.steps[si]
+	o["prank"] = pd.id
+	o["step"] = si
+	o["item_needed"] = st.needs
+	var have := st.needs == "" or hu.uses_of(st.needs) > 0
+	o["item_have"] = have
+	var h := db.house.hotspots[hs]
+	o["target_icon"] = str(h.art.get("icon", h.art.get("idle", "")))
+	o["ring_pm"] = pranks.progress_pm(self, pi)
+	o["tier_ticks"] = st.prep_ticks
+	if have:
+		o["verb"] = "rig"
+	else:
+		o["verb"] = "rig_dim"
+		var it: ItemDef = db.items.get(st.needs, null)
+		o["container"] = it.source if it != null else ""
+	return o
+
+
+## "green" | "amber" | "red" (GDD §3.2 rim): red = Bellows is in Hush's room; amber = one link away or his
+## path ends in her room; green otherwise.
+func _danger_rim() -> String:
+	var hr := hush.room
+	var br := bellows.room
+	if hr < 0 or br < 0:
+		return "green"
+	if br == hr:
+		return "red"
+	if db.nav.linked(br, hr) or (bellows.path != null and not bellows.path.is_done() and bellows.path.final_room() == hr):
+		return "amber"
+	return "green"
+
+
+## Bellows' current one-shot beat (SimOneshots): {id ("" none), t, len, variant}. Reused Dictionary.
+func bellows_oneshot() -> Dictionary:
+	SimOneshots.fill_bellows(self, _b1)
+	return _b1
+
+
+## Hush's current one-shot beat (SimOneshots): {id ("" none), t, len, variant}. Reused Dictionary.
+func hush_oneshot() -> Dictionary:
+	SimOneshots.fill_hush(self, _h1)
+	return _h1
+
+
+## Bellows' sight for his current state (GDD §4.3): {moving_px, frozen_px, to_wall, blind}. `to_wall`: he sees a
+## moving Hush anywhere ahead to the wall (moving_px is −1 then); `blind`: he sees nothing. Reused Dictionary.
+func sight_ranges() -> Dictionary:
+	var r := senses.sight_ranges_into(self)
+	_sr["moving_px"] = r.x
+	_sr["frozen_px"] = r.y
+	_sr["to_wall"] = r.x < 0
+	_sr["blind"] = r.x == 0 and r.y == 0
+	return _sr
+
+
+## How far Bellows hears a noise of `kind` right now, px: "run" / "rig" → the 500 px path distance on his floor;
+## "squeak" → −1 (his room and doorway-joined rooms, not a distance); 0 when he can't hear it now (reacting,
+## asleep, chasing, blind-and-deaf after a reaction, on the stairs / in a door, `rules.senses: false`).
+func hearing_px(kind: String) -> int:
+	var b := bellows
+	if b.state == SimBellows.REACTING or b.state == SimBellows.MELTDOWN or b.state == SimBellows.CAUGHT_HOLD \
+			or b.state == SimBellows.CHASE or b.state == SimBellows.SPOTTED or tick < b.blind_after_until:
+		return 0
+	if b.path != null and not b.path.is_done() and (b.path.current_kind() == NavPath.STAIRS or b.path.current_kind() == NavPath.DOOR):
+		return 0
+	match kind:
+		"squeak":
+			return -1
+		"run", "rig":
+			if not ctx.senses or b.asleep or not (b.state == SimBellows.ROUTINE or b.state == SimBellows.DETOUR or b.state == SimBellows.CURIOUS):
+				return 0
+			return SimConst.NOISE_PX
+	return 0
+
+
+## Bellows' current path leg: {kind: "walk"|"door"|"stairs"|"", from_room, to_room (ids), from_x, to_x (px),
+## progress_pm}. During a STAIRS leg his `room`/`x` are already the arrival end's (draw the climb from
+## `from_*` to `to_*` by `progress_pm`). Reused Dictionary.
+func bellows_leg() -> Dictionary:
+	return _leg(bellows.path, bellows.room, bellows.x_sub, _bl)
+
+
+## Hush's current path leg (same shape as `bellows_leg()`). Reused Dictionary.
+func hush_leg() -> Dictionary:
+	return _leg(hush.path, hush.room, hush.x_sub, _hl)
+
+
+func _leg(p: NavPath, r: int, x: int, out: Dictionary) -> Dictionary:
+	if p == null:
+		out["kind"] = ""
+		out["from_room"] = room_id(r)
+		out["to_room"] = out["from_room"]
+		out["from_x"] = Fx.to_px(x)
+		out["to_x"] = out["from_x"]
+		out["progress_pm"] = 0
+		return out
+	p.leg_into(out)
+	out["from_room"] = room_id(int(out["from_room"]))
+	out["to_room"] = room_id(int(out["to_room"]))
+	out["from_x"] = Fx.to_px(int(out["from_x"]))
+	out["to_x"] = Fx.to_px(int(out["to_x"]))
+	return out
 
 
 ## Room id of a room idx ("" if none).

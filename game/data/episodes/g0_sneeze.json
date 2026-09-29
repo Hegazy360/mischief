@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "id": "g0_sneeze",
+  "act": 0,
+  "index": 0,
+  "title": "Gate 0: the Sneeze",
+  "status": "draft",
+  "seed": 190,
+  "desc": "Dev scene for Gate 0 (stage door only): ACHOO-RIA! end to end in the kitchen, can't fail, ends 3 s after the sneeze.",
+  "rooms": ["parlour", "kitchen"],
+  "backstage": ["hall"],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 2.0,
+    "tomatoes": -1,
+    "cant_fail": true,
+    "nerves": false,
+    "curtain_calls": false,
+    "loop_repeat": false,
+    "senses": false
+  },
+  "new_rule": "sneeze",
+  "card": null,
+  "cold_open": null,
+  "hush": {"start": {"room": "kitchen", "x": 3620}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [
+      {"a": "warmup", "gate": {"until": "rigged:achoo_ria", "plus_s": 2.0, "max_s": null, "first_loop_only": true}},
+      {"a": "tea"},
+      {"a": "warmup"}
+    ]
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"}
+    }
+  ],
+  "director": {
+    "gates": [
+      {"loop": 0, "gate": {"until": "rigged:achoo_ria", "plus_s": 2.0, "max_s": null, "first_loop_only": true}}
+    ],
+    "cues": [
+      {
+        "id": "ghost_honey",
+        "when": {"tick_ge_s": 1.0},
+        "target": "kitchen_honey",
+        "mode": "tap",
+        "until": {"event_seen": {"event": "hush_arrive", "match": {"hotspot": "kitchen_honey"}}},
+        "renudge_idle_s": 8
+      },
+      {
+        "id": "ghost_hold",
+        "when": {"event_seen": {"event": "hush_arrive", "match": {"hotspot": "kitchen_honey"}}},
+        "target": "action",
+        "mode": "hold",
+        "until": {"prank_state": ["achoo_ria", "rigged"]}
+      },
+      {
+        "id": "ghost_hide",
+        "when": {"event_seen": {"event": "b_activity_end", "match": {"id": "warmup"}}},
+        "target": "kitchen_pantry_curtain",
+        "mode": "tap",
+        "until": {"hush_hidden": true}
+      }
+    ],
+    "safety_net": {
+      "hide_before_entry_s": 1.5,
+      "slowmo": 0.5,
+      "pulse": "kitchen_pantry_curtain",
+      "room": "kitchen",
+      "once": true
+    },
+    "end": {
+      "when": {"event_seen": {"event": "reaction_end", "match": {"prank": "achoo_ria"}, "after_s": 3.0}},
+      "reason": "g0_done"
+    },
+    "figgis_hook": {"spot_fill_pct": 100, "to": "nearest_hiding"}
+  },
+  "encores": []
+}

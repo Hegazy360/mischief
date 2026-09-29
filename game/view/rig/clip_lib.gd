@@ -6,12 +6,15 @@
 ## in GDScript (it overrides Object.get: parse error), so it is **`ClipLib.get_clip(id)`**.
 ##
 ## Clip ids are `<rig>/<name>`. Files in `anim/<rig>/` that are not clips (`reactions.json`,
-## `map.json`) are skipped by `list()`. `reload_changed()` re-reads files whose mtime changed
-## (the AnimViewer's hot reload) and returns the ids it dropped.
+## `map.json`, `tiers.json`) are skipped by `list()`, and `rigs_with_clips()` lists only
+## folders that belong to a rig (`rigs/<id>/rig.json`), so `anim/cold/` (cold-open scripts)
+## and `anim/clip_rules.json` never reach the clip tools. `reload_changed()` re-reads files
+## whose mtime changed (the AnimViewer's hot reload) and returns the ids it dropped.
+## `register(clip)` puts a clip built elsewhere (a test fixture) under its id.
 class_name ClipLib
 extends RefCounted
 
-const NOT_CLIPS: PackedStringArray = ["reactions.json", "map.json"]
+const NOT_CLIPS: PackedStringArray = ["reactions.json", "map.json", "tiers.json"]
 
 static var _cache: Dictionary = {}    ## id → ClipDef
 static var _mtime: Dictionary = {}    ## id → int
@@ -50,16 +53,36 @@ static func list(rig_id: String) -> PackedStringArray:
 	return out
 
 
-## Every rig id that has an `anim/<rig>/` folder, sorted.
+## Every rig id that has an `anim/<rig>/` folder and a `rigs/<rig>/rig.json`, sorted.
 static func rigs_with_clips() -> PackedStringArray:
 	var out := PackedStringArray()
 	var d := DirAccess.open("%s/anim" % RigDef.data_root)
 	if d == null:
 		return out
 	for n in d.get_directories():
-		out.append(n)
+		if FileAccess.file_exists("%s/rigs/%s/rig.json" % [RigDef.data_root, n]):
+			out.append(n)
 	out.sort()
 	return out
+
+
+## Put `clip` in the cache under its id (fixtures, tools); get_clip() then returns it until
+## invalidate(). Returns the clip.
+static func register(clip: ClipDef) -> ClipDef:
+	if clip == null or clip.id == "":
+		return clip
+	_cache[clip.id] = clip
+	var p := path_of(clip.id)
+	_mtime[clip.id] = FileAccess.get_modified_time(p) if FileAccess.file_exists(p) else -1
+	return clip
+
+
+## Load a clip file from anywhere (`res://tests/rig/fixtures/…`) and register it under
+## `clip_id` (default: the file's `clip` field). Null when the file is missing.
+static func register_file(file_path: String, clip_id: String = "") -> ClipDef:
+	if not FileAccess.file_exists(file_path):
+		return null
+	return register(load_file(file_path, clip_id))
 
 
 ## Drop cached clips ("" = all).
@@ -122,11 +145,25 @@ static func from_dict(d: Dictionary, clip_id: String = "", rig_def: RigDef = nul
 	if c.layer < 0:
 		c.errors.append("%s: unknown layer '%s'" % [where, layer_name])
 		c.layer = ClipDef.LAYER_BASE
+	# Mask: a rig.json `masks` name or a list of parts. A name the rig does not define (yet)
+	# is not an error: the overlay falls back to the parts the clip keys (lint A23 warns); an
+	# overlay without any mask is lint A23's error.
 	var mv: Variant = d.get("mask", null)
-	if mv != null:
+	c.mask_spec = mv
+	c.touch_legs = bool(d.get("touch_legs", false))
+	if mv is String and String(mv) != "":
+		if c.rig.has_mask(String(mv)):
+			c.mask = c.rig.mask_from(mv, c.errors)
+			c.mask_src = ClipDef.MASK_RIG
+		else:
+			c.mask_src = ClipDef.MASK_KEYS
+	elif mv is Array:
 		c.mask = c.rig.mask_from(mv, c.errors)
+		c.mask_src = ClipDef.MASK_PARTS
+	elif mv != null and not (mv is String):
+		c.errors.append("%s: mask must be a rig mask name or a list of parts" % where)
 	elif c.layer == ClipDef.LAYER_OVERLAY:
-		c.errors.append("%s: overlay clips need a mask" % where)
+		c.mask_src = ClipDef.MASK_KEYS
 	c.has_blend_in = d.has("blend_in")
 	c.has_blend_out = d.has("blend_out")
 	c.blend_in = int(d.get("blend_in", ClipDef.DEFAULT_BLEND))

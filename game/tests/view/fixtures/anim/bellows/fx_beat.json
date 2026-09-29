@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_beat",
+ "rig": "bellows",
+ "loop": false,
+ "length": 60,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_slow_burn",
+   "ease": "linear"
+  },
+  {
+   "f": 60,
+   "pose": "b_slow_burn",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 10,
+   "type": "voice",
+   "id": "vo_bellows_hmph"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

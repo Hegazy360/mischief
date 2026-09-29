@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "clip": "hush/fx_snicker",
+ "rig": "hush",
+ "loop": false,
+ "length": 40,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_snicker_a",
+   "ease": "linear"
+  },
+  {
+   "f": 10,
+   "pose": "h_snicker_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 20,
+   "pose": "h_snicker_a",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 30,
+   "pose": "h_snicker_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 40,
+   "pose": "h_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

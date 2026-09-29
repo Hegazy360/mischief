@@ -77,7 +77,7 @@ func test_hush_enter_is_busy_and_unseen_until_she_is_in() -> void:
 	assert_false(q.is_empty(), "a held move says so at once (owner check #6: never a silent tap)")
 	assert_eq(int(q.get("t", -1)), w.tick, "the same tick")
 	assert_eq(str(q.get("why", "")), "entering")
-	assert_eq(str(q.get("target", "")), "kitchen")
+	assert_eq(str(q.get("target", "")), "kitchen:3500", "a move's target is <room>:<x px> (the view anchors its marker there)")
 	var x0 := w.hush.x_sub
 	log.append_array(U.run(w, 80))
 	assert_eq(w.hush.x_sub, x0, "she doesn't move while climbing in")

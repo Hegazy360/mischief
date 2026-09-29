@@ -345,7 +345,46 @@ def roof_main():
     return out
 
 
+def front_door_glow(reg):
+    """The front door's bow glow (GDD §2.2 Take a Bow; "the front door flashes" when every line is done): a warm
+    additive light round the doorway gap at x 500 with a lit frame and soft rays. Decor `hall_front_door_glow`
+    (hidden; the view shows it while Take a Bow is available, pulsing, and brighter while the Stalls chant)."""
+    cv = Canvas()
+    x0, y0, W, H = 300, -560, 400, 600
+    cx, cy = 500, -240
+    g = cv.grad(Grad("dglow", "radial", (cx, cy, 300), [(0, "#FFF1B8", 0.85), (0.35, "#FFD27A", 0.45), (0.75, "#FFB050", 0.12),
+                                                         (1, "#FFB050", 0.0)]))
+    cv.add(ellipse(cx, cy, 196, 296, fill=g.url(), sil=False))
+    # soft rays fanning out of the doorway
+    rays = PB()
+    for ang in (-62, -38, -14, 14, 38, 62, 180 - 50, 180 + 50):
+        a = math.radians(ang - 90)
+        a1, a2 = a - math.radians(4), a + math.radians(4)
+        rays.M(cx + 20 * math.cos(a), cy + 20 * math.sin(a)).L(cx + 230 * math.cos(a1), cy + 290 * math.sin(a1)).L(cx + 230 * math.cos(a2), cy + 290 * math.sin(a2)).Z()
+    cv.add(path(rays, fill="#FFE7A8", fop=0.22, sil=False))
+    # the lit door frame (the gap from -474 to the floor, 40 px band)
+    frame = PB().M(476, -8).L(476, -470).Q(476, -484, 490, -484).L(510, -484).Q(524, -484, 524, -470).L(524, -8)
+    cv.add(path(frame, fill="none", sw=18, stroke="#FFD27A", sop=0.55, sil=False))
+    cv.add(path(frame, fill="none", sw=6, stroke="#FFF6D8", sop=0.9, sil=False))
+    art = _write("front_door_glow", cv, x0, y0, W, H)
+    reg.decor.append({"id": "hall_front_door_glow", "room": "hall", "pos": [x0, y0], "size": [W, H], "art": {"idle": art},
+                      "z": 1, "hidden": True, "show": "bow", "blend": "add", "pulse_hz": 1.5, "link": "front_door"})
+
+
+def bow_spot():
+    """A warm light pool on the apron for the curtain call (screen-space, additive; bottom-centred)."""
+    cv = Canvas()
+    W, H = 1100, 300
+    g = cv.grad(Grad("bspot", "radial", (W / 2, H - 40, W / 2), [(0, "#FFF1C8", 0.8), (0.45, "#FFD27A", 0.35), (1, "#FFB050", 0.0)]))
+    cv.add(ellipse(W / 2, H - 40, W / 2 - 4, 150, fill=g.url(), sil=False))
+    # the beam from the flies above (a soft cone into the pool)
+    cone = PB().M(W / 2 - 90, 0).L(W / 2 + 90, 0).L(W / 2 + 380, H - 60).L(W / 2 - 380, H - 60).Z()
+    cv.add(path(cone, fill="#FFE7A8", fop=0.1, sil=False))
+    return _write("bow_spot", cv, 0, 0, W, H)
+
+
 def build(reg):
+    front_door_glow(reg)
     st = {}
     st["curtain"] = {"art": curtain(), "size": [1920, 1080], "tile_x": 1920, "screen": True}
     st["curtain_valance"] = {"art": valance(), "size": [1920, 260], "tile_x": 1920, "screen": True}
@@ -358,6 +397,7 @@ def build(reg):
                    "fill_color": pal.STAGE_DARK2}
     st["vignette_top"] = {"art": vignette_top(), "size": [1920, 360], "screen": True}
     st["velvet_rope"] = {"art": velvet_rope(), "size": [200, 176], "anchor": [100, 176]}
+    st["bow_spot"] = {"art": bow_spot(), "size": [1100, 300], "screen": True, "blend": "add", "anchor": "bottom_centre", "alpha": 0.85}
     pieces = []
     art, box_ = sky_left()
     pieces.append({"id": "sky_left", "art": art, "world_pos": [box_[0], box_[1]], "size": [box_[2], box_[3]], "z": -2})

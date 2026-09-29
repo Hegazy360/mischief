@@ -137,11 +137,10 @@ def piano_body(peek=False):
         x += 9
     out.append(path(fr, fill="none", sw=4, stroke=pal.GOLD, sil=False))
     if peek:
-        # dark gap under the shawl: Hush's eyes + glove fingers on the fringe
-        g = PB().M(PX0 + 90, BODY_BOT + 58).L(PX1 - 70, BODY_BOT + 54).L(PX1 - 76, -24).L(PX0 + 96, -24).Z()
-        out.append(path(g, fill=pal.DARK_GAP, fop=0.9, sil=False))
-        out += hush_eyes((PX0 + PX1) / 2 - 4, -64, look=1, s=0.95)
-        out += glove_fingers((PX0 + PX1) / 2 + 30, BODY_BOT + 48, side=1, s=0.85, n=2)
+        # the shawl fringe lifted between the legs: a wide dark gap under the piano for Hush's animated eyes
+        g = PB().M(PX0 + 50, -22).L(PX0 + 52, BODY_BOT + 66).Q(PX0 + 56, BODY_BOT + 44, PX0 + 90, BODY_BOT + 44)
+        g.L(PX1 - 74, BODY_BOT + 42).Q(PX1 - 52, BODY_BOT + 44, PX1 - 50, BODY_BOT + 66).L(PX1 - 48, -22).Z()
+        out.append(path(g, fill=pal.DARK_GAP, sil=False))
     return out
 
 
@@ -149,7 +148,7 @@ def piano(reg):
     p = Prop("piano", "parlour")
     p.add("idle", piano_body())
     p.add("occupied", piano_body(peek=True))
-    p.extra["eyes"] = [(PX0 + PX1) / 2 - 4, -64]
+    p.extra["eyes"] = [(PX0 + PX1) / 2 - 4, -66]
     emit(reg, "parlour_piano_back", p)
 
     w = Prop("piano_wedge", "parlour")
@@ -366,9 +365,14 @@ def chaise(reg):
         for fx in (x0 + 16, x1 - 26):
             out += box(fx, -32, 12, 26, 4, wood, D + 1, hi=False)
         if peek:
-            # Hush's eyes + gloves peeking over the scrolled head end
-            out += hush_eyes(x0 + 70, -210, look=1, s=0.9)
-            out += glove_fingers(x0 + 96, -196, side=1, s=0.85, n=2)
+            # Hush crouched behind the low back: her shadow rises over it with the tip of her red beret; the view
+            # draws her animated eyes (and the glove fingertips curled over the back) at `eyes`
+            sh = PB().M(x0 + 36, -112).Q(x0 + 32, -196, x0 + 108, -198).Q(x0 + 184, -196, x0 + 180, -112).Z()
+            out.append(path(sh, fill=pal.DARK_GAP, sil=False))
+            bt = [(x0 + 104, -192), (x0 + 112, -210), (x0 + 138, -218), (x0 + 162, -208), (x0 + 166, -192)]
+            out.append(group(shape(bt, pal.BERET, D, smooth=True, t=0.4)
+                             + [circle(x0 + 138, -220, 4.5, fill=pal.BERET, sw=2.5, stroke=INK, sil=False)],
+                             rot=14, cx=x0 + 136, cy=-196, sil=False))
         # scrolled high end on the left + a low back running right
         head = [(x0, -60), (x0 - 6, -200), (x0 + 20, -232), (x0 + 46, -214), (x0 + 38, -170), (x0 + 54, -120), (x1 - 40, -120), (x1 - 20, -140),
                 (x1, -126), (x1, -60)]
@@ -384,7 +388,7 @@ def chaise(reg):
 
     p.add("idle", body())
     p.add("occupied", body(peek=True))
-    p.extra["eyes"] = [x0 + 70, -210]
+    p.extra["eyes"] = [x0 + 108, -150]
     emit(reg, "parlour_chaise_back", p)
 
 
@@ -497,9 +501,15 @@ def fan(reg):
 MANTEL = -300
 
 
+VASE_X = 2226
+MANTEL_L = 2186          # left end of the mantel shelf (rooms_final.fireplace: cx 2330 - 130 - 14)
+
+
 def vase(reg):
+    """The vase on the mantel (Prologue `laugh_vase`): the view slides it 10-14 px toward the mantel's left
+    end on every warm-up note, tips it over the edge at `slide.edge_x` and swaps in `parlour_vase_smashed`."""
     p = Prop("vase", "parlour")
-    vx = 2226
+    vx = VASE_X
     blue = ("#6E9BE0", "#4E7AC0", "#B4CDF5")
     out = [shadow(vx, MANTEL - 1, 22, 3)]
     pts = [(vx - 12, MANTEL), (vx + 12, MANTEL), (vx + 22, MANTEL - 26), (vx + 16, MANTEL - 48), (vx + 10, MANTEL - 60), (vx + 14, MANTEL - 72),
@@ -510,16 +520,79 @@ def vase(reg):
     out += ball(vx + 8, MANTEL - 80, 7, pal.MUSTARD, D, hi=False)
     out.append(detail(PB().M(vx - 4, MANTEL - 78).L(vx - 2, MANTEL - 70).M(vx + 6, MANTEL - 74).L(vx + 4, MANTEL - 70), 2.5))
     p.add("idle", out)
-    emit_decor(reg, "parlour_vase", p, z=0)
-    # the smashed vase: shards on the floor under the mantel's left end (shown when it falls)
+    pos, size = emit_decor(reg, "parlour_vase", p, z=0)
+    d = reg.decor[-1]
+    # `base` = bottom centre on the mantel (slide it along x, tip it around `tip_l` = its bottom-left corner)
+    d["pivots"] = {"base": [int(vx - pos[0]), int(MANTEL - pos[1])], "tip_l": [int(vx - 12 - pos[0]), int(MANTEL - pos[1])]}
+    d["slide"] = {"dir": -1, "step_px": [10, 14], "edge_x": MANTEL_L + 6, "floor_y": -8, "smashed": "parlour_vase_smashed"}
+    # the smashed vase: shards on the hearth under the mantel's left end (shown when it lands)
     s = Prop("vase_smashed", "parlour")
+    sx = MANTEL_L - 4
     sh = []
     for (ox, oy, ang) in [(-30, -8, 20), (-6, -6, -30), (18, -10, 60), (38, -6, -10)]:
-        sh.append(group(shape([(vx + ox - 10, oy), (vx + ox + 10, oy), (vx + ox + 4, oy - 14)], blue[0], D + 1), rot=ang, cx=vx + ox, cy=oy))
-    sh += ball(vx - 46, -12, 9, pal.PINK, D, hi=False)
-    sh += ball(vx + 58, -10, 7, pal.MUSTARD, D, hi=False)
+        sh.append(group(shape([(sx + ox - 10, oy), (sx + ox + 10, oy), (sx + ox + 4, oy - 14)], blue[0], D + 1), rot=ang, cx=sx + ox, cy=oy))
+    sh += ball(sx - 46, -12, 9, pal.PINK, D, hi=False)
+    sh += ball(sx + 58, -10, 7, pal.MUSTARD, D, hi=False)
     s.add("idle", sh)
-    emit_decor(reg, "parlour_vase_smashed", s, z=1, hidden=True)
+    emit_decor(reg, "parlour_vase_smashed", s, z=1, hidden=True, show="event")
+
+
+def fire(reg):
+    """The parlour fire: flames + logs in the firebox, 3 flicker frames played at 8 fps (decor `frames`)."""
+    p = Prop("parlour_fire", "parlour")
+    cx = 2330
+    logs = PB().rrect(cx - 62, -52, 124, 20, 10).rrect(cx - 40, -66, 90, 18, 9)
+    shapes = [
+        # (outer tips [(x, y)...], inner tips)
+        ([(-50, -44), (-26, -118), (-8, -80), (16, -150), (34, -96), (52, -126), (50, -44)],
+         [(-30, -44), (-10, -92), (6, -66), (24, -110), (34, -44)]),
+        ([(-50, -44), (-32, -106), (-10, -86), (8, -140), (30, -104), (48, -134), (50, -44)],
+         [(-30, -44), (-16, -84), (2, -70), (18, -116), (34, -44)]),
+        ([(-50, -44), (-22, -126), (-4, -90), (20, -142), (38, -92), (54, -118), (50, -44)],
+         [(-30, -44), (-6, -100), (8, -72), (26, -102), (34, -44)]),
+    ]
+    for i, (outer, inner) in enumerate(shapes):
+        st = "idle" if i == 0 else "f%d" % i
+        o = [(cx + x, y) for x, y in outer]
+        n = [(cx + x, y) for x, y in inner]
+        items = [path(PB().smooth(o, True, 0.35), fill="#F7A23E"), path(PB().smooth(n, True, 0.35), fill="#FFE07A", sil=False),
+                 path(logs, fill="#7A4E36"), path(logs, fill="none", sw=pal.LW_SET_D, stroke=pal.ARCH, sop=pal.ARCH_OP, sil=False)]
+        # a couple of rising sparks, different per frame
+        sp = PB()
+        for (sx_, sy_) in [(-18 + i * 14, -150 - i * 6), (28 - i * 10, -168 + i * 8)]:
+            sp.circle(cx + sx_, sy_, 3.2)
+        items.append(path(sp, fill="#FFE07A", sil=False))
+        p.add(st, items)
+    _emit_frames(reg, "parlour_fire", p, 8.0, z=-1)
+
+
+def candles(reg):
+    """The two candle flames on the mantel's right end (3 frames at 6 fps; the sticks are in the room bg)."""
+    p = Prop("parlour_candles", "parlour")
+    x1 = 2330 + 130
+    tips = [[(0, 0), (1, 0)], [(-2, 3), (2, -2)], [(2, -2), (-1, 2)]]
+    for i, tp in enumerate(tips):
+        st = "idle" if i == 0 else "f%d" % i
+        items = []
+        for j, (kx, h) in enumerate([(x1 - 34, 54), (x1 - 12, 44)]):
+            top = MANTEL - 20 - h
+            dx, dh = tp[j]
+            fl = PB().M(kx - 5, top - 4).Q(kx - 6 + dx, top - 14 - dh, kx + dx, top - 24 - dh).Q(kx + 6 + dx, top - 14 - dh, kx + 5, top - 4).Q(kx, top + 1, kx - 5, top - 4).Z()
+            items += [path(fl, fill="#FFD05A"), path(PB().ellipse(kx, top - 8, 2.2, 4.5), fill="#FFFFFF", sil=False)]
+        p.add(st, items)
+    _emit_frames(reg, "parlour_candles", p, 6.0, z=0)
+
+
+def _emit_frames(reg, decor_id, prop, fps, z=0):
+    """Emit a decor whose states idle/f1/f2... are animation frames: `art.idle` = frame 0, `frames` = all
+    frames in order, `fps` (STYLE §8). All frames share the canvas top-left."""
+    emit_decor(reg, decor_id, prop, z=z)
+    d = reg.decor[-1]
+    art = d["art"]
+    keys = ["idle"] + sorted(k for k in art if k.startswith("f") and k[1:].isdigit())
+    d["frames"] = [art[k] for k in keys]
+    d["fps"] = fps
+    d["art"] = {"idle": art["idle"]}
 
 
 def portrait(reg):
@@ -561,22 +634,64 @@ def portrait(reg):
 
 
 def picture_frame(reg):
-    """The little picture near the hall doorway: falls on his head in the Prologue (+ a Meltdown prop)."""
+    """The picture by the hall doorway: falls on his head in the Prologue (`laugh_picture`) and is a Meltdown
+    prop. `falling` = the same frame with his head burst through the canvas (a real transparent hole), so the
+    view can drop it on his head socket and hang it round his neck (pivot `hole`)."""
     p = Prop("picture_frame", "parlour")
-    x0, y0, w, h = 1542, -600, 92, 76
-    out = [detail(PB().M(x0 + 16, y0).L(x0 + w / 2, y0 - 22).L(x0 + w - 16, y0), 2.5)]
-    out += ball(x0 + w / 2, y0 - 24, 4, pal.BRASS, 2.0, hi=False)
-    out += box(x0, y0, w, h, 5, pal.WALNUT, W, hi=False)
-    out.append(rect(x0 + 10, y0 + 10, w - 20, h - 20, 3, fill="#FFF6E2", sil=False))
-    # a sheet-music motif (notes) - the house of a singer
-    notes = PB()
-    for i, (nx, ny) in enumerate([(x0 + 28, y0 + 48), (x0 + 48, y0 + 40), (x0 + 66, y0 + 46)]):
-        notes.ellipse(nx, ny, 6, 4.5)
-    out.append(path(notes, fill=INK, sil=False))
-    out.append(detail(PB().M(x0 + 33, y0 + 48).L(x0 + 33, y0 + 26).L(x0 + 53, y0 + 22).L(x0 + 53, y0 + 40).M(x0 + 71, y0 + 46).L(x0 + 71, y0 + 26), 2.5))
-    out.append(detail(PB().M(x0 + 16, y0 + 58).L(x0 + w - 16, y0 + 58), 1.5))
-    p.add("idle", out)
-    emit_decor(reg, "parlour_picture_frame", p, z=0)
+    x0, y0, w, h = 1530, -598, 128, 104
+    hx, hy = x0 + w / 2, y0 + h / 2 + 2
+
+    def frame(torn=False):
+        out = []
+        if torn:
+            # the snapped wire: two loose ends
+            out.append(detail(PB().M(x0 + 20, y0).Q(x0 + 16, y0 - 16, x0 + 30, y0 - 22).M(x0 + w - 20, y0).Q(x0 + w - 12, y0 - 14, x0 + w - 26, y0 - 24), 2.5))
+        else:
+            out.append(detail(PB().M(x0 + 20, y0).L(hx, y0 - 26).L(x0 + w - 20, y0), 2.5))
+            out += ball(hx, y0 - 28, 4, pal.BRASS, 2.0, hi=False)
+        ring = PB().rrect(x0, y0, w, h, 6).rrect(x0 + 14, y0 + 14, w - 28, h - 28, 3)
+        el = path(ring, fill=pal.WALNUT[0])
+        el.attrs["fill-rule"] = "evenodd"
+        out.append(el)
+        sh = PB().M(x0 + w, y0 + 8).L(x0 + w, y0 + h - 6).Q(x0 + w, y0 + h, x0 + w - 6, y0 + h).L(x0 + 8, y0 + h).L(x0 + 14, y0 + h - 14)
+        sh.L(x0 + w - 14, y0 + h - 14).L(x0 + w - 14, y0 + 14).Z()
+        out.append(path(sh, fill=pal.WALNUT[1], sil=False))
+        if torn:
+            # canvas torn open: jagged paper flaps round a head-sized hole (transparent: his head shows through)
+            ix0, iy0, ix1, iy1 = x0 + 14, y0 + 14, x0 + w - 14, y0 + h - 14
+            jag = []
+            n = 14
+            for i in range(n):
+                a = math.radians(360.0 * i / n)
+                r = (0.62 if i % 2 else 0.8)
+                jag.append((hx + math.cos(a) * (ix1 - ix0) * 0.5 * r, hy + math.sin(a) * (iy1 - iy0) * 0.5 * r))
+            paper = PB().rrect(ix0, iy0, ix1 - ix0, iy1 - iy0, 3).poly(jag, True)
+            pe = path(paper, fill="#FFF6E2", sil=False)
+            pe.attrs["fill-rule"] = "evenodd"
+            out.append(pe)
+            out.append(path(PB().poly(jag, True), fill="none", sw=2.5, stroke=INK, sil=False))
+            # a scrap of the sheet music still stuck on one flap
+            out.append(path(PB().ellipse(ix0 + 12, iy1 - 12, 5, 3.6), fill=INK, sil=False))
+        else:
+            out.append(rect(x0 + 14, y0 + 14, w - 28, h - 28, 3, fill="#FFF6E2", sil=False))
+            # a sheet-music motif (notes) - the house of a singer
+            notes = PB()
+            for (nx, ny) in [(x0 + 40, y0 + 64), (x0 + 62, y0 + 54), (x0 + 86, y0 + 60)]:
+                notes.ellipse(nx, ny, 7, 5.2)
+            out.append(path(notes, fill=INK, sil=False))
+            out.append(detail(PB().M(x0 + 46, y0 + 64).L(x0 + 46, y0 + 38).L(x0 + 68, y0 + 32).L(x0 + 68, y0 + 54).M(x0 + 92, y0 + 60)
+                              .L(x0 + 92, y0 + 36), 2.5))
+            out.append(detail(PB().M(x0 + 26, y0 + 76).L(x0 + w - 26, y0 + 76), 1.5))
+        out.append(path(PB().rrect(x0, y0, w, h, 6), fill="none", sw=W, stroke=INK))
+        out.append(path(PB().rrect(x0 + 14, y0 + 14, w - 28, h - 28, 3), fill="none", sw=D, stroke=INK, sil=False))
+        return out
+
+    p.add("idle", frame())
+    p.add("falling", frame(torn=True))
+    pos, size = emit_decor(reg, "parlour_picture_frame", p, z=0)
+    d = reg.decor[-1]
+    d["pivots"] = {"hook": [int(hx - pos[0]), int(y0 - 28 - pos[1])], "hole": [int(hx - pos[0]), int(hy - pos[1])]}
+    d["cue"] = "laugh_picture"
 
 
 def log_basket(reg):
@@ -616,8 +731,10 @@ def build(reg):
     portrait(reg)
     picture_frame(reg)
     log_basket(reg)
+    fire(reg)
+    candles(reg)
     reg.quake.setdefault("parlour", []).extend([
-        {"prop": "picture_frame", "x": 1588, "decor": "parlour_picture_frame"},
+        {"prop": "picture_frame", "x": 1594, "decor": "parlour_picture_frame"},
         {"prop": "vase", "x": 2226, "decor": "parlour_vase"},
         {"prop": "portrait", "x": 2330, "decor": "parlour_portrait"},
     ])

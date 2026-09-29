@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "clip": "hush/fx_tinker_b",
+ "rig": "hush",
+ "loop": true,
+ "length": 150,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_tinker_b_a",
+   "ease": "linear"
+  },
+  {
+   "f": 50,
+   "pose": "h_tinker_b_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 100,
+   "pose": "h_brow_wipe",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 150,
+   "pose": "h_tinker_b_a",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

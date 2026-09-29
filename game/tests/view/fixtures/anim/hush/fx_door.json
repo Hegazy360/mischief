@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "clip": "hush/fx_door",
+ "rig": "hush",
+ "loop": false,
+ "length": 21,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_door_reach",
+   "ease": "linear"
+  },
+  {
+   "f": 21,
+   "pose": "h_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

@@ -9,6 +9,8 @@ extends RefCounted
 var house: HouseDef = null
 ## Per room: bitmask of rooms joined to it by a doorway (squeak hearing).
 var doorway_adj: PackedInt32Array = PackedInt32Array()
+## Per room: bitmask of rooms joined to it by any link — doorway, door or the stairs (the PiP rule).
+var link_adj: PackedInt32Array = PackedInt32Array()
 
 
 ## Build from a HouseDef.
@@ -16,13 +18,24 @@ static func build(h: HouseDef) -> NavGraph:
 	var g := NavGraph.new()
 	g.house = h
 	g.doorway_adj.resize(h.rooms.size())
+	g.link_adj.resize(h.rooms.size())
 	for i in h.rooms.size():
 		g.doorway_adj[i] = 0
+		g.link_adj[i] = 0
 	for l in h.links:
-		if l.kind == LinkDef.DOORWAY and l.a_idx >= 0 and l.b_idx >= 0:
+		if l.a_idx < 0 or l.b_idx < 0:
+			continue
+		g.link_adj[l.a_idx] |= 1 << l.b_idx
+		g.link_adj[l.b_idx] |= 1 << l.a_idx
+		if l.kind == LinkDef.DOORWAY:
 			g.doorway_adj[l.a_idx] |= 1 << l.b_idx
 			g.doorway_adj[l.b_idx] |= 1 << l.a_idx
 	return g
+
+
+## True when rooms `a` and `b` share a link (doorway, door or the stairs).
+func linked(a: int, b: int) -> bool:
+	return a >= 0 and b >= 0 and a < link_adj.size() and (link_adj[a] & (1 << b)) != 0
 
 
 ## Base speed (sub-px per tick) of a mover (SimConst.MOVER_*).
@@ -58,6 +71,8 @@ func path(from_room: int, from_x: int, to_room: int, to_x: int, mover: int, room
 	p.speed = sp
 	p.x = from_x
 	p.room = from_room
+	p.start_x = from_x
+	p.start_room = from_room
 	if from_room < 0 or to_room < 0 or from_room >= house.rooms.size() or to_room >= house.rooms.size():
 		p.ok = false
 		return p

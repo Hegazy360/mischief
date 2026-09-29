@@ -2,411 +2,2741 @@
   "episode": "fx_act1",
   "data": "res://tests/sim/fixtures",
   "ticks": 18000,
-  "reason": "sim stage 1: state hash now covers scored / exit_due / entering (behaviour unchanged: 711 events, applause 409)",
-  "checkpoints": [
-    [600, 2620081198],
-    [1200, 2717594094],
-    [1800, 3655234321],
-    [2400, 3910095022],
-    [3000, 3888288481],
-    [3600, 3519739464],
-    [4200, 1486675563],
-    [4800, 409936470],
-    [5400, 876045280],
-    [6000, 2805833167],
-    [6600, 2602197893],
-    [7200, 1438429466],
-    [7800, 2595802437],
-    [8400, 2007951270],
-    [9000, 4090413484],
-    [9600, 2286395833],
-    [10200, 3019501169],
-    [10800, 3585064607],
-    [11400, 3257609099],
-    [12000, 3995592136],
-    [12600, 2919449401],
-    [13200, 3934225787],
-    [13800, 4018018458],
-    [14400, 762578759],
-    [15000, 185790873],
-    [15600, 1149013784],
-    [16200, 1751310344],
-    [16800, 2576055054],
-    [17400, 2414256252],
-    [18000, 2250709564]
-  ],
+  "reason": "s2-sim: state hash now covers the micro-gag clock (mg_last_t, mg_walk_i, walk_t, walk_len), the one-shot starts (bit_id/bit_t0, specs_t0, curious_t0, fizzle_t0; Hush yank/near-miss/wink ticks) and the last-beat fields (rx_count, rx_last_beat, rx_beat_len). Behaviour unchanged: applause 409, lines tap/pickle/achoo; 727 events = the Stage-1 711 + 16 cmd_queued (the fixture has no micro_gags, no clip_timings).",
   "cmds": [
-    [1.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [123.0, {"c": "rig", "on": true}],
-    [171.0, {"c": "rig", "on": false}],
-    [171.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [192.0, {"c": "rig", "on": true}],
-    [192.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}],
-    [383.0, {"c": "rig", "on": false}],
-    [383.0, {"c": "rig", "on": true}],
-    [383.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [6305.0, {"c": "pop_out", "run": false}],
-    [6326.0, {"c": "squeak"}],
-    [6380.0, {"c": "freeze", "on": false}],
-    [6401.0, {"c": "squeak"}],
-    [6442.0, {"c": "rig", "on": false}],
-    [6480.0, {"c": "go", "hotspot": "kitchen_table", "run": false}],
-    [6539.0, {"c": "rig", "on": false}],
-    [6591.0, {"c": "freeze", "on": false}],
-    [6600.0, {"c": "pop_out", "run": false}],
-    [6636.0, {"c": "rig", "on": false}],
-    [6720.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [6733.0, {"c": "rig", "on": false}],
-    [6747.0, {"c": "squeak"}],
-    [6752.0, {"c": "freeze", "on": true}],
-    [6802.0, {"c": "freeze", "on": false}],
-    [6830.0, {"c": "rig", "on": false}],
-    [6900.0, {"c": "pop_out", "run": false}],
-    [6920.0, {"c": "squeak"}],
-    [6927.0, {"c": "rig", "on": false}],
-    [6960.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [6963.0, {"c": "freeze", "on": true}],
-    [7013.0, {"c": "freeze", "on": false}],
-    [7024.0, {"c": "rig", "on": false}],
-    [7080.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}],
-    [7093.0, {"c": "squeak"}],
-    [7121.0, {"c": "rig", "on": false}],
-    [7174.0, {"c": "freeze", "on": true}],
-    [7178.0, {"c": "rig", "on": true}],
-    [7200.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": false}],
-    [7218.0, {"c": "rig", "on": false}],
-    [7224.0, {"c": "freeze", "on": false}],
-    [7266.0, {"c": "squeak"}],
-    [7315.0, {"c": "rig", "on": false}],
-    [7320.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": true}],
-    [7385.0, {"c": "freeze", "on": true}],
-    [7412.0, {"c": "rig", "on": false}],
-    [7435.0, {"c": "freeze", "on": false}],
-    [7439.0, {"c": "squeak"}],
-    [7469.0, {"c": "rig", "on": true}],
-    [7509.0, {"c": "rig", "on": false}],
-    [7560.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": false}],
-    [7596.0, {"c": "freeze", "on": true}],
-    [7606.0, {"c": "rig", "on": false}],
-    [7612.0, {"c": "squeak"}],
-    [7646.0, {"c": "freeze", "on": false}],
-    [7703.0, {"c": "rig", "on": false}],
-    [7785.0, {"c": "squeak"}],
-    [7800.0, {"c": "rig", "on": false}],
-    [7807.0, {"c": "freeze", "on": true}],
-    [7857.0, {"c": "freeze", "on": false}],
-    [7897.0, {"c": "rig", "on": false}],
-    [7920.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}],
-    [7958.0, {"c": "squeak"}],
-    [7994.0, {"c": "rig", "on": false}],
-    [8018.0, {"c": "freeze", "on": true}],
-    [8040.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [8068.0, {"c": "freeze", "on": false}],
-    [8091.0, {"c": "rig", "on": false}],
-    [8131.0, {"c": "squeak"}],
-    [8160.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": true}],
-    [8188.0, {"c": "rig", "on": false}],
-    [8229.0, {"c": "freeze", "on": true}],
-    [8279.0, {"c": "freeze", "on": false}],
-    [8280.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [8285.0, {"c": "rig", "on": false}],
-    [8304.0, {"c": "squeak"}],
-    [8382.0, {"c": "rig", "on": false}],
-    [8400.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [8439.0, {"c": "rig", "on": true}],
-    [8440.0, {"c": "freeze", "on": true}],
-    [8477.0, {"c": "squeak"}],
-    [8479.0, {"c": "rig", "on": false}],
-    [8490.0, {"c": "freeze", "on": false}],
-    [8576.0, {"c": "rig", "on": false}],
-    [8650.0, {"c": "squeak"}],
-    [8651.0, {"c": "freeze", "on": true}],
-    [8673.0, {"c": "rig", "on": false}],
-    [8701.0, {"c": "freeze", "on": false}],
-    [8760.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [8770.0, {"c": "rig", "on": false}],
-    [8823.0, {"c": "squeak"}],
-    [8862.0, {"c": "freeze", "on": true}],
-    [8867.0, {"c": "rig", "on": false}],
-    [8880.0, {"c": "go", "hotspot": "parlour_piano_back", "run": false}],
-    [8912.0, {"c": "freeze", "on": false}],
-    [8964.0, {"c": "rig", "on": false}],
-    [8996.0, {"c": "squeak"}],
-    [9000.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [9061.0, {"c": "rig", "on": false}],
-    [9073.0, {"c": "freeze", "on": true}],
-    [9120.0, {"c": "go", "hotspot": "kitchen_honey", "run": true}],
-    [9123.0, {"c": "freeze", "on": false}],
-    [9158.0, {"c": "rig", "on": false}],
-    [9169.0, {"c": "squeak"}],
-    [9240.0, {"c": "go", "hotspot": "parlour_piano_back", "run": false}],
-    [9255.0, {"c": "rig", "on": false}],
-    [9284.0, {"c": "freeze", "on": true}],
-    [9334.0, {"c": "freeze", "on": false}],
-    [9342.0, {"c": "squeak"}],
-    [9352.0, {"c": "rig", "on": false}],
-    [9360.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [9449.0, {"c": "rig", "on": false}],
-    [9480.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [9495.0, {"c": "freeze", "on": true}],
-    [9515.0, {"c": "squeak"}],
-    [9545.0, {"c": "freeze", "on": false}],
-    [9546.0, {"c": "rig", "on": false}],
-    [9600.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": true}],
-    [9643.0, {"c": "rig", "on": false}],
-    [9740.0, {"c": "rig", "on": false}],
-    [9756.0, {"c": "freeze", "on": false}],
-    [9837.0, {"c": "rig", "on": false}],
-    [9900.0, {"c": "pop_out", "run": true}],
-    [9917.0, {"c": "freeze", "on": true}],
-    [9934.0, {"c": "rig", "on": false}],
-    [9960.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [9967.0, {"c": "freeze", "on": false}],
-    [10031.0, {"c": "rig", "on": false}],
-    [10034.0, {"c": "squeak"}],
-    [10080.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [10128.0, {"c": "freeze", "on": true}],
-    [10178.0, {"c": "freeze", "on": false}],
-    [10207.0, {"c": "squeak"}],
-    [10225.0, {"c": "rig", "on": false}],
-    [10322.0, {"c": "rig", "on": false}],
-    [10339.0, {"c": "freeze", "on": true}],
-    [10380.0, {"c": "squeak"}],
-    [10389.0, {"c": "freeze", "on": false}],
-    [10419.0, {"c": "rig", "on": false}],
-    [10440.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [10516.0, {"c": "rig", "on": false}],
-    [10550.0, {"c": "freeze", "on": true}],
-    [10553.0, {"c": "squeak"}],
-    [10560.0, {"c": "go", "hotspot": "kitchen_table", "run": false}],
-    [10600.0, {"c": "freeze", "on": false}],
-    [10613.0, {"c": "rig", "on": false}],
-    [10680.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [10710.0, {"c": "rig", "on": false}],
-    [10726.0, {"c": "squeak"}],
-    [10761.0, {"c": "freeze", "on": true}],
-    [10800.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [10807.0, {"c": "rig", "on": false}],
-    [10811.0, {"c": "freeze", "on": false}],
-    [10899.0, {"c": "squeak"}],
-    [10904.0, {"c": "rig", "on": false}],
-    [10920.0, {"c": "go", "hotspot": "parlour_piano_back", "run": false}],
-    [10972.0, {"c": "freeze", "on": true}],
-    [11001.0, {"c": "rig", "on": false}],
-    [11022.0, {"c": "freeze", "on": false}],
-    [11072.0, {"c": "squeak"}],
-    [11098.0, {"c": "rig", "on": false}],
-    [11183.0, {"c": "freeze", "on": true}],
-    [11195.0, {"c": "rig", "on": false}],
-    [11233.0, {"c": "freeze", "on": false}],
-    [11245.0, {"c": "squeak"}],
-    [11280.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": true}],
-    [11292.0, {"c": "rig", "on": false}],
-    [11389.0, {"c": "rig", "on": false}],
-    [11394.0, {"c": "freeze", "on": true}],
-    [11400.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": true}],
-    [11418.0, {"c": "squeak"}],
-    [11444.0, {"c": "freeze", "on": false}],
-    [11486.0, {"c": "rig", "on": false}],
-    [11520.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [11583.0, {"c": "rig", "on": false}],
-    [11591.0, {"c": "squeak"}],
-    [11605.0, {"c": "freeze", "on": true}],
-    [11640.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [11655.0, {"c": "freeze", "on": false}],
-    [11680.0, {"c": "rig", "on": false}],
-    [11737.0, {"c": "rig", "on": true}],
-    [11760.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [11764.0, {"c": "squeak"}],
-    [11777.0, {"c": "rig", "on": false}],
-    [11816.0, {"c": "freeze", "on": true}],
-    [11834.0, {"c": "rig", "on": true}],
-    [11866.0, {"c": "freeze", "on": false}],
-    [11874.0, {"c": "rig", "on": false}],
-    [11880.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [11937.0, {"c": "squeak"}],
-    [11971.0, {"c": "rig", "on": false}],
-    [12027.0, {"c": "freeze", "on": true}],
-    [12068.0, {"c": "rig", "on": false}],
-    [12077.0, {"c": "freeze", "on": false}],
-    [12110.0, {"c": "squeak"}],
-    [12165.0, {"c": "rig", "on": false}],
-    [12238.0, {"c": "freeze", "on": true}],
-    [12240.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [12262.0, {"c": "rig", "on": false}],
-    [12283.0, {"c": "squeak"}],
-    [12288.0, {"c": "freeze", "on": false}],
-    [12359.0, {"c": "rig", "on": false}],
-    [12360.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [12449.0, {"c": "freeze", "on": true}],
-    [12456.0, {"c": "squeak"}],
-    [12480.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": true}],
-    [12499.0, {"c": "freeze", "on": false}],
-    [12553.0, {"c": "rig", "on": false}],
-    [12600.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [12629.0, {"c": "squeak"}],
-    [12650.0, {"c": "rig", "on": false}],
-    [12660.0, {"c": "freeze", "on": true}],
-    [12710.0, {"c": "freeze", "on": false}],
-    [12720.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}],
-    [12747.0, {"c": "rig", "on": false}],
-    [12802.0, {"c": "squeak"}],
-    [12844.0, {"c": "rig", "on": false}],
-    [12871.0, {"c": "freeze", "on": true}],
-    [12921.0, {"c": "freeze", "on": false}],
-    [12941.0, {"c": "rig", "on": false}],
-    [12975.0, {"c": "squeak"}],
-    [13038.0, {"c": "rig", "on": false}],
-    [13080.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [13082.0, {"c": "freeze", "on": true}],
-    [13132.0, {"c": "freeze", "on": false}],
-    [13135.0, {"c": "rig", "on": false}],
-    [13148.0, {"c": "squeak"}],
-    [13200.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [13232.0, {"c": "rig", "on": false}],
-    [13293.0, {"c": "freeze", "on": true}],
-    [13320.0, {"c": "go", "hotspot": "kitchen_table", "run": false}],
-    [13321.0, {"c": "squeak"}],
-    [13329.0, {"c": "rig", "on": false}],
-    [13343.0, {"c": "freeze", "on": false}],
-    [13426.0, {"c": "rig", "on": false}],
-    [13440.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [13494.0, {"c": "squeak"}],
-    [13504.0, {"c": "freeze", "on": true}],
-    [13523.0, {"c": "rig", "on": false}],
-    [13554.0, {"c": "freeze", "on": false}],
-    [13620.0, {"c": "rig", "on": false}],
-    [13667.0, {"c": "squeak"}],
-    [13715.0, {"c": "freeze", "on": true}],
-    [13717.0, {"c": "rig", "on": false}],
-    [13765.0, {"c": "freeze", "on": false}],
-    [13800.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [13814.0, {"c": "rig", "on": false}],
-    [13840.0, {"c": "squeak"}],
-    [13911.0, {"c": "rig", "on": false}],
-    [13920.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [13926.0, {"c": "freeze", "on": true}],
-    [13976.0, {"c": "freeze", "on": false}],
-    [14008.0, {"c": "rig", "on": false}],
-    [14013.0, {"c": "squeak"}],
-    [14040.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [14105.0, {"c": "rig", "on": false}],
-    [14137.0, {"c": "freeze", "on": true}],
-    [14160.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": false}],
-    [14186.0, {"c": "squeak"}],
-    [14187.0, {"c": "freeze", "on": false}],
-    [14202.0, {"c": "rig", "on": false}],
-    [14280.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [14299.0, {"c": "rig", "on": false}],
-    [14348.0, {"c": "freeze", "on": true}],
-    [14359.0, {"c": "squeak"}],
-    [14396.0, {"c": "rig", "on": false}],
-    [14398.0, {"c": "freeze", "on": false}],
-    [14400.0, {"c": "go", "hotspot": "kitchen_table", "run": false}],
-    [14493.0, {"c": "rig", "on": false}],
-    [14520.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [14532.0, {"c": "squeak"}],
-    [14559.0, {"c": "freeze", "on": true}],
-    [14590.0, {"c": "rig", "on": false}],
-    [14609.0, {"c": "freeze", "on": false}],
-    [14640.0, {"c": "go", "hotspot": "kitchen_honey", "run": false}],
-    [14687.0, {"c": "rig", "on": false}],
-    [14705.0, {"c": "squeak"}],
-    [14760.0, {"c": "go", "hotspot": "kitchen_table", "run": true}],
-    [14770.0, {"c": "freeze", "on": true}],
-    [14784.0, {"c": "rig", "on": false}],
-    [14820.0, {"c": "freeze", "on": false}],
-    [14878.0, {"c": "squeak"}],
-    [14881.0, {"c": "rig", "on": false}],
-    [14978.0, {"c": "rig", "on": false}],
-    [14981.0, {"c": "freeze", "on": true}],
-    [15031.0, {"c": "freeze", "on": false}],
-    [15051.0, {"c": "squeak"}],
-    [15075.0, {"c": "rig", "on": false}],
-    [15120.0, {"c": "go", "hotspot": "kitchen_table", "run": true}],
-    [15172.0, {"c": "rig", "on": false}],
-    [15192.0, {"c": "freeze", "on": true}],
-    [15224.0, {"c": "squeak"}],
-    [15240.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [15242.0, {"c": "freeze", "on": false}],
-    [15269.0, {"c": "rig", "on": false}],
-    [15360.0, {"c": "go", "hotspot": "kitchen_pantry_curtain", "run": false}],
-    [15366.0, {"c": "rig", "on": false}],
-    [15397.0, {"c": "squeak"}],
-    [15403.0, {"c": "freeze", "on": true}],
-    [15453.0, {"c": "freeze", "on": false}],
-    [15463.0, {"c": "rig", "on": false}],
-    [15480.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [15560.0, {"c": "rig", "on": false}],
-    [15570.0, {"c": "squeak"}],
-    [15600.0, {"c": "go", "hotspot": "parlour_piano_back", "run": false}],
-    [15614.0, {"c": "freeze", "on": true}],
-    [15657.0, {"c": "rig", "on": false}],
-    [15664.0, {"c": "freeze", "on": false}],
-    [15720.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": true}],
-    [15743.0, {"c": "squeak"}],
-    [15754.0, {"c": "rig", "on": false}],
-    [15825.0, {"c": "freeze", "on": true}],
-    [15840.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": true}],
-    [15851.0, {"c": "rig", "on": false}],
-    [15875.0, {"c": "freeze", "on": false}],
-    [15948.0, {"c": "rig", "on": false}],
-    [16045.0, {"c": "rig", "on": false}],
-    [16086.0, {"c": "freeze", "on": false}],
-    [16142.0, {"c": "rig", "on": false}],
-    [16200.0, {"c": "pop_out", "run": true}],
-    [16239.0, {"c": "rig", "on": false}],
-    [16247.0, {"c": "freeze", "on": true}],
-    [16262.0, {"c": "squeak"}],
-    [16297.0, {"c": "freeze", "on": false}],
-    [16320.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": true}],
-    [16336.0, {"c": "rig", "on": false}],
-    [16433.0, {"c": "rig", "on": false}],
-    [16435.0, {"c": "squeak"}],
-    [16440.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [16458.0, {"c": "freeze", "on": true}],
-    [16508.0, {"c": "freeze", "on": false}],
-    [16530.0, {"c": "rig", "on": false}],
-    [16608.0, {"c": "squeak"}],
-    [16627.0, {"c": "rig", "on": false}],
-    [16669.0, {"c": "freeze", "on": true}],
-    [16719.0, {"c": "freeze", "on": false}],
-    [16724.0, {"c": "rig", "on": false}],
-    [16781.0, {"c": "squeak"}],
-    [16800.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": false}],
-    [16821.0, {"c": "rig", "on": false}],
-    [16880.0, {"c": "freeze", "on": true}],
-    [16918.0, {"c": "rig", "on": false}],
-    [16930.0, {"c": "freeze", "on": false}],
-    [17015.0, {"c": "rig", "on": false}],
-    [17100.0, {"c": "pop_out", "run": false}],
-    [17112.0, {"c": "rig", "on": false}],
-    [17127.0, {"c": "squeak"}],
-    [17141.0, {"c": "freeze", "on": false}],
-    [17160.0, {"c": "go", "hotspot": "kitchen_sink_tap", "run": false}],
-    [17209.0, {"c": "rig", "on": false}],
-    [17280.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [17300.0, {"c": "squeak"}],
-    [17302.0, {"c": "freeze", "on": true}],
-    [17306.0, {"c": "rig", "on": false}],
-    [17352.0, {"c": "freeze", "on": false}],
-    [17400.0, {"c": "go", "hotspot": "hall_coat_cupboard", "run": false}],
-    [17403.0, {"c": "rig", "on": false}],
-    [17473.0, {"c": "squeak"}],
-    [17500.0, {"c": "rig", "on": false}],
-    [17563.0, {"c": "freeze", "on": false}],
-    [17597.0, {"c": "rig", "on": false}],
-    [17694.0, {"c": "rig", "on": false}],
-    [17700.0, {"c": "pop_out", "run": true}],
-    [17724.0, {"c": "freeze", "on": true}],
-    [17760.0, {"c": "go", "hotspot": "hall_confiscated_box", "run": false}],
-    [17774.0, {"c": "freeze", "on": false}],
-    [17791.0, {"c": "rig", "on": false}],
-    [17819.0, {"c": "squeak"}],
-    [17880.0, {"c": "go", "hotspot": "kitchen_pickle_jar", "run": false}],
-    [17888.0, {"c": "rig", "on": false}],
-    [17935.0, {"c": "freeze", "on": true}],
-    [17985.0, {"c": "freeze", "on": false}],
-    [17992.0, {"c": "squeak"}]
+    [
+      1.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      123.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      171.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      171.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      192.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      192.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": false
+      }
+    ],
+    [
+      383.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      383.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      383.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      6305.0,
+      {
+        "c": "pop_out",
+        "run": false
+      }
+    ],
+    [
+      6326.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      6380.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      6401.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      6442.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6480.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": false
+      }
+    ],
+    [
+      6539.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6591.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      6600.0,
+      {
+        "c": "pop_out",
+        "run": false
+      }
+    ],
+    [
+      6636.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6720.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      6733.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6747.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      6752.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      6802.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      6830.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6900.0,
+      {
+        "c": "pop_out",
+        "run": false
+      }
+    ],
+    [
+      6920.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      6927.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      6960.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      6963.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      7013.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      7024.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7080.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": false
+      }
+    ],
+    [
+      7093.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7121.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7174.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      7178.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      7200.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": false
+      }
+    ],
+    [
+      7218.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7224.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      7266.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7315.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7320.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": true
+      }
+    ],
+    [
+      7385.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      7412.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7435.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      7439.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7469.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      7509.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7560.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": false
+      }
+    ],
+    [
+      7596.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      7606.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7612.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7646.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      7703.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7785.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7800.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7807.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      7857.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      7897.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      7920.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": false
+      }
+    ],
+    [
+      7958.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      7994.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8018.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      8040.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      8068.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      8091.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8131.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      8160.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": true
+      }
+    ],
+    [
+      8188.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8229.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      8279.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      8280.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      8285.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8304.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      8382.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8400.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      8439.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      8440.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      8477.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      8479.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8490.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      8576.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8650.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      8651.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      8673.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8701.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      8760.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      8770.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8823.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      8862.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      8867.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8880.0,
+      {
+        "c": "go",
+        "hotspot": "parlour_piano_back",
+        "run": false
+      }
+    ],
+    [
+      8912.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      8964.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      8996.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      9000.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      9061.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9073.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      9120.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": true
+      }
+    ],
+    [
+      9123.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      9158.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9169.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      9240.0,
+      {
+        "c": "go",
+        "hotspot": "parlour_piano_back",
+        "run": false
+      }
+    ],
+    [
+      9255.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9284.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      9334.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      9342.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      9352.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9360.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      9449.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9480.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      9495.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      9515.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      9545.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      9546.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9600.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": true
+      }
+    ],
+    [
+      9643.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9740.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9756.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      9837.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9900.0,
+      {
+        "c": "pop_out",
+        "run": true
+      }
+    ],
+    [
+      9917.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      9934.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      9960.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      9967.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      10031.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10034.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10080.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      10128.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      10178.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      10207.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10225.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10322.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10339.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      10380.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10389.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      10419.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10440.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      10516.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10550.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      10553.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10560.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": false
+      }
+    ],
+    [
+      10600.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      10613.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10680.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      10710.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10726.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10761.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      10800.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      10807.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10811.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      10899.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      10904.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      10920.0,
+      {
+        "c": "go",
+        "hotspot": "parlour_piano_back",
+        "run": false
+      }
+    ],
+    [
+      10972.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      11001.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11022.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      11072.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11098.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11183.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      11195.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11233.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      11245.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11280.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": true
+      }
+    ],
+    [
+      11292.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11389.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11394.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      11400.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": true
+      }
+    ],
+    [
+      11418.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11444.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      11486.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11520.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      11583.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11591.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11605.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      11640.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      11655.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      11680.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11737.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      11760.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      11764.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11777.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11816.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      11834.0,
+      {
+        "c": "rig",
+        "on": true
+      }
+    ],
+    [
+      11866.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      11874.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      11880.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      11937.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      11971.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12027.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      12068.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12077.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      12110.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      12165.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12238.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      12240.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      12262.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12283.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      12288.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      12359.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12360.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      12449.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      12456.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      12480.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": true
+      }
+    ],
+    [
+      12499.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      12553.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12600.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      12629.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      12650.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12660.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      12710.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      12720.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": false
+      }
+    ],
+    [
+      12747.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12802.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      12844.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12871.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      12921.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      12941.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      12975.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13038.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13080.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      13082.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      13132.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      13135.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13148.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13200.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      13232.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13293.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      13320.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": false
+      }
+    ],
+    [
+      13321.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13329.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13343.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      13426.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13440.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      13494.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13504.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      13523.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13554.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      13620.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13667.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13715.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      13717.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13765.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      13800.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      13814.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13840.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      13911.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      13920.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      13926.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      13976.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      14008.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14013.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14040.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      14105.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14137.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      14160.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": false
+      }
+    ],
+    [
+      14186.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14187.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      14202.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14280.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      14299.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14348.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      14359.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14396.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14398.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      14400.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": false
+      }
+    ],
+    [
+      14493.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14520.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      14532.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14559.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      14590.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14609.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      14640.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_honey",
+        "run": false
+      }
+    ],
+    [
+      14687.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14705.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14760.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": true
+      }
+    ],
+    [
+      14770.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      14784.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14820.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      14878.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      14881.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14978.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      14981.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      15031.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      15051.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      15075.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15120.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_table",
+        "run": true
+      }
+    ],
+    [
+      15172.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15192.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      15224.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      15240.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      15242.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      15269.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15360.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pantry_curtain",
+        "run": false
+      }
+    ],
+    [
+      15366.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15397.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      15403.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      15453.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      15463.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15480.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      15560.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15570.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      15600.0,
+      {
+        "c": "go",
+        "hotspot": "parlour_piano_back",
+        "run": false
+      }
+    ],
+    [
+      15614.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      15657.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15664.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      15720.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": true
+      }
+    ],
+    [
+      15743.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      15754.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15825.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      15840.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": true
+      }
+    ],
+    [
+      15851.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      15875.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      15948.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16045.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16086.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      16142.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16200.0,
+      {
+        "c": "pop_out",
+        "run": true
+      }
+    ],
+    [
+      16239.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16247.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      16262.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      16297.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      16320.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": true
+      }
+    ],
+    [
+      16336.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16433.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16435.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      16440.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      16458.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      16508.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      16530.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16608.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      16627.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16669.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      16719.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      16724.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16781.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      16800.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": false
+      }
+    ],
+    [
+      16821.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16880.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      16918.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      16930.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17015.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17100.0,
+      {
+        "c": "pop_out",
+        "run": false
+      }
+    ],
+    [
+      17112.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17127.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      17141.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17160.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_sink_tap",
+        "run": false
+      }
+    ],
+    [
+      17209.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17280.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      17300.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      17302.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      17306.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17352.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17400.0,
+      {
+        "c": "go",
+        "hotspot": "hall_coat_cupboard",
+        "run": false
+      }
+    ],
+    [
+      17403.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17473.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      17500.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17563.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17597.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17694.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17700.0,
+      {
+        "c": "pop_out",
+        "run": true
+      }
+    ],
+    [
+      17724.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      17760.0,
+      {
+        "c": "go",
+        "hotspot": "hall_confiscated_box",
+        "run": false
+      }
+    ],
+    [
+      17774.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17791.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17819.0,
+      {
+        "c": "squeak"
+      }
+    ],
+    [
+      17880.0,
+      {
+        "c": "go",
+        "hotspot": "kitchen_pickle_jar",
+        "run": false
+      }
+    ],
+    [
+      17888.0,
+      {
+        "c": "rig",
+        "on": false
+      }
+    ],
+    [
+      17935.0,
+      {
+        "c": "freeze",
+        "on": true
+      }
+    ],
+    [
+      17985.0,
+      {
+        "c": "freeze",
+        "on": false
+      }
+    ],
+    [
+      17992.0,
+      {
+        "c": "squeak"
+      }
+    ]
+  ],
+  "checkpoints": [
+    [
+      600,
+      2773509527
+    ],
+    [
+      1200,
+      1847618625
+    ],
+    [
+      1800,
+      755492865
+    ],
+    [
+      2400,
+      1021153619
+    ],
+    [
+      3000,
+      2424608600
+    ],
+    [
+      3600,
+      874012149
+    ],
+    [
+      4200,
+      1470523519
+    ],
+    [
+      4800,
+      2037378457
+    ],
+    [
+      5400,
+      1446660727
+    ],
+    [
+      6000,
+      1945182850
+    ],
+    [
+      6600,
+      254552132
+    ],
+    [
+      7200,
+      1514740412
+    ],
+    [
+      7800,
+      21410297
+    ],
+    [
+      8400,
+      3539609610
+    ],
+    [
+      9000,
+      2367632151
+    ],
+    [
+      9600,
+      161166630
+    ],
+    [
+      10200,
+      4098213570
+    ],
+    [
+      10800,
+      198930241
+    ],
+    [
+      11400,
+      2518884600
+    ],
+    [
+      12000,
+      3657485362
+    ],
+    [
+      12600,
+      1539552493
+    ],
+    [
+      13200,
+      429041758
+    ],
+    [
+      13800,
+      2685586776
+    ],
+    [
+      14400,
+      1270257708
+    ],
+    [
+      15000,
+      2671082405
+    ],
+    [
+      15600,
+      1187254294
+    ],
+    [
+      16200,
+      2831753784
+    ],
+    [
+      16800,
+      2783345925
+    ],
+    [
+      17400,
+      938718418
+    ],
+    [
+      18000,
+      168281455
+    ]
   ]
 }

@@ -54,6 +54,15 @@ var final_hash: int = 0
 var replay_hash: Variant = null          ## determinism replay result (int) or null = not run
 var softlock_probes: Array = []          ## [{t, ok, why}]
 var end_reason: String = ""
+## The ⏩ persona model (ruling L2; Metrics): ticks after a drop (or hiding) before the persona re-presses ⏩,
+## and whether it needs this Night's `director_cue {id: ghost_ff}` before it uses ⏩ at all (the slow
+## first-timer before it has been taught).
+var ff_repress_ticks: int = 30
+var ff_needs_cue: bool = false
+## Ticks Hush is busy climbing in (`hush.enter`), for rule 9's queued-command check.
+var enter_ticks: int = 0
+## `rules.combos`: null = every combo allowed, else the allowed combo ids (rule 12).
+var combos_allowed: Variant = null
 
 
 ## Intern a string to a code.

@@ -1,0 +1,44 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_mg",
+ "rig": "bellows",
+ "loop": false,
+ "length": 48,
+ "layer": "overlay",
+ "mask": [
+  "head*",
+  "arm_upper_l*",
+  "arm_upper_r*",
+  "cravat"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 24,
+   "pose": "b_fidget_admire",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 48,
+   "pose": "b_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 8,
+   "type": "voice",
+   "id": "vo_bellows_hum"
+  }
+ ],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

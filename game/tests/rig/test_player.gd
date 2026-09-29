@@ -235,7 +235,7 @@ func test_overlay_and_additive_layers() -> void:
 	assert_eq(p.current_clip(), "_mannequin/loco_walk", "base keeps walking")
 	p.stop_layer("overlay")
 	_step(12)
-	assert_true(p._ov_plan == null, "overlay faded out")
+	assert_eq(p.layer_clip("overlay"), "", "overlay faded out")
 	ClipLib.invalidate("_mannequin/_ov_test")
 
 

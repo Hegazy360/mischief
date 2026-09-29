@@ -9,11 +9,21 @@
 ## * A pose's `face` preset (faces.json `presets`) is baked into the virtual face parts'
 ##   `tex` / `vis` channels; `face_of(pose)` keeps the name.
 ## * `tags` and `silhouette` notes are kept for the sheets and lints.
+## * faces.json `gaze` (preset → [dx, dy] px) is the resting pupil offset of that preset
+##   (FaceState applies it; Bellows' slow burn stares at the Stalls).
+## * **Tolerant parser** (the art files evolve while the game loads them): an unknown key or a
+##   value of the wrong type warns ONCE (per file and key) and is skipped — the rest of that
+##   preset / pose still loads; nothing crashes and no preset is dropped silently. Names that
+##   do not resolve (a variant, a base pose) stay errors for the rig lint.
 ## Pure data; `PoseLib.for_rig(id)` caches by rig id.
 class_name PoseLib
 extends RefCounted
 
 static var _cache: Dictionary = {}
+
+## Preset → Vector2 resting pupil offset in px (faces.json `gaze`).
+var gaze: Dictionary = {}
+var _warned: Dictionary = {}
 
 var rig: RigDef
 var path: String = ""
@@ -130,29 +140,40 @@ func apply_preset(out: PackedFloat32Array, preset: String) -> void:
 func apply_channels(out: PackedFloat32Array, i: int, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
 	var b := RigDef.ROOT_CH + i * RigDef.STRIDE
 	for cn in chans:
-		var c := RigDef.CHANNELS.find(String(cn))
+		var c := RigDef.CHANNELS.find(str(cn))
 		if c < 0:
 			errs.append("%s: unknown channel '%s' on '%s'" % [where, cn, rig.names[i]])
 			continue
 		var v: Variant = chans[cn]
 		if c == RigDef.C_TEX:
-			var vi := rig.tex_index(i, String(v)) if v is String else int(v)
+			if not (v is String or v is StringName or _is_num(v)):
+				errs.append("%s: part '%s' tex must be a variant name (got %s)" % [where, rig.names[i], str(v)])
+				continue
+			var vi := rig.tex_index(i, str(v)) if (v is String or v is StringName) else int(v)
 			if vi < 0 or vi >= rig.tex_names[i].size():
 				errs.append("%s: part '%s' has no texture '%s'" % [where, rig.names[i], v])
 				continue
 			out[b + c] = float(vi)
 		elif c == RigDef.C_VIS:
+			if not (v is bool or _is_num(v)):
+				errs.append("%s: part '%s' vis must be a bool (got %s)" % [where, rig.names[i], str(v)])
+				continue
 			out[b + c] = 1.0 if (v is bool and v) or (not (v is bool) and float(v) > 0.5) else 0.0
-		else:
+		elif _is_num(v):
 			out[b + c] = float(v)
+		else:
+			errs.append("%s: part '%s' channel '%s' must be a number (got %s)" % [where, rig.names[i], cn, str(v)])
 
 
 ## Applies a JSON root dictionary ({"y": 10, "sx": 1.1}) to `out`.
 func apply_root(out: PackedFloat32Array, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
 	for cn in chans:
-		var c := RigDef.ROOT_CHANNELS.find(String(cn))
+		var c := RigDef.ROOT_CHANNELS.find(str(cn))
 		if c < 0:
 			errs.append("%s: unknown root channel '%s'" % [where, cn])
+			continue
+		if not _is_num(chans[cn]):
+			errs.append("%s: root channel '%s' must be a number (got %s)" % [where, cn, str(chans[cn])])
 			continue
 		out[c] = float(chans[cn])
 
@@ -190,10 +211,10 @@ func _parse(pd: Dictionary, fd: Dictionary) -> void:
 	var mv: Variant = pd.get("mirror_of", {})
 	_mirror_of = mv if mv is Dictionary else {}
 	for pn in _raw:
-		names.append(String(pn))
+		names.append(str(pn))
 	for pn2 in _mirror_of:
 		if not _raw.has(pn2):
-			names.append(String(pn2))
+			names.append(str(pn2))
 	for n in names:
 		_resolve(n)
 
@@ -201,21 +222,32 @@ func _parse(pd: Dictionary, fd: Dictionary) -> void:
 func _parse_presets(fd: Dictionary) -> void:
 	var pv: Variant = fd.get("presets", {})
 	if not (pv is Dictionary):
+		if fd.has("presets"):
+			_warn_once("presets", "%s: 'presets' must be an object (got %s) — no face presets loaded" % [faces_path, type_string(typeof(pv))])
 		return
-	for name in pv:
-		var e: Variant = pv[name]
+	for key in pv:
+		var name := str(key)
+		var e: Variant = pv[key]
 		if not (e is Dictionary):
 			errors.append("%s: preset '%s' is not an object" % [faces_path, name])
 			continue
 		var arr := PackedInt32Array()
 		arr.resize(rig.face_slots.size())
 		arr.fill(-1)
-		for slot in e:
-			var s := rig.face_slots.find(String(slot))
+		for slot_k in e:
+			var slot := str(slot_k)
+			var s := rig.face_slots.find(slot)
 			if s < 0:
-				errors.append("%s: preset '%s' slot '%s' is not a face slot of %s" % [faces_path, name, slot, rig.id])
+				_warn_once("slot:" + slot, "%s: preset '%s' key '%s' is not a face slot of %s — skipped" % [faces_path, name, slot, rig.id])
 				continue
-			var vname := String((e as Dictionary)[slot])
+			var v: Variant = (e as Dictionary)[slot_k]
+			if v == null:
+				arr[s] = -2
+				continue
+			if not (v is String or v is StringName):
+				_warn_once("type:" + slot, "%s: preset '%s' slot '%s' must name a variant (got %s %s) — skipped" % [faces_path, name, slot, type_string(typeof(v)), str(v)])
+				continue
+			var vname := str(v)
 			if vname == "none" or vname == "":
 				arr[s] = -2
 				continue
@@ -224,8 +256,34 @@ func _parse_presets(fd: Dictionary) -> void:
 				errors.append("%s: preset '%s' slot '%s' has no variant '%s'" % [faces_path, name, slot, vname])
 				continue
 			arr[s] = vi
-		presets[String(name)] = arr
-		preset_names.append(String(name))
+		presets[name] = arr
+		preset_names.append(name)
+	var gv: Variant = fd.get("gaze", {})
+	if gv is Dictionary:
+		for gk in gv:
+			var g: Variant = gv[gk]
+			if g is Array and (g as Array).size() >= 2 and _is_num(g[0]) and _is_num(g[1]):
+				gaze[str(gk)] = Vector2(float(g[0]), float(g[1]))
+			else:
+				_warn_once("gaze:" + str(gk), "%s: gaze '%s' must be [dx, dy] (got %s) — skipped" % [faces_path, gk, str(g)])
+	elif fd.has("gaze"):
+		_warn_once("gaze", "%s: 'gaze' must be an object — skipped" % faces_path)
+
+
+## Resting pupil offset (px) of face preset `preset` (ZERO when it has none).
+func gaze_of(preset: String) -> Vector2:
+	return gaze.get(preset, Vector2.ZERO)
+
+
+func _warn_once(key: String, msg: String) -> void:
+	if _warned.has(key):
+		return
+	_warned[key] = true
+	warnings.append(msg)
+
+
+static func _is_num(v: Variant) -> bool:
+	return v is int or v is float
 
 
 func _resolve(n: String) -> PackedFloat32Array:
@@ -238,7 +296,7 @@ func _resolve(n: String) -> PackedFloat32Array:
 	var out := rig.rest.duplicate()
 	var d: Dictionary = _raw.get(n, {}) if _raw.get(n, {}) is Dictionary else {}
 	var where := "%s: pose '%s'" % [path, n]
-	var mirror := String(_mirror_of.get(n, d.get("mirror", d.get("mirror_of", ""))))
+	var mirror := str(_mirror_of.get(n, d.get("mirror", d.get("mirror_of", ""))))
 	var face := ""
 	var tg := PackedStringArray()
 	if mirror != "":
@@ -249,7 +307,7 @@ func _resolve(n: String) -> PackedFloat32Array:
 			face = face_of(mirror)
 			tg = tags_of(mirror).duplicate()
 	else:
-		var base := String(d.get("base", ""))
+		var base := str(d.get("base", ""))
 		if base != "":
 			if not _raw.has(base) and not _mirror_of.has(base):
 				errors.append("%s has unknown base '%s'" % [where, base])
@@ -264,7 +322,7 @@ func _resolve(n: String) -> PackedFloat32Array:
 	var bv: Variant = d.get("bones", {})
 	if bv is Dictionary:
 		for pn in bv:
-			var i := rig.idx(String(pn))
+			var i := rig.idx(str(pn))
 			if i < 0:
 				errors.append("%s: bone '%s' is not a part of %s" % [where, pn, rig.id])
 				continue
@@ -273,7 +331,7 @@ func _resolve(n: String) -> PackedFloat32Array:
 			else:
 				errors.append("%s: bone '%s' must be a channel object" % [where, pn])
 	if d.has("face"):
-		face = String(d["face"])
+		face = str(d["face"]) if d["face"] != null else ""
 		if face != "" and not presets.has(face):
 			errors.append("%s: face preset '%s' unknown" % [where, face])
 	if face != "":
@@ -283,6 +341,6 @@ func _resolve(n: String) -> PackedFloat32Array:
 	poses[n] = out
 	faces[n] = face
 	tags[n] = tg
-	silhouettes[n] = String(d.get("silhouette", ""))
+	silhouettes[n] = str(d.get("silhouette", ""))
 	_resolving.erase(n)
 	return out

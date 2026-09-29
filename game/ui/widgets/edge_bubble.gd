@@ -1,6 +1,13 @@
 ## EdgeBubble — where Bellows is while the PiP is hidden (GDD §3.7): a 112 px face circle with
 ## a pointer toward him and a 36 px label ("↑ upstairs", "2 rooms →"), on a 144 px hit box the Hud
 ## places at the screen edge in `dir` (HudModel.edge_bubble_dir). Tap → `pip_tap()` (peek).
+##
+## Emotes (D1, ruling L1): `set_emote(id)` with id ∈ EMOTES (`sing, hum, smug, laugh, tut, sniff,
+## yum, yawn`) swaps the face for `art/ui/emote_<id>.svg` with a pop and floats a pictogram puff
+## (`puff_<id>.svg`: notes, steam, a teacup …; no words) beside the bubble, on the screen-centre
+## side, for as long as the emote is set (the model clears it after the micro-gag's `len`). This is
+## what lets an off-screen micro-gag count as "seen", so each face must read in half a second.
+## `""` (or an unknown id) = his normal scowl; the puff fades out over PUFF_OUT_MS.
 class_name EdgeBubble
 extends TouchWidget
 
@@ -8,17 +15,31 @@ signal pip_tap()
 
 const HIT := 144.0
 const FACE := 112.0
+## The emote vocabulary (s2-sim §4.1; the same list the content validator accepts).
+const EMOTES: PackedStringArray = ["sing", "hum", "smug", "laugh", "tut", "sniff", "yum", "yawn"]
+const PUFF := 76.0
+const POP_MS := 240
+const POP_PEAK := 1.2
+const PUFF_IN_MS := 160
+const PUFF_OUT_MS := 220
 
 var dir: Vector2 = Vector2.RIGHT
 var label: String = ""
+## The emote playing ("" = none).
+var emote: String = ""
 
 var _tex_face: Texture2D = null
+var _tex_default: Texture2D = null
+var _tex_puff: Texture2D = null
 var _label_w: float = 0.0
-var _bob_ms: int = 0
+var _emote_ms: int = -100000
+var _clear_ms: int = -100000
+var _tri := PackedVector2Array()
 
 
 func _init() -> void:
 	super()
+	_tri.resize(3)
 	hit_circle = true
 	size = Vector2(HIT, HIT)
 	custom_minimum_size = size
@@ -26,7 +47,9 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	_tex_face = UiIcons.get_icon(&"bellows_face")
+	_tex_default = UiIcons.get_icon(&"bellows_face")
+	if emote == "":
+		_tex_face = _tex_default
 	set_process(false)
 
 
@@ -42,25 +65,67 @@ func set_target(d: Vector2, text: String) -> void:
 	queue_redraw()
 
 
+## Play emote `id` on the face ("" / unknown = back to the normal face).
+func set_emote(id: String) -> void:
+	var e := id if EMOTES.has(id) else ""
+	if e == emote:
+		return
+	var now := UiKit.now_ms()
+	if e == "":
+		_clear_ms = now
+		_tex_face = _tex_default if _tex_default != null else UiIcons.get_icon(&"bellows_face")
+	else:
+		_emote_ms = now
+		_clear_ms = -100000
+		_tex_face = UiIcons.get_icon(StringName("emote_" + e))
+		_tex_puff = UiIcons.get_icon(StringName("puff_" + e))
+	emote = e
+	set_process(true)
+	queue_redraw()
+
+
+## True while the puff is on screen (an emote is set, or it is still fading out).
+func puff_visible() -> bool:
+	return emote != "" or UiKit.now_ms() - _clear_ms < PUFF_OUT_MS
+
+
+## The face texture shown now (tests).
+func face_texture() -> Texture2D:
+	return _tex_face
+
+
 func _touch_down(_pos: Vector2) -> bool:
 	UiKit.haptic(&"ui")
 	pip_tap.emit()
 	return true
 
 
+func _process(_delta: float) -> void:
+	queue_redraw()
+	if emote == "" and not puff_visible():
+		set_process(false)
+
+
 func _draw() -> void:
+	var now := UiKit.now_ms()
 	var c := size * 0.5
 	var k := UiKit.PRESS_SCALE if is_pressed else 1.0
+	var pt := float(now - _emote_ms) / float(POP_MS)
+	if emote != "" and pt >= 0.0 and pt < 1.0 and not UiKit.reduce_motion():
+		k *= 1.0 + (POP_PEAK - 1.0) * sin(pt * PI)
 	draw_set_transform(c, 0.0, Vector2(k, k))
 	var r := FACE * 0.5
 	# pointer toward him
 	var tip := dir * (r + 22.0)
 	var side := Vector2(-dir.y, dir.x) * 20.0
 	var base := dir * (r - 6.0)
-	var tri := PackedVector2Array([base + side, tip, base - side])
-	draw_colored_polygon(tri, UiKit.NAVY)
+	_tri[0] = base + side
+	_tri[1] = tip
+	_tri[2] = base - side
+	draw_colored_polygon(_tri, UiKit.NAVY)
 	draw_circle(Vector2(0, 5), r, Color(UiKit.NAVY, 0.35))
-	UiKit.draw_disc(self, Vector2.ZERO, r, UiKit.CREAM, UiKit.CREAM_SHADE)
+	var fill := UiKit.CREAM if emote == "" else UiKit.GOLD_LIGHT
+	UiKit.draw_disc(self, Vector2.ZERO, r, fill, UiKit.CREAM_SHADE)
 	UiKit.draw_icon(self, _tex_face, Rect2(-r + 8.0, -r + 6.0, FACE - 16.0, FACE - 12.0))
 	if label != "":
 		var f := UiKit.ui_font()
@@ -69,4 +134,34 @@ func _draw() -> void:
 		var lr := Rect2(-w * 0.5, ly, w, 52.0)
 		UiKit.draw_chunky_rect(self, lr, 24.0, UiKit.NAVY, UiKit.NAVY, 0.0, 0.0)
 		UiKit.draw_text_centered(self, f, lr.get_center(), label, UiKit.SIZE_MIN, UiKit.CREAM, 0)
+	draw_set_transform(c, 0.0, Vector2.ONE)
+	_draw_puff(now, r)
 	draw_set_transform(Vector2.ZERO)
+
+
+## The pictogram puff: on the screen-centre side of the bubble, above it, rising and bobbing.
+func _draw_puff(now: int, r: float) -> void:
+	if _tex_puff == null or not puff_visible():
+		return
+	var a := 1.0
+	if emote != "":
+		a = clampf(float(now - _emote_ms) / float(PUFF_IN_MS), 0.0, 1.0)
+	else:
+		a = 1.0 - clampf(float(now - _clear_ms) / float(PUFF_OUT_MS), 0.0, 1.0)
+	if a <= 0.0:
+		return
+	# toward the middle of the screen: a bubble on the right edge puffs to its upper-left
+	var sx := -1.0 if dir.x > 0.35 else 1.0
+	var t := float(now - _emote_ms) * 0.001
+	var bob := 0.0 if UiKit.reduce_motion() else sin(t * TAU * 1.4) * 6.0
+	var rise := 0.0 if UiKit.reduce_motion() else minf(1.0, t / 0.35) * 14.0
+	var ctr := Vector2(sx * (r + PUFF * 0.28), -r - PUFF * 0.18 - rise + bob)
+	var s := PUFF * (0.6 + 0.4 * a)
+	# a small plum thought-cloud behind the pictogram so it reads over any wallpaper
+	var tail := ctr - Vector2(sx * s * 0.34, -s * 0.44)
+	draw_circle(ctr + Vector2(0, 4), s * 0.56, Color(UiKit.NAVY, 0.3 * a))
+	draw_circle(ctr, s * 0.56, Color(UiKit.NAVY, a))
+	draw_circle(ctr, s * 0.56 - 5.0, Color(UiKit.PLUM, 0.92 * a))
+	draw_circle(tail, 9.0, Color(UiKit.NAVY, a))
+	draw_circle(tail, 5.0, Color(UiKit.PLUM, 0.92 * a))
+	UiKit.draw_icon(self, _tex_puff, Rect2(ctr - Vector2(s, s) * 0.42, Vector2(s, s) * 0.84), Color(1, 1, 1, a))

@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "clip": "hush/fx_near_miss",
+ "rig": "hush",
+ "loop": false,
+ "length": 30,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_pop_out",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "h_near_miss",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

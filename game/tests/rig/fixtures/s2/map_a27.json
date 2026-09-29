@@ -1,0 +1,14 @@
+{
+ "walk": {
+  "clip": "loco_walk",
+  "stride_px": 144,
+  "speed_px_s": 270
+ },
+ "skin:pip": {
+  "run": {
+   "clip": "_mannequin/loco_walk",
+   "stride_px": 120,
+   "speed_px_s": 180
+  }
+ }
+}

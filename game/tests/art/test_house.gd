@@ -323,3 +323,79 @@ func test_prop_textures_load_at_their_declared_size() -> void:
 	if not assert_true(tex != null, "honey jar texture loads"):
 		return
 	assert_eq(Vector2i(tex.get_size()), Vector2i(int(h["art_size"][0]), int(h["art_size"][1])), "art_size = the idle canvas size")
+
+
+# ------------------------------------------------------------------------------ Stage 2 (s2-art)
+
+func test_st_tea_faces_the_counter_from_the_right() -> void:
+	var st: Dictionary = _by_id("stations").get("st_tea", {})
+	if not assert_false(st.is_empty(), "st_tea exists"):
+		return
+	assert_eq(int(st["facing"]), -1, "st_tea faces -1 (the counter), his back to the pantry + sink")
+	assert_almost_eq(float(st["stand_x"]), 3000.0, 20.0, "st_tea stand_x ~3000, right of the counter")
+	var sink_x := float(_house["landings"]["kitchen"]["sink"])
+	assert_gt(sink_x, float(st["stand_x"]), "the sink landing is behind him (to his right)")
+	var stool: Dictionary = _by_id("decor").get("kitchen_stool", {})
+	if not assert_false(stool.is_empty(), "kitchen_stool decor exists"):
+		return
+	var pv: Dictionary = stool.get("pivots", {})
+	if assert_has(pv, "seat", "the stool documents its seat pivot") and assert_has(pv, "foot"):
+		assert_almost_eq(float(stool["pos"][0]) + float(pv["seat"][0]), float(st["stand_x"]), 1.0, "the stool sits under his seat")
+		assert_almost_eq(float(stool["pos"][1]) + float(pv["foot"][1]), 0.0, 1.0, "the stool's foot pivot is on the floor")
+		assert_true(float(pv["seat"][0]) >= 0.0 and float(pv["seat"][0]) <= float(stool["size"][0]), "seat pivot inside the canvas")
+
+
+func test_decor_schema() -> void:
+	var rooms := _rooms()
+	var ids := {}
+	for d in _house.get("decor", []):
+		var id: String = d["id"]
+		assert_false(ids.has(id), "decor id %s unique" % id)
+		ids[id] = true
+		assert_has(rooms, d["room"], "%s room" % id)
+		assert_true(d["pos"] is Array and (d["pos"] as Array).size() == 2, "%s pos [x, y]" % id)
+		assert_true(d["size"] is Array and (d["size"] as Array).size() == 2, "%s size [w, h]" % id)
+		assert_true((d["art"] as Dictionary).has("idle"), "%s has idle art" % id)
+		for s in d["art"]:
+			assert_true(d["art"][s] is String, "%s art.%s is a path" % [id, s])
+		assert_true(int(d.get("z", 0)) in [-1, 0, 1, 2], "%s z in -1..2" % id)
+		if d.has("frames") or d.has("fps"):
+			assert_true(d.get("frames") is Array and (d["frames"] as Array).size() >= 2, "%s frames: >= 2 paths" % id)
+			assert_true(float(d.get("fps", 0.0)) > 0.0 and float(d.get("fps", 0.0)) <= 30.0, "%s fps in (0, 30]" % id)
+			for f in d.get("frames", []):
+				assert_true(f is String and _exists(f), "%s frame %s exists" % [id, f])
+	var decor := _by_id("decor")
+	for need in ["kitchen_stool", "kitchen_sink_lip", "parlour_vase", "parlour_picture_frame", "hall_front_door_glow"]:
+		assert_has(decor, need, "decor %s" % need)
+	if decor.has("kitchen_sink_lip"):
+		assert_eq(int(decor["kitchen_sink_lip"]["z"]), 2, "the sink lip draws over the characters")
+		assert_true(bool(decor["kitchen_sink_lip"].get("hidden", false)), "the sink lip is shown only by a decor event")
+
+
+func test_raster_hints_are_valid() -> void:
+	var n := 0
+	for h in _house.get("hotspots", []):
+		if h.has("raster"):
+			n += 1
+			assert_true(float(h["raster"]) in [1.0, 1.5, 2.0], "%s raster %s in {1, 1.5, 2}" % [h["id"], h["raster"]])
+	for d in _house.get("decor", []):
+		if d.has("raster"):
+			assert_true(float(d["raster"]) in [1.0, 1.5, 2.0], "%s raster in {1, 1.5, 2}" % d["id"])
+	assert_gt(n, 0, "the big hiding pieces carry a raster hint")
+
+
+func test_every_occupied_state_has_an_eyes_point() -> void:
+	var rooms := _rooms()
+	for h in _house.get("hotspots", []):
+		var art: Dictionary = h.get("art", {})
+		if not art.has("occupied"):
+			continue
+		if not assert_has(h, "eyes", "%s occupied needs an eyes point" % h["id"]):
+			continue
+		var e: Array = h["eyes"]
+		var ex := float(e[0])
+		assert_true(_inside(rooms[h["room"]], ex), "%s eyes inside the room" % h["id"])
+		var ap: Array = h["art_pos"]
+		var asz: Array = h["art_size"]
+		assert_true(ex >= float(ap[0]) and ex <= float(ap[0]) + float(asz[0]) and float(e[1]) >= float(ap[1])
+			and float(e[1]) <= float(ap[1]) + float(asz[1]), "%s eyes inside the prop canvas" % h["id"])

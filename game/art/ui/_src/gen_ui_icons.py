@@ -556,6 +556,275 @@ def badge_needs():
             P("M62 92 Q80 100 92 88 Q112 90 112 72 Q104 82 92 80 Q80 90 62 84 Q44 90 34 80 Q44 98 62 92 Z", GREY_S,
               stroke=None)]
 
+# --- Stage 2: edge-bubble emotes (GDD §3.7, D1) ----------------------------------------------
+# Bellows' 112 px edge-bubble face playing an off-screen micro-gag. Each must read in half a
+# second at 112 px: the face changes where it counts (eyes, mouth) and a separate pictogram
+# puff (notes, steam, a teacup …; no words) rises beside the bubble (puff_<emote>.svg).
+
+def _bellows(eyes, mouth, brows="M42 58 L58 64 M86 58 L70 64", face=PEACH, face_s=PEACH_S, nose=None,
+             extra=None, chops=SILVER):
+    b = []
+    b.append(P("M20 58 Q10 36 30 30 Q30 12 50 16 Q60 2 76 14 Q96 8 100 28 Q120 34 108 58 Z", SILVER))
+    b.append(P("M76 14 Q96 8 100 28 Q120 34 108 58 L96 58 Q104 36 88 30 Q84 18 76 14 Z", SILVER_S, stroke=None))
+    b.append(P("M20 58 Q10 36 30 30 Q30 12 50 16 Q60 2 76 14 Q96 8 100 28 Q120 34 108 58 Z", "none"))
+    b.append(E(64, 74, 36, 38, face))
+    b.append(P("M64 112 Q100 110 100 74 Q96 100 70 104 Z", face_s, stroke=None))
+    b.append(E(64, 74, 36, 38, "none"))
+    b.append(P("M28 62 Q14 80 22 100 Q34 110 42 96 Q38 84 40 70 Z", chops))
+    b.append(P("M100 62 Q114 80 106 100 Q94 110 86 96 Q90 84 88 70 Z", chops))
+    if brows:
+        b.append(P(brows, "none", sw=6))
+    b.extend(eyes)
+    b.append(nose if nose is not None else E(64, 86, 10, 8, "#EDA98A", sw=5))
+    b.extend(mouth)
+    if extra:
+        b.extend(extra)
+    return b
+
+
+def _note(x, y, s=1.0, fill=CREAM):
+    # an eighth note: head + stem + flag (pictogram, no text)
+    return G([E(0, 0, 11, 8, fill, sw=5, rot=-20), L("M9 -2 L9 -38", NAVY, 11), L("M9 -2 L9 -38", fill, 5),
+              P("M9 -38 Q26 -30 24 -14 Q20 -26 9 -28 Z", fill, sw=4)],
+             "translate(%s %s) scale(%s)" % (x, y, s))
+
+
+@icon("emote_sing")
+def emote_sing():
+    # "MI-MI-MIII": eyes shut in rapture, brows up, mouth a big round O
+    eyes = [L("M44 72 Q52 64 60 72", NAVY, 6), L("M68 72 Q76 64 84 72", NAVY, 6)]
+    mouth = [E(64, 102, 12, 14, "#7A1E2C", sw=6), E(64, 108, 7, 5, PINK, stroke=None)]
+    return _bellows(eyes, mouth, brows="M40 56 Q50 46 60 54 M68 54 Q78 46 88 56")
+
+
+@icon("emote_hum")
+def emote_hum():
+    # humming to himself: content closed eyes, lips pressed in a little smile
+    eyes = [L("M44 72 Q52 76 60 72", NAVY, 6), L("M68 72 Q76 76 84 72", NAVY, 6)]
+    mouth = [L("M52 101 Q58 106 64 101 Q70 106 76 101", NAVY, 6)]
+    return _bellows(eyes, mouth, brows="M42 60 Q50 56 58 60 M70 60 Q78 56 86 60",
+                    extra=[E(40, 90, 7, 4, "#F29A8A", stroke=None), E(88, 90, 7, 4, "#F29A8A", stroke=None)])
+
+
+@icon("emote_smug")
+def emote_smug():
+    # pleased with himself: heavy half lids, one brow cocked, a lopsided smirk
+    eyes = [E(52, 74, 8, 7, WHITE, sw=5), E(76, 74, 8, 7, WHITE, sw=5),
+            C(54, 76, 3.5, NAVY, stroke=None), C(78, 76, 3.5, NAVY, stroke=None),
+            P("M43 73 Q52 64 61 73 L61 70 Q52 62 43 70 Z", face_lid(), sw=4),
+            P("M67 73 Q76 64 85 73 L85 70 Q76 62 67 70 Z", face_lid(), sw=4)]
+    mouth = [L("M50 102 Q66 106 80 94", NAVY, 6)]
+    return _bellows(eyes, mouth, brows="M42 62 L58 62 M68 54 Q78 46 88 54")
+
+
+def face_lid():
+    return PEACH_S
+
+
+@icon("emote_laugh")
+def emote_laugh():
+    # a belly laugh at his own joke: eyes squeezed to chevrons, a huge open grin, tears
+    eyes = [L("M44 66 L56 72 L44 78", NAVY, 6), L("M84 66 L72 72 L84 78", NAVY, 6)]
+    mouth = [P("M44 96 Q64 92 84 96 Q82 118 64 118 Q46 118 44 96 Z", "#7A1E2C", sw=6),
+             P("M48 97 Q64 94 80 97 L79 102 Q64 100 49 102 Z", WHITE, stroke=None),
+             E(64, 112, 9, 4, PINK, stroke=None)]
+    extra = [P("M34 80 Q30 90 34 94 Q40 90 34 80 Z", "#9FD3FF", sw=3),
+             P("M94 80 Q90 90 94 94 Q100 90 94 80 Z", "#9FD3FF", sw=3)]
+    return _bellows(eyes, mouth, brows="M40 56 Q50 50 58 58 M70 58 Q78 50 88 56", extra=extra)
+
+
+@icon("emote_tut")
+def emote_tut():
+    # "tsk tsk": eyes narrowed sideways, brows down, lips pursed tight to one side
+    eyes = [R(44, 70, 16, 7, 3, WHITE, sw=4), R(68, 70, 16, 7, 3, WHITE, sw=4),
+            C(46, 73.5, 3.5, NAVY, stroke=None), C(70, 73.5, 3.5, NAVY, stroke=None)]
+    mouth = [E(56, 102, 6, 5, "#7A1E2C", sw=5)]
+    return _bellows(eyes, mouth, brows="M40 60 L60 66 M68 66 L88 60")
+
+
+@icon("emote_sniff")
+def emote_sniff():
+    # sniffing the air: eyes shut, chin up, a big pink nose with flared nostrils
+    eyes = [L("M44 70 Q52 66 60 70", NAVY, 6), L("M68 70 Q76 66 84 70", NAVY, 6)]
+    nose = G([E(64, 84, 15, 12, "#F29A8A", sw=5), E(58, 88, 3, 2.5, NAVY, stroke=None),
+              E(70, 88, 3, 2.5, NAVY, stroke=None)], "")
+    mouth = [L("M54 106 L74 106", NAVY, 6)]
+    return _bellows(eyes, mouth, brows="M42 58 Q50 52 58 58 M70 58 Q78 52 86 58", nose=nose)
+
+
+@icon("emote_yum")
+def emote_yum():
+    # "mmm, tea": happy eyes, a wide smile with the tongue licking the corner
+    eyes = [L("M44 74 Q52 66 60 74", NAVY, 6), L("M68 74 Q76 66 84 74", NAVY, 6)]
+    mouth = [P("M46 98 Q64 112 82 98", "none", sw=6), P("M72 103 Q80 104 80 112 Q74 116 70 108 Z", "#F07A8A", sw=4)]
+    extra = [E(40, 90, 7, 4, "#F29A8A", stroke=None), E(88, 90, 7, 4, "#F29A8A", stroke=None)]
+    return _bellows(eyes, mouth, brows="M42 60 Q50 56 58 60 M70 60 Q78 56 86 60", extra=extra)
+
+
+@icon("emote_yawn")
+def emote_yawn():
+    # a jaw-cracking yawn: eyes screwed shut with a tear, mouth a tall dark oval
+    eyes = [L("M44 70 Q52 74 60 70", NAVY, 6), L("M68 70 Q76 74 84 70", NAVY, 6)]
+    mouth = [E(64, 104, 11, 16, "#5A1522", sw=6), E(64, 112, 6, 5, PINK, stroke=None)]
+    extra = [P("M88 74 Q84 82 88 86 Q94 82 88 74 Z", "#9FD3FF", sw=3)]
+    return _bellows(eyes, mouth, brows="M42 60 Q50 64 58 60 M70 60 Q78 64 86 60",
+                    nose=E(64, 86, 10, 7, "#EDA98A", sw=5), extra=extra)
+
+
+# the puffs (drawn ~64–72 px beside the bubble, rising)
+
+@icon("puff_sing")
+def puff_sing():
+    return [_note(40, 96, 1.25, YELLOW), _note(84, 64, 1.05, CREAM)]
+
+
+@icon("puff_hum")
+def puff_hum():
+    return [DS("M16 80 Q30 64 44 80 Q58 96 72 80", CREAM, 7, outline=5), _note(94, 70, 1.0, CREAM)]
+
+
+@icon("puff_smug")
+def puff_smug():
+    return [P(star_path(60, 64, 40, 12, n=4, rot=-90), YELLOW, sw=6), P(star_path(100, 30, 16, 5, n=4), CREAM, sw=4),
+            P(star_path(24, 104, 12, 4, n=4), CREAM, sw=4)]
+
+
+@icon("puff_laugh")
+def puff_laugh():
+    # shaking-with-laughter burst: radiating dashes + two bouncing tear drops
+    b = []
+    for d in ("M64 14 L64 36", "M100 28 L86 46", "M114 64 L92 64", "M28 28 L42 46", "M14 64 L36 64"):
+        b.append(DS(d, YELLOW, 8, outline=5))
+    b.append(P("M50 76 Q40 96 50 104 Q62 96 50 76 Z", "#9FD3FF", sw=5))
+    b.append(P("M82 82 Q74 98 82 106 Q92 98 82 82 Z", "#9FD3FF", sw=5))
+    return b
+
+
+@icon("puff_tut")
+def puff_tut():
+    # a wagging index finger with motion arcs
+    b = []
+    b.append(L("M24 40 Q18 64 24 88", CREAM, 6))
+    b.append(L("M104 40 Q110 64 104 88", CREAM, 6))
+    b.append(G([P("M-10 0 L-10 -44 Q-10 -54 0 -54 Q10 -54 10 -44 L10 -6 Q30 -8 30 12 Q30 34 6 36 L-8 36 Q-24 34 -24 16 "
+                  "Q-24 2 -10 0 Z", PEACH, sw=6),
+                L("M-12 14 L14 14", PEACH_S, 4)], "translate(64 80) rotate(-14)"))
+    return b
+
+
+@icon("puff_sniff")
+def puff_sniff():
+    # a scent swirl drifting up
+    return [DS("M30 110 Q16 90 34 76 Q52 62 36 44 Q24 30 40 18", CREAM, 7, outline=5),
+            DS("M64 112 Q50 92 68 78 Q86 64 70 46 Q58 32 74 20", PINK, 7, outline=5),
+            DS("M98 108 Q84 90 100 78 Q116 66 102 50", CREAM, 7, outline=5)]
+
+
+@icon("puff_yum")
+def puff_yum():
+    # a steaming teacup
+    b = []
+    b.append(DS("M44 44 Q36 32 44 22 Q52 12 44 4", CREAM, 5, outline=4))
+    b.append(DS("M66 44 Q58 32 66 22 Q74 12 66 4", CREAM, 5, outline=4))
+    b.append(L("M92 72 Q114 72 110 88 Q106 100 88 96", NAVY, 14))
+    b.append(L("M92 72 Q114 72 110 88 Q106 100 88 96", WHITE, 6))
+    b.append(P("M24 58 L98 58 Q96 96 72 104 L50 104 Q26 96 24 58 Z", WHITE))
+    b.append(P("M28 72 L94 72 Q90 96 72 102 L50 102 Q30 96 28 72 Z", "#C9CCDC", stroke=None))
+    b.append(P("M24 58 L98 58 Q96 96 72 104 L50 104 Q26 96 24 58 Z", "none"))
+    b.append(E(61, 60, 34, 7, "#B5703A", sw=5))
+    b.append(E(61, 112, 44, 8, WHITE, sw=5))
+    b.append(P(star_path(104, 30, 12, 5, n=4), YELLOW, sw=4))
+    return b
+
+
+@icon("puff_yawn")
+def puff_yawn():
+    return [DS("M60 54 L90 54 L60 88 L90 88", CREAM, 8, outline=5),
+            DS("M20 82 L40 82 L20 104 L40 104", CREAM, 6, outline=4),
+            DS("M98 18 L116 18 L98 38 L116 38", CREAM, 5, outline=4)]
+
+
+# --- Stage 2: card icons ----------------------------------------------------------------------
+
+@icon("bellows_livid")
+def bellows_livid():
+    # MELTDOWN: beetroot face, steam out of his ears, gritted teeth
+    eyes = [C(52, 72, 7, WHITE, sw=4), C(76, 72, 7, WHITE, sw=4), C(52, 73, 3, NAVY, stroke=None),
+            C(76, 73, 3, NAVY, stroke=None)]
+    mouth = [R(46, 96, 36, 14, 5, WHITE, sw=5), L("M55 97 L55 109 M64 97 L64 109 M73 97 L73 109", NAVY, 3)]
+    extra = [DS("M10 64 Q2 54 10 44 Q18 34 10 24", CREAM, 6, outline=4),
+             DS("M118 64 Q126 54 118 44 Q110 34 118 24", CREAM, 6, outline=4)]
+    return _bellows(eyes, mouth, brows="M40 56 L60 68 M88 56 L68 68", face="#E0605A", face_s="#B5403E",
+                    nose=E(64, 86, 10, 8, "#C84A48", sw=5), extra=extra)
+
+
+@icon("behind_you")
+def behind_you():
+    # PANTO: an audience head shouting, arm flung out pointing BEHIND (a curved arrow back)
+    b = []
+    b.append(DS("M92 30 Q124 44 110 78", CREAM, 8, outline=5))
+    b.append(P("M100 74 L112 90 L122 70 Z", CREAM, sw=5))
+    b.append(DS("M60 88 L96 60", PEACH, 12, outline=5))
+    b.append(C(98, 58, 9, PEACH, sw=5))
+    b.append(C(48, 70, 34, "#F2D3A6"))
+    b.append(P("M48 104 Q82 102 82 70 Q78 94 54 98 Z", "#D9B27E", stroke=None))
+    b.append(C(48, 70, 34, "none"))
+    b.append(P("M20 52 Q24 32 48 34 Q70 34 76 50 Q62 42 48 44 Q30 44 20 52 Z", "#6A4A3A", sw=5))
+    b.append(C(38, 64, 6, WHITE, sw=4))
+    b.append(C(58, 64, 6, WHITE, sw=4))
+    b.append(C(39, 65, 2.5, NAVY, stroke=None))
+    b.append(C(59, 65, 2.5, NAVY, stroke=None))
+    b.append(E(48, 86, 10, 11, "#7A1E2C", sw=5))
+    b.append(R(4, 6, 12, 34, 6, YELLOW, sw=5))
+    b.append(C(10, 50, 6, YELLOW, sw=5))
+    return b
+
+
+@icon("clarence_hold")
+def clarence_hold():
+    # Clarence squeezed flat in a fist, a yellow hold-ring filling round him (hold = ⏩)
+    b = []
+    b.append(L("M64 8 A56 56 0 1 1 8 64", NAVY, 16))
+    b.append(L("M64 8 A56 56 0 1 1 8 64", YELLOW, 8))
+    b.append(L("M8 64 A56 56 0 0 1 64 8", "#8C87A3", 6))
+    b.append(G([E(0, 0, 36, 14, YELLOW, rot=0), P("M-34 4 Q0 20 34 4 Q30 14 0 16 Q-28 14 -34 4 Z", YELLOW_S, stroke=None),
+                E(0, 0, 36, 14, "none"),
+                P("M-40 -6 Q-48 -18 -40 -22 Q-34 -26 -30 -14 Z", CHERRY, sw=4),
+                C(-34, -4, 9, YELLOW, sw=5), P("M-44 -6 L-56 -2 L-44 2 Z", ORANGE, sw=4),
+                L("M-37 -7 L-31 -1 M-31 -7 L-37 -1", NAVY, 3)], "translate(66 60)"))
+    b.append(P("M40 70 Q40 96 60 100 L84 100 Q98 96 98 78 L98 66 Q90 60 82 66 Q76 58 68 64 Q60 58 54 66 Q46 60 40 70 Z",
+               WHITE, sw=6))
+    b.append(L("M56 70 L56 84 M68 68 L68 84 M82 70 L82 84", "#C9CCDC", 4))
+    b.append(P("M60 100 L84 100 L84 116 L60 116 Z", CHERRY, sw=5))
+    return b
+
+
+@icon("clock_fast")
+def clock_fast():
+    # a clock whose hands are a blur: speed arcs, ghost hands and a little ⏩
+    import math
+    b = []
+    b.append(L("M18 34 Q6 64 18 94", CREAM, 6))
+    b.append(L("M8 46 Q2 64 8 82", CREAM, 4))
+    b.append(C(66, 60, 44, CREAM, sw=7))
+    b.append(P("M66 104 A44 44 0 0 0 110 60 Q104 94 66 98 Q40 98 26 80 A44 44 0 0 0 66 104 Z", CREAM_S, stroke=None))
+    b.append(C(66, 60, 44, "none", sw=7))
+    for i in range(12):
+        a = math.radians(i * 30)
+        b.append(L("M%.1f %.1f L%.1f %.1f" % (66 + 34 * math.cos(a), 60 + 34 * math.sin(a),
+                                               66 + 39 * math.cos(a), 60 + 39 * math.sin(a)), NAVY, 3))
+    for k, alpha in ((50, "0.25"), (25, "0.5")):
+        a = math.radians(-90 + k)
+        b.append('<path d="M66 60 L%.1f %.1f" stroke="%s" stroke-width="7" stroke-linecap="round" '
+                 'stroke-opacity="%s" fill="none"/>' % (66 + 30 * math.cos(a), 60 + 30 * math.sin(a), NAVY, alpha))
+    b.append(L("M66 60 L66 30", NAVY, 7))
+    b.append(L("M66 60 L86 70", NAVY, 7))
+    b.append(C(66, 60, 5, CHERRY, sw=3))
+    b.append(P("M84 96 L104 110 L84 124 Z", YELLOW, sw=5))
+    b.append(P("M102 96 L122 110 L102 124 Z", YELLOW, sw=5))
+    return b
+
+
 
 def main():
     for name, (fn, w, h) in sorted(ICONS.items()):

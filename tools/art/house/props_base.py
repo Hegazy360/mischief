@@ -14,6 +14,7 @@ and registers the hotspot (or decor) art in the house.json registry.
 import math
 import os
 
+import geo
 from svgk import Canvas, fit_box, reduce_palette, write
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,7 +53,7 @@ class Prop:
 MERGES = {}          # prop name -> [(from, to)] colour merges done by the <= 10 colours rule
 
 
-def _emit_files(prop, outline=True, sub="props"):
+def _emit_files(prop, outline=True, sub="props", scale=2.0):
     canv = dict(prop.states)
     m = reduce_palette(list(canv.values()), 10)
     if m:
@@ -79,7 +80,7 @@ def _emit_files(prop, outline=True, sub="props"):
         write(p, c.svg(x0, y0, w, h))
         WRITTEN.append((p, sub))
         art[s] = "%s/%s/%s.svg" % (RES, sub, fname)
-        area += w * h * 4
+        area += w * h * scale * scale     # states at the atlas raster scale (geo.RASTER hint, default 2x)
     if ol is not None:
         p = os.path.join(ART, sub, prop.name + "_ol.svg")
         ox, oy = x0 - OUTLINE_GROW, y0 - OUTLINE_GROW
@@ -95,13 +96,13 @@ def _emit_files(prop, outline=True, sub="props"):
 
 
 def emit(reg, hotspot_id, prop, outline=True):
-    pos, size, art = _emit_files(prop, outline)
+    pos, size, art = _emit_files(prop, outline, scale=geo.RASTER.get(hotspot_id, 2.0))
     reg.hotspot(hotspot_id, pos, size, art, **prop.extra)
     return pos, size
 
 
 def emit_decor(reg, decor_id, prop, z=0, **extra):
-    pos, size, art = _emit_files(prop, outline=False)
+    pos, size, art = _emit_files(prop, outline=False, scale=geo.RASTER.get(decor_id, 2.0))
     d = {"id": decor_id, "room": prop.room, "pos": [int(pos[0]), int(pos[1])], "size": [int(size[0]), int(size[1])],
          "art": art, "z": z}
     d.update(extra)

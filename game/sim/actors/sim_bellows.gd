@@ -97,7 +97,7 @@ var reacting: Dictionary:
 		if state != REACTING or rx_prank < 0:
 			return {}
 		return {"prank": rx_prank_id, "archetype": rx_archetype, "variant": rx_variant, "tier": rx_tier,
-			"suppressed": rx_suppressed, "t": rx_t, "len": rx_len,
+			"suppressed": rx_suppressed, "t": rx_t, "len": rx_len, "last_beat": rx_last_beat,
 			"travel": {"from_f": rx_from_f, "to_f": rx_to_f, "room": rx_room1_id, "x_sub": rx_x1} if rx_has_travel else {}}
 
 # task
@@ -168,6 +168,26 @@ var rx_room1: int = -1
 var rx_room1_id: String = ""
 var rx_ease: int = 0
 var rx_end_place: bool = false
+## The reaction's last beat clip ("" none) and its frames (included in `rx_len`, at its end).
+var rx_last_beat: String = ""
+var rx_beat_len: int = 0
+# one-shot bookkeeping (SimOneshots reads these; all hashed)
+## The squeak bit playing until `bit_until` and the tick it started.
+var bit_id: String = ""
+var bit_t0: int = 0
+## Tick specs last went on / CURIOUS began / a fizzle happened.
+var specs_t0: int = -1000000
+var curious_t0: int = -1000000
+var fizzle_t0: int = -1000000
+# micro-gags (D1)
+## Tick of the last micro-gag beat (MG_MIN_GAP spacing).
+var mg_last_t: int = -1000000
+## Walk beats: cycle cursor, ticks walked on the current path, and its planned length.
+var mg_walk_i: int = 0
+var walk_t: int = 0
+var walk_len: int = 0
+## Non-T3 reactions this Night (every SLOW_BURN_EVERY-th ends with a slow burn).
+var rx_count: int = 0
 # bookkeeping
 var last_next_id: String = ""
 var last_specs: bool = false
@@ -265,6 +285,8 @@ func _walk(w: SimWorld) -> void:
 		return
 	if flags & NavPath.F_DONE:
 		_arrive(w)
+		return
+	_walk_beat(w)
 
 
 ## Apply a path advance; returns true when a STEP prank fired (the walk is over).
@@ -452,8 +474,14 @@ func _perform(w: SimWorld) -> void:
 		if activity_t % SimConst.SEARCH_TURN_EVERY == 0:
 			facing = -facing
 	if task_kind == T_ACTIVITY and a != null:
-		while hook_cursor < a.hook_count() and a.hooks[hook_cursor * 2] <= activity_t:
-			var mark := a.hooks[hook_cursor * 2]
+		# `hooks: "after_gate"`: the marks count from the tick the gate opened (nothing fires before it)
+		var base := 0
+		var hooks_on := true
+		if _hooks_after_gate(w):
+			hooks_on = gate_met_t >= 0
+			base = maxi(0, gate_met_t)
+		while hooks_on and hook_cursor < a.hook_count() and _hook_tick(a, hook_cursor, base) <= activity_t:
+			var mark := _hook_tick(a, hook_cursor, base)
 			var pi := a.hooks[hook_cursor * 2 + 1]
 			hook_cursor += 1
 			if mark == activity_t:
@@ -465,9 +493,71 @@ func _perform(w: SimWorld) -> void:
 		w.pranks.fixup_hooks(w, task_station, _fixup_kind(w))
 		if state == REACTING or w.bits.mirror_active:
 			return
+	if a != null and a.mg_cycle > 0 and (task_kind == T_ACTIVITY or task_kind == T_FIXUP):
+		var k := a.mg_due(activity_t)
+		if k >= 0:
+			_emit_beat(w, a.mg_ids[k], a.id, a.mg_len[k], a.mg_emote[k])
 	# a squeak bit plays over the activity clock; he doesn't leave before it is over
 	if activity_len >= 0 and activity_t >= activity_len and w.tick >= bit_until:
 		_complete_task(w)
+
+
+## PERFORM tick at which hook `k` fires: its mark, counted from `base` (the gate-open tick for
+## `hooks: "after_gate"`; a mark of 0 then fires on the next tick).
+func _hook_tick(a: ActivityDef, k: int, base: int) -> int:
+	var m := a.hooks[k * 2]
+	return m if base <= 0 else base + maxi(1, m)
+
+
+## True when the current loop entry's hooks wait for its gate (`hooks: "after_gate"`, content request d).
+func _hooks_after_gate(w: SimWorld) -> bool:
+	if task_kind != T_ACTIVITY or task_loop < 0:
+		return false
+	var le: EpisodeDef.LoopEntry = w.episode.loop[task_loop]
+	return le.hooks_after_gate and le.has_gate and not (le.first_loop_only and w.routine.loop_count > 0)
+
+
+# --- micro-gags (GDD §2.1, lead decision D1) ------------------------------------------------------
+
+## True while a beat may not play: anything but ROUTINE / DETOUR (reacting, CURIOUS, SEARCH, SPOTTED, CHASE,
+## the caught hold / Lecture, MELTDOWN, EXHAUSTED), a squeak bit, any Bellows one-shot (doorway pause,
+## look-back, bump, head turn, specs flick, fizzle), or within MG_MIN_GAP of the last beat.
+func beats_suppressed(w: SimWorld) -> bool:
+	if state != ROUTINE and state != DETOUR:
+		return true
+	if w.tick - mg_last_t < SimConst.MG_MIN_GAP or w.tick < bit_until or w.tick < head_turn_until:
+		return true
+	if bump_phase != BUMP_NONE or w.tick - fizzle_t0 < SimConst.FIZZLE_TICKS:
+		return true
+	if specs_on and w.tick - specs_t0 < SimConst.SPECS_ON_TICKS:
+		return true
+	if path != null and not path.is_done() and path.current_kind() == NavPath.PAUSE:
+		return true
+	return w.senses.f2f_active() or w.bits.mirror_active
+
+
+func _emit_beat(w: SimWorld, id: String, act: String, length: int, emote: String) -> void:
+	if beats_suppressed(w):
+		return
+	mg_last_t = w.tick
+	w.emit(SimEvents.MICRO_GAG, {"id": id, "activity": act, "room": w.room_id(room), "x": Fx.to_px(x_sub),
+		"len": length, "emote": emote, "vis": SimVisibility.beat_vis(w, emote != "")})
+
+
+## Walk beats: during a non-chase walk whose planned length exceeds `walk_beats.min_leg_s`, one every
+## `every_s` of walking, cycling `walk_beats.ids` (deterministic: list order).
+func _walk_beat(w: SimWorld) -> void:
+	walk_t += 1
+	var db := w.db
+	if db.wb_every <= 0 or db.wb_ids.is_empty() or walk_len <= db.wb_min_leg:
+		return
+	if task_kind == T_CURIOUS or task_kind == T_SEARCH or walk_t % db.wb_every != 0:
+		return
+	if beats_suppressed(w):
+		return
+	var k := mg_walk_i % db.wb_ids.size()
+	mg_walk_i += 1
+	_emit_beat(w, db.wb_ids[k], "walk", db.wb_len[k], db.wb_emote[k])
 
 
 func _fixup_mark(w: SimWorld) -> int:
@@ -668,6 +758,8 @@ func _path_to(w: SimWorld, troom: int, tx: int, mover: int) -> void:
 	p.serial = path_serial
 	p.facing = facing
 	path = p
+	walk_t = 0
+	walk_len = p.remaining_ticks()
 
 
 ## Leave the current task because a reaction, chase or curious detour takes over.
@@ -895,6 +987,8 @@ func _update_derived(w: SimWorld) -> void:
 	specs_on = s
 	if specs_on != last_specs:
 		last_specs = specs_on
+		if specs_on:
+			specs_t0 = w.tick
 		w.emit(SimEvents.SPECS, {"on": specs_on})
 	if w.residue.blinded():
 		# a blinding residue keeps `blinded_until` just ahead so readers of either field agree
@@ -1008,8 +1102,9 @@ const _PROPS: Array[String] = ["room", "floor", "x_sub", "facing", "state", "act
 	"exhaust_after", "rx_prank", "rx_prank_id", "rx_archetype", "rx_variant", "rx_key", "rx_tier",
 	"rx_suppressed", "rx_t", "rx_len", "rx_entry", "rx_accent", "rx_knock_f", "rx_accented", "rx_trig",
 	"rx_link", "rx_knock_from", "rx_has_travel", "rx_from_f", "rx_to_f", "rx_x0", "rx_x1", "rx_room0",
-	"rx_room1", "rx_room1_id", "rx_ease", "rx_end_place", "last_next_id", "last_specs", "last_step_px",
-	"visit_bits"]
+	"rx_room1", "rx_room1_id", "rx_ease", "rx_end_place", "rx_last_beat", "rx_beat_len", "last_next_id",
+	"last_specs", "last_step_px", "visit_bits", "bit_id", "bit_t0", "specs_t0", "curious_t0", "fizzle_t0", "mg_last_t",
+	"mg_walk_i", "walk_t", "walk_len", "rx_count"]
 
 
 ## Mix into a state hash.

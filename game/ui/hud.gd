@@ -12,6 +12,10 @@
 ## * Panels (ScriptPanel, PauseMenu, SettingsPanel, LoadingCard, ResultsScreen) are shown on top
 ##   with `show_panel(panel)`; the HUD itself dims while `model.paused`.
 ## * Teaching: `ghost_finger(target, mode)` and `show_figgis_card(icons)`.
+## * The Bellows-Cam: `attach_pip(pip_view)` hands the Hud the PipView — its texture, its
+##   `shown_changed` / `pip_resized` signals drive the PipFrame (placement per HudLayout: 448 × 252
+##   top-right, the escalated Gag-Cam window anchored to the same corner); while attached the
+##   model's pip_visible / pip_escalated are ignored (tier and glyph still come from the model).
 class_name Hud
 extends CanvasLayer
 
@@ -66,6 +70,9 @@ var hud_scale: float = 1.0
 ## The last model's script data (for the Script panel).
 var script_lines: Array = []
 var script_loop: Array = []
+
+## The attached PipView (attach_pip), or null.
+var pip_view: PipView = null
 
 var _safe: SafeArea
 var _insets: Vector4 = Vector4.ZERO
@@ -263,12 +270,12 @@ func apply(m: HudModel) -> void:
 		pip.set_glyph(m.pip_glyph)
 		n += 1
 	var pip_moved := false
-	if int(m.pip_escalated) != _c_pipesc:
+	if pip_view == null and int(m.pip_escalated) != _c_pipesc:
 		_c_pipesc = int(m.pip_escalated)
 		pip.set_escalated(m.pip_escalated)
 		pip_moved = true
 		n += 1
-	if int(m.pip_visible) != _c_pipv:
+	if pip_view == null and int(m.pip_visible) != _c_pipv:
 		_c_pipv = int(m.pip_visible)
 		pip.set_shown(m.pip_visible)
 		pip_moved = true
@@ -331,6 +338,40 @@ func set_tap_to_rig(on: bool) -> void:
 ## The PiP SubViewport texture (PipView.get_texture()).
 func set_pip_texture(tex: Texture2D) -> void:
 	pip.set_texture(tex)
+
+
+## Take over the Bellows-Cam: show `view.get_texture()` in the PipFrame and follow its
+## `shown_changed` / `pip_resized` signals (placement, escalation). Passing null detaches.
+func attach_pip(view: PipView) -> void:
+	if pip_view == view:
+		return
+	if pip_view != null and is_instance_valid(pip_view):
+		if pip_view.shown_changed.is_connected(_on_pip_shown):
+			pip_view.shown_changed.disconnect(_on_pip_shown)
+		if pip_view.pip_resized.is_connected(_on_pip_resized):
+			pip_view.pip_resized.disconnect(_on_pip_resized)
+	pip_view = view
+	if view == null:
+		pip.set_texture(null)
+		return
+	pip.set_texture(view.get_texture())
+	view.shown_changed.connect(_on_pip_shown)
+	view.pip_resized.connect(_on_pip_resized)
+	pip.set_escalated(view.is_escalated())
+	pip.set_shown(view.is_shown())
+	_place_pip()
+	_place_edge_bubble()
+
+
+func _on_pip_shown(on: bool) -> void:
+	pip.set_shown(on)
+	_place_pip()
+	_place_edge_bubble()
+
+
+func _on_pip_resized(new_size: Vector2i) -> void:
+	pip.set_escalated(new_size.x > PipFrame.SIZE_NORMAL.x)
+	_place_pip()
 
 
 ## Show the overview toggle in its "zoomed out" state.
@@ -426,7 +467,6 @@ func relayout() -> void:
 	_put(action, layout[&"action"], k)
 	edge_bubble.scale = k
 	pick_strip.scale = k
-	pip.scale = k
 	overview.scale = k
 	_place_pip()
 	_place_edge_bubble()
@@ -460,9 +500,17 @@ func _place_pip() -> void:
 	if layout.is_empty():
 		return
 	var esc := pip.escalated
-	pip.position = (layout[&"pip_escalated"] if esc else layout[&"pip"]).position
+	var r: Rect2 = layout[&"pip_escalated"] if esc else layout[&"pip"]
+	pip.position = r.position
+	var sz := pip.frame_size()
+	pip.scale = Vector2(r.size.x / sz.x, r.size.y / sz.y)
 	var ov: Rect2 = layout[&"overview_escalated"] if (esc and pip.shown) else layout[&"overview"]
 	overview.position = ov.position
+
+
+## The PipFrame's on-screen rect (its hit box) as placed now.
+func pip_rect() -> Rect2:
+	return Rect2(pip.position, pip.size * pip.scale)
 
 
 func _place_edge_bubble() -> void:

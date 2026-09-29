@@ -42,7 +42,7 @@ def _hand(side):
 	tex = OrderedDict((t, ART + "hand_%s_%s.svg" % (side, t)) for t in A.HAND_TEX)
 	d = {"parent": "arm_lower_" + side, "offset": [0, round(A.ARM_LO * A.K, 1)]}
 	d.update(_c("hand"))
-	d.update({"z": Z["hand_" + side], "tex": tex, "default_tex": "open", "limits": {"rot": [-120, 120]},
+	d.update({"z": Z["hand_" + side], "tex": tex, "default_tex": "open", "limits": {"rot": [-165, 165]},
 			  "sockets": {"grip": A.cpt("hand", (12, 24)) + [90]}})
 	return d
 

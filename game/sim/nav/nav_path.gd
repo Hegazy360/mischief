@@ -45,6 +45,9 @@ var facing: int = 1
 var ok: bool = true
 ## Serial of the path (per owner), used to key entry warnings.
 var serial: int = 0
+## Where the walker stood when the path was built (the first leg's "from"; set once, not hashed — the legs are).
+var start_room: int = -1
+var start_x: int = 0
 
 
 ## Number of legs.
@@ -220,6 +223,8 @@ func duplicate_path() -> NavPath:
 	p.facing = facing
 	p.ok = ok
 	p.serial = serial
+	p.start_room = start_room
+	p.start_x = start_x
 	return p
 
 
@@ -237,6 +242,40 @@ func hash_into(h: int) -> int:
 	h = StateHash.mix(h, speed)
 	h = StateHash.mix(h, facing)
 	return StateHash.mix(h, serial)
+
+
+## The current leg into `out` (reused; no allocation): {kind: "walk"|"door"|"stairs"|"" (none / a pause),
+## from_room, to_room (room idx), from_x, to_x (sub-px), progress_pm (0–1000)}. During a STAIRS leg the
+## walker's `room`/`x` are already the arrival end's; `from_*` is the near end.
+func leg_into(out: Dictionary) -> void:
+	out["kind"] = ""
+	out["from_room"] = room
+	out["to_room"] = room
+	out["from_x"] = x
+	out["to_x"] = x
+	out["progress_pm"] = 0
+	if cursor >= kinds.size():
+		return
+	var k := kinds[cursor]
+	var fr := start_room if cursor == 0 else rooms[cursor - 1]
+	var fx := start_x if cursor == 0 else xs[cursor - 1]
+	out["from_room"] = fr
+	out["to_room"] = rooms[cursor]
+	out["from_x"] = fx
+	out["to_x"] = xs[cursor]
+	match k:
+		WALK:
+			out["kind"] = "walk"
+			var span := absi(xs[cursor] - fx)
+			out["progress_pm"] = 1000 if span <= 0 else clampi(Fx.div(absi(x - fx) * 1000, span), 0, 1000)
+		DOOR, STAIRS:
+			out["kind"] = "door" if k == DOOR else "stairs"
+			out["progress_pm"] = clampi(Fx.div(leg_t * 1000, maxi(1, ticks[cursor])), 0, 1000)
+		_:
+			out["from_room"] = room
+			out["to_room"] = room
+			out["from_x"] = x
+			out["to_x"] = x
 
 
 ## Debug text.

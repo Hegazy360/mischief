@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "clip": "bellows/fx_smirk",
+ "rig": "bellows",
+ "loop": false,
+ "length": 30,
+ "layer": "overlay",
+ "mask": [
+  "head*",
+  "arm_upper_l*",
+  "arm_upper_r*",
+  "cravat"
+ ],
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "b_preen",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content."
+}

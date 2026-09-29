@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "clip": "hush/fx_run",
+ "rig": "hush",
+ "loop": true,
+ "length": 24,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 6,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "h_run_contact_l",
+   "ease": "linear"
+  },
+  {
+   "f": 12,
+   "pose": "h_run_pass_l",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 24,
+   "pose": "h_run_contact_l",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [],
+ "tags": [
+  "fixture"
+ ],
+ "doc": "s2-view test fixture (static poses); not shipped content.",
+ "stride_px": 144
+}

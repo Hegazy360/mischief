@@ -570,6 +570,46 @@ func launch_offset_s(ep_id: String) -> float:
 	return 0.0
 
 
+## The episode's `index` (Night number; the Prologue is 0).
+func episode_index(ep_id: String) -> int:
+	return int(episode(ep_id).get("index", 0))
+
+
+## The lowest `index` of an episode whose director cues include `cue_id` (−1 when none does) — the
+## slow persona learns ⏩ from the `ghost_ff` cue (ruling L2).
+func cue_episode_index(cue_id: String) -> int:
+	var best := -1
+	for id in sorted_ids("episodes"):
+		var d: Variant = (episodes[id] as Dictionary).get("director", null)
+		if not (d is Dictionary):
+			continue
+		for c in (d as Dictionary).get("cues", []):
+			if c is Dictionary and sv((c as Dictionary).get("id", "")) == cue_id:
+				var ix := episode_index(id)
+				if best < 0 or ix < best:
+					best = ix
+	return best
+
+
+## Ticks Hush is busy climbing in (`hush.enter.at_s + busy_s`; 0 without an entry).
+func enter_ticks(ep_id: String) -> int:
+	var h: Variant = episode(ep_id).get("hush", {})
+	if not (h is Dictionary):
+		return 0
+	var e: Variant = (h as Dictionary).get("enter", null)
+	if not (e is Dictionary):
+		return 0
+	return int(round((float((e as Dictionary).get("at_s", 0.0)) + float((e as Dictionary).get("busy_s", 0.0))) * 60.0))
+
+
+## `rules.combos` of an episode: null when absent (every combo allowed), else the allowed ids.
+func combos_rule(ep_id: String) -> Variant:
+	var r := rules(ep_id)
+	if not r.has("combos") or r["combos"] == null:
+		return null
+	return as_ids(r["combos"])
+
+
 ## Tomato limit (−1 = unlimited).
 func tomatoes_max(ep_id: String) -> int:
 	return int(rules(ep_id).get("tomatoes", -1))

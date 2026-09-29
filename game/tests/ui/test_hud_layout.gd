@@ -39,7 +39,12 @@ func test_positions_match_the_gdd_table() -> void:
 	assert_eq(L[&"meter"], Rect2((W - 600) / 2, 16, 600, 144))
 	assert_eq((L[&"banner"] as Rect2).position.y, 164.0)
 	assert_eq(L[&"pip"], Rect2(W - s - 472, 24, 448, 252))
-	assert_eq(L[&"pip_escalated"], Rect2(W - s - 24 - 704, 24, 704, 396), "escalated PiP keeps the top-right corner")
+	var e: Rect2 = L[&"pip_escalated"]
+	assert_eq(e.end.x, W - s - 24, "escalated PiP keeps the top-right corner")
+	assert_eq(e.position.y, 24.0)
+	assert_eq(e.position.x, (L[&"meter"] as Rect2).end.x + 24, "…and fits 24 px beside the meter (690 × 388 here)")
+	var full := HudLayout.compute(Vector2(2400, 1080), Vector4.ZERO, false, 1.0)
+	assert_eq(full[&"pip_escalated"], Rect2(2400 - 24 - 704, 24, 704, 396), "704 × 396 where it fits")
 	assert_eq((L[&"overview"] as Rect2).position, Vector2(W - s - 168, 300))
 	assert_eq(L[&"tray"], Rect2(s + 32, H - B - 200, 744, 168))
 	assert_eq(L[&"clarence"], Rect2(s + 32, H - B - 392, 168, 168))

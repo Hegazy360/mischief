@@ -1,0 +1,164 @@
+## NightWarm — the per-Night warm list (s2-night §4.2) and the warmer that works through it under
+## the curtain / cold open / loading card, spread over frames (≤ 2.0 s).
+##
+## `NightWarm.list(episode_id, data_root)` is pure (reads only the JSON data) and returns:
+## `{episode, rigs: ["hush", "bellows"], rooms: [...], props: [hotspot ids], looks: {"bellows": [...],
+##   "hush": [...]}, combos: [...], fx: [...], captions: [...], fonts: [{font, size}], audio: [ids], pip: true}`
+## * rooms = the Night's rooms + backstage; props = every hotspot in them (their atlases are built with
+##   the WorldView, the list is the record TexStats checks);
+## * looks = every residue look the Night's pranks can leave (`KIND`, `KIND:<look>`, `KIND:blind`),
+##   plus `COMBO:<id>` for each combo whose two residues can both happen **and** that `rules.combos`
+##   allows (`[]` = none, absent = all), plus `COSTUME:<look>`;
+## * fx = the particle kinds the Night can emit (the pool's kinds + the curtain call's roses);
+## * fonts = captions 88 px, stamps 64 px, HUD numbers 48 px (display / ui faces), each glyph set drawn
+##   once off-screen;
+## * audio = the cue ids of the Night's pranks and archetypes (`cues.json`).
+## `NightWarmer` (a Node) executes it: `RigPlayer.warm_looks` (soft), the font primer, `PipView.warm()`
+## (soft), `Audio.warm(ids)` — one step per frame under an 8 ms budget; `done` when finished.
+class_name NightWarm
+extends RefCounted
+
+const FX_KINDS: PackedStringArray = ["dust", "flour", "feathers", "drops", "steam", "sparkles", "notes", "roses"]
+const FONT_SIZES := [{"font": "display", "size": 88}, {"font": "display", "size": 64}, {"font": "ui", "size": 48}]
+const STAMP_TEXTS: PackedStringArray = ["MELTDOWN! +8", "COMBO! +4", "NEAR MISS! +2", "EMBARRASSED! +5", "RUNNING GAG ×1.5",
+	"×2", "×3", "ENCORE!", "0123456789+-×!?.,'"]
+
+
+static func _read(path: String) -> Variant:
+	if not FileAccess.file_exists(path):
+		return null
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(path)) != OK:
+		return null
+	return j.data
+
+
+## The warm list for one episode (see the class doc). {} when the episode file is missing.
+static func list(episode_id: String, data_root: String = "res://data") -> Dictionary:
+	var ep: Variant = _read("%s/episodes/%s.json" % [data_root, episode_id])
+	if not (ep is Dictionary):
+		return {}
+	var e: Dictionary = ep
+	var pj: Variant = _read("%s/pranks.json" % data_root)
+	var pranks: Dictionary = (pj as Dictionary).get("pranks", {}) if pj is Dictionary else {}
+	var das: Dictionary = (pj as Dictionary).get("double_acts", {}) if pj is Dictionary else {}
+	var rj: Variant = _read("%s/residues.json" % data_root)
+	var combos: Dictionary = (rj as Dictionary).get("combos", {}) if rj is Dictionary else {}
+	var hj: Variant = _read("%s/house/house.json" % data_root)
+	var rooms := PackedStringArray()
+	for r in e.get("rooms", []):
+		rooms.append(String(r))
+	for r in e.get("backstage", []):
+		if not rooms.has(String(r)):
+			rooms.append(String(r))
+	var props := PackedStringArray()
+	if hj is Dictionary:
+		for hs in (hj as Dictionary).get("hotspots", []):
+			if hs is Dictionary and rooms.has(String((hs as Dictionary).get("room", ""))):
+				props.append(String((hs as Dictionary).get("id", "")))
+	props.sort()
+	# The Night's pranks: prank lines + both halves of double acts (+ knock-on targets).
+	var night_pranks := PackedStringArray()
+	for l in e.get("script", []):
+		if not (l is Dictionary):
+			continue
+		var ld: Dictionary = l
+		if ld.get("prank") != null and String(ld.get("prank", "")) != "":
+			_add(night_pranks, String(ld["prank"]))
+		if ld.get("double_act") != null and das.get(String(ld.get("double_act", "")), null) is Dictionary:
+			var da: Dictionary = das[String(ld["double_act"])]
+			for k in ["a", "b"]:
+				if da.get(k) != null:
+					_add(night_pranks, String(da[k]))
+	for pid in night_pranks.duplicate():
+		var pd: Variant = pranks.get(pid, null)
+		if pd is Dictionary and (pd as Dictionary).get("knock_on") is Dictionary:
+			var ko: Variant = ((pd as Dictionary)["knock_on"] as Dictionary).get("prank", null)
+			if ko != null and night_pranks.has(String(ko)):
+				_add(night_pranks, String(ko))
+	night_pranks.sort()
+	var kinds := PackedStringArray()
+	var looks := PackedStringArray()
+	var captions := PackedStringArray()
+	var archetypes := PackedStringArray()
+	for pid in night_pranks:
+		var pd: Variant = pranks.get(pid, null)
+		if not (pd is Dictionary):
+			continue
+		var p: Dictionary = pd
+		if p.get("caption") != null:
+			_add(captions, String(p["caption"]))
+		var rx: Variant = p.get("reaction", null)
+		if rx is Dictionary and (rx as Dictionary).get("archetype") != null:
+			_add(archetypes, String((rx as Dictionary)["archetype"]))
+		for res in p.get("residue", []):
+			if not (res is Dictionary):
+				continue
+			var rd: Dictionary = res
+			var k := String(rd.get("kind", ""))
+			if k == "":
+				continue
+			_add(kinds, k)
+			_add(looks, k)
+			if rd.get("look") != null and String(rd["look"]) != "":
+				_add(looks, "%s:%s" % [k, String(rd["look"])])
+			if bool(rd.get("blind", false)):
+				_add(looks, "%s:blind" % k)
+			if k == "COSTUME" and rd.get("look") != null:
+				_add(looks, "COSTUME:%s" % String(rd["look"]))
+	# Combos: both residues possible tonight AND allowed by rules.combos (absent = all, [] = none).
+	var rules: Dictionary = e.get("rules", {}) if e.get("rules") is Dictionary else {}
+	var allowed: Variant = rules.get("combos", null)
+	var combo_ids := PackedStringArray()
+	for cid in combos:
+		var cd: Variant = combos[cid]
+		if not (cd is Dictionary):
+			continue
+		var of: Array = (cd as Dictionary).get("of", [])
+		var ok := of.size() >= 2
+		for k in of:
+			if not kinds.has(String(k)):
+				ok = false
+		if ok and allowed is Array and not (allowed as Array).has(cid):
+			ok = false
+		if ok:
+			_add(combo_ids, String(cid))
+			_add(looks, "COMBO:%s" % String(cid))
+			if (cd as Dictionary).get("caption") != null:
+				_add(captions, String((cd as Dictionary)["caption"]))
+	combo_ids.sort()
+	looks.sort()
+	# Audio: the cue ids of tonight's pranks and archetypes.
+	var audio := PackedStringArray()
+	var cj: Variant = _read("%s/audio/cues.json" % data_root)
+	if cj is Dictionary:
+		for pid in night_pranks:
+			_collect_ids(((cj as Dictionary).get("pranks", {}) as Dictionary).get(pid, null), audio)
+		for a in archetypes:
+			_collect_ids(((cj as Dictionary).get("archetypes", {}) as Dictionary).get(a, null), audio)
+	audio.sort()
+	var all_captions := captions.duplicate()
+	all_captions.append_array(STAMP_TEXTS)
+	return {"episode": episode_id, "rigs": PackedStringArray(["hush", "bellows"]), "rooms": rooms, "props": props,
+		"pranks": night_pranks, "looks": {"bellows": looks, "hush": PackedStringArray()}, "combos": combo_ids,
+		"fx": FX_KINDS.duplicate(), "captions": all_captions, "fonts": FONT_SIZES.duplicate(true), "audio": audio,
+		"pip": true}
+
+
+static func _add(arr: PackedStringArray, v: String) -> void:
+	if v != "" and not arr.has(v):
+		arr.append(v)
+
+
+## Every `sfx` / `voice` / `sting` / `crowd` string value inside a cues.json entry.
+static func _collect_ids(v: Variant, out: PackedStringArray) -> void:
+	if v is Dictionary:
+		for k in v:
+			var x: Variant = (v as Dictionary)[k]
+			if (k == "sfx" or k == "voice" or k == "sting") and x is String:
+				_add(out, String(x))
+			else:
+				_collect_ids(x, out)
+	elif v is Array:
+		for x in v:
+			_collect_ids(x, out)

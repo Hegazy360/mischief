@@ -76,6 +76,11 @@ def main():
 				bb = union(bb, (-2, -2, 2, 2))
 				canvases[bone] = ov[0].canvas(bb)
 
+	prop_specs = PR.props()
+	# torso:seat = the barrel's seat point + the stool's pivot offset below its cushion (the stool prop's pivot)
+	seat_dy = prop_specs["stool"]["pivot_y"] - PR.STOOL_SEAT[1]
+	R.SOCKETS["torso"]["seat"] = [R.SEAT_POINT[0], round(R.SEAT_POINT[1] + seat_dy, 1), 0]
+
 	rig = {"version": 1, "rig": R.RIG_ID, "height_px": R.HEIGHT_PX, "root_part": "torso", "origin": "feet",
 		   "doc": ("Conventions" + R.__doc__.split("Conventions")[1]).strip(),
 		   "parts": {}}
@@ -178,7 +183,7 @@ def main():
 
 	# props
 	props = {}
-	for name, spec in PR.props().items():
+	for name, spec in prop_specs.items():
 		states = spec["states"]
 		cv = shared_canvas(list(states.values()))
 		sock_part = spec["socket"].split(":")[0]
@@ -208,6 +213,9 @@ def main():
 	rig["props"] = props
 	rig["mirror_pairs"] = R.MIRROR_PAIRS
 	rig["no_mirror"] = []
+	rig["breath"] = dict(R.BREATH)
+	rig["look"] = dict(R.LOOK)
+	rig["masks"] = {k: list(v) for k, v in R.MASKS.items()}
 
 	os.makedirs(DATA, exist_ok=True)
 	with open(os.path.join(DATA, "rig.json"), "w") as fh:

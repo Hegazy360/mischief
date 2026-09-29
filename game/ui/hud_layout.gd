@@ -5,7 +5,9 @@
 ##   tablets). Right-handed (default):
 ##   pause (S+24, T+24) 144 · figgis (S+192, T+24) 144 · meter centred, y T+16, 600 × 144 ·
 ##   banner centred, y T+164 (not a target) · pip (W−S−472, T+24) 448 × 252 (escalated 704 × 396,
-##   same top-right corner) · overview (W−S−168, T+300) 144 (moves below an escalated PiP) ·
+##   same top-right corner, scaled down only when the meter or the action column would be
+##   covered — on a 16:9 phone it fits 612 × 344 beside the meter) · overview (W−S−168, T+300)
+##   144 (moves below an escalated PiP, or beside it when that doesn't fit) ·
 ##   tray (S+32, H−B−200) 744 × 168 · clarence (S+32, H−B−392) 168 · action centre
 ##   (W−S−168, H−B−168) 240 · Stalls band x ∈ [S+800, W−S−312] along the bottom: no targets.
 ##   Left-handed mirrors every rect horizontally (x' = W − x − w): the thumb clusters swap and the
@@ -33,13 +35,31 @@ static func compute(vp: Vector2, insets: Vector4, left_handed: bool = false, k: 
 	r[&"meter"] = Rect2((w - 600.0 * k) * 0.5, t + 16.0 * k, 600.0 * k, 144.0 * k)
 	r[&"banner"] = Rect2((w - 640.0 * k) * 0.5, t + 164.0 * k, 640.0 * k, 96.0 * k)
 	r[&"pip"] = Rect2(w - s - 472.0 * k, t + 24.0 * k, 448.0 * k, 252.0 * k)
-	r[&"pip_escalated"] = Rect2(w - s - 728.0 * k, t + 24.0 * k, 704.0 * k, 396.0 * k)
 	r[&"overview"] = Rect2(w - s - 168.0 * k, t + 300.0 * k, 144.0 * k, 144.0 * k)
-	r[&"overview_escalated"] = Rect2(w - s - 168.0 * k, t + 444.0 * k, 144.0 * k, 144.0 * k)
 	r[&"tray"] = Rect2(s + 32.0 * k, h - b - 200.0 * k, 744.0 * k, 168.0 * k)
 	r[&"clarence"] = Rect2(s + 32.0 * k, h - b - 392.0 * k, 168.0 * k, 168.0 * k)
 	var ac := Vector2(w - s - 168.0 * k, h - b - 168.0 * k)
 	r[&"action"] = Rect2(ac - Vector2(120.0, 120.0) * k, Vector2(240.0, 240.0) * k)
+	# the escalated Gag-Cam window: top-right, 24 px clear of the meter and — with the overview
+	# button under it — of the action button's column; scaled (aspect kept) only to fit
+	var meter_end := (r[&"meter"] as Rect2).end.x
+	var right := w - s - 24.0 * k
+	var avail_w := right - (meter_end + 24.0 * k)
+	var top := t + 24.0 * k
+	var act_top := (r[&"action"] as Rect2).position.y
+	var avail_h := act_top - 24.0 * k - top
+	var fit_w := avail_w / (704.0 * k)
+	# first choice: the overview button fits under the window (168 = 144 + 24)
+	var ek := minf(1.0, minf(fit_w, (avail_h - 168.0 * k) / (396.0 * k)))
+	var under := ek >= 0.75
+	if not under:
+		ek = minf(1.0, minf(fit_w, avail_h / (396.0 * k)))
+	var esz := Vector2(704.0, 396.0) * k * ek
+	r[&"pip_escalated"] = Rect2(right - esz.x, top, esz.x, esz.y)
+	if under:
+		r[&"overview_escalated"] = Rect2(w - s - 168.0 * k, top + esz.y + 24.0 * k, 144.0 * k, 144.0 * k)
+	else:
+		r[&"overview_escalated"] = Rect2(right - esz.x - 168.0 * k, t + 300.0 * k, 144.0 * k, 144.0 * k)
 	var bx0 := s + 800.0 * k
 	var bx1 := w - s - 312.0 * k
 	r[&"band"] = Rect2(bx0, h - b - BAND_H * k, maxf(0.0, bx1 - bx0), BAND_H * k)

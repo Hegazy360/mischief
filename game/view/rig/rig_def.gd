@@ -169,6 +169,10 @@ var breath_period: float = 3.2
 var look_part: int = -1
 var look_max_deg: float = 20.0
 var masks: Dictionary = {}             ## name → PackedStringArray
+## Locomotion parts (1 = in): the root part, every foot and every ancestor of a foot. An
+## overlay clip never writes them (RigPlayer), so a micro-gag over a walk keeps the walk's
+## planted feet and root exactly (s2-rig §4.1.1).
+var locomotion: PackedByteArray = PackedByteArray()
 var skins: Dictionary = {}             ## skin → {"dir": String}
 var rest: PackedFloat32Array = PackedFloat32Array()
 
@@ -371,6 +375,11 @@ func subtree(i: int) -> PackedInt32Array:
 			inside[j] = 1
 			out.append(j)
 	return out
+
+
+## True when rig.json `masks` defines `mask_name`.
+func has_mask(mask_name: String) -> bool:
+	return masks.has(mask_name)
 
 
 ## Per-part mask (1 = in) from a list of part names; `name*` adds the whole subtree, a
@@ -952,6 +961,15 @@ func _parse_misc(d: Dictionary) -> void:
 	if mv is Dictionary:
 		for mn in mv:
 			masks[String(mn)] = PackedStringArray(mv[mn] if mv[mn] is Array else [])
+	locomotion.resize(names.size())
+	locomotion.fill(0)
+	if not names.is_empty():
+		locomotion[root_index] = 1
+	for ft2 in feet:
+		var a := ft2
+		while a >= 0:
+			locomotion[a] = 1
+			a = parent[a]
 
 
 func _build_rest() -> void:

@@ -1,0 +1,93 @@
+{
+ "version": 1,
+ "clip": "_mannequin/cold_test",
+ "rig": "_mannequin",
+ "loop": false,
+ "length": 450,
+ "tags": [
+  "cold"
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 30,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "m_idle_shift",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 90,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 120,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 150,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 180,
+   "pose": "m_idle_shift",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 210,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 240,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 270,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 300,
+   "pose": "m_idle_shift",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 330,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 360,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 390,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 420,
+   "pose": "m_idle_shift",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 450,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

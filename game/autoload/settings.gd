@@ -2,7 +2,13 @@
 ##
 ## Keys (DEFAULTS): music_vol, sfx_vol, voice_vol, crowd_vol (linear 0..1), haptics, relaxed,
 ## tap_to_rig, left_handed, hints ("always" | "long_press" | "off"), stare_strip, reduce_motion,
-## reduce_flash, text_scale (1.0 or 1.2 = "Text +20 %").
+## reduce_flash, text_scale (1.0 or 1.2 = "Text +20 %"), plus the Stage-2 Gate-0 A/B keys
+## voice_style ("formant" | "tuba"), crowd_style ("formant" | "fallback") and hush_skin
+## ("" = Hush the mime | "pip") — applied by Audio (styles) and the view (skin); the owner's
+## Gate-0 decisions become the DEFAULTS (one line each).
+## Migration-safe: a file written by an older build (no `meta/version`, or missing keys) loads
+## with defaults for every missing key; unknown keys and invalid values are ignored / reset;
+## the file is rewritten at FILE_VERSION on the next save.
 ## Every change emits `changed(key, value)` and schedules a debounced save (SAVE_DELAY_SEC);
 ## the file is written crash-safely (tmp + rename, `.bak` fallback — SafeFile). Volumes are
 ## pushed to the Audio autoload's buses (`set_bus_volume`) when it exists.
@@ -15,6 +21,9 @@ signal changed(key: String, value: Variant)
 const PATH := "user://settings.cfg"
 const SECTION := "settings"
 const SAVE_DELAY_SEC := 0.5
+## Version stamped into the file's `meta` section (1 = Stage 1, no stamp; 2 = the A/B keys).
+const FILE_VERSION := 2
+const META := "meta"
 const DEFAULTS := {
 	"music_vol": 0.7,
 	"sfx_vol": 0.9,
@@ -29,9 +38,17 @@ const DEFAULTS := {
 	"reduce_motion": false,
 	"reduce_flash": false,
 	"text_scale": 1.0,
+	"voice_style": "formant",
+	"crowd_style": "formant",
+	"hush_skin": "",
 }
 ## Allowed values of string keys (anything else falls back to the default).
-const CHOICES := {"hints": ["always", "long_press", "off"]}
+const CHOICES := {
+	"hints": ["always", "long_press", "off"],
+	"voice_style": ["formant", "tuba"],
+	"crowd_style": ["formant", "fallback"],
+	"hush_skin": ["", "pip"],
+}
 ## Clamp ranges of numeric keys.
 const RANGES := {
 	"music_vol": [0.0, 1.0], "sfx_vol": [0.0, 1.0], "voice_vol": [0.0, 1.0], "crowd_vol": [0.0, 1.0],
@@ -44,6 +61,8 @@ const BUSES := {"music_vol": "Music", "sfx_vol": "SFX", "voice_vol": "Voice", "c
 var path: String = PATH
 ## Number of completed writes (tests).
 var save_count: int = 0
+## Version of the file last loaded (0 = no file, 1 = a Stage-1 file without a stamp).
+var loaded_version: int = 0
 
 var _values: Dictionary = {}
 var _cfg := ConfigFile.new()
@@ -73,7 +92,9 @@ func _process(delta: float) -> void:
 func load_settings() -> void:
 	_values = DEFAULTS.duplicate(true)
 	_cfg = ConfigFile.new()
+	loaded_version = 0
 	if SafeFile.load_config(_cfg, path) == OK:
+		loaded_version = int(_cfg.get_value(META, "version", 1)) if _cfg.has_section(META) else 1
 		for k in DEFAULTS:
 			if _cfg.has_section_key(SECTION, k):
 				_values[k] = _coerce(k, _cfg.get_value(SECTION, k))
@@ -84,6 +105,7 @@ func save() -> void:
 	_save_pending = false
 	for k in _values:
 		_cfg.set_value(SECTION, k, _values[k])
+	_cfg.set_value(META, "version", FILE_VERSION)
 	var err := SafeFile.save_config(_cfg, path)
 	if err != OK:
 		push_warning("Settings: could not save %s (%d)" % [path, err])

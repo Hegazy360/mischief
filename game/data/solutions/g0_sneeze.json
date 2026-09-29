@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "episode": "g0_sneeze",
+  "notes": "Gate 0: rig the honey the moment the ghost finger shows it, hide in the pantry, watch the sneeze; the scene ends 3 s after the reaction (g0_done).",
+  "routes": {
+    "ideal": {
+      "persona": "ideal",
+      "steps": [
+        {
+          "do": "wait",
+          "until": {"event_seen": {"event": "director_cue", "match": {"id": "ghost_honey"}}},
+          "max_s": 5
+        },
+        {"do": "rig", "prank": "achoo_ria"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "achoo_ria"}, "max_s": 45},
+        {"do": "wait_event", "event": "night_end", "match": {"reason": "g0_done"}, "max_s": 10}
+      ],
+      "expect": {
+        "stars": [null, null, null],
+        "lines": ["sneeze"],
+        "catches_max": 0,
+        "first_prank_s_max": 30,
+        "duration_s": [15, 45]
+      }
+    }
+  }
+}

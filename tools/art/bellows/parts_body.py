@@ -235,15 +235,16 @@ def foot(kind, far=False):
 		it.append(path(d, sw=5))
 		it.append(path("M-18 14 L48 14", sw=5.5))     # sole line
 		it.append(circle(28, -3, 7, fill=pom, stroke=INK, stroke_width=3.5))  # pom-pom on the instep
-	else:  # tiptoe: on pointe, heel lifted
-		up = [(-10, 0), (2, -5), (14, 4), (22, 18), (26, 32), (16, 34), (6, 24), (-6, 12)]
+	else:  # tiptoe: on pointe, heel lifted -- a pointed slipper whose tip reaches exactly the flat sole's depth, so
+		# swapping flat <-> tiptoe (the tutu costumes) never dips the foot below the floor (rig request RIG-13)
+		up = [(-11, 1), (1, -6), (16, -4), (30, 2), (41, 9), (46, 13), (40, 15), (24, 12), (8, 10), (-7, 8)]
 		d = smooth_closed(up, 0.55)
 		it.append(path(d, fill=b))
 		it += _tartan(up, far)
 		it.append(path(d, sw=5))
-		it.append(circle(14, 8, 6.5, fill=pom, stroke=INK, stroke_width=3.5))
+		it.append(circle(16, 1, 6.5, fill=pom, stroke=INK, stroke_width=3.5))
 	return Part("foot_%s_%s" % ("l" if far else "r", kind), it, FOOT_EXTRA)
 
 
 # Lowest sole points (foot-local, ink included) used to plant poses on the floor line.
-FOOT_SOLE = {"flat": [(-18, 16.8), (15, 16.8), (48, 16.8)], "tiptoe": [(18, 36.5), (24, 35.5)]}
+FOOT_SOLE = {"flat": [(-18, 16.8), (15, 16.8), (48, 16.8)], "tiptoe": [(40, 17.5), (46, 15.5)]}

@@ -56,7 +56,8 @@ static func lint_rig(rig: RigDef, lib: PoseLib = null) -> Array:
 			var r := "R05_face" if e2.contains("preset") or e2.contains("faces") else "R08_poses"
 			out.append(AnimLint.finding(r, lib.path if not e2.contains("faces.json") else lib.faces_path, -1, e2))
 		for w2 in lib.warnings:
-			out.append(AnimLint.finding("R08_poses", lib.path, -1, w2, "warning"))
+			var face_w := w2.contains("preset") or w2.contains("faces") or w2.contains("gaze")
+			out.append(AnimLint.finding("R05_face" if face_w else "R08_poses", lib.faces_path if face_w else lib.path, -1, w2, "warning"))
 		_pose_limits(rig, lib, out)
 	_silhouette(rig, lib, file, out)
 	return out

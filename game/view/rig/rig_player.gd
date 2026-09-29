@@ -30,10 +30,13 @@ class_name RigPlayer
 extends Node2D
 
 ## Every clip event (sfx, voice, laugh, fx, face, cam, shake, hitstop, slowmo, freeze, prop,
-## smear, mark, spring) as its frame is crossed. The Dictionary is shared: do not modify.
+## smear, mark, spring, decor) as its frame is crossed — base, overlay and additive layers
+## alike (the event's `clip` names the clip). The Dictionary is shared: do not modify.
 signal clip_event(ev: Dictionary)
-## A non-looping clip reached its end (the T3 last beat reports separately).
+## A non-looping BASE clip reached its end (the T3 last beat reports separately).
 signal clip_finished(clip_id: String)
+## An overlay / additive layer finished (faded out after stop_layer() or its clip's end).
+signal layer_finished(layer: String, clip_id: String)
 
 const SMEAR_ROT := 25.0
 const SMEAR_PX := 40.0
@@ -103,14 +106,11 @@ var _queue_opts: Dictionary = {}
 var _last_face: String = ""
 var _clip_df: float = 0.0
 
-var _ov_plan: PlayPlan = null
-var _ov_frame: float = 0.0
-var _ov_w: float = 0.0
-var _ov_out: bool = false
-var _ad_plan: PlayPlan = null
-var _ad_frame: float = 0.0
-var _ad_w: float = 0.0
-var _ad_out: bool = false
+## Masked overlay (micro-gags over any activity or walk), the overlay it replaced (fading out
+## underneath, so overlay → overlay never pops) and the additive clip layer.
+var _ov: _Layer = _Layer.new()
+var _ov_prev: _Layer = _Layer.new()
+var _ad: _Layer = _Layer.new()
 
 var _time_s: float = 0.0
 var _shiver_f: float = 0.0
@@ -182,6 +182,39 @@ var _smear_len: PackedFloat32Array = PackedFloat32Array()
 var _hist: int = 0
 var _force_smear: bool = false
 var _smearing: bool = false
+
+
+## One overlay / additive layer: its plan, clock, weight (0..1, blended in / out linearly and
+## applied smoothstepped), blend lengths, mask and event cursor.
+class _Layer extends RefCounted:
+	var plan: PlayPlan = null
+	var frame: float = 0.0
+	var cursor: float = -1.0
+	var w: float = 0.0
+	var out: bool = false
+	var bi: float = 6.0
+	var bo: float = 6.0
+	var mask: PackedByteArray = PackedByteArray()
+	var events: Array = []
+
+	func clear() -> void:
+		plan = null
+		w = 0.0
+		out = false
+
+	func copy_from(o: _Layer) -> void:
+		plan = o.plan
+		frame = o.frame
+		cursor = o.cursor
+		w = o.w
+		out = true
+		bi = o.bi
+		bo = o.bo
+		mask = o.mask
+
+	## The applied weight (smoothstep of the linear blend: no velocity kink at either end).
+	func weight() -> float:
+		return w * w * (3.0 - 2.0 * w)
 
 
 ## One triangle-array run: consecutive limbs + limb-end parts on one page.
@@ -262,8 +295,9 @@ func setup(p_rig_id: String, p_skin: String = "") -> void:
 	_tint_tier = 0
 	_plan = null
 	_from_plan = null
-	_ov_plan = null
-	_ad_plan = null
+	_ov.clear()
+	_ov_prev.clear()
+	_ad.clear()
 	_frame = 0.0
 	_finished = false
 	_external = false
@@ -280,7 +314,13 @@ func setup(p_rig_id: String, p_skin: String = "") -> void:
 ## blend_out, else 6), speed (px/s for clips with stride_px, else a rate multiplier), rate,
 ## loop (override), start_frame, tier (1..3), suppressed, seed (variation + last beat pick),
 ## hold / t3_prop_f / t3_prop / last_beat / suppressed_clip (PlayPlan overrides).
-## Overlay / additive clips go to their own layer.
+## `layer` ("base" / "overlay" / "additive") overrides the clip's own layer: overlay and
+## additive clips go to their own layer and leave the base clip playing.
+## Overlay opts: `mask` (a rig.json `masks` name or a part list; default the clip's, else the
+## parts it keys — never the locomotion parts, see RigDef.locomotion), blend_in / blend_out
+## (≥ 4 f, default the clip's, else 6). An overlay auto-stops at its clip's end (stop_layer()
+## ends it early); a new overlay crossfades from the current one. A base reaction / take
+## (`rx_`, `sig_`, tagged `take`) stops a running overlay unless opts `keep_overlay`.
 func play(clip_id: String, opts: Dictionary = {}) -> void:
 	if rig == null:
 		return
@@ -291,21 +331,24 @@ func play(clip_id: String, opts: Dictionary = {}) -> void:
 	if c.rig_id != rig.id:
 		push_warning("RigPlayer: clip '%s' is for rig '%s', not '%s'" % [clip_id, c.rig_id, rig.id])
 		return
-	var plan := PlayPlan.build(c, opts)
+	var layer := c.layer
+	if opts.has("layer"):
+		var li := ClipDef.LAYERS.find(String(opts["layer"]))
+		if li >= 0:
+			layer = li
+		else:
+			push_warning("RigPlayer: unknown layer '%s'" % opts["layer"])
+	var plan := PlayPlan.build(c, opts if layer == ClipDef.LAYER_BASE else {})
 	if opts.has("loop"):
 		plan.loop = bool(opts["loop"])
-	if c.layer == ClipDef.LAYER_OVERLAY:
-		_ov_plan = plan
-		_ov_frame = float(opts.get("start_frame", 0.0))
-		_ov_w = 0.0 if c.blend_in > 0 else 1.0
-		_ov_out = false
+	if layer == ClipDef.LAYER_OVERLAY:
+		_play_layer(_ov, c, plan, opts, true)
 		return
-	if c.layer == ClipDef.LAYER_ADDITIVE:
-		_ad_plan = plan
-		_ad_frame = float(opts.get("start_frame", 0.0))
-		_ad_w = 0.0 if c.blend_in > 0 else 1.0
-		_ad_out = false
+	if layer == ClipDef.LAYER_ADDITIVE:
+		_play_layer(_ad, c, plan, opts, false)
 		return
+	if c.is_take and _ov.plan != null and not bool(opts.get("keep_overlay", false)):
+		stop_layer("overlay", ClipDef.OVERLAY_MIN_BLEND)
 	var fade := ClipDef.DEFAULT_BLEND
 	if opts.has("blend_in"):
 		fade = int(opts["blend_in"])
@@ -549,12 +592,92 @@ func set_speed(px_per_s: float) -> void:
 	_rate = absf(px_per_s) / natural if natural > 0.0 else 1.0
 
 
-## Stop an overlay / additive layer ("overlay" / "additive") with its blend out.
-func stop_layer(layer: String) -> void:
-	if layer == "overlay":
-		_ov_out = true
-	elif layer == "additive":
-		_ad_out = true
+## Stop an overlay / additive layer ("overlay" / "additive") with its blend out
+## (`blend_out` ≥ 0 overrides it; overlays never blend out in under 4 f).
+func stop_layer(layer: String, blend_out: int = -1) -> void:
+	var l := _layer(layer)
+	if l == null or l.plan == null:
+		return
+	l.out = true
+	if blend_out >= 0:
+		l.bo = float(maxi(ClipDef.OVERLAY_MIN_BLEND if l == _ov else 1, blend_out))
+	if l == _ov and _ov_prev.plan != null:
+		_ov_prev.out = true
+
+
+## Drop the overlay and additive layers at once (no blend out; retry / seek / tools).
+func reset_layers() -> void:
+	_ov.clear()
+	_ov_prev.clear()
+	_ad.clear()
+
+
+## Clip id playing on a layer ("base", "overlay", "additive"; "" = none).
+func layer_clip(layer: String) -> String:
+	if layer == "base":
+		return current_clip()
+	var l := _layer(layer)
+	return l.plan.clip.id if l != null and l.plan != null else ""
+
+
+## Frame of a layer's clip (base: current_frame()).
+func layer_frame(layer: String) -> float:
+	if layer == "base":
+		return _frame
+	var l := _layer(layer)
+	return l.frame if l != null and l.plan != null else 0.0
+
+
+## Applied weight of an overlay / additive layer (0..1; base = 1).
+func layer_weight(layer: String) -> float:
+	if layer == "base":
+		return 1.0
+	var l := _layer(layer)
+	return l.weight() if l != null and l.plan != null else 0.0
+
+
+## The per-part mask an overlay layer writes (1 = the overlay drives that part).
+func overlay_mask() -> PackedByteArray:
+	return _ov.mask
+
+
+func _layer(layer: String) -> _Layer:
+	match layer:
+		"overlay":
+			return _ov
+		"additive":
+			return _ad
+	return null
+
+
+func _play_layer(l: _Layer, c: ClipDef, plan: PlayPlan, opts: Dictionary, overlay: bool) -> void:
+	var min_b := ClipDef.OVERLAY_MIN_BLEND if overlay else 0
+	if overlay and _ov.plan != null and _ov.w > 0.0:
+		# Crossfade overlay → overlay: the current one fades out underneath the new one.
+		_ov_prev.copy_from(_ov)
+		_ov_prev.bo = maxf(float(ClipDef.OVERLAY_MIN_BLEND), float(int(opts.get("blend_in", c.blend_in))))
+	l.plan = plan
+	l.frame = float(opts.get("start_frame", 0.0))
+	l.cursor = l.frame - 0.001
+	l.bi = float(maxi(min_b, int(opts.get("blend_in", c.blend_in))))
+	l.bo = float(maxi(min_b, int(opts.get("blend_out", c.blend_out))))
+	l.out = false
+	l.w = 0.0 if l.bi > 0.0 else 1.0
+	if not overlay:
+		l.mask = PackedByteArray()
+		return
+	if opts.has("mask"):
+		var mv: Variant = opts["mask"]
+		var errs := PackedStringArray()
+		var m := PackedByteArray()
+		if (mv is String and rig.has_mask(String(mv))) or mv is Array:
+			m = rig.mask_from(mv, errs)
+		if not ClipDef.mask_any(m):
+			m = c.keyed_parts().duplicate()
+		ClipDef.strip_locomotion(rig, m, c.touch_legs)
+		l.mask = m
+	else:
+		l.mask = c.overlay_mask()
 
 
 ## Timeline length of the base clip (frames).
@@ -678,28 +801,40 @@ func _pose_base() -> PackedFloat32Array:
 
 
 func _advance_layer_frames(clip_frames: float) -> void:
-	if _ov_plan != null:
-		_ov_frame += clip_frames
-		var bi := float(maxi(1, _ov_plan.clip.blend_in))
-		var bo := float(maxi(1, _ov_plan.clip.blend_out))
-		if not _ov_plan.loop and _ov_frame >= float(_ov_plan.length) - bo:
-			_ov_out = true
-		_ov_w = clampf(_ov_w + (clip_frames / bo * -1.0 if _ov_out else clip_frames / bi), 0.0, 1.0)
-		if _ov_out and _ov_w <= 0.0:
-			_ov_plan = null
-		elif _ov_plan.loop:
-			_ov_frame = fposmod(_ov_frame, float(_ov_plan.length))
-	if _ad_plan != null:
-		_ad_frame += clip_frames
-		var bi2 := float(maxi(1, _ad_plan.clip.blend_in))
-		var bo2 := float(maxi(1, _ad_plan.clip.blend_out))
-		if not _ad_plan.loop and _ad_frame >= float(_ad_plan.length) - bo2:
-			_ad_out = true
-		_ad_w = clampf(_ad_w + (clip_frames / bo2 * -1.0 if _ad_out else clip_frames / bi2), 0.0, 1.0)
-		if _ad_out and _ad_w <= 0.0:
-			_ad_plan = null
-		elif _ad_plan.loop:
-			_ad_frame = fposmod(_ad_frame, float(_ad_plan.length))
+	_step_layer(_ov_prev, clip_frames, "")
+	_step_layer(_ov, clip_frames, "overlay")
+	_step_layer(_ad, clip_frames, "additive")
+
+
+## Advance one layer: clock (wrapping loops, clamping one-shots at their end), weight (in
+## over bi, out over bo; a one-shot starts blending out bo frames before its end), events.
+## `name` "" = the outgoing overlay (no events, no signal).
+func _step_layer(l: _Layer, clip_frames: float, name: String) -> void:
+	if l.plan == null:
+		return
+	var ln := float(l.plan.length)
+	var f := l.frame + clip_frames
+	if l.plan.loop:
+		f = fposmod(f, ln)
+	else:
+		f = minf(f, ln)
+		if f >= ln - l.bo:
+			l.out = true
+	l.frame = f
+	if l.out:
+		l.w = maxf(0.0, l.w - clip_frames / maxf(1.0, l.bo)) if l.bo > 0.0 else 0.0
+	else:
+		l.w = minf(1.0, l.w + clip_frames / maxf(1.0, l.bi)) if l.bi > 0.0 else 1.0
+	if name != "" and absf(l.frame - l.cursor) > 0.00001:
+		l.plan.between_into(l.cursor, l.frame, l.events)
+		l.cursor = l.frame
+		for e in l.events:
+			_handle_event(e)
+	if l.out and l.w <= 0.0 and l.plan != null:
+		var id := l.plan.clip.id
+		l.clear()
+		if name != "":
+			layer_finished.emit(name, id)
 
 
 func _fire_events() -> void:
@@ -799,13 +934,16 @@ func _update_pose(vdt: float) -> void:
 		RigSampler.copy(_static, _pose)
 	else:
 		RigSampler.copy(rig.rest, _pose)
-	# 2. overlay, 3. additive clip
-	if _ov_plan != null and _ov_w > 0.0:
-		_ov_plan.sample(_ov_frame, _tmp)
-		RigSampler.apply_mask(_pose, _tmp, _ov_plan.clip.mask, _ov_w)
-	if _ad_plan != null and _ad_w > 0.0:
-		_ad_plan.sample(_ad_frame, _tmp)
-		RigSampler.apply_additive(_pose, _tmp, rig.rest, _ad_w)
+	# 2. overlay (the outgoing one underneath while it fades), 3. additive clip
+	if _ov_prev.plan != null and _ov_prev.w > 0.0:
+		_ov_prev.plan.sample(_ov_prev.frame, _tmp)
+		RigSampler.apply_mask(_pose, _tmp, _ov_prev.mask, _ov_prev.weight())
+	if _ov.plan != null and _ov.w > 0.0:
+		_ov.plan.sample(_ov.frame, _tmp)
+		RigSampler.apply_mask(_pose, _tmp, _ov.mask, _ov.weight())
+	if _ad.plan != null and _ad.w > 0.0:
+		_ad.plan.sample(_ad.frame, _tmp)
+		RigSampler.apply_additive(_pose, _tmp, rig.rest, _ad.weight())
 	# 4. procedural additive layers
 	if _has_jitter:
 		for p in _jitter.size():
@@ -857,6 +995,7 @@ func _track_face_keys() -> void:
 	var fname := c.key_face[k]
 	if fname != _last_face:
 		_last_face = fname
+		face.clip_preset = fname
 		face.on_clip_face_changed()
 
 

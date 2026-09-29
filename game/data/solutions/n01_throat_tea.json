@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "episode": "n01_throat_tea",
+  "notes": "Ideal: HOT & COLD in loop 1 (counts while the Big Number is sealed), then KETTLE -> PICKLE -> LIFT-OFF as one Running Gag in loop 2 (est. 109 Applause).",
+  "routes": {
+    "ideal": {
+      "persona": "ideal",
+      "steps": [
+        {"do": "wait", "until": {"tick_ge_s": 0.5}, "max_s": 5},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "rig", "prank": "tap_dance"},
+        {"do": "rig", "prank": "achoo_ria"},
+        {"do": "hide", "spot": "kitchen_table"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "tap_dance"}, "max_s": 60},
+        {"do": "wait", "until": {"bellows_in_room": "hall"}, "max_s": 30},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "pickles"}, "max_s": 45},
+        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 45},
+        {"do": "move", "room": "parlour", "x": 1800, "run": false},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "idle", "s": 3.0},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 45},
+        {"do": "rig", "prank": "lift_off"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "warmup"}, "max_s": 45},
+        {"do": "rig", "prank": "kettle_drum"},
+        {"do": "rig", "prank": "in_a_pickle"},
+        {"do": "hide", "spot": "kitchen_table"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "lift_off"}, "max_s": 90},
+        {"do": "wait", "until": {"all_required_done": true}, "max_s": 30},
+        {"do": "bow"}
+      ],
+      "expect": {
+        "stars": [true, true, true],
+        "applause": [100, 140],
+        "catches_max": 0,
+        "duration_s": [110, 300],
+        "lines": ["kettle", "tap", "pickle", "orbit", "sneeze", "bn"]
+      }
+    },
+    "required": {
+      "persona": "required",
+      "steps": [
+        {"do": "rig", "prank": "tap_dance"},
+        {"do": "rig", "prank": "in_a_pickle"},
+        {"do": "hide", "spot": "kitchen_table"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "in_a_pickle"}, "max_s": 60},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
+        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "tea"}, "max_s": 90},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "pickles"}, "max_s": 40},
+        {"do": "rig", "prank": "kettle_drum"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 40},
+        {"do": "pop_out", "run": false},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "kettle_drum"}, "max_s": 150},
+        {"do": "bow"}
+      ],
+      "expect": {
+        "stars": [true, null, null],
+        "applause": [35, 60],
+        "catches_max": 0,
+        "lines": ["kettle", "tap", "pickle"]
+      }
+    },
+    "slow": {
+      "persona": "slow",
+      "steps": [
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "rig", "prank": "tap_dance"},
+        {"do": "rig", "prank": "in_a_pickle"},
+        {"do": "hide", "spot": "kitchen_table"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "in_a_pickle"}, "max_s": 60},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
+        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "tea"}, "max_s": 90},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "pickles"}, "max_s": 40},
+        {"do": "rig", "prank": "kettle_drum"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 40},
+        {"do": "pop_out", "run": false},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "idle", "s": 3.0},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "kettle_drum"}, "max_s": 150},
+        {"do": "bow"}
+      ],
+      "expect": {
+        "stars": [true, null, null],
+        "lines": ["kettle", "tap", "pickle"],
+        "first_player_laugh_s_max": 10,
+        "first_prank_s_max": 30
+      }
+    }
+  }
+}

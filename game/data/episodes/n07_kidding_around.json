@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "id": "n07_kidding_around",
+  "act": 2,
+  "index": 7,
+  "title": "Kidding Around",
+  "status": "draft",
+  "seed": 107,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "conservatory", "garden", "landing", "bathroom", "bedroom"],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "herding",
+  "card": {
+    "text": "Lead Beryl indoors with an apple. If he spots her inside, he drops everything to herd her out.",
+    "icon": "herd"
+  },
+  "cold_open": {
+    "clip": "cold/n07_kidding_around",
+    "len_s": 5,
+    "desc": "He sells Hush's confiscated unicycle to the rag-and-bone man."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "conservatory", "x": 4090},
+    "loop": [{"a": "feed_beryl"}, {"a": "roses"}, {"a": "paper"}, {"a": "bath"}, {"a": "nap"}]
+  },
+  "cast": {
+    "beryl": {
+      "start": {"room": "conservatory", "x": 4360},
+      "mood": "grazing",
+      "lane": [3950, 5650],
+      "lane_speed": 70,
+      "lane_pause_s": 3,
+      "doze": {"station_x": 4360, "every_s": 60, "for_s": 20},
+      "wake_noise_px": 300,
+      "besotted_s": 20,
+      "follow_px": 150,
+      "bleat_every_s": 6,
+      "bend_px": 300,
+      "paw_s": 0.6
+    },
+    "delphine": null
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "kiss",
+      "kind": "prank",
+      "prank": "sweet_tooth",
+      "req": true,
+      "big_number": false,
+      "text": "Beryl gives him a kiss",
+      "hint": {
+        "item": "treacle",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "conservatory_feed_bin",
+        "when": "feed_beryl"
+      }
+    },
+    {
+      "id": "hose",
+      "kind": "prank",
+      "prank": "hosed",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows peers down a hose",
+      "hint": {
+        "item": "apple",
+        "container": "conservatory_potting_bench",
+        "rig_point": "garden_hose",
+        "when": "roses"
+      }
+    },
+    {
+      "id": "herd",
+      "kind": "herd",
+      "req": true,
+      "big_number": false,
+      "text": "Herd the goat twice",
+      "count": 2,
+      "hint": {
+        "item": "apple",
+        "container": "conservatory_potting_bench",
+        "rig_point": null,
+        "when": null,
+        "lead": "beryl",
+        "tip": "lead_indoors"
+      }
+    },
+    {
+      "id": "float",
+      "kind": "prank",
+      "prank": "in_over_his_head",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows floats away",
+      "hint": {
+        "item": "bubble_bath",
+        "container": "bathroom_cabinet",
+        "rig_point": "bathroom_bath_taps",
+        "when": "bath",
+        "also": [{"item": "sherbet", "container": "kitchen_pantry_shelf", "rig_point": "bathroom_bath_taps"}]
+      }
+    },
+    {
+      "id": "orbit",
+      "kind": "prank",
+      "prank": "lift_off",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows reads the paper in orbit",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_recliner", "when": "paper"}
+    },
+    {
+      "id": "bn",
+      "kind": "prank",
+      "prank": "kidding_around",
+      "req": false,
+      "big_number": true,
+      "text": "Put a goat in his bed",
+      "hint": {
+        "item": "apple",
+        "container": "conservatory_potting_bench",
+        "rig_point": "bedroom_bed",
+        "when": "nap",
+        "lead": "beryl"
+      }
+    }
+  ],
+  "director": null,
+  "encores": []
+}

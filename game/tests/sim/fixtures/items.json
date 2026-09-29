@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "items": {
+    "squeaker": {
+      "name": "Squeaker",
+      "icon": "res://art/house/items/squeaker.svg",
+      "source": "hall_confiscated_box",
+      "pranks": [
+        "kettle_drum"
+      ],
+      "count": 1
+    },
+    "magnifier": {
+      "name": "Magnifier",
+      "icon": "res://art/house/items/magnifier.svg",
+      "source": "hall_confiscated_box",
+      "pranks": [
+        "lift_off"
+      ],
+      "count": 1
+    },
+    "balloon": {
+      "name": "Balloon",
+      "icon": "res://art/house/items/balloon.svg",
+      "source": "hall_confiscated_box",
+      "pranks": [
+        "pipe_down"
+      ],
+      "count": 1
+    },
+    "kipper": {
+      "name": "Kipper",
+      "icon": "res://art/house/items/kipper.svg",
+      "source": "kitchen_fridge",
+      "pranks": [
+        "something_fishy"
+      ],
+      "count": 1
+    },
+    "butter": {
+      "name": "Butter",
+      "icon": "res://art/house/items/butter.svg",
+      "source": "kitchen_fridge",
+      "pranks": [
+        "cold_open"
+      ],
+      "count": 1
+    },
+    "flour": {
+      "name": "Flour",
+      "icon": "res://art/house/items/flour.svg",
+      "source": "kitchen_pantry_shelf",
+      "pranks": [
+        "bellows_blows"
+      ],
+      "count": 1
+    }
+  }
+}

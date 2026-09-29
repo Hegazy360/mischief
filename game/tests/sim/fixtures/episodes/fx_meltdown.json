@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "id": "fx_meltdown",
+  "act": 1,
+  "index": 4,
+  "title": "Fixture Big Sulk",
+  "status": "draft",
+  "seed": 404,
+  "rooms": [
+    "hall",
+    "parlour",
+    "kitchen",
+    "landing"
+  ],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 1.0,
+    "tomatoes": 3
+  },
+  "new_rule": "meltdown",
+  "card": {
+    "text": "Keep him fuming.",
+    "icon": "meltdown"
+  },
+  "cold_open": {},
+  "hush": {
+    "start": {
+      "room": "kitchen",
+      "x": 3800
+    }
+  },
+  "bellows": {
+    "start": {
+      "room": "parlour",
+      "x": 1700
+    },
+    "loop": [
+      {
+        "a": "warmup"
+      },
+      {
+        "a": "paper"
+      },
+      {
+        "a": "fire"
+      },
+      {
+        "a": "mirror"
+      },
+      {
+        "a": "radiator"
+      }
+    ]
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "rug",
+      "kind": "prank",
+      "prank": "rug_burn",
+      "req": true,
+      "text": "Bellows surfs the stairs"
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": true,
+      "text": "Bellows gets in a spin"
+    },
+    {
+      "id": "melt",
+      "kind": "meltdown",
+      "count": 1,
+      "req": true,
+      "text": "Bellows throws a tantrum"
+    },
+    {
+      "id": "prima",
+      "kind": "prank",
+      "prank": "prima_ballerina",
+      "req": false,
+      "text": "Bellows dances in the chandelier"
+    },
+    {
+      "id": "blows",
+      "kind": "prank",
+      "prank": "bellows_blows",
+      "req": false,
+      "text": "Bellows turns into a ghost"
+    },
+    {
+      "id": "mirror",
+      "kind": "prank",
+      "prank": "mirror_mirror",
+      "req": false,
+      "text": "Be his reflection"
+    },
+    {
+      "id": "bn",
+      "kind": "chain",
+      "link": 3,
+      "big_number": true,
+      "text": "Land three in one Running Gag"
+    }
+  ],
+  "director": {},
+  "encores": []
+}

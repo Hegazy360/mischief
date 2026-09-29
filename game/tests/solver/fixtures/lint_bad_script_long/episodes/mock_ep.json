@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "id": "mock_ep",
+  "act": 1,
+  "index": 1,
+  "title": "Mock Night",
+  "status": "final",
+  "seed": 7,
+  "rooms": [
+    "hall",
+    "parlour",
+    "kitchen"
+  ],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 1.0,
+    "tomatoes": -1,
+    "cant_fail": false,
+    "nerves": false
+  },
+  "new_rule": "items",
+  "card": {
+    "text": "Carry things. Do the Script, then bow.",
+    "icon": "tray"
+  },
+  "hush": {
+    "start": {
+      "room": "kitchen",
+      "x": 3800
+    }
+  },
+  "bellows": {
+    "start": {
+      "room": "parlour",
+      "x": 1700
+    },
+    "loop": [
+      {
+        "a": "warmup"
+      },
+      {
+        "a": "tea"
+      },
+      {
+        "a": "rinse"
+      }
+    ]
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "l0",
+      "kind": "prank",
+      "prank": "kettle_drum",
+      "req": true,
+      "text": "Line 0"
+    },
+    {
+      "id": "l1",
+      "kind": "prank",
+      "prank": "tap_dance",
+      "req": true,
+      "text": "Line 1"
+    },
+    {
+      "id": "l2",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "text": "Line 2"
+    },
+    {
+      "id": "l3",
+      "kind": "prank",
+      "prank": "kettle_drum",
+      "req": false,
+      "text": "Line 3"
+    },
+    {
+      "id": "l4",
+      "kind": "prank",
+      "prank": "tap_dance",
+      "req": false,
+      "text": "Line 4"
+    },
+    {
+      "id": "l5",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "text": "Line 5"
+    },
+    {
+      "id": "l6",
+      "kind": "prank",
+      "prank": "kettle_drum",
+      "req": false,
+      "text": "Line 6"
+    },
+    {
+      "id": "bn",
+      "kind": "double_act",
+      "double_act": "hot_and_cold",
+      "big_number": true,
+      "req": false,
+      "text": "Sneeze him into the sink"
+    }
+  ],
+  "director": null,
+  "encores": []
+}

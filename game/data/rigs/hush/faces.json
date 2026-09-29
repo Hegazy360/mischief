@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "Face presets: a variant (or none) for every face slot: eyes, pupils (baked look), brows, mouth and the overlay slots blush / sweat / tear (on / none).",
+  "presets": {
+    "neutral": {
+      "eyes": "open",
+      "brows": "neutral",
+      "mouth": "smile",
+      "pupils": "centre",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "grin": {
+      "eyes": "open",
+      "brows": "up",
+      "mouth": "grin",
+      "pupils": "centre",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "snicker": {
+      "eyes": "squint",
+      "brows": "sly",
+      "mouth": "grin",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "shock": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "O",
+      "pupils": "centre",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "fear": {
+      "eyes": "wide",
+      "brows": "worried",
+      "mouth": "grimace",
+      "pupils": "centre",
+      "blush": "none",
+      "sweat": "on",
+      "tear": "none"
+    },
+    "hold_breath": {
+      "eyes": "wide",
+      "brows": "worried",
+      "mouth": "puffed",
+      "pupils": "left",
+      "blush": "none",
+      "sweat": "on",
+      "tear": "none"
+    },
+    "smug": {
+      "eyes": "half",
+      "brows": "sly",
+      "mouth": "smile",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "wince": {
+      "eyes": "closed",
+      "brows": "worried",
+      "mouth": "grimace",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "determined": {
+      "eyes": "squint",
+      "brows": "determined",
+      "mouth": "tongue",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "sad": {
+      "eyes": "worried",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "on"
+    },
+    "busted": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "grimace",
+      "pupils": "up_right",
+      "blush": "none",
+      "sweat": "on",
+      "tear": "none"
+    },
+    "wink": {
+      "eyes": "wink",
+      "brows": "sly",
+      "mouth": "grin",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "statue": {
+      "eyes": "half",
+      "brows": "neutral",
+      "mouth": "smile",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "happy": {
+      "eyes": "happy",
+      "brows": "up",
+      "mouth": "laugh",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "laugh": {
+      "eyes": "happy",
+      "brows": "worried",
+      "mouth": "laugh",
+      "pupils": "none",
+      "blush": "on",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "worried": {
+      "eyes": "open",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "left",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "shush": {
+      "eyes": "open",
+      "brows": "up",
+      "mouth": "shh",
+      "pupils": "right",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "glance": {
+      "eyes": "open",
+      "brows": "sly",
+      "mouth": "grin",
+      "pupils": "down_left",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "proud": {
+      "eyes": "happy",
+      "brows": "up",
+      "mouth": "grin",
+      "pupils": "none",
+      "blush": "on",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "dazed": {
+      "eyes": "half",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "sneak": {
+      "eyes": "open",
+      "brows": "sly",
+      "mouth": "shh",
+      "pupils": "right",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "curious": {
+      "eyes": "open",
+      "brows": "up",
+      "mouth": "O",
+      "pupils": "up_right",
+      "blush": "none",
+      "sweat": "none",
+      "tear": "none"
+    },
+    "phew": {
+      "eyes": "closed",
+      "brows": "worried",
+      "mouth": "smile",
+      "pupils": "none",
+      "blush": "none",
+      "sweat": "on",
+      "tear": "none"
+    }
+  }
+}

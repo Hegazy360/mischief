@@ -1,0 +1,477 @@
+{
+  "version": 1,
+  "rig": "bellows",
+  "doc": "presets set every face slot they own; 'none' hides a slot, 'default' is a single-file slot. gaze = suggested pupil offset in px (pupils range [6, 4]; negative x looks at the viewer/Stalls).",
+  "presets": {
+    "neutral": {
+      "eyes": "open",
+      "brows": "neutral",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "smug": {
+      "eyes": "half",
+      "brows": "sly",
+      "mouth": "smug",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "pompous": {
+      "eyes": "half",
+      "brows": "up",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "admiring": {
+      "eyes": "half",
+      "brows": "up",
+      "mouth": "smile",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "on",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "disdain": {
+      "eyes": "half",
+      "brows": "one_up",
+      "mouth": "smug",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sing_small": {
+      "eyes": "half",
+      "brows": "up",
+      "mouth": "O_small",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "inhale": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "O_small",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sing_mid": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "O_mid",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sing_big": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "O_big",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "on",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "suspicious": {
+      "eyes": "squint",
+      "brows": "one_up",
+      "mouth": "closed",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "huh": {
+      "eyes": "open",
+      "brows": "one_up",
+      "mouth": "open",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "look_back": {
+      "eyes": "half",
+      "brows": "one_up",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "shock": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "O_mid",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "wild_take": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "scream",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "terrified": {
+      "eyes": "pinpoint",
+      "brows": "worried",
+      "mouth": "scream",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "on",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "antic": {
+      "eyes": "closed",
+      "brows": "angry",
+      "mouth": "wavy",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "irked": {
+      "eyes": "half",
+      "brows": "angry",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "furious": {
+      "eyes": "angry",
+      "brows": "angry",
+      "mouth": "grit",
+      "pupils": "default",
+      "lids": "angry",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "on",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "livid": {
+      "eyes": "angry",
+      "brows": "angry",
+      "mouth": "scream",
+      "pupils": "default",
+      "lids": "angry",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "on",
+      "steam_l": "on",
+      "steam_r": "on"
+    },
+    "lecture": {
+      "eyes": "angry",
+      "brows": "angry",
+      "mouth": "open",
+      "pupils": "default",
+      "lids": "angry",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "strain": {
+      "eyes": "squint",
+      "brows": "angry",
+      "mouth": "grit",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "on",
+      "vein": "on",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sneeze_build": {
+      "eyes": "half",
+      "brows": "worried",
+      "mouth": "O_small",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sneeze_build2": {
+      "eyes": "squint",
+      "brows": "worried",
+      "mouth": "open",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sneeze_choo": {
+      "eyes": "closed",
+      "brows": "angry",
+      "mouth": "scream",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "dazed": {
+      "eyes": "spiral",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "slow_burn": {
+      "eyes": "half",
+      "brows": "neutral",
+      "mouth": "closed",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "strained_grin": {
+      "eyes": "wide",
+      "brows": "worried",
+      "mouth": "grit",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "on",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "sulk": {
+      "eyes": "half",
+      "brows": "angry",
+      "mouth": "wavy",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "mortified": {
+      "eyes": "wide",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "on",
+      "sweat": "on",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "teary": {
+      "eyes": "teary",
+      "brows": "worried",
+      "mouth": "wavy",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "wheeze": {
+      "eyes": "half",
+      "brows": "worried",
+      "mouth": "open",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "on",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "magnified": {
+      "eyes": "balloon",
+      "brows": "up",
+      "mouth": "O_mid",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "pardon": {
+      "eyes": "open",
+      "brows": "up",
+      "mouth": "smile",
+      "pupils": "default",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "relief": {
+      "eyes": "half",
+      "brows": "up",
+      "mouth": "smile",
+      "pupils": "default",
+      "lids": "half",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "asleep": {
+      "eyes": "closed",
+      "brows": "neutral",
+      "mouth": "O_small",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "none",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    },
+    "blissful": {
+      "eyes": "closed",
+      "brows": "up",
+      "mouth": "smile",
+      "pupils": "none",
+      "lids": "none",
+      "blush": "on",
+      "sweat": "none",
+      "vein": "none",
+      "steam_l": "none",
+      "steam_r": "none"
+    }
+  },
+  "gaze": {
+    "pompous": [
+      2,
+      -1
+    ],
+    "disdain": [
+      3,
+      2
+    ],
+    "inhale": [
+      0,
+      -2
+    ],
+    "huh": [
+      4,
+      0
+    ],
+    "look_back": [
+      -6,
+      0
+    ],
+    "sneeze_build": [
+      0,
+      -3
+    ],
+    "slow_burn": [
+      -5,
+      2
+    ],
+    "sulk": [
+      0,
+      3
+    ],
+    "pardon": [
+      -3,
+      0
+    ]
+  }
+}

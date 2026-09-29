@@ -1,0 +1,27 @@
+{
+ "version": 1,
+ "clip": "_mannequin/seam",
+ "rig": "_mannequin",
+ "loop": true,
+ "layer": "base",
+ "mask": null,
+ "length": 60,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 30,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "m_crouch",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

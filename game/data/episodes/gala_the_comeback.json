@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "id": "gala_the_comeback",
+  "act": 4,
+  "index": 11,
+  "title": "The Comeback",
+  "status": "draft",
+  "seed": 111,
+  "rooms": [
+    "porch",
+    "hall",
+    "parlour",
+    "kitchen",
+    "conservatory",
+    "garden",
+    "landing",
+    "bathroom",
+    "bedroom",
+    "dressing"
+  ],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false, "max_minutes": 8},
+  "new_rule": "spotlight",
+  "card": {"text": "It's his comeback concert. Give the street the show they deserve.", "icon": "spotlight"},
+  "cold_open": {
+    "clip": "cold/gala_the_comeback",
+    "len_s": 5,
+    "desc": "The street arrives with deckchairs; he booms 'PIPE DOWN!' at his own audience."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [
+      {"a": "warmup"},
+      {"a": "host_tea"},
+      {"a": "feed_beryl"},
+      {"a": "stroll"},
+      {"a": "rehearse"},
+      {"a": "mirror"}
+    ]
+  },
+  "cast": {
+    "beryl": {
+      "start": {"room": "conservatory", "x": 4360},
+      "mood": "grazing",
+      "lane": [3950, 5650],
+      "lane_speed": 70,
+      "lane_pause_s": 3,
+      "doze": {"station_x": 4360, "every_s": 60, "for_s": 20},
+      "wake_noise_px": 300,
+      "besotted_s": 20,
+      "follow_px": 150,
+      "bleat_every_s": 6,
+      "bend_px": 300,
+      "paw_s": 0.6
+    },
+    "delphine": {
+      "arrive": "start",
+      "start": {"room": "parlour", "x": 2620},
+      "loop": [
+        {"do": "tea", "station": "st_chaise", "while": "host_tea"},
+        {"do": "sing", "station": "st_piano", "while": "piano"},
+        {"do": "powder_nose", "room": "bathroom", "x": 1930, "dur_s": 15},
+        {"do": "tea", "station": "st_chaise"}
+      ],
+      "glasses": {"every_s": 12, "lift_s": 1.0, "look_s": 3.0, "moving_px": 600, "frozen_px": 250},
+      "spot_fill_s": 1.0
+    }
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "spotlight",
+      "kind": "prank",
+      "prank": "spotlight_stealer",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows steals the spotlight",
+      "hint": {"item": null, "container": null, "rig_point": "garden_spotlight", "when": "rehearse"}
+    },
+    {
+      "id": "penny",
+      "kind": "prank",
+      "prank": "penny_pincher",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows pinches a penny too far",
+      "hint": {
+        "item": "coins",
+        "container": "hall_piggy_bank",
+        "rig_point": "garden_coin_1",
+        "when": "stroll",
+        "also": [
+          {"item": "coins", "container": null, "rig_point": "garden_coin_2"},
+          {"item": "coins", "container": null, "rig_point": "garden_coin_3"}
+        ]
+      }
+    },
+    {
+      "id": "spray",
+      "kind": "prank",
+      "prank": "spit_take",
+      "req": true,
+      "big_number": false,
+      "text": "Delphine gives him a spray",
+      "hint": {
+        "item": "salt",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "parlour_tea_tray",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "mirror",
+      "kind": "prank",
+      "prank": "mirror_mirror",
+      "req": true,
+      "big_number": false,
+      "text": "Be his reflection",
+      "hint": {"item": null, "container": null, "rig_point": "hall_mirror", "when": "mirror"}
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows gets in a spin",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_gramophone", "when": "warmup"}
+    },
+    {
+      "id": "beehive",
+      "kind": "prank",
+      "prank": "fan_mail",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows blows her beehive back",
+      "hint": {
+        "item": "feathers",
+        "container": "conservatory_potting_bench",
+        "rig_point": "parlour_fan",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "bn",
+      "kind": "double_act",
+      "double_act": "curtain_call",
+      "req": false,
+      "big_number": true,
+      "text": "Take a bow, Bellows",
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": "garden_spotlight",
+        "when": "rehearse",
+        "also": [{"item": "apple", "container": "conservatory_potting_bench", "rig_point": null, "lead": "beryl"}]
+      },
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["spotlight_stealer"]
+    }
+  ],
+  "director": null,
+  "encores": []
+}

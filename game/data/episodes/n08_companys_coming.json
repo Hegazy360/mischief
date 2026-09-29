@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "id": "n08_companys_coming",
+  "act": 3,
+  "index": 8,
+  "title": "Company's Coming",
+  "status": "draft",
+  "seed": 108,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "conservatory", "garden", "landing", "bathroom", "bedroom"],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "delphine",
+  "card": {
+    "text": "Dame Delphine sees nothing without her opera glasses. Prank him in front of her: he's EMBARRASSED, and the Stalls love it.",
+    "icon": "delphine"
+  },
+  "cold_open": {
+    "clip": "cold/n08_companys_coming",
+    "len_s": 5,
+    "desc": "He rehearses his bow to a cardboard cut-out of Delphine, then hides it as the doorbell rings."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "hall", "x": 952},
+    "loop": [
+      {"a": "mirror"},
+      {"a": "answer_door", "first_loop_only": true},
+      {"a": "host_tea"},
+      {"a": "piano"},
+      {"a": "tea"},
+      {"a": "mirror"}
+    ]
+  },
+  "cast": {
+    "beryl": null,
+    "delphine": {
+      "arrive": {"activity": "answer_door", "first_loop_only": true},
+      "start": {"room": "parlour", "x": 2620},
+      "loop": [
+        {"do": "tea", "station": "st_chaise", "while": "host_tea"},
+        {"do": "sing", "station": "st_piano", "while": "piano"},
+        {"do": "powder_nose", "room": "bathroom", "x": 1930, "dur_s": 15},
+        {"do": "tea", "station": "st_chaise"}
+      ],
+      "glasses": {"every_s": 12, "lift_s": 1.0, "look_s": 3.0, "moving_px": 600, "frozen_px": 250},
+      "spot_fill_s": 1.0
+    }
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "spray",
+      "kind": "prank",
+      "prank": "spit_take",
+      "req": true,
+      "big_number": false,
+      "text": "Delphine gives him a spray",
+      "hint": {
+        "item": "salt",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "parlour_tea_tray",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "beehive",
+      "kind": "prank",
+      "prank": "fan_mail",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows blows her beehive back",
+      "hint": {
+        "item": "feathers",
+        "container": "conservatory_potting_bench",
+        "rig_point": "parlour_fan",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "embarrass",
+      "kind": "witness",
+      "req": true,
+      "big_number": false,
+      "text": "Embarrass him in front of her twice",
+      "count": 2,
+      "hint": {
+        "item": "salt",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "parlour_tea_tray",
+        "when": "host_tea",
+        "tip": "prank_in_front_of_her"
+      }
+    },
+    {
+      "id": "ghost",
+      "kind": "prank",
+      "prank": "bellows_blows",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows turns into a ghost",
+      "hint": {"item": "flour", "container": "kitchen_pantry_shelf", "rig_point": "parlour_bellows", "when": "fire"},
+      "via": "SOAKED"
+    },
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"}
+    },
+    {
+      "id": "bn",
+      "kind": "combo_witnessed",
+      "req": false,
+      "big_number": true,
+      "text": "Make DOUGH of him in front of her",
+      "combo": "dough_man",
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["spit_take", "bellows_blows"],
+      "hint": {
+        "item": "salt",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "parlour_tea_tray",
+        "when": "host_tea",
+        "also": [
+          {
+            "item": "flour",
+            "container": "kitchen_pantry_shelf",
+            "rig_point": "parlour_bellows",
+            "note": "the DRY fix-up"
+          }
+        ],
+        "lines": ["spray", "ghost"],
+        "tip": "soak_then_flour"
+      }
+    }
+  ],
+  "director": null,
+  "encores": []
+}

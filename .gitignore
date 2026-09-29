@@ -20,3 +20,6 @@ game/android/
 *.p12
 *.mobileprovision
 *.p8
+# python
+__pycache__/
+*.pyc

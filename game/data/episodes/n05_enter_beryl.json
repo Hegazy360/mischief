@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "id": "n05_enter_beryl",
+  "act": 2,
+  "index": 5,
+  "title": "Enter Beryl",
+  "status": "draft",
+  "seed": 105,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "conservatory", "garden"],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "beryl",
+  "card": {
+    "text": "Beryl headbutts anyone who bends over near her. Anyone. Feed her an apple and she'll follow you.",
+    "icon": "beryl"
+  },
+  "cold_open": {
+    "clip": "cold/n05_enter_beryl",
+    "len_s": 5,
+    "desc": "He hoses Hush's chalk mime drawings off the pavement, then hoses Hush (she mimes an umbrella)."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "conservatory", "x": 4090},
+    "loop": [{"a": "feed_beryl"}, {"a": "roses"}, {"a": "marrow"}, {"a": "stroll"}, {"a": "tea"}]
+  },
+  "cast": {
+    "beryl": {
+      "start": {"room": "conservatory", "x": 4360},
+      "mood": "grazing",
+      "lane": [3950, 5650],
+      "lane_speed": 70,
+      "lane_pause_s": 3,
+      "doze": {"station_x": 4360, "every_s": 60, "for_s": 20},
+      "wake_noise_px": 300,
+      "besotted_s": 20,
+      "follow_px": 150,
+      "bleat_every_s": 6,
+      "bend_px": 300,
+      "paw_s": 0.6
+    },
+    "delphine": null
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "hose",
+      "kind": "prank",
+      "prank": "hosed",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows peers down a hose",
+      "hint": {
+        "item": "apple",
+        "container": "conservatory_potting_bench",
+        "rig_point": "garden_hose",
+        "when": "roses"
+      }
+    },
+    {
+      "id": "marrow",
+      "kind": "prank",
+      "prank": "marrow_escape",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows's marrow flies away",
+      "hint": {
+        "item": "balloon",
+        "container": "hall_confiscated_box",
+        "rig_point": "garden_marrow",
+        "when": "marrow"
+      }
+    },
+    {
+      "id": "penny",
+      "kind": "prank",
+      "prank": "penny_pincher",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows pinches a penny too far",
+      "hint": {
+        "item": "coins",
+        "container": "hall_piggy_bank",
+        "rig_point": "garden_coin_1",
+        "when": "stroll",
+        "also": [
+          {"item": "coins", "container": null, "rig_point": "garden_coin_2"},
+          {"item": "coins", "container": null, "rig_point": "garden_coin_3"}
+        ]
+      }
+    },
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"}
+    },
+    {
+      "id": "bn",
+      "kind": "double_act",
+      "double_act": "marrow_mayhem",
+      "req": false,
+      "big_number": true,
+      "text": "Chase the marrow into the goat",
+      "hint": {
+        "item": "balloon",
+        "container": "hall_confiscated_box",
+        "rig_point": "garden_marrow",
+        "when": "marrow",
+        "also": [{"item": "apple", "container": "conservatory_potting_bench", "rig_point": null, "lead": "beryl"}]
+      },
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["marrow_escape"]
+    }
+  ],
+  "director": null,
+  "encores": []
+}

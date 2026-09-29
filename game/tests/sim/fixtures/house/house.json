@@ -1,0 +1,587 @@
+{
+  "version": 1,
+  "id": "fx_house",
+  "floor_pitch": 700,
+  "interior_h": 640,
+  "slab_h": 60,
+  "floors": [
+    {
+      "index": 0,
+      "y": 0
+    },
+    {
+      "index": 1,
+      "y": -700
+    }
+  ],
+  "rooms": [
+    {
+      "id": "porch",
+      "floor": 0,
+      "x0": 0,
+      "x1": 500,
+      "outdoor": true,
+      "wallpaper": "#8FA37E",
+      "art": {}
+    },
+    {
+      "id": "hall",
+      "floor": 0,
+      "x0": 500,
+      "x1": 1500,
+      "outdoor": false,
+      "wallpaper": "#A9B79A",
+      "art": {}
+    },
+    {
+      "id": "parlour",
+      "floor": 0,
+      "x0": 1500,
+      "x1": 2800,
+      "outdoor": false,
+      "wallpaper": "#C9A0A0",
+      "art": {}
+    },
+    {
+      "id": "kitchen",
+      "floor": 0,
+      "x0": 2800,
+      "x1": 3900,
+      "outdoor": false,
+      "wallpaper": "#E8D9A8",
+      "art": {}
+    },
+    {
+      "id": "landing",
+      "floor": 1,
+      "x0": 1000,
+      "x1": 1800,
+      "outdoor": false,
+      "wallpaper": "#9FB2C8",
+      "art": {}
+    }
+  ],
+  "links": [
+    {
+      "id": "front_door",
+      "kind": "door",
+      "a": "porch",
+      "b": "hall",
+      "x": 500
+    },
+    {
+      "id": "hall_parlour",
+      "kind": "doorway",
+      "a": "hall",
+      "b": "parlour",
+      "x": 1500
+    },
+    {
+      "id": "parlour_kitchen",
+      "kind": "doorway",
+      "a": "parlour",
+      "b": "kitchen",
+      "x": 2800
+    },
+    {
+      "id": "stairs",
+      "kind": "stairs",
+      "a": "hall",
+      "ax": 1450,
+      "b": "landing",
+      "bx": 1050,
+      "hush_s": 1.0,
+      "bellows_s": 1.8
+    }
+  ],
+  "stations": [
+    {
+      "id": "st_phone",
+      "room": "hall",
+      "x": 980,
+      "stand_x": 960,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_hall_mirror",
+      "room": "hall",
+      "x": 1160,
+      "stand_x": 1080,
+      "facing": 1,
+      "kinds": [
+        "MIRROR"
+      ],
+      "frame_x": 1240
+    },
+    {
+      "id": "st_clock",
+      "room": "hall",
+      "x": 1340,
+      "stand_x": 1300,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_gramophone",
+      "room": "parlour",
+      "x": 1640,
+      "stand_x": 1700,
+      "facing": -1,
+      "kinds": []
+    },
+    {
+      "id": "st_recliner",
+      "room": "parlour",
+      "x": 2080,
+      "stand_x": 2080,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_parlour_centre",
+      "room": "parlour",
+      "x": 2150,
+      "stand_x": 2150,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_fireplace",
+      "room": "parlour",
+      "x": 2330,
+      "stand_x": 2300,
+      "facing": 1,
+      "kinds": [
+        "DRY"
+      ]
+    },
+    {
+      "id": "st_tea",
+      "room": "kitchen",
+      "x": 2960,
+      "stand_x": 2900,
+      "facing": 1,
+      "kinds": [
+        "HONEY"
+      ]
+    },
+    {
+      "id": "st_pickles",
+      "room": "kitchen",
+      "x": 3130,
+      "stand_x": 3130,
+      "facing": 1,
+      "kinds": []
+    },
+    {
+      "id": "st_sink",
+      "room": "kitchen",
+      "x": 3800,
+      "stand_x": 3740,
+      "facing": 1,
+      "kinds": [
+        "SINK"
+      ]
+    },
+    {
+      "id": "st_radiator",
+      "room": "landing",
+      "x": 1450,
+      "stand_x": 1420,
+      "facing": 1,
+      "kinds": [
+        "DRY"
+      ]
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hall_front_door",
+      "kind": "exit",
+      "room": "hall",
+      "use_x": 560,
+      "rect": [
+        510,
+        -300,
+        150,
+        300
+      ]
+    },
+    {
+      "id": "hall_coat_cupboard",
+      "kind": "hiding",
+      "room": "hall",
+      "use_x": 700,
+      "rect": [
+        630,
+        -300,
+        150,
+        300
+      ],
+      "in_use_by": null
+    },
+    {
+      "id": "hall_confiscated_box",
+      "kind": "container",
+      "room": "hall",
+      "use_x": 830,
+      "facing": 1,
+      "rect": [
+        760,
+        -230,
+        150,
+        230
+      ]
+    },
+    {
+      "id": "hall_phone",
+      "kind": "rig_point",
+      "room": "hall",
+      "use_x": 980,
+      "rect": [
+        910,
+        -260,
+        150,
+        260
+      ],
+      "station": "st_phone"
+    },
+    {
+      "id": "hall_mirror",
+      "kind": "rig_point",
+      "room": "hall",
+      "use_x": 1240,
+      "rect": [
+        1170,
+        -330,
+        150,
+        330
+      ],
+      "station": "st_hall_mirror"
+    },
+    {
+      "id": "hall_clock",
+      "kind": "rig_point",
+      "room": "hall",
+      "use_x": 1340,
+      "rect": [
+        1270,
+        -600,
+        150,
+        250
+      ],
+      "station": "st_clock"
+    },
+    {
+      "id": "hall_clock_case",
+      "kind": "hiding",
+      "room": "hall",
+      "use_x": 1340,
+      "rect": [
+        1270,
+        -326,
+        150,
+        326
+      ],
+      "in_use_by": "clock"
+    },
+    {
+      "id": "stairs_foot",
+      "kind": "stairs",
+      "link": "stairs",
+      "room": "hall",
+      "use_x": 1450,
+      "rect": [
+        1380,
+        -250,
+        150,
+        250
+      ]
+    },
+    {
+      "id": "stairs_rods",
+      "kind": "rig_point",
+      "room": "hall",
+      "use_x": 1450,
+      "rect": [
+        1380,
+        -520,
+        150,
+        246
+      ]
+    },
+    {
+      "id": "parlour_gramophone",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 1640,
+      "facing": -1,
+      "rect": [
+        1570,
+        -300,
+        150,
+        300
+      ],
+      "station": "st_gramophone"
+    },
+    {
+      "id": "parlour_piano_back",
+      "kind": "hiding",
+      "room": "parlour",
+      "use_x": 1840,
+      "rect": [
+        1770,
+        -300,
+        150,
+        300
+      ],
+      "in_use_by": null
+    },
+    {
+      "id": "parlour_recliner",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 2020,
+      "facing": 1,
+      "rect": [
+        1950,
+        -260,
+        150,
+        260
+      ],
+      "station": "st_recliner"
+    },
+    {
+      "id": "parlour_newspaper",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 2140,
+      "facing": 1,
+      "rect": [
+        2070,
+        -520,
+        150,
+        236
+      ],
+      "station": "st_recliner"
+    },
+    {
+      "id": "parlour_bellows",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 2330,
+      "rect": [
+        2260,
+        -250,
+        150,
+        250
+      ],
+      "station": "st_fireplace"
+    },
+    {
+      "id": "parlour_chandelier",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 2400,
+      "rect": [
+        2330,
+        -620,
+        150,
+        200
+      ]
+    },
+    {
+      "id": "parlour_fan",
+      "kind": "rig_point",
+      "room": "parlour",
+      "use_x": 2600,
+      "rect": [
+        2530,
+        -260,
+        150,
+        260
+      ]
+    },
+    {
+      "id": "kitchen_kettle",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 2930,
+      "rect": [
+        2860,
+        -520,
+        150,
+        200
+      ],
+      "station": "st_tea"
+    },
+    {
+      "id": "kitchen_honey",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 2990,
+      "rect": [
+        2920,
+        -296,
+        150,
+        296
+      ],
+      "station": "st_tea"
+    },
+    {
+      "id": "kitchen_pickle_jar",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 3130,
+      "rect": [
+        3060,
+        -300,
+        150,
+        300
+      ],
+      "station": "st_pickles"
+    },
+    {
+      "id": "kitchen_fridge",
+      "kind": "container",
+      "room": "kitchen",
+      "use_x": 3300,
+      "rect": [
+        3230,
+        -300,
+        150,
+        300
+      ]
+    },
+    {
+      "id": "kitchen_fridge_shelf",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 3300,
+      "rect": [
+        3230,
+        -570,
+        150,
+        246
+      ]
+    },
+    {
+      "id": "kitchen_table",
+      "kind": "hiding",
+      "room": "kitchen",
+      "use_x": 3470,
+      "rect": [
+        3400,
+        -200,
+        150,
+        200
+      ],
+      "in_use_by": null
+    },
+    {
+      "id": "kitchen_pantry_shelf",
+      "kind": "container",
+      "room": "kitchen",
+      "use_x": 3640,
+      "rect": [
+        3570,
+        -570,
+        150,
+        246
+      ]
+    },
+    {
+      "id": "kitchen_pantry_curtain",
+      "kind": "hiding",
+      "room": "kitchen",
+      "use_x": 3640,
+      "rect": [
+        3570,
+        -300,
+        150,
+        300
+      ],
+      "in_use_by": null
+    },
+    {
+      "id": "kitchen_sink_tap",
+      "kind": "rig_point",
+      "room": "kitchen",
+      "use_x": 3800,
+      "rect": [
+        3730,
+        -300,
+        150,
+        300
+      ],
+      "station": "st_sink"
+    },
+    {
+      "id": "stairs_head",
+      "kind": "stairs",
+      "link": "stairs",
+      "room": "landing",
+      "use_x": 1050,
+      "rect": [
+        980,
+        -250,
+        150,
+        250
+      ]
+    },
+    {
+      "id": "landing_airing_cupboard",
+      "kind": "hiding",
+      "room": "landing",
+      "use_x": 1250,
+      "rect": [
+        1180,
+        -300,
+        150,
+        300
+      ],
+      "in_use_by": null
+    },
+    {
+      "id": "landing_boiler_valve",
+      "kind": "rig_point",
+      "room": "landing",
+      "use_x": 1250,
+      "rect": [
+        1180,
+        -570,
+        150,
+        246
+      ],
+      "station": "st_radiator"
+    }
+  ],
+  "landings": {
+    "kitchen": {
+      "sink": 3760,
+      "table": 3470
+    },
+    "parlour": {
+      "log_basket": 2400
+    }
+  },
+  "quake_props": {
+    "parlour": [
+      {
+        "prop": "picture_frame",
+        "x": 2150
+      }
+    ]
+  },
+  "entries": {
+    "window": {
+      "room": "kitchen",
+      "x": 3800
+    },
+    "doorstep": {
+      "room": "porch",
+      "x": 350
+    }
+  }
+}

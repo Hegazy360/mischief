@@ -1,0 +1,10 @@
+{"version": 1,
+ "archetypes": {
+  "mq_take": {"clip": "_mannequin/rx_take", "frames": 90,
+              "marks": {"antic": 18, "accent": 30, "hold": [33, 69], "release": 90}, "t3_prop_f": 50, "cam": {"zoom": 1.3, "hitstop": 5}},
+  "mq_launch": {"clip": "_mannequin/rx_launch", "frames": 100,
+                "marks": {"antic": 14, "accent": 27, "hold": [30, 72], "release": 100}, "t3_prop_f": 47, "cam": {"zoom": 1.2, "hitstop": 4}},
+  "mq_land": {"clip": "_mannequin/rx_land", "frames": 80,
+              "marks": {"antic": 0, "accent": 10, "hold": [23, 60], "release": 80}, "t3_prop_f": 30, "cam": {"zoom": 1.25, "hitstop": 6}},
+  "suppressed": {"clip": "_mannequin/beat_suppressed", "frames": 60}},
+ "t3_last_beats": ["_mannequin/beat_slow_burn"]}

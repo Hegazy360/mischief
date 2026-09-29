@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "id": "mock_ep",
+  "act": 1,
+  "index": 1,
+  "title": "Mock Night",
+  "status": "final",
+  "seed": 7,
+  "rooms": [
+    "hall",
+    "parlour",
+    "kitchen"
+  ],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 1.0,
+    "tomatoes": -1,
+    "cant_fail": false,
+    "nerves": false
+  },
+  "new_rule": "items",
+  "card": {
+    "text": "Carry things. Do the Script, then bow.",
+    "icon": "tray"
+  },
+  "hush": {
+    "start": {
+      "room": "kitchen",
+      "x": 3800
+    }
+  },
+  "bellows": {
+    "start": {
+      "room": "parlour",
+      "x": 1700
+    },
+    "loop": [
+      {
+        "a": "warmup"
+      },
+      {
+        "a": "tea"
+      },
+      {
+        "a": "rinse"
+      }
+    ]
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "kettle",
+      "kind": "prank",
+      "prank": "kettle_drum",
+      "req": true,
+      "text": "Bellows sings a duet with his kettle"
+    },
+    {
+      "id": "tap",
+      "kind": "prank",
+      "prank": "tap_dance",
+      "req": true,
+      "text": "Bellows gets a face wash"
+    },
+    {
+      "id": "bn",
+      "kind": "double_act",
+      "double_act": "hot_and_cold",
+      "big_number": true,
+      "req": false,
+      "text": "Sneeze him into the sink"
+    },
+    {
+      "id": "bn2",
+      "kind": "double_act",
+      "double_act": "hot_and_cold",
+      "big_number": true,
+      "req": false,
+      "text": "Sneeze him into the sink"
+    }
+  ],
+  "director": null,
+  "encores": []
+}

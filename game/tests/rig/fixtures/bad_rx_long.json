@@ -1,0 +1,70 @@
+{
+ "version": 1,
+ "clip": "_mannequin/rx_long",
+ "rig": "_mannequin",
+ "loop": false,
+ "layer": "base",
+ "mask": null,
+ "beats": {
+  "anticipation": [
+   10,
+   20
+  ],
+  "accent": [
+   20,
+   23
+  ],
+  "hold": [
+   23,
+   60
+  ],
+  "settle": [
+   60,
+   300
+  ]
+ },
+ "length": 300,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 10,
+   "pose": "m_notice",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 19,
+   "pose": "m_take_antic",
+   "ease": "out_cubic"
+  },
+  {
+   "f": 20,
+   "pose": "m_take_accent",
+   "ease": "pop"
+  },
+  {
+   "f": 23,
+   "pose": "m_take_accent_b",
+   "ease": "out_quad"
+  },
+  {
+   "f": 60,
+   "pose": "m_take_hold",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 72,
+   "pose": "m_take_settle",
+   "ease": "out_back"
+  },
+  {
+   "f": 300,
+   "pose": "m_take_settle_b",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

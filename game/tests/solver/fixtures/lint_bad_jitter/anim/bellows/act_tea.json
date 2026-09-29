@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "clip": "bellows/act_tea",
+  "rig": "bellows",
+  "loop": true,
+  "length": 60,
+  "keys": [],
+  "events": [],
+  "variation": {
+    "time_jitter": 0.3
+  }
+}

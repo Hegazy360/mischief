@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "idle": "hush/loco_idle",
+  "walk": {"clip": "hush/loco_walk", "stride_px": 67, "speed_px_s": 400},
+  "run": {"clip": "hush/loco_run", "stride_px": 120, "speed_px_s": 720},
+  "state:stairs": "hush/loco_stairs",
+  "state:door": "hush/loco_door",
+  "state:rummage": "hush/act_rummage",
+  "state:pick_window": "hush/act_rummage",
+  "state:rigging": "hush/act_tinker_q",
+  "state:diving": "hush/act_dive",
+  "state:hidden": "",
+  "state:popping": "hush/act_pop",
+  "state:squeaking": "hush/act_squeak",
+  "state:caught": "hush/st_busted",
+  "state:bowing": "hush/act_bow",
+  "reaction_fallback": "",
+  "freeze": ["hush/freeze_1", "hush/freeze_2", "hush/freeze_3", "hush/freeze_4",
+             "hush/freeze_5", "hush/freeze_6", "hush/freeze_7", "hush/freeze_8"],
+  "stand_in": "_mannequin"
+}

@@ -1,0 +1,66 @@
+{
+ "version": 1,
+ "clip": "_mannequin/loco_idle",
+ "rig": "_mannequin",
+ "loop": true,
+ "length": 240,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 8,
+ "blend_out": 8,
+ "tags": [
+  "idle"
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 100,
+   "pose": "m_idle_shift",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 130,
+   "pose": "m_idle_look",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 175,
+   "pose": "m_idle_look_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 205,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 240,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 130,
+   "type": "voice",
+   "bank": "vo_mannequin_hmm"
+  }
+ ],
+ "variation": {
+  "time_jitter": 0.06,
+  "rot_jitter": 1.5
+ },
+ "smear": {
+  "auto": false
+ },
+ "plant": true
+}

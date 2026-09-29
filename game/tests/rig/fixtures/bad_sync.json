@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "clip": "_mannequin/sync",
+ "rig": "_mannequin",
+ "loop": false,
+ "layer": "base",
+ "mask": null,
+ "events": [
+  {
+   "f": 10,
+   "type": "sfx",
+   "id": "bonk"
+  },
+  {
+   "f": 30,
+   "type": "face",
+   "preset": "shock"
+  }
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 20,
+   "pose": "m_stand_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 40,
+   "pose": "m_stand",
+   "ease": "in_out_sine"
+  }
+ ],
+ "length": 40
+}

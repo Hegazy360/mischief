@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "id": "n10_it_takes_two",
+  "act": 3,
+  "index": 10,
+  "title": "It Takes Two",
+  "status": "draft",
+  "seed": 110,
+  "rooms": [
+    "porch",
+    "hall",
+    "parlour",
+    "kitchen",
+    "conservatory",
+    "garden",
+    "landing",
+    "bathroom",
+    "bedroom",
+    "dressing"
+  ],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": true, "nerves_temper": 20},
+  "new_rule": "nerves",
+  "card": {
+    "text": "Opening-night nerves: he starts every loop already irked. Chains come easy, and so do his specs.",
+    "icon": "nerves"
+  },
+  "cold_open": {
+    "clip": "cold/n10_it_takes_two",
+    "len_s": 5,
+    "desc": "He rehearses his comeback aria; windows crack all down the street."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [{"a": "warmup"}, {"a": "host_tea"}, {"a": "tango"}, {"a": "bath"}, {"a": "cloak"}]
+  },
+  "cast": {
+    "beryl": null,
+    "delphine": {
+      "arrive": "start",
+      "start": {"room": "parlour", "x": 2620},
+      "loop": [
+        {"do": "tea", "station": "st_chaise", "while": "host_tea"},
+        {"do": "sing", "station": "st_piano", "while": "piano"},
+        {"do": "powder_nose", "room": "bathroom", "x": 1930, "dur_s": 15},
+        {"do": "tea", "station": "st_chaise"}
+      ],
+      "glasses": {"every_s": 12, "lift_s": 1.0, "look_s": 3.0, "moving_px": 600, "frozen_px": 250},
+      "spot_fill_s": 1.0
+    }
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "trousers",
+      "kind": "prank",
+      "prank": "it_takes_two",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows splits his trousers",
+      "hint": {
+        "item": "record",
+        "container": "dressing_costume_trunk",
+        "rig_point": "parlour_gramophone",
+        "when": "tango"
+      }
+    },
+    {
+      "id": "beehive",
+      "kind": "prank",
+      "prank": "fan_mail",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows blows her beehive back",
+      "hint": {
+        "item": "feathers",
+        "container": "conservatory_potting_bench",
+        "rig_point": "parlour_fan",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "tantrums",
+      "kind": "meltdown",
+      "req": true,
+      "big_number": false,
+      "text": "Two tantrums in one Night",
+      "count": 2,
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": null,
+        "when": null,
+        "lines": ["trousers", "beehive", "float", "tutu"],
+        "tip": "chain"
+      }
+    },
+    {
+      "id": "float",
+      "kind": "prank",
+      "prank": "in_over_his_head",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows floats away",
+      "hint": {
+        "item": "bubble_bath",
+        "container": "bathroom_cabinet",
+        "rig_point": "bathroom_bath_taps",
+        "when": "bath",
+        "also": [{"item": "sherbet", "container": "kitchen_pantry_shelf", "rig_point": "bathroom_bath_taps"}]
+      }
+    },
+    {
+      "id": "tutu",
+      "kind": "prank",
+      "prank": "tutu_much",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows wears a tutu",
+      "hint": {
+        "item": "tutu",
+        "container": "dressing_costume_trunk",
+        "rig_point": "dressing_dummy",
+        "when": "cloak"
+      }
+    },
+    {
+      "id": "bn",
+      "kind": "chain",
+      "req": false,
+      "big_number": true,
+      "text": "Land four in one Running Gag",
+      "link": 4,
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["it_takes_two", "fan_mail", "in_over_his_head", "tutu_much"],
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": null,
+        "when": null,
+        "lines": ["beehive", "trousers", "float", "tutu"],
+        "tip": "chain"
+      }
+    }
+  ],
+  "director": null,
+  "encores": []
+}

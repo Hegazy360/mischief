@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "activities": {
+    "warmup": {
+      "station": "st_gramophone",
+      "dur_s": 10,
+      "facing": -1,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_warmup",
+      "panto": true,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_warmup",
+      "icon": "res://art/icons/activities/warmup.svg"
+    },
+    "tea": {
+      "station": "st_tea",
+      "dur_s": 10,
+      "facing": 1,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_tea",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_tea",
+      "icon": "res://art/icons/activities/tea.svg"
+    },
+    "pickles": {
+      "station": "st_pickles",
+      "dur_s": 6,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_pickles",
+      "icon": "res://art/icons/activities/pickles.svg"
+    },
+    "rinse": {
+      "station": "st_sink",
+      "dur_s": 5,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_rinse",
+      "icon": "res://art/icons/activities/rinse.svg"
+    },
+    "paper": {
+      "station": "st_recliner",
+      "dur_s": 12,
+      "facing": 0,
+      "specs": true,
+      "awareness": "normal",
+      "squeak_bit": "bit_paper",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_paper",
+      "icon": "res://art/icons/activities/paper.svg"
+    },
+    "fire": {
+      "station": "st_fireplace",
+      "dur_s": 6,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_fire",
+      "icon": "res://art/icons/activities/fire.svg"
+    },
+    "mirror": {
+      "station": "st_hall_mirror",
+      "dur_s": 6,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_mirror",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_mirror",
+      "icon": "res://art/icons/activities/mirror.svg"
+    },
+    "phone": {
+      "station": "st_phone",
+      "dur_s": 8,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_phone",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_phone",
+      "icon": "res://art/icons/activities/phone.svg"
+    },
+    "clock": {
+      "station": "st_clock",
+      "dur_s": 5,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": "hall_clock_case",
+      "clip": "bellows/act_clock",
+      "icon": "res://art/icons/activities/clock.svg"
+    },
+    "radiator": {
+      "station": "st_radiator",
+      "dur_s": 5,
+      "facing": 0,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_radiator",
+      "icon": "res://art/icons/activities/radiator.svg"
+    },
+    "hunt": {
+      "station": "st_parlour_centre",
+      "dur_s": 6,
+      "facing": 0,
+      "specs": true,
+      "awareness": "searching",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_hunt",
+      "icon": "res://art/icons/activities/hunt.svg"
+    },
+    "nap": {
+      "station": "st_recliner",
+      "dur_s": 18,
+      "facing": 0,
+      "specs": false,
+      "awareness": "asleep",
+      "squeak_bit": "bit_nap",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_nap",
+      "icon": "res://art/icons/activities/nap.svg",
+      "bar": "sleep"
+    },
+    "bath": {
+      "station": "st_sink",
+      "dur_s": 24,
+      "facing": 0,
+      "specs": false,
+      "awareness": "absorbed",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_bath",
+      "icon": "res://art/icons/activities/bath.svg",
+      "bar": "bath"
+    },
+    "cloak": {
+      "station": "st_parlour_centre",
+      "dur_s": 6,
+      "facing": 0,
+      "specs": false,
+      "awareness": "blind",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_cloak",
+      "icon": "res://art/icons/activities/cloak.svg"
+    },
+    "fixup_dry": {
+      "station": null,
+      "dur_s": 4,
+      "clip": "bellows/fixup_dry",
+      "icon": "res://art/icons/activities/fixup_dry.svg"
+    },
+    "fixup_sink": {
+      "station": null,
+      "dur_s": 4,
+      "clip": "bellows/fixup_sink",
+      "icon": "res://art/icons/activities/fixup_sink.svg"
+    },
+    "fixup_honey": {
+      "station": null,
+      "dur_s": 4,
+      "clip": "bellows/fixup_honey",
+      "icon": "res://art/icons/activities/fixup_honey.svg"
+    },
+    "fixup_mirror": {
+      "station": null,
+      "dur_s": 4,
+      "clip": "bellows/fixup_mirror",
+      "icon": "res://art/icons/activities/fixup_mirror.svg"
+    },
+    "curious": {
+      "station": null,
+      "dur_s": 3,
+      "clip": "bellows/st_look",
+      "icon": "res://art/icons/activities/curious.svg"
+    },
+    "search": {
+      "station": null,
+      "dur_s": 6,
+      "clip": "bellows/st_search",
+      "icon": "res://art/icons/activities/search.svg"
+    }
+  },
+  "squeak_bits": {
+    "bit_warmup": {
+      "clip": "bellows/bit_warmup",
+      "len_f": 90
+    },
+    "bit_tea": {
+      "clip": "bellows/bit_tea",
+      "len_f": 60
+    },
+    "bit_paper": {
+      "clip": "bellows/bit_paper",
+      "len_f": 72
+    },
+    "bit_mirror": {
+      "clip": "bellows/bit_mirror",
+      "len_f": 60
+    },
+    "bit_phone": {
+      "clip": "bellows/bit_phone",
+      "len_f": 90
+    },
+    "bit_nap": {
+      "clip": "bellows/bit_nap",
+      "len_f": 60
+    }
+  }
+}

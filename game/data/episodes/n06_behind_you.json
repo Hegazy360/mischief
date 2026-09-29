@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "id": "n06_behind_you",
+  "act": 2,
+  "index": 6,
+  "title": "Behind You!",
+  "status": "draft",
+  "seed": 106,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "conservatory", "garden"],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "panto",
+  "card": {
+    "text": "Squeak behind his back, then FREEZE before he turns. Survive three rounds and the Stalls go wild.",
+    "icon": "panto"
+  },
+  "cold_open": {
+    "clip": "cold/n06_behind_you",
+    "len_s": 5,
+    "desc": "He conducts the dawn chorus to be quiet ('PIPE DOWN!'); the offended birds leave in a huff; a feather lands in his tea."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1990},
+    "loop": [{"a": "piano"}, {"a": "warmup"}, {"a": "feed_beryl"}, {"a": "marrow"}, {"a": "paper"}]
+  },
+  "cast": {
+    "beryl": {
+      "start": {"room": "conservatory", "x": 4360},
+      "mood": "grazing",
+      "lane": [3950, 5650],
+      "lane_speed": 70,
+      "lane_pause_s": 3,
+      "doze": {"station_x": 4360, "every_s": 60, "for_s": 20},
+      "wake_noise_px": 300,
+      "besotted_s": 20,
+      "follow_px": 150,
+      "bleat_every_s": 6,
+      "bend_px": 300,
+      "paw_s": 0.6
+    },
+    "delphine": null
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "panto",
+      "kind": "panto",
+      "req": true,
+      "big_number": false,
+      "text": "Survive three rounds of BEHIND YOU!",
+      "rounds": 3,
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": null,
+        "when": "piano",
+        "tip": "squeak_behind_then_freeze"
+      }
+    },
+    {
+      "id": "kiss",
+      "kind": "prank",
+      "prank": "sweet_tooth",
+      "req": true,
+      "big_number": false,
+      "text": "Beryl gives him a kiss",
+      "hint": {
+        "item": "treacle",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "conservatory_feed_bin",
+        "when": "feed_beryl"
+      }
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows gets in a spin",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_gramophone", "when": "warmup"}
+    },
+    {
+      "id": "news",
+      "kind": "prank",
+      "prank": "eye_popping_news",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows reads the news up close",
+      "hint": {
+        "item": "magnifier",
+        "container": "hall_confiscated_box",
+        "rig_point": "parlour_newspaper",
+        "when": "paper"
+      }
+    },
+    {
+      "id": "marrow",
+      "kind": "prank",
+      "prank": "marrow_escape",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows's marrow flies away",
+      "hint": {
+        "item": "balloon",
+        "container": "hall_confiscated_box",
+        "rig_point": "garden_marrow",
+        "when": "marrow"
+      }
+    },
+    {
+      "id": "stairs",
+      "kind": "prank",
+      "prank": "rug_burn",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows surfs the stairs",
+      "hint": {"item": null, "container": null, "rig_point": "stairs_rods", "when": "stairs_up"},
+      "via": "encore"
+    },
+    {
+      "id": "bn",
+      "kind": "prank",
+      "prank": "grand_exit",
+      "req": false,
+      "big_number": true,
+      "text": "Bellows chases his piano",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_piano_wedge", "when": "piano"}
+    }
+  ],
+  "director": null,
+  "encores": []
+}

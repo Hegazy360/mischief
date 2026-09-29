@@ -1,0 +1,553 @@
+{
+  "version": 1,
+  "pranks": {
+    "achoo_ria": {
+      "caption": "ACHOO-RIA!",
+      "size": "M",
+      "rig_point": "kitchen_honey",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null,
+          "fx": "pepper_shake"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 7.0,
+        "resume": false,
+        "fixup_kinds": [
+          "HONEY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sneeze_blast",
+        "variants": [
+          "a",
+          "b"
+        ],
+        "end": {
+          "room": "kitchen",
+          "x": 3760
+        }
+      },
+      "residue": [
+        {
+          "kind": "FRAZZLED",
+          "blind": true
+        }
+      ],
+      "tags": [
+        "free"
+      ],
+      "nights": [
+        "fx_prologue",
+        "fx_act1"
+      ],
+      "knock_on": {
+        "prank": "tap_dance",
+        "frame": 110
+      }
+    },
+    "tap_dance": {
+      "caption": "TAP DANCE",
+      "size": "S",
+      "rig_point": "kitchen_sink_tap",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "rinse",
+        "mark_s": 1.0,
+        "fixup_kinds": [
+          "SINK"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "drench",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "SOAKED"
+        }
+      ],
+      "tags": [],
+      "nights": [
+        "fx_act1"
+      ]
+    },
+    "kettle_drum": {
+      "caption": "KETTLE DRUM",
+      "size": "M",
+      "rig_point": "kitchen_kettle",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": "squeaker"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 3.0,
+        "resume": true,
+        "fixup_kinds": [
+          "HONEY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sing_crack",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [],
+      "tags": [],
+      "nights": [
+        "fx_act1"
+      ]
+    },
+    "in_a_pickle": {
+      "caption": "IN A PICKLE",
+      "size": "L",
+      "rig_point": "kitchen_pickle_jar",
+      "steps": [
+        {
+          "prep": "S",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "pickles",
+        "mark_s": 1.0
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "strain_slip",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [],
+      "tags": [],
+      "nights": [
+        "fx_act1"
+      ],
+      "knock_on": {
+        "prank": "cold_open",
+        "frame": 100
+      }
+    },
+    "cold_open": {
+      "caption": "COLD OPEN",
+      "size": "M",
+      "rig_point": "kitchen_fridge_shelf",
+      "steps": [
+        {
+          "prep": "S",
+          "needs": "butter"
+        }
+      ],
+      "trigger": {
+        "type": "knock_on_only"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "avalanche_helmet",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "STICKY"
+        },
+        {
+          "kind": "COSTUME"
+        }
+      ],
+      "tags": [],
+      "nights": []
+    },
+    "allegro_go_go": {
+      "caption": "ALLEGRO-GO-GO!",
+      "size": "M",
+      "rig_point": "parlour_gramophone",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "warmup",
+        "mark_s": 0.5
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "dizzy_spin",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [],
+      "tags": [],
+      "nights": [
+        "fx_prologue",
+        "fx_meltdown"
+      ]
+    },
+    "lift_off": {
+      "caption": "LIFT-OFF",
+      "size": "L",
+      "rig_point": "parlour_recliner",
+      "steps": [
+        {
+          "prep": "B",
+          "needs": null
+        },
+        {
+          "prep": "Q",
+          "needs": "magnifier",
+          "at": "parlour_newspaper"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "paper",
+        "mark_s": 1.0
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "launch_ceiling",
+        "variants": [
+          "a"
+        ],
+        "end": {
+          "room": "parlour",
+          "landing": "log_basket"
+        }
+      },
+      "residue": [
+        {
+          "kind": "FRAZZLED"
+        }
+      ],
+      "tags": [],
+      "nights": [
+        "fx_act1"
+      ],
+      "knock_on": {
+        "prank": "bellows_blows",
+        "frame": 120
+      }
+    },
+    "bellows_blows": {
+      "caption": "BELLOWS BLOWS",
+      "size": "M",
+      "rig_point": "parlour_bellows",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": "flour"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "fire",
+        "mark_s": 2.0,
+        "fixup_kinds": [
+          "DRY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "poof",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "FLOURY"
+        }
+      ],
+      "tags": [],
+      "nights": [
+        "fx_meltdown"
+      ]
+    },
+    "prima_ballerina": {
+      "caption": "PRIMA BALLERINA",
+      "size": "L",
+      "rig_point": "parlour_chandelier",
+      "steps": [
+        {
+          "prep": "B",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "quake",
+        "room": "parlour"
+      },
+      "conditions": [
+        {
+          "meltdown_in_room": "parlour"
+        }
+      ],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "drop_on",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "COSTUME"
+        }
+      ],
+      "tags": [],
+      "nights": [
+        "fx_meltdown"
+      ]
+    },
+    "mirror_mirror": {
+      "caption": "MIRROR, MIRROR",
+      "size": "SIG",
+      "rig_point": "hall_mirror",
+      "steps": [
+        {
+          "prep": "B",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "mirror",
+        "mark_s": 0.5,
+        "fixup_kinds": [
+          "MIRROR"
+        ]
+      },
+      "conditions": [
+        {
+          "hush_in_frame_frozen": true
+        }
+      ],
+      "fizzle": {
+        "bark": "hmph"
+      },
+      "reaction": {
+        "archetype": "sig_mirror_mirror",
+        "variants": [],
+        "end": null
+      },
+      "residue": [],
+      "tags": [],
+      "nights": [
+        "fx_meltdown"
+      ],
+      "clears": [
+        "FRAZZLED",
+        "COSTUME"
+      ]
+    },
+    "rug_burn": {
+      "caption": "RUG BURN",
+      "size": "L",
+      "rig_point": "stairs_rods",
+      "steps": [
+        {
+          "prep": "S",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "step",
+        "at": "stairs_foot",
+        "dir": "up",
+        "chase": true
+      },
+      "conditions": [
+        {
+          "tier_min": "steaming",
+          "or_chase": true
+        }
+      ],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "surf_out",
+        "variants": [
+          "a"
+        ],
+        "end": {
+          "room": "hall",
+          "x": 700
+        }
+      },
+      "residue": [
+        {
+          "kind": "FRAZZLED"
+        }
+      ],
+      "tags": [],
+      "nights": [
+        "fx_meltdown"
+      ]
+    },
+    "pipe_down": {
+      "caption": "PIPE DOWN!",
+      "size": "L",
+      "rig_point": "landing_boiler_valve",
+      "steps": [
+        {
+          "prep": "B",
+          "needs": "balloon"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "radiator",
+        "mark_s": 1.0,
+        "fixup_kinds": [
+          "DRY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "steam_duel",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "FRAZZLED"
+        }
+      ],
+      "tags": [],
+      "nights": []
+    },
+    "something_fishy": {
+      "caption": "SOMETHING FISHY",
+      "size": "M",
+      "rig_point": "hall_phone",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": "kipper"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "phone",
+        "mark_s": 1.0
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "fish_slap",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "residue": [],
+      "tags": [],
+      "nights": [],
+      "knock_on": {
+        "headbutt": true,
+        "frame": 80,
+        "requires": {
+          "beryl_within": 300
+        }
+      }
+    },
+    "fan_mail": {
+      "caption": "FAN MAIL",
+      "size": "M",
+      "rig_point": "parlour_fan",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null,
+          "conditions": [
+            {
+              "beryl_within": 150
+            }
+          ]
+        }
+      ],
+      "trigger": {
+        "type": "third_party",
+        "actor": "delphine",
+        "event": "fan"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "feather_burst",
+        "variants": [
+          "b"
+        ],
+        "end": null
+      },
+      "residue": [
+        {
+          "kind": "COSTUME"
+        }
+      ],
+      "tags": [],
+      "nights": []
+    }
+  },
+  "double_acts": {
+    "hot_and_cold": {
+      "a": "achoo_ria",
+      "b": "tap_dance",
+      "caption": "HOT & COLD!"
+    },
+    "up_in_smoke": {
+      "a": "lift_off",
+      "b": "bellows_blows",
+      "caption": "UP IN SMOKE!"
+    },
+    "encore": {
+      "a": "in_a_pickle",
+      "b": "cold_open",
+      "caption": "ENCORE!"
+    }
+  }
+}

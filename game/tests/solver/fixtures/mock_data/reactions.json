@@ -1,0 +1,5 @@
+{"version": 1, "archetypes": {
+  "sing_crack_a": {"clip": "bellows/rx_sing_crack_a", "frames": 120, "marks": {"antic": 40, "accent": 60, "hold": [62, 100], "release": 120}},
+  "sneeze_blast_a": {"clip": "bellows/rx_sneeze_blast_a", "frames": 120, "marks": {"antic": 40, "accent": 60, "hold": [62, 100], "release": 120}},
+  "drench_a": {"clip": "bellows/rx_drench_a", "frames": 120, "marks": {"antic": 40, "accent": 60, "hold": [62, 100], "release": 120}},
+  "suppressed": {"clip": "bellows/rx_suppressed", "frames": 60}}}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "rig": "figgis",
+  "presets": {
+    "psst": {
+      "eyes": "open",
+      "mouth": "psst"
+    },
+    "point": {
+      "eyes": "wide",
+      "mouth": "smile"
+    },
+    "shh": {
+      "eyes": "open",
+      "mouth": "shh"
+    },
+    "proud": {
+      "eyes": "happy",
+      "mouth": "smile"
+    }
+  }
+}

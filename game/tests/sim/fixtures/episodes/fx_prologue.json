@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "id": "fx_prologue",
+  "act": 0,
+  "index": 0,
+  "title": "Fixture Curtain Up",
+  "status": "final",
+  "seed": 7,
+  "rooms": [
+    "parlour",
+    "kitchen"
+  ],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 2.0,
+    "tomatoes": -1,
+    "cant_fail": true,
+    "nerves": false
+  },
+  "new_rule": "squeak",
+  "card": {
+    "text": "Squeak, rig, hide.",
+    "icon": "clarence"
+  },
+  "cold_open": {},
+  "hush": {
+    "start": {
+      "room": "kitchen",
+      "x": 3800
+    }
+  },
+  "bellows": {
+    "start": {
+      "room": "parlour",
+      "x": 1700
+    },
+    "loop": [
+      {
+        "a": "warmup",
+        "gate": {
+          "until": "first_squeak",
+          "plus_s": 1.0,
+          "max_s": 15
+        }
+      },
+      {
+        "a": "warmup",
+        "gate": {
+          "until": "rigged:achoo_ria",
+          "plus_s": 2.0
+        }
+      },
+      {
+        "a": "tea"
+      },
+      {
+        "a": "warmup",
+        "gate": {
+          "until": "rigged:allegro_go_go",
+          "plus_s": 2.0,
+          "max_s": 25
+        }
+      },
+      {
+        "a": "hunt"
+      }
+    ]
+  },
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": true,
+      "text": "Bellows sneezes up a storm",
+      "hint": {
+        "rig_point": "kitchen_honey",
+        "when": "tea"
+      }
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": true,
+      "text": "Bellows gets in a spin",
+      "hint": {
+        "rig_point": "parlour_gramophone",
+        "when": "warmup"
+      }
+    }
+  ],
+  "director": {
+    "cues": [
+      {
+        "id": "laugh_vase",
+        "when": {
+          "tick_ge_s": 2.3
+        }
+      },
+      {
+        "id": "ghost_squeak",
+        "when": {
+          "tick_ge_s": 3.7
+        }
+      },
+      {
+        "id": "ghost_honey",
+        "when": {
+          "event_seen": "squeak"
+        }
+      },
+      {
+        "id": "ghost_hide",
+        "when": {
+          "prank_state": [
+            "achoo_ria",
+            "RIGGED"
+          ]
+        }
+      },
+      {
+        "id": "sparkle_lever",
+        "when": {
+          "and": [
+            {
+              "event_ago_ge_s": [
+                "b_activity",
+                {
+                  "id": "fixup_mirror"
+                },
+                8
+              ]
+            },
+            {
+              "not": {
+                "prank_state": [
+                  "allegro_go_go",
+                  "RIGGED"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "safety_net": {
+      "hide_before_entry_s": 1.5,
+      "slowmo": 0.5,
+      "pulse": "kitchen_pantry_curtain"
+    },
+    "end_when": {
+      "event_seen": [
+        "b_activity_end",
+        {
+          "id": "hunt"
+        }
+      ]
+    },
+    "launch_offset_s": 2.3,
+    "gates": []
+  },
+  "encores": []
+}

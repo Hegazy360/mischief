@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "id": "p00_curtain_up",
+  "act": 0,
+  "index": 0,
+  "title": "Curtain Up",
+  "status": "final",
+  "seed": 100,
+  "rooms": ["parlour", "kitchen"],
+  "backstage": ["hall"],
+  "entry": "window",
+  "rules": {
+    "spot_fill_s": 2.0,
+    "tomatoes": -1,
+    "cant_fail": true,
+    "nerves": false,
+    "curtain_calls": false,
+    "loop_repeat": false
+  },
+  "new_rule": "basics",
+  "card": null,
+  "cold_open": null,
+  "hush": {
+    "start": {"room": "kitchen", "x": 3800},
+    "enter": {"clip": "hush/act_climb_in", "at_s": 2.7, "busy_s": 1.0}
+  },
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [
+      {"a": "warmup", "gate": {"until": "first_squeak", "plus_s": 1.0, "max_s": 15, "first_loop_only": true}},
+      {"a": "warmup", "gate": {"until": "rigged:achoo_ria", "plus_s": 2.0, "max_s": null, "first_loop_only": true}},
+      {"a": "tea"},
+      {
+        "a": "warmup",
+        "gate": {"until": "rigged:allegro_go_go", "plus_s": 2.0, "max_s": 25, "first_loop_only": true}
+      },
+      {"a": "hunt"}
+    ],
+    "exit": {"after": "hunt", "to": {"room": "hall", "x": 1450, "hotspot": "stairs_foot"}}
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"}
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows gets in a spin",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_gramophone", "when": "warmup"}
+    }
+  ],
+  "director": {
+    "launch_offset_s": 2.3,
+    "gates": [
+      {"loop": 0, "gate": {"until": "first_squeak", "plus_s": 1.0, "max_s": 15, "first_loop_only": true}},
+      {"loop": 1, "gate": {"until": "rigged:achoo_ria", "plus_s": 2.0, "max_s": null, "first_loop_only": true}},
+      {"loop": 3, "gate": {"until": "rigged:allegro_go_go", "plus_s": 2.0, "max_s": 25, "first_loop_only": true}}
+    ],
+    "cues": [
+      {
+        "id": "laugh_vase",
+        "when": {"tick_ge_s": 2.3},
+        "prop": "parlour_vase",
+        "desc": "Each warm-up note nudges the vase along the mantel; it smashes behind him (launch 4.6 s)."
+      },
+      {"id": "figgis_psst", "when": {"tick_ge_s": 3.7}, "card": "figgis_psst"},
+      {
+        "id": "ghost_squeak",
+        "when": {"tick_ge_s": 3.7},
+        "target": "clarence",
+        "mode": "tap",
+        "until": {"first_squeak": true}
+      },
+      {
+        "id": "ghost_honey",
+        "when": {"event_seen": {"event": "b_activity_end", "match": {"id": "warmup"}}},
+        "target": "kitchen_honey",
+        "mode": "tap",
+        "until": {"event_seen": {"event": "hush_arrive", "match": {"hotspot": "kitchen_honey"}}},
+        "renudge_idle_s": 8
+      },
+      {
+        "id": "ghost_hold",
+        "when": {"event_seen": {"event": "hush_arrive", "match": {"hotspot": "kitchen_honey"}}},
+        "target": "action",
+        "mode": "hold",
+        "until": {"prank_state": ["achoo_ria", "rigged"]}
+      },
+      {
+        "id": "ghost_hide",
+        "when": {"event_seen": {"event": "b_activity_end", "match": {"id": "warmup"}, "count_ge": 2}},
+        "target": "kitchen_pantry_curtain",
+        "mode": "tap",
+        "until": {"hush_hidden": true}
+      },
+      {
+        "id": "sparkle_lever",
+        "when": {
+          "and": [
+            {"event_seen": {"event": "b_detour", "match": {"station": "st_hall_mirror"}, "after_s": 8.0}},
+            {"not": {"prank_state": ["allegro_go_go", "rigged"]}}
+          ]
+        },
+        "target": "parlour_gramophone",
+        "mode": "sparkle",
+        "until": {"prank_state": ["allegro_go_go", "rigged"]}
+      },
+      {
+        "id": "laugh_doorframe",
+        "when": {
+          "and": [
+            {"event_seen": {"event": "residue_add", "match": {"kind": "FRAZZLED"}}},
+            {"bellows_in_room": "parlour"}
+          ]
+        },
+        "prop": "parlour_kitchen",
+        "desc": "Hair over his eyes, he shuffles off to the mirror and bonks the door frame (titter)."
+      },
+      {
+        "id": "laugh_relief",
+        "when": {
+          "and": [
+            {"event_seen": {"event": "b_activity_end", "match": {"id": "hunt"}}},
+            {"not": {"event_seen": {"event": "spotted", "match": {}}}}
+          ]
+        },
+        "desc": "He hunted and found nothing: the Stalls laugh with relief."
+      },
+      {
+        "id": "laugh_picture",
+        "when": {
+          "and": [{"event_seen": {"event": "b_activity_end", "match": {"id": "hunt"}}}, {"bellows_in_room": "hall"}]
+        },
+        "prop": "parlour_picture_frame",
+        "desc": "'Hmph!' He stomps out; a picture falls on his head in the doorway."
+      },
+      {
+        "id": "title_card",
+        "when": {"event_seen": {"event": "director_cue", "match": {"id": "laugh_picture"}, "after_s": 4.0}},
+        "desc": "Curtain falls, Hush bows, roses; only now MISCHIEF NEXT DOOR slams down."
+      }
+    ],
+    "safety_net": {
+      "hide_before_entry_s": 1.5,
+      "slowmo": 0.5,
+      "pulse": "kitchen_pantry_curtain",
+      "room": "kitchen",
+      "once": true
+    },
+    "hunt": {"activity": "hunt", "specs": true, "dur_s": 6, "path": [2350, 1650]},
+    "exit": {"after": "hunt", "to": {"room": "hall", "x": 1450, "hotspot": "stairs_foot"}, "via": "hall_parlour"},
+    "end": {
+      "when": {"event_seen": {"event": "director_cue", "match": {"id": "title_card"}, "after_s": 1.0}},
+      "reason": "prologue_done"
+    },
+    "figgis_hook": {"spot_fill_pct": 100, "to": "nearest_hiding"}
+  },
+  "encores": []
+}

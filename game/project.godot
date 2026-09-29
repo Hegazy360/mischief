@@ -16,6 +16,12 @@ run/max_fps=60
 
 [autoload]
 
+Settings="*res://autoload/settings.gd"
+Save="*res://autoload/save.gd"
+Haptics="*res://autoload/haptics.gd"
+Content="*res://autoload/content.gd"
+Audio="*res://autoload/audio.gd"
+Router="*res://autoload/router.gd"
 DevShot="*res://autoload/dev_shot.gd"
 
 [display]

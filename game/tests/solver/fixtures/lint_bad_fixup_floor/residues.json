@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "residues": {
+    "FRAZZLED": {
+      "fixup": "DRY",
+      "overlay": "frazzled"
+    }
+  },
+  "combos": {}
+}

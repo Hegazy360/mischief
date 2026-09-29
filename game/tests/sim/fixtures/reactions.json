@@ -1,0 +1,328 @@
+{
+  "version": 1,
+  "archetypes": {
+    "sneeze_blast_a": {
+      "clip": "bellows/rx_sneeze_blast_a",
+      "frames": 150,
+      "marks": {
+        "antic": 72,
+        "accent": 92,
+        "hold": [
+          95,
+          140
+        ],
+        "release": 150
+      },
+      "travel": {
+        "from_f": 92,
+        "to_f": 110,
+        "ease": "out_cubic",
+        "arc_px": 60
+      },
+      "t3_prop_f": 112,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "sneeze_blast_b": {
+      "clip": "bellows/rx_sneeze_blast_b",
+      "frames": 140,
+      "marks": {
+        "antic": 66,
+        "accent": 86,
+        "hold": [
+          89,
+          130
+        ],
+        "release": 140
+      },
+      "travel": {
+        "from_f": 86,
+        "to_f": 104,
+        "ease": "out_cubic",
+        "arc_px": 60
+      },
+      "t3_prop_f": 106,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "drench_a": {
+      "clip": "bellows/rx_drench_a",
+      "frames": 120,
+      "marks": {
+        "antic": 0,
+        "accent": 20,
+        "hold": [
+          23,
+          90
+        ],
+        "release": 120
+      },
+      "t3_prop_f": 40,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "sing_crack_a": {
+      "clip": "bellows/rx_sing_crack_a",
+      "frames": 130,
+      "marks": {
+        "antic": 20,
+        "accent": 40,
+        "hold": [
+          43,
+          110
+        ],
+        "release": 130
+      },
+      "t3_prop_f": 60,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "strain_slip_a": {
+      "clip": "bellows/rx_strain_slip_a",
+      "frames": 160,
+      "marks": {
+        "antic": 50,
+        "accent": 70,
+        "hold": [
+          73,
+          140
+        ],
+        "release": 160,
+        "knock_on": 100
+      },
+      "t3_prop_f": 90,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "avalanche_helmet_a": {
+      "clip": "bellows/rx_avalanche_helmet_a",
+      "frames": 150,
+      "marks": {
+        "antic": 10,
+        "accent": 30,
+        "hold": [
+          33,
+          120
+        ],
+        "release": 150
+      },
+      "t3_prop_f": 50,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "dizzy_spin_a": {
+      "clip": "bellows/rx_dizzy_spin_a",
+      "frames": 180,
+      "marks": {
+        "antic": 20,
+        "accent": 40,
+        "hold": [
+          43,
+          160
+        ],
+        "release": 180
+      },
+      "t3_prop_f": 60,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "launch_ceiling_a": {
+      "clip": "bellows/rx_launch_ceiling_a",
+      "frames": 200,
+      "marks": {
+        "antic": 10,
+        "accent": 30,
+        "hold": [
+          33,
+          170
+        ],
+        "release": 200
+      },
+      "travel": {
+        "from_f": 30,
+        "to_f": 80,
+        "ease": "in_out_quad",
+        "arc_px": 200
+      },
+      "t3_prop_f": 50,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "poof_a": {
+      "clip": "bellows/rx_poof_a",
+      "frames": 120,
+      "marks": {
+        "antic": 4,
+        "accent": 24,
+        "hold": [
+          27,
+          100
+        ],
+        "release": 120
+      },
+      "t3_prop_f": 44,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "drop_on_a": {
+      "clip": "bellows/rx_drop_on_a",
+      "frames": 150,
+      "marks": {
+        "antic": 10,
+        "accent": 30,
+        "hold": [
+          33,
+          130
+        ],
+        "release": 150
+      },
+      "t3_prop_f": 50,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "sig_mirror_mirror": {
+      "clip": "bellows/rx_sig_mirror_mirror",
+      "frames": 240,
+      "marks": {
+        "antic": 20,
+        "accent": 40,
+        "hold": [
+          43,
+          200
+        ],
+        "release": 240
+      },
+      "t3_prop_f": 60,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "surf_out_a": {
+      "clip": "bellows/rx_surf_out_a",
+      "frames": 240,
+      "marks": {
+        "antic": 0,
+        "accent": 20,
+        "hold": [
+          23,
+          200
+        ],
+        "release": 240
+      },
+      "travel": {
+        "from_f": 20,
+        "to_f": 120,
+        "ease": "linear",
+        "arc_px": 0
+      },
+      "t3_prop_f": 40,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "steam_duel_a": {
+      "clip": "bellows/rx_steam_duel_a",
+      "frames": 150,
+      "marks": {
+        "antic": 40,
+        "accent": 60,
+        "hold": [
+          63,
+          130
+        ],
+        "release": 150
+      },
+      "t3_prop_f": 80,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "fish_slap_a": {
+      "clip": "bellows/rx_fish_slap_a",
+      "frames": 140,
+      "marks": {
+        "antic": 30,
+        "accent": 50,
+        "hold": [
+          53,
+          120
+        ],
+        "release": 140
+      },
+      "t3_prop_f": 70,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "feather_burst_b": {
+      "clip": "bellows/rx_feather_burst_b",
+      "frames": 150,
+      "marks": {
+        "antic": 10,
+        "accent": 30,
+        "hold": [
+          33,
+          120
+        ],
+        "release": 150
+      },
+      "t3_prop_f": 50,
+      "cam": {
+        "zoom": 1.3,
+        "hitstop": 5
+      }
+    },
+    "suppressed": {
+      "clip": "bellows/beat_suppressed",
+      "frames": 60,
+      "marks": {
+        "accent": 0,
+        "hold": [
+          0,
+          40
+        ],
+        "release": 60
+      }
+    }
+  },
+  "meltdown": [
+    "bellows/melt_a",
+    "bellows/melt_b",
+    "bellows/melt_c"
+  ],
+  "lecture": [
+    "bellows/lec_a",
+    "bellows/lec_b",
+    "bellows/lec_c"
+  ],
+  "t3_last_beats": [
+    "bellows/beat_slow_burn",
+    "bellows/beat_dignity_fail",
+    "bellows/beat_bow_topple",
+    "bellows/beat_tear"
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "id": "n03_singing_in_the_bath",
+  "act": 1,
+  "index": 3,
+  "title": "Singing in the Bath",
+  "status": "draft",
+  "seed": 103,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "landing", "bathroom", "bedroom"],
+  "entry": "window",
+  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false},
+  "new_rule": "residue_fixup",
+  "card": {
+    "text": "Soaked, floury or frazzled? He goes to fix it, and his bubble shows where. Rig that spot first.",
+    "icon": "fixup"
+  },
+  "cold_open": {
+    "clip": "cold/n03_singing_in_the_bath",
+    "len_s": 5,
+    "desc": "6 a.m. scales through the bathroom window; Hush's alarm clock at No. 9 shakes itself off her shelf."
+  },
+  "hush": {"start": {"room": "kitchen", "x": 3800}},
+  "bellows": {
+    "start": {"room": "bathroom", "x": 1870},
+    "loop": [{"a": "gargle"}, {"a": "bath"}, {"a": "radiator"}, {"a": "dress"}, {"a": "nap"}]
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {"HONEY": "st_tea"},
+  "script": [
+    {
+      "id": "soprano",
+      "kind": "prank",
+      "prank": "sopran_oh_no",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows sings soprano",
+      "hint": {
+        "item": "balloon",
+        "container": "hall_confiscated_box",
+        "rig_point": "bathroom_basin_spray",
+        "when": "gargle"
+      }
+    },
+    {
+      "id": "croc",
+      "kind": "prank",
+      "prank": "snap_decision",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows meets the bath croc",
+      "hint": {"item": "croc", "container": "hall_confiscated_box", "rig_point": "bathroom_duck", "when": "bath"}
+    },
+    {
+      "id": "plumbing",
+      "kind": "prank",
+      "prank": "pipe_down",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows argues with the plumbing",
+      "hint": {"item": null, "container": null, "rig_point": "landing_boiler_valve", "when": "radiator"}
+    },
+    {
+      "id": "pillow",
+      "kind": "prank",
+      "prank": "pillow_talk",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows has a pillow fight",
+      "hint": {
+        "item": "squeaker",
+        "container": "hall_confiscated_box",
+        "rig_point": "bedroom_pillow",
+        "when": "nap"
+      }
+    },
+    {
+      "id": "hatstand",
+      "kind": "prank",
+      "prank": "butter_fingers",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows serenades the hat stand",
+      "hint": {"item": "butter", "container": "kitchen_fridge", "rig_point": "bedroom_bedside", "when": "nap"}
+    },
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"},
+      "via": "SQUEAKY"
+    },
+    {
+      "id": "bn",
+      "kind": "combo",
+      "req": false,
+      "big_number": true,
+      "text": "Make a POODLE of him",
+      "combo": "poodle",
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["snap_decision", "pipe_down"],
+      "hint": {
+        "item": "croc",
+        "container": "hall_confiscated_box",
+        "rig_point": "bathroom_duck",
+        "when": "bath",
+        "also": [
+          {
+            "item": null,
+            "container": null,
+            "rig_point": "landing_boiler_valve",
+            "note": "rig first: the DRY fix-up"
+          }
+        ],
+        "lines": ["croc", "plumbing"],
+        "tip": "soak_then_frazzle"
+      }
+    }
+  ],
+  "director": {
+    "gates": [],
+    "cues": [
+      {
+        "id": "card_fixup",
+        "when": {"event_seen": {"event": "b_detour", "match": {}}},
+        "card": "card_fixup",
+        "once": true
+      }
+    ]
+  },
+  "encores": []
+}

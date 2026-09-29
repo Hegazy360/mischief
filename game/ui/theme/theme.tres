@@ -1,0 +1,11 @@
+[gd_resource type="Theme" load_steps=2 format=3]
+
+[ext_resource type="FontFile" path="res://ui/theme/fonts/Nunito-ExtraBold.ttf" id="1_ui"]
+
+[resource]
+default_font = ExtResource("1_ui")
+default_font_size = 44
+Label/colors/font_color = Color(1, 0.956863, 0.878431, 1)
+Label/colors/font_outline_color = Color(0.105882, 0.137255, 0.25098, 1)
+Label/constants/outline_size = 12
+Label/font_sizes/font_size = 44

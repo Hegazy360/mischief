@@ -1,0 +1,288 @@
+## PoseLib — a rig's `poses.json` + `faces.json` resolved into FULL poses (TECH §4.7).
+##
+## * Every pose starts from the rig's rest pose (or from its `base` pose, recursively), then
+##   applies `root` and `bones` channel overrides (`rot, x, y, sx, sy, z, tex, vis, alpha`;
+##   `tex` by variant name). `mirror_of: {"walk_pass_r": "walk_pass_l"}` (or an inline
+##   `"mirror": "<pose>"`) builds a pose by swapping every `_l`/`_r` partner's channels (all
+##   but `z`: depth stays with the near/far side; `tex` maps by variant name). A pose may
+##   still add overrides on top of its mirror / base.
+## * A pose's `face` preset (faces.json `presets`) is baked into the virtual face parts'
+##   `tex` / `vis` channels; `face_of(pose)` keeps the name.
+## * `tags` and `silhouette` notes are kept for the sheets and lints.
+## Pure data; `PoseLib.for_rig(id)` caches by rig id.
+class_name PoseLib
+extends RefCounted
+
+static var _cache: Dictionary = {}
+
+var rig: RigDef
+var path: String = ""
+var faces_path: String = ""
+## Pose names in file order.
+var names: PackedStringArray = PackedStringArray()
+var poses: Dictionary = {}        ## name → PackedFloat32Array (full pose)
+var tags: Dictionary = {}         ## name → PackedStringArray
+var silhouettes: Dictionary = {}  ## name → String
+var faces: Dictionary = {}        ## pose name → face preset name ("" = none)
+## Face presets: name → PackedInt32Array per face slot (variant index, -1 = unchanged,
+## -2 = hidden).
+var presets: Dictionary = {}
+var preset_names: PackedStringArray = PackedStringArray()
+var errors: PackedStringArray = PackedStringArray()
+var warnings: PackedStringArray = PackedStringArray()
+
+var _raw: Dictionary = {}
+var _mirror_of: Dictionary = {}
+var _resolving: Dictionary = {}
+
+
+## Cached poses of rig `rig_id` (`<data_root>/rigs/<id>/poses.json` + `faces.json`).
+static func for_rig(rig_id: String) -> PoseLib:
+	var hit: PoseLib = _cache.get(rig_id, null)
+	if hit != null:
+		return hit
+	var rig := RigDef.for_id(rig_id)
+	if rig == null:
+		return null
+	var dir := "%s/rigs/%s" % [RigDef.data_root, rig_id]
+	var lib := PoseLib.load(rig, dir + "/poses.json", dir + "/faces.json")
+	_cache[rig_id] = lib
+	return lib
+
+
+## Forget cached poses ("" = all).
+static func invalidate(rig_id: String = "") -> void:
+	if rig_id == "":
+		_cache.clear()
+	else:
+		_cache.erase(rig_id)
+
+
+## Load and resolve poses for `rig`. `faces_file` may be "" / missing (no presets).
+static func load(rig_def: RigDef, file_path: String, faces_file: String = "") -> PoseLib:
+	var lib := PoseLib.new()
+	lib.rig = rig_def
+	lib.path = file_path
+	lib.faces_path = faces_file
+	var fd: Variant = null
+	if faces_file != "" and FileAccess.file_exists(faces_file):
+		fd = RigDef._read_json(faces_file, lib.errors)
+	var pd: Variant = RigDef._read_json(file_path, lib.errors) if FileAccess.file_exists(file_path) else {}
+	if not FileAccess.file_exists(file_path):
+		lib.warnings.append("%s: missing (rig has only its rest pose)" % file_path)
+	lib._parse(pd if pd is Dictionary else {}, fd if fd is Dictionary else {})
+	return lib
+
+
+## Build from parsed dictionaries (tests).
+static func from_dicts(rig_def: RigDef, poses_d: Dictionary, faces_d: Dictionary = {}) -> PoseLib:
+	var lib := PoseLib.new()
+	lib.rig = rig_def
+	lib._parse(poses_d, faces_d)
+	return lib
+
+
+## True when `pose_name` exists.
+func has_pose(pose_name: String) -> bool:
+	return poses.has(pose_name)
+
+
+## The resolved pose (the rig's rest pose when unknown). Shared: duplicate() before editing.
+func pose(pose_name: String) -> PackedFloat32Array:
+	return poses.get(pose_name, rig.rest)
+
+
+## Face preset name of a pose ("" when it has none).
+func face_of(pose_name: String) -> String:
+	return String(faces.get(pose_name, ""))
+
+
+## Tags of a pose.
+func tags_of(pose_name: String) -> PackedStringArray:
+	return tags.get(pose_name, PackedStringArray())
+
+
+## True when `preset` exists.
+func has_preset(preset: String) -> bool:
+	return presets.has(preset)
+
+
+## Writes preset `preset` into the face parts of `out` (tex / vis). Unknown → no change.
+func apply_preset(out: PackedFloat32Array, preset: String) -> void:
+	var p: Variant = presets.get(preset, null)
+	if p == null:
+		return
+	var arr: PackedInt32Array = p
+	for s in arr.size():
+		var v := arr[s]
+		if v == -1:
+			continue
+		var b := RigDef.ROOT_CH + rig.face_slot_part[s] * RigDef.STRIDE
+		if v == -2:
+			out[b + RigDef.C_VIS] = 0.0
+		else:
+			out[b + RigDef.C_TEX] = float(v)
+			out[b + RigDef.C_VIS] = 1.0
+
+
+## Applies a JSON channel dictionary ({"rot": 5, "tex": "fist"}) to part `i` of `out`.
+## Unknown channels / variants go to `errs` prefixed with `where`.
+func apply_channels(out: PackedFloat32Array, i: int, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
+	var b := RigDef.ROOT_CH + i * RigDef.STRIDE
+	for cn in chans:
+		var c := RigDef.CHANNELS.find(String(cn))
+		if c < 0:
+			errs.append("%s: unknown channel '%s' on '%s'" % [where, cn, rig.names[i]])
+			continue
+		var v: Variant = chans[cn]
+		if c == RigDef.C_TEX:
+			var vi := rig.tex_index(i, String(v)) if v is String else int(v)
+			if vi < 0 or vi >= rig.tex_names[i].size():
+				errs.append("%s: part '%s' has no texture '%s'" % [where, rig.names[i], v])
+				continue
+			out[b + c] = float(vi)
+		elif c == RigDef.C_VIS:
+			out[b + c] = 1.0 if (v is bool and v) or (not (v is bool) and float(v) > 0.5) else 0.0
+		else:
+			out[b + c] = float(v)
+
+
+## Applies a JSON root dictionary ({"y": 10, "sx": 1.1}) to `out`.
+func apply_root(out: PackedFloat32Array, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
+	for cn in chans:
+		var c := RigDef.ROOT_CHANNELS.find(String(cn))
+		if c < 0:
+			errs.append("%s: unknown root channel '%s'" % [where, cn])
+			continue
+		out[c] = float(chans[cn])
+
+
+## Swaps every mirror pair of `src` into `out` (all channels but z; tex by variant name).
+func mirror_into(src: PackedFloat32Array, out: PackedFloat32Array) -> void:
+	for k in src.size():
+		out[k] = src[k]
+	for i in rig.names.size():
+		var j := rig.mirror_idx[i]
+		if j < 0:
+			continue
+		var bi := RigDef.ROOT_CH + i * RigDef.STRIDE
+		var bj := RigDef.ROOT_CH + j * RigDef.STRIDE
+		for c in RigDef.STRIDE:
+			if c == RigDef.C_Z:
+				continue
+			if c == RigDef.C_TEX:
+				var vn := ""
+				var vj := int(src[bj + c])
+				if vj >= 0 and vj < rig.tex_names[j].size():
+					vn = rig.tex_names[j][vj]
+				var mapped := rig.tex_index(i, vn)
+				out[bi + c] = float(mapped) if mapped >= 0 else src[bi + c]
+			else:
+				out[bi + c] = src[bj + c]
+
+
+# --- parsing ---------------------------------------------------------------------------------
+
+func _parse(pd: Dictionary, fd: Dictionary) -> void:
+	_parse_presets(fd)
+	var pv: Variant = pd.get("poses", {})
+	_raw = pv if pv is Dictionary else {}
+	var mv: Variant = pd.get("mirror_of", {})
+	_mirror_of = mv if mv is Dictionary else {}
+	for pn in _raw:
+		names.append(String(pn))
+	for pn2 in _mirror_of:
+		if not _raw.has(pn2):
+			names.append(String(pn2))
+	for n in names:
+		_resolve(n)
+
+
+func _parse_presets(fd: Dictionary) -> void:
+	var pv: Variant = fd.get("presets", {})
+	if not (pv is Dictionary):
+		return
+	for name in pv:
+		var e: Variant = pv[name]
+		if not (e is Dictionary):
+			errors.append("%s: preset '%s' is not an object" % [faces_path, name])
+			continue
+		var arr := PackedInt32Array()
+		arr.resize(rig.face_slots.size())
+		arr.fill(-1)
+		for slot in e:
+			var s := rig.face_slots.find(String(slot))
+			if s < 0:
+				errors.append("%s: preset '%s' slot '%s' is not a face slot of %s" % [faces_path, name, slot, rig.id])
+				continue
+			var vname := String((e as Dictionary)[slot])
+			if vname == "none" or vname == "":
+				arr[s] = -2
+				continue
+			var vi := rig.tex_names[rig.face_slot_part[s]].find(vname)
+			if vi < 0:
+				errors.append("%s: preset '%s' slot '%s' has no variant '%s'" % [faces_path, name, slot, vname])
+				continue
+			arr[s] = vi
+		presets[String(name)] = arr
+		preset_names.append(String(name))
+
+
+func _resolve(n: String) -> PackedFloat32Array:
+	if poses.has(n):
+		return poses[n]
+	if _resolving.has(n):
+		errors.append("%s: pose '%s' is in a base/mirror cycle" % [path, n])
+		return rig.rest
+	_resolving[n] = true
+	var out := rig.rest.duplicate()
+	var d: Dictionary = _raw.get(n, {}) if _raw.get(n, {}) is Dictionary else {}
+	var where := "%s: pose '%s'" % [path, n]
+	var mirror := String(_mirror_of.get(n, d.get("mirror", d.get("mirror_of", ""))))
+	var face := ""
+	var tg := PackedStringArray()
+	if mirror != "":
+		if not _raw.has(mirror) and not _mirror_of.has(mirror):
+			errors.append("%s mirrors unknown pose '%s'" % [where, mirror])
+		else:
+			mirror_into(_resolve(mirror), out)
+			face = face_of(mirror)
+			tg = tags_of(mirror).duplicate()
+	else:
+		var base := String(d.get("base", ""))
+		if base != "":
+			if not _raw.has(base) and not _mirror_of.has(base):
+				errors.append("%s has unknown base '%s'" % [where, base])
+			else:
+				var bp := _resolve(base)
+				for k in bp.size():
+					out[k] = bp[k]
+				face = face_of(base)
+	var rv: Variant = d.get("root", {})
+	if rv is Dictionary:
+		apply_root(out, rv, where, errors)
+	var bv: Variant = d.get("bones", {})
+	if bv is Dictionary:
+		for pn in bv:
+			var i := rig.idx(String(pn))
+			if i < 0:
+				errors.append("%s: bone '%s' is not a part of %s" % [where, pn, rig.id])
+				continue
+			if bv[pn] is Dictionary:
+				apply_channels(out, i, bv[pn], where, errors)
+			else:
+				errors.append("%s: bone '%s' must be a channel object" % [where, pn])
+	if d.has("face"):
+		face = String(d["face"])
+		if face != "" and not presets.has(face):
+			errors.append("%s: face preset '%s' unknown" % [where, face])
+	if face != "":
+		apply_preset(out, face)
+	if d.get("tags", null) is Array:
+		tg = PackedStringArray(d["tags"])
+	poses[n] = out
+	faces[n] = face
+	tags[n] = tg
+	silhouettes[n] = String(d.get("silhouette", ""))
+	_resolving.erase(n)
+	return out

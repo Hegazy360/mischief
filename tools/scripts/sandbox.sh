@@ -17,8 +17,13 @@ LOG="$BASE/$NAME.import.log"
 mkdir -p "$SB"
 rsync -a --delete --exclude '.godot/' "$ROOT/game/" "$SB/"
 if [ -z "${NO_IMPORT:-}" ]; then
-  timeout 600 godot --headless --path "$SB" --import >"$LOG" 2>&1 || {
-    echo "[sandbox] import failed, see $LOG" >&2; tail -40 "$LOG" >&2; exit 3; }
+  # Godot 4.7.2's headless --import occasionally segfaults on a large first import; retry up to 3 times.
+  ok=0
+  for attempt in 1 2 3; do
+    if timeout 600 godot --headless --path "$SB" --import >"$LOG" 2>&1; then ok=1; break; fi
+    echo "[sandbox] import attempt $attempt failed, retrying" >&2
+  done
+  [ "$ok" = 1 ] || { echo "[sandbox] import failed, see $LOG" >&2; tail -40 "$LOG" >&2; exit 3; }
 fi
 echo "[sandbox] $SB" >&2
 if [ "$#" -gt 0 ]; then

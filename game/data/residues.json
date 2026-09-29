@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "residues": {
+    "SOAKED": {
+      "fixup": "DRY",
+      "overlay": "SOAKED",
+      "blind": false,
+      "look": "Drips, spaniel-ear sideburns, squelching steps.",
+      "chains_into": ["bellows_blows", "pipe_down"],
+      "step_sfx": "squelch"
+    },
+    "FLOURY": {
+      "fixup": "SINK",
+      "overlay": "FLOURY",
+      "blind": false,
+      "look": "Ghost-white tint, a puff every step.",
+      "chains_into": ["tap_dance"],
+      "step_fx": "flour_puff"
+    },
+    "STICKY": {
+      "fixup": "SINK",
+      "overlay": "STICKY",
+      "blind": false,
+      "look": "The next thing he touches sticks to his hand.",
+      "chains_into": ["tap_dance"],
+      "sticks_to_hand": true
+    },
+    "SQUEAKY": {
+      "fixup": "HONEY",
+      "overlay": "SQUEAKY",
+      "blind": false,
+      "look": "Every sung or said line +12 semitones.",
+      "chains_into": ["achoo_ria", "kettle_drum"],
+      "voice_pitch_st": 12
+    },
+    "FRAZZLED": {
+      "fixup": "MIRROR",
+      "overlay": "FRAZZLED",
+      "blind": false,
+      "blind_look": "flipped",
+      "look": "Frizzed bouffant; flipped over his eyes when blind (ACHOO-RIA!) until fixed.",
+      "chains_into": ["mirror_mirror"]
+    },
+    "FEATHERED": {
+      "fixup": "MIRROR",
+      "overlay": "FEATHERED",
+      "blind": false,
+      "look": "Feathers everywhere; a small sneeze every 6 s.",
+      "chains_into": ["mirror_mirror"],
+      "tic": {"clip": "bellows/rx_sneeze_blast_tic", "frames": 40, "every_s": 6}
+    },
+    "COSTUME": {
+      "fixup": "MIRROR",
+      "overlay": "COSTUME",
+      "blind": false,
+      "looks": {
+        "jelly_helmet": "COSTUME:jelly_helmet",
+        "tutu_tulle": "COSTUME:tutu_tulle",
+        "tutu_chandelier": "COSTUME:tutu_chandelier",
+        "trophy_helmet": "COSTUME:trophy_helmet",
+        "long_johns": "COSTUME:long_johns",
+        "hedge_twigs": "COSTUME:hedge_twigs",
+        "umbrella_stand": "COSTUME:umbrella_stand"
+      },
+      "look": "Tutu, trophy helmet, jelly helmet or long johns (the prank picks the look).",
+      "chains_into": ["mirror_mirror"]
+    }
+  },
+  "combos": {
+    "dough_man": {
+      "of": ["SOAKED", "FLOURY"],
+      "caption": "DOUGH MAN!",
+      "clip": "bellows/combo_dough_man",
+      "overlay": "COMBO:dough_man",
+      "joke": "He looks down: he's dough. Squelch-puff steps; Beryl tries to lick him."
+    },
+    "poodle": {
+      "of": ["SOAKED", "FRAZZLED"],
+      "caption": "POODLE!",
+      "clip": "bellows/combo_poodle",
+      "overlay": "COMBO:poodle",
+      "joke": "His bouffant balls into a pom-pom; his 'PIPE DOWN!' comes out as a yap."
+    },
+    "chicken": {
+      "of": ["STICKY", "FEATHERED"],
+      "caption": "CHICKEN!",
+      "clip": "bellows/combo_chicken",
+      "overlay": "COMBO:chicken",
+      "joke": "Feathers stick: every sung note clucks; Clarence squeaks back, smitten (heart)."
+    },
+    "mad_maestro": {
+      "of": ["FRAZZLED", "SQUEAKY"],
+      "caption": "MAD MAESTRO!",
+      "clip": "bellows/combo_mad_maestro",
+      "overlay": "COMBO:mad_maestro",
+      "joke": "A wild-haired chipmunk tenor, conducting furiously at nobody."
+    }
+  },
+  "fixup_kinds": {
+    "DRY": {"detour": "fixup_dry", "stations": ["st_fireplace", "st_sun_lounger", "st_radiator"]},
+    "SINK": {"detour": "fixup_sink", "stations": ["st_sink", "st_basin"]},
+    "HONEY": {"detour": "fixup_honey", "stations": ["st_tea"]},
+    "MIRROR": {"detour": "fixup_mirror", "stations": ["st_hall_mirror", "st_basin", "st_dressing_mirror"]}
+  },
+  "fixup": {"dur_s": 4, "mark_s": 1}
+}

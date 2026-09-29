@@ -1,0 +1,65 @@
+{
+ "version": 1,
+ "clip": "_mannequin/beat_suppressed",
+ "rig": "_mannequin",
+ "loop": false,
+ "length": 60,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 6,
+ "blend_out": 10,
+ "tags": [
+  "suppressed"
+ ],
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_suppress"
+  },
+  {
+   "f": 12,
+   "pose": "m_suppress_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 24,
+   "pose": "m_suppress",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 36,
+   "pose": "m_suppress_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 48,
+   "pose": "m_suppress",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "m_stand_b",
+   "ease": "out_cubic"
+  }
+ ],
+ "events": [
+  {
+   "f": 0,
+   "type": "voice",
+   "bank": "vo_mannequin_mmph"
+  },
+  {
+   "f": 24,
+   "type": "shake",
+   "trauma": 0.1
+  }
+ ],
+ "variation": {
+  "time_jitter": 0.0,
+  "rot_jitter": 0
+ },
+ "smear": {
+  "auto": false
+ },
+ "plant": true
+}

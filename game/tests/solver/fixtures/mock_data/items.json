@@ -1,0 +1,2 @@
+{"version": 1, "items": {
+  "squeaker": {"name": "Squeaker", "icon": "res://art/house/items/squeaker.svg", "source": "hall_confiscated_box", "pranks": ["kettle_drum"], "count": 1}}}

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Every lint in one go: tools/scripts/lint.sh (content, hotspot, IP, anim/rig) + every
+# tools/art/*/validate*.py (and lint_*.py) + `python3 tools/audio/gen_audio.py --check`, each only
+# when it exists. Usage: tools/ci/lint_all.sh [--no-godot]   (--no-godot: only the Python checks)
+set -uo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT"
+rc=0
+if [ "${1:-}" != "--no-godot" ]; then
+  tools/scripts/lint.sh || rc=1
+fi
+shopt -s nullglob
+py=(tools/art/*/validate*.py tools/art/*/lint_*.py)
+if [ ${#py[@]} -eq 0 ]; then
+  echo "[lint_all] art: SKIPPED — no tools/art/*/validate*.py yet"
+fi
+for s in "${py[@]}"; do
+  echo "[lint_all] python3 $s"
+  python3 "$s" || rc=1
+done
+if [ -f tools/audio/gen_audio.py ]; then
+  echo "[lint_all] python3 tools/audio/gen_audio.py --check"
+  python3 tools/audio/gen_audio.py --check || rc=1
+else
+  echo "[lint_all] audio: SKIPPED — tools/audio/gen_audio.py not built yet"
+fi
+[ "$rc" -eq 0 ] && echo "[lint_all] OK" || echo "[lint_all] FAIL"
+exit "$rc"

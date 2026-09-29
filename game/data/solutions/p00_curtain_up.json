@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "episode": "p00_curtain_up",
+  "notes": "Times in expect are launch-relative where the key says so (director.launch_offset_s = 2.3).",
+  "routes": {
+    "ideal": {
+      "persona": "ideal",
+      "steps": [
+        {"do": "wait", "until": {"tick_ge_s": 3.8}, "max_s": 10},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "rig", "prank": "achoo_ria"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "achoo_ria"}, "max_s": 45},
+        {"do": "wait", "until": {"bellows_in_room": "hall"}, "max_s": 25},
+        {"do": "rig", "prank": "allegro_go_go"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "allegro_go_go"}, "max_s": 45},
+        {"do": "wait_event", "event": "night_end", "match": {}, "max_s": 45}
+      ],
+      "expect": {
+        "stars": [null, null, null],
+        "lines": ["sneeze", "spin"],
+        "catches_max": 0,
+        "first_player_laugh_s_max": 10,
+        "first_prank_s_max": 30,
+        "laughs_by_s": [[60, 6]],
+        "duration_s": [50, 80]
+      }
+    },
+    "required": {
+      "persona": "required",
+      "steps": [
+        {"do": "wait", "until": {"tick_ge_s": 3.8}, "max_s": 10},
+        {"do": "rig", "prank": "achoo_ria"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "achoo_ria"}, "max_s": 45},
+        {"do": "wait", "until": {"bellows_in_room": "hall"}, "max_s": 25},
+        {"do": "rig", "prank": "allegro_go_go"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "allegro_go_go"}, "max_s": 45},
+        {"do": "wait_event", "event": "night_end", "match": {}, "max_s": 45}
+      ],
+      "expect": {"stars": [null, null, null], "lines": ["sneeze", "spin"], "catches_max": 0, "duration_s": [55, 95]}
+    },
+    "slow": {
+      "persona": "slow",
+      "steps": [
+        {
+          "do": "wait",
+          "until": {"event_seen": {"event": "director_cue", "match": {"id": "ghost_squeak"}}},
+          "max_s": 15
+        },
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {
+          "do": "wait",
+          "until": {"event_seen": {"event": "director_cue", "match": {"id": "ghost_honey"}}},
+          "max_s": 25
+        },
+        {"do": "rig", "prank": "achoo_ria"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "achoo_ria"}, "max_s": 45},
+        {
+          "do": "wait",
+          "until": {"event_seen": {"event": "director_cue", "match": {"id": "sparkle_lever"}}},
+          "max_s": 40
+        },
+        {"do": "rig", "prank": "allegro_go_go"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "night_end", "match": {}, "max_s": 60}
+      ],
+      "expect": {
+        "stars": [null, null, null],
+        "lines": ["sneeze", "spin"],
+        "first_player_laugh_s_max": 10,
+        "first_prank_s_max": 30,
+        "laughs_by_s": [[75, 4]]
+      }
+    }
+  }
+}

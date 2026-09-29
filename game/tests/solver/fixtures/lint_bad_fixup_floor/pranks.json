@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "pranks": {
+    "kettle_drum": {
+      "caption": "KETTLE DRUM",
+      "size": "M",
+      "rig_point": "kitchen_kettle",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": "squeaker"
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 3.0,
+        "resume": true,
+        "fixup_kinds": [
+          "HONEY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sing_crack",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "knock_on": null,
+      "residue": [],
+      "tags": [],
+      "nights": [
+        "mock_ep"
+      ]
+    },
+    "achoo_ria": {
+      "caption": "ACHOO-RIA!",
+      "size": "M",
+      "rig_point": "kitchen_honey",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 7.0,
+        "resume": false,
+        "fixup_kinds": [
+          "HONEY"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sneeze_blast",
+        "variants": [
+          "a"
+        ],
+        "end": {
+          "room": "kitchen",
+          "x": 3760
+        }
+      },
+      "knock_on": {
+        "prank": "tap_dance",
+        "frame": 60
+      },
+      "residue": [
+        {
+          "kind": "FRAZZLED",
+          "blind": true
+        }
+      ],
+      "tags": [
+        "free"
+      ],
+      "nights": [
+        "mock_ep"
+      ]
+    },
+    "tap_dance": {
+      "caption": "TAP DANCE",
+      "size": "S",
+      "rig_point": "kitchen_sink_tap",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null
+        }
+      ],
+      "trigger": {
+        "type": "use",
+        "activity": "rinse",
+        "mark_s": 1.0,
+        "resume": false,
+        "fixup_kinds": [
+          "SINK"
+        ]
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "drench",
+        "variants": [
+          "a"
+        ],
+        "end": null
+      },
+      "knock_on": null,
+      "residue": [],
+      "tags": [
+        "free"
+      ],
+      "nights": [
+        "mock_ep"
+      ]
+    }
+  },
+  "double_acts": {
+    "hot_and_cold": {
+      "a": "achoo_ria",
+      "b": "tap_dance",
+      "caption": "HOT & COLD!"
+    }
+  }
+}

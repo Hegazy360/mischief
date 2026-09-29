@@ -1,0 +1,2303 @@
+{
+  "auto": {
+    "n01_throat_tea": {
+      "ok": true,
+      "proofs": {
+        "budget_ms": 50000,
+        "elapsed_ms": 42535,
+        "expanded": 183,
+        "line_alone": {
+          "bn": {
+            "ok": true,
+            "via": "whole Script",
+            "why": ""
+          },
+          "kettle": {
+            "ok": true,
+            "why": ""
+          },
+          "orbit": {
+            "ok": true,
+            "why": ""
+          },
+          "pickle": {
+            "ok": true,
+            "why": ""
+          },
+          "sneeze": {
+            "ok": true,
+            "why": ""
+          },
+          "tap": {
+            "ok": true,
+            "why": ""
+          }
+        },
+        "max_macros": 400,
+        "notes": [],
+        "prediction": {
+          "activities": [
+            {
+              "id": "warmup",
+              "room": "parlour",
+              "t": 1
+            },
+            {
+              "id": "tea",
+              "room": "kitchen",
+              "t": 1789
+            },
+            {
+              "id": "pickles",
+              "room": "kitchen",
+              "t": 2432
+            },
+            {
+              "id": "paper",
+              "room": "parlour",
+              "t": 3035
+            },
+            {
+              "id": "rinse",
+              "room": "kitchen",
+              "t": 4167
+            },
+            {
+              "id": "warmup",
+              "room": "parlour",
+              "t": 4967
+            },
+            {
+              "id": "tea",
+              "room": "kitchen",
+              "t": 5855
+            },
+            {
+              "id": "pickles",
+              "room": "kitchen",
+              "t": 6498
+            },
+            {
+              "id": "paper",
+              "room": "parlour",
+              "t": 7101
+            },
+            {
+              "id": "rinse",
+              "room": "kitchen",
+              "t": 8233
+            },
+            {
+              "id": "warmup",
+              "room": "parlour",
+              "t": 9033
+            }
+          ],
+          "loop_s": 82.7666666666667
+        },
+        "script": {
+          "applause": 106.4,
+          "catches": 0,
+          "lines": [
+            "kettle",
+            "tap",
+            "pickle",
+            "orbit",
+            "sneeze",
+            "bn"
+          ],
+          "ok": true,
+          "stars": [
+            true,
+            true,
+            true
+          ],
+          "steps_n": 20,
+          "ticks": 8906
+        },
+        "softlock": {
+          "at": [
+            1870,
+            1959,
+            4898
+          ],
+          "cant_fail": false,
+          "catches": 3,
+          "ok": true,
+          "why": ""
+        },
+        "three_stars": true,
+        "three_stars_note": "yes (planner)",
+        "three_stars_proven": true
+      },
+      "wrote": ""
+    },
+    "n02_something_fishy": {
+      "ok": true,
+      "proofs": {
+        "budget_ms": 50000,
+        "elapsed_ms": 49393,
+        "expanded": 179,
+        "line_alone": {
+          "bn": {
+            "ok": true,
+            "via": "whole Script",
+            "why": ""
+          },
+          "clock": {
+            "ok": true,
+            "why": ""
+          },
+          "dinner": {
+            "ok": true,
+            "why": ""
+          },
+          "fish": {
+            "ok": true,
+            "why": ""
+          },
+          "news": {
+            "ok": true,
+            "why": ""
+          }
+        },
+        "max_macros": 400,
+        "notes": [],
+        "prediction": {
+          "activities": [
+            {
+              "id": "mirror",
+              "room": "hall",
+              "t": 1
+            },
+            {
+              "id": "phone",
+              "room": "hall",
+              "t": 383
+            },
+            {
+              "id": "clock",
+              "room": "hall",
+              "t": 947
+            },
+            {
+              "id": "paper",
+              "room": "parlour",
+              "t": 1467
+            },
+            {
+              "id": "fire",
+              "room": "parlour",
+              "t": 2277
+            },
+            {
+              "id": "snack",
+              "room": "kitchen",
+              "t": 2826
+            },
+            {
+              "id": "mirror",
+              "room": "hall",
+              "t": 3746
+            },
+            {
+              "id": "phone",
+              "room": "hall",
+              "t": 4128
+            },
+            {
+              "id": "clock",
+              "room": "hall",
+              "t": 4692
+            },
+            {
+              "id": "paper",
+              "room": "parlour",
+              "t": 5212
+            },
+            {
+              "id": "fire",
+              "room": "parlour",
+              "t": 6022
+            },
+            {
+              "id": "snack",
+              "room": "kitchen",
+              "t": 6571
+            },
+            {
+              "id": "mirror",
+              "room": "hall",
+              "t": 7491
+            }
+          ],
+          "loop_s": 62.4166666666667
+        },
+        "script": {
+          "applause": 83.2,
+          "catches": 1,
+          "lines": [
+            "fish",
+            "clock",
+            "dinner",
+            "news",
+            "bn"
+          ],
+          "ok": true,
+          "stars": [
+            true,
+            true,
+            false
+          ],
+          "steps_n": 28,
+          "ticks": 11843
+        },
+        "softlock": {
+          "at": [
+            2723,
+            5447,
+            8053
+          ],
+          "cant_fail": false,
+          "catches": 3,
+          "ok": true,
+          "why": ""
+        },
+        "three_stars": false,
+        "three_stars_note": "yes (authored route)",
+        "three_stars_proven": true
+      },
+      "wrote": ""
+    },
+    "p00_curtain_up": {
+      "ok": true,
+      "proofs": {
+        "budget_ms": 50000,
+        "elapsed_ms": 12823,
+        "expanded": 40,
+        "line_alone": {
+          "sneeze": {
+            "ok": true,
+            "why": ""
+          },
+          "spin": {
+            "ok": true,
+            "why": ""
+          }
+        },
+        "max_macros": 400,
+        "notes": [],
+        "prediction": {
+          "activities": [
+            {
+              "id": "warmup",
+              "room": "parlour",
+              "t": 1
+            },
+            {
+              "id": "warmup",
+              "room": "parlour",
+              "t": 902
+            }
+          ],
+          "loop_s": 15.0166666666667
+        },
+        "script": {
+          "applause": 87.5,
+          "catches": 0,
+          "lines": [
+            "sneeze",
+            "spin"
+          ],
+          "ok": true,
+          "stars": [
+            false,
+            false,
+            false
+          ],
+          "steps_n": 6,
+          "ticks": 3191
+        },
+        "softlock": {
+          "at": [
+            1180,
+            1914,
+            2169
+          ],
+          "cant_fail": true,
+          "catches": 0,
+          "note": "can't-fail: no catch can be forced",
+          "ok": true,
+          "why": ""
+        },
+        "three_stars": false,
+        "three_stars_note": "n/a (no Curtain Calls)",
+        "three_stars_proven": true
+      },
+      "wrote": ""
+    }
+  },
+  "generated_by": "tools/solve.gd",
+  "runs": [
+    {
+      "applause": 118.3,
+      "applause_tenths": 1183,
+      "catches": [],
+      "dead_air_ff_pct": 37.4,
+      "dead_air_pct": 50.0,
+      "derived_from": "",
+      "duration_s": 131.07,
+      "episode": "n01_throat_tea",
+      "expect": {
+        "applause": [
+          100.0,
+          140.0
+        ],
+        "catches_max": 0.0,
+        "duration_s": [
+          110.0,
+          300.0
+        ],
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle",
+          "orbit",
+          "sneeze",
+          "bn"
+        ],
+        "stars": [
+          true,
+          true,
+          true
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 0.53,
+      "first_player_laugh_s": 0.53,
+      "first_prank_launch_s": 17.02,
+      "first_prank_s": 17.02,
+      "freeze_total_s": 0.0,
+      "hash": 4181503477,
+      "hold_total_s": 6.4,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "squeak_bit:bit_warmup",
+          "t": 0.53
+        },
+        {
+          "kind": "reaction_accent:achoo_ria",
+          "t": 17.02
+        },
+        {
+          "kind": "reaction_accent:tap_dance",
+          "t": 17.35
+        },
+        {
+          "kind": "combo",
+          "t": 18.3
+        },
+        {
+          "kind": "squeak_bit:bit_paper",
+          "t": 62.27
+        },
+        {
+          "kind": "squeak_bit:bit_paper",
+          "t": 65.32
+        },
+        {
+          "kind": "reaction_accent:kettle_drum",
+          "t": 110.45
+        },
+        {
+          "kind": "reaction_accent:in_a_pickle",
+          "t": 121.65
+        },
+        {
+          "kind": "reaction_accent:lift_off",
+          "t": 129.03
+        },
+        {
+          "kind": "meltdown_start",
+          "t": 131.02
+        }
+      ],
+      "laughs_by_60": 4,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "kettle",
+        "tap",
+        "pickle",
+        "orbit",
+        "sneeze",
+        "bn"
+      ],
+      "max_gap_ff_s": 10.02,
+      "max_gap_s": 21.02,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "ideal",
+      "prank_interval_mean_s": 28.0,
+      "pranks_landed": 5,
+      "real_time_ff_s": 69.42,
+      "route": "ideal",
+      "stars": [
+        true,
+        true,
+        true
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (wait {\"tick_ge_s\":0.5})",
+          "ok": true,
+          "t0": 0,
+          "t1": 30,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (squeak)",
+          "ok": true,
+          "t0": 31,
+          "t1": 32,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (rig tap_dance)",
+          "ok": true,
+          "t0": 33,
+          "t1": 99,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (rig achoo_ria)",
+          "ok": true,
+          "t0": 100,
+          "t1": 276,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (hide kitchen_table)",
+          "ok": true,
+          "t0": 277,
+          "t1": 369,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 370,
+          "t1": 1098,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (wait {\"bellows_in_room\":\"hall\"})",
+          "ok": true,
+          "t0": 1099,
+          "t1": 1673,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 1674,
+          "t1": 1948,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (wait_event b_activity)",
+          "ok": true,
+          "t0": 1949,
+          "t1": 2936,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (pick squeaker)",
+          "ok": true,
+          "t0": 2937,
+          "t1": 3172,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (wait_event b_activity)",
+          "ok": true,
+          "t0": 3173,
+          "t1": 3579,
+          "why": ""
+        },
+        {
+          "i": 12,
+          "label": "12 (move parlour)",
+          "ok": true,
+          "t0": 3580,
+          "t1": 3734,
+          "why": ""
+        },
+        {
+          "i": 13,
+          "label": "13 (squeak)",
+          "ok": true,
+          "t0": 3735,
+          "t1": 3736,
+          "why": ""
+        },
+        {
+          "i": 14,
+          "label": "14 (idle)",
+          "ok": true,
+          "t0": 3737,
+          "t1": 3917,
+          "why": ""
+        },
+        {
+          "i": 15,
+          "label": "15 (squeak)",
+          "ok": true,
+          "t0": 3918,
+          "t1": 3919,
+          "why": ""
+        },
+        {
+          "i": 16,
+          "label": "16 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 3920,
+          "t1": 3956,
+          "why": ""
+        },
+        {
+          "i": 17,
+          "label": "17 (wait_event b_activity)",
+          "ok": true,
+          "t0": 3957,
+          "t1": 4688,
+          "why": ""
+        },
+        {
+          "i": 18,
+          "label": "18 (rig lift_off)",
+          "ok": true,
+          "t0": 4689,
+          "t1": 4886,
+          "why": ""
+        },
+        {
+          "i": 19,
+          "label": "19 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 4887,
+          "t1": 4934,
+          "why": ""
+        },
+        {
+          "i": 20,
+          "label": "20 (wait_event b_activity)",
+          "ok": true,
+          "t0": 4935,
+          "t1": 5481,
+          "why": ""
+        },
+        {
+          "i": 21,
+          "label": "21 (rig kettle_drum)",
+          "ok": true,
+          "t0": 5482,
+          "t1": 5712,
+          "why": ""
+        },
+        {
+          "i": 22,
+          "label": "22 (rig in_a_pickle)",
+          "ok": true,
+          "t0": 5713,
+          "t1": 5829,
+          "why": ""
+        },
+        {
+          "i": 23,
+          "label": "23 (hide kitchen_table)",
+          "ok": true,
+          "t0": 5830,
+          "t1": 5896,
+          "why": ""
+        },
+        {
+          "i": 24,
+          "label": "24 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 5897,
+          "t1": 7861,
+          "why": ""
+        },
+        {
+          "i": 25,
+          "label": "25 (wait {\"all_required_done\":true})",
+          "ok": true,
+          "t0": 7862,
+          "t1": 7862,
+          "why": ""
+        },
+        {
+          "i": 26,
+          "label": "26 (bow)",
+          "ok": true,
+          "t0": 7863,
+          "t1": 7864,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 7864,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n01_throat_tea_ideal.png",
+      "warnings": []
+    },
+    {
+      "applause": 39.5,
+      "applause_tenths": 395,
+      "catches": [],
+      "dead_air_ff_pct": 57.2,
+      "dead_air_pct": 73.9,
+      "derived_from": "",
+      "duration_s": 148.78,
+      "episode": "n01_throat_tea",
+      "expect": {
+        "applause": [
+          35.0,
+          60.0
+        ],
+        "catches_max": 0.0,
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle"
+        ],
+        "stars": [
+          true,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 20.65,
+      "first_player_laugh_s": 20.65,
+      "first_prank_launch_s": 20.65,
+      "first_prank_s": 20.65,
+      "freeze_total_s": 0.0,
+      "hash": 2110147859,
+      "hold_total_s": 3.1,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "reaction_accent:in_a_pickle",
+          "t": 20.65
+        },
+        {
+          "kind": "reaction_accent:tap_dance",
+          "t": 47.3
+        },
+        {
+          "kind": "reaction_accent:kettle_drum",
+          "t": 147.53
+        }
+      ],
+      "laughs_by_60": 2,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "kettle",
+        "tap",
+        "pickle"
+      ],
+      "max_gap_ff_s": 16.92,
+      "max_gap_s": 49.92,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "required",
+      "prank_interval_mean_s": 63.43,
+      "pranks_landed": 3,
+      "real_time_ff_s": 66.05,
+      "route": "required",
+      "stars": [
+        true,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (rig tap_dance)",
+          "ok": true,
+          "t0": 0,
+          "t1": 50,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (rig in_a_pickle)",
+          "ok": true,
+          "t0": 51,
+          "t1": 243,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (hide kitchen_table)",
+          "ok": true,
+          "t0": 244,
+          "t1": 310,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 311,
+          "t1": 1320,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (wait_event b_activity)",
+          "ok": true,
+          "t0": 1321,
+          "t1": 2728,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (pick squeaker)",
+          "ok": true,
+          "t0": 2729,
+          "t1": 3207,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 3208,
+          "t1": 3249,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (wait_event b_activity)",
+          "ok": true,
+          "t0": 3250,
+          "t1": 4500,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 4501,
+          "t1": 4715,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (wait_event b_activity)",
+          "ok": true,
+          "t0": 4716,
+          "t1": 5143,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (rig kettle_drum)",
+          "ok": true,
+          "t0": 5144,
+          "t1": 5374,
+          "why": ""
+        },
+        {
+          "i": 12,
+          "label": "12 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 5375,
+          "t1": 5557,
+          "why": ""
+        },
+        {
+          "i": 13,
+          "label": "13 (wait_event b_activity)",
+          "ok": true,
+          "t0": 5558,
+          "t1": 5774,
+          "why": ""
+        },
+        {
+          "i": 14,
+          "label": "14 (pop_out)",
+          "ok": true,
+          "t0": 5775,
+          "t1": 5776,
+          "why": ""
+        },
+        {
+          "i": 15,
+          "label": "15 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 5777,
+          "t1": 5805,
+          "why": ""
+        },
+        {
+          "i": 16,
+          "label": "16 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 5806,
+          "t1": 8925,
+          "why": ""
+        },
+        {
+          "i": 17,
+          "label": "17 (bow)",
+          "ok": true,
+          "t0": 8926,
+          "t1": 8927,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 8927,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n01_throat_tea_required.png",
+      "warnings": []
+    },
+    {
+      "applause": 44.5,
+      "applause_tenths": 445,
+      "catches": [],
+      "dead_air_ff_pct": 43.6,
+      "dead_air_pct": 63.8,
+      "derived_from": "",
+      "duration_s": 155.08,
+      "episode": "n01_throat_tea",
+      "expect": {
+        "first_player_laugh_s_max": 10.0,
+        "first_prank_s_max": 30.0,
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle"
+        ],
+        "stars": [
+          true,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 3.62,
+      "first_player_laugh_s": 3.62,
+      "first_prank_launch_s": 26.35,
+      "first_prank_s": 26.35,
+      "freeze_total_s": 0.0,
+      "hash": 791229888,
+      "hold_total_s": 3.1,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "squeak_bit:bit_warmup",
+          "t": 3.62
+        },
+        {
+          "kind": "reaction_accent:in_a_pickle",
+          "t": 26.35
+        },
+        {
+          "kind": "reaction_accent:tap_dance",
+          "t": 53.0
+        },
+        {
+          "kind": "squeak_bit:bit_paper",
+          "t": 103.2
+        },
+        {
+          "kind": "squeak_bit:bit_paper",
+          "t": 106.85
+        },
+        {
+          "kind": "reaction_accent:kettle_drum",
+          "t": 153.23
+        }
+      ],
+      "laughs_by_60": 3,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "kettle",
+        "tap",
+        "pickle"
+      ],
+      "max_gap_ff_s": 14.95,
+      "max_gap_s": 44.43,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "slow",
+      "prank_interval_mean_s": 63.43,
+      "pranks_landed": 3,
+      "real_time_ff_s": 77.05,
+      "route": "slow",
+      "stars": [
+        true,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (squeak)",
+          "ok": true,
+          "t0": 180,
+          "t1": 217,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (go kitchen_pantry_shelf)",
+          "ok": true,
+          "t0": 218,
+          "t1": 281,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (rig tap_dance)",
+          "ok": true,
+          "t0": 282,
+          "t1": 392,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (rig in_a_pickle)",
+          "ok": true,
+          "t0": 393,
+          "t1": 621,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (hide kitchen_table)",
+          "ok": true,
+          "t0": 622,
+          "t1": 724,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 725,
+          "t1": 1662,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (wait_event b_activity)",
+          "ok": true,
+          "t0": 1663,
+          "t1": 3070,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (pick squeaker)",
+          "ok": true,
+          "t0": 3071,
+          "t1": 3681,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 3682,
+          "t1": 3759,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (wait_event b_activity)",
+          "ok": true,
+          "t0": 3760,
+          "t1": 4842,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 4843,
+          "t1": 5093,
+          "why": ""
+        },
+        {
+          "i": 12,
+          "label": "12 (wait_event b_activity)",
+          "ok": true,
+          "t0": 5094,
+          "t1": 5485,
+          "why": ""
+        },
+        {
+          "i": 13,
+          "label": "13 (rig kettle_drum)",
+          "ok": true,
+          "t0": 5486,
+          "t1": 5752,
+          "why": ""
+        },
+        {
+          "i": 14,
+          "label": "14 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 5753,
+          "t1": 5971,
+          "why": ""
+        },
+        {
+          "i": 15,
+          "label": "15 (wait_event b_activity)",
+          "ok": true,
+          "t0": 5972,
+          "t1": 6116,
+          "why": ""
+        },
+        {
+          "i": 16,
+          "label": "16 (pop_out)",
+          "ok": true,
+          "t0": 6117,
+          "t1": 6154,
+          "why": ""
+        },
+        {
+          "i": 17,
+          "label": "17 (squeak)",
+          "ok": true,
+          "t0": 6155,
+          "t1": 6192,
+          "why": ""
+        },
+        {
+          "i": 18,
+          "label": "18 (idle)",
+          "ok": true,
+          "t0": 6193,
+          "t1": 6373,
+          "why": ""
+        },
+        {
+          "i": 19,
+          "label": "19 (squeak)",
+          "ok": true,
+          "t0": 6374,
+          "t1": 6411,
+          "why": ""
+        },
+        {
+          "i": 20,
+          "label": "20 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 6412,
+          "t1": 6463,
+          "why": ""
+        },
+        {
+          "i": 21,
+          "label": "21 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 6464,
+          "t1": 9267,
+          "why": ""
+        },
+        {
+          "i": 22,
+          "label": "22 (bow)",
+          "ok": true,
+          "t0": 9268,
+          "t1": 9305,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 9305,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n01_throat_tea_slow.png",
+      "warnings": []
+    },
+    {
+      "applause": 116.5,
+      "applause_tenths": 1165,
+      "catches": [],
+      "dead_air_ff_pct": 37.6,
+      "dead_air_pct": 54.6,
+      "derived_from": "",
+      "duration_s": 182.75,
+      "episode": "n02_something_fishy",
+      "expect": {
+        "applause": [
+          100.0,
+          140.0
+        ],
+        "catches_max": 0.0,
+        "duration_s": [
+          150.0,
+          360.0
+        ],
+        "lines": [
+          "fish",
+          "clock",
+          "dinner",
+          "news",
+          "bn"
+        ],
+        "stars": [
+          true,
+          true,
+          true
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 3.78,
+      "first_player_laugh_s": 3.78,
+      "first_prank_launch_s": 48.87,
+      "first_prank_s": 48.87,
+      "freeze_total_s": 13.82,
+      "hash": 1885366483,
+      "hold_total_s": 8.6,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "squeak_bit:bit_mirror",
+          "t": 3.78
+        },
+        {
+          "kind": "reaction_accent:cold_open",
+          "t": 48.87
+        },
+        {
+          "kind": "reaction_accent:something_fishy",
+          "t": 79.67
+        },
+        {
+          "kind": "reaction_accent:times_up",
+          "t": 84.02
+        },
+        {
+          "kind": "meltdown_start",
+          "t": 85.82
+        },
+        {
+          "kind": "bump",
+          "t": 146.45
+        },
+        {
+          "kind": "reaction_accent:mirror_mirror",
+          "t": 152.98
+        },
+        {
+          "kind": "reaction_accent:times_up",
+          "t": 166.35
+        },
+        {
+          "kind": "reaction_accent:eye_popping_news",
+          "t": 180.77
+        },
+        {
+          "kind": "meltdown_start",
+          "t": 182.72
+        }
+      ],
+      "laughs_by_60": 2,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "fish",
+        "clock",
+        "dinner",
+        "news",
+        "bn"
+      ],
+      "max_gap_ff_s": 13.45,
+      "max_gap_s": 38.98,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "ideal",
+      "prank_interval_mean_s": 26.37,
+      "pranks_landed": 6,
+      "real_time_ff_s": 95.43,
+      "route": "ideal",
+      "stars": [
+        true,
+        true,
+        true
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (move parlour)",
+          "ok": true,
+          "t0": 0,
+          "t1": 225,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (squeak)",
+          "ok": true,
+          "t0": 226,
+          "t1": 227,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (pick kipper)",
+          "ok": true,
+          "t0": 228,
+          "t1": 452,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (rig cold_open)",
+          "ok": true,
+          "t0": 453,
+          "t1": 544,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 545,
+          "t1": 589,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 590,
+          "t1": 3011,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (wait {\"and\":[{\"bellows_in_room\":\"kitchen\"},{\"bellows_state\":\"detour\"},{\"bellows_facing_away_from_hush\":true}]})",
+          "ok": true,
+          "t0": 3012,
+          "t1": 3114,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (rig times_up)",
+          "ok": true,
+          "t0": 3115,
+          "t1": 3571,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (rig something_fishy)",
+          "ok": true,
+          "t0": 3572,
+          "t1": 3648,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (pick magnifier)",
+          "ok": true,
+          "t0": 3649,
+          "t1": 3736,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 3737,
+          "t1": 3778,
+          "why": ""
+        },
+        {
+          "i": 12,
+          "label": "12 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 3779,
+          "t1": 5149,
+          "why": ""
+        },
+        {
+          "i": 13,
+          "label": "13 (wait {\"and\":[{\"bellows_activity\":\"paper\"},{\"bellows_in_room\":\"parlour\"},{\"bellows_facing_away_from_hush\":true}]})",
+          "ok": true,
+          "t0": 5150,
+          "t1": 6369,
+          "why": ""
+        },
+        {
+          "i": 14,
+          "label": "14 (rig mirror_mirror)",
+          "ok": true,
+          "t0": 6370,
+          "t1": 6611,
+          "why": ""
+        },
+        {
+          "i": 15,
+          "label": "15 (rig times_up)",
+          "ok": true,
+          "t0": 6612,
+          "t1": 6728,
+          "why": ""
+        },
+        {
+          "i": 16,
+          "label": "16 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 6729,
+          "t1": 6845,
+          "why": ""
+        },
+        {
+          "i": 17,
+          "label": "17 (wait {\"and\":[{\"bellows_activity\":\"snack\"},{\"bellows_in_room\":\"kitchen\"}]})",
+          "ok": true,
+          "t0": 6846,
+          "t1": 7819,
+          "why": ""
+        },
+        {
+          "i": 18,
+          "label": "18 (rig eye_popping_news)",
+          "ok": true,
+          "t0": 7820,
+          "t1": 8104,
+          "why": ""
+        },
+        {
+          "i": 19,
+          "label": "19 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 8105,
+          "t1": 8158,
+          "why": ""
+        },
+        {
+          "i": 20,
+          "label": "20 (wait_event prank_fire)",
+          "ok": true,
+          "t0": 8159,
+          "t1": 8159,
+          "why": ""
+        },
+        {
+          "i": 21,
+          "label": "21 (stand_in mirror_mirror)",
+          "ok": true,
+          "t0": 8160,
+          "t1": 9115,
+          "why": ""
+        },
+        {
+          "i": 22,
+          "label": "22 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 9116,
+          "t1": 9207,
+          "why": ""
+        },
+        {
+          "i": 23,
+          "label": "23 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 9208,
+          "t1": 10963,
+          "why": ""
+        },
+        {
+          "i": 24,
+          "label": "24 (bow)",
+          "ok": true,
+          "t0": 10964,
+          "t1": 10965,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 10965,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n02_something_fishy_ideal.png",
+      "warnings": []
+    },
+    {
+      "applause": 59.3,
+      "applause_tenths": 593,
+      "catches": [],
+      "dead_air_ff_pct": 57.8,
+      "dead_air_pct": 69.6,
+      "derived_from": "",
+      "duration_s": 85.85,
+      "episode": "n02_something_fishy",
+      "expect": {
+        "applause": [
+          35.0,
+          60.0
+        ],
+        "catches_max": 0.0,
+        "lines": [
+          "fish",
+          "clock",
+          "dinner"
+        ],
+        "stars": [
+          true,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 48.87,
+      "first_player_laugh_s": 48.87,
+      "first_prank_launch_s": 48.87,
+      "first_prank_s": 48.87,
+      "freeze_total_s": 0.0,
+      "hash": 3483822212,
+      "hold_total_s": 3.8,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "reaction_accent:cold_open",
+          "t": 48.87
+        },
+        {
+          "kind": "reaction_accent:something_fishy",
+          "t": 79.67
+        },
+        {
+          "kind": "reaction_accent:times_up",
+          "t": 84.02
+        },
+        {
+          "kind": "meltdown_start",
+          "t": 85.82
+        }
+      ],
+      "laughs_by_60": 1,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "fish",
+        "clock",
+        "dinner"
+      ],
+      "max_gap_ff_s": 15.38,
+      "max_gap_s": 44.77,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "required",
+      "prank_interval_mean_s": 17.57,
+      "pranks_landed": 3,
+      "real_time_ff_s": 37.95,
+      "route": "required",
+      "stars": [
+        true,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (pick kipper)",
+          "ok": true,
+          "t0": 0,
+          "t1": 105,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (rig cold_open)",
+          "ok": true,
+          "t0": 106,
+          "t1": 197,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 198,
+          "t1": 242,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 243,
+          "t1": 3011,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (wait {\"and\":[{\"bellows_in_room\":\"kitchen\"},{\"bellows_state\":\"detour\"},{\"bellows_facing_away_from_hush\":true}]})",
+          "ok": true,
+          "t0": 3012,
+          "t1": 3114,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (rig times_up)",
+          "ok": true,
+          "t0": 3115,
+          "t1": 3571,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (rig something_fishy)",
+          "ok": true,
+          "t0": 3572,
+          "t1": 3648,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 3649,
+          "t1": 3715,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 3716,
+          "t1": 5149,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (bow)",
+          "ok": true,
+          "t0": 5150,
+          "t1": 5151,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 5151,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n02_something_fishy_required.png",
+      "warnings": []
+    },
+    {
+      "applause": 61.3,
+      "applause_tenths": 613,
+      "catches": [],
+      "dead_air_ff_pct": 38.4,
+      "dead_air_pct": 53.8,
+      "derived_from": "",
+      "duration_s": 86.45,
+      "episode": "n02_something_fishy",
+      "expect": {
+        "first_player_laugh_s_max": 10.0,
+        "lines": [
+          "fish",
+          "clock",
+          "dinner"
+        ],
+        "stars": [
+          true,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 8.62,
+      "first_player_laugh_s": 8.62,
+      "first_prank_launch_s": 48.87,
+      "first_prank_s": 48.87,
+      "freeze_total_s": 0.0,
+      "hash": 1178829330,
+      "hold_total_s": 3.8,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "squeak_bit:bit_phone",
+          "t": 8.62
+        },
+        {
+          "kind": "reaction_accent:cold_open",
+          "t": 48.87
+        },
+        {
+          "kind": "reaction_accent:something_fishy",
+          "t": 79.67
+        },
+        {
+          "kind": "reaction_accent:times_up",
+          "t": 84.02
+        },
+        {
+          "kind": "meltdown_start",
+          "t": 85.82
+        }
+      ],
+      "laughs_by_60": 2,
+      "launch_offset_s": 0.0,
+      "lines": [
+        "fish",
+        "clock",
+        "dinner"
+      ],
+      "max_gap_ff_s": 11.58,
+      "max_gap_s": 32.62,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "slow",
+      "prank_interval_mean_s": 17.57,
+      "pranks_landed": 3,
+      "real_time_ff_s": 47.55,
+      "route": "slow",
+      "stars": [
+        true,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (go kitchen_sink_tap)",
+          "ok": true,
+          "t0": 180,
+          "t1": 218,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (move parlour)",
+          "ok": true,
+          "t0": 219,
+          "t1": 479,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (squeak)",
+          "ok": true,
+          "t0": 480,
+          "t1": 517,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (pick kipper)",
+          "ok": true,
+          "t0": 518,
+          "t1": 762,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (rig cold_open)",
+          "ok": true,
+          "t0": 763,
+          "t1": 890,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 891,
+          "t1": 993,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 994,
+          "t1": 3011,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (wait {\"and\":[{\"bellows_in_room\":\"kitchen\"},{\"bellows_state\":\"detour\"},{\"bellows_facing_away_from_hush\":true}]})",
+          "ok": true,
+          "t0": 3012,
+          "t1": 3114,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (rig times_up)",
+          "ok": true,
+          "t0": 3115,
+          "t1": 3607,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (rig something_fishy)",
+          "ok": true,
+          "t0": 3608,
+          "t1": 3743,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (hide hall_coat_cupboard)",
+          "ok": true,
+          "t0": 3744,
+          "t1": 3846,
+          "why": ""
+        },
+        {
+          "i": 12,
+          "label": "12 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 3847,
+          "t1": 5149,
+          "why": ""
+        },
+        {
+          "i": 13,
+          "label": "13 (bow)",
+          "ok": true,
+          "t0": 5150,
+          "t1": 5187,
+          "why": "night ended (bow)"
+        }
+      ],
+      "ticks": 5187,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/n02_something_fishy_slow.png",
+      "warnings": []
+    },
+    {
+      "applause": 89.5,
+      "applause_tenths": 895,
+      "catches": [],
+      "dead_air_ff_pct": 25.1,
+      "dead_air_pct": 31.2,
+      "derived_from": "",
+      "duration_s": 59.05,
+      "episode": "p00_curtain_up",
+      "expect": {
+        "catches_max": 0.0,
+        "duration_s": [
+          50.0,
+          80.0
+        ],
+        "first_player_laugh_s_max": 10.0,
+        "first_prank_s_max": 30.0,
+        "laughs_by_s": [
+          [
+            60.0,
+            6.0
+          ]
+        ],
+        "lines": [
+          "sneeze",
+          "spin"
+        ],
+        "stars": [
+          null,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 6.13,
+      "first_player_laugh_s": 3.83,
+      "first_prank_launch_s": 24.73,
+      "first_prank_s": 22.43,
+      "freeze_total_s": 0.0,
+      "hash": 2275374003,
+      "hold_total_s": 1.6,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "cue:laugh_vase",
+          "t": 2.3
+        },
+        {
+          "kind": "squeak_bit:bit_warmup",
+          "t": 3.83
+        },
+        {
+          "kind": "reaction_accent:achoo_ria",
+          "t": 22.43
+        },
+        {
+          "kind": "cue:laugh_doorframe",
+          "t": 27.45
+        },
+        {
+          "kind": "reaction_accent:allegro_go_go",
+          "t": 43.82
+        },
+        {
+          "kind": "cue:laugh_relief",
+          "t": 53.47
+        },
+        {
+          "kind": "cue:laugh_picture",
+          "t": 54.05
+        }
+      ],
+      "laughs_by_60": 7,
+      "launch_offset_s": 2.3,
+      "lines": [
+        "sneeze",
+        "spin"
+      ],
+      "max_gap_ff_s": 5.85,
+      "max_gap_s": 13.75,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "ideal",
+      "prank_interval_mean_s": 21.38,
+      "pranks_landed": 2,
+      "real_time_ff_s": 30.18,
+      "route": "ideal",
+      "stars": [
+        false,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (wait {\"tick_ge_s\":3.8})",
+          "ok": true,
+          "t0": 0,
+          "t1": 228,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (squeak)",
+          "ok": true,
+          "t0": 229,
+          "t1": 230,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (rig achoo_ria)",
+          "ok": true,
+          "t0": 231,
+          "t1": 424,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 425,
+          "t1": 542,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 543,
+          "t1": 1417,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (wait {\"bellows_in_room\":\"hall\"})",
+          "ok": true,
+          "t0": 1418,
+          "t1": 1956,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (rig allegro_go_go)",
+          "ok": true,
+          "t0": 1957,
+          "t1": 2317,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 2318,
+          "t1": 2362,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 2363,
+          "t1": 2712,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (wait_event night_end)",
+          "ok": true,
+          "t0": 2713,
+          "t1": 3543,
+          "why": "night ended (prologue_done)"
+        }
+      ],
+      "ticks": 3543,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/p00_curtain_up_ideal.png",
+      "warnings": []
+    },
+    {
+      "applause": 87.5,
+      "applause_tenths": 875,
+      "catches": [],
+      "dead_air_ff_pct": 31.7,
+      "dead_air_pct": 39.8,
+      "derived_from": "",
+      "duration_s": 67.02,
+      "episode": "p00_curtain_up",
+      "expect": {
+        "catches_max": 0.0,
+        "duration_s": [
+          55.0,
+          95.0
+        ],
+        "lines": [
+          "sneeze",
+          "spin"
+        ],
+        "stars": [
+          null,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 32.7,
+      "first_player_laugh_s": 30.4,
+      "first_prank_launch_s": 32.7,
+      "first_prank_s": 30.4,
+      "freeze_total_s": 0.0,
+      "hash": 446193848,
+      "hold_total_s": 1.6,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "cue:laugh_vase",
+          "t": 2.3
+        },
+        {
+          "kind": "reaction_accent:achoo_ria",
+          "t": 30.4
+        },
+        {
+          "kind": "cue:laugh_doorframe",
+          "t": 35.42
+        },
+        {
+          "kind": "reaction_accent:allegro_go_go",
+          "t": 51.78
+        },
+        {
+          "kind": "cue:laugh_relief",
+          "t": 61.43
+        },
+        {
+          "kind": "cue:laugh_picture",
+          "t": 62.02
+        }
+      ],
+      "laughs_by_60": 4,
+      "launch_offset_s": 2.3,
+      "lines": [
+        "sneeze",
+        "spin"
+      ],
+      "max_gap_ff_s": 8.62,
+      "max_gap_s": 22.02,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "required",
+      "prank_interval_mean_s": 21.38,
+      "pranks_landed": 2,
+      "real_time_ff_s": 32.63,
+      "route": "required",
+      "stars": [
+        false,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (wait {\"tick_ge_s\":3.8})",
+          "ok": true,
+          "t0": 0,
+          "t1": 228,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (rig achoo_ria)",
+          "ok": true,
+          "t0": 229,
+          "t1": 406,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 407,
+          "t1": 524,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 525,
+          "t1": 1895,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (wait {\"bellows_in_room\":\"hall\"})",
+          "ok": true,
+          "t0": 1896,
+          "t1": 2434,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (rig allegro_go_go)",
+          "ok": true,
+          "t0": 2435,
+          "t1": 2795,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 2796,
+          "t1": 2840,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 2841,
+          "t1": 3190,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (wait_event night_end)",
+          "ok": true,
+          "t0": 3191,
+          "t1": 4021,
+          "why": "night ended (prologue_done)"
+        }
+      ],
+      "ticks": 4021,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/p00_curtain_up_required.png",
+      "warnings": []
+    },
+    {
+      "applause": 89.5,
+      "applause_tenths": 895,
+      "catches": [],
+      "dead_air_ff_pct": 20.7,
+      "dead_air_pct": 27.8,
+      "derived_from": "",
+      "duration_s": 62.03,
+      "episode": "p00_curtain_up",
+      "expect": {
+        "first_player_laugh_s_max": 10.0,
+        "first_prank_s_max": 30.0,
+        "laughs_by_s": [
+          [
+            75.0,
+            4.0
+          ]
+        ],
+        "lines": [
+          "sneeze",
+          "spin"
+        ],
+        "stars": [
+          null,
+          null,
+          null
+        ]
+      },
+      "fail": [],
+      "first_player_laugh_launch_s": 6.63,
+      "first_player_laugh_s": 4.33,
+      "first_prank_launch_s": 27.72,
+      "first_prank_s": 25.42,
+      "freeze_total_s": 0.0,
+      "hash": 2395894316,
+      "hold_total_s": 1.6,
+      "invariants": [],
+      "laughs": [
+        {
+          "kind": "cue:laugh_vase",
+          "t": 2.3
+        },
+        {
+          "kind": "squeak_bit:bit_warmup",
+          "t": 4.33
+        },
+        {
+          "kind": "reaction_accent:achoo_ria",
+          "t": 25.42
+        },
+        {
+          "kind": "cue:laugh_doorframe",
+          "t": 30.43
+        },
+        {
+          "kind": "reaction_accent:allegro_go_go",
+          "t": 46.8
+        },
+        {
+          "kind": "cue:laugh_relief",
+          "t": 56.45
+        },
+        {
+          "kind": "cue:laugh_picture",
+          "t": 57.03
+        }
+      ],
+      "laughs_by_60": 7,
+      "launch_offset_s": 2.3,
+      "lines": [
+        "sneeze",
+        "spin"
+      ],
+      "max_gap_ff_s": 5.65,
+      "max_gap_s": 13.15,
+      "near_misses": 0,
+      "ok": true,
+      "persona": "slow",
+      "prank_interval_mean_s": 21.38,
+      "pranks_landed": 2,
+      "real_time_ff_s": 33.97,
+      "route": "slow",
+      "stars": [
+        false,
+        false,
+        false
+      ],
+      "steps": [
+        {
+          "i": 1,
+          "label": "1 (wait {\"event_seen\":{\"event\":\"director_cue\",\"match\":{\"id\":\"ghost_squeak\"}}})",
+          "ok": true,
+          "t0": 180,
+          "t1": 222,
+          "why": ""
+        },
+        {
+          "i": 2,
+          "label": "2 (squeak)",
+          "ok": true,
+          "t0": 223,
+          "t1": 260,
+          "why": ""
+        },
+        {
+          "i": 3,
+          "label": "3 (wait {\"event_seen\":{\"event\":\"director_cue\",\"match\":{\"id\":\"ghost_honey\"}}})",
+          "ok": true,
+          "t0": 261,
+          "t1": 351,
+          "why": ""
+        },
+        {
+          "i": 4,
+          "label": "4 (go kitchen_sink_tap)",
+          "ok": true,
+          "t0": 352,
+          "t1": 390,
+          "why": ""
+        },
+        {
+          "i": 5,
+          "label": "5 (rig achoo_ria)",
+          "ok": true,
+          "t0": 391,
+          "t1": 603,
+          "why": ""
+        },
+        {
+          "i": 6,
+          "label": "6 (hide kitchen_pantry_curtain)",
+          "ok": true,
+          "t0": 604,
+          "t1": 757,
+          "why": ""
+        },
+        {
+          "i": 7,
+          "label": "7 (wait_event reaction_end)",
+          "ok": true,
+          "t0": 758,
+          "t1": 1596,
+          "why": ""
+        },
+        {
+          "i": 8,
+          "label": "8 (wait {\"event_seen\":{\"event\":\"director_cue\",\"match\":{\"id\":\"sparkle_lever\"}}})",
+          "ok": true,
+          "t0": 1597,
+          "t1": 2076,
+          "why": ""
+        },
+        {
+          "i": 9,
+          "label": "9 (rig allegro_go_go)",
+          "ok": true,
+          "t0": 2077,
+          "t1": 2473,
+          "why": ""
+        },
+        {
+          "i": 10,
+          "label": "10 (hide parlour_piano_back)",
+          "ok": true,
+          "t0": 2474,
+          "t1": 2554,
+          "why": ""
+        },
+        {
+          "i": 11,
+          "label": "11 (wait_event night_end)",
+          "ok": true,
+          "t0": 2555,
+          "t1": 3722,
+          "why": "night ended (prologue_done)"
+        }
+      ],
+      "ticks": 3722,
+      "timeline": "/home/user/mischief/docs/review/solver/timelines/p00_curtain_up_slow.png",
+      "warnings": []
+    }
+  ]
+}

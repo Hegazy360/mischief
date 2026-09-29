@@ -1,4 +1,8 @@
-# Mischief Next Door CI: GDScript tests (headless Godot) + committed import metadata.
+# Mischief Next Door CI (TECH §12): import metadata → GDScript tests → design lints → solver routes
+# for every `final` episode → bounded fairness fuzz, plus the Python checks (art validators, audio).
+# Every step passes on an empty-but-valid repo: a module that doesn't exist yet is SKIPPED with a
+# clear log line by the script itself (solve/fuzz/lint print "SKIP: …" and exit 0).
+# The Android preview APK lives in android-preview.yml (untouched here).
 name: CI
 
 on:
@@ -16,12 +20,14 @@ concurrency:
 
 env:
   GODOT_VERSION: "4.7.2"
+  # All Godot steps share one sandbox so the import runs once.
+  SANDBOX: ci
 
 jobs:
   godot:
-    name: Godot tests
+    name: Godot tests, lints, solver, fuzz
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-godot
@@ -31,3 +37,33 @@ jobs:
         run: tools/ci/check_import_meta.sh
       - name: GDScript test suite
         run: tools/scripts/test_game.sh ci
+      - name: Design lints (content, hotspot, IP; anim/rig when present)
+        run: tools/scripts/lint.sh
+      - name: Solver — every route of every final episode (expects, invariants, determinism)
+        run: |
+          mkdir -p build/solver
+          tools/scripts/solve.sh all --route=all --report="$PWD/build/solver/solve.json"
+      - name: Fairness fuzz — 20 seeded runs per bot per final episode
+        run: tools/scripts/fuzz.sh all --runs=20 --report="$PWD/build/solver/fuzz.json"
+      - name: Upload solver reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: solver-reports
+          path: build/solver
+          if-no-files-found: ignore
+          retention-days: 14
+
+  python-checks:
+    name: Art validators + audio check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install numpy + pillow
+        run: python3 -m pip install --quiet numpy pillow
+      - name: Art validators and gen_audio.py --check (each skipped when absent)
+        run: tools/ci/lint_all.sh --no-godot

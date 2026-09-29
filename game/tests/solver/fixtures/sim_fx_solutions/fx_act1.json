@@ -1,0 +1,8 @@
+{"version": 1, "episode": "fx_act1", "routes": {
+ "ideal": {"persona": "ideal", "steps": [
+   {"do": "rig", "prank": "tap_dance"},
+   {"do": "rig", "prank": "achoo_ria"},
+   {"do": "hide", "spot": "kitchen_pantry_curtain"},
+   {"do": "wait_event", "event": "reaction_end", "match": {"prank": "tap_dance"}, "max_s": 90},
+   {"do": "wait", "until": {"bellows_not_in_room": "kitchen"}, "max_s": 90}],
+  "expect": {"catches_max": 0}}}}

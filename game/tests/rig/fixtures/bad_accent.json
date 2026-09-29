@@ -1,0 +1,46 @@
+{
+ "version": 1,
+ "clip": "_mannequin/accent",
+ "rig": "_mannequin",
+ "loop": false,
+ "layer": "base",
+ "mask": null,
+ "beats": {
+  "anticipation": [
+   0,
+   10
+  ],
+  "accent": [
+   10,
+   18
+  ],
+  "hold": [
+   18,
+   60
+  ]
+ },
+ "length": 60,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 10,
+   "pose": "m_take_antic",
+   "ease": "out_cubic"
+  },
+  {
+   "f": 18,
+   "pose": "m_notice",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 60,
+   "pose": "m_notice_b",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": []
+}

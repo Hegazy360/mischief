@@ -1,0 +1,843 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "Hush cutout rig (TECH 4.7). px at zoom 1.0, y down, faces +x; `_r` = near side. offset = child joint in the parent's joint frame (root: joint above the FEET ORIGIN); pivot/sockets = canvas px of the part texture (joint = pivot; socket [x, y, rot]); world = parent * T(offset + pose.xy) * R(rot) * S(sx, sy); pose root channels = a transform about the feet origin applied first. Limb bones (`draw: limb:<id>`) are invisible; each limb is a round-capped hose through its joints' world positions (quadratic, control = 2*mid - (a+b)/2), `width` fill + `outline` ink each side. Parts with `visible: false` are hidden unless a pose sets vis 1. Face slots: canvas `pivot` placed on head * T(face.offset); pupils shift within `range` and hide while eyes is one of `hide_with`. Skins swap textures by path (skins.<id>.files) and limb fills; pivots are identical.",
+  "height_px": 340,
+  "root_part": "pelvis",
+  "origin": "feet",
+  "facing": 1,
+  "parts": {
+    "pelvis": {
+      "offset": [
+        0.0,
+        -118.3
+      ],
+      "file": "res://art/chars/hush/pelvis.svg",
+      "pivot": [
+        34.0,
+        21.0
+      ],
+      "size": [
+        69,
+        48
+      ],
+      "z": 11
+    },
+    "torso": {
+      "parent": "pelvis",
+      "offset": [
+        0.0,
+        -8.7
+      ],
+      "file": "res://art/chars/hush/torso.svg",
+      "pivot": [
+        34.0,
+        90.0
+      ],
+      "size": [
+        71,
+        108
+      ],
+      "z": 8,
+      "limits": {
+        "rot": [
+          -75,
+          75
+        ]
+      },
+      "sockets": {
+        "braces": [
+          51.4,
+          51.7,
+          14
+        ]
+      }
+    },
+    "braces_front": {
+      "parent": "torso",
+      "offset": [
+        0.0,
+        0.0
+      ],
+      "file": "res://art/chars/hush/braces_front.svg",
+      "pivot": [
+        9.0,
+        70.0
+      ],
+      "size": [
+        37,
+        81
+      ],
+      "z": 10
+    },
+    "braces_loop": {
+      "parent": "torso",
+      "offset": [
+        -12.2,
+        -53.9
+      ],
+      "file": "res://art/chars/hush/braces_loop.svg",
+      "pivot": [
+        21.0,
+        105.0
+      ],
+      "size": [
+        41,
+        116
+      ],
+      "z": 2,
+      "visible": false,
+      "sockets": {
+        "grab": [
+          19.3,
+          14.5,
+          0
+        ]
+      }
+    },
+    "head": {
+      "parent": "torso",
+      "offset": [
+        4.3,
+        -66.1
+      ],
+      "file": "res://art/chars/hush/head.svg",
+      "pivot": [
+        58.0,
+        117.0
+      ],
+      "size": [
+        119,
+        124
+      ],
+      "z": 12,
+      "limits": {
+        "rot": [
+          -40,
+          40
+        ]
+      },
+      "sockets": {
+        "hat": [
+          61.5,
+          24.8,
+          0
+        ]
+      }
+    },
+    "hair_back": {
+      "parent": "head",
+      "offset": [
+        -20.9,
+        -50.5
+      ],
+      "file": "res://art/chars/hush/hair_back.svg",
+      "pivot": [
+        32.0,
+        30.0
+      ],
+      "size": [
+        60,
+        81
+      ],
+      "z": 3,
+      "spring": {
+        "channel": "rot",
+        "k": 150,
+        "c": 8,
+        "clamp": 14
+      }
+    },
+    "beret": {
+      "parent": "head",
+      "offset": [
+        3.5,
+        -92.2
+      ],
+      "file": "res://art/chars/hush/beret.svg",
+      "pivot": [
+        63.0,
+        68.0
+      ],
+      "size": [
+        124,
+        89
+      ],
+      "z": 18,
+      "spring": {
+        "channel": "rot",
+        "k": 180,
+        "c": 9,
+        "clamp": 25
+      }
+    },
+    "arm_upper_r": {
+      "parent": "torso",
+      "offset": [
+        7.8,
+        -59.2
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 19,
+      "draw": "limb:arm_r",
+      "limits": {
+        "rot": [
+          -200,
+          200
+        ]
+      }
+    },
+    "arm_lower_r": {
+      "parent": "arm_upper_r",
+      "offset": [
+        0,
+        46.1
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 19,
+      "draw": "limb:arm_r",
+      "limits": {
+        "rot": [
+          -175,
+          175
+        ]
+      }
+    },
+    "hand_r": {
+      "parent": "arm_lower_r",
+      "offset": [
+        0,
+        44.4
+      ],
+      "pivot": [
+        41.0,
+        21.0
+      ],
+      "size": [
+        94,
+        103
+      ],
+      "z": 21,
+      "tex": {
+        "open": "res://art/chars/hush/hand_r_open.svg",
+        "wall": "res://art/chars/hush/hand_r_wall.svg",
+        "point": "res://art/chars/hush/hand_r_point.svg",
+        "pinch": "res://art/chars/hush/hand_r_pinch.svg",
+        "fist": "res://art/chars/hush/hand_r_fist.svg",
+        "thumbs_up": "res://art/chars/hush/hand_r_thumbs_up.svg",
+        "shush": "res://art/chars/hush/hand_r_shush.svg",
+        "wave": "res://art/chars/hush/hand_r_wave.svg"
+      },
+      "default_tex": "open",
+      "limits": {
+        "rot": [
+          -120,
+          120
+        ]
+      },
+      "sockets": {
+        "grip": [
+          51.4,
+          41.9,
+          90
+        ]
+      }
+    },
+    "arm_upper_l": {
+      "parent": "torso",
+      "offset": [
+        -8.7,
+        -60.9
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 0,
+      "draw": "limb:arm_l",
+      "limits": {
+        "rot": [
+          -200,
+          200
+        ]
+      }
+    },
+    "arm_lower_l": {
+      "parent": "arm_upper_l",
+      "offset": [
+        0,
+        46.1
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 0,
+      "draw": "limb:arm_l",
+      "limits": {
+        "rot": [
+          -175,
+          175
+        ]
+      }
+    },
+    "hand_l": {
+      "parent": "arm_lower_l",
+      "offset": [
+        0,
+        44.4
+      ],
+      "pivot": [
+        41.0,
+        21.0
+      ],
+      "size": [
+        94,
+        103
+      ],
+      "z": 1,
+      "tex": {
+        "open": "res://art/chars/hush/hand_l_open.svg",
+        "wall": "res://art/chars/hush/hand_l_wall.svg",
+        "point": "res://art/chars/hush/hand_l_point.svg",
+        "pinch": "res://art/chars/hush/hand_l_pinch.svg",
+        "fist": "res://art/chars/hush/hand_l_fist.svg",
+        "thumbs_up": "res://art/chars/hush/hand_l_thumbs_up.svg",
+        "shush": "res://art/chars/hush/hand_l_shush.svg",
+        "wave": "res://art/chars/hush/hand_l_wave.svg"
+      },
+      "default_tex": "open",
+      "limits": {
+        "rot": [
+          -120,
+          120
+        ]
+      },
+      "sockets": {
+        "grip": [
+          51.4,
+          41.9,
+          90
+        ]
+      }
+    },
+    "leg_upper_r": {
+      "parent": "pelvis",
+      "offset": [
+        6.1,
+        5.2
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 6,
+      "draw": "limb:leg_r",
+      "limits": {
+        "rot": [
+          -130,
+          90
+        ]
+      }
+    },
+    "leg_lower_r": {
+      "parent": "leg_upper_r",
+      "offset": [
+        0,
+        50.5
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 6,
+      "draw": "limb:leg_r",
+      "limits": {
+        "rot": [
+          -30,
+          170
+        ]
+      }
+    },
+    "foot_r": {
+      "parent": "leg_lower_r",
+      "offset": [
+        0,
+        49.6
+      ],
+      "pivot": [
+        25.0,
+        25.0
+      ],
+      "size": [
+        71,
+        69
+      ],
+      "z": 7,
+      "tex": {
+        "flat": "res://art/chars/hush/foot_r_flat.svg",
+        "tiptoe": "res://art/chars/hush/foot_r_tiptoe.svg"
+      },
+      "default_tex": "flat",
+      "limits": {
+        "rot": [
+          -60,
+          80
+        ]
+      }
+    },
+    "leg_upper_l": {
+      "parent": "pelvis",
+      "offset": [
+        -6.1,
+        5.2
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 4,
+      "draw": "limb:leg_l",
+      "limits": {
+        "rot": [
+          -130,
+          90
+        ]
+      }
+    },
+    "leg_lower_l": {
+      "parent": "leg_upper_l",
+      "offset": [
+        0,
+        50.5
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 4,
+      "draw": "limb:leg_l",
+      "limits": {
+        "rot": [
+          -30,
+          170
+        ]
+      }
+    },
+    "foot_l": {
+      "parent": "leg_lower_l",
+      "offset": [
+        0,
+        49.6
+      ],
+      "pivot": [
+        25.0,
+        25.0
+      ],
+      "size": [
+        71,
+        69
+      ],
+      "z": 5,
+      "tex": {
+        "flat": "res://art/chars/hush/foot_l_flat.svg",
+        "tiptoe": "res://art/chars/hush/foot_l_tiptoe.svg"
+      },
+      "default_tex": "flat",
+      "limits": {
+        "rot": [
+          -60,
+          80
+        ]
+      }
+    }
+  },
+  "limbs": {
+    "arm_r": {
+      "joints": [
+        "arm_upper_r",
+        "arm_lower_r",
+        "hand_r"
+      ],
+      "width": 22,
+      "fill": "#2B3566",
+      "outline": 6,
+      "ink": "#1B2340",
+      "cap": "round"
+    },
+    "leg_r": {
+      "joints": [
+        "leg_upper_r",
+        "leg_lower_r",
+        "foot_r"
+      ],
+      "width": 24,
+      "fill": "#2B3566",
+      "outline": 6,
+      "ink": "#1B2340",
+      "cap": "round"
+    },
+    "arm_l": {
+      "joints": [
+        "arm_upper_l",
+        "arm_lower_l",
+        "hand_l"
+      ],
+      "width": 22,
+      "fill": "#222B55",
+      "outline": 6,
+      "ink": "#1B2340",
+      "cap": "round"
+    },
+    "leg_l": {
+      "joints": [
+        "leg_upper_l",
+        "leg_lower_l",
+        "foot_l"
+      ],
+      "width": 24,
+      "fill": "#222B55",
+      "outline": 6,
+      "ink": "#1B2340",
+      "cap": "round"
+    }
+  },
+  "face": {
+    "anchor": "head",
+    "offset": [
+      20.9,
+      -50.5
+    ],
+    "pivot": [
+      41.0,
+      54.0
+    ],
+    "size": [
+      92,
+      108
+    ],
+    "slots": {
+      "eyes": {
+        "z": 13,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "open",
+        "variants": {
+          "open": "res://art/chars/hush/eyes_open.svg",
+          "half": "res://art/chars/hush/eyes_half.svg",
+          "closed": "res://art/chars/hush/eyes_closed.svg",
+          "wide": "res://art/chars/hush/eyes_wide.svg",
+          "happy": "res://art/chars/hush/eyes_happy.svg",
+          "worried": "res://art/chars/hush/eyes_worried.svg",
+          "squint": "res://art/chars/hush/eyes_squint.svg",
+          "wink": "res://art/chars/hush/eyes_wink.svg"
+        }
+      },
+      "pupils": {
+        "z": 14,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "centre",
+        "variants": {
+          "centre": "res://art/chars/hush/pupils.svg",
+          "left": "res://art/chars/hush/pupils_left.svg",
+          "right": "res://art/chars/hush/pupils_right.svg",
+          "up": "res://art/chars/hush/pupils_up.svg",
+          "down": "res://art/chars/hush/pupils_down.svg",
+          "down_left": "res://art/chars/hush/pupils_down_left.svg",
+          "up_right": "res://art/chars/hush/pupils_up_right.svg"
+        },
+        "range": [
+          6,
+          4
+        ],
+        "hide_with": [
+          "half",
+          "closed",
+          "happy",
+          "worried",
+          "squint",
+          "wink"
+        ],
+        "doc": "look variants are baked offsets; look_at adds up to `range` on top. Presets set pupils none whenever the eyes variant bakes its own pupils (hide_with)."
+      },
+      "brows": {
+        "z": 15,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "neutral",
+        "variants": {
+          "neutral": "res://art/chars/hush/brows_neutral.svg",
+          "up": "res://art/chars/hush/brows_up.svg",
+          "worried": "res://art/chars/hush/brows_worried.svg",
+          "sly": "res://art/chars/hush/brows_sly.svg",
+          "determined": "res://art/chars/hush/brows_determined.svg"
+        }
+      },
+      "mouth": {
+        "z": 14,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "smile",
+        "variants": {
+          "smile": "res://art/chars/hush/mouth_smile.svg",
+          "grin": "res://art/chars/hush/mouth_grin.svg",
+          "O": "res://art/chars/hush/mouth_O.svg",
+          "shh": "res://art/chars/hush/mouth_shh.svg",
+          "grimace": "res://art/chars/hush/mouth_grimace.svg",
+          "wavy": "res://art/chars/hush/mouth_wavy.svg",
+          "laugh": "res://art/chars/hush/mouth_laugh.svg",
+          "puffed": "res://art/chars/hush/mouth_puffed.svg",
+          "tongue": "res://art/chars/hush/mouth_tongue.svg"
+        }
+      },
+      "blush": {
+        "z": 13,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "none",
+        "overlay": true,
+        "variants": {
+          "on": "res://art/chars/hush/fx_blush.svg"
+        }
+      },
+      "sweat": {
+        "z": 16,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "none",
+        "overlay": true,
+        "variants": {
+          "on": "res://art/chars/hush/fx_sweat.svg"
+        }
+      },
+      "tear": {
+        "z": 16,
+        "pivot": [
+          41.0,
+          54.0
+        ],
+        "size": [
+          92,
+          108
+        ],
+        "default": "none",
+        "overlay": true,
+        "variants": {
+          "on": "res://art/chars/hush/fx_tear.svg"
+        }
+      }
+    }
+  },
+  "props": {
+    "clarence": {
+      "file": "res://art/chars/hush/clarence_limp.svg",
+      "pivot": [
+        46.0,
+        132.0
+      ],
+      "size": [
+        106,
+        164
+      ],
+      "socket": "torso:braces",
+      "sockets": [
+        "torso:braces",
+        "hand_r:grip"
+      ],
+      "z": 9,
+      "z_by_socket": {
+        "torso:braces": 9,
+        "hand_r:grip": 20
+      },
+      "states": [
+        "limp",
+        "squeezed",
+        "stretched",
+        "smitten"
+      ],
+      "default_state": "limp",
+      "tex": {
+        "limp": "res://art/chars/hush/clarence_limp.svg",
+        "squeezed": "res://art/chars/hush/clarence_squeezed.svg",
+        "stretched": "res://art/chars/hush/clarence_stretched.svg",
+        "smitten": "res://art/chars/hush/clarence_smitten.svg"
+      }
+    }
+  },
+  "residues": {
+    "TOMATO": {
+      "overlays": {
+        "head": "res://art/chars/hush/head_tomato.svg"
+      },
+      "doc": "view-only: the Stalls' tomato after a catch (GDD 6.3)"
+    }
+  },
+  "hidden": {
+    "doc": "Hiding-spot look: drawn by the hotspot, not the rig. `file` is complete (eyes + pupils + gloved fingertips in a dark gap); for tracking draw `whites` + `pupils` shifted within `pupil_range`; `blink` for 6 frames every 2-6 s.",
+    "file": "res://art/chars/hush/hidden_eyes.svg",
+    "whites": "res://art/chars/hush/hidden_eyes_whites.svg",
+    "blink": "res://art/chars/hush/hidden_eyes_blink.svg",
+    "pupils": "res://art/chars/hush/hidden_pupils.svg",
+    "pivot": [
+      77.0,
+      44.0
+    ],
+    "size": [
+      156,
+      95
+    ],
+    "pupil_range": [
+      6,
+      3
+    ]
+  },
+  "skins": {
+    "pip": {
+      "doc": "Pip fallback (GDD 1.2 R4): an 11-year-old Statues champion. Same part names, canvases, pivots, sockets; only textures and limb fills change.",
+      "dir": "res://art/chars/hush/pip/",
+      "files": {
+        "res://art/chars/hush/beret.svg": "res://art/chars/hush/pip/beret.svg",
+        "res://art/chars/hush/braces_front.svg": "res://art/chars/hush/pip/braces_front.svg",
+        "res://art/chars/hush/braces_loop.svg": "res://art/chars/hush/pip/braces_loop.svg",
+        "res://art/chars/hush/brows_determined.svg": "res://art/chars/hush/pip/brows_determined.svg",
+        "res://art/chars/hush/brows_neutral.svg": "res://art/chars/hush/pip/brows_neutral.svg",
+        "res://art/chars/hush/brows_sly.svg": "res://art/chars/hush/pip/brows_sly.svg",
+        "res://art/chars/hush/brows_up.svg": "res://art/chars/hush/pip/brows_up.svg",
+        "res://art/chars/hush/brows_worried.svg": "res://art/chars/hush/pip/brows_worried.svg",
+        "res://art/chars/hush/eyes_closed.svg": "res://art/chars/hush/pip/eyes_closed.svg",
+        "res://art/chars/hush/eyes_half.svg": "res://art/chars/hush/pip/eyes_half.svg",
+        "res://art/chars/hush/eyes_open.svg": "res://art/chars/hush/pip/eyes_open.svg",
+        "res://art/chars/hush/eyes_squint.svg": "res://art/chars/hush/pip/eyes_squint.svg",
+        "res://art/chars/hush/eyes_wide.svg": "res://art/chars/hush/pip/eyes_wide.svg",
+        "res://art/chars/hush/eyes_wink.svg": "res://art/chars/hush/pip/eyes_wink.svg",
+        "res://art/chars/hush/eyes_worried.svg": "res://art/chars/hush/pip/eyes_worried.svg",
+        "res://art/chars/hush/foot_l_flat.svg": "res://art/chars/hush/pip/foot_l_flat.svg",
+        "res://art/chars/hush/foot_l_tiptoe.svg": "res://art/chars/hush/pip/foot_l_tiptoe.svg",
+        "res://art/chars/hush/foot_r_flat.svg": "res://art/chars/hush/pip/foot_r_flat.svg",
+        "res://art/chars/hush/foot_r_tiptoe.svg": "res://art/chars/hush/pip/foot_r_tiptoe.svg",
+        "res://art/chars/hush/hair_back.svg": "res://art/chars/hush/pip/hair_back.svg",
+        "res://art/chars/hush/hand_l_fist.svg": "res://art/chars/hush/pip/hand_l_fist.svg",
+        "res://art/chars/hush/hand_l_open.svg": "res://art/chars/hush/pip/hand_l_open.svg",
+        "res://art/chars/hush/hand_l_pinch.svg": "res://art/chars/hush/pip/hand_l_pinch.svg",
+        "res://art/chars/hush/hand_l_point.svg": "res://art/chars/hush/pip/hand_l_point.svg",
+        "res://art/chars/hush/hand_l_shush.svg": "res://art/chars/hush/pip/hand_l_shush.svg",
+        "res://art/chars/hush/hand_l_thumbs_up.svg": "res://art/chars/hush/pip/hand_l_thumbs_up.svg",
+        "res://art/chars/hush/hand_l_wall.svg": "res://art/chars/hush/pip/hand_l_wall.svg",
+        "res://art/chars/hush/hand_l_wave.svg": "res://art/chars/hush/pip/hand_l_wave.svg",
+        "res://art/chars/hush/hand_r_fist.svg": "res://art/chars/hush/pip/hand_r_fist.svg",
+        "res://art/chars/hush/hand_r_open.svg": "res://art/chars/hush/pip/hand_r_open.svg",
+        "res://art/chars/hush/hand_r_pinch.svg": "res://art/chars/hush/pip/hand_r_pinch.svg",
+        "res://art/chars/hush/hand_r_point.svg": "res://art/chars/hush/pip/hand_r_point.svg",
+        "res://art/chars/hush/hand_r_shush.svg": "res://art/chars/hush/pip/hand_r_shush.svg",
+        "res://art/chars/hush/hand_r_thumbs_up.svg": "res://art/chars/hush/pip/hand_r_thumbs_up.svg",
+        "res://art/chars/hush/hand_r_wall.svg": "res://art/chars/hush/pip/hand_r_wall.svg",
+        "res://art/chars/hush/hand_r_wave.svg": "res://art/chars/hush/pip/hand_r_wave.svg",
+        "res://art/chars/hush/head.svg": "res://art/chars/hush/pip/head.svg",
+        "res://art/chars/hush/hidden_eyes.svg": "res://art/chars/hush/pip/hidden_eyes.svg",
+        "res://art/chars/hush/hidden_eyes_blink.svg": "res://art/chars/hush/pip/hidden_eyes_blink.svg",
+        "res://art/chars/hush/hidden_eyes_whites.svg": "res://art/chars/hush/pip/hidden_eyes_whites.svg",
+        "res://art/chars/hush/mouth_puffed.svg": "res://art/chars/hush/pip/mouth_puffed.svg",
+        "res://art/chars/hush/mouth_shh.svg": "res://art/chars/hush/pip/mouth_shh.svg",
+        "res://art/chars/hush/mouth_smile.svg": "res://art/chars/hush/pip/mouth_smile.svg",
+        "res://art/chars/hush/pelvis.svg": "res://art/chars/hush/pip/pelvis.svg",
+        "res://art/chars/hush/torso.svg": "res://art/chars/hush/pip/torso.svg"
+      },
+      "limbs": {
+        "arm_r": {
+          "fill": "#2E9C95"
+        },
+        "arm_l": {
+          "fill": "#217A75"
+        },
+        "leg_r": {
+          "fill": "#3F5FA3"
+        },
+        "leg_l": {
+          "fill": "#2F4A85"
+        }
+      }
+    }
+  },
+  "feet": [
+    "foot_l",
+    "foot_r"
+  ],
+  "breath": {
+    "part": "torso",
+    "amp": 0.015,
+    "period_s": 3.2
+  },
+  "look": {
+    "part": "head",
+    "max_deg": 20
+  },
+  "masks": {
+    "upper": [
+      "torso*"
+    ],
+    "arms": [
+      "arm_upper_l*",
+      "arm_upper_r*"
+    ],
+    "arm_r": [
+      "arm_upper_r*"
+    ],
+    "legs": [
+      "leg_upper_l*",
+      "leg_upper_r*"
+    ],
+    "head": [
+      "head*"
+    ]
+  },
+  "mirror_pairs": [
+    [
+      "_l",
+      "_r"
+    ]
+  ],
+  "no_mirror": []
+}

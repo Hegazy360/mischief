@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "residues": {
+    "SOAKED": {
+      "fixup": "DRY",
+      "overlay": "soaked"
+    },
+    "FLOURY": {
+      "fixup": "SINK",
+      "overlay": "floury"
+    },
+    "STICKY": {
+      "fixup": "SINK",
+      "overlay": "sticky"
+    },
+    "FRAZZLED": {
+      "fixup": "MIRROR",
+      "overlay": "frazzled"
+    },
+    "COSTUME": {
+      "fixup": "MIRROR",
+      "overlay": "costume"
+    },
+    "SQUEAKY": {
+      "fixup": "HONEY",
+      "overlay": "squeaky"
+    }
+  },
+  "combos": {
+    "dough_man": {
+      "of": [
+        "SOAKED",
+        "FLOURY"
+      ],
+      "caption": "DOUGH MAN!",
+      "clip": "bellows/combo_dough_man"
+    },
+    "poodle": {
+      "of": [
+        "SOAKED",
+        "FRAZZLED"
+      ],
+      "caption": "POODLE!",
+      "clip": "bellows/combo_poodle"
+    }
+  }
+}

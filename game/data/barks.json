@@ -1,0 +1,983 @@
+{
+  "version": 1,
+  "voice": {
+    "pipe_down": {
+      "speaker": "bellows",
+      "kind": "shout",
+      "bank": "vo_bellows_pipe_down",
+      "on": "lure_fatigue",
+      "text": "PIPE DOWN!",
+      "fallback": null,
+      "stage": 1
+    },
+    "the_pipes": {
+      "speaker": "bellows",
+      "kind": "mutter",
+      "bank": "vo_bellows_the_pipes",
+      "on": "head_turn",
+      "text": "...the pipes.",
+      "fallback": null,
+      "stage": 1
+    },
+    "who_squeaked": {
+      "speaker": "bellows",
+      "kind": "shout",
+      "bank": "vo_bellows_who_squeaked",
+      "on": "squeak_bit:bit_livid",
+      "text": "WHO SQUEAKED?!",
+      "fallback": null,
+      "stage": 1
+    },
+    "did_not_squeak": {
+      "speaker": "bellows",
+      "kind": "argue",
+      "bank": "vo_bellows_did_not_squeak",
+      "on": "squeak_bit:bit_phone",
+      "text": "I did NOT squeak!",
+      "fallback": "vo_bellows_grr",
+      "stage": 1
+    },
+    "pardon": {
+      "speaker": "bellows",
+      "kind": "mutter",
+      "bank": "vo_bellows_pardon",
+      "on": "bump",
+      "text": "Pardon.",
+      "fallback": null,
+      "stage": 1
+    },
+    "hmph": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_hmph",
+      "on": "fizzle",
+      "text": "Hmph!",
+      "fallback": null,
+      "stage": 1
+    },
+    "huh": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_huh",
+      "on": "spot_start",
+      "text": "Huh?",
+      "fallback": null,
+      "stage": 1
+    },
+    "wha": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_wha",
+      "on": "spotted",
+      "text": "WHA!",
+      "fallback": null,
+      "stage": 1
+    },
+    "yow": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_yow",
+      "on": null,
+      "text": "Yow!",
+      "fallback": null,
+      "stage": 1
+    },
+    "grr": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_grr",
+      "on": "temper_tier:livid",
+      "text": "Grr...",
+      "fallback": null,
+      "stage": 1
+    },
+    "ahem": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_ahem",
+      "on": "doorway_pause",
+      "text": "Ahem.",
+      "fallback": null,
+      "stage": 1
+    },
+    "ooh": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_ooh",
+      "on": null,
+      "text": "Ooh!",
+      "fallback": null,
+      "stage": 1
+    },
+    "hah": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_hah",
+      "on": null,
+      "text": "Hah!",
+      "fallback": null,
+      "stage": 1
+    },
+    "tut": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_tut",
+      "on": null,
+      "text": "Tut.",
+      "fallback": null,
+      "stage": 1
+    },
+    "pff": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_pff",
+      "on": null,
+      "text": "Pff.",
+      "fallback": null,
+      "stage": 1
+    },
+    "ugh": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_ugh",
+      "on": "exhausted",
+      "text": "Ugh.",
+      "fallback": null,
+      "stage": 1
+    },
+    "oof": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_oof",
+      "on": "door_slam",
+      "text": "Oof!",
+      "fallback": null,
+      "stage": 1
+    },
+    "warmup": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_warmup",
+      "on": "b_activity:warmup",
+      "text": "MI-MI-MIIII",
+      "fallback": null,
+      "stage": 1
+    },
+    "warmup_crack": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_warmup_crack",
+      "on": "squeak_bit:bit_warmup",
+      "text": "MI-MI-MIII-yodel",
+      "fallback": null,
+      "stage": 1
+    },
+    "aria": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_aria",
+      "on": null,
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "hum": {
+      "speaker": "bellows",
+      "kind": "hum",
+      "bank": "vo_bellows_hum",
+      "on": "b_next",
+      "text": "Hm-hm-hmm... TEA.",
+      "fallback": null,
+      "stage": 1
+    },
+    "lecture_a": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_lecture_a",
+      "on": "lecture:a",
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "lecture_b": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_lecture_b",
+      "on": "lecture:b",
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "lecture_c": {
+      "speaker": "bellows",
+      "kind": "sing",
+      "bank": "vo_bellows_lecture_c",
+      "on": "lecture:c",
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "sneeze_ah1": {
+      "speaker": "bellows",
+      "kind": "sneeze",
+      "bank": "vo_bellows_sneeze_ah1",
+      "on": null,
+      "text": "ah...",
+      "fallback": null,
+      "stage": 1
+    },
+    "sneeze_ah2": {
+      "speaker": "bellows",
+      "kind": "sneeze",
+      "bank": "vo_bellows_sneeze_ah2",
+      "on": null,
+      "text": "ahh...",
+      "fallback": null,
+      "stage": 1
+    },
+    "sneeze_ah3": {
+      "speaker": "bellows",
+      "kind": "sneeze",
+      "bank": "vo_bellows_sneeze_ah3",
+      "on": null,
+      "text": "AHHH...",
+      "fallback": null,
+      "stage": 1
+    },
+    "sneeze_choo": {
+      "speaker": "bellows",
+      "kind": "sneeze",
+      "bank": "vo_bellows_sneeze_choo",
+      "on": null,
+      "text": "CHOO!",
+      "fallback": null,
+      "stage": 1
+    },
+    "sneeze_small": {
+      "speaker": "bellows",
+      "kind": "sneeze",
+      "bank": "vo_bellows_sneeze_small",
+      "on": null,
+      "text": "tchoo",
+      "fallback": null,
+      "stage": 1
+    },
+    "wheeze": {
+      "speaker": "bellows",
+      "kind": "nonverbal",
+      "bank": "vo_bellows_wheeze",
+      "on": "wheeze",
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "dizzy_babble": {
+      "speaker": "bellows",
+      "kind": "babble",
+      "bank": "vo_bellows_dizzy_babble",
+      "on": null,
+      "text": null,
+      "fallback": null,
+      "stage": 1
+    },
+    "ha_ha_my_dear": {
+      "speaker": "bellows",
+      "kind": "strained",
+      "bank": "vo_bellows_ha_ha_my_dear",
+      "on": "embarrassed",
+      "text": "Ha-ha, my dear...",
+      "fallback": "vo_bellows_hah",
+      "stage": 3
+    },
+    "beryl": {
+      "speaker": "bellows",
+      "kind": "shout",
+      "bank": "vo_bellows_beryl",
+      "on": "blame:beryl",
+      "text": "BERYL!",
+      "fallback": "vo_bellows_grr",
+      "stage": 3
+    },
+    "meh": {
+      "speaker": "beryl",
+      "kind": "bleat",
+      "bank": "vo_beryl_meh",
+      "on": "blame:beryl",
+      "text": "MEH!",
+      "fallback": null,
+      "stage": 3
+    },
+    "bleat": {
+      "speaker": "beryl",
+      "kind": "bleat",
+      "bank": "vo_beryl_bleat",
+      "on": "bleat",
+      "text": "Mehhh",
+      "fallback": null,
+      "stage": 3
+    },
+    "horace": {
+      "speaker": "delphine",
+      "kind": "shout",
+      "bank": "vo_delphine_horace",
+      "on": "prank_fire:delphine",
+      "text": "HORACE!",
+      "fallback": null,
+      "stage": 3
+    },
+    "intruder": {
+      "speaker": "delphine",
+      "kind": "high_c",
+      "bank": "vo_delphine_intruder",
+      "on": "high_c",
+      "text": "INTRUDER!",
+      "fallback": null,
+      "stage": 3
+    }
+  },
+  "figgis_cards": {
+    "figgis_psst": {"icons": ["clarence", "arrow", "bellows"], "say": "psst!"},
+    "ghost_squeak": {"icons": ["clarence", "arrow", "bellows"], "ghost": "clarence"},
+    "ghost_honey": {"icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"], "ghost": "kitchen_honey"},
+    "ghost_hold": {"icons": ["hold"], "ghost": "action"},
+    "ghost_hide": {"icons": ["hide", "arrow", "bellows"], "ghost": "kitchen_pantry_curtain"},
+    "sparkle_lever": {"icons": ["rig", "arrow", "res://art/icons/activities/warmup.svg"], "ghost": null},
+    "title_card": {"icons": [], "ghost": null},
+    "card_tray": {"icons": ["tray", "arrow", "rig"]},
+    "card_script": {"icons": ["script", "arrow", "star"]},
+    "card_bow": {"icons": ["bow", "arrow", "res://art/ui/star.svg"]},
+    "card_freeze": {"icons": ["freeze", "arrow", "specs_off"]},
+    "card_specs": {"icons": ["specs_on", "arrow", "hide"]},
+    "card_fixup": {"icons": ["res://art/icons/activities/fixup_mirror.svg", "arrow", "rig"]}
+  },
+  "line_cards": {
+    "gala_the_comeback:spotlight": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/rehearse.svg"],
+      "room": "garden",
+      "container": null,
+      "rig_point": "garden_spotlight"
+    },
+    "gala_the_comeback:penny": {
+      "icons": ["coins", "arrow", "res://art/icons/activities/stroll.svg"],
+      "room": "garden",
+      "container": "hall_piggy_bank",
+      "rig_point": "garden_coin_1"
+    },
+    "gala_the_comeback:spray": {
+      "icons": ["salt", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_tea_tray"
+    },
+    "gala_the_comeback:mirror": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/mirror.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "hall_mirror"
+    },
+    "gala_the_comeback:spin": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/warmup.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_gramophone"
+    },
+    "gala_the_comeback:beehive": {
+      "icons": ["feathers", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "conservatory_potting_bench",
+      "rig_point": "parlour_fan"
+    },
+    "gala_the_comeback:bn": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/rehearse.svg"],
+      "room": "garden",
+      "container": null,
+      "rig_point": "garden_spotlight"
+    },
+    "n01_throat_tea:kettle": {
+      "icons": ["squeaker", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": "hall_confiscated_box",
+      "rig_point": "kitchen_kettle"
+    },
+    "n01_throat_tea:tap": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/rinse.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_sink_tap"
+    },
+    "n01_throat_tea:pickle": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/pickles.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_pickle_jar"
+    },
+    "n01_throat_tea:orbit": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/paper.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_recliner"
+    },
+    "n01_throat_tea:sneeze": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "n01_throat_tea:bn": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "n02_something_fishy:fish": {
+      "icons": ["kipper", "arrow", "res://art/icons/activities/phone.svg"],
+      "room": "hall",
+      "container": "kitchen_fridge",
+      "rig_point": "hall_phone"
+    },
+    "n02_something_fishy:clock": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/clock.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "hall_clock"
+    },
+    "n02_something_fishy:dinner": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/snack.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_fridge_shelf"
+    },
+    "n02_something_fishy:news": {
+      "icons": ["magnifier", "arrow", "res://art/icons/activities/paper.svg"],
+      "room": "parlour",
+      "container": "hall_confiscated_box",
+      "rig_point": "parlour_newspaper"
+    },
+    "n02_something_fishy:bn": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/mirror.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "hall_mirror"
+    },
+    "n03_singing_in_the_bath:soprano": {
+      "icons": ["balloon", "arrow", "res://art/icons/activities/gargle.svg"],
+      "room": "bathroom",
+      "container": "hall_confiscated_box",
+      "rig_point": "bathroom_basin_spray"
+    },
+    "n03_singing_in_the_bath:croc": {
+      "icons": ["croc", "arrow", "res://art/icons/activities/bath.svg"],
+      "room": "bathroom",
+      "container": "hall_confiscated_box",
+      "rig_point": "bathroom_duck"
+    },
+    "n03_singing_in_the_bath:plumbing": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/radiator.svg"],
+      "room": "landing",
+      "container": null,
+      "rig_point": "landing_boiler_valve"
+    },
+    "n03_singing_in_the_bath:pillow": {
+      "icons": ["squeaker", "arrow", "res://art/icons/activities/nap.svg"],
+      "room": "bedroom",
+      "container": "hall_confiscated_box",
+      "rig_point": "bedroom_pillow"
+    },
+    "n03_singing_in_the_bath:hatstand": {
+      "icons": ["butter", "arrow", "res://art/icons/activities/nap.svg"],
+      "room": "bedroom",
+      "container": "kitchen_fridge",
+      "rig_point": "bedroom_bedside"
+    },
+    "n03_singing_in_the_bath:sneeze": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "n03_singing_in_the_bath:bn": {
+      "icons": ["croc", "arrow", "res://art/icons/activities/bath.svg"],
+      "room": "bathroom",
+      "container": "hall_confiscated_box",
+      "rig_point": "bathroom_duck"
+    },
+    "n04_the_big_sulk:stairs": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/fixup_dry.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "stairs_rods"
+    },
+    "n04_the_big_sulk:spin": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/warmup.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_gramophone"
+    },
+    "n04_the_big_sulk:tantrum": {
+      "icons": ["rig", "arrow", "bellows"],
+      "room": null,
+      "container": null,
+      "rig_point": null
+    },
+    "n04_the_big_sulk:chandelier": {
+      "icons": ["rig", "arrow", "tomato"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_chandelier"
+    },
+    "n04_the_big_sulk:ghost": {
+      "icons": ["flour", "arrow", "res://art/icons/activities/fire.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_bellows"
+    },
+    "n04_the_big_sulk:orbit": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/paper.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_recliner"
+    },
+    "n04_the_big_sulk:bn": {
+      "icons": ["bubble_bath", "arrow", "res://art/icons/activities/bath.svg"],
+      "room": "bathroom",
+      "container": "bathroom_cabinet",
+      "rig_point": "bathroom_bath_taps"
+    },
+    "n05_enter_beryl:hose": {
+      "icons": ["apple", "arrow", "res://art/icons/activities/roses.svg"],
+      "room": "garden",
+      "container": "conservatory_potting_bench",
+      "rig_point": "garden_hose"
+    },
+    "n05_enter_beryl:marrow": {
+      "icons": ["balloon", "arrow", "res://art/icons/activities/marrow.svg"],
+      "room": "garden",
+      "container": "hall_confiscated_box",
+      "rig_point": "garden_marrow"
+    },
+    "n05_enter_beryl:penny": {
+      "icons": ["coins", "arrow", "res://art/icons/activities/stroll.svg"],
+      "room": "garden",
+      "container": "hall_piggy_bank",
+      "rig_point": "garden_coin_1"
+    },
+    "n05_enter_beryl:sneeze": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "n05_enter_beryl:bn": {
+      "icons": ["balloon", "arrow", "res://art/icons/activities/marrow.svg"],
+      "room": "garden",
+      "container": "hall_confiscated_box",
+      "rig_point": "garden_marrow"
+    },
+    "n06_behind_you:panto": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/piano.svg"],
+      "room": null,
+      "container": null,
+      "rig_point": null
+    },
+    "n06_behind_you:kiss": {
+      "icons": ["treacle", "arrow", "res://art/icons/activities/feed_beryl.svg"],
+      "room": "conservatory",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "conservatory_feed_bin"
+    },
+    "n06_behind_you:spin": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/warmup.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_gramophone"
+    },
+    "n06_behind_you:news": {
+      "icons": ["magnifier", "arrow", "res://art/icons/activities/paper.svg"],
+      "room": "parlour",
+      "container": "hall_confiscated_box",
+      "rig_point": "parlour_newspaper"
+    },
+    "n06_behind_you:marrow": {
+      "icons": ["balloon", "arrow", "res://art/icons/activities/marrow.svg"],
+      "room": "garden",
+      "container": "hall_confiscated_box",
+      "rig_point": "garden_marrow"
+    },
+    "n06_behind_you:stairs": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/fixup_dry.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "stairs_rods"
+    },
+    "n06_behind_you:bn": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/piano.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_piano_wedge"
+    },
+    "n07_kidding_around:kiss": {
+      "icons": ["treacle", "arrow", "res://art/icons/activities/feed_beryl.svg"],
+      "room": "conservatory",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "conservatory_feed_bin"
+    },
+    "n07_kidding_around:hose": {
+      "icons": ["apple", "arrow", "res://art/icons/activities/roses.svg"],
+      "room": "garden",
+      "container": "conservatory_potting_bench",
+      "rig_point": "garden_hose"
+    },
+    "n07_kidding_around:herd": {
+      "icons": ["apple", "arrow", "bellows"],
+      "room": null,
+      "container": "conservatory_potting_bench",
+      "rig_point": null
+    },
+    "n07_kidding_around:float": {
+      "icons": ["bubble_bath", "arrow", "res://art/icons/activities/bath.svg"],
+      "room": "bathroom",
+      "container": "bathroom_cabinet",
+      "rig_point": "bathroom_bath_taps"
+    },
+    "n07_kidding_around:orbit": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/paper.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_recliner"
+    },
+    "n07_kidding_around:bn": {
+      "icons": ["apple", "arrow", "res://art/icons/activities/nap.svg"],
+      "room": "bedroom",
+      "container": "conservatory_potting_bench",
+      "rig_point": "bedroom_bed"
+    },
+    "n08_companys_coming:spray": {
+      "icons": ["salt", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_tea_tray"
+    },
+    "n08_companys_coming:beehive": {
+      "icons": ["feathers", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "conservatory_potting_bench",
+      "rig_point": "parlour_fan"
+    },
+    "n08_companys_coming:embarrass": {
+      "icons": ["salt", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_tea_tray"
+    },
+    "n08_companys_coming:ghost": {
+      "icons": ["flour", "arrow", "res://art/icons/activities/fire.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_bellows"
+    },
+    "n08_companys_coming:sneeze": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "n08_companys_coming:bn": {
+      "icons": ["salt", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_tea_tray"
+    },
+    "n09_tutu_much:tutu": {
+      "icons": ["tutu", "arrow", "res://art/icons/activities/cloak.svg"],
+      "room": "dressing",
+      "container": "dressing_costume_trunk",
+      "rig_point": "dressing_dummy"
+    },
+    "n09_tutu_much:award": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/polish.svg"],
+      "room": "dressing",
+      "container": null,
+      "rig_point": "dressing_trophy_shelf"
+    },
+    "n09_tutu_much:trip": {
+      "icons": ["rig", "arrow", "bellows"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "stairs_rods"
+    },
+    "n09_tutu_much:stairs": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/fixup_dry.svg"],
+      "room": "hall",
+      "container": null,
+      "rig_point": "stairs_rods"
+    },
+    "n09_tutu_much:plumbing": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/radiator.svg"],
+      "room": "landing",
+      "container": null,
+      "rig_point": "landing_boiler_valve"
+    },
+    "n09_tutu_much:spray": {
+      "icons": ["salt", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "kitchen_pantry_shelf",
+      "rig_point": "parlour_tea_tray"
+    },
+    "n09_tutu_much:bn": {
+      "icons": ["tutu", "arrow", "res://art/icons/activities/cloak.svg"],
+      "room": "dressing",
+      "container": "dressing_costume_trunk",
+      "rig_point": "dressing_dummy"
+    },
+    "n10_it_takes_two:trousers": {
+      "icons": ["record", "arrow", "res://art/icons/activities/tango.svg"],
+      "room": "parlour",
+      "container": "dressing_costume_trunk",
+      "rig_point": "parlour_gramophone"
+    },
+    "n10_it_takes_two:beehive": {
+      "icons": ["feathers", "arrow", "res://art/icons/activities/host_tea.svg"],
+      "room": "parlour",
+      "container": "conservatory_potting_bench",
+      "rig_point": "parlour_fan"
+    },
+    "n10_it_takes_two:tantrums": {
+      "icons": ["rig", "arrow", "bellows"],
+      "room": null,
+      "container": null,
+      "rig_point": null
+    },
+    "n10_it_takes_two:float": {
+      "icons": ["bubble_bath", "arrow", "res://art/icons/activities/bath.svg"],
+      "room": "bathroom",
+      "container": "bathroom_cabinet",
+      "rig_point": "bathroom_bath_taps"
+    },
+    "n10_it_takes_two:tutu": {
+      "icons": ["tutu", "arrow", "res://art/icons/activities/cloak.svg"],
+      "room": "dressing",
+      "container": "dressing_costume_trunk",
+      "rig_point": "dressing_dummy"
+    },
+    "n10_it_takes_two:bn": {
+      "icons": ["rig", "arrow", "bellows"],
+      "room": null,
+      "container": null,
+      "rig_point": null
+    },
+    "p00_curtain_up:sneeze": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/tea.svg"],
+      "room": "kitchen",
+      "container": null,
+      "rig_point": "kitchen_honey"
+    },
+    "p00_curtain_up:spin": {
+      "icons": ["rig", "arrow", "res://art/icons/activities/warmup.svg"],
+      "room": "parlour",
+      "container": null,
+      "rig_point": "parlour_gramophone"
+    }
+  },
+  "results": {
+    "missed_required": "{done}/{total} lines — Bellows still hasn't {missed}",
+    "missed_optional": "{done}/{total} lines — Bellows still hasn't {missed}",
+    "missed_big_number": "The Big Number is still sealed — Bellows hasn't {missed}",
+    "big_number_open": "{done}/{total} lines — the Big Number is waiting: Bellows hasn't {missed}",
+    "short_link": "Applause {n} — land one more prank inside a Running Gag",
+    "short_meltdown": "Applause {n} — keep him fuming into a MELTDOWN (+8)",
+    "short_combo": "Applause {n} — stack two messes on him for a COMBO! (+4)",
+    "short_near_misses": "Applause {n} — a NEAR MISS is worth +2 (up to three)",
+    "short_bits": "Applause {n} — squeak at him for a bit (+2 each)",
+    "short_embarrassed": "Applause {n} — prank him in front of Delphine (+5)",
+    "catches": "Applause {n} — {c} tomatoes cost you {lost}",
+    "standing_ovation": "Standing ovation! Applause {n}",
+    "prologue": "The overture is over. Tonight, the real show.",
+    "hook": "The Hook! Three tomatoes — the Curtain Calls you earned are kept."
+  },
+  "missed": {
+    "achoo_ria": "sneezed up a storm",
+    "tap_dance": "had a face wash",
+    "kettle_drum": "sung a duet with his kettle",
+    "in_a_pickle": "lost a fight with a jar",
+    "cold_open": "worn his dinner",
+    "allegro_go_go": "got in a spin",
+    "lift_off": "read the paper in orbit",
+    "eye_popping_news": "read the news up close",
+    "bellows_blows": "turned into a ghost",
+    "prima_ballerina": "danced in the chandelier",
+    "grand_exit": "chased his piano",
+    "it_takes_two": "split his trousers",
+    "something_fishy": "talked to a fish",
+    "times_up": "ridden the grandfather clock",
+    "mirror_mirror": "met his reflection",
+    "rug_burn": "surfed the stairs",
+    "sopran_oh_no": "sung soprano",
+    "snap_decision": "met the bath croc",
+    "in_over_his_head": "floated away",
+    "pipe_down": "argued with the plumbing",
+    "pillow_talk": "had a pillow fight",
+    "butter_fingers": "serenaded the hat stand",
+    "kidding_around": "found a goat in his bed",
+    "tutu_much": "worn a tutu",
+    "award_winning": "won an award, hard",
+    "hosed": "peered down a hose",
+    "marrow_escape": "lost his marrow",
+    "penny_pincher": "pinched a penny too far",
+    "sweet_tooth": "had a kiss from Beryl",
+    "spit_take": "had a spray from Delphine",
+    "fan_mail": "blown her beehive back",
+    "spotlight_stealer": "stolen the spotlight",
+    "n01_throat_tea:bn": "been sneezed into the sink",
+    "n03_singing_in_the_bath:bn": "been made a POODLE",
+    "n04_the_big_sulk:tantrum": "thrown a tantrum",
+    "n05_enter_beryl:bn": "chased his marrow into the goat",
+    "n06_behind_you:panto": "survived three rounds of BEHIND YOU!",
+    "n07_kidding_around:herd": "herded the goat twice",
+    "n08_companys_coming:embarrass": "been embarrassed in front of her twice",
+    "n08_companys_coming:bn": "been made DOUGH in front of her",
+    "n09_tutu_much:trip": "fallen for a Chase Trip",
+    "n09_tutu_much:bn": "taken the tutu to tea",
+    "n10_it_takes_two:tantrums": "thrown two tantrums",
+    "n10_it_takes_two:bn": "landed four in one Running Gag",
+    "gala_the_comeback:bn": "taken his bow"
+  },
+  "teasers": {
+    "p00_curtain_up": "Tonight: Bellows takes his throat tea...",
+    "n01_throat_tea": "Tomorrow night: Bellows answers the phone...",
+    "n02_something_fishy": "Tomorrow night: Bellows takes a bath...",
+    "n03_singing_in_the_bath": "Tomorrow night: Bellows throws a tantrum...",
+    "n04_the_big_sulk": "Tomorrow night: meet Beryl...",
+    "n05_enter_beryl": "Tomorrow night: BEHIND YOU!",
+    "n06_behind_you": "Tomorrow night: a goat in his bed...",
+    "n07_kidding_around": "Tomorrow night: company's coming...",
+    "n08_companys_coming": "Tomorrow night: Bellows tries on a tutu...",
+    "n09_tutu_much": "Tomorrow night: it takes two...",
+    "n10_it_takes_two": "Tomorrow night: the Gala!",
+    "gala_the_comeback": null
+  },
+  "loading_cards": {
+    "gala_the_comeback": {
+      "icon": "spotlight",
+      "fallback": "res://art/icons/activities/rehearse.svg",
+      "title": "The Comeback",
+      "new_rule": "spotlight"
+    },
+    "n01_throat_tea": {
+      "icon": "tray",
+      "fallback": "res://art/ui/tray.svg",
+      "title": "Throat Tea",
+      "new_rule": "items"
+    },
+    "n02_something_fishy": {
+      "icon": "freeze",
+      "fallback": "res://art/ui/verb_freeze.svg",
+      "title": "Something Fishy",
+      "new_rule": "freeze_specs"
+    },
+    "n03_singing_in_the_bath": {
+      "icon": "fixup",
+      "fallback": "res://art/icons/activities/fixup_mirror.svg",
+      "title": "Singing in the Bath",
+      "new_rule": "residue_fixup"
+    },
+    "n04_the_big_sulk": {
+      "icon": "meltdown",
+      "fallback": "res://art/ui/glyph_stars.svg",
+      "title": "The Big Sulk",
+      "new_rule": "meltdown"
+    },
+    "n05_enter_beryl": {
+      "icon": "beryl",
+      "fallback": "res://art/icons/activities/feed_beryl.svg",
+      "title": "Enter Beryl",
+      "new_rule": "beryl"
+    },
+    "n06_behind_you": {
+      "icon": "panto",
+      "fallback": "res://art/ui/clarence.svg",
+      "title": "Behind You!",
+      "new_rule": "panto"
+    },
+    "n07_kidding_around": {
+      "icon": "herd",
+      "fallback": "res://art/icons/activities/herd_beryl.svg",
+      "title": "Kidding Around",
+      "new_rule": "herding"
+    },
+    "n08_companys_coming": {
+      "icon": "delphine",
+      "fallback": "res://art/icons/activities/host_tea.svg",
+      "title": "Company's Coming",
+      "new_rule": "delphine"
+    },
+    "n09_tutu_much": {
+      "icon": "chase_trip",
+      "fallback": "res://art/icons/activities/search.svg",
+      "title": "Tutu Much",
+      "new_rule": "chase_trips"
+    },
+    "n10_it_takes_two": {
+      "icon": "nerves",
+      "fallback": "res://art/icons/activities/warmup.svg",
+      "title": "It Takes Two",
+      "new_rule": "nerves"
+    }
+  },
+  "cold_opens": {
+    "gala_the_comeback": {
+      "clip": "cold/gala_the_comeback",
+      "len_s": 5,
+      "desc": "The street arrives with deckchairs; he booms 'PIPE DOWN!' at his own audience."
+    },
+    "n01_throat_tea": {
+      "clip": "cold/n01_throat_tea",
+      "len_s": 5,
+      "desc": "Dawn: he sings scales through a megaphone out of his window; the window of No. 9 cracks."
+    },
+    "n02_something_fishy": {
+      "clip": "cold/n02_something_fishy",
+      "len_s": 5,
+      "desc": "He pops a child's balloon with his conductor's baton and drops the string in the CONFISCATED box."
+    },
+    "n03_singing_in_the_bath": {
+      "clip": "cold/n03_singing_in_the_bath",
+      "len_s": 5,
+      "desc": "6 a.m. scales through the bathroom window; Hush's alarm clock at No. 9 shakes itself off her shelf."
+    },
+    "n04_the_big_sulk": {
+      "clip": "cold/n04_the_big_sulk",
+      "len_s": 5,
+      "desc": "He confiscates a kite from a child and snaps it over his knee."
+    },
+    "n05_enter_beryl": {
+      "clip": "cold/n05_enter_beryl",
+      "len_s": 5,
+      "desc": "He hoses Hush's chalk mime drawings off the pavement, then hoses Hush (she mimes an umbrella)."
+    },
+    "n06_behind_you": {
+      "clip": "cold/n06_behind_you",
+      "len_s": 5,
+      "desc": "He conducts the dawn chorus to be quiet ('PIPE DOWN!'); the offended birds leave in a huff; a feather lands in his tea."
+    },
+    "n07_kidding_around": {
+      "clip": "cold/n07_kidding_around",
+      "len_s": 5,
+      "desc": "He sells Hush's confiscated unicycle to the rag-and-bone man."
+    },
+    "n08_companys_coming": {
+      "clip": "cold/n08_companys_coming",
+      "len_s": 5,
+      "desc": "He rehearses his bow to a cardboard cut-out of Delphine, then hides it as the doorbell rings."
+    },
+    "n09_tutu_much": {
+      "clip": "cold/n09_tutu_much",
+      "len_s": 5,
+      "desc": "He tears down the street's talent-show poster and pins up 'BELLOWS: THE COMEBACK'."
+    },
+    "n10_it_takes_two": {
+      "clip": "cold/n10_it_takes_two",
+      "len_s": 5,
+      "desc": "He rehearses his comeback aria; windows crack all down the street."
+    }
+  }
+}

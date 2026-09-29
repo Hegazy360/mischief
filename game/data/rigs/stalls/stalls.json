@@ -1,0 +1,565 @@
+{
+  "version": 1,
+  "doc": "The Stalls (GDD 6.5, TECH 5.10): audience silhouettes seen from behind. One flat fill; apply alpha at runtime (0.6 at rest, 1.0 in reaction holds). pivot = bottom centre = the shoulder line. Frames: rest, laugh (head back, profile, jaw open), lean (toward face_dir), point (arm up for BEHIND YOU!). `tumble` = one head's T4 fall, 4 frames (8 f each), drawn in its seat slot. `layout` = suggested left-to-right order; `w`/`h` = rest silhouette size.",
+  "fill": "#2A1E3A",
+  "alpha_rest": 0.6,
+  "alpha_hold": 1.0,
+  "heads": [
+    {
+      "id": "bowler",
+      "w": 75,
+      "h": 71,
+      "face_dir": 1,
+      "size": [
+        174,
+        187
+      ],
+      "pivot": [
+        87,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/bowler_rest.svg",
+        "laugh": "res://art/chars/stalls/bowler_laugh.svg",
+        "lean": "res://art/chars/stalls/bowler_lean.svg",
+        "point": "res://art/chars/stalls/bowler_point.svg"
+      }
+    },
+    {
+      "id": "beehive",
+      "w": 65,
+      "h": 98,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/beehive_rest.svg",
+        "laugh": "res://art/chars/stalls/beehive_laugh.svg",
+        "lean": "res://art/chars/stalls/beehive_lean.svg",
+        "point": "res://art/chars/stalls/beehive_point.svg"
+      }
+    },
+    {
+      "id": "bald",
+      "w": 80,
+      "h": 71,
+      "face_dir": 1,
+      "size": [
+        184,
+        187
+      ],
+      "pivot": [
+        92,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/bald_rest.svg",
+        "laugh": "res://art/chars/stalls/bald_laugh.svg",
+        "lean": "res://art/chars/stalls/bald_lean.svg",
+        "point": "res://art/chars/stalls/bald_point.svg"
+      }
+    },
+    {
+      "id": "toddler",
+      "w": 96,
+      "h": 101,
+      "face_dir": -1,
+      "size": [
+        174,
+        187
+      ],
+      "pivot": [
+        87,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/toddler_rest.svg",
+        "laugh": "res://art/chars/stalls/toddler_laugh.svg",
+        "lean": "res://art/chars/stalls/toddler_lean.svg",
+        "point": "res://art/chars/stalls/toddler_point.svg"
+      }
+    },
+    {
+      "id": "feather",
+      "w": 70,
+      "h": 102,
+      "face_dir": 1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/feather_rest.svg",
+        "laugh": "res://art/chars/stalls/feather_laugh.svg",
+        "lean": "res://art/chars/stalls/feather_lean.svg",
+        "point": "res://art/chars/stalls/feather_point.svg"
+      }
+    },
+    {
+      "id": "curlers",
+      "w": 68,
+      "h": 78,
+      "face_dir": -1,
+      "size": [
+        174,
+        187
+      ],
+      "pivot": [
+        87,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/curlers_rest.svg",
+        "laugh": "res://art/chars/stalls/curlers_laugh.svg",
+        "lean": "res://art/chars/stalls/curlers_lean.svg",
+        "point": "res://art/chars/stalls/curlers_point.svg"
+      }
+    },
+    {
+      "id": "top_hat",
+      "w": 75,
+      "h": 106,
+      "face_dir": 1,
+      "size": [
+        174,
+        187
+      ],
+      "pivot": [
+        87,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/top_hat_rest.svg",
+        "laugh": "res://art/chars/stalls/top_hat_laugh.svg",
+        "lean": "res://art/chars/stalls/top_hat_lean.svg",
+        "point": "res://art/chars/stalls/top_hat_point.svg"
+      }
+    },
+    {
+      "id": "flat_cap",
+      "w": 78,
+      "h": 68,
+      "face_dir": -1,
+      "size": [
+        174,
+        187
+      ],
+      "pivot": [
+        87,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/flat_cap_rest.svg",
+        "laugh": "res://art/chars/stalls/flat_cap_laugh.svg",
+        "lean": "res://art/chars/stalls/flat_cap_lean.svg",
+        "point": "res://art/chars/stalls/flat_cap_point.svg"
+      }
+    },
+    {
+      "id": "pigtails",
+      "w": 70,
+      "h": 59,
+      "face_dir": 1,
+      "size": [
+        158,
+        187
+      ],
+      "pivot": [
+        79,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/pigtails_rest.svg",
+        "laugh": "res://art/chars/stalls/pigtails_laugh.svg",
+        "lean": "res://art/chars/stalls/pigtails_lean.svg",
+        "point": "res://art/chars/stalls/pigtails_point.svg"
+      }
+    },
+    {
+      "id": "afro",
+      "w": 70,
+      "h": 78,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/afro_rest.svg",
+        "laugh": "res://art/chars/stalls/afro_laugh.svg",
+        "lean": "res://art/chars/stalls/afro_lean.svg",
+        "point": "res://art/chars/stalls/afro_point.svg"
+      }
+    },
+    {
+      "id": "topknot",
+      "w": 65,
+      "h": 85,
+      "face_dir": 1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/topknot_rest.svg",
+        "laugh": "res://art/chars/stalls/topknot_laugh.svg",
+        "lean": "res://art/chars/stalls/topknot_lean.svg",
+        "point": "res://art/chars/stalls/topknot_point.svg"
+      }
+    },
+    {
+      "id": "mohawk",
+      "w": 72,
+      "h": 86,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/mohawk_rest.svg",
+        "laugh": "res://art/chars/stalls/mohawk_laugh.svg",
+        "lean": "res://art/chars/stalls/mohawk_lean.svg",
+        "point": "res://art/chars/stalls/mohawk_point.svg"
+      }
+    },
+    {
+      "id": "cowlick",
+      "w": 50,
+      "h": 82,
+      "face_dir": 1,
+      "size": [
+        152,
+        187
+      ],
+      "pivot": [
+        76,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/cowlick_rest.svg",
+        "laugh": "res://art/chars/stalls/cowlick_laugh.svg",
+        "lean": "res://art/chars/stalls/cowlick_lean.svg",
+        "point": "res://art/chars/stalls/cowlick_point.svg"
+      }
+    },
+    {
+      "id": "sunhat",
+      "w": 79,
+      "h": 66,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/sunhat_rest.svg",
+        "laugh": "res://art/chars/stalls/sunhat_laugh.svg",
+        "lean": "res://art/chars/stalls/sunhat_lean.svg",
+        "point": "res://art/chars/stalls/sunhat_point.svg"
+      }
+    },
+    {
+      "id": "beanie",
+      "w": 70,
+      "h": 78,
+      "face_dir": 1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/beanie_rest.svg",
+        "laugh": "res://art/chars/stalls/beanie_laugh.svg",
+        "lean": "res://art/chars/stalls/beanie_lean.svg",
+        "point": "res://art/chars/stalls/beanie_point.svg"
+      }
+    },
+    {
+      "id": "ponytail",
+      "w": 70,
+      "h": 64,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/ponytail_rest.svg",
+        "laugh": "res://art/chars/stalls/ponytail_laugh.svg",
+        "lean": "res://art/chars/stalls/ponytail_lean.svg",
+        "point": "res://art/chars/stalls/ponytail_point.svg"
+      }
+    },
+    {
+      "id": "spiky",
+      "w": 62,
+      "h": 76,
+      "face_dir": 1,
+      "size": [
+        164,
+        187
+      ],
+      "pivot": [
+        82,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/spiky_rest.svg",
+        "laugh": "res://art/chars/stalls/spiky_laugh.svg",
+        "lean": "res://art/chars/stalls/spiky_lean.svg",
+        "point": "res://art/chars/stalls/spiky_point.svg"
+      }
+    },
+    {
+      "id": "bob",
+      "w": 67,
+      "h": 72,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/bob_rest.svg",
+        "laugh": "res://art/chars/stalls/bob_laugh.svg",
+        "lean": "res://art/chars/stalls/bob_lean.svg",
+        "point": "res://art/chars/stalls/bob_point.svg"
+      }
+    },
+    {
+      "id": "side_cap",
+      "w": 70,
+      "h": 66,
+      "face_dir": 1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/side_cap_rest.svg",
+        "laugh": "res://art/chars/stalls/side_cap_laugh.svg",
+        "lean": "res://art/chars/stalls/side_cap_lean.svg",
+        "point": "res://art/chars/stalls/side_cap_point.svg"
+      }
+    },
+    {
+      "id": "flower_hat",
+      "w": 65,
+      "h": 89,
+      "face_dir": -1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/flower_hat_rest.svg",
+        "laugh": "res://art/chars/stalls/flower_hat_laugh.svg",
+        "lean": "res://art/chars/stalls/flower_hat_lean.svg",
+        "point": "res://art/chars/stalls/flower_hat_point.svg"
+      }
+    },
+    {
+      "id": "big_ears",
+      "w": 75,
+      "h": 69,
+      "face_dir": 1,
+      "size": [
+        180,
+        187
+      ],
+      "pivot": [
+        90,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/big_ears_rest.svg",
+        "laugh": "res://art/chars/stalls/big_ears_laugh.svg",
+        "lean": "res://art/chars/stalls/big_ears_lean.svg",
+        "point": "res://art/chars/stalls/big_ears_point.svg"
+      }
+    },
+    {
+      "id": "bunny",
+      "w": 50,
+      "h": 97,
+      "face_dir": -1,
+      "size": [
+        152,
+        187
+      ],
+      "pivot": [
+        76,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/bunny_rest.svg",
+        "laugh": "res://art/chars/stalls/bunny_laugh.svg",
+        "lean": "res://art/chars/stalls/bunny_lean.svg",
+        "point": "res://art/chars/stalls/bunny_point.svg"
+      }
+    },
+    {
+      "id": "tiara",
+      "w": 65,
+      "h": 81,
+      "face_dir": 1,
+      "size": [
+        168,
+        187
+      ],
+      "pivot": [
+        84,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/tiara_rest.svg",
+        "laugh": "res://art/chars/stalls/tiara_laugh.svg",
+        "lean": "res://art/chars/stalls/tiara_lean.svg",
+        "point": "res://art/chars/stalls/tiara_point.svg"
+      }
+    },
+    {
+      "id": "big_bow",
+      "w": 55,
+      "h": 79,
+      "face_dir": -1,
+      "size": [
+        158,
+        187
+      ],
+      "pivot": [
+        79,
+        187
+      ],
+      "frames": {
+        "rest": "res://art/chars/stalls/big_bow_rest.svg",
+        "laugh": "res://art/chars/stalls/big_bow_laugh.svg",
+        "lean": "res://art/chars/stalls/big_bow_lean.svg",
+        "point": "res://art/chars/stalls/big_bow_point.svg"
+      }
+    }
+  ],
+  "tumble": [
+    {
+      "file": "res://art/chars/stalls/tumble_1.svg",
+      "size": [
+        158,
+        150
+      ],
+      "pivot": [
+        86.0,
+        150.0
+      ],
+      "frames": 8
+    },
+    {
+      "file": "res://art/chars/stalls/tumble_2.svg",
+      "size": [
+        158,
+        150
+      ],
+      "pivot": [
+        86.0,
+        150.0
+      ],
+      "frames": 8
+    },
+    {
+      "file": "res://art/chars/stalls/tumble_3.svg",
+      "size": [
+        158,
+        150
+      ],
+      "pivot": [
+        86.0,
+        150.0
+      ],
+      "frames": 8
+    },
+    {
+      "file": "res://art/chars/stalls/tumble_4.svg",
+      "size": [
+        158,
+        150
+      ],
+      "pivot": [
+        86.0,
+        150.0
+      ],
+      "frames": 8
+    }
+  ],
+  "layout": [
+    "bowler",
+    "pigtails",
+    "beehive",
+    "bald",
+    "cowlick",
+    "feather",
+    "flat_cap",
+    "toddler",
+    "bob",
+    "top_hat",
+    "bunny",
+    "curlers",
+    "afro",
+    "big_bow",
+    "sunhat",
+    "spiky",
+    "tiara",
+    "big_ears",
+    "beanie",
+    "ponytail",
+    "mohawk",
+    "flower_hat",
+    "topknot",
+    "side_cap"
+  ]
+}

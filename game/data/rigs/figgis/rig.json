@@ -1,0 +1,246 @@
+{
+  "version": 1,
+  "rig": "figgis",
+  "doc": "Old Figgis HUD bust (TECH 4.7 conventions as rigs/hush/rig.json). Origin = the chip's bottom centre; the bust fits a 128 x 128 chip at zoom 1.0 (x -64..64, y -128..0). Hands point UP at rest. The card prop is blank: draw item icons inside props.card.icon_rect (card canvas px).",
+  "height_px": 128,
+  "root_part": "hood",
+  "origin": "chip_bottom_centre",
+  "facing": 0,
+  "parts": {
+    "hood": {
+      "file": "res://art/chars/figgis/hood.svg",
+      "offset": [
+        0,
+        0
+      ],
+      "pivot": [
+        72,
+        138
+      ],
+      "z": 0
+    },
+    "box": {
+      "parent": "hood",
+      "offset": [
+        0,
+        0
+      ],
+      "file": "res://art/chars/figgis/box.svg",
+      "pivot": [
+        74,
+        29
+      ],
+      "z": 7
+    },
+    "body": {
+      "parent": "hood",
+      "offset": [
+        0,
+        -24
+      ],
+      "file": "res://art/chars/figgis/body.svg",
+      "pivot": [
+        46,
+        17
+      ],
+      "z": 2,
+      "sockets": {
+        "card": [
+          46,
+          23,
+          0
+        ]
+      }
+    },
+    "head": {
+      "parent": "body",
+      "offset": [
+        0,
+        -30
+      ],
+      "file": "res://art/chars/figgis/head.svg",
+      "pivot": [
+        34,
+        74
+      ],
+      "z": 3,
+      "limits": {
+        "rot": [
+          -25,
+          25
+        ]
+      }
+    },
+    "ear_l": {
+      "parent": "head",
+      "offset": [
+        -19,
+        -30
+      ],
+      "file": "res://art/chars/figgis/ear_l.svg",
+      "pivot": [
+        40,
+        30
+      ],
+      "z": 1,
+      "spring": {
+        "channel": "rot",
+        "k": 160,
+        "c": 6,
+        "clamp": 20
+      }
+    },
+    "ear_r": {
+      "parent": "head",
+      "offset": [
+        19,
+        -30
+      ],
+      "file": "res://art/chars/figgis/ear_r.svg",
+      "pivot": [
+        10,
+        30
+      ],
+      "z": 1,
+      "spring": {
+        "channel": "rot",
+        "k": 160,
+        "c": 6,
+        "clamp": 20
+      }
+    },
+    "specs": {
+      "parent": "head",
+      "offset": [
+        0,
+        -18
+      ],
+      "file": "res://art/chars/figgis/specs.svg",
+      "pivot": [
+        30,
+        14
+      ],
+      "z": 6,
+      "spring": {
+        "channel": "rot",
+        "k": 200,
+        "c": 10,
+        "clamp": 6
+      }
+    },
+    "hand_l": {
+      "parent": "body",
+      "offset": [
+        -30,
+        -6
+      ],
+      "tex": {
+        "hold": "res://art/chars/figgis/hand_l_hold.svg",
+        "point": "res://art/chars/figgis/hand_l_point.svg",
+        "shh": "res://art/chars/figgis/hand_l_shh.svg",
+        "cup": "res://art/chars/figgis/hand_l_cup.svg"
+      },
+      "default_tex": "hold",
+      "pivot": [
+        24,
+        36
+      ],
+      "z": 9
+    },
+    "hand_r": {
+      "parent": "body",
+      "offset": [
+        30,
+        -6
+      ],
+      "tex": {
+        "hold": "res://art/chars/figgis/hand_r_hold.svg",
+        "point": "res://art/chars/figgis/hand_r_point.svg",
+        "shh": "res://art/chars/figgis/hand_r_shh.svg",
+        "cup": "res://art/chars/figgis/hand_r_cup.svg"
+      },
+      "default_tex": "hold",
+      "pivot": [
+        24,
+        36
+      ],
+      "z": 9
+    }
+  },
+  "limbs": {},
+  "face": {
+    "anchor": "head",
+    "offset": [
+      0,
+      -30
+    ],
+    "pivot": [
+      24,
+      22
+    ],
+    "slots": {
+      "eyes": {
+        "z": 4,
+        "pivot": [
+          24,
+          22
+        ],
+        "default": "open",
+        "variants": {
+          "open": "res://art/chars/figgis/eyes_open.svg",
+          "happy": "res://art/chars/figgis/eyes_happy.svg",
+          "wide": "res://art/chars/figgis/eyes_wide.svg"
+        }
+      },
+      "mouth": {
+        "z": 5,
+        "pivot": [
+          24,
+          22
+        ],
+        "default": "smile",
+        "variants": {
+          "psst": "res://art/chars/figgis/mouth_psst.svg",
+          "smile": "res://art/chars/figgis/mouth_smile.svg",
+          "shh": "res://art/chars/figgis/mouth_shh.svg"
+        }
+      }
+    },
+    "overlays": {}
+  },
+  "props": {
+    "card": {
+      "file": "res://art/chars/figgis/card_up.svg",
+      "pivot": [
+        40,
+        50
+      ],
+      "socket": "body:card",
+      "z": 8,
+      "z_offset": 6,
+      "hidden": true,
+      "default": "up",
+      "states": [
+        "up"
+      ],
+      "default_state": "up",
+      "tex": {
+        "up": "res://art/chars/figgis/card_up.svg"
+      },
+      "icon_rect": [
+        16,
+        13,
+        48,
+        32
+      ]
+    }
+  },
+  "residues": {},
+  "mirror_pairs": [
+    [
+      "_l",
+      "_r"
+    ]
+  ],
+  "no_mirror": []
+}

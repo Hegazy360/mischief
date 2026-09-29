@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "episode": "n02_something_fishy",
+  "notes": "Ideal: COLD OPEN (loop 1) -> FISHY -> TIME'S UP -> Meltdown (loop 2, unseals the Big Number and re-arms TIME'S UP); loop 3: TIME'S UP again -> MIRROR fix-up -> MIRROR, MIRROR (released in round 3) -> EYE-POPPING NEWS (est. 127 Applause).",
+  "routes": {
+    "ideal": {
+      "persona": "ideal",
+      "steps": [
+        {"do": "move", "room": "parlour", "x": 2300, "run": false},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "pick", "item": "kipper", "from": "kitchen_fridge"},
+        {"do": "rig", "prank": "cold_open"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "cold_open"}, "max_s": 90},
+        {
+          "do": "wait",
+          "until": {
+            "and": [
+              {"bellows_in_room": "kitchen"},
+              {"bellows_state": "detour"},
+              {"bellows_facing_away_from_hush": true}
+            ]
+          },
+          "max_s": 20
+        },
+        {"do": "rig", "prank": "times_up"},
+        {"do": "rig", "prank": "something_fishy"},
+        {"do": "pick", "item": "magnifier", "from": "hall_confiscated_box"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "times_up"}, "max_s": 90},
+        {
+          "do": "wait",
+          "until": {
+            "and": [
+              {"bellows_activity": "paper"},
+              {"bellows_in_room": "parlour"},
+              {"bellows_facing_away_from_hush": true}
+            ]
+          },
+          "max_s": 60
+        },
+        {"do": "rig", "prank": "mirror_mirror"},
+        {"do": "rig", "prank": "times_up"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {
+          "do": "wait",
+          "until": {"and": [{"bellows_activity": "snack"}, {"bellows_in_room": "kitchen"}]},
+          "max_s": 60
+        },
+        {"do": "rig", "prank": "eye_popping_news"},
+        {"do": "hide", "spot": "parlour_piano_back"},
+        {"do": "wait_event", "event": "prank_fire", "match": {"prank": "times_up"}, "max_s": 90},
+        {"do": "stand_in", "prank": "mirror_mirror", "release_round": 3},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "eye_popping_news"}, "max_s": 60},
+        {"do": "bow"}
+      ],
+      "expect": {
+        "stars": [true, true, true],
+        "applause": [100, 140],
+        "catches_max": 0,
+        "duration_s": [150, 360],
+        "lines": ["fish", "clock", "dinner", "news", "bn"]
+      }
+    },
+    "required": {
+      "persona": "required",
+      "steps": [
+        {"do": "pick", "item": "kipper", "from": "kitchen_fridge"},
+        {"do": "rig", "prank": "cold_open"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "cold_open"}, "max_s": 90},
+        {
+          "do": "wait",
+          "until": {
+            "and": [
+              {"bellows_in_room": "kitchen"},
+              {"bellows_state": "detour"},
+              {"bellows_facing_away_from_hush": true}
+            ]
+          },
+          "max_s": 20
+        },
+        {"do": "rig", "prank": "times_up"},
+        {"do": "rig", "prank": "something_fishy"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "times_up"}, "max_s": 90},
+        {"do": "bow"}
+      ],
+      "expect": {
+        "stars": [true, null, null],
+        "applause": [35, 60],
+        "catches_max": 0,
+        "lines": ["fish", "clock", "dinner"]
+      }
+    },
+    "slow": {
+      "persona": "slow",
+      "steps": [
+        {"do": "move", "room": "parlour", "x": 2300, "run": false},
+        {"do": "squeak", "n": 1, "gap_s": 0.5},
+        {"do": "pick", "item": "kipper", "from": "kitchen_fridge"},
+        {"do": "rig", "prank": "cold_open"},
+        {"do": "hide", "spot": "kitchen_pantry_curtain"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "cold_open"}, "max_s": 90},
+        {
+          "do": "wait",
+          "until": {
+            "and": [
+              {"bellows_in_room": "kitchen"},
+              {"bellows_state": "detour"},
+              {"bellows_facing_away_from_hush": true}
+            ]
+          },
+          "max_s": 20
+        },
+        {"do": "rig", "prank": "times_up"},
+        {"do": "rig", "prank": "something_fishy"},
+        {"do": "hide", "spot": "hall_coat_cupboard"},
+        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "times_up"}, "max_s": 90},
+        {"do": "bow"}
+      ],
+      "expect": {"stars": [true, null, null], "lines": ["fish", "clock", "dinner"], "first_player_laugh_s_max": 10}
+    }
+  }
+}

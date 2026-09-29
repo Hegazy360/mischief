@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "clip": "bellows/rx_drench_a",
+  "rig": "bellows",
+  "loop": false,
+  "length": 120,
+  "keys": [],
+  "events": [],
+  "variation": {
+    "time_jitter": 0.5,
+    "rot_jitter": 2
+  }
+}

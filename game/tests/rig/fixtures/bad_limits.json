@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "clip": "_mannequin/limits",
+ "rig": "_mannequin",
+ "loop": false,
+ "layer": "base",
+ "mask": null,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 10,
+   "pose": "m_stand_b",
+   "ease": "linear",
+   "set": {
+    "head": {
+     "rot": 80
+    }
+   }
+  },
+  {
+   "f": 20,
+   "pose": "m_stand",
+   "ease": "linear"
+  }
+ ],
+ "length": 20,
+ "events": []
+}

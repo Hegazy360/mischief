@@ -1,0 +1,194 @@
+{
+ "version": 1,
+ "clip": "_mannequin/rx_launch",
+ "rig": "_mannequin",
+ "loop": false,
+ "length": 100,
+ "layer": "base",
+ "mask": null,
+ "blend_in": 0,
+ "blend_out": 10,
+ "tags": [
+  "take"
+ ],
+ "beats": {
+  "anticipation": [
+   14,
+   27
+  ],
+  "accent": [
+   27,
+   30
+  ],
+  "hold": [
+   30,
+   72
+  ],
+  "settle": [
+   72,
+   100
+  ]
+ },
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_sip"
+  },
+  {
+   "f": 14,
+   "pose": "m_sip_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 24,
+   "pose": "m_launch_antic",
+   "ease": "out_cubic"
+  },
+  {
+   "f": 26,
+   "pose": "m_launch_antic_b",
+   "ease": "linear"
+  },
+  {
+   "f": 27,
+   "pose": "m_jolt",
+   "ease": "pop"
+  },
+  {
+   "f": 30,
+   "pose": "m_jolt_b",
+   "ease": "out_quad"
+  },
+  {
+   "f": 38,
+   "pose": "m_watch_up",
+   "ease": "in_quad"
+  },
+  {
+   "f": 54,
+   "pose": "m_watch_up_b",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 72,
+   "pose": "m_watch_up",
+   "ease": "in_out_sine"
+  },
+  {
+   "f": 82,
+   "pose": "m_flinch",
+   "ease": "in_cubic"
+  },
+  {
+   "f": 94,
+   "pose": "m_look_down",
+   "ease": "out_back"
+  },
+  {
+   "f": 100,
+   "pose": "m_look_down_b",
+   "ease": "in_out_sine"
+  }
+ ],
+ "events": [
+  {
+   "f": 0,
+   "type": "prop",
+   "op": "attach",
+   "prop": "mug"
+  },
+  {
+   "f": 0,
+   "type": "prop",
+   "op": "state",
+   "prop": "mug",
+   "state": "full"
+  },
+  {
+   "f": 14,
+   "type": "sfx",
+   "id": "gulp"
+  },
+  {
+   "f": 27,
+   "type": "prop",
+   "op": "launch",
+   "prop": "mug",
+   "vel": [
+    140,
+    -1000
+   ],
+   "spin": 900
+  },
+  {
+   "f": 27,
+   "type": "sfx",
+   "id": "whoosh"
+  },
+  {
+   "f": 27,
+   "type": "hitstop",
+   "frames": 4
+  },
+  {
+   "f": 27,
+   "type": "cam",
+   "op": "punch",
+   "zoom": 1.2,
+   "in": 6,
+   "hold": 40,
+   "out": 20
+  },
+  {
+   "f": 27,
+   "type": "spring",
+   "part": "hat",
+   "kick": -22
+  },
+  {
+   "f": 27,
+   "type": "mark",
+   "name": "accent"
+  },
+  {
+   "f": 28,
+   "type": "shake",
+   "trauma": 0.25
+  },
+  {
+   "f": 36,
+   "type": "laugh",
+   "tier": "auto"
+  },
+  {
+   "f": 38,
+   "type": "sfx",
+   "id": "land_soft"
+  },
+  {
+   "f": 38,
+   "type": "fx",
+   "id": "shiver",
+   "dur": 30,
+   "amp": 1.2
+  },
+  {
+   "f": 82,
+   "type": "sfx",
+   "id": "crash_small"
+  },
+  {
+   "f": 100,
+   "type": "mark",
+   "name": "release"
+  }
+ ],
+ "variation": {
+  "time_jitter": 0.0,
+  "rot_jitter": 1.0
+ },
+ "smear": {
+  "auto": true
+ },
+ "plant": true
+}

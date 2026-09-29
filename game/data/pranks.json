@@ -1,0 +1,740 @@
+{
+  "version": 1,
+  "pranks": {
+    "achoo_ria": {
+      "caption": "ACHOO-RIA!",
+      "size": "M",
+      "rig_point": "kitchen_honey",
+      "steps": [{"prep": "Q", "needs": null, "fx": "pepper_shake"}],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 7.0,
+        "resume": false,
+        "fixup_kinds": ["HONEY"],
+        "fixup_station": "st_tea"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sneeze_blast",
+        "variants": ["a"],
+        "end": {"room": "kitchen", "x": 3760, "landing": "sink"}
+      },
+      "knock_on": {"prank": "tap_dance", "frame": 112},
+      "residue": [{"kind": "FRAZZLED", "blind": true, "look": "flipped"}],
+      "tags": ["free", "fixup"],
+      "nights": [
+        "p00_curtain_up",
+        "n01_throat_tea",
+        "n03_singing_in_the_bath",
+        "n05_enter_beryl",
+        "n08_companys_coming"
+      ],
+      "joke": "Rule-of-three sneeze (ah... ahh... AHHH... false stop... CHOO!) rockets him backwards on his stool into the sink, bouffant flipped over his face."
+    },
+    "tap_dance": {
+      "caption": "TAP DANCE",
+      "size": "S",
+      "rig_point": "kitchen_sink_tap",
+      "steps": [{"prep": "Q", "needs": null, "fx": "twist_tap"}],
+      "trigger": {
+        "type": "use",
+        "activity": "rinse",
+        "mark_s": 1.0,
+        "resume": false,
+        "fixup_kinds": ["SINK"],
+        "fixup_station": "st_sink"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "drench", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["free", "fixup", "double_act_target"],
+      "nights": ["n01_throat_tea"],
+      "joke": "The spray tap whips round like a python; he wrestles it and loses: a face blast."
+    },
+    "kettle_drum": {
+      "caption": "KETTLE DRUM",
+      "size": "M",
+      "rig_point": "kitchen_kettle",
+      "steps": [{"prep": "Q", "needs": "squeaker", "fx": "stuff_squeaker"}],
+      "trigger": {
+        "type": "use",
+        "activity": "tea",
+        "mark_s": 3.0,
+        "resume": true,
+        "fixup_kinds": ["HONEY"],
+        "fixup_station": "st_tea"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "sing_crack", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [],
+      "tags": ["item", "resume", "fixup"],
+      "nights": ["n01_throat_tea"],
+      "joke": "The kettle squeaks a melody; he harmonises, cracks on the high note, the lid pops onto his nose, and he pours his tea anyway."
+    },
+    "in_a_pickle": {
+      "caption": "IN A PICKLE",
+      "size": "L",
+      "rig_point": "kitchen_pickle_jar",
+      "steps": [{"prep": "S", "needs": null, "fx": "tighten_lid"}],
+      "trigger": {"type": "use", "activity": "pickles", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "strain_slip", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [],
+      "tags": ["free"],
+      "nights": ["n01_throat_tea"],
+      "joke": "He strains at the onion jar, purples, sideburns spring; POP, onions pinball off the pans; he slips on one and windmills down.",
+      "wear": {"look": "pickled_onion", "socket": "head:hat", "s": 20}
+    },
+    "cold_open": {
+      "caption": "COLD OPEN",
+      "size": "M",
+      "rig_point": "kitchen_fridge_shelf",
+      "steps": [{"prep": "S", "needs": null, "fx": "stack_shelf"}],
+      "trigger": {"type": "use", "activity": "snack", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "avalanche_helmet", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [
+        {"kind": "STICKY", "blind": false, "look": null},
+        {"kind": "COSTUME", "blind": false, "look": "jelly_helmet"}
+      ],
+      "tags": ["free"],
+      "nights": ["n02_something_fishy"],
+      "joke": "Fridge avalanche: he ends up in a jelly-mould helmet with a sausage boa."
+    },
+    "allegro_go_go": {
+      "caption": "ALLEGRO-GO-GO!",
+      "size": "M",
+      "rig_point": "parlour_gramophone",
+      "steps": [{"prep": "Q", "needs": null, "fx": "speed_lever"}],
+      "trigger": {"type": "use", "activity": "warmup", "mark_s": 0.5, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "dizzy_spin", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [],
+      "tags": ["free"],
+      "nights": ["p00_curtain_up", "n04_the_big_sulk", "n06_behind_you", "gala_the_comeback"],
+      "joke": "His record screeches to triple speed; he babbles his scales as a chipmunk, spins like a top and collapses dizzy under orbiting notes."
+    },
+    "lift_off": {
+      "caption": "LIFT-OFF",
+      "size": "L",
+      "rig_point": "parlour_recliner",
+      "steps": [{"prep": "B", "needs": null, "fx": "crank_spring"}],
+      "trigger": {"type": "use", "activity": "paper", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "launch_ceiling",
+        "variants": ["a"],
+        "end": {"room": "parlour", "x": 2236, "landing": "log_basket"}
+      },
+      "knock_on": {"prank": "bellows_blows", "frame": 103},
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["free", "double_act_source"],
+      "nights": ["n01_throat_tea", "n04_the_big_sulk", "n07_kidding_around"],
+      "joke": "He pulls the recliner lever: catapulted, his cravat snags the chandelier, he swings, and drops into the log basket."
+    },
+    "eye_popping_news": {
+      "caption": "EYE-POPPING NEWS",
+      "size": "M",
+      "rig_point": "parlour_newspaper",
+      "steps": [{"prep": "Q", "needs": "magnifier", "fx": "swap_lens"}],
+      "trigger": {"type": "use", "activity": "paper", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "blind_bumble", "variants": ["a", "b"], "end": null},
+      "knock_on": null,
+      "residue": [],
+      "tags": ["item", "functional"],
+      "nights": ["n02_something_fishy", "n06_behind_you"],
+      "joke": "Specs on behind a magnifier: his eyes balloon x4 and he bumbles blind for 15 s, bowing to the hat stand.",
+      "blind_s": 15
+    },
+    "bellows_blows": {
+      "caption": "BELLOWS BLOWS",
+      "size": "M",
+      "rig_point": "parlour_bellows",
+      "steps": [{"prep": "Q", "needs": "flour", "fx": "fill_flour"}],
+      "trigger": {
+        "type": "use",
+        "activity": "fire",
+        "mark_s": 2.0,
+        "resume": false,
+        "fixup_kinds": ["DRY"],
+        "fixup_station": "st_fireplace"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "poof", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "FLOURY", "blind": false, "look": null}],
+      "tags": ["item", "fixup", "double_act_target"],
+      "nights": ["n04_the_big_sulk", "n08_companys_coming"],
+      "joke": "POOF: ghost-white, and so is his portrait; he coughs a smoke ring."
+    },
+    "prima_ballerina": {
+      "caption": "PRIMA BALLERINA",
+      "size": "L",
+      "rig_point": "parlour_chandelier",
+      "steps": [{"prep": "B", "needs": null, "fx": "loosen_chain"}],
+      "trigger": {"type": "quake", "room": "parlour", "resume": false, "fixup_kinds": []},
+      "conditions": [{"meltdown_in_room": "parlour"}],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "drop_on",
+        "variants": ["a"],
+        "end": {"room": "parlour", "x": 2330, "landing": "chandelier"}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "COSTUME", "blind": false, "look": "tutu_chandelier"}],
+      "tags": ["free", "quake"],
+      "nights": ["n04_the_big_sulk"],
+      "joke": "A Meltdown shakes the chandelier loose: it drops round his waist like a tutu, candles and all; he tiptoes out on pointe, mortified."
+    },
+    "grand_exit": {
+      "caption": "GRAND EXIT",
+      "size": "SIG",
+      "rig_point": "parlour_piano_wedge",
+      "steps": [{"prep": "B", "needs": null, "fx": "kick_wedge"}],
+      "trigger": {"type": "use", "activity": "piano", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sig_grand_exit",
+        "variants": [],
+        "end": {"room": "hall", "x": 1450, "landing": null}
+      },
+      "knock_on": {"prank": "rug_burn", "frame": 177},
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["free", "signature", "double_act_source"],
+      "nights": ["n06_behind_you"],
+      "joke": "His fortissimo sets the piano rolling; he chases it, still playing, across the parlour and the hall; it flips at the stair foot with him inside; one muffled chord; the lid rises and he's wearing it."
+    },
+    "it_takes_two": {
+      "caption": "IT TAKES TWO",
+      "size": "SIG",
+      "rig_point": "parlour_gramophone",
+      "steps": [{"prep": "S", "needs": "record", "fx": "swap_record"}],
+      "trigger": {"type": "use", "activity": "tango", "mark_s": 4.0, "resume": false, "fixup_kinds": []},
+      "conditions": [{"delphine_present": true}],
+      "fizzle": null,
+      "reaction": {"archetype": "sig_it_takes_two", "variants": [], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "COSTUME", "blind": false, "look": "long_johns"}],
+      "tags": ["item", "signature", "delphine", "always_suppressed"],
+      "nights": ["n10_it_takes_two"],
+      "joke": "He can't resist a tango with Delphine; the dip... RRRIP: split trousers, spotty long johns, frozen mid-dip with a strangled grin while she fans herself.",
+      "always_suppressed": true
+    },
+    "something_fishy": {
+      "caption": "SOMETHING FISHY",
+      "size": "M",
+      "rig_point": "hall_phone",
+      "steps": [{"prep": "Q", "needs": "kipper", "fx": "swap_handset"}],
+      "trigger": {"type": "use", "activity": "phone", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "fish_slap", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [],
+      "tags": ["item"],
+      "nights": ["n02_something_fishy"],
+      "joke": "His agent calls; he speaks pompously into a kipper; it flops and slaps him twice; slow burn to the Stalls."
+    },
+    "times_up": {
+      "caption": "TIME'S UP",
+      "size": "M",
+      "rig_point": "hall_clock",
+      "steps": [{"prep": "S", "needs": null, "fx": "overwind"}],
+      "trigger": {"type": "use", "activity": "clock", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "jackhammer_cling",
+        "variants": ["a"],
+        "end": {"room": "hall", "x": 1150, "landing": null}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["free"],
+      "nights": ["n02_something_fishy"],
+      "joke": "Machine-gun chimes: he clings on as the clock pogoes across the hall ('a-a-a-a'); the pendulum door smacks his bum."
+    },
+    "mirror_mirror": {
+      "caption": "MIRROR, MIRROR",
+      "size": "SIG",
+      "rig_point": "hall_mirror",
+      "steps": [{"prep": "B", "needs": null, "fx": "lift_glass"}],
+      "trigger": {
+        "type": "use",
+        "activity": "mirror",
+        "mark_s": 0.5,
+        "resume": false,
+        "fixup_kinds": ["MIRROR"],
+        "fixup_station": "st_hall_mirror"
+      },
+      "conditions": [{"hush_in_frame_frozen": true}],
+      "fizzle": {
+        "clip": "bellows/st_smirk",
+        "desc": "No Hush in the frame: he preens at an empty frame, too vain to notice."
+      },
+      "reaction": {
+        "archetype": "sig_mirror_mirror",
+        "variants": [],
+        "end": {"room": "hall", "x": 862, "landing": "coat_stand"}
+      },
+      "knock_on": null,
+      "residue": [],
+      "tags": ["free", "signature", "fixup", "stand_in"],
+      "nights": ["n02_something_fishy", "gala_the_comeback"],
+      "joke": "Stand in the empty frame and hold FREEZE: he preens, leans in, lifts his specs... release to WINK: he screams (T1/T2/T3 by rounds survived) and flies backwards into the coat stand, which spins him like a revolving door.",
+      "stand_in": {
+        "hotspot": "hall_mirror",
+        "station": "st_hall_mirror",
+        "hold": "freeze",
+        "rounds_f": [72, 72, 60],
+        "tier_by_round": [1, 2, 3],
+        "poke_window_f": 48
+      },
+      "residue_clear": ["FRAZZLED", "FEATHERED", "COSTUME"]
+    },
+    "rug_burn": {
+      "caption": "RUG BURN",
+      "size": "L",
+      "rig_point": "stairs_rods",
+      "steps": [{"prep": "S", "needs": null, "fx": "pull_rods"}],
+      "trigger": {
+        "type": "step",
+        "at": "stairs_foot",
+        "dir": "up",
+        "chase": true,
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [{"tier_min": "steaming", "or_chase": true}],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "surf_out",
+        "variants": ["a"],
+        "end": {"room": "porch", "x": 230, "landing": "hedge"}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["free", "step", "chase_trip", "anger_gated", "double_act_target"],
+      "nights": ["n04_the_big_sulk", "n06_behind_you", "n09_tutu_much"],
+      "joke": "The runner whips away: he surfs it down, across the hall and out of the front door; 4 s later he walks back in wearing half a hedge.",
+      "wear": {"look": "hedge_twigs", "socket": "head:hat", "s": 20},
+      "return_s": 4
+    },
+    "sopran_oh_no": {
+      "caption": "SOPRAN-OH-NO",
+      "size": "M",
+      "rig_point": "bathroom_basin_spray",
+      "steps": [{"prep": "Q", "needs": "balloon", "fx": "fill_helium"}],
+      "trigger": {"type": "use", "activity": "gargle", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "squeaky_voice", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "SQUEAKY", "blind": false, "look": null}],
+      "tags": ["item"],
+      "nights": ["n03_singing_in_the_bath"],
+      "joke": "Helium in the throat spray: a chipmunk-soprano aria; he stops, tries again, slow burn."
+    },
+    "snap_decision": {
+      "caption": "SNAP DECISION",
+      "size": "M",
+      "rig_point": "bathroom_duck",
+      "steps": [{"prep": "Q", "needs": "croc", "fx": "swap_duck"}],
+      "trigger": {"type": "use", "activity": "bath", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "scare_leap",
+        "variants": ["a"],
+        "end": {"room": "bathroom", "x": 2702, "landing": "laundry_basket"}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["item"],
+      "nights": ["n03_singing_in_the_bath"],
+      "joke": "He serenades his 'duck'; it snaps his nose; soprano shriek; he leaps, tangles in the shower curtain and lands in the laundry basket."
+    },
+    "in_over_his_head": {
+      "caption": "IN OVER HIS HEAD",
+      "size": "SIG",
+      "rig_point": "bathroom_bath_taps",
+      "steps": [
+        {"prep": "S", "needs": "bubble_bath", "fx": "pour_bubbles"},
+        {"prep": "Q", "needs": "sherbet", "fx": "add_sherbet"}
+      ],
+      "trigger": {"type": "use", "activity": "bath", "mark_s": 4.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sig_in_over_his_head",
+        "variants": [],
+        "end": {"room": "hall", "x": 862, "landing": "umbrella_stand"}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["item", "signature", "two_step"],
+      "nights": ["n04_the_big_sulk", "n07_kidding_around", "n10_it_takes_two"],
+      "joke": "A foam mountain: he rises inside a giant bubble, still singing, drifts out of the door and down the stairwell, and pops into the hall umbrella stand, wearing it.",
+      "wear": {"look": "umbrella_stand", "socket": "head:hat", "s": 20}
+    },
+    "pipe_down": {
+      "caption": "PIPE DOWN!",
+      "size": "L",
+      "rig_point": "landing_boiler_valve",
+      "steps": [{"prep": "B", "needs": null, "fx": "open_valve"}],
+      "trigger": {
+        "type": "use",
+        "activity": "radiator",
+        "mark_s": 1.0,
+        "resume": false,
+        "fixup_kinds": ["DRY"],
+        "fixup_station": "st_radiator"
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "steam_duel", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["free", "fixup"],
+      "nights": ["n03_singing_in_the_bath", "n09_tutu_much"],
+      "joke": "The pipes whistle his tune back, wrong; he sings louder; they answer louder; 'PIPE DOWN!': a steam blast."
+    },
+    "pillow_talk": {
+      "caption": "PILLOW TALK",
+      "size": "M",
+      "rig_point": "bedroom_pillow",
+      "steps": [{"prep": "Q", "needs": "squeaker", "fx": "stuff_squeaker"}],
+      "trigger": {"type": "use", "activity": "nap", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "feather_burst", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "FEATHERED", "blind": false, "look": null}],
+      "tags": ["item"],
+      "nights": ["n03_singing_in_the_bath"],
+      "joke": "SQUEAK... SQUEAK... on the third he punches the pillow; it bursts: a feather blizzard and a sneeze fit."
+    },
+    "butter_fingers": {
+      "caption": "BUTTER-FINGERS",
+      "size": "M",
+      "rig_point": "bedroom_bedside",
+      "steps": [{"prep": "Q", "needs": "butter", "fx": "butter_lens"}],
+      "trigger": {
+        "type": "use",
+        "activity": "nap",
+        "mark_s": 18.0,
+        "resume": false,
+        "fixup_kinds": [],
+        "at_end": true
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "blind_bumble",
+        "variants": ["b", "a"],
+        "end": {"room": "bedroom", "x": 3540, "landing": null}
+      },
+      "knock_on": null,
+      "residue": [],
+      "tags": ["item", "functional"],
+      "nights": ["n03_singing_in_the_bath"],
+      "joke": "He wakes and puts on buttered specs: blinded, he serenades the hat stand, dips it and kisses its hand.",
+      "blind_s": 15
+    },
+    "kidding_around": {
+      "caption": "KIDDING AROUND",
+      "size": "SIG",
+      "rig_point": "bedroom_bed",
+      "steps": [
+        {
+          "prep": "Q",
+          "needs": null,
+          "fx": "tuck_in",
+          "conditions": [{"beryl_within": 150}],
+          "setup": {"item": "apple", "lead": "beryl"}
+        }
+      ],
+      "trigger": {
+        "type": "third_party",
+        "actor": "beryl",
+        "event": "tucked_in",
+        "activity": "nap",
+        "mark_s": 1.0,
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sig_kidding_around",
+        "variants": [],
+        "end": {"room": "bathroom", "x": 2702, "landing": "laundry_basket"}
+      },
+      "knock_on": null,
+      "residue": [],
+      "tags": ["beryl", "signature"],
+      "nights": ["n07_kidding_around"],
+      "joke": "He snuggles his 'hot-water bottle'; it bleats; goat eyes 5 cm from his: the wildest take in the game; she headbutts him off the bed, through the door and into the laundry basket."
+    },
+    "tutu_much": {
+      "caption": "TUTU MUCH",
+      "size": "M",
+      "rig_point": "dressing_dummy",
+      "steps": [{"prep": "S", "needs": "tutu", "fx": "dress_dummy"}],
+      "trigger": {"type": "use", "activity": "cloak", "mark_s": 1.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "costume_burn", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "COSTUME", "blind": false, "look": "tutu_tulle"}],
+      "tags": ["item"],
+      "nights": ["n09_tutu_much", "n10_it_takes_two"],
+      "joke": "He dresses with his eyes shut, humming; opens them at the mirror: a tutu; a 70 f slow burn. Meet Delphine before the mirror and he's EMBARRASSED."
+    },
+    "award_winning": {
+      "caption": "AWARD-WINNING",
+      "size": "L",
+      "rig_point": "dressing_trophy_shelf",
+      "steps": [{"prep": "S", "needs": null, "fx": "loosen_shelf"}],
+      "trigger": {"type": "use", "activity": "polish", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "avalanche_helmet", "variants": ["b"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "COSTUME", "blind": false, "look": "trophy_helmet"}],
+      "tags": ["free"],
+      "nights": ["n09_tutu_much"],
+      "joke": "Trophies bonk him in rising pitch; 'Best Baritone 1987' lands over his head as a helmet; a muffled 'PIPE DOWN!'."
+    },
+    "hosed": {
+      "caption": "HOSED",
+      "size": "M",
+      "rig_point": "garden_hose",
+      "steps": [{"prep": "Q", "needs": "apple", "fx": "drop_apple"}],
+      "trigger": {
+        "type": "third_party",
+        "actor": "beryl",
+        "event": "on_hose",
+        "activity": "roses",
+        "mark_s": 3.0,
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [{"beryl_on": "garden_hose"}],
+      "fizzle": {"clip": "bellows/st_smirk", "desc": "No goat on the hose: he waters his roses, smug."},
+      "reaction": {"archetype": "drench", "variants": ["c"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["item", "beryl"],
+      "nights": ["n05_enter_beryl", "n07_kidding_around"],
+      "joke": "Beryl trots over for the apple and stands on the hose: nothing comes out; he peers down the dead nozzle; Beryl trots off; SPLOOSH.",
+      "beryl_lure_px": 400
+    },
+    "marrow_escape": {
+      "caption": "MARROW ESCAPE",
+      "size": "M",
+      "rig_point": "garden_marrow",
+      "steps": [{"prep": "S", "needs": "balloon", "fx": "swap_marrow"}],
+      "trigger": {"type": "use", "activity": "marrow", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "balloon_chase",
+        "variants": ["a"],
+        "end": {"room": "garden", "x": 5650, "landing": null}
+      },
+      "knock_on": {"headbutt": true, "frame": 128, "requires": {"beryl_within": 300}, "landing": "pond"},
+      "residue": [],
+      "tags": ["item", "double_act_source"],
+      "nights": ["n05_enter_beryl", "n06_behind_you"],
+      "joke": "His prize marrow is a balloon: it shrieks round his head, deflating; he chases it round the garden."
+    },
+    "penny_pincher": {
+      "caption": "PENNY PINCHER",
+      "size": "L",
+      "rig_point": "garden_coin_1",
+      "steps": [
+        {"prep": "Q", "needs": "coins", "fx": "place_coin", "at": "garden_coin_1"},
+        {"prep": "Q", "needs": "coins", "fx": "place_coin", "at": "garden_coin_2"},
+        {"prep": "Q", "needs": "coins", "fx": "place_coin", "at": "garden_coin_3"}
+      ],
+      "trigger": {
+        "type": "step",
+        "at": ["garden_coin_1", "garden_coin_2", "garden_coin_3"],
+        "dir": "any",
+        "chase": true,
+        "activity": "stroll",
+        "fire_at": "garden_coin_3",
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [{"beryl_within": 300}],
+      "fizzle": {"clip": "bellows/st_smirk", "desc": "No goat: he pockets the coins, richer."},
+      "reaction": {
+        "archetype": "headbutt_launch",
+        "variants": ["a"],
+        "end": {"room": "garden", "x": 5000, "landing": "roses"}
+      },
+      "knock_on": null,
+      "residue": [{"kind": "FRAZZLED", "blind": false, "look": null}],
+      "tags": ["item", "beryl", "step", "chase_trip"],
+      "nights": ["n05_enter_beryl", "gala_the_comeback"],
+      "joke": "Too stingy to pass a coin, he bends once, twice... and on the third bend, with Beryl behind him, HEADBUTT into the roses.",
+      "bends": [
+        {"at": "garden_coin_1", "clip": "bellows/rx_penny_bend_1", "frames": 60},
+        {"at": "garden_coin_2", "clip": "bellows/rx_penny_bend_2", "frames": 60}
+      ]
+    },
+    "sweet_tooth": {
+      "caption": "SWEET TOOTH",
+      "size": "M",
+      "rig_point": "conservatory_feed_bin",
+      "steps": [{"prep": "Q", "needs": "treacle", "fx": "pour_treacle"}],
+      "trigger": {"type": "use", "activity": "feed_beryl", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {"archetype": "goat_kiss", "variants": ["a"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "STICKY", "blind": false, "look": null}],
+      "tags": ["item", "beryl"],
+      "nights": ["n06_behind_you", "n07_kidding_around"],
+      "joke": "Treacle everywhere; Beryl licks his face adoringly and follows him indoors, so he must herd her out (a 10 s detour).",
+      "effects": {"beryl_follows": true, "queue_detour": "herd_beryl"}
+    },
+    "spit_take": {
+      "caption": "SPIT TAKE",
+      "size": "M",
+      "rig_point": "parlour_tea_tray",
+      "steps": [{"prep": "Q", "needs": "salt", "fx": "salt_sugar"}],
+      "trigger": {
+        "type": "third_party",
+        "actor": "delphine",
+        "event": "sip",
+        "activity": "host_tea",
+        "mark_s": 3.0,
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [{"delphine_present": true}],
+      "fizzle": null,
+      "reaction": {"archetype": "drench", "variants": ["b"], "end": null},
+      "knock_on": {"prank": "fan_mail", "frame": 111},
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["item", "delphine", "always_suppressed", "double_act_source"],
+      "nights": ["n08_companys_coming", "n09_tutu_much", "gala_the_comeback"],
+      "joke": "He serves Delphine; she sips... holds it... and sprays him full in the face; he grins through gritted teeth.",
+      "always_suppressed": true
+    },
+    "fan_mail": {
+      "caption": "FAN MAIL",
+      "size": "M",
+      "rig_point": "parlour_fan",
+      "steps": [{"prep": "Q", "needs": "feathers", "fx": "stuff_fan"}],
+      "trigger": {
+        "type": "third_party",
+        "actor": "delphine",
+        "event": "fan",
+        "activity": "host_tea",
+        "mark_s": 8.0,
+        "resume": false,
+        "fixup_kinds": []
+      },
+      "conditions": [{"delphine_present": true}],
+      "fizzle": null,
+      "reaction": {"archetype": "feather_burst", "variants": ["b"], "end": null},
+      "knock_on": null,
+      "residue": [{"kind": "FEATHERED", "blind": false, "look": null}],
+      "tags": ["item", "delphine", "double_act_target"],
+      "nights": ["n08_companys_coming", "n10_it_takes_two", "gala_the_comeback"],
+      "joke": "She fans herself beside him: a feather storm; his sneeze blows her beehive back; 'HORACE!'."
+    },
+    "spotlight_stealer": {
+      "caption": "SPOTLIGHT STEALER",
+      "size": "SIG",
+      "rig_point": "garden_spotlight",
+      "steps": [{"prep": "B", "needs": null, "fx": "aim_spotlight"}],
+      "trigger": {"type": "use", "activity": "rehearse", "mark_s": 2.0, "resume": false, "fixup_kinds": []},
+      "conditions": [],
+      "fizzle": null,
+      "reaction": {
+        "archetype": "sig_spotlight_stealer",
+        "variants": [],
+        "end": {"room": "garden", "x": 6060, "landing": "pond"}
+      },
+      "knock_on": {"headbutt": true, "frame": 200, "requires": {"beryl_within": 300}, "landing": "pond"},
+      "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
+      "tags": ["free", "signature", "fourth_wall", "double_act_source"],
+      "nights": ["gala_the_comeback"],
+      "joke": "He steps into the light and can't help himself: he bows to the real Stalls and launches into his aria; they pelt him with tomatoes (and a few roses); he slips on a tomato into the pond."
+    }
+  },
+  "double_acts": {
+    "hot_and_cold": {
+      "a": "achoo_ria",
+      "b": "tap_dance",
+      "headbutt": false,
+      "caption": "HOT & COLD!",
+      "nights": ["n01_throat_tea"],
+      "desc": "ACHOO-RIA! blasts him backwards on his stool into the sink: TAP DANCE."
+    },
+    "up_in_smoke": {
+      "a": "lift_off",
+      "b": "bellows_blows",
+      "headbutt": false,
+      "caption": "UP IN SMOKE!",
+      "nights": ["n04_the_big_sulk"],
+      "desc": "LIFT-OFF drops him into the log basket, jolting the bellows: BELLOWS BLOWS."
+    },
+    "marrow_mayhem": {
+      "a": "marrow_escape",
+      "b": null,
+      "headbutt": true,
+      "landing": "pond",
+      "caption": "MARROW MAYHEM!",
+      "nights": ["n05_enter_beryl"],
+      "desc": "MARROW ESCAPE's chase ends by Beryl; he bends for the balloon: headbutt into the pond."
+    },
+    "encore": {
+      "a": "grand_exit",
+      "b": "rug_burn",
+      "headbutt": false,
+      "caption": "ENCORE!",
+      "nights": ["n06_behind_you"],
+      "desc": "GRAND EXIT flips him out of the piano onto the stair runner: RUG BURN."
+    },
+    "tea_for_two": {
+      "a": "spit_take",
+      "b": "fan_mail",
+      "headbutt": false,
+      "caption": "TEA FOR TWO!",
+      "nights": ["n08_companys_coming"],
+      "desc": "SPIT TAKE soaks him; Delphine fans him dry with her rigged fan: FAN MAIL."
+    },
+    "curtain_call": {
+      "a": "spotlight_stealer",
+      "b": null,
+      "headbutt": true,
+      "landing": "pond",
+      "caption": "CURTAIN CALL!",
+      "nights": ["gala_the_comeback"],
+      "desc": "SPOTLIGHT STEALER: he bends for a thrown rose; Beryl headbutts him into the pond."
+    }
+  }
+}

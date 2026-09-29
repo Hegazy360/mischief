@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "poses": {
+  "p": {
+   "base": "ghost"
+  },
+  "q": {
+   "bones": {
+    "head": {
+     "rot": 90
+    }
+   }
+  }
+ }
+}

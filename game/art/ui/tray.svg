@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<rect x="8" y="40" width="112" height="56" rx="12" fill="#D9A441" stroke="#1B2340" stroke-width="6" stroke-linejoin="round"/>
+<path d="M8 80 L120 80 L120 84 Q120 96 108 96 L20 96 Q8 96 8 84 Z" fill="#A8792A"/>
+<rect x="8" y="40" width="112" height="56" rx="12" fill="none" stroke="#1B2340" stroke-width="6" stroke-linejoin="round"/>
+<rect x="16" y="50" width="20" height="30" rx="5" fill="#2A1E3A" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"/>
+<rect x="42" y="50" width="20" height="30" rx="5" fill="#2A1E3A" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"/>
+<rect x="68" y="50" width="20" height="30" rx="5" fill="#2A1E3A" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"/>
+<rect x="94" y="50" width="20" height="30" rx="5" fill="#2A1E3A" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="26" cy="62" r="6" fill="#E23B4E" stroke="#1B2340" stroke-width="3"/>
+<rect x="44" y="56" width="12" height="16" rx="3" fill="#FFD23F" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"/>
+</svg>

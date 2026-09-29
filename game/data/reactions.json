@@ -1,0 +1,785 @@
+{
+  "version": 1,
+  "archetypes": {
+    "sneeze_blast_a": {
+      "clip": "bellows/rx_sneeze_blast_a",
+      "frames": 165,
+      "scale": "big",
+      "marks": {"antic": 74, "accent": 94, "hold": [97, 145], "release": 165, "knock_on": 112},
+      "travel": {"from_f": 94, "to_f": 112, "ease": "out_cubic", "arc_px": 60},
+      "t3_prop_f": 114,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "ah": [0, 20],
+        "ahh": [20, 44],
+        "ahhh": [44, 74],
+        "false_stop": [74, 94],
+        "choo": [94, 97],
+        "in_the_sink": [97, 145],
+        "dazed": [145, 165]
+      }
+    },
+    "drench_a": {
+      "clip": "bellows/rx_drench_a",
+      "frames": 107,
+      "scale": "small",
+      "marks": {"antic": 40, "accent": 50, "hold": [53, 93], "release": 107},
+      "travel": null,
+      "t3_prop_f": 70,
+      "cam": {"zoom": 1.15, "hitstop": 3},
+      "beats": {
+        "tap_sprays": [0, 12],
+        "python_wrestle": [12, 40],
+        "cobra_rear_peer": [40, 50],
+        "face_blast": [50, 53],
+        "drenched_deadpan": [53, 93],
+        "droop_drip": [93, 107]
+      }
+    },
+    "drench_b": {
+      "clip": "bellows/rx_drench_b",
+      "frames": 135,
+      "scale": "big",
+      "marks": {"antic": 42, "accent": 58, "hold": [61, 111], "release": 135, "knock_on": 111},
+      "travel": null,
+      "t3_prop_f": 78,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "serves": [0, 12],
+        "she_sips_holds": [12, 42],
+        "cheeks_puff_he_leans_in": [42, 58],
+        "spray": [58, 61],
+        "gritted_grin": [61, 111],
+        "mops_face": [111, 135]
+      }
+    },
+    "drench_c": {
+      "clip": "bellows/rx_drench_c",
+      "frames": 141,
+      "scale": "big",
+      "marks": {"antic": 48, "accent": 64, "hold": [67, 117], "release": 141},
+      "travel": null,
+      "t3_prop_f": 84,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "dead_nozzle_shake": [0, 30],
+        "beryl_trots_off": [30, 48],
+        "gurgle_peer_in": [48, 64],
+        "sploosh": [64, 67],
+        "drenched": [67, 117],
+        "dog_shake": [117, 141]
+      }
+    },
+    "sing_crack_a": {
+      "clip": "bellows/rx_sing_crack_a",
+      "frames": 151,
+      "scale": "big",
+      "marks": {"antic": 60, "accent": 78, "hold": [81, 131], "release": 151},
+      "travel": null,
+      "t3_prop_f": 98,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "kettle_melody": [0, 24],
+        "he_harmonises": [24, 60],
+        "high_note_breath": [60, 78],
+        "crack_lid_pop": [78, 81],
+        "lid_on_nose": [81, 131],
+        "pours_tea_anyway": [131, 151]
+      }
+    },
+    "strain_slip_a": {
+      "clip": "bellows/rx_strain_slip_a",
+      "frames": 159,
+      "scale": "big",
+      "marks": {"antic": 60, "accent": 78, "hold": [81, 135], "release": 159},
+      "travel": null,
+      "t3_prop_f": 98,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "strain_1": [0, 16],
+        "strain_2": [16, 32],
+        "strain_3_purple": [32, 48],
+        "pop_onions_pinball": [48, 60],
+        "windmill_on_onion": [60, 78],
+        "thud": [78, 81],
+        "dazed_onion_hat": [81, 135],
+        "gets_up": [135, 159]
+      }
+    },
+    "avalanche_helmet_a": {
+      "clip": "bellows/rx_avalanche_helmet_a",
+      "frames": 125,
+      "scale": "big",
+      "marks": {"antic": 30, "accent": 46, "hold": [49, 105], "release": 125},
+      "travel": null,
+      "t3_prop_f": 66,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "opens_fridge_creak": [0, 30],
+        "looks_up_hm": [30, 46],
+        "avalanche": [46, 49],
+        "jelly_helmet_sausage_boa": [49, 105],
+        "wobble_settle": [105, 125]
+      }
+    },
+    "avalanche_helmet_b": {
+      "clip": "bellows/rx_avalanche_helmet_b",
+      "frames": 151,
+      "scale": "big",
+      "marks": {"antic": 48, "accent": 66, "hold": [69, 129], "release": 151},
+      "travel": null,
+      "t3_prop_f": 86,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "bonk_1": [0, 16],
+        "bonk_2": [16, 32],
+        "bonk_3": [32, 48],
+        "looks_up": [48, 66],
+        "trophy_helmet": [66, 69],
+        "muffled_pipe_down": [69, 129],
+        "staggers": [129, 151]
+      }
+    },
+    "dizzy_spin_a": {
+      "clip": "bellows/rx_dizzy_spin_a",
+      "frames": 169,
+      "scale": "big",
+      "marks": {"antic": 70, "accent": 86, "hold": [89, 149], "release": 169},
+      "travel": null,
+      "t3_prop_f": 106,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "needle_screech": [0, 12],
+        "chipmunk_babble": [12, 40],
+        "spins_like_a_top": [40, 70],
+        "wobble": [70, 86],
+        "collapse": [86, 89],
+        "dizzy_orbiting_notes": [89, 149],
+        "sits_up": [149, 169]
+      }
+    },
+    "launch_ceiling_a": {
+      "clip": "bellows/rx_launch_ceiling_a",
+      "frames": 119,
+      "scale": "big",
+      "marks": {"antic": 12, "accent": 30, "hold": [33, 93], "release": 119, "knock_on": 103},
+      "travel": {"from_f": 30, "to_f": 44, "ease": "out_quad", "arc_px": 220},
+      "t3_prop_f": 50,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "pulls_lever": [0, 12],
+        "spring_sinks": [12, 30],
+        "catapult": [30, 33],
+        "cravat_snags_swing": [33, 93],
+        "drops_into_log_basket": [93, 119]
+      }
+    },
+    "blind_bumble_a": {
+      "clip": "bellows/rx_blind_bumble_a",
+      "frames": 133,
+      "scale": "big",
+      "marks": {"antic": 30, "accent": 46, "hold": [49, 109], "release": 133},
+      "travel": null,
+      "t3_prop_f": 66,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "opens_paper_magnifier": [0, 30],
+        "leans_in_squint": [30, 46],
+        "eyes_balloon_x4": [46, 49],
+        "reels": [49, 109],
+        "bows_to_hat_stand": [109, 133]
+      }
+    },
+    "blind_bumble_b": {
+      "clip": "bellows/rx_blind_bumble_b",
+      "frames": 135,
+      "scale": "big",
+      "marks": {"antic": 30, "accent": 46, "hold": [49, 105], "release": 135},
+      "travel": {"from_f": 105, "to_f": 135, "ease": "in_out_sine", "arc_px": 0},
+      "t3_prop_f": 66,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "wakes_specs_on": [0, 30],
+        "blinks": [30, 46],
+        "butter_smear": [46, 49],
+        "arms_out_blind": [49, 105],
+        "serenades_hat_stand": [105, 135]
+      }
+    },
+    "poof_a": {
+      "clip": "bellows/rx_poof_a",
+      "frames": 119,
+      "scale": "big",
+      "marks": {"antic": 24, "accent": 40, "hold": [43, 93], "release": 119},
+      "travel": null,
+      "t3_prop_f": 60,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "pump_1": [0, 12],
+        "pump_2": [12, 24],
+        "big_squeeze_peer": [24, 40],
+        "poof": [40, 43],
+        "ghost_white_portrait_too": [43, 93],
+        "blinks_cough_ring": [93, 119]
+      }
+    },
+    "drop_on_a": {
+      "clip": "bellows/rx_drop_on_a",
+      "frames": 135,
+      "scale": "big",
+      "marks": {"antic": 30, "accent": 48, "hold": [51, 111], "release": 135},
+      "travel": {"from_f": 0, "to_f": 30, "ease": "in_out_sine", "arc_px": 0},
+      "t3_prop_f": 68,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "stagger_under_chandelier": [0, 30],
+        "looks_up_uh_oh": [30, 48],
+        "chandelier_drop": [48, 51],
+        "tutu_candles_deadpan": [51, 111],
+        "pointe_mortified": [111, 135]
+      }
+    },
+    "fish_slap_a": {
+      "clip": "bellows/rx_fish_slap_a",
+      "frames": 149,
+      "scale": "big",
+      "marks": {"antic": 40, "accent": 56, "hold": [59, 129], "release": 149},
+      "travel": null,
+      "t3_prop_f": 76,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "answers_pompously": [0, 40],
+        "kipper_flops_hm": [40, 56],
+        "slap_1": [56, 59],
+        "slap_2_then_slow_burn": [59, 129],
+        "hangs_up": [129, 149]
+      }
+    },
+    "jackhammer_cling_a": {
+      "clip": "bellows/rx_jackhammer_cling_a",
+      "frames": 127,
+      "scale": "big",
+      "marks": {"antic": 16, "accent": 32, "hold": [35, 101], "release": 127},
+      "travel": {"from_f": 35, "to_f": 101, "ease": "linear", "arc_px": 30},
+      "t3_prop_f": 52,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "overwound_shudder": [0, 16],
+        "chimes_grab_on": [16, 32],
+        "pogo_launch": [32, 35],
+        "pogo_across_hall_a_a_a": [35, 101],
+        "pendulum_smacks_bum": [101, 127]
+      }
+    },
+    "surf_out_a": {
+      "clip": "bellows/rx_surf_out_a",
+      "frames": 105,
+      "scale": "big",
+      "marks": {"antic": 10, "accent": 28, "hold": [31, 81], "release": 105},
+      "travel": {"from_f": 28, "to_f": 81, "ease": "in_quad", "arc_px": 0},
+      "t3_prop_f": 48,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "steps_on": [0, 10],
+        "runner_tugs_flail": [10, 28],
+        "whip": [28, 31],
+        "surfs_out_front_door": [31, 81],
+        "hedge_crash": [81, 105]
+      }
+    },
+    "squeaky_voice_a": {
+      "clip": "bellows/rx_squeaky_voice_a",
+      "frames": 141,
+      "scale": "big",
+      "marks": {"antic": 36, "accent": 54, "hold": [57, 117], "release": 141},
+      "travel": null,
+      "t3_prop_f": 74,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "spray_gargle": [0, 36],
+        "big_breath": [36, 54],
+        "chipmunk_aria": [54, 57],
+        "stops_tries_again": [57, 117],
+        "slow_burn": [117, 141]
+      }
+    },
+    "scare_leap_a": {
+      "clip": "bellows/rx_scare_leap_a",
+      "frames": 140,
+      "scale": "big",
+      "marks": {"antic": 48, "accent": 64, "hold": [67, 112], "release": 140},
+      "travel": {"from_f": 112, "to_f": 140, "ease": "out_quad", "arc_px": 90},
+      "t3_prop_f": 84,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "serenades_duck": [0, 30],
+        "leans_in_to_kiss": [30, 48],
+        "duck_eyes_open": [48, 64],
+        "snap_shriek": [64, 67],
+        "clings_curtain_rail": [67, 112],
+        "tears_into_laundry_basket": [112, 140]
+      }
+    },
+    "steam_duel_a": {
+      "clip": "bellows/rx_steam_duel_a",
+      "frames": 163,
+      "scale": "big",
+      "marks": {"antic": 60, "accent": 80, "hold": [83, 139], "release": 163},
+      "travel": null,
+      "t3_prop_f": 100,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "pipes_answer_1": [0, 20],
+        "louder_2": [20, 40],
+        "louder_3": [40, 60],
+        "pipe_inhale": [60, 80],
+        "down_steam_blast": [80, 83],
+        "steamed_frazzled": [83, 139],
+        "coughs": [139, 163]
+      }
+    },
+    "feather_burst_a": {
+      "clip": "bellows/rx_feather_burst_a",
+      "frames": 157,
+      "scale": "big",
+      "marks": {"antic": 54, "accent": 70, "hold": [73, 133], "release": 157},
+      "travel": null,
+      "t3_prop_f": 90,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "squeak_1_stirs": [0, 27],
+        "squeak_2": [27, 54],
+        "fist_raised": [54, 70],
+        "punch_burst": [70, 73],
+        "feather_blizzard_sneezes": [73, 133],
+        "spits_feather": [133, 157]
+      }
+    },
+    "feather_burst_b": {
+      "clip": "bellows/rx_feather_burst_b",
+      "frames": 143,
+      "scale": "big",
+      "marks": {"antic": 40, "accent": 60, "hold": [63, 119], "release": 143},
+      "travel": null,
+      "t3_prop_f": 80,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "she_fans_feathers_drift": [0, 40],
+        "tickle_build": [40, 60],
+        "sneeze_beehive_back": [60, 63],
+        "horace": [63, 119],
+        "strained_grin": [119, 143]
+      }
+    },
+    "costume_burn_a": {
+      "clip": "bellows/rx_costume_burn_a",
+      "frames": 149,
+      "scale": "big",
+      "marks": {"antic": 40, "accent": 56, "hold": [59, 129], "release": 149},
+      "travel": null,
+      "t3_prop_f": 76,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "dresses_eyes_shut_humming": [0, 40],
+        "opens_eyes_at_mirror": [40, 56],
+        "take_tutu": [56, 59],
+        "slow_burn_70": [59, 129],
+        "twirl_check": [129, 149]
+      }
+    },
+    "balloon_chase_a": {
+      "clip": "bellows/rx_balloon_chase_a",
+      "frames": 133,
+      "scale": "big",
+      "marks": {"antic": 24, "accent": 40, "hold": [43, 103], "release": 133, "knock_on": 128},
+      "travel": {"from_f": 103, "to_f": 133, "ease": "in_out_sine", "arc_px": 0},
+      "t3_prop_f": 60,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "bends_polish_wobble": [0, 24],
+        "shriek_inflate_lean_back": [24, 40],
+        "rockets_off": [40, 43],
+        "round_his_head": [43, 103],
+        "chases_round_garden": [103, 133]
+      }
+    },
+    "headbutt_launch_a": {
+      "clip": "bellows/rx_headbutt_launch_a",
+      "frames": 129,
+      "scale": "big",
+      "marks": {"antic": 36, "accent": 52, "hold": [55, 105], "release": 129},
+      "travel": {"from_f": 52, "to_f": 76, "ease": "out_cubic", "arc_px": 180},
+      "t3_prop_f": 72,
+      "cam": {"zoom": 1.3, "hitstop": 8},
+      "beats": {
+        "bends_beryl_paws": [0, 36],
+        "rump_up_glance_back": [36, 52],
+        "headbutt": [52, 55],
+        "upside_down_landing": [55, 105],
+        "climbs_out": [105, 129]
+      }
+    },
+    "goat_kiss_a": {
+      "clip": "bellows/rx_goat_kiss_a",
+      "frames": 133,
+      "scale": "big",
+      "marks": {"antic": 30, "accent": 46, "hold": [49, 109], "release": 133},
+      "travel": null,
+      "t3_prop_f": 66,
+      "cam": {"zoom": 1.4, "hitstop": 5},
+      "beats": {
+        "treacle_glugs": [0, 30],
+        "beryl_sniffs_no_no": [30, 46],
+        "slurp": [46, 49],
+        "adoring_licks": [49, 109],
+        "shoo_she_follows": [109, 133]
+      }
+    },
+    "sig_mirror_mirror": {
+      "clip": "bellows/sig_mirror_mirror",
+      "frames": 177,
+      "scale": "sig",
+      "marks": {"antic": 40, "accent": 64, "hold": [67, 147], "release": 177},
+      "travel": {"from_f": 64, "to_f": 84, "ease": "out_cubic", "arc_px": 40},
+      "t3_prop_f": 84,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "wink": [0, 12],
+        "dawning_horror": [12, 40],
+        "lip_tremble_inhale": [40, 64],
+        "scream_launch": [64, 67],
+        "revolving_coat_stand": [67, 147],
+        "staggers_out": [147, 177]
+      },
+      "freeze_frame": [75, 123]
+    },
+    "sig_grand_exit": {
+      "clip": "bellows/sig_grand_exit",
+      "frames": 247,
+      "scale": "sig",
+      "marks": {"antic": 114, "accent": 134, "hold": [137, 217], "release": 247, "knock_on": 177},
+      "travel": {"from_f": 24, "to_f": 114, "ease": "linear", "arc_px": 0},
+      "t3_prop_f": 154,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "fortissimo_chord": [0, 24],
+        "chases_piano_still_playing": [24, 114],
+        "tips_at_stair_foot_look": [114, 134],
+        "flip": [134, 137],
+        "muffled_chord_lid_rises": [137, 217],
+        "wearing_the_lid": [217, 247]
+      },
+      "freeze_frame": [145, 193]
+    },
+    "sig_in_over_his_head": {
+      "clip": "bellows/sig_in_over_his_head",
+      "frames": 333,
+      "scale": "sig",
+      "marks": {"antic": 210, "accent": 230, "hold": [233, 303], "release": 333},
+      "travel": {"from_f": 60, "to_f": 210, "ease": "in_out_sine", "arc_px": -240},
+      "t3_prop_f": 250,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "foam_mountain": [0, 40],
+        "bubble_lifts_singing": [40, 60],
+        "drifts_out_down_stairwell": [60, 210],
+        "wobble_uh_oh": [210, 230],
+        "pop": [230, 233],
+        "wearing_umbrella_stand": [233, 303],
+        "drips": [303, 333]
+      },
+      "freeze_frame": [241, 289]
+    },
+    "sig_kidding_around": {
+      "clip": "bellows/sig_kidding_around",
+      "frames": 247,
+      "scale": "sig",
+      "marks": {"antic": 110, "accent": 134, "hold": [137, 217], "release": 247},
+      "travel": {"from_f": 217, "to_f": 247, "ease": "out_quad", "arc_px": 120},
+      "t3_prop_f": 154,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "snuggles_hot_water_bottle": [0, 50],
+        "it_bleats_pats_it": [50, 80],
+        "one_eye_opens": [80, 110],
+        "pupils_shrink_tremble": [110, 134],
+        "wildest_take": [134, 137],
+        "goat_eyes_5cm": [137, 217],
+        "headbutt_into_laundry": [217, 247]
+      },
+      "freeze_frame": [145, 193]
+    },
+    "sig_it_takes_two": {
+      "clip": "bellows/sig_it_takes_two",
+      "frames": 247,
+      "scale": "sig",
+      "marks": {"antic": 100, "accent": 124, "hold": [127, 217], "release": 247},
+      "travel": null,
+      "t3_prop_f": 144,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "tango_steps": [0, 60],
+        "she_spins": [60, 100],
+        "deep_dip_strain": [100, 124],
+        "rrrip": [124, 127],
+        "frozen_long_johns_grin": [127, 217],
+        "she_fans_furiously": [217, 247]
+      },
+      "freeze_frame": [135, 183]
+    },
+    "sig_spotlight_stealer": {
+      "clip": "bellows/sig_spotlight_stealer",
+      "frames": 243,
+      "scale": "sig",
+      "marks": {"antic": 110, "accent": 130, "hold": [133, 213], "release": 243, "knock_on": 200},
+      "travel": {"from_f": 213, "to_f": 237, "ease": "out_cubic", "arc_px": 120},
+      "t3_prop_f": 150,
+      "cam": {"zoom": 1.6, "hitstop": 8},
+      "beats": {
+        "steps_into_light": [0, 30],
+        "sees_the_stalls": [30, 60],
+        "bows": [60, 110],
+        "aria_breath": [110, 130],
+        "first_tomato": [130, 133],
+        "pelted_rose_lands": [133, 213],
+        "slips_into_pond": [213, 243]
+      },
+      "freeze_frame": [141, 189]
+    },
+    "suppressed": {
+      "clip": "bellows/beat_suppressed",
+      "frames": 60,
+      "scale": "beat",
+      "marks": {"grin": 0, "twitch": [20, 44], "ha_ha": 44, "release": 60},
+      "beats": {"strained_grin": [0, 20], "eye_twitch": [20, 44], "ha_ha_my_dear": [44, 60]},
+      "voice": "vo_bellows_ha_ha_my_dear",
+      "desc": "Replaces the settle when Delphine witnesses: strained grin, twitching eye, squeaky 'ha-ha, my dear'."
+    }
+  },
+  "meltdown": ["bellows/melt_a", "bellows/melt_b", "bellows/melt_c"],
+  "exhausted": "bellows/melt_exhausted",
+  "lecture": ["bellows/lec_a", "bellows/lec_b", "bellows/lec_c"],
+  "t3_last_beats": [
+    "bellows/beat_slow_burn",
+    "bellows/beat_dignity_fail",
+    "bellows/beat_bow_topple",
+    "bellows/beat_tear"
+  ],
+  "penny_bends": ["bellows/rx_penny_bend_1", "bellows/rx_penny_bend_2"],
+  "combo_beats": [
+    "bellows/combo_dough_man",
+    "bellows/combo_poodle",
+    "bellows/combo_chicken",
+    "bellows/combo_mad_maestro"
+  ],
+  "states": [
+    "bellows/st_suspicious",
+    "bellows/st_double_take",
+    "bellows/st_look",
+    "bellows/st_chase",
+    "bellows/st_wheeze",
+    "bellows/st_grab",
+    "bellows/st_search",
+    "bellows/st_bump",
+    "bellows/st_bonk",
+    "bellows/st_look_back",
+    "bellows/st_head_turn",
+    "bellows/st_smirk",
+    "bellows/st_specs_on",
+    "bellows/st_door_slam",
+    "bellows/st_straighten_cravat"
+  ],
+  "caught": {
+    "total_f": 240,
+    "busted_cam": [0, 60],
+    "lecture": [60, 192],
+    "wipe": [192, 204],
+    "doorstep": [204, 240],
+    "hush_placed_f": 204,
+    "control_f": 240,
+    "clips": {
+      "bellows_grab": "bellows/st_grab",
+      "bellows_doorstep": "bellows/st_door_slam",
+      "hush_busted": "hush/st_busted",
+      "hush_dangled": "hush/lec_dangled",
+      "hush_doorstep": "hush/st_doorstep"
+    }
+  },
+  "panto": {
+    "r1": {"twitch_f": 30, "turn_f": 48, "look_f": 72, "back_f": 48},
+    "r2": {"turn_f": 36, "look_f": 60, "back_f": 36},
+    "r3": {"tell_f": 36, "fake_back_f": 24, "whip_f": 30, "look_f": 90, "back_f": 36},
+    "window_s": 8,
+    "clips": {
+      "twitch": "bellows/st_panto_twitch",
+      "turn": "bellows/st_panto_turn",
+      "look": "bellows/st_panto_look",
+      "tell": "bellows/st_panto_tell",
+      "whip": "bellows/st_panto_whip"
+    }
+  },
+  "mirror_rounds": {
+    "rounds_f": [72, 72, 60],
+    "clips": ["bellows/sig_mirror_mirror_r1", "bellows/sig_mirror_mirror_r2", "bellows/sig_mirror_mirror_r3"],
+    "desc": [
+      "Round 1: preens at his 'reflection'.",
+      "Round 2: leans in and squints.",
+      "Round 3 (tell): lifts his specs toward his nose."
+    ],
+    "poke_window_f": 48
+  },
+  "tiers": {
+    "hold_scale_pct": [100, 120, 150],
+    "t3_travel_pct": 130,
+    "t3_prop_after_accent_f": 20,
+    "suppressed_settle_f": 60,
+    "tier_by_temper": {"t2": 45, "t3": 70}
+  },
+  "clip_timings": {
+    "bellows/melt_a": {
+      "frames": 330,
+      "marks": {
+        "stomps": [60, 150, 240],
+        "stomp_beat": {"antic": 6, "accent": 2, "settle": 8},
+        "kettle_whistle": [256, 296]
+      },
+      "desc": "Classic tantrum: three house-shaking stomps, kettle whistle out of both ears.",
+      "voice": "vo_bellows_pipe_down"
+    },
+    "bellows/melt_b": {
+      "frames": 330,
+      "marks": {"stomps": [60, 150, 240], "stomp_beat": {"antic": 6, "accent": 2, "settle": 8}, "hops": [100, 200]},
+      "desc": "Hopping mad: bounces on the spot between stomps, sideburns boinging.",
+      "voice": "vo_bellows_grr"
+    },
+    "bellows/melt_c": {
+      "frames": 330,
+      "marks": {
+        "stomps": [60, 150, 240],
+        "stomp_beat": {"antic": 6, "accent": 2, "settle": 8},
+        "bouffant_explodes": 244
+      },
+      "desc": "The rage aria: bellows at the ceiling, bouffant explodes on the last stomp.",
+      "voice": "vo_bellows_who_squeaked"
+    },
+    "bellows/melt_exhausted": {
+      "frames": 480,
+      "marks": {"sit": [0, 20], "pant_loop": [20, 460], "stand": [460, 480]},
+      "desc": "Sits and pants for 8 s; sight 150 px, specs off.",
+      "loop": true
+    },
+    "bellows/lec_a": {
+      "frames": 132,
+      "marks": {"lift": [0, 14], "wag": [24, 44, 64, 84, 104], "plonk": 122},
+      "desc": "Sung scolding, finger wag on every beat.",
+      "voice": "vo_bellows_lecture_a"
+    },
+    "bellows/lec_b": {
+      "frames": 132,
+      "marks": {"lift": [0, 14], "wag": [20, 36, 52, 68, 84, 100], "plonk": 122},
+      "desc": "Faster patter scolding; he shakes her like a rug on the last beat.",
+      "voice": "vo_bellows_lecture_b"
+    },
+    "bellows/lec_c": {
+      "frames": 132,
+      "marks": {"lift": [0, 14], "wag": [30, 60, 90], "plonk": 122},
+      "desc": "Slow operatic scolding; three huge wags and a high note.",
+      "voice": "vo_bellows_lecture_c"
+    },
+    "bellows/beat_slow_burn": {
+      "frames": 70,
+      "marks": {"stare": [0, 70], "blink": 40},
+      "desc": "70 f stare at the Stalls, one blink."
+    },
+    "bellows/beat_dignity_fail": {
+      "frames": 70,
+      "marks": {"straighten": [0, 30], "look_around": [30, 60], "cravat_pings": 60},
+      "desc": "Straightens his cravat, looks round, it pings off again."
+    },
+    "bellows/beat_bow_topple": {
+      "frames": 60,
+      "marks": {"bow": [0, 30], "topple": 30, "floor": [34, 60]},
+      "desc": "A dignified bow that keeps going until he topples."
+    },
+    "bellows/beat_tear": {
+      "frames": 60,
+      "marks": {"lip": [0, 24], "tear": 24, "sniff": [40, 60]},
+      "desc": "A single tear rolls down; he sniffs it back."
+    },
+    "bellows/combo_dough_man": {
+      "frames": 90,
+      "marks": {"look": [0, 30], "accent": 30, "hold": [33, 78], "release": 90},
+      "desc": "Looks down: he's dough. Squelch-puff step."
+    },
+    "bellows/combo_poodle": {
+      "frames": 90,
+      "marks": {"look": [0, 30], "accent": 30, "hold": [33, 78], "release": 90},
+      "desc": "Bouffant balls into a pom-pom; his PIPE DOWN! comes out as a yap."
+    },
+    "bellows/combo_chicken": {
+      "frames": 90,
+      "marks": {"look": [0, 30], "accent": 30, "hold": [33, 78], "release": 90},
+      "desc": "Feathers stick; he clucks; Clarence squeaks back, smitten."
+    },
+    "bellows/combo_mad_maestro": {
+      "frames": 90,
+      "marks": {"look": [0, 30], "accent": 30, "hold": [33, 78], "release": 90},
+      "desc": "Wild-haired chipmunk tenor conducting furiously at nobody."
+    },
+    "bellows/rx_penny_bend_1": {
+      "frames": 60,
+      "marks": {"bend": [0, 24], "pocket": [24, 44], "up": [44, 60]},
+      "desc": "PENNY PINCHER bend 1: too stingy to pass a coin (a bit, not a link)."
+    },
+    "bellows/rx_penny_bend_2": {
+      "frames": 60,
+      "marks": {"bend": [0, 24], "pocket": [24, 44], "up": [44, 60]},
+      "desc": "PENNY PINCHER bend 2: too stingy to pass a coin (a bit, not a link)."
+    },
+    "bellows/st_suspicious": {
+      "frames": 60,
+      "marks": {"stop": [0, 10], "squint": [10, 16], "turn": [16, 46]},
+      "desc": "Stops, squints, slow head turn: 'hmm?'"
+    },
+    "bellows/st_double_take": {
+      "frames": 18,
+      "marks": {"away": [0, 8], "snap_back": [8, 18]},
+      "desc": "Spotted: '!' sting and the 0.3 s double take."
+    },
+    "bellows/st_look": {
+      "frames": 180,
+      "marks": {"look_l": [0, 60], "look_r": [60, 120], "shrug": [150, 180]},
+      "desc": "Curious: specs on, looks both ways, shrugs."
+    },
+    "bellows/st_chase": {"frames": 32, "marks": {}, "desc": "Chase run, fists pumping.", "loop": true},
+    "bellows/st_wheeze": {"frames": 90, "marks": {}, "desc": "Bent double, wheezing (harmless)."},
+    "bellows/st_grab": {
+      "frames": 60,
+      "marks": {"antic": 0, "accent": 8, "hold": [12, 60]},
+      "desc": "Grabs Hush by the braces (Busted Cam plays over this)."
+    },
+    "bellows/st_search": {"frames": 360, "marks": {}, "desc": "Specs on, searches the room.", "loop": true},
+    "bellows/st_bump": {
+      "frames": 72,
+      "marks": {"pat": [0, 30], "steps": [30, 60], "double_take": [60, 72]},
+      "desc": "First bump: 'Pardon', pats the statue, two steps, double take.",
+      "voice": "vo_bellows_pardon"
+    },
+    "bellows/st_bonk": {"frames": 60, "marks": {"accent": 0, "stars": [6, 60]}, "desc": "Door-slam bonk: 1 s stun."},
+    "bellows/st_look_back": {"frames": 60, "marks": {}, "desc": "Steaming+: pauses in a doorway and looks back."},
+    "bellows/st_head_turn": {
+      "frames": 60,
+      "marks": {},
+      "desc": "Hears a squeak: '...the pipes?'",
+      "voice": "vo_bellows_the_pipes"
+    },
+    "bellows/st_smirk": {"frames": 30, "marks": {}, "desc": "A fizzle: smug 'hmph'.", "voice": "vo_bellows_hmph"},
+    "bellows/st_specs_on": {"frames": 12, "marks": {"tink": 6}, "desc": "Jams his specs on: tink!"},
+    "bellows/st_door_slam": {
+      "frames": 36,
+      "marks": {"slam": 12},
+      "desc": "Doorstep: plonks Hush down and slams the door."
+    },
+    "bellows/st_straighten_cravat": {"frames": 30, "marks": {}, "desc": "Doorway pause filler (no-ambush rule)."}
+  }
+}

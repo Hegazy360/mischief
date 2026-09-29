@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "clip": "_mannequin/jump",
+ "rig": "_mannequin",
+ "loop": false,
+ "layer": "base",
+ "mask": null,
+ "keys": [
+  {
+   "f": 0,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 10,
+   "pose": "m_stand",
+   "ease": "linear"
+  },
+  {
+   "f": 11,
+   "pose": "m_take_accent",
+   "ease": "linear"
+  },
+  {
+   "f": 30,
+   "pose": "m_take_hold",
+   "ease": "in_out_sine"
+  }
+ ],
+ "length": 30,
+ "events": []
+}

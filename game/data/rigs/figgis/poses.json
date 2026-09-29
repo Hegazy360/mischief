@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "rig": "figgis",
+  "poses": {
+    "f_rest": {
+      "root": {
+        "x": 0,
+        "y": 0,
+        "rot": 0,
+        "sx": 1,
+        "sy": 1
+      },
+      "face": "proud",
+      "tags": [
+        "idle"
+      ],
+      "bones": {
+        "hand_r": {
+          "rot": 0,
+          "tex": "hold"
+        },
+        "hand_l": {
+          "rot": 0,
+          "tex": "hold"
+        },
+        "body": {
+          "y": 10
+        }
+      },
+      "props": {
+        "card": {
+          "vis": 0
+        }
+      },
+      "silhouette": "sunk low in the box, only head and ears showing"
+    },
+    "f_psst": {
+      "base": "f_rest",
+      "face": "psst",
+      "tags": [
+        "cue",
+        "psst"
+      ],
+      "bones": {
+        "body": {
+          "y": 0,
+          "rot": 6
+        },
+        "head": {
+          "rot": 8
+        },
+        "hand_r": {
+          "tex": "cup",
+          "x": -14,
+          "y": -30,
+          "rot": -20
+        }
+      },
+      "silhouette": "leaning out, hand cupped at his mouth"
+    },
+    "f_point": {
+      "base": "f_rest",
+      "face": "point",
+      "tags": [
+        "cue",
+        "card"
+      ],
+      "bones": {
+        "body": {
+          "y": 0
+        },
+        "hand_l": {
+          "tex": "hold",
+          "x": 2
+        },
+        "hand_r": {
+          "tex": "point",
+          "x": 4,
+          "y": -12,
+          "rot": -30
+        }
+      },
+      "props": {
+        "card": {
+          "vis": 1
+        }
+      },
+      "silhouette": "card held up, finger jabbing at it"
+    },
+    "f_shh": {
+      "base": "f_rest",
+      "face": "shh",
+      "tags": [
+        "cue",
+        "shh"
+      ],
+      "bones": {
+        "body": {
+          "y": 0
+        },
+        "hand_r": {
+          "tex": "shh",
+          "x": -22,
+          "y": -28,
+          "rot": 0
+        }
+      },
+      "silhouette": "finger to his lips"
+    },
+    "f_proud": {
+      "base": "f_rest",
+      "face": "proud",
+      "tags": [
+        "cue",
+        "card",
+        "proud"
+      ],
+      "bones": {
+        "body": {
+          "y": -2
+        },
+        "head": {
+          "rot": -6,
+          "y": -2
+        }
+      },
+      "props": {
+        "card": {
+          "vis": 1
+        }
+      },
+      "silhouette": "card held high in both hands, chin up"
+    }
+  },
+  "mirror_of": {}
+}

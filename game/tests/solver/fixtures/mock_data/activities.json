@@ -1,0 +1,5 @@
+{"version": 1, "activities": {
+  "warmup": {"station": "st_gramophone", "dur_s": 10, "facing": -1, "specs": false, "awareness": "normal", "squeak_bit": "bit_warmup", "panto": false, "bend": false, "in_use": null, "clip": "bellows/act_warmup", "icon": "res://art/icons/activities/warmup.svg"},
+  "tea": {"station": "st_tea", "dur_s": 10, "facing": 1, "specs": false, "awareness": "normal", "squeak_bit": "bit_tea", "panto": false, "bend": false, "in_use": null, "clip": "bellows/act_tea", "icon": "res://art/icons/activities/tea.svg"},
+  "rinse": {"station": "st_sink", "dur_s": 5, "facing": 1, "specs": false, "awareness": "normal", "squeak_bit": null, "panto": false, "bend": false, "in_use": null, "clip": "bellows/act_rinse", "icon": "res://art/icons/activities/rinse.svg"}},
+ "squeak_bits": {"bit_warmup": {"clip": "bellows/bit_warmup", "len_f": 90}, "bit_tea": {"clip": "bellows/bit_tea", "len_f": 90}}}

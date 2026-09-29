@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "id": "n09_tutu_much",
+  "act": 3,
+  "index": 9,
+  "title": "Tutu Much",
+  "status": "draft",
+  "seed": 109,
+  "rooms": [
+    "porch",
+    "hall",
+    "parlour",
+    "kitchen",
+    "conservatory",
+    "garden",
+    "landing",
+    "bathroom",
+    "bedroom",
+    "dressing"
+  ],
+  "entry": "gate",
+  "rules": {"spot_fill_s": 0.8, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "chase_trips",
+  "card": {
+    "text": "Being chased? Run him over something you rigged. He falls for it every time.",
+    "icon": "chase_trip"
+  },
+  "cold_open": {
+    "clip": "cold/n09_tutu_much",
+    "len_s": 5,
+    "desc": "He tears down the street's talent-show poster and pins up 'BELLOWS: THE COMEBACK'."
+  },
+  "hush": {"start": {"room": "garden", "x": 6150}},
+  "bellows": {
+    "start": {"room": "dressing", "x": 4360},
+    "loop": [
+      {"a": "cloak"},
+      {"a": "polish"},
+      {"a": "mirror", "station": "st_dressing_mirror"},
+      {"a": "host_tea"},
+      {"a": "piano"}
+    ]
+  },
+  "cast": {
+    "beryl": null,
+    "delphine": {
+      "arrive": "start",
+      "start": {"room": "parlour", "x": 2620},
+      "loop": [
+        {"do": "tea", "station": "st_chaise", "while": "host_tea"},
+        {"do": "sing", "station": "st_piano", "while": "piano"},
+        {"do": "powder_nose", "room": "bathroom", "x": 1930, "dur_s": 15},
+        {"do": "tea", "station": "st_chaise"}
+      ],
+      "glasses": {"every_s": 12, "lift_s": 1.0, "look_s": 3.0, "moving_px": 600, "frozen_px": 250},
+      "spot_fill_s": 1.0
+    }
+  },
+  "fixup_overrides": {"DRY": "st_radiator"},
+  "script": [
+    {
+      "id": "tutu",
+      "kind": "prank",
+      "prank": "tutu_much",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows wears a tutu",
+      "hint": {
+        "item": "tutu",
+        "container": "dressing_costume_trunk",
+        "rig_point": "dressing_dummy",
+        "when": "cloak"
+      }
+    },
+    {
+      "id": "award",
+      "kind": "prank",
+      "prank": "award_winning",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows wins an award, hard",
+      "hint": {"item": null, "container": null, "rig_point": "dressing_trophy_shelf", "when": "polish"}
+    },
+    {
+      "id": "trip",
+      "kind": "chase_trip",
+      "req": true,
+      "big_number": false,
+      "text": "He fell for it! Trip him mid-chase",
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": "stairs_rods",
+        "when": "chase",
+        "tip": "run_him_over_it"
+      }
+    },
+    {
+      "id": "stairs",
+      "kind": "prank",
+      "prank": "rug_burn",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows surfs the stairs",
+      "hint": {"item": null, "container": null, "rig_point": "stairs_rods", "when": "stairs_up"}
+    },
+    {
+      "id": "plumbing",
+      "kind": "prank",
+      "prank": "pipe_down",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows argues with the plumbing",
+      "hint": {"item": null, "container": null, "rig_point": "landing_boiler_valve", "when": "radiator"},
+      "via": "SOAKED"
+    },
+    {
+      "id": "spray",
+      "kind": "prank",
+      "prank": "spit_take",
+      "req": false,
+      "big_number": false,
+      "text": "Delphine gives him a spray",
+      "hint": {
+        "item": "salt",
+        "container": "kitchen_pantry_shelf",
+        "rig_point": "parlour_tea_tray",
+        "when": "host_tea"
+      }
+    },
+    {
+      "id": "bn",
+      "kind": "prank_witnessed",
+      "req": false,
+      "big_number": true,
+      "text": "Take the tutu to tea",
+      "prank": "tutu_much",
+      "residue_witness": true,
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["tutu_much"],
+      "hint": {
+        "item": "tutu",
+        "container": "dressing_costume_trunk",
+        "rig_point": "dressing_dummy",
+        "when": "cloak",
+        "tip": "meet_her_before_the_mirror"
+      }
+    }
+  ],
+  "director": null,
+  "encores": []
+}

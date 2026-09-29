@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "id": "n04_the_big_sulk",
+  "act": 1,
+  "index": 4,
+  "title": "The Big Sulk",
+  "status": "draft",
+  "seed": 104,
+  "rooms": ["porch", "hall", "parlour", "kitchen", "landing", "bathroom", "bedroom"],
+  "entry": "window",
+  "rules": {"spot_fill_s": 1.0, "tomatoes": 3, "cant_fail": false, "nerves": false},
+  "new_rule": "meltdown",
+  "card": {
+    "text": "Keep him fuming, prank after prank. At full temper he melts down, then sulks blind for 8 s. Tomatoes count now.",
+    "icon": "meltdown"
+  },
+  "cold_open": {
+    "clip": "cold/n04_the_big_sulk",
+    "len_s": 5,
+    "desc": "He confiscates a kite from a child and snaps it over his knee."
+  },
+  "hush": {"start": {"room": "kitchen", "x": 3800}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [{"a": "warmup"}, {"a": "paper"}, {"a": "fire"}, {"a": "bath"}, {"a": "nap"}]
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "stairs",
+      "kind": "prank",
+      "prank": "rug_burn",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows surfs the stairs",
+      "hint": {"item": null, "container": null, "rig_point": "stairs_rods", "when": "stairs_up"}
+    },
+    {
+      "id": "spin",
+      "kind": "prank",
+      "prank": "allegro_go_go",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows gets in a spin",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_gramophone", "when": "warmup"}
+    },
+    {
+      "id": "tantrum",
+      "kind": "meltdown",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows throws a tantrum",
+      "count": 1,
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": null,
+        "when": null,
+        "lines": ["spin", "orbit", "ghost"],
+        "tip": "chain"
+      }
+    },
+    {
+      "id": "chandelier",
+      "kind": "prank",
+      "prank": "prima_ballerina",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows dances in the chandelier",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_chandelier", "when": "meltdown"}
+    },
+    {
+      "id": "ghost",
+      "kind": "prank",
+      "prank": "bellows_blows",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows turns into a ghost",
+      "hint": {"item": "flour", "container": "kitchen_pantry_shelf", "rig_point": "parlour_bellows", "when": "fire"}
+    },
+    {
+      "id": "orbit",
+      "kind": "prank",
+      "prank": "lift_off",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows reads the paper in orbit",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_recliner", "when": "paper"}
+    },
+    {
+      "id": "bn",
+      "kind": "prank",
+      "prank": "in_over_his_head",
+      "req": false,
+      "big_number": true,
+      "text": "Bellows floats away",
+      "hint": {
+        "item": "bubble_bath",
+        "container": "bathroom_cabinet",
+        "rig_point": "bathroom_bath_taps",
+        "when": "bath",
+        "also": [{"item": "sherbet", "container": "kitchen_pantry_shelf", "rig_point": "bathroom_bath_taps"}]
+      }
+    }
+  ],
+  "director": null,
+  "encores": []
+}

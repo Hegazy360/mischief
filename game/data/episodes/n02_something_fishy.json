@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "id": "n02_something_fishy",
+  "act": 1,
+  "index": 2,
+  "title": "Something Fishy",
+  "status": "final",
+  "seed": 102,
+  "rooms": ["porch", "hall", "parlour", "kitchen"],
+  "entry": "window",
+  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false},
+  "new_rule": "freeze_specs",
+  "card": {
+    "text": "Hold FREEZE to be a statue. Specs off, he only spots what moves. Specs on, get out of sight.",
+    "icon": "freeze"
+  },
+  "cold_open": {
+    "clip": "cold/n02_something_fishy",
+    "len_s": 5,
+    "desc": "He pops a child's balloon with his conductor's baton and drops the string in the CONFISCATED box."
+  },
+  "hush": {"start": {"room": "kitchen", "x": 3800}},
+  "bellows": {
+    "start": {"room": "hall", "x": 952},
+    "loop": [{"a": "mirror"}, {"a": "phone"}, {"a": "clock"}, {"a": "paper"}, {"a": "fire"}, {"a": "snack"}]
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {},
+  "script": [
+    {
+      "id": "fish",
+      "kind": "prank",
+      "prank": "something_fishy",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows talks to a fish",
+      "hint": {"item": "kipper", "container": "kitchen_fridge", "rig_point": "hall_phone", "when": "phone"}
+    },
+    {
+      "id": "clock",
+      "kind": "prank",
+      "prank": "times_up",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows rides the grandfather clock",
+      "hint": {"item": null, "container": null, "rig_point": "hall_clock", "when": "clock"}
+    },
+    {
+      "id": "dinner",
+      "kind": "prank",
+      "prank": "cold_open",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows wears his dinner",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_fridge_shelf", "when": "snack"}
+    },
+    {
+      "id": "news",
+      "kind": "prank",
+      "prank": "eye_popping_news",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows reads the news up close",
+      "hint": {
+        "item": "magnifier",
+        "container": "hall_confiscated_box",
+        "rig_point": "parlour_newspaper",
+        "when": "paper"
+      }
+    },
+    {
+      "id": "bn",
+      "kind": "prank",
+      "prank": "mirror_mirror",
+      "req": false,
+      "big_number": true,
+      "text": "Be his reflection",
+      "hint": {"item": null, "container": null, "rig_point": "hall_mirror", "when": "mirror"},
+      "rearm_on_unseal": ["times_up"]
+    }
+  ],
+  "director": {
+    "gates": [],
+    "cues": [
+      {
+        "id": "card_freeze",
+        "when": {"tick_ge_s": 1.0},
+        "card": "card_freeze",
+        "target": "action",
+        "mode": "hold",
+        "once": true
+      },
+      {
+        "id": "card_specs",
+        "when": {"event_seen": {"event": "specs", "match": {"on": true}}},
+        "card": "card_specs",
+        "once": true
+      }
+    ]
+  },
+  "encores": []
+}

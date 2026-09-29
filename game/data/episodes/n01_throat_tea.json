@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "id": "n01_throat_tea",
+  "act": 1,
+  "index": 1,
+  "title": "Throat Tea",
+  "status": "final",
+  "seed": 101,
+  "rooms": ["porch", "hall", "parlour", "kitchen"],
+  "entry": "window",
+  "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false},
+  "new_rule": "items",
+  "card": {
+    "text": "Your tray carries things. Glowing spots take them. Do the Script, then take a bow at the front door.",
+    "icon": "tray"
+  },
+  "cold_open": {
+    "clip": "cold/n01_throat_tea",
+    "len_s": 5,
+    "desc": "Dawn: he sings scales through a megaphone out of his window; the window of No. 9 cracks."
+  },
+  "hush": {"start": {"room": "kitchen", "x": 3800}},
+  "bellows": {
+    "start": {"room": "parlour", "x": 1730},
+    "loop": [
+      {"a": "warmup", "gate": {"until": "first_rig", "plus_s": 2, "max_s": 25, "first_loop_only": true}},
+      {"a": "tea"},
+      {"a": "pickles"},
+      {"a": "paper"},
+      {"a": "rinse"}
+    ]
+  },
+  "cast": {"beryl": null, "delphine": null},
+  "fixup_overrides": {"DRY": "st_fireplace"},
+  "script": [
+    {
+      "id": "kettle",
+      "kind": "prank",
+      "prank": "kettle_drum",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows sings a duet with his kettle",
+      "hint": {
+        "item": "squeaker",
+        "container": "hall_confiscated_box",
+        "rig_point": "kitchen_kettle",
+        "when": "tea"
+      }
+    },
+    {
+      "id": "tap",
+      "kind": "prank",
+      "prank": "tap_dance",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows gets a face wash",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_sink_tap", "when": "rinse"}
+    },
+    {
+      "id": "pickle",
+      "kind": "prank",
+      "prank": "in_a_pickle",
+      "req": true,
+      "big_number": false,
+      "text": "Bellows loses a fight with a jar",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_pickle_jar", "when": "pickles"}
+    },
+    {
+      "id": "orbit",
+      "kind": "prank",
+      "prank": "lift_off",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows reads the paper in orbit",
+      "hint": {"item": null, "container": null, "rig_point": "parlour_recliner", "when": "paper"}
+    },
+    {
+      "id": "sneeze",
+      "kind": "prank",
+      "prank": "achoo_ria",
+      "req": false,
+      "big_number": false,
+      "text": "Bellows sneezes up a storm",
+      "hint": {"item": null, "container": null, "rig_point": "kitchen_honey", "when": "tea"}
+    },
+    {
+      "id": "bn",
+      "kind": "double_act",
+      "double_act": "hot_and_cold",
+      "req": false,
+      "big_number": true,
+      "text": "Sneeze him into the sink",
+      "hint": {
+        "item": null,
+        "container": null,
+        "rig_point": "kitchen_honey",
+        "when": "tea",
+        "also": [
+          {"item": null, "container": null, "rig_point": "kitchen_sink_tap", "when": "rinse", "note": "rig first"}
+        ]
+      },
+      "counts_while_sealed": true,
+      "rearm_on_unseal": ["achoo_ria", "tap_dance"]
+    }
+  ],
+  "director": {
+    "gates": [{"loop": 0, "gate": {"until": "first_rig", "plus_s": 2, "max_s": 25, "first_loop_only": true}}],
+    "cues": [
+      {"id": "card_tray", "when": {"event_seen": {"event": "pick", "match": {}}}, "card": "card_tray", "once": true},
+      {"id": "card_script", "when": {"tick_ge_s": 1.0}, "card": "card_script", "once": true},
+      {
+        "id": "card_bow",
+        "when": {"all_required_done": true},
+        "card": "card_bow",
+        "target": "hall_front_door",
+        "mode": "sparkle",
+        "once": true
+      }
+    ]
+  },
+  "encores": []
+}

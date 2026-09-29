@@ -17,6 +17,9 @@ const HOLD_APPROACH_S := 0.3
 const HOLD_RELEASE_S := 0.45
 const RING_R := 46.0
 const RING_W := 12.0
+## How far the tap ripple / HOLD ring reach from the fingertip (the Hud keeps this inside the
+## safe area).
+const TIP_REACH := 64.0
 
 var mode: int = Mode.TAP
 ## Seconds the HOLD ring takes to fill (the prep tier of the rig being taught).

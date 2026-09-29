@@ -4,8 +4,8 @@ game/art/icons/**.
 
 Checks: well-formed XML; the root header (width/height = integer px = viewBox); only the allowed
 elements (svg defs g path rect circle ellipse line polyline polygon linearGradient radialGradient
-stop); no style/class/filter/mask/clip-path/href/<text>/<image>/<use>; gradients only in rooms/ and
-stage/; <= 10 distinct colours per sprite (props, items, icons); outline sprites (*_ol.svg) are flat
+stop); no style/class/filter/mask/clip-path/href/<text>/<image>/<use>; gradients only in rooms/, stage/
+and the cold-open set pieces (cold/*_bg|_fg.svg); cold-open state sprites follow the prop rules; <= 10 distinct colours per sprite (props, items, icons); outline sprites (*_ol.svg) are flat
 white; numbers have <= 1 decimal; the canvas size matches its kind (room = width x 700, item 128,
 activity icon 88); the 3 px canvas margin is empty (rendered alpha, sprites only); file size caps.
 Exit 1 on any error. Usage: python3 tools/art/house/validate_svg.py [--no-render]
@@ -26,7 +26,8 @@ NS = "{http://www.w3.org/2000/svg}"
 ALLOWED = {"svg", "defs", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon", "linearGradient", "radialGradient", "stop"}
 BAD_ATTR = {"style", "class", "filter", "mask", "clip-path", "href", "{http://www.w3.org/1999/xlink}href"}
 MAX_COLOURS = 10
-SIZE_CAP = {"props": 48 * 1024, "items": 16 * 1024, "icons": 16 * 1024, "rooms": 120 * 1024, "stage": 160 * 1024}
+SIZE_CAP = {"props": 48 * 1024, "items": 16 * 1024, "icons": 16 * 1024, "rooms": 120 * 1024, "stage": 160 * 1024,
+            "cold_set": 160 * 1024, "cold": 48 * 1024}
 NUM = re.compile(r"-?\d+\.(\d+)")
 HEX = re.compile(r"#[0-9A-Fa-f]{6}\b")
 
@@ -37,7 +38,9 @@ def kind_of(path):
     if parts[0] == "icons":
         return "icons"
     if parts[0] == "house" and len(parts) > 1:
-        return parts[1]          # rooms | props | stage | items | _src
+        if parts[1] == "cold" and re.search(r"_(bg|fg)\.svg$", parts[-1]):
+            return "cold_set"    # a cold-open set piece (full-frame bg / fg over the actors): like a stage flat
+        return parts[1]          # rooms | props | stage | items | cold | _src
     return "other"
 
 
@@ -70,7 +73,7 @@ def check_file(path, widths, render=True, tmp=None):
                 errs.append("%s: attribute %s not allowed" % (name, a))
         if tag in ("linearGradient", "radialGradient"):
             grads += 1
-    if grads and kind not in ("rooms", "stage"):
+    if grads and kind not in ("rooms", "stage", "cold_set"):
         errs.append("%s: gradients are only for rooms/stage (walls, sky, glows)" % name)
     for mm in NUM.finditer(re.sub(r'transform="[^"]*"', "", txt)):
         if len(mm.group(1)) > 1:
@@ -80,7 +83,7 @@ def check_file(path, widths, render=True, tmp=None):
     if name.endswith("_ol.svg"):
         if cols - {"#FFFFFF"}:
             errs.append("%s: outline sprite must be flat white, has %s" % (name, sorted(cols)))
-    elif kind in ("props", "items", "icons") and len(cols) > MAX_COLOURS:
+    elif kind in ("props", "items", "icons", "cold") and len(cols) > MAX_COLOURS:
         errs.append("%s: %d colours > %d" % (name, len(cols), MAX_COLOURS))
     cap = SIZE_CAP.get(kind)
     if cap and len(txt.encode()) > cap:
@@ -93,7 +96,7 @@ def check_file(path, widths, render=True, tmp=None):
         errs.append("%s: item icons are 128x128 (got %dx%d)" % (name, w, h))
     elif kind == "icons" and (w, h) != (88, 88):
         errs.append("%s: activity icons are 88x88 (got %dx%d)" % (name, w, h))
-    if render and kind in ("props", "items", "icons"):
+    if render and kind in ("props", "items", "icons", "cold"):
         errs += margin_check(path, name, w, h, tmp)
     return errs
 

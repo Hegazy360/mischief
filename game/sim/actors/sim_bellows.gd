@@ -690,6 +690,7 @@ func _start_next(w: SimWorld) -> void:
 			return
 		if kind == Routine.D_CURIOUS:
 			state = CURIOUS
+			curious_t0 = w.tick
 			var look := d[4] if d[4] > 0 else SimConst.CURIOUS_LOOK_TICKS
 			_begin_task(w, T_CURIOUS, w.db.activity_idx("curious"), -1, -1, d[1], d[2], facing, look, "curious")
 			task_why = Routine.WHY_NAMES[clampi(d[3], 0, Routine.WHY_NAMES.size() - 1)]

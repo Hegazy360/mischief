@@ -52,6 +52,9 @@ var props: FxFallingProps = null
 var screen: CanvasLayer = null
 var busted: FxBustedOverlay = null
 var freeze: FxFreezeFrame = null
+var cane_fx: FxCane = null
+var stars: FxStars = null
+var wipe_fx: FxWipe = null
 var _captions: Array[FxCaption] = []
 var _stamps: Array[FxStamp] = []
 var _next_caption := 0
@@ -127,6 +130,10 @@ func warm() -> void:
 	particles.warm()
 	props = FxFallingProps.new()
 	add_child(props)
+	cane_fx = FxCane.new()
+	add_child(cane_fx)
+	stars = FxStars.new()
+	add_child(stars)
 	screen = CanvasLayer.new()
 	screen.name = "FxScreen"
 	screen.layer = SCREEN_LAYER
@@ -135,6 +142,8 @@ func warm() -> void:
 	screen.add_child(busted)
 	freeze = FxFreezeFrame.new()
 	screen.add_child(freeze)
+	wipe_fx = FxWipe.new()
+	screen.add_child(wipe_fx)
 	var st := ViewKit.autoload("Settings")
 	if st != null and st.has_signal("changed"):
 		st.connect("changed", _on_setting)
@@ -229,9 +238,44 @@ func burst(kind: String, world_pos: Vector2, amount: int = -1, dir: Vector2 = Ve
 	return particles.burst(kind, world_pos, amount, dir)
 
 
-func ripple(world_pos: Vector2) -> void:
+## Tap ripple; `grey` = a rejected tap (`cmd_rejected`).
+func ripple(world_pos: Vector2, grey: bool = false) -> void:
 	warm()
-	ripples.ripple(world_pos)
+	ripples.ripple(world_pos, grey)
+
+
+## A held command (`cmd_queued`): the pulsing destination marker with its "…" badge.
+func queued_marker(world_pos: Vector2) -> void:
+	warm()
+	ripples.queued(world_pos)
+
+
+## The held command ran: back to a normal marker (the dotted path follows).
+func queued_done() -> void:
+	warm()
+	ripples.queued_done()
+
+
+func is_queued() -> bool:
+	return ripples != null and ripples.is_queued()
+
+
+## Figgis's cane sweeping in toward `target` (world).
+func cane(target: Vector2, from_right: bool) -> void:
+	warm()
+	cane_fx.start(target, from_right)
+
+
+## Stars orbiting a point (a bonk).
+func stars_at(world_pos: Vector2) -> void:
+	warm()
+	stars.spin(world_pos)
+
+
+## The caught sequence's ink iris wipe around a screen fraction.
+func wipe(centre_frac: Vector2 = Vector2(0.5, 0.45)) -> void:
+	warm()
+	wipe_fx.start(centre_frac)
 
 
 func path_dots(points: PackedVector2Array) -> void:
@@ -354,6 +398,8 @@ func clear() -> void:
 	entry.stop()
 	ripples.clear()
 	rings.clear()
+	cane_fx.stop()
+	stars.clear()
 	end_busted()
 	set_freeze_frame(false)
 
@@ -403,6 +449,8 @@ func advance(real_dt: float) -> void:
 	strip.tick(real_dt)
 	entry.tick(vdt, _unit)
 	props.tick(vdt)
+	cane_fx.tick(vdt, _unit)
+	stars.tick(vdt, _unit)
 	_sight.tick(real_dt, _unit)
 	particles.set_speed(clampf(rate, 0.0, 3.0))
 

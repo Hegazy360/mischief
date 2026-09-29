@@ -20,6 +20,7 @@ var _json_reactions: Dictionary = {}
 var _json_combos: Dictionary = {}
 var _ids: PackedStringArray = PackedStringArray()
 var _ids_ready := false
+var _preps: Dictionary = {}
 
 
 static func of(w: Object) -> ContentInfo:
@@ -218,3 +219,29 @@ static func _g(o: Variant, key: String, def: Variant = null) -> Variant:
 		var v: Variant = (o as Object).get(key)
 		return def if v == null else v
 	return def
+
+
+## The rigging tier of a prank step ("q" | "s" | "b"; "" unknown) — pranks.json `steps[i].prep`.
+func step_prep(prank_id: String, step: int) -> String:
+	var ck := "%s|%d" % [prank_id, step]
+	if _preps.has(ck):
+		return _preps[ck]
+	var out := ""
+	var src: Variant = _json_pranks.get(prank_id, null)
+	if src is Dictionary:
+		var steps: Variant = (src as Dictionary).get("steps", [])
+		if steps is Array and step >= 0 and step < (steps as Array).size() and (steps as Array)[step] is Dictionary:
+			out = ViewKit.s(((steps as Array)[step] as Dictionary).get("prep", "")).to_lower()
+	_preps[ck] = out
+	return out
+
+
+## The COSTUME look a prank dresses him in (pranks.json `residue[].look` of kind COSTUME; "" none).
+func costume_look(prank_id: String) -> String:
+	var src: Variant = _json_pranks.get(prank_id, null)
+	if not (src is Dictionary):
+		return ""
+	for r in (src as Dictionary).get("residue", []):
+		if r is Dictionary and ViewKit.s((r as Dictionary).get("kind", "")) == "COSTUME":
+			return ViewKit.s((r as Dictionary).get("look", ""))
+	return ""

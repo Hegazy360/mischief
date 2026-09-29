@@ -24,7 +24,9 @@
         "first_player_laugh_s_max": 10,
         "first_prank_s_max": 30,
         "laughs_by_s": [[60, 6]],
-        "duration_s": [50, 80]
+        "duration_s": [50, 80],
+        "dead_air_pct_max": 20,
+        "max_gap_s_max": 12
       }
     },
     "required": {
@@ -40,7 +42,14 @@
         {"do": "wait_event", "event": "reaction_end", "match": {"prank": "allegro_go_go"}, "max_s": 45},
         {"do": "wait_event", "event": "night_end", "match": {}, "max_s": 45}
       ],
-      "expect": {"stars": [null, null, null], "lines": ["sneeze", "spin"], "catches_max": 0, "duration_s": [55, 95]}
+      "expect": {
+        "stars": [null, null, null],
+        "lines": ["sneeze", "spin"],
+        "catches_max": 0,
+        "duration_s": [55, 95],
+        "dead_air_pct_max": 25,
+        "max_gap_s_max": 12
+      }
     },
     "slow": {
       "persona": "slow",
@@ -73,7 +82,9 @@
         "lines": ["sneeze", "spin"],
         "first_player_laugh_s_max": 10,
         "first_prank_s_max": 30,
-        "laughs_by_s": [[75, 4]]
+        "laughs_by_s": [[75, 4]],
+        "dead_air_pct_max": 30,
+        "max_gap_s_max": 12
       }
     }
   }

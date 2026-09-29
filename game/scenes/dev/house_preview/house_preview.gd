@@ -20,8 +20,9 @@
 ##                        --hface= --nobellows --nohush)
 ##   --show=a,b|all       also draw hidden decor (the sink lip, the smashed vase, the door glow)
 ##   --decor=<id>:<state> draw a decor sprite in a named state (e.g. parlour_picture_frame:falling)
-##   --cold=<set>         draw a cold-open set from cold_sets.json (+ --cold_state=<layer>:<state>,…)
-##   --title              draw the title card on the curtain (+ --title_scale=0.5 for phone scale)
+##   --cold=<set>         draw a cold-open set from cold_sets.json (+ --cold_state=<layer>:<state>,…;
+##                        --chars puts the real rigs at the set's `actors` anchors, --rects the anchors)
+##   --title              draw the title card on the curtain (+ --title_scale=0.5; bulbs chase)
 ## Hidden eyes: with --state=occupied every hiding spot gets Hush's animated-eye sprite drawn at its
 ## `eyes` point exactly as the view will (res://art/chars/hush/hidden_eyes.svg, pivot from rig.json).
 ## Not exported (scenes/dev/ is filtered out of release builds).
@@ -364,6 +365,9 @@ func _make_rig(rig_id: String, pose: String, at: Vector2, facing: int, layer: St
 		push_warning("HousePreview: %s missing, no characters" % RIG_PLAYER_PATH)
 		return null
 	var scr: Script = load(RIG_PLAYER_PATH)
+	if scr == null or not scr.can_instantiate():
+		push_warning("HousePreview: %s does not load right now, no characters" % RIG_PLAYER_PATH)
+		return null
 	var p: Node2D = scr.new()
 	(_layers[layer] as Node2D).add_child(p)
 	if p.has_method("configure_for_tools"):
@@ -417,7 +421,8 @@ func _place_camera(at: Vector2, z: float) -> void:
 # ------------------------------------------------------------------------------ cold opens + title
 
 ## A cold-open set in screen space (the 2400 x 1080 logical 20:9 frame; the camera centres it, so a
-## 16:9 phone sees its central 1920 px).
+## 16:9 phone sees its central 1920 px). Layers with z <= 0 draw behind the actors, z >= 2 over them; a
+## layer's state comes from --cold_state, else its `state` field; an empty state path hides the layer.
 func _build_cold() -> void:
 	var data := _load_json(COLD_PATH)
 	var sets: Dictionary = data.get("sets", {})
@@ -433,30 +438,32 @@ func _build_cold() -> void:
 		var path: String = l.get("art", "")
 		if states.has(id):
 			var st: Dictionary = states[id]
-			var want: String = cold_states.get(id, str(l.get("state", st.keys()[0])))
-			path = st.get(want, path)
-		if bool(l.get("hidden", false)) and not cold_states.has(id):
+			var want: String = cold_states.get(id, str(l.get("state", "")))
+			path = str(st.get(want, path))
+		if path == "":
 			continue
 		var z := int(l.get("z", 0))
-		var layer := "rooms" if z < 0 else ("props" if z < 2 else "fg")
-		var s := _sprite(layer, path, _v2(l["pos"]))
-		if s != null and str(l.get("blend", "")) == "add":
-			_add_blend(s)
+		var layer := "rooms" if z < 0 else ("props" if z < 2 else "decor_over")
+		_sprite(layer, path, _v2(l["pos"]))
 	if show_chars:
 		var anchors: Dictionary = _cold.get("anchors", {})
-		if anchors.has("bellows"):
-			var pose := str(char_over.get("bpose", _cold.get("bellows_pose", "b_sing_big")))
-			var face := int(char_over.get("bface", _cold.get("bellows_facing", 1)))
-			var b := _make_rig("bellows", pose, _v2(anchors["bellows"]), face, "props")
-			if b != null:
-				b.scale = Vector2.ONE * float(_cold.get("bellows_scale", 1.0))
-				b.z_index = 1
+		var actors: Dictionary = _cold.get("actors", {})
+		for rig_id in actors:
+			if not anchors.has(rig_id) or char_over.has("no" + str(rig_id)):
+				continue
+			var a: Dictionary = actors[rig_id]
+			var pose := str(char_over.get("bpose", a.get("pose", "")))
+			var face := int(char_over.get("bface", a.get("facing", 1)))
+			var r := _make_rig(str(rig_id), pose, _v2(anchors[rig_id]), face, "chars")
+			if r != null:
+				r.scale = Vector2.ONE * float(a.get("scale", 1.0))
 	var size: Array = _cold.get("size", [2400, 1080])
 	_overlay.queue_redraw()
 	_place_camera(Vector2(float(size[0]) * 0.5, float(size[1]) * 0.5), 1.0)
 
 
-## The title card slammed down over the curtain (`--title_scale` shows it at phone scale).
+## The title card slammed down over the curtain in its rest place (stage.title_card; `--title_scale`
+## scales it, the bulb overlays chase at `chase_hz`).
 func _build_title() -> void:
 	var st: Dictionary = house.get("stage", {})
 	var curtain: Dictionary = st.get("curtain", {})
@@ -467,14 +474,23 @@ func _build_title() -> void:
 		var sz: Array = spot.get("size", [900, 260])
 		_add_blend(_sprite("fg", spot["art"], Vector2(1200 - float(sz[0]) * 0.5, 1080 - float(sz[1])),
 			Color(1, 1, 1, float(spot.get("alpha", 0.8)))))
-	var tex := _tex(TITLE_PATH)
-	if tex != null:
-		var s := Sprite2D.new()
-		s.texture = tex
-		s.centered = true
-		s.position = Vector2(1200, 470)
+	var tc: Dictionary = st.get("title_card", {})
+	var centre := _v2(tc.get("rest_center", [1200, 470]))
+	var tsize := _v2(tc.get("size", [1500, 790]))
+	var origin := centre - tsize * 0.5 * title_scale
+	var board := _sprite("props", str(tc.get("art", TITLE_PATH)), origin)
+	if board != null:
+		board.scale = Vector2.ONE * title_scale
+	var bulb_tex: Array[Texture2D] = []
+	var bulbs: Array = tc.get("bulbs", [])
+	for b in bulbs:
+		var t := _tex(str(b))
+		if t != null:
+			bulb_tex.append(t)
+	if bulb_tex.size() >= 2:
+		var s := _sprite("props_front", str(bulbs[0]), origin)
 		s.scale = Vector2.ONE * title_scale
-		(_layers["props"] as Node2D).add_child(s)
+		_anims.append({"sprite": s, "tex": bulb_tex, "fps": float(tc.get("chase_hz", 6.0))})
 	_place_camera(Vector2(1200, 540), 1.0)
 
 

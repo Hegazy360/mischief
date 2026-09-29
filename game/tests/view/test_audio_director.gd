@@ -177,3 +177,106 @@ func test_audio_task_cues_json_runs_if_present() -> void:
 	_frames(120)
 	assert_gt(_a.calls.size(), 10, "cue actions were played")
 	assert_has(_laughs, 4, "Meltdown → T4")
+
+
+# --- s2-view §4.1.11: sound timing and ownership (ruling L12) --------------------------------
+
+func test_cue_delays_count_in_view_time_so_hitstop_holds_them() -> void:
+	_a.events = {"prank_fire": {"sfx": "splash", "delay_s": 0.1}}
+	_a.on_ticked([{"e": "prank_fire", "prank": "x", "t": 1}])
+	_d.juice.test_now_us = 1000
+	_d.juice.request_kind(&"hit_big")
+	# 5 frames of hit-stop: view time frozen → the splash waits.
+	for i in 5:
+		_d.juice.test_now_us += 16667
+		_frames(1)
+	var n := 0
+	for c in _a.calls:
+		if c[0] == "play_sfx" and c[1] == "splash":
+			n += 1
+	assert_eq(n, 0, "held by the hit-stop")
+	for i2 in 12:
+		_d.juice.test_now_us += 16667
+		_frames(1)
+	n = 0
+	for c2 in _a.calls:
+		if c2[0] == "play_sfx" and c2[1] == "splash":
+			n += 1
+	assert_eq(n, 1, "plays once view time has passed 0.1 s")
+
+
+func test_no_sound_id_twice_within_100_ms() -> void:
+	_a.events = {"bump": {"sfx": "woodblock_bonk"}}
+	_a.on_ticked([{"e": "bump", "t": 1}, {"e": "bump", "t": 1}])
+	_frames(3)
+	_a.on_ticked([{"e": "bump", "t": 4}])
+	var n := 0
+	for c in _a.calls:
+		if c[0] == "play_sfx" and c[1] == "woodblock_bonk":
+			n += 1
+	assert_eq(n, 1, "three bonks within 100 ms → one")
+	assert_eq(_a.skipped_repeats, 2)
+	_frames(8)
+	_a.on_ticked([{"e": "bump", "t": 20}])
+	n = 0
+	for c2 in _a.calls:
+		if c2[0] == "play_sfx" and c2[1] == "woodblock_bonk":
+			n += 1
+	assert_eq(n, 2, "after 100 ms it may play again")
+
+
+func test_event_cue_repeating_a_clip_sound_is_skipped() -> void:
+	var fix := preload("res://tests/view/view_fixtures.gd")
+	fix.install(true)
+	var sb := ViewSandbox.new()
+	tree.root.add_child(sb)
+	await tree.process_frame
+	sb.set_process(false)
+	var ad := sb.audio
+	ad.record = true
+	ad.events = {"reaction_accent": {"sfx": "sneeze_choo"}}
+	var bv := sb.world_view.bellows_view
+	bv._clip = "bellows/rx_fx_take_a"
+	assert_has(AudioDirector.clip_sounds("bellows/rx_fx_take_a"), "sneeze_choo")
+	allow_errors()
+	ad.on_ticked([{"e": "reaction_accent", "prank": "achoo_ria", "t": 1}])
+	var n := 0
+	for c in ad.calls:
+		if c[0] == "play_sfx" and c[1] == "sneeze_choo":
+			n += 1
+	assert_eq(n, 0, "the clip owns the CHOO: the event-level cue never doubles it")
+	assert_eq(ad.skipped_dups, 1)
+	sb.queue_free()
+	fix.uninstall()
+
+
+func test_record_mode_sneeze_plays_no_sound_twice_within_100_ms() -> void:
+	var fix := preload("res://tests/view/view_fixtures.gd")
+	fix.install(true)
+	var sb := ViewSandbox.new()
+	tree.root.add_child(sb)
+	await tree.process_frame
+	sb.set_process(false)
+	sb._seek(640)
+	sb.audio.record = true
+	sb.audio.calls.clear()
+	sb.audio.call_times.clear()
+	var n := 0
+	while sb.driver.snapshot().tick < 900 and n < 900:
+		sb._process(1.0 / 60.0)
+		n += 1
+	var last: Dictionary = {}
+	var doubles := 0
+	for i in sb.audio.calls.size():
+		var c: Array = sb.audio.calls[i]
+		if c[0] != "play_sfx" and c[0] != "play_voice":
+			continue
+		var id := String(c[1])
+		var t := sb.audio.call_times[i]
+		if last.has(id) and t - float(last[id]) < 0.1 - 0.0001:
+			doubles += 1
+		last[id] = t
+	assert_eq(doubles, 0, "no sound id twice within 100 ms over the sneeze")
+	assert_gt(sb.audio.calls.size(), 0)
+	sb.queue_free()
+	fix.uninstall()

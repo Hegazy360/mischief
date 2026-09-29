@@ -22,7 +22,7 @@ const TARGETS: PackedStringArray = ["pause", "figgis", "meter", "pip", "overview
 
 
 ## Every rect (Dictionary StringName → Rect2): pause, figgis, meter, banner, pip, pip_escalated,
-## overview, overview_escalated, tray, clarence, action, band, safe, edge_zone.
+## overview, overview_escalated, tray, clarence, action, band, safe, edge_zone, arrow_zone.
 static func compute(vp: Vector2, insets: Vector4, left_handed: bool = false, k: float = 1.0) -> Dictionary:
 	var s := maxf(insets.x, insets.z)
 	var t := insets.y
@@ -66,9 +66,13 @@ static func compute(vp: Vector2, insets: Vector4, left_handed: bool = false, k: 
 	r[&"safe"] = Rect2(s, t, w - 2.0 * s, h - t - b)
 	# where edge bubbles and pick strips may go: below the top row, above the bottom clusters
 	r[&"edge_zone"] = Rect2(s + 32.0 * k, t + 300.0 * k, w - 2.0 * s - 64.0 * k, h - t - b - 300.0 * k - 420.0 * k)
+	# where "it's over there" arrows may sit (EdgeArrows): 48 px below the overview button's row (a tilted
+	# arrow's tail rises) and 52 px above the thumb clusters, the full safe width
+	var az_top := t + 492.0 * k
+	r[&"arrow_zone"] = Rect2(s + 32.0 * k, az_top, w - 2.0 * s - 64.0 * k, maxf(0.0, h - b - 444.0 * k - az_top))
 	if left_handed:
 		for key in r.keys():
-			if key == &"safe" or key == &"meter" or key == &"banner" or key == &"edge_zone":
+			if key == &"safe" or key == &"meter" or key == &"banner" or key == &"edge_zone" or key == &"arrow_zone":
 				continue
 			var rc: Rect2 = r[key]
 			r[key] = Rect2(w - rc.position.x - rc.size.x, rc.position.y, rc.size.x, rc.size.y)

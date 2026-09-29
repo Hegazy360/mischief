@@ -126,6 +126,29 @@ func add_sample(t: int, s: Dictionary) -> void:
 	applause.append(int(s.get("applause", 0)))
 
 
+## Write the command log in the `sim_run.gd --cmds` format (SimReplay): {episode, route, persona, ticks (the last
+## tick), hash (the final state hash), …`meta`, cmds: [[tick, cmd], …]}, one command per line. Returns OK or an
+## error code. Replaying it through sim_run gives the same hash (NightScene's e2e driver, ViewSandbox --cmds).
+func write_cmds(path: String, meta: Dictionary = {}) -> int:
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return FileAccess.get_open_error()
+	var head := {"persona": persona, "ticks": last_tick(), "hash": final_hash}
+	head.merge(meta, true)
+	var keys := head.keys()
+	keys.sort()
+	var parts := PackedStringArray()
+	for k in keys:
+		parts.append("%s: %s" % [JSON.stringify(str(k)), JSON.stringify(head[k])])
+	var rows := PackedStringArray()
+	for c in cmds:
+		rows.append("  [%d, %s]" % [int(c[0]), JSON.stringify(c[1])])
+	f.store_string("{%s,\n \"cmds\": [\n%s\n]}\n" % [", ".join(parts), ",\n".join(rows)])
+	f.close()
+	return OK
+
+
 ## Sample index of world tick `t` (−1 if not sampled).
 func index_of_tick(t: int) -> int:
 	if ticks.is_empty():

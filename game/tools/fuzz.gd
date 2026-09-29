@@ -4,7 +4,11 @@
 ##
 ##   tools/scripts/fuzz.sh [<episode>|all] [--runs=20] [--seed=1] [--bot=all|random,reckless,…]
 ##                         [--ticks=10800] [--report=/abs/out.json] [--verbose] [--no-probe] [--strict]
-##                         [--probe-every=4] [--probe-macros=60] [--replay-every=5]
+##                         [--probe-every=4] [--probe-macros=60] [--replay-every=5] [--dump-cmds=/abs/dir]
+## `--dump-cmds=/abs/dir`: per (episode, bot), the command log of the first run containing each of `caught`,
+## `face_to_face`, `meltdown_start` and `chase_start` → `<episode>_<bot>_<event>.cmds.json` (the `sim_run.gd
+## --cmds` format with `bot`, `seed` and `event`: replaying it through sim_run gives the same hash) — variety for
+## the view's caught staging tests and the e2e replays.
 ## The soft-lock probe (the planner on the run's final state) is deterministic: it is budgeted in
 ## macro executions, not wall time, and runs on every `--probe-every`-th run of each bot.
 ##
@@ -22,7 +26,7 @@ func _initialize() -> void:
 func _args() -> Dictionary:
 	var a := {"episode": "all", "runs": 20, "seed": 1, "bot": "all", "ticks": Fuzz.DEFAULT_TICKS, "report": "",
 		"verbose": false, "probe": true, "strict": false, "data": "res://data", "replay_every": 5,
-		"probe_budget_ms": 0, "probe_macros": 60, "probe_every": 4, "world": "sim"}
+		"probe_budget_ms": 0, "probe_macros": 60, "probe_every": 4, "world": "sim", "dump_cmds": ""}
 	for s in OS.get_cmdline_user_args():
 		if not s.begins_with("--"):
 			a["episode"] = s
@@ -37,6 +41,25 @@ func _args() -> Dictionary:
 		else:
 			a[k] = int(kv[1]) if (a.get(k, null) is int) else kv[1]
 	return a
+
+
+## The events whose first run per (episode, bot) `--dump-cmds` keeps.
+const DUMP_EVENTS: PackedStringArray = ["caught", "face_to_face", "meltdown_start", "chase_start"]
+
+
+## Write `<episode>_<bot>_<event>.cmds.json` for every DUMP_EVENTS event in `lg` not yet in `done` (event →
+## path, updated). Returns the paths written.
+static func dump_events(lg: SolverLog, dir: String, ep: String, bot: String, seed: int, done: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for e in DUMP_EVENTS:
+		if done.has(e) or lg.events_named(e).is_empty():
+			continue
+		var path := "%s/%s_%s_%s.cmds.json" % [dir, ep, bot, e]
+		if lg.write_cmds(path, {"episode": ep, "bot": bot, "seed": seed, "event": e,
+				"event_t": int((lg.events_named(e)[0] as Dictionary).get("t", 0))}) == OK:
+			done[e] = path
+			out.append(path)
+	return out
 
 
 func run(a: Dictionary) -> int:
@@ -75,12 +98,16 @@ func run(a: Dictionary) -> int:
 			var catches := 0
 			var near := 0
 			var locks := 0
+			var dumped := {}
 			for k in runs:
 				var probe_now := bool(a["probe"]) and (int(a["probe_every"]) <= 1 or k % int(a["probe_every"]) == 0)
 				var o := {"ticks": int(a["ticks"]), "probe": probe_now, "probe_budget_ms": int(a["probe_budget_ms"]),
 					"probe_macros": int(a["probe_macros"]),
 					"replay": int(a["replay_every"]) > 0 and k % int(a["replay_every"]) == 0}
 				var r := Fuzz.run_bot(factory, data, ep, bot, int(a["seed"]) + k, o)
+				if String(a["dump_cmds"]) != "" and r.get("log", null) is SolverLog:
+					for f in dump_events(r["log"], String(a["dump_cmds"]), ep, bot, int(a["seed"]) + k, dumped):
+						print("[fuzz] wrote %s" % f)
 				r.erase("log")
 				total += 1
 				catches += int(r.get("catches", 0))

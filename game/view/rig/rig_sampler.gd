@@ -42,7 +42,7 @@ static func sample(clip: ClipDef, frame: float, out: PackedFloat32Array) -> void
 			if span <= 0.0:
 				t = 1.0
 			var ew := RigEase.apply(clip.key_ease[0], t)
-			lerp_pose(clip.key_pose[n - 1], clip.key_pose[0], ew, out)
+			lerp_live(clip.key_pose[n - 1], clip.key_pose[0], ew, out, clip.live_channels())
 			if clip.plant:
 				plant(clip, n - 1, 0, ew, out)
 			return
@@ -59,7 +59,7 @@ static func sample(clip: ClipDef, frame: float, out: PackedFloat32Array) -> void
 	var f1 := float(kf[k + 1])
 	var tt := (f - f0) / (f1 - f0) if f1 > f0 else 1.0
 	var e := RigEase.apply(clip.key_ease[k + 1], tt)
-	lerp_pose(clip.key_pose[k], clip.key_pose[k + 1], e, out)
+	lerp_live(clip.key_pose[k], clip.key_pose[k + 1], e, out, clip.live_channels())
 	if clip.plant:
 		plant(clip, k, k + 1, e, out)
 
@@ -122,6 +122,18 @@ static func _world_deep(rig: RigDef, pose: PackedFloat32Array, p: int) -> Transf
 		return Transform2D(deg_to_rad(pose[RigDef.R_ROT]), Vector2(pose[RigDef.R_SX], pose[RigDef.R_SY]), 0.0,
 			Vector2(pose[RigDef.R_X], pose[RigDef.R_Y])) * local
 	return _world_deep(rig, pose, par) * local
+
+
+## Key interpolation over the clip's live channels only: every channel is copied from `a`
+## (discrete ones step on keys; static continuous ones are equal in every key), then each
+## `live` continuous channel moves a → b by `e`. Same result as lerp_pose, a third of the work
+## for a typical clip (most channels never move).
+static func lerp_live(a: PackedFloat32Array, b: PackedFloat32Array, e: float, out: PackedFloat32Array, live: PackedInt32Array) -> void:
+	var sz := out.size()
+	for i in sz:
+		out[i] = a[i]
+	for c in live:
+		out[c] = a[c] + (b[c] - a[c]) * e
 
 
 ## Key interpolation: continuous channels a → b by `e`; discrete channels keep `a` (they step

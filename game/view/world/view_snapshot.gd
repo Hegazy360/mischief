@@ -100,6 +100,12 @@ class Actor:
 	var leg_to_y: float = 0.0
 	var leg_pm: int = 0
 	var leg_up: bool = false
+	# Bellows' sight from the sim (`sight_ranges()`, s2-sim §4.4; the stare strip): known, moving
+	# px (to the wall when `sight_wall`), frozen px.
+	var sight_known: bool = false
+	var sight_moving: float = 0.0
+	var sight_frozen: float = 0.0
+	var sight_wall: bool = false
 
 	## Temper in points (temper_q / 60).
 	func temper_points() -> float:
@@ -165,6 +171,10 @@ class Actor:
 		leg_to_y = o.leg_to_y
 		leg_pm = o.leg_pm
 		leg_up = o.leg_up
+		sight_known = o.sight_known
+		sight_moving = o.sight_moving
+		sight_frozen = o.sight_frozen
+		sight_wall = o.sight_wall
 
 
 ## Sorted id tables for int → id mapping (TECH §2 interning order).
@@ -249,6 +259,7 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 	_fill_oneshot(bellows, world, "bellows_oneshot", bb, bb)
 	_fill_leg(hush, world, "hush_leg", ids, prev.hush if prev != null else null)
 	_fill_leg(bellows, world, "bellows_leg", ids, prev.bellows if prev != null else null)
+	_fill_sight(world)
 	_fill_bubble(world, ids)
 	applause_tenths = _call_int(world, "applause_tenths", 0)
 	link = _call_int(world, "link", 0)
@@ -451,6 +462,25 @@ static func _floor_of(v: Variant, room: String, a: Actor) -> int:
 	return r.floor if r != null else a.floor
 
 
+## Bellows' sight ranges from `sight_ranges()` (soft; the stare strip keeps its GDD table otherwise).
+func _fill_sight(world: Object) -> void:
+	var b := bellows
+	b.sight_known = false
+	if not b.present or not world.has_method("sight_ranges"):
+		return
+	var v: Variant = world.call("sight_ranges")
+	if not (v is Dictionary):
+		return
+	var d: Dictionary = v
+	b.sight_known = true
+	b.sight_wall = bool(d.get("to_wall", false))
+	b.sight_moving = float(d.get("moving_px", 0))
+	b.sight_frozen = float(d.get("frozen_px", 0))
+	if bool(d.get("blind", false)):
+		b.sight_moving = 0.0
+		b.sight_frozen = 0.0
+
+
 ## Frames of a clip in reactions.json `clip_timings` (0 when unknown): last-beat lengths.
 static func beat_frames(clip: String) -> int:
 	if clip == "":
@@ -488,6 +518,12 @@ func _fill_bubble(world: Object, ids: IdTables) -> void:
 		bubble_bar_pct = clampf(float(bellows.activity_t) / float(bellows.activity_len), 0.0, 1.0)
 	if bubble_icon == "":
 		bubble_icon = ViewSnapshot.icon_for(bubble_next)
+
+
+## True for a bubble `next` that is a detour (fix-ups, the "?" look, search, herding) — or
+## "exit" (he leaves: the exit icon; not a detour but never an activity of the routine).
+static func is_detour(next_id: String) -> bool:
+	return next_id.begins_with("fixup_") or next_id in ["curious", "herd_beryl", "search", "hunt"]
 
 
 ## Refresh hotspot states for `ids_list` (TECH §3.4 hotspot_state).

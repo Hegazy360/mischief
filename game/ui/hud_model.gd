@@ -7,7 +7,8 @@
 ## TECH §5.9 fields, plus a few optional ones the widgets need (marked "added"; defaults keep
 ## the documented behaviour): figgis_ghost, pip_glyph, pip_escalated, script_loop,
 ## pick_strip_pos, edge_bubble_* (the "(dir, label)" pair as two typed fields). `script` is
-## spelled `script_lines` (Object already owns `script`).
+## spelled `script_lines` (Object already owns `script`). Stage 2 adds edge_bubble_emote,
+## tray_arrows and tray_arrows_item (s2-ui §4.2.1, §4.2.8).
 class_name HudModel
 extends RefCounted
 
@@ -79,6 +80,21 @@ var pip_escalated: bool = false
 var edge_bubble_dir: Vector2 = Vector2.ZERO
 ## Its label, e.g. "↑ upstairs", "2 rooms →" (see strings.json hud.edge_*).
 var edge_bubble_label: String = ""
+## (Stage 2, D1 / ruling L1) The emote Bellows' face plays in the edge bubble while an off-screen
+## micro-gag runs: one of EdgeBubble.EMOTES (`sing, hum, smug, laugh, tut, sniff, yum, yawn`) or
+## "" = his normal face. NightScene sets it from a `micro_gag` event with `vis == "edge"` for the
+## event's `len`, then clears it. This is what lets an off-screen micro-gag count as "seen".
+var edge_bubble_emote: String = ""
+
+# --- "where does this go?" (GDD §3.1 tray tap, §3.2 RIG_DIM) ------------------------------------
+## (Stage 2) Screen directions (from the screen centre; need not be normalised) of the matching
+## OFF-screen targets — the rig points that take the tapped tray item, or the container that holds
+## a RIG_DIM prop's missing item. NightScene fills it for 3 s after `tray_tap(i)` / the RIG_DIM tap,
+## then empties it. Drawn as bobbing edge arrows (≤ 6) between the top row and the thumb clusters.
+var tray_arrows: PackedVector2Array = PackedVector2Array()
+## (added) Item id (or res:// path) shown in a disc at each arrow's tail; "" = the item in the
+## tray slot tapped last.
+var tray_arrows_item: String = ""
 
 # --- panels / strips --------------------------------------------------------------------------
 ## Script lines for the Script panel (TECH §5.9 `script`; renamed because `script` is Object's
@@ -102,7 +118,7 @@ func copy_from(other: HudModel) -> void:
 	for p in get_property_list():
 		if int(p["usage"]) & PROPERTY_USAGE_SCRIPT_VARIABLE:
 			var v: Variant = other.get(p["name"])
-			if v is Array or v is PackedStringArray or v is Dictionary:
+			if v is Array or v is PackedStringArray or v is PackedVector2Array or v is Dictionary:
 				v = v.duplicate()
 			set(p["name"], v)
 

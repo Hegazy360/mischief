@@ -34,9 +34,12 @@ const REEL := Vector2(704, 396)
 const NEXT_SIZE := Vector2(520, 240)
 const SMALL_SIZE := Vector2(340, 144)
 const DIAL := 150.0
+## The lower stage band between the corner buttons stays at least this wide (Bellows' slow burn
+## and the curtain bonk are staged there, behind the screen).
+const STAGE_BAND_MIN := 560.0
 ## Timeline (ms from open, first viewing; a repeat viewing runs at REPEAT_PACE).
 const COUNT_FROM_MS := 150
-const COUNT_MS := 1100
+const COUNT_MS := 1000
 const STAMP_MS := 300
 const STAMP_LAND_MS := 140
 const WHY_FADE_MS := 200
@@ -54,6 +57,8 @@ var repeat: bool = false
 ## Paint a curtain backdrop (standalone use); false over the real stage.
 var stage: bool = false
 var reel_texture: Texture2D = null
+## Retry sits above Playbill (a narrow safe area; see STAGE_BAND_MIN).
+var stacked: bool = false
 
 ## The default button (Next Night ▶ / Night 1 ▶ / Again ▶).
 var next_button: UiButton
@@ -268,7 +273,13 @@ func _layout(rect: Rect2) -> void:
 	var small_y := s.end.y - 40.0 - SMALL_SIZE.y
 	retry_button.position = Vector2(s.position.x + 48.0, small_y)
 	playbill_button.position = Vector2(s.position.x + 48.0 + SMALL_SIZE.x + 24.0, small_y)
-	stage_door_button.position = retry_button.position
+	# keep the lower stage band clear for Bellows: on a narrow safe area Retry stacks above Playbill
+	var band := next_button.position.x - playbill_button.position.x - SMALL_SIZE.x
+	stacked = playbill_button.visible and band < STAGE_BAND_MIN
+	if stacked:
+		playbill_button.position = Vector2(s.position.x + 48.0, small_y)
+		retry_button.position = Vector2(s.position.x + 48.0, small_y - SMALL_SIZE.y - 48.0)
+	stage_door_button.position = Vector2(s.position.x + 48.0, small_y)
 	var top := s.position.y + 170.0
 	_reel = Rect2(s.end.x - 48.0 - REEL.x, top, REEL.x, REEL.y)
 	_left = Rect2(s.position.x + 48.0, top, _reel.position.x - s.position.x - 96.0, 460.0)
@@ -375,7 +386,7 @@ func _draw_card(ci: Control) -> void:
 			var fs := ScriptPanel.fit_size(UiKit.ui_font(), nm, pitch - 16.0, UiKit.SIZE_MIN)
 			UiKit.draw_text_centered(ci, UiKit.ui_font(), c + Vector2(0, STAMP * 0.5 + 30.0), nm, fs,
 				UiKit.CREAM if earned and lt >= 0.0 else Color(UiKit.CREAM, 0.5), 10)
-		y += STAMP + 64.0
+		y += STAMP + 88.0
 	# the why-missed line
 	if not _why_lines.is_empty():
 		var why_t := t - (total_ms() - float(WHY_FADE_MS) - 100.0)

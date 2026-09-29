@@ -1,7 +1,8 @@
 ## Gate-0 A/B (s2-sound §4.1.4): `data/audio/ab.json` schema + every side resolves in its
 ## style; `Audio.preview(id, style)` plays the right style's file (a sequence part by part)
 ## and leaves Settings and the current styles alone; the Settings `voice_style` /
-## `crowd_style` keys switch the styles on ready and on `changed`.
+## `crowd_style` keys switch the styles on ready and on `changed` (against the real Settings
+## autoload when it is registered — its values are restored after each test — else a stand-in).
 extends TestBase
 
 const AB := "res://data/audio/ab.json"
@@ -23,9 +24,44 @@ func after_each() -> void:
 	if audio != null:
 		audio.free()
 		audio = null
-	var fake := tree.root.get_node_or_null("Settings")
-	if fake != null and fake.has_meta("fake_settings"):
-		fake.free()
+	var s := tree.root.get_node_or_null("Settings")
+	if s != null and s.has_meta("fake_settings"):
+		s.free()
+	elif s != null and not _saved.is_empty():
+		for k: String in _saved:
+			s.call("set_value", k, _saved[k])
+	_saved = {}
+	_emitted = 0
+
+
+var _saved: Dictionary = {}
+var _emitted: int = 0
+
+
+## The Settings node the Audio autoload reads: the real autoload (its style keys saved, restored in
+## after_each) or a stand-in with `vstyle` / `cstyle` when none is registered.
+func _settings_with(vstyle: String, cstyle: String) -> Node:
+	var real := tree.root.get_node_or_null("Settings")
+	if real == null:
+		return _fake_settings(vstyle, cstyle)
+	for k: String in ["voice_style", "crowd_style"]:
+		if not _saved.has(k):
+			_saved[k] = real.call("get_value", k)
+	real.call("set_value", "voice_style", vstyle)
+	real.call("set_value", "crowd_style", cstyle)
+	return real
+
+
+func _count_changed(_k: String, _v: Variant) -> void:
+	_emitted += 1
+
+
+## Emit a style change the way the real Settings does (set_value) or the stand-in does (the signal).
+func _change(s: Node, key: String, value: Variant) -> void:
+	if s.has_meta("fake_settings"):
+		s.emit_signal("changed", key, value)
+	else:
+		s.call("set_value", key, value)
 
 
 func _make() -> Node:
@@ -100,12 +136,12 @@ func test_preview_plays_the_style_and_leaves_settings_alone() -> void:
 	if not _has_map():
 		skip("sfx_map.json not generated")
 		return
-	if tree.root.get_node_or_null("Settings") != null:
-		skip("a real Settings autoload is registered")
-		return
 	audio.free()
-	var fake := _fake_settings("formant", "formant")
+	var st := _settings_with("formant", "formant")
 	audio = _make()
+	var fake := st.has_meta("fake_settings")
+	var sets0 := int(st.get("sets")) if fake else 0
+	st.connect("changed", _count_changed)
 	audio.preview("vo_bellows_pipe_down_1", "tuba")
 	assert_eq(audio.last_preview_files(), PackedStringArray(["vo_bellows_tuba_pipe_down_1"]))
 	audio.preview("vo_bellows_pipe_down_1", "formant")
@@ -116,12 +152,18 @@ func test_preview_plays_the_style_and_leaves_settings_alone() -> void:
 	assert_true(audio.last_preview_files()[0].begins_with("crowd_fb_t2_"), "a crowd kind previews its bank")
 	audio.preview("vo_bellows_hmph", "tuba")
 	assert_eq(audio.last_preview_files(), PackedStringArray(["vo_bellows_tuba_hmph_1"]), "a bank previews its first take")
+	audio.preview("vo_bellows_sneeze_seq", "tuba")
+	assert_true(audio.is_previewing(), "a preview is sounding")
 	assert_eq(audio.voice_style, "formant", "preview never switches the voice style")
 	assert_eq(audio.crowd_style, "formant", "…or the crowd style")
-	assert_eq(int(fake.get("sets")), 0, "preview never writes Settings")
-	assert_eq(String(fake.call("get_value", "voice_style")), "formant")
+	assert_eq(_emitted, 0, "preview never changes a Setting")
+	if fake:
+		assert_eq(int(st.get("sets")), sets0, "preview never writes Settings")
+	assert_eq(String(st.call("get_value", "voice_style")), "formant")
+	assert_eq(String(st.call("get_value", "crowd_style")), "formant")
 	audio.play_voice("vo_bellows_pipe_down")
 	assert_false(audio.last_voice_file().begins_with("vo_bellows_tuba_"), "the game voice stays formant")
+	st.disconnect("changed", _count_changed)
 
 
 func test_preview_sequence_plays_part_by_part() -> void:
@@ -156,26 +198,33 @@ func test_preview_sequence_plays_part_by_part() -> void:
 
 
 func test_settings_styles_apply_on_ready_and_on_changed() -> void:
-	if tree.root.get_node_or_null("Settings") != null:
-		skip("a real Settings autoload is registered")
-		return
 	audio.free()
-	var fake := _fake_settings("tuba", "fallback")
+	var st := _settings_with("tuba", "fallback")
 	audio = _make()
 	assert_eq(audio.voice_style, "tuba", "voice_style applied on ready")
 	assert_eq(audio.crowd_style, "fallback", "crowd_style applied on ready")
-	fake.emit_signal("changed", "voice_style", "formant")
+	_change(st, "voice_style", "formant")
 	assert_eq(audio.voice_style, "formant", "changed(voice_style) switches")
-	fake.emit_signal("changed", "crowd_style", "formant")
+	_change(st, "crowd_style", "formant")
 	assert_eq(audio.crowd_style, "formant", "changed(crowd_style) switches")
-	fake.emit_signal("changed", "voice_style", "banjo")
-	assert_eq(audio.voice_style, "formant", "an unknown style is ignored")
-	fake.emit_signal("changed", "crowd_style", 3)
-	assert_eq(audio.crowd_style, "formant", "a non-string is ignored")
+	if st.has_meta("fake_settings"):
+		_change(st, "voice_style", "banjo")
+		assert_eq(audio.voice_style, "formant", "an unknown style is ignored")
+		_change(st, "crowd_style", 3)
+		assert_eq(audio.crowd_style, "formant", "a non-string is ignored")
+	else:
+		# the real Settings refuses unknown values itself; the autoload must still ignore them
+		audio._on_setting_changed("voice_style", "banjo")
+		assert_eq(audio.voice_style, "formant", "an unknown style is ignored")
+		audio._on_setting_changed("crowd_style", 3)
+		assert_eq(audio.crowd_style, "formant", "a non-string is ignored")
 	if _has_map():
-		fake.emit_signal("changed", "voice_style", "tuba")
+		_change(st, "voice_style", "tuba")
 		audio.play_voice("vo_bellows_sneeze_choo")
 		assert_true(audio.last_voice_file().begins_with("vo_bellows_tuba_sneeze_choo_"), audio.last_voice_file())
+		_change(st, "crowd_style", "fallback")
+		audio.crowd("t3")
+		assert_true(audio.last_pick("crowd_t3").begins_with("crowd_fb_t3_"), audio.last_pick("crowd_t3"))
 
 
 func test_hush_tiptoe_walks_up_the_scale() -> void:

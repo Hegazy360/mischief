@@ -86,6 +86,53 @@ var warnings: PackedStringArray = PackedStringArray()
 
 var _ov_mask: PackedByteArray = PackedByteArray()
 var _keyed: PackedByteArray = PackedByteArray()
+var _live: PackedInt32Array = PackedInt32Array()
+var _live_done: bool = false
+var _live_alpha: int = -1
+
+
+## True when some part's alpha animates between keys (visibility can change mid-segment).
+func live_alpha() -> bool:
+	if _live_alpha < 0:
+		_live_alpha = 0
+		for c in live_channels():
+			if c >= RigDef.ROOT_CH and (c - RigDef.ROOT_CH) % RigDef.STRIDE == RigDef.C_ALPHA:
+				_live_alpha = 1
+				break
+	return _live_alpha == 1
+
+
+## Index of the key segment frame `f` samples (its discrete channels are that key's): changes
+## exactly when the sampler steps onto another key.
+func segment_at(f: float) -> int:
+	if key_f.is_empty():
+		return 0
+	var ff := fposmod(f, float(maxi(1, length))) if loop else f
+	return key_f.bsearch(int(floor(ff)), false)
+
+
+## Continuous pose channels (root x/y/rot/sx/sy; part rot, x, y, sx, sy, alpha) whose value
+## differs between any two keys (cached) — the only ones the sampler interpolates; every other
+## channel is a plain copy of the key (RigSampler.sample, s2-rig §4.3 "skip static channels").
+func live_channels() -> PackedInt32Array:
+	if _live_done:
+		return _live
+	_live_done = true
+	_live = PackedInt32Array()
+	if key_pose.size() < 2:
+		return _live
+	var k0: PackedFloat32Array = key_pose[0]
+	var sz := k0.size()
+	for c in sz:
+		if c >= RigDef.ROOT_CH:
+			var sub := (c - RigDef.ROOT_CH) % RigDef.STRIDE
+			if sub == RigDef.C_Z or sub == RigDef.C_TEX or sub == RigDef.C_VIS:
+				continue
+		for k in range(1, key_pose.size()):
+			if (key_pose[k] as PackedFloat32Array)[c] != k0[c]:
+				_live.append(c)
+				break
+	return _live
 
 
 ## The mask this clip uses as an OVERLAY (cached): its declared mask, else the parts it keys,

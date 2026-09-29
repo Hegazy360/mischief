@@ -37,6 +37,11 @@
           142.0,
           43.0,
           0
+        ],
+        "seat": [
+          124.0,
+          276.0,
+          0
         ]
       }
     },
@@ -419,7 +424,7 @@
       ],
       "size": [
         89,
-        57
+        37
       ],
       "file": "res://art/chars/bellows/parts/foot_l_flat.svg",
       "tex": {
@@ -484,7 +489,7 @@
       ],
       "size": [
         89,
-        57
+        37
       ],
       "file": "res://art/chars/bellows/parts/foot_r_flat.svg",
       "tex": {
@@ -1270,16 +1275,25 @@
     },
     "teacup": {
       "pivot": [
-        18.0,
+        47.0,
         24.0
       ],
       "size": [
-        65,
+        94,
         51
       ],
       "socket": "hand_r:grip",
       "z_offset": 2,
-      "file": "res://art/chars/bellows/props/teacup.svg",
+      "states": [
+        "held",
+        "sip"
+      ],
+      "tex": {
+        "held": "res://art/chars/bellows/props/teacup_held.svg",
+        "sip": "res://art/chars/bellows/props/teacup_sip.svg"
+      },
+      "file": "res://art/chars/bellows/props/teacup_held.svg",
+      "default": "held",
       "hidden": true
     },
     "newspaper": {
@@ -1430,6 +1444,30 @@
       "z_offset": 2,
       "file": "res://art/chars/bellows/props/megaphone.svg",
       "hidden": true
+    },
+    "stool": {
+      "pivot": [
+        47.0,
+        74.0
+      ],
+      "size": [
+        94,
+        163
+      ],
+      "socket": "torso:seat",
+      "z_offset": -21,
+      "states": [
+        "under",
+        "flying"
+      ],
+      "tex": {
+        "under": "res://art/chars/bellows/props/stool_under.svg",
+        "flying": "res://art/chars/bellows/props/stool_flying.svg"
+      },
+      "file": "res://art/chars/bellows/props/stool_under.svg",
+      "default": "under",
+      "hidden": true,
+      "note": "the kitchen stool (house decor kitchen_stool, pre-mirrored for facing -1): torso:seat puts its cushion under the barrel; rides ACHOO-RIA! and hops home (PropSim launch) where the decor reappears on the same pixels. Hidden by default; the sneeze shows it while the decor is hidden."
     }
   },
   "mirror_pairs": [
@@ -1438,5 +1476,71 @@
       "_r"
     ]
   ],
-  "no_mirror": []
+  "no_mirror": [],
+  "breath": {
+    "part": "belly",
+    "amp": 0.025,
+    "period_s": 4.0
+  },
+  "look": {
+    "part": "head",
+    "max_deg": 20
+  },
+  "masks": {
+    "upper": [
+      "head",
+      "nose",
+      "bouffant",
+      "sideburn_r",
+      "sideburn_l",
+      "cravat",
+      "arm_upper_r",
+      "arm_lower_r",
+      "hand_r",
+      "arm_upper_l",
+      "arm_lower_l",
+      "hand_l",
+      "face_eyes",
+      "face_pupils",
+      "face_lids",
+      "face_brows",
+      "face_mouth",
+      "face_blush",
+      "face_sweat",
+      "face_vein",
+      "face_steam_l",
+      "face_steam_r",
+      "face_singe",
+      "face_pinch",
+      "face_hiccup"
+    ],
+    "arms": [
+      "arm_upper_r",
+      "arm_lower_r",
+      "hand_r",
+      "arm_upper_l",
+      "arm_lower_l",
+      "hand_l"
+    ],
+    "head": [
+      "head",
+      "nose",
+      "bouffant",
+      "sideburn_r",
+      "sideburn_l",
+      "face_eyes",
+      "face_pupils",
+      "face_lids",
+      "face_brows",
+      "face_mouth",
+      "face_blush",
+      "face_sweat",
+      "face_vein",
+      "face_steam_l",
+      "face_steam_r",
+      "face_singe",
+      "face_pinch",
+      "face_hiccup"
+    ]
+  }
 }

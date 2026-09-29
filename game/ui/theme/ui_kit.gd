@@ -149,8 +149,14 @@ static func theme() -> Theme:
 	return _theme
 
 
+## Test / demo hook: a text scale that wins over Settings (≤ 0 = use Settings).
+static var text_scale_override: float = -1.0
+
+
 ## Text scale from Settings.text_scale (1.0 or 1.2 = "Text +20 %").
 static func text_scale() -> float:
+	if text_scale_override > 0.0:
+		return clampf(text_scale_override, 1.0, 1.4)
 	return clampf(float(setting("text_scale", 1.0)), 1.0, 1.4)
 
 

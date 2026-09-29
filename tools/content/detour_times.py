@@ -4,7 +4,9 @@
 A detour runs from its `b_detour {kind, station, why}` (the tick it is queued and shown in the bubble) to the
 `b_activity_end {id: kind}` that closes it (the fix-up done). Several residues queue several detours: they
 are closed in queue order, so each detour's time includes any queue ahead of it — what the player waits.
-A detour a prank interrupts (the residue stays) is closed by the later visit that clears that residue.
+A detour a prank interrupts (the residue stays) is closed by the later visit that clears that residue; one whose
+residue a prank clears first (N01: TAP DANCE washes out ACHOO-RIA!'s frizz, `clears: ["FRAZZLED"]`) closes at
+that `residue_clear` and is flagged "cleared by a prank" (he never walks it).
 
 Usage: python3 tools/content/detour_times.py <events.jsonl|dir> [...] [--max=12] [--json]
   (dumps from `SANDBOX=… tools/scripts/solve.sh … --dump-events=/abs/dir`)
@@ -37,7 +39,7 @@ def read_events(path):
 
 
 def detours(evs):
-    """[{kind, station, why, t0, t1, dur_s, interrupted, ended}] in queue order (t1 = None when never closed;
+    """[{kind, station, why, t0, t1, dur_s, interrupted, cleared, ended}] in queue order (t1 = None when never closed;
     `ended` = the Night ended with it still open, which is not a slow detour)."""
     open_q = []
     out = []
@@ -47,7 +49,7 @@ def detours(evs):
         t = int(ev.get("t", 0))
         if e == "b_detour" and ev.get("kind") in FIXUPS:
             d = {"kind": ev["kind"], "station": ev.get("station", ""), "why": ev.get("why", ""), "t0": t,
-                 "t1": None, "dur_s": None, "interrupted": False, "ended": False}
+                 "t1": None, "dur_s": None, "interrupted": False, "cleared": False, "ended": False}
             open_q.append(d)
             out.append(d)
         elif e == "b_activity" and ev.get("id") in FIXUPS:
@@ -63,6 +65,7 @@ def detours(evs):
             for d in list(open_q):
                 if d["why"] == ev.get("kind"):
                     d["t1"] = t
+                    d["cleared"] = started != d["kind"]
                     open_q.remove(d)
         elif e == "prank_fire" and started is not None:
             for d in open_q:
@@ -113,7 +116,7 @@ def main(argv):
         for d in ds:
             dur = ("open at the curtain" if d["ended"] else "never closed") if d["dur_s"] is None else "%.1f s" % d["dur_s"]
             print("  %-13s %-15s %-9s t %6.1f -> %s%s" % (d["kind"], d["station"], d["why"], d["t0"] / TPS, dur,
-                                                     " (interrupted)" if d["interrupted"] else ""))
+                                                     (" (interrupted)" if d["interrupted"] else "") + (" (cleared by a prank)" if d["cleared"] else "")))
     return 1 if over else 0
 
 

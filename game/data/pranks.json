@@ -53,7 +53,8 @@
       "residue": [{"kind": "SOAKED", "blind": false, "look": null}],
       "tags": ["free", "fixup", "double_act_target"],
       "nights": ["n01_throat_tea"],
-      "joke": "The spray tap whips round like a python; he wrestles it and loses: a face blast."
+      "joke": "The spray tap whips round like a python; he wrestles it and loses: a face blast.",
+      "clears": ["FRAZZLED"]
     },
     "kettle_drum": {
       "caption": "KETTLE DRUM",

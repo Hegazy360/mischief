@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "clip": "hush/idle_fidget_look",
+  "rig": "hush",
+  "loop": false,
+  "length": 80,
+  "layer": "base",
+  "mask": null,
+  "doc": "Flavour (cut within 1 f by any state change): the ear-cup + eye dart by f9.",
+  "blend_in": 4,
+  "blend_out": 6,
+  "tags": [
+    "idle",
+    "fidget",
+    "flavour"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "neutral"
+    },
+    {
+      "f": 5,
+      "pose": "h_breath_out",
+      "ease": "in_quad",
+      "face": "shock",
+      "set": {
+        "root": {
+          "sx": 1.03,
+          "sy": 0.97
+        },
+        "head": {
+          "rot": 4.0
+        },
+        "leg_upper_r": {
+          "rot": -9.51
+        },
+        "leg_lower_r": {
+          "rot": 11.29
+        },
+        "foot_r": {
+          "rot": -1.68
+        },
+        "leg_upper_l": {
+          "rot": 1.35
+        },
+        "leg_lower_l": {
+          "rot": 11.05
+        },
+        "foot_l": {
+          "rot": -11.7
+        }
+      }
+    },
+    {
+      "f": 9,
+      "pose": "h_fidget_look",
+      "ease": "out_back",
+      "face": "worried",
+      "set": {
+        "root": {
+          "sx": 0.97,
+          "sy": 1.03
+        },
+        "leg_upper_r": {
+          "rot": -4.38
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 4.11
+        },
+        "leg_upper_l": {
+          "rot": 6.93
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.9
+        }
+      }
+    },
+    {
+      "f": 24,
+      "pose": "h_fidget_look",
+      "ease": "in_out_sine",
+      "face": "fear",
+      "set": {
+        "torso": {
+          "rot": -10.0
+        },
+        "head": {
+          "rot": -14.0
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 40,
+      "pose": "h_fidget_look",
+      "ease": "in_out_sine",
+      "face": "worried",
+      "set": {
+        "head": {
+          "rot": -7.0
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 52,
+      "pose": "h_breath_out",
+      "ease": "in_out_sine",
+      "face": "phew",
+      "set": {
+        "root": {
+          "sx": 1.04,
+          "sy": 0.96
+        },
+        "torso": {
+          "rot": 4.0
+        },
+        "head": {
+          "rot": 6.0
+        },
+        "leg_upper_r": {
+          "rot": -10.27
+        },
+        "leg_lower_r": {
+          "rot": 12.89
+        },
+        "foot_r": {
+          "rot": -2.42
+        },
+        "leg_upper_l": {
+          "rot": 0.42
+        },
+        "leg_lower_l": {
+          "rot": 12.81
+        },
+        "foot_l": {
+          "rot": -12.25
+        }
+      }
+    },
+    {
+      "f": 80,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "neutral"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 6,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

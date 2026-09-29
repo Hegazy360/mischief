@@ -32,6 +32,8 @@ class Step:
 	var prep_ticks: int = SimConst.PREP_Q
 	## Needed item id ("" = free).
 	var needs: String = ""
+	## Derived: the container `needs` comes from (`items.json source`; "" when none).
+	var needs_src: String = ""
 	## Rig point hotspot of this step (defaults to the prank's rig_point).
 	var at: String = ""
 	var at_idx: int = -1

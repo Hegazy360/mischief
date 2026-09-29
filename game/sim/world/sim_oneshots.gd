@@ -153,7 +153,7 @@ static func fill_bellows(w: SimWorld, out: Dictionary) -> void:
 			set_to(out, CURIOUS_STOP, ce, SimConst.CURIOUS_STOP_TICKS, 0)
 			return
 		if b.task_kind == SimBellows.T_CURIOUS and b.phase == SimBellows.PH_PERFORM:
-			set_to(out, CURIOUS_LOOK, maxi(0, b.activity_t - 1), maxi(1, b.activity_len), 0)
+			set_to(out, CURIOUS_LOOK, b.activity_t, maxi(1, b.activity_len), 0)
 			return
 	if b.path != null and not b.path.is_done() and b.path.current_kind() == NavPath.PAUSE:
 		var aux := b.path.current_pause_aux()

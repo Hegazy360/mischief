@@ -29,6 +29,8 @@ var _from: float = 1.0
 
 func _init() -> void:
 	name = "NightCurtain"
+	# after NightScene (priority 10): a rise started this frame advances this frame (tick 0 = first rise frame)
+	process_priority = 20
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	if ResourceLoader.exists(ART):
@@ -70,6 +72,11 @@ func fall(sec: float = FALL_S) -> void:
 	_t = 0.0
 	_dur = maxf(0.01, sec)
 	_from = drop
+
+
+## Seconds into the current rise / fall.
+func elapsed() -> float:
+	return _t
 
 
 func is_animating() -> bool:

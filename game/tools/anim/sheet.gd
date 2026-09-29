@@ -20,6 +20,12 @@
 ##   plots it to <clip>_curves.png); <clip>_lint.txt — the animation lint for the clip.
 ## Cells are rendered by advancing a real player frame by frame (springs, smears, props and
 ## tier remaps show exactly as in game; blinks and breathing are off so sheets repeat).
+## * **Overlay clips** (`layer: overlay`, s2-rig §4.4) play over a base (`--base=<clip>`, else
+##   the rig's loco_idle): each contact cell draws the base-only pose as a blue ghost under
+##   the overlaid pose, onion-style, so the sheet shows exactly what the micro-gag changes
+##   (and that the feet do not move). The onion sheet plays base + overlay too.
+## * **Two rigs** (`--rig2=<rig> --clip2=<clip> [--x2=260]`): every cell also shows rig 2 at the
+##   same frame, x2 px to the right (the HOT & COLD hand-off, the Lecture dangle); tag `_2rig`.
 extends SceneTree
 
 const BG := Color("#E9E4D8")
@@ -34,6 +40,13 @@ var _out: String = ""
 var _rig: RigDef
 var _poses: PoseLib
 var _scale: float = 1.0
+## Overlay sheets: the overlay clip id and the base clip under it ("" = plain clip).
+var _ov_id: String = ""
+var _base_id: String = ""
+## Two-rig sheets: rig 2, its clip, its x offset (1× px).
+var _rig2: String = ""
+var _clip2: String = ""
+var _x2: float = 260.0
 
 
 func _initialize() -> void:
@@ -123,10 +136,10 @@ func _label(text: String, pos: Vector2, size: int = 16, col: Color = INK, width:
 	return l
 
 
-func _player() -> RigPlayer:
+func _player(rig_id: String = "") -> RigPlayer:
 	var p := RigPlayer.new()
 	p.configure_for_tools()
-	p.setup(_rig.id)
+	p.setup(_rig.id if rig_id == "" else rig_id)
 	return p
 
 
@@ -145,11 +158,37 @@ func _at_frame(clip_id: String, frame: int, opts: Dictionary, pos: Vector2 = Vec
 	var p := _player()
 	p.position = pos
 	p.scale = Vector2(scl, scl)
-	p.play(clip_id, opts)
+	if clip_id == _ov_id and _base_id != "":
+		p.play(_base_id, {"blend_in": 0})
+		p.play(clip_id, {"layer": "overlay"})
+	else:
+		p.play(clip_id, opts)
 	p.advance(0.0)
 	for i in frame:
 		p.advance(1.0 / 60.0)
 	return p
+
+
+## Everything drawn in one contact cell at `feet`: the base-only ghost under an overlay, the
+## clip's player, rig 2.
+func _cell_nodes(clip_id: String, frame: int, opts: Dictionary, feet: Vector2, scl: float) -> Array[Node]:
+	var out: Array[Node] = []
+	if clip_id == _ov_id and _base_id != "":
+		var g := _at_frame(_base_id, frame, {"blend_in": 0}, feet, scl)
+		g.modulate = Color(0.45, 0.62, 1.0, 0.45)
+		out.append(g)
+	out.append(_at_frame(clip_id, frame, opts, feet, scl))
+	if _rig2 != "" and _clip2 != "":
+		var q := _player(_rig2)
+		q.position = feet + Vector2(_x2 * scl, 0.0)
+		q.scale = Vector2(scl, scl)
+		q.set_facing(-1, false)
+		q.play(_clip2, {"blend_in": 0})
+		q.advance(0.0)
+		for i in frame:
+			q.advance(1.0 / 60.0)
+		out.append(q)
+	return out
 
 
 ## A Node2D that draws with a callable (outlines, dots, bars).
@@ -397,6 +436,23 @@ func _clip_sheets(cid: String) -> bool:
 	var opts := _clip_opts()
 	var plan := PlayPlan.build(clip, opts)
 	var tag := clip.short_name()
+	_ov_id = ""
+	_base_id = ""
+	if clip.layer == ClipDef.LAYER_OVERLAY:
+		_ov_id = clip.id
+		var b := String(_args.get("base", "loco_idle"))
+		_base_id = b if b.contains("/") else clip.rig_id + "/" + b
+		if ClipLib.get_clip(_base_id) == null:
+			_base_id = ""
+		elif _args.has("base"):
+			tag += "_on_" + _base_id.get_file()
+	_rig2 = String(_args.get("rig2", ""))
+	_clip2 = String(_args.get("clip2", ""))
+	if _clip2 != "" and not _clip2.contains("/"):
+		_clip2 = _rig2 + "/" + _clip2
+	_x2 = float(_args.get("x2", "260"))
+	if _rig2 != "" and _clip2 != "":
+		tag += "_2rig"
 	if opts.has("tier"):
 		tag += "_t%d" % int(opts["tier"])
 	if opts.has("suppressed"):
@@ -517,13 +573,20 @@ func _contact(clip: ClipDef, plan: PlayPlan, opts: Dictionary, tag: String) -> v
 	if ext.x * s < -cell_w * 0.5 + 8.0 or ext.y * s > cell_w * 0.5 - 8.0:
 		cell_w = maxf(cell_w, (ext.y - ext.x) * s + 16.0)
 		feet_dx = clampf(cell_w * 0.5, 8.0 - ext.x * s, cell_w - 8.0 - ext.y * s)
+	if _rig2 != "" and _clip2 != "":
+		cell_w += absf(_x2) * s
 	var char_h := _rig.height_px * 1.9 * s
 	var cell_h := char_h + 118.0
 	var cols := maxi(1, int(3000.0 / cell_w))
 	var stage := Node2D.new()
 	var top := 96.0
-	stage.add_child(_label("%s  %d f%s  tier %d%s — red = key, blue = hold beat; events under each cell" % [
-		clip.id, plan.length, " loop" if plan.loop else "", plan.tier, " suppressed" if plan.suppressed else ""], Vector2(14, 8), 24))
+	var extra := ""
+	if _base_id != "" and clip.id == _ov_id:
+		extra += "  · overlay over %s (blue ghost = the base alone)" % _base_id.get_file()
+	if _rig2 != "" and _clip2 != "":
+		extra += "  · with %s" % _clip2
+	stage.add_child(_label("%s  %d f%s  tier %d%s — red = key, blue = hold beat; events under each cell%s" % [
+		clip.id, plan.length, " loop" if plan.loop else "", plan.tier, " suppressed" if plan.suppressed else "", extra], Vector2(14, 8), 24))
 	stage.add_child(_beat_bar(clip, plan, Rect2(14, 44, float(cols) * cell_w - 28.0, 34)))
 	var prev := -1
 	for i in frames.size():
@@ -531,9 +594,9 @@ func _contact(clip: ClipDef, plan: PlayPlan, opts: Dictionary, tag: String) -> v
 		var cx := 10.0 + float(i % cols) * cell_w
 		var cy := top + float(i / cols) * cell_h
 		var feet := Vector2(cx + feet_dx, cy + char_h * 0.92)
-		var p := _at_frame(clip.id, f, opts, feet, s)
 		stage.add_child(_floor_line(cx + cell_w * 0.5, feet.y, cell_w - 6.0))
-		stage.add_child(p)
+		for nd in _cell_nodes(clip.id, f, opts, feet, s):
+			stage.add_child(nd)
 		var key := _is_key(clip, plan, f)
 		var hold := _in_hold(plan, clip, f)
 		var r := Rect2(cx + 2, cy, cell_w - 4, char_h)
@@ -560,6 +623,8 @@ func _contact(clip: ClipDef, plan: PlayPlan, opts: Dictionary, tag: String) -> v
 	if ext.x * ps < -pcw * 0.5 + 4.0 or ext.y * ps > pcw * 0.5 - 4.0:
 		pcw = maxf(pcw, (ext.y - ext.x) * ps + 8.0)
 		pdx = clampf(pcw * 0.5, 4.0 - ext.x * ps, pcw - 4.0 - ext.y * ps)
+	if _rig2 != "" and _clip2 != "":
+		pcw += absf(_x2) * ps
 	var pch := _rig.height_px * 1.75 * ps
 	var pcols := maxi(1, int(2300.0 / pcw))
 	var pstage := Node2D.new()
@@ -567,8 +632,8 @@ func _contact(clip: ClipDef, plan: PlayPlan, opts: Dictionary, tag: String) -> v
 		var f2 := frames[i]
 		var fx := 10.0 + float(i % pcols) * pcw + pdx
 		var fy := 10.0 + float(i / pcols) * (pch + 16.0) + pch * 0.9
-		var p2 := _at_frame(clip.id, f2, opts, Vector2(fx, fy), ps)
-		pstage.add_child(p2)
+		for nd2 in _cell_nodes(clip.id, f2, opts, Vector2(fx, fy), ps):
+			pstage.add_child(nd2)
 		pstage.add_child(_label(str(f2), Vector2(fx - 10, fy + 1), 11, KEY_COL if _is_key(clip, plan, f2) else INK))
 	var prows := (frames.size() + pcols - 1) / pcols
 	_save(await _capture(pstage, Vector2i(int(20.0 + float(pcols) * pcw), int(20.0 + float(prows) * (pch + 16.0)))), "%s_contact_phone.png" % tag)
@@ -610,7 +675,11 @@ func _beat_bar(clip: ClipDef, plan: PlayPlan, r: Rect2) -> Painter:
 func _onion(clip: ClipDef, plan: PlayPlan, opts: Dictionary, tag: String) -> void:
 	# Track head top, hands and root per frame (character space) with one player.
 	var p := _player()
-	p.play(clip.id, opts)
+	if clip.id == _ov_id and _base_id != "":
+		p.play(_base_id, {"blend_in": 0})
+		p.play(clip.id, {"layer": "overlay"})
+	else:
+		p.play(clip.id, opts)
 	p.advance(0.0)
 	var t_head := PackedVector2Array()
 	var t_hr := PackedVector2Array()

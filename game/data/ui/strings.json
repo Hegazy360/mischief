@@ -153,6 +153,7 @@
     "settings.crowd_fallback": "Kazoo",
     "settings.hush_skin": "Hush",
     "settings.skin_mime": "Mime",
-    "settings.skin_pip": "Pip"
+    "settings.skin_pip": "Pip",
+    "settings.tab_debug": "Debug"
   }
 }

@@ -11,6 +11,7 @@ Godot project — docs/ is not in the test sandbox) to prove no id is both.
   python3 tools/audio/clip_events.py            # write docs/review/s2-sound/clip_events.md +
                                                  # game/data/audio/clip_events.json
   python3 tools/audio/clip_events.py --check    # exit 1 when the files on disk are stale / invalid
+  python3 tools/audio/clip_events.py --status   # docs/review/s2-sound/placement.md: the clips on disk vs the table
 
 `gen_audio.py` rewrites the table after every render (lengths come from sfx_map.json) and
 `gen_audio.py --check` fails when it is stale. Frames are clip frames at 60 fps (view time,
@@ -62,9 +63,9 @@ def _warmup_note_frames(line_id: str, start_f: int) -> list[int]:
 def _warmup_rows() -> list[tuple]:
     rows: list[tuple] = []
     for start, lid, label in ((0, "warmup_1", "mi-mi-mi-mi-MIIII (C3 E3 G3 C4, C4 held)"),
-                              (360, "warmup_3", "la-la-LAAA (D3 A3, D4 held)")):
+                              (600, "warmup_3", "la-la-LAAA (D3 A3, D4 held)")):
         rows.append((start, "voice", f"vo_bellows_{lid}", 0.0,
-                     f"the phrase {label} — one sung line per 6 s (GDD §9.5)"))
+                     f"the phrase {label} — one sung line per 10 s (GDD §9.5: ≤ 1 per 6 s)"))
         for k, f in enumerate(_warmup_note_frames(lid, start), start=1):
             rows.append((f, "sfx", "vase_nudge", 0.0,
                          f"note {k} lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event)"))
@@ -105,48 +106,64 @@ def _build_spec() -> list[dict]:
        "f112 (HOT & COLD) the drench clip takes over, so f154 never plays there — correct.")
 
     # ------------------------------------------------------------------ the tea loop
-    clip("bellows/act_tea", None, "G", [
-        (10, "sfx", "kettle_pour", 0.0, "the kettle tips: water into the cup, pitch rising as it fills"),
-        (84, "sfx", "spoon_clink", 0.0, "the spoon dips in: ting"),
-        (96, "sfx", "tea_stir", 0.0, "stir: ting-ting-ting round the cup"),
-        (150, "sfx", "spoon_clink", -3.0, "tap, tap on the rim"),
-        (172, "sfx", "tea_sniff", 0.0, "leans in: sniff-SNIIIFF (the pepper is in there…)"),
-        (214, "sfx", "tea_slurp", 0.0, "lip contact: the posh slurp, pinkie up"),
-        (262, "sfx", "teacup_clink", 0.0, "the cup goes down on its saucer"),
-        (282, "sfx", "stool_creak", -2.0, "shifts his weight: the stool creaks"),
-    ], "Frames are for a **300-f reference loop** (he sits on the stool facing −1 throughout; the `decor` event hides "
-       "the house stool). Keep the order; put each event on your action's contact frame ± 1 f and keep them ≥ 12 f "
-       "apart. No voice in the loop — the tea micro-gags carry his hum.")
+    clip("bellows/act_tea", 480, "G", [
+        (40, "sfx", "kettle_pour", 0.0, "the kettle tips (pose b_stool_pour_a): water into the cup, pitch rising as it fills"),
+        (169, "sfx", "spoon_clink", 0.0, "the spoon dips in: ting"),
+        (182, "sfx", "tea_stir", 0.0, "stir: ting-ting-ting round the cup"),
+        (243, "sfx", "spoon_clink", -3.0, "tap, tap on the rim"),
+        (270, "sfx", "tea_sniff", 0.0, "leans in: sniff-SNIIIFF (the pepper is in there…)"),
+        (388, "sfx", "tea_slurp", 0.0, "lips meet the cup: the posh slurp (the sip ACHOO-RIA! fires on at 7.0 s)"),
+        (462, "sfx", "teacup_clink", 0.0, "the cup goes down on its saucer (unarmed runs only)"),
+        (472, "sfx", "stool_creak", -2.0, "shifts his weight: the stool creaks"),
+    ], "The **480-f (8 s, the D1 `dur_s`) pass**, phase-locked to the activity start, at `s2-anim-bellows`' contact "
+       "frames: the two tea micro-gags overlay it at 2.0 s (f120–168) and 7.0 s (f420–468), so the base clip is quiet "
+       "there. ACHOO-RIA! fires on the sip (`trigger.mark_s` 7.0 = f420): the slurp at f388 is the last thing heard "
+       "before the sneeze's 'ah…' at the reaction's f0. He sits on the stool facing −1 throughout (the `decor` event "
+       "hides the house stool). No voice in the base clip — the micro-gags carry his voice.")
 
     # ------------------------------------------------------------------ the warm-up
-    clip("bellows/act_warmup", 720, "G", _warmup_rows(),
-         "A **720-f loop** with two phrases 6 s apart (the ≤ 1 sung line per 6 s rule, outside reactions). The phrase "
-         "ids are fixed files (not the bank) so each note's `vase_nudge` frame is exact; the style switch maps them to "
-         "the tuba takes with the same timing. The micro-gags between the phrases carry no singing.")
+    clip("bellows/act_warmup", 1200, "G", _warmup_rows(),
+         "A **1200-f loop (20 s = the warm-up's `mg_cycle_s`), phase-locked to the activity start**, with two phrases "
+         "10 s apart (the ≤ 1 sung line per 6 s rule, outside reactions). The micro-gags overlay it at 2, 7, 12 and "
+         "17 s; the phrases (f0–98, f600–682) sit clear of every micro-gag's voice (the horn's 'mm-HM' f134, the trill "
+         "f420, the hum f1020). **No 720-f loop can do this** (its phrases drift against the 20-s gag cycle and one "
+         "always lands on the trill or the hum); a 600-f loop works with only the f0 phrase and its nudges. "
+         "Re-timing a 720-f clip with phrase 2 at f360: keep f0–345, shift the keys f346–720 by +240 (phrase 2's "
+         "breath at f586, the phrase at f600) and hold the rest poses to f1200. The phrase ids are fixed files (not "
+         "the bank) so each note's `vase_nudge` frame is exact; the style switch maps them to the tuba takes with the "
+         "same timing.")
 
     # ------------------------------------------------------------------ micro-gags (overlay clips, mask `upper`)
-    clip("bellows/mg_admire_reflection_horn", None, "G", [
-        (6, "sfx", "glint", 0.0, "the brass horn gleams back at him"),
+    # ids, lengths and gags: docs/review/s2-content/micro_gags.md (warm-up 2 / 7 / 12 / 17 s, tea 2 / 7 s)
+    clip("bellows/mg_admire_reflection_horn", 60, "G", [
+        (6, "sfx", "glint", 0.0, "his face blooms huge in the brass: the horn gleams back"),
         (14, "voice", "vo_bellows_smug", 0.0, "pleased with himself: 'mm-HM!'"),
-    ], "Warm-up, emote `smug`.")
-    clip("bellows/mg_trill", None, "G", [
-        (0, "voice", "vo_bellows_trill", 0.0, "a motorboat lip trill up and down (brrrrr) — a noise, not a sung line"),
-    ], "Warm-up, emote `sing`. ≈ 1.0 s; if `len_f` is shorter, the tail rides the blend-out.")
-    clip("bellows/mg_conduct_air", None, "G", [
-        (0, "sfx", "baton_swish", 0.0, "downbeat 1 of his finger"),
-        (15, "sfx", "baton_swish", -2.0, "downbeat 2"),
+        (42, "sfx", "kiss_smack", 0.0, "…and blows it a kiss (pose b_mg_kiss_throw): mwah!"),
+    ], "Warm-up at 2.0 s, emote `smug`.")
+    clip("bellows/mg_trill", 48, "G", [
+        (0, "voice", "vo_bellows_trill", 0.0, "a falsetto coloratura trill (C5↔D5), a run up to G5, a delighted 'hm!'"),
+        (30, "sfx", "teacups_rattle", 0.0, "the teacups on the mantel chatter at his top note"),
+    ], "Warm-up at 7.0 s, emote `sing`. A vocal flourish, not a sung line.")
+    clip("bellows/mg_conduct_air", 60, "G", [
+        (5, "sfx", "baton_swish", 0.0, "downbeat 1 of his pinkie baton (b_mg_conduct_down)"),
+        (20, "sfx", "baton_swish", -2.0, "downbeat 2"),
         (30, "sfx", "baton_swish", 0.0, "downbeat 3 (the flourish)"),
-    ], "Warm-up. One swish per downbeat of the conducting finger.")
-    clip("bellows/mg_admire_in_kettle", None, "G", [
-        (6, "sfx", "glint", 0.0, "the kettle's chrome gleams"),
-        (14, "voice", "vo_bellows_smug", 0.0, "'mm-HM!' (the bank never repeats the horn's take)"),
-    ], "Tea, emote `smug`.")
-    clip("bellows/mg_hum", None, "G", [
-        (0, "voice", "vo_bellows_hum", 0.0, "hm-hm-hmm… (bank of 4; the only sung line of the tea loop)"),
-    ], "Tea, emote `hum`.")
-    clip("bellows/mg_pinkie_up", None, "G", [
-        (10, "sfx", "teacup_clink", 0.0, "the cup leaves the saucer as the pinkie flicks up"),
-    ], "Tea, emote `smug`.")
+        (42, "sfx", "bow_creak", -4.0, "…then bows to his invisible orchestra (b_mg_bow_head): his stays creak"),
+    ], "Warm-up at 12.0 s, emote `smug`. No voice (the f600 phrase ended at f682).")
+    clip("bellows/mg_hum", 48, "G", [
+        (0, "voice", "vo_bellows_hum", 0.0, "hums along to his record, eyes shut: hm-hm-hmm… (bank of 4)"),
+    ], "Warm-up at 17.0 s (moved from the tea by `s2-content`), emote `hum`. The longest take is 74 f: the tail rides "
+       "the blend-out.")
+    clip("bellows/mg_admire_in_kettle", 48, "G", [
+        (6, "sfx", "glint", 0.0, "the kettle's chrome gleams: he catches his reflection"),
+        (14, "voice", "vo_bellows_smug", 0.0, "pats his bouffant: 'mm-HM!' (the bank never repeats the horn's take)"),
+    ], "Tea at 2.0 s, emote `smug`.")
+    clip("bellows/mg_pinkie_up", 48, "G", [
+        (10, "sfx", "teacup_clink", 0.0, "the cup chinks as the pinkie cocks up (b_mg_pinkie)"),
+        (14, "sfx", "pinkie_wobble", 0.0, "the pinkie cocked so high it quivers (f10–34): a tiny high twang"),
+        (30, "voice", "vo_bellows_bliss", 0.0, "eyes shut: a contented, falling 'Ahhh.' (rides the blend-out)"),
+    ], "Tea at 7.0 s (the sip), emote `yum` — unarmed runs only: when ACHOO-RIA! is armed the sneeze starts here "
+       "instead and its 'ah…' answers the sip.")
 
     # ------------------------------------------------------------------ last beats (after the settle)
     clip("bellows/beat_slow_burn", 70, "G", [
@@ -169,18 +186,18 @@ def _build_spec() -> list[dict]:
     ])
 
     # ------------------------------------------------------------------ Bellows' Phase-G locomotion + bonks
-    clip("bellows/loco_idle", None, "G", [
-        (0, "sfx", "cravat_tug", -4.0, "on the cravat-tug fidget's tug frame (not every loop: only the fidget)"),
+    clip("bellows/loco_idle", 240, "G", [
+        (170, "sfx", "cravat_tug", -4.0, "the cravat-tug fidget's tug frame"),
     ], "Breathing is silent; only the fidget's tug makes a sound.")
-    clip("bellows/loco_strut", None, "G", [
+    clip("bellows/loco_strut", 32, "G", [
         (0, "sfx", "bellows_step", -2.0, "foot plant 1 (the slipper 'fwip' + weight)"),
         (16, "sfx", "bellows_step", -2.0, "foot plant 2"),
     ], "A 32-f cycle at the L3 cadence (≈ 15–16 f per step): one event per foot plant, on the plant frame. Hush "
        "hears where he is from these (the director attenuates by rooms; entry warnings boost them +6 dB), so the "
        "entry warning no longer plays its own slipper steps.")
-    clip("bellows/loco_blind_shuffle", None, "G", [
+    clip("bellows/loco_blind_shuffle", 24, "G", [
         (0, "sfx", "slipper_scuff", 0.0, "foot 1 slides forward, feeling for the floor"),
-        (24, "sfx", "slipper_scuff", -2.0, "foot 2"),
+        (12, "sfx", "slipper_scuff", -2.0, "foot 2"),
     ], "FRAZZLED, arms out. One scuff per foot slide.")
     clip("bellows/cue_doorframe_bonk", 36, "G", [
         (4, "sfx", "woodblock_bonk", 0.0, "the head meets the door frame (contact frame)"),
@@ -192,11 +209,11 @@ def _build_spec() -> list[dict]:
     ], "The door-slam stun (and the curtain-call bonk): the door itself is the event-level `door_slam`.")
 
     # ------------------------------------------------------------------ Hush: the Gate-0 kitchen set
-    clip("hush/loco_walk", None, "G", [
+    clip("hush/loco_walk", 80, "G", [
         (0, "sfx", "step_pizz_up", 0.0, "footfall 1: the next pizzicato note of the E-minor scale"),
-        (10, "sfx", "step_pizz_up", 0.0, "footfall 2 (10 f per step)"),
-    ], "`step_pizz_up` is a *cycle*: each event plays the next note, up E4 → E5 and back down; after 0.8 s without a "
-       "step the next walk starts at the bottom again.")
+    ] + [(10 * k, "sfx", "step_pizz_up", 0.0, f"footfall {k + 1} (10 f per step)") for k in range(1, 8)],
+        "An 80-f cycle, 8 footfalls. `step_pizz_up` is a *cycle*: each event plays the next note, up E4 → E5 and back "
+        "down; after 0.8 s without a step the next walk starts at the bottom again.")
     clip("hush/loco_run", None, "G", [
         (0, "sfx", "step_pizz_up", 2.0, "footfall 1 (the scale runs faster as she runs)"),
         (12, "sfx", "step_pizz_up", 2.0, "footfall 2 (12 f per step)"),
@@ -237,6 +254,9 @@ def _build_spec() -> list[dict]:
         clip(f"hush/freeze_{k}", None, "G", [
             (5, "sfx", "freeze_clack", 0.0, "the woodblock CLACK as the statue pose lands (end of the 6-f pop)"),
         ])
+    clip("hush/idle_fidget_clarence", 80, "G", [
+        (12, "sfx", "clarence_smitten", -6.0, "the fidget: she gives Clarence a fond squeeze — his smitten little sigh"),
+    ], "Idle flavour fidget (placed by `s2-anim-hush`; published here so the sound has one owner).")
     clip("hush/act_squeak", 18, "G", [],
          "**No sound in this clip.** Clarence's squeak stays event-level (`squeak` → `clarence_squeak`): a tap must "
          "answer at once, including when the arm is an overlay or a fallback.")
@@ -259,9 +279,8 @@ EVENT_CLIPS: list[tuple[str, str, list[str]]] = [
     ("reaction_end", "", ["bellows/beat_slow_burn", "bellows/beat_dignity_fail", "bellows/beat_bow_topple",
                           "bellows/beat_tear"]),
     ("b_activity", "id=warmup", ["bellows/act_warmup", "bellows/mg_admire_reflection_horn", "bellows/mg_trill",
-                                 "bellows/mg_conduct_air"]),
-    ("b_activity", "id=tea", ["bellows/act_tea", "bellows/mg_admire_in_kettle", "bellows/mg_hum",
-                              "bellows/mg_pinkie_up"]),
+                                 "bellows/mg_conduct_air", "bellows/mg_hum"]),
+    ("b_activity", "id=tea", ["bellows/act_tea", "bellows/mg_admire_in_kettle", "bellows/mg_pinkie_up"]),
     ("micro_gag", "", ["bellows/mg_admire_reflection_horn", "bellows/mg_trill", "bellows/mg_conduct_air",
                        "bellows/mg_admire_in_kettle", "bellows/mg_hum", "bellows/mg_pinkie_up"]),
     ("b_room", "", ["bellows/loco_strut", "bellows/loco_blind_shuffle"]),
@@ -361,6 +380,52 @@ def validate() -> list[str]:
             end = a[0] + lens.get(a[2], 0)
             if end > b[0] + VOICE_OVERLAP_F:
                 errs.append(f"{c['clip']}: {a[2]} (f{a[0]}, {lens.get(a[2])} f) still sounds at f{b[0]} ({b[2]})")
+    errs += _overlay_voice_clashes(lens)
+    return errs
+
+
+def _overlay_voice_clashes(lens: dict) -> list[str]:
+    """An activity clip's voice rows vs its micro-gag overlays' voice rows (activities.json `micro_gags`
+    at_s, repeating every `mg_cycle_s` or the base loop): his voice never sounds twice at once."""
+    path = ROOT / "game" / "data" / "activities.json"
+    if not path.exists():
+        return []
+    try:
+        acts = json.loads(path.read_text()).get("activities", {})
+    except ValueError:
+        return []
+    by_clip = {c["clip"]: c for c in spec()}
+    errs = []
+    for aid, act in acts.items() if isinstance(acts, dict) else []:
+        base = by_clip.get(str(act.get("clip", "")))
+        if base is None or not act.get("micro_gags"):
+            continue
+        span = int(round(float(act.get("mg_cycle_s") or act.get("dur_s") or 0) * FPS))
+        loop = base["len_f"] or span
+        if not span or not loop:
+            continue
+        horizon = max(span, loop) * 2
+        wins = []
+        for r in base["rows"]:
+            if r[1] == "voice":
+                for k in range(0, horizon // loop + 1):
+                    wins.append((r[0] + k * loop, r[0] + k * loop + lens.get(r[2], 0), f"{base['clip']} {r[2]}"))
+        for mg in act["micro_gags"]:
+            ov = by_clip.get(f"bellows/mg_{mg.get('id')}")
+            if ov is None:
+                continue
+            at = int(round(float(mg.get("at_s", 0)) * FPS))
+            for r in ov["rows"]:
+                if r[1] != "voice":
+                    continue
+                for k in range(0, horizon // span + 1):
+                    s0 = at + r[0] + k * span
+                    wins.append((s0, s0 + lens.get(r[2], 0), f"{ov['clip']} {r[2]}"))
+        wins.sort()
+        for a, b in zip(wins, wins[1:]):
+            if a[1] > b[0] + VOICE_OVERLAP_F and a[2] != b[2]:
+                errs.append(f"{aid}: {a[2]} (f{a[0]}–{a[1]}) still sounds when {b[2]} starts (f{b[0]})")
+                break
     return errs
 
 
@@ -443,7 +508,69 @@ def check() -> list[str]:
     return errs
 
 
+def placement() -> tuple[str, int]:
+    """Where the anim tasks stand: every table clip vs its clip file under game/data/anim (placed rows, rows still
+    to place, sounds the table doesn't list, length, voice clashes with the micro-gags at the clip's real length).
+    Written to docs/review/s2-sound/placement.md by `--status`; not part of --check (it follows other tasks' files).
+    Returns (markdown, number of problems)."""
+    anim = ROOT / "game" / "data" / "anim"
+    lens = _lens()
+    out = ["# Clip-event placement status", "",
+           "_Generated by `tools/audio/clip_events.py --status` from the clips on disk (not checked by CI: it follows "
+           "the anim tasks' work in progress). A row is placed when the clip has the same id on the same frame ± 1 f "
+           "(any frame when the table leaves the length to the anim task)._", "",
+           "| clip | length (clip / table) | placed | to place | not in the table | voice clash |",
+           "|---|---|---|---|---|---|"]
+    problems = 0
+    for c in spec():
+        path = anim / (c["clip"] + ".json")
+        if not path.exists():
+            out.append(f"| {c['clip']} | — / {c['len_f'] or 'any'} | clip not authored yet | {len(c['rows'])} | | |")
+            continue
+        try:
+            d = json.loads(path.read_text())
+        except ValueError:
+            out.append(f"| {c['clip']} | ? | clip JSON does not parse | | | |")
+            problems += 1
+            continue
+        have = [(int(e.get("f", -1)), str(e.get("id", e.get("bank", "")))) for e in d.get("events", [])
+                if e.get("type") in ("sfx", "voice")]
+        exact = c["len_f"] is not None and int(c["len_f"]) == int(d.get("length", -1))
+        left = list(have)
+        missing = []
+        for r in c["rows"]:
+            hit = next((h for h in left if h[1] == r[2] and (not exact or abs(h[0] - r[0]) <= 1)), None)
+            if hit is None:
+                missing.append(f"f{r[0]} {r[2]}")
+            else:
+                left.remove(hit)
+        extra = [f"f{f} {i}" for f, i in left]
+        clash = ""
+        if c["clip"] in ("bellows/act_warmup", "bellows/act_tea"):
+            real = dict(c, len_f=int(d.get("length", 0)) or c["len_f"],
+                        rows=[(f, "voice" if i.startswith("vo_") else "sfx", i, 0.0, "") for f, i in have])
+            saved = list(_SPEC or [])
+            try:
+                _SPEC[:] = [real if x["clip"] == c["clip"] else x for x in saved]
+                cl = _overlay_voice_clashes(lens)
+            finally:
+                _SPEC[:] = saved
+            clash = "; ".join(cl)
+        n_bad = len(missing) + len(extra) + (1 if clash else 0)
+        problems += n_bad
+        ln = f"{d.get('length')} / {c['len_f'] or 'any'}"
+        out.append(f"| {c['clip']} | {ln} | {len(c['rows']) - len(missing)} of {len(c['rows'])} | "
+                   f"{', '.join(missing) or '—'} | {', '.join(extra) or '—'} | {clash or '—'} |")
+    out.append("")
+    return "\n".join(out), problems
+
+
 def main() -> int:
+    if "--status" in sys.argv:
+        md, n = placement()
+        (DOC_DIR / "placement.md").write_text(md)
+        print(f"wrote {(DOC_DIR / 'placement.md').relative_to(ROOT)} ({n} open item(s))")
+        return 0
     errs = check() if "--check" in sys.argv else write()
     for e in errs:
         print("ERROR:", e)

@@ -253,3 +253,46 @@ func test_draw_uses_few_runs() -> void:
 			rect_runs += 1
 		prev_kind = 1 if k != RigPlayer.K_RUN else 0
 	assert_le(tri_runs + rect_runs, 8, "≤ 8 batches (%d triangle runs + %d rect runs) — budget 12" % [tri_runs, rect_runs])
+
+
+## A `smear` event on a clip without smear.auto: the ghosts follow the part's real history
+## and the smear ends (regression: ghosts stuck at the character's origin).
+func test_smear_event_without_auto_ends_and_ghosts_follow() -> void:
+	var c := ClipLib.from_dict({"version": 1, "rig": RIG, "length": 30, "keys": [{"f": 0, "pose": "m_stand"},
+		{"f": 30, "pose": "m_notice", "ease": "in_out_sine"}], "events": [{"f": 5, "type": "smear", "part": "head", "frames": 6}]},
+		"_mannequin/_smear_ev")
+	ClipLib.register(c)
+	p.play("_mannequin/_smear_ev", {"blend_in": 0})
+	_step(7)
+	var h := p.rig.idx("head")
+	assert_gt(p._smear_t[h], 0.0, "smearing after the event")
+	assert_true(p._g1[h].origin.distance_to(p._xf[h].origin) < 40.0, "ghost 1 sits on the head's recent path")
+	_step(6)
+	assert_eq(p._smear_t[h], 0.0, "the smear ends")
+	ClipLib.invalidate("_mannequin/_smear_ev")
+
+
+## The render sync skips the z sort while nothing discrete changed: over a whole take with a
+## launched prop, blinks and a face override, the skipped frames' draw order always equals a
+## fresh sort (no stale layering).
+func test_sort_skip_never_leaves_a_stale_order() -> void:
+	p.configure_for_tools()
+	p.face.blinks_enabled = true
+	p.play("_mannequin/rx_launch", {"blend_in": 0})
+	var skipped := 0
+	for f in 150:
+		p.advance(DT)
+		if f == 40:
+			p.set_face("shock" if p.poses.has_preset("shock") else p.poses.preset_names[0])
+		if f == 90:
+			p.set_residue("SOAKED", true)
+		var was := p._keys.duplicate()
+		if RigPlayer.skip_unchanged_sort and p._discrete_same() and not p._layout_dirty:
+			skipped += 1
+			p._sort_items()
+			assert_eq(p._keys, was, "frame %d: the skipped sort would have given the same order" % f)
+		else:
+			p._sort_items()
+		if p._layout_dirty:
+			p._rebuild_layout()
+	assert_gt(skipped, 60, "most frames skip the sort (%d / 150)" % skipped)

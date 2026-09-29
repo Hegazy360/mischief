@@ -97,7 +97,9 @@ const SAFETY_NET := "safety_net"            ## {on}
 const FIGGIS_HOOK := "figgis_hook"
 const NIGHT_END := "night_end"              ## {reason}
 const CMD_REJECTED := "cmd_rejected"        ## {c, why}
-const CMD_QUEUED := "cmd_queued"            ## {c, why, target} (a go/move held while busy; why: entering | busy)
+## {c, why, target}: a command held behind a busy action — a go/move while busy, a FREEZE on the stairs / in a door /
+## mid-rummage, a POP OUT mid-dive; why: "entering" (the climb-in) | "busy"; target: a hotspot id or "<room>:<x px>".
+const CMD_QUEUED := "cmd_queued"
 # --- Stage 3 ---
 const BERYL_MOOD := "beryl_mood"            ## {mood}
 const BLEAT := "bleat"

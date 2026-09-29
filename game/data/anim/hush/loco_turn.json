@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "clip": "hush/loco_turn",
+  "rig": "hush",
+  "loop": false,
+  "length": 6,
+  "layer": "base",
+  "mask": null,
+  "doc": "Squash, hop (gloves tucked), land: 6 f.",
+  "blend_in": 2,
+  "blend_out": 3,
+  "tags": [
+    "loco",
+    "turn"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "neutral"
+    },
+    {
+      "f": 2,
+      "pose": "h_stand",
+      "ease": "out_quad",
+      "face": "grin",
+      "set": {
+        "root": {
+          "sx": 1.07,
+          "sy": 0.93
+        },
+        "leg_upper_r": {
+          "rot": -12.19
+        },
+        "leg_lower_r": {
+          "rot": 16.94
+        },
+        "foot_r": {
+          "rot": -4.13
+        },
+        "leg_upper_l": {
+          "rot": -1.89
+        },
+        "leg_lower_l": {
+          "rot": 17.17
+        },
+        "foot_l": {
+          "rot": -13.36
+        }
+      }
+    },
+    {
+      "f": 4,
+      "pose": "h_turn_mid",
+      "ease": "out_quad",
+      "face": "grin",
+      "set": {
+        "root": {
+          "y": -16.2,
+          "sx": 0.9,
+          "sy": 1.08
+        }
+      }
+    },
+    {
+      "f": 6,
+      "pose": "h_stand",
+      "ease": "in_quad",
+      "face": "neutral"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 3,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 6,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

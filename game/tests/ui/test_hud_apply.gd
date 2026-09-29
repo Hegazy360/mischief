@@ -159,7 +159,8 @@ func test_pause_dims_and_disables() -> void:
 	var m := _model()
 	m.paused = true
 	hud.apply(m)
-	assert_lt(hud.root.modulate.a, 1.0, "dimmed")
+	assert_lt(hud.action.modulate.a, 1.0, "widgets dimmed")
+	assert_eq(hud.dim.modulate.a, 1.0, "the stage dim keeps its strength")
 	var got := []
 	hud.action_down.connect(func(v: int) -> void: got.append(v))
 	hud.action.touch(true, Vector2(120, 120), 0)

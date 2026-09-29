@@ -10,6 +10,7 @@ import os
 
 import geo
 import pal
+import title
 from draw import ball, box, shape
 from props_base import ART, RES, WRITTEN
 from svgk import INK, PB, Canvas, Grad, circle, ellipse, lift, mix, mul, path, rect, write
@@ -398,6 +399,7 @@ def build(reg):
     st["vignette_top"] = {"art": vignette_top(), "size": [1920, 360], "screen": True}
     st["velvet_rope"] = {"art": velvet_rope(), "size": [200, 176], "anchor": [100, 176]}
     st["bow_spot"] = {"art": bow_spot(), "size": [1100, 300], "screen": True, "blend": "add", "anchor": "bottom_centre", "alpha": 0.85}
+    st["title_card"] = title.build()
     pieces = []
     art, box_ = sky_left()
     pieces.append({"id": "sky_left", "art": art, "world_pos": [box_[0], box_[1]], "size": [box_[2], box_[3]], "z": -2})

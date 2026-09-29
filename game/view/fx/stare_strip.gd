@@ -36,10 +36,20 @@ func _init() -> void:
 	z_index = -4
 
 
-## GDD §4.3 sight table → Vector3(moving_px, frozen_px, mode). WALL = to the wall.
+## Bellows' sight → Vector3(moving_px, frozen_px, mode). WALL = to the wall. From the sim's
+## `sight_ranges()` when the snapshot carries it (one source of truth, s2-sim §4.4); this GDD
+## §4.3 table is the fallback.
 static func ranges(b: ViewSnapshot.Actor, glyph: String, awareness: String) -> Vector3:
 	if not b.present:
 		return Vector3(0, 0, Mode.NONE)
+	if b.sight_known:
+		if b.sight_moving <= 0.0 and b.sight_frozen <= 0.0 and not b.sight_wall:
+			return Vector3(0, 0, Mode.GREY)
+		var mv := WALL if b.sight_wall else b.sight_moving
+		var mode := Mode.SPECS if (b.sight_wall or b.specs_on) else Mode.AMBER
+		if b.blinded:
+			mode = Mode.GREY
+		return Vector3(mv, b.sight_frozen, mode)
 	if b.reacting or b.state == "REACTING" or b.state == "MELTDOWN" or glyph == "stars" \
 			or glyph == "asleep" or awareness == "asleep" or awareness == "blind":
 		return Vector3(0, 0, Mode.GREY)

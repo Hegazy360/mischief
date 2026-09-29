@@ -52,7 +52,7 @@ func test_t4_stands_and_one_head_tumbles() -> void:
 	assert_between(_max_rise(), 0.0, 120.0 + 40.0, "up to ~120 px")
 	var tumbler := _s.tumbling()
 	assert_ge(tumbler, 0)
-	assert_lt(_s.head_rise(tumbler), 0.0, "the tumbler falls out of view")
+	assert_ge(_s.tumble_frame(), 0, "the tumbler plays its tumble frames in its seat")
 
 
 func test_low_tiers_are_small() -> void:
@@ -69,10 +69,48 @@ func test_specials_switch_modes() -> void:
 		_s.special(k)
 		assert_eq(_s.mode(), k)
 	_s.special("relief")
-	assert_eq(_s.mode(), "laugh")
-	assert_eq(_s.tier(), 1)
+	assert_eq(_s.mode(), "relief", "relief is its own special (exhale, then a titter)")
 
 
 func test_no_input_handling() -> void:
 	for m in ["_input", "_unhandled_input", "_gui_input"]:
 		assert_false(_s.get_script().has_method(m), "StallsView must not handle input (%s)" % m)
+
+
+func test_tumble_advances_at_8_frames_per_frame_then_holds() -> void:
+	_s.react(4)
+	_run(1.0 / 60.0)
+	assert_eq(_s.tumble_frame(), 0)
+	_run(8.0 / 60.0)
+	assert_eq(_s.tumble_frame(), 1, "8 f per tumble frame")
+	_run(2.0)
+	assert_eq(_s.tumble_frame(), 3, "holds the last frame")
+
+
+func test_behind_you_points_and_shush_leans() -> void:
+	_s.special("behind_you")
+	_run(0.3)
+	var pointing := 0
+	for i in StallsView.HEADS:
+		if _s.frame_of(i) == "point":
+			pointing += 1
+	assert_between(pointing, 4, 12, "about a third of the Stalls point")
+	_s.special("shush")
+	assert_eq(_s.frame_of(0), "lean")
+
+
+func test_seats_follow_the_layout_and_alpha_from_data() -> void:
+	var d: Variant = TestBase.load_json(StallsView.STALLS_JSON)
+	if not (d is Dictionary) or not (d as Dictionary).has("layout"):
+		skip("stalls.json has no layout")
+		return
+	var lay: Array = (d as Dictionary)["layout"]
+	assert_eq(_s.seat_ids()[0], String(lay[0]))
+	assert_eq(_s.seat_ids()[5], String(lay[5]))
+	assert_almost_eq(_s.alpha_rest, float((d as Dictionary).get("alpha_rest", 0.6)), 0.001)
+
+
+func test_tier_rows_merge_the_optional_tiers_json() -> void:
+	var t4 := _s.tier_row(4)
+	assert_true(bool(t4.get("stand", false)), "T4 stands")
+	assert_gt(float(t4.get("rise_px", 0.0)), float(_s.tier_row(3).get("rise_px", 0.0)) - 30.0)

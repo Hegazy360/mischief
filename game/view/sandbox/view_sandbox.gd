@@ -7,12 +7,19 @@
 ##                      near_miss, busted_cam, stalls_t4, overview, peek (default: full run)
 ##   --realtime         drive from the real frame delta (default: a fixed 1/60 s step with a
 ##                      virtual juice clock, so frame N after the start is reproducible)
-##   --rig              draw characters with the rig system (RigPlayer + rig data) when they
-##                      load; the default is the stand-in puppets (`--puppets`) until the
-##                      Stage-2 character clips exist (a rig without clips falls back too)
-##   --rig=<id>         draw both characters with rig <id> (e.g. _mannequin: the rig path with
-##                      the stand-in clips)
-##   --sim              use res://sim/world/sim_world.gd + the ContentDB when present
+##   --rig              (default) draw the real rigs (RigPlayer + rig data); clips the map wants
+##                      but nobody authored fall through (counted, WorldView.fallback_counts())
+##   --puppets          the Stage-1 stand-in puppets instead
+##   --rig=<id>         draw both characters with rig <id> (e.g. _mannequin)
+##   --fixtures         also install s2-view's static-pose fixture clips + maps
+##                      (tests/view/fixtures/anim) for rigs whose real map.json is missing, so
+##                      the real rigs animate before the animation tasks deliver
+##   --skin=pip         Settings hush_skin for this run (the Pip fallback)
+##   --sim              the real SimWorld + ContentDB instead of FakeWorld
+##   --episode=<id>     (with --sim) the episode (default n01_throat_tea)
+##   --cmds=/abs.json   (with --sim) replay a `solve.sh --dump-cmds` command dump
+##   --seek=<tick>      (with --sim) step the sim to that tick (muted) before the first frame
+##   --fallbacks        print WorldView.fallback_counts() every 60 frames and at exit
 ## It wires exactly what a NightScene will: SimDriver → WorldView (+ FxLayer) → GagStager →
 ## CameraDirector → PipView (+ the ui's PipFrame when present) → AudioDirector → StallsView.
 class_name ViewSandbox
@@ -25,7 +32,12 @@ const DT := 1.0 / 60.0
 
 var scenario: String = "full"
 var fixed_step: bool = true
-var puppets: bool = true
+var puppets: bool = false
+var fixtures: bool = false
+var episode: String = "n01_throat_tea"
+var cmds_path: String = ""
+var seek_tick: int = -1
+var print_fallbacks: bool = false
 ## `--rig=<id>`: draw both characters with that rig (e.g. _mannequin).
 var rig_override: String = ""
 var world: RefCounted = null
@@ -55,12 +67,54 @@ func _ready() -> void:
 		elif a.begins_with("--rig="):
 			puppets = false
 			rig_override = a.substr(6)
+		elif a == "--fixtures":
+			fixtures = true
+		elif a.begins_with("--skin="):
+			var st := ViewKit.autoload("Settings")
+			if st != null and st.has_method("set_value"):
+				st.call("set_value", "hush_skin", a.substr(7))
+			elif st != null:
+				st.set("hush_skin", a.substr(7))
+		elif a.begins_with("--episode="):
+			episode = a.substr(10)
+		elif a.begins_with("--cmds="):
+			cmds_path = a.substr(7)
+		elif a.begins_with("--seek="):
+			seek_tick = int(a.substr(7))
+		elif a == "--fallbacks":
+			print_fallbacks = true
 	RenderingServer.set_default_clear_color(Color("#1E1830"))
+	if fixtures:
+		install_fixtures()
 	world = _make_world(OS.get_cmdline_user_args().has("--sim"))
 	build(world)
-	_seek(int(FakeWorld.SCENARIOS.get(scenario, 0)) if world is FakeWorld else 0)
-	print("[ViewSandbox] scenario=%s start=%d rig=%s house=%s" % [scenario, driver.snapshot().tick,
-		"on" if world_view.hush_view.uses_rig else "puppet", world_view.layout.source])
+	if cmds_path != "":
+		var j := JSON.new()
+		if FileAccess.file_exists(cmds_path) and j.parse(FileAccess.get_file_as_string(cmds_path)) == OK:
+			driver.set_script_cmds(j.data)
+		else:
+			push_warning("ViewSandbox: cannot read --cmds=%s" % cmds_path)
+	if world is FakeWorld:
+		_seek(int(FakeWorld.SCENARIOS.get(scenario, 0)))
+	else:
+		_seek(maxi(0, seek_tick))
+	print("[ViewSandbox] scenario=%s start=%d rig=%s house=%s fixtures=%s" % [scenario, driver.snapshot().tick,
+		"on" if world_view.hush_view.uses_rig else "puppet", world_view.layout.source, fixtures])
+
+
+## Install the s2-view fixture clips; a rig's real `data/anim/<rig>/map.json` keeps winning.
+static func install_fixtures() -> void:
+	var fx := ViewKit.soft_script("res://tests/view/view_fixtures.gd")
+	if fx == null:
+		push_warning("ViewSandbox: --fixtures needs res://tests/view/view_fixtures.gd")
+		return
+	fx.call("install", true)
+	for rig in ["hush", "bellows"]:
+		if ClipMap.has_data_map(rig):
+			ClipMap.map_override.erase(rig)
+		elif ClipMap.map_override.has(rig):
+			var base: Variant = ViewKit.json("%s/%s.json" % [ClipMap.DEFAULT_DIR, rig])
+			ClipMap.map_override[rig] = ClipMap.merge(base if base is Dictionary else {}, ClipMap.map_override[rig])
 
 
 func _make_world(want_sim: bool) -> RefCounted:
@@ -69,11 +123,15 @@ func _make_world(want_sim: bool) -> RefCounted:
 		var cdb := ViewKit.soft_script(CONTENT_DB)
 		if sw != null and cdb != null and sw.has_method("create"):
 			var db: Variant = cdb.call("load_dir", "res://data")
-			var w: Variant = sw.call("create", db, "n01_throat_tea", {})
+			var w: Variant = sw.call("create", db, episode, {})
 			if w is RefCounted:
 				return w
 		push_warning("ViewSandbox: --sim requested but the sim is not available; using FakeWorld")
-	return FakeWorld.create()
+	var fw := FakeWorld.create()
+	if FakeWorld.DEMOS.has(scenario):
+		fw.demo = String(FakeWorld.DEMOS[scenario])
+		fw.reset()
+	return fw
 
 
 ## Build the full view stack for `w` (public so tests can reuse the wiring).
@@ -176,14 +234,19 @@ func _on_ticked(events: Array) -> void:
 			var room := ViewKit.s(d.get("room", "kitchen"))
 			var fy := world_view.layout.room_floor_y(room)
 			var to := Vector2(float(d.get("x", 0)), fy)
-			world_view.fx.ripple(to + Vector2(0, -40))
-			var from := world_view.hush_view.global_position
-			world_view.fx.path_dots(PackedVector2Array([from + Vector2(0, -6), to + Vector2(0, -6)]))
+			world_view.tap_feedback(to + Vector2(0, -40))
+		elif ViewKit.s(d.get("e", "")) == "hush_go" and not (world is FakeWorld):
+			# A replayed command dump: show the tap where the player's thumb went.
+			var tp := world_view.target_point(ViewKit.s(d.get("target", "")))
+			if tp != Vector2.INF:
+				world_view.fx.ripple(tp + Vector2(0, -40))
 
 
 func _process(delta: float) -> void:
 	var dt := DT if fixed_step else delta
 	_frame += 1
+	if print_fallbacks and _frame % 60 == 0:
+		print("[ViewSandbox] frame %d tick %d fallbacks %s" % [_frame, driver.snapshot().tick, JSON.stringify(world_view.fallback_counts())])
 	_scenario_actions()
 	if fixed_step:
 		_vt += dt

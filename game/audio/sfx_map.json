@@ -638,6 +638,12 @@
    "len": 1.049,
    "cat": "soft"
   },
+  "kiss_smack": {
+   "path": "sfx/kiss_smack.wav",
+   "bus": "SFX",
+   "len": 0.215,
+   "cat": "soft"
+  },
   "knocker_bonk": {
    "path": "sfx/knocker_bonk.wav",
    "bus": "SFX",
@@ -647,7 +653,7 @@
   "ladle_spin": {
    "path": "sfx/ladle_spin.wav",
    "bus": "SFX",
-   "len": 2.1,
+   "len": 1.6,
    "cat": "sfx"
   },
   "lid_boink": {
@@ -782,6 +788,12 @@
    "len": 0.198,
    "cat": "sfx"
   },
+  "pinkie_wobble": {
+   "path": "sfx/pinkie_wobble.wav",
+   "bus": "SFX",
+   "len": 0.187,
+   "cat": "soft"
+  },
   "pop_out": {
    "path": "sfx/pop_out.wav",
    "bus": "SFX",
@@ -839,13 +851,7 @@
   "sink_crash": {
    "path": "sfx/sink_crash.wav",
    "bus": "SFX",
-   "len": 0.552,
-   "cat": "sfx"
-  },
-  "sink_splash": {
-   "path": "sfx/sink_splash.wav",
-   "bus": "SFX",
-   "len": 0.756,
+   "len": 0.35,
    "cat": "sfx"
   },
   "slide_down": {
@@ -1160,6 +1166,12 @@
    "len": 0.159,
    "cat": "soft"
   },
+  "teacups_rattle": {
+   "path": "sfx/teacups_rattle.wav",
+   "bus": "SFX",
+   "len": 0.5,
+   "cat": "soft"
+  },
   "tear_plink": {
    "path": "sfx/tear_plink.wav",
    "bus": "SFX",
@@ -1308,6 +1320,12 @@
    "path": "voice/vo_bellows_beryl_2.wav",
    "bus": "Voice",
    "len": 0.907,
+   "cat": "voice"
+  },
+  "vo_bellows_bliss": {
+   "path": "voice/vo_bellows_bliss.wav",
+   "bus": "Voice",
+   "len": 0.53,
    "cat": "voice"
   },
   "vo_bellows_crack_1": {
@@ -1679,7 +1697,7 @@
   "vo_bellows_trill": {
    "path": "voice/vo_bellows_trill.wav",
    "bus": "Voice",
-   "len": 0.964,
+   "len": 0.98,
    "cat": "voice"
   },
   "vo_bellows_tuba_ahem_1": {
@@ -1746,6 +1764,12 @@
    "path": "voice/vo_bellows_tuba_beryl_2.wav",
    "bus": "Voice",
    "len": 0.922,
+   "cat": "voice"
+  },
+  "vo_bellows_tuba_bliss": {
+   "path": "voice/vo_bellows_tuba_bliss.wav",
+   "bus": "Voice",
+   "len": 0.491,
    "cat": "voice"
   },
   "vo_bellows_tuba_crack_1": {
@@ -2057,7 +2081,7 @@
   "vo_bellows_tuba_trill": {
    "path": "voice/vo_bellows_tuba_trill.wav",
    "bus": "Voice",
-   "len": 0.964,
+   "len": 0.979,
    "cat": "voice"
   },
   "vo_bellows_tuba_tut_1": {
@@ -2898,7 +2922,7 @@
   "specs": "specs_tink",
   "specs_on": "specs_tink",
   "spin": "coatstand_spin",
-  "splash": "sink_splash",
+  "splash": "sink_crash",
   "splat": "tomato_splat",
   "spray": "spray_blast",
   "squeak": "clarence_squeak",
@@ -2926,6 +2950,7 @@
   "vo_b_ahem": "vo_bellows_ahem",
   "vo_b_aria": "vo_bellows_aria",
   "vo_b_beryl": "vo_bellows_beryl",
+  "vo_b_bliss": "vo_bellows_bliss",
   "vo_b_did_not_squeak": "vo_bellows_did_not_squeak",
   "vo_b_dizzy_babble": "vo_bellows_dizzy_babble",
   "vo_b_grr": "vo_bellows_grr",

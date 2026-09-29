@@ -33,6 +33,10 @@ var wb_emote: PackedStringArray = PackedStringArray()
 var wb_errors: PackedStringArray = PackedStringArray()
 ## `reactions.json clip_timings`: clip id → frames (last beats and other fixed-length clips the sim times).
 var clip_frames: Dictionary = {}
+## Derived per hotspot idx: prank idxs with a rig step there (prank_list order), and the icon the action button shows.
+var pranks_at_hs: Array[PackedInt32Array] = []
+var hs_icon: PackedStringArray = PackedStringArray()
+var hs_is_rig: PackedByteArray = PackedByteArray()
 var pranks: Dictionary = {}
 var prank_list: Array[PrankDef] = []
 var double_acts: Dictionary = {}
@@ -270,6 +274,21 @@ func _derive() -> void:
 		p.trig_at_idx = int(house.hotspot_index.get(p.trig_at, -1))
 		for st in p.steps:
 			st.at_idx = int(house.hotspot_index.get(st.at, -1))
+			var nit: ItemDef = items.get(st.needs, null) if st.needs != "" else null
+			st.needs_src = nit.source if nit != null else ""
+	# per hotspot: the pranks with a rig step there, in prank_list order (Pranks.rig_target scans only these)
+	pranks_at_hs.resize(house.hotspots.size())
+	for i in house.hotspots.size():
+		pranks_at_hs[i] = PackedInt32Array()
+		var h := house.hotspots[i]
+		hs_icon.append(str(h.art.get("icon", h.art.get("idle", ""))))
+		hs_is_rig.append(1 if h.kind == HotspotDef.RIG_POINT else 0)
+	for p in prank_list:
+		var seen := {}
+		for st in p.steps:
+			if st.at_idx >= 0 and not seen.has(st.at_idx):
+				seen[st.at_idx] = true
+				pranks_at_hs[st.at_idx].append(p.idx)
 	# USE hooks per activity, sorted by mark then prank id (prank_list is id-sorted).
 	var per_act := {}
 	for p in prank_list:

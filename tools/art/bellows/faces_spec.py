@@ -38,6 +38,9 @@ PRESETS = {
 	"sip": {"eyes": "closed", "brows": "up", "mouth": "O_small", "overlays": ["blush"]},   # pinkie-up slurp
 	"hum": {"eyes": "closed", "brows": "up", "mouth": "smug"},                      # hm-hm-hmm
 	"dazed_open": {"eyes": "spiral", "brows": "up", "mouth": "open"},
+	"kiss": {"eyes": "closed", "brows": "up", "mouth": "O_small", "overlays": ["blush"]},     # blows himself a kiss
+	"trill": {"eyes": "squint", "brows": "up", "mouth": "wavy"},                             # brrrr lip trill
+	"sly_smile": {"eyes": "half", "brows": "sly", "mouth": "smile", "pupils": [4, 3]},       # a nod to his reflection
 	# after the hit
 	"dazed": {"eyes": "spiral", "brows": "worried", "mouth": "wavy"},
 	"slow_burn": {"eyes": "half", "brows": "neutral", "mouth": "closed", "pupils": [-5, 2]},

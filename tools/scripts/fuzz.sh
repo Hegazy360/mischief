@@ -3,6 +3,8 @@
 # invariants + soft-lock probe per run, determinism replay every 5th run.
 # Usage: tools/scripts/fuzz.sh [<episode>|all] [--runs=20] [--seed=1] [--bot=all|random,reckless,hider,bait]
 #                              [--ticks=10800] [--report=/abs/out.json] [--verbose] [--no-probe] [--strict]
+#                              [--dump-cmds=/abs/dir]  (first run per episode × bot with a caught / face_to_face /
+#                              meltdown_start / chase_start → <episode>_<bot>_<event>.cmds.json, sim_run --cmds format)
 # Exit 1 on any violation. Env: SANDBOX (default "fuzz").
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -20,6 +22,7 @@ args=()
 for a in "$@"; do
   case "$a" in
     --report=*) args+=("--report=$(realpath -m "${a#--report=}")") ;;
+    --dump-cmds=*) args+=("--dump-cmds=$(realpath -m "${a#--dump-cmds=}")") ;;
     *) args+=("$a") ;;
   esac
 done

@@ -474,18 +474,6 @@ def pepper_shake(rng):
     return place([(0, shake()), (0.19, shake(), 0.9), (0.38, shake(), 1.0)], 0.6)
 
 
-@sfx("sink_splash", max_dur=1.3, desc="into the sink: metal bong + splash")
-def sink_splash(rng):
-    dur = 1.1
-    n = ns(dur)
-    bong = metal_hit(rng, 260, 0.9, (1.0, 2.1, 3.3, 4.6), decay=0.6)
-    impact = filt(white(n, rng), ("lp", 6000), ("hp", 200)) * perc(n, 0.0005, 0.08)
-    body = noise_sweep(n, rng, env_exp([(0, 2500), (0.3, 900), (dur, 700)], n), 1.4) * perc(n, 0.002, 0.6)
-    drops = place([(rng.uniform(0.05, 0.8) ** 1.5, droplet(rng, rng.uniform(900, 2400), rng.uniform(0.03, 0.07)),
-                    rng.uniform(0.2, 0.6)) for _ in range(26)], dur)
-    return pad(bong, n) * 0.6 + norm(impact) * 0.7 + norm(body) + pad(drops, n) * 0.5 + pad(thump(0.25, 120, 55), n) * 0.5
-
-
 @sfx("spray_blast", max_dur=0.95, desc="spray tap twisted: eek + high-pressure face blast")
 def spray_blast(rng):
     dur = 1.0

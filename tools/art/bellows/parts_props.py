@@ -83,7 +83,12 @@ def specs(state):
 
 # --- hand-held props (+x = forward along the fingers) --------------------------------------------
 
-def teacup():
+def teacup(state="held"):
+	"""`held`: handle at the grip, cup body forward (+x). `sip`: the same cup mirrored -- handle forward, body back
+	toward his face -- so a sip keeps the hand in front of the mouth and the pinkie clear (art-bellows weak spot)."""
+	if state == "sip":
+		p = teacup("held")
+		return Part("teacup_sip", ['<g transform="scale(-1 1)">%s</g>' % "".join(p.items)], (-44, -22, 16, 24))
 	it = []
 	# handle loop at the grip (0, 0), cup body forward (+x)
 	it.append(path("M-2 -8 C-12 -8 -12 10 -2 10", stroke=INK, stroke_width=9, stroke_linecap="round"))
@@ -325,7 +330,8 @@ def props():
 				  "state_z_offset": {"on": 14, "buttered": 14, "magnifier": 14},
 				  "note": "dangling hangs on its chain from torso:chain (default, visible); on/buttered/magnifier sit on "
 						  "head:specs at head z + 14 (re-attach the prop to head:specs when switching state)"},
-		"teacup": {"states": {"_": teacup()}, "socket": "hand_r:grip", "z": 66},
+		"teacup": {"states": {"held": teacup("held"), "sip": teacup("sip")}, "default": "held", "socket": "hand_r:grip",
+				   "z": 66},
 		"newspaper": {"states": {"closed": newspaper("closed"), "open": newspaper("open")}, "default": "closed",
 					  "socket": "hand_r:grip", "z": 62},
 		"comb": {"states": {"_": comb()}, "socket": "hand_r:grip", "z": 66},

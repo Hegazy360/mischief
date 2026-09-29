@@ -11,6 +11,9 @@
 ## * `--paused`         hold after the seek (the driver stays paused; nothing moves).
 ## * `--relaxed`        Relaxed mode.
 ## * `--no-curtain`     start playing on the first frame (no curtain rise; shots of early ticks).
+## * `--curtain-call=<reason>`  end the Night right after the start/seek with that `night_end` reason
+##                      (bow, g0_done, prologue_done …): shots of the curtain call.
+## * `--open=pause|script|tbc` open the pause menu / the Script panel / the "To be continued…" card (shots).
 ## Pure: `parse(args)` returns a Dictionary; `read_cmds(path)` loads a command log.
 class_name NightArgs
 extends RefCounted
@@ -22,7 +25,7 @@ const DEFAULT_EPISODE := "p00_curtain_up"
 ## paused (false), relaxed (false), no_curtain (false), given (true when any NightScene flag appeared).
 static func parse(args: PackedStringArray) -> Dictionary:
 	var out := {"episode": "", "cmds_path": "", "seek_tick": -1, "paused": false, "relaxed": false,
-		"no_curtain": false, "given": false}
+		"no_curtain": false, "curtain_call": "", "open": "", "given": false}
 	for a in args:
 		if a.begins_with("--episode="):
 			out["episode"] = a.substr(10)
@@ -40,6 +43,12 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			out["relaxed"] = true
 		elif a == "--no-curtain":
 			out["no_curtain"] = true
+		elif a.begins_with("--curtain-call="):
+			out["curtain_call"] = a.substr(15)
+			out["given"] = true
+		elif a.begins_with("--open="):
+			out["open"] = a.substr(7)
+			out["given"] = true
 	return out
 
 

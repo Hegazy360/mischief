@@ -81,8 +81,8 @@ func test_table_parses_and_every_row_resolves() -> void:
 				assert_lt(int(ev.get("f", 0)), int(len_f), "%s f%s inside the clip" % [clip, ev.get("f")])
 	assert_ge(n, 60, "%d rows" % n)
 	for must in ["bellows/rx_sneeze_blast_a", "bellows/act_tea", "bellows/act_warmup", "bellows/mg_hum",
-			"bellows/mg_pinkie_up", "bellows/mg_trill", "bellows/beat_slow_burn", "hush/loco_walk", "hush/act_dive",
-			"hush/act_pop", "hush/freeze_1", "hush/act_snicker", "hush/act_tinker_b"]:
+			"bellows/mg_admire_in_kettle", "bellows/mg_pinkie_up", "bellows/mg_trill", "bellows/beat_slow_burn",
+			"hush/loco_walk", "hush/act_dive", "hush/act_pop", "hush/freeze_1", "hush/act_snicker", "hush/act_tinker_b"]:
 		assert_true(clips.has(must), "table covers %s" % must)
 
 
@@ -201,3 +201,97 @@ func _collect(v: Variant, flt: String, out: Dictionary) -> void:
 				out[String(id)] = true
 		elif d[k] is Dictionary or d[k] is Array:
 			_collect(d[k], flt, out)
+
+
+## Every Gate-0 micro-gag (activities.json `warmup` + `tea`) has its `bellows/mg_<id>` rows, sized to the
+## gag's `len_f`; the brief's three are there (a trill, a hum, a teacup clink for pinkie_up); the tea's base
+## clip carries no voice (the micro-gags do), and last beats end in silence (the slow burn: one note).
+func test_gate0_micro_gags_and_last_beats() -> void:
+	var a: Variant = load_json("res://data/activities.json")
+	if not (a is Dictionary):
+		skip("activities.json missing")
+		return
+	var acts: Dictionary = (a as Dictionary).get("activities", {})
+	var clips: Dictionary = table.get("clips", {})
+	var n := 0
+	for aid: String in ["warmup", "tea"]:
+		for mg: Dictionary in (acts.get(aid, {}) as Dictionary).get("micro_gags", []):
+			var clip := "bellows/mg_" + String(mg.get("id", ""))
+			n += 1
+			assert_true(clips.has(clip), "%s micro-gag %s has clip events" % [aid, clip])
+			var c: Dictionary = clips.get(clip, {})
+			assert_eq(int(c.get("len_f", -1)), int(mg.get("len_f", -2)), "%s is sized to the gag" % clip)
+			assert_false((c.get("events", []) as Array).is_empty(), "%s makes a sound" % clip)
+			for ev: Dictionary in c.get("events", []):
+				assert_lt(int(ev["f"]), int(mg.get("len_f", 0)), "%s f%d inside the gag" % [clip, int(ev["f"])])
+	assert_ge(n, 6, "the six Gate-0 micro-gags")
+	assert_eq(String(_row("bellows/mg_trill", "vo_bellows_trill").get("type", "")), "voice", "a trill")
+	assert_eq(String(_row("bellows/mg_hum", "vo_bellows_hum").get("type", "")), "voice", "a hum")
+	assert_false(_row("bellows/mg_pinkie_up", "teacup_clink").is_empty(), "a teacup clink for pinkie_up")
+	for ev: Dictionary in _events("bellows/act_tea"):
+		assert_ne(String(ev["type"]), "voice", "the tea's base clip is voice-free (f%d)" % int(ev["f"]))
+	var burn: Array = _events("bellows/beat_slow_burn")
+	assert_eq(burn.size(), 1, "the slow burn: ONE low bassoon note, then silence")
+	if burn.size() == 1:
+		assert_eq(String((burn[0] as Dictionary)["id"]), "bassoon_burn")
+		assert_le(int((burn[0] as Dictionary)["f"]) + _len_f("bassoon_burn"), 60, "…and ≥ 10 f of dry silence")
+	for beat in ["bellows/beat_dignity_fail", "bellows/beat_bow_topple", "bellows/beat_tear"]:
+		assert_false(_events(beat).is_empty(), "%s has its sounds" % beat)
+
+
+## The tea ends in the sip that ACHOO-RIA! fires on: the slurp lands before the trigger mark and the
+## sneeze's first 'ah' answers it at the reaction's f0.
+func test_the_sip_leads_into_the_sneeze() -> void:
+	var p: Variant = load_json("res://data/pranks.json")
+	if not (p is Dictionary):
+		skip("pranks.json missing")
+		return
+	var pr: Dictionary = ((p as Dictionary).get("pranks", {}) as Dictionary).get("achoo_ria", {})
+	var mark_f := int(round(float((pr.get("trigger", {}) as Dictionary).get("mark_s", 7.0)) * FPS))
+	var sip := _row("bellows/act_tea", "tea_slurp")
+	assert_false(sip.is_empty(), "the tea has its sip")
+	assert_le(int(sip.get("f", 9999)) + _len_f("tea_slurp"), mark_f, "the slurp is over by the trigger (f%d)" % mark_f)
+	assert_ge(int(sip.get("f", 0)), mark_f - 45, "…and close to it (the joke reads as sip → ah…)")
+	assert_eq(int(_row("bellows/rx_sneeze_blast_a", "vo_bellows_sneeze_ah1").get("f", -1)), 0)
+
+
+## The contract with the anim tasks, checked on every clip that exists (L12): every sfx / voice event in a
+## clip is a row of the table — the id, and the frame ± 1 f when the clip has the table's length (a clip the
+## table sizes as "the anim task's", len_f null, may retime its rows). A row the anim task has not placed yet
+## is listed (soft: the anim tasks are placing them in this batch; `clip_events.py --status` writes the list
+## to docs/review/s2-sound/placement.md), a sound the table doesn't publish fails.
+func test_existing_clips_carry_their_rows() -> void:
+	var checked := 0
+	var pending := PackedStringArray()
+	for clip: String in (table.get("clips", {}) as Dictionary):
+		var path := "res://data/anim/%s.json" % clip
+		if not FileAccess.file_exists(path):
+			continue
+		var d: Variant = load_json(path)
+		if not (d is Dictionary):
+			continue
+		checked += 1
+		var have: Array = []
+		for ev: Dictionary in (d as Dictionary).get("events", []):
+			var t := String(ev.get("type", ""))
+			if t == "sfx" or t == "voice":
+				have.append([int(ev.get("f", -1)), String(ev.get("id", ev.get("bank", "")))])
+		var tlen: Variant = ((table["clips"] as Dictionary)[clip] as Dictionary).get("len_f")
+		var exact := tlen != null and int(tlen) == int((d as Dictionary).get("length", -1))
+		var left := have.duplicate()
+		for r: Dictionary in _events(clip):
+			var hit := -1
+			for i in left.size():
+				var h: Array = left[i]
+				if String(h[1]) == String(r["id"]) and (not exact or absi(int(h[0]) - int(r["f"])) <= 1):
+					hit = i
+					break
+			if hit >= 0:
+				left.remove_at(hit)
+			else:
+				pending.append("%s f%d %s" % [clip, int(r["f"]), r["id"]])
+		assert_true(left.is_empty(), "%s: sounds not published in clip_events.md (or off their frame): %s" % [clip, left])
+	if not pending.is_empty():
+		print("  [clip events] %d row(s) still to place: %s" % [pending.size(), ", ".join(pending)])
+	if checked == 0:
+		skip("no clip of the table exists yet")

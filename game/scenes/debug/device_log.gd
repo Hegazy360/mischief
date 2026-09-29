@@ -94,6 +94,17 @@ static func now_ms() -> int:
 	return Time.get_ticks_msec() + _offset_ms
 
 
+static var _proc_offset: int = -1
+
+## Milliseconds since process start whether or not the log records (Boot's launch clock): the
+## /proc offset is read once (Android / Linux), else engine ms.
+static func process_ms() -> int:
+	if _proc_offset < 0:
+		var age := process_age_ms()
+		_proc_offset = maxi(0, age - Time.get_ticks_msec()) if age >= 0 else 0
+	return Time.get_ticks_msec() + _proc_offset
+
+
 ## Record a milestone: the first time for MILESTONES (`<name>_ms`), else in `marks` (latest).
 static func mark(name: String) -> void:
 	if not _started:
@@ -108,6 +119,16 @@ static func mark(name: String) -> void:
 	else:
 		(_session["marks"] as Dictionary)[name] = now_ms()
 		_dirty = true
+
+
+## Record a measured value (e.g. `night_build_ms`, `warm_ms`) in the session's `values` (latest wins).
+static func note(key: String, value: Variant) -> void:
+	if not _started:
+		return
+	if not _session.has("values"):
+		_session["values"] = {}
+	(_session["values"] as Dictionary)[key] = value
+	_dirty = true
 
 
 ## Record a laugh (a sim laugh event); returns its index (for `set_laugh_tier`), −1 when inactive.

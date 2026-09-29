@@ -169,3 +169,56 @@ func _clear_of_doors(x: float, half: float) -> bool:
 		if absf(dx - x) < half + DOOR_W:
 			return false
 	return true
+
+
+## A static re-staging backdrop of one room (s2-night's Gag Reel / curtain call, inside a
+## SubViewport): the room bg + fg, its props in the given visual states (`prop_states`:
+## hotspot id → PropView state, e.g. from a MomentRecorder frame) and its decor with the given
+## visibility (`decor_visible`: decor id → bool; absent = authored default). Returns a Node2D in
+## world coordinates (place a Camera2D on it).
+static func build_backdrop(h: HouseLayout, room_id: String, prop_states: Dictionary = {}, decor_visible: Dictionary = {}) -> Node2D:
+	var root := Node2D.new()
+	root.name = "Backdrop_" + room_id
+	var r := h.room(room_id)
+	if r == null:
+		return root
+	var fg := Node2D.new()
+	fg.name = "Fg"
+	fg.z_index = 8
+	var rv := RoomView.new()
+	root.add_child(rv)
+	rv.setup(r, h, false, fg)
+	var back := Node2D.new()
+	back.z_index = -12
+	root.add_child(back)
+	var props_node := Node2D.new()
+	props_node.z_index = -10
+	root.add_child(props_node)
+	var front := Node2D.new()
+	front.z_index = -6
+	root.add_child(front)
+	var over := Node2D.new()
+	over.z_index = 2
+	root.add_child(over)
+	for hs in h.hotspots:
+		if hs.room != room_id:
+			continue
+		var pv := PropView.new()
+		props_node.add_child(pv)
+		pv.setup(hs, h, false, over)
+		var st := ViewKit.s(prop_states.get(hs.id, "idle"))
+		pv.set_state_from({"occupant": st == "occupied", "spent": st == "spent", "rigged": st.begins_with("rigged")}, st == "open",
+			st.substr(7) if st.begins_with("rigged_") else "")
+	for d in h.decor:
+		if d.room != room_id:
+			continue
+		var parent := back if d.z < 0 else (over if d.z >= 2 else front)
+		var s := Sprite2D.new()
+		s.centered = false
+		s.texture = ViewKit.tex(ViewKit.s(d.art.get("idle", "")))
+		s.position = d.pos
+		s.visible = bool(decor_visible.get(d.id, not d.hidden))
+		s.name = "Decor_" + d.id
+		parent.add_child(s)
+	root.add_child(fg)
+	return root

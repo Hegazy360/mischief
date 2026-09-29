@@ -54,47 +54,47 @@
    ]
   },
   "bellows/act_tea": {
-   "len_f": null,
+   "len_f": 480,
    "phase": "G",
    "events": [
     {
-     "f": 10,
+     "f": 40,
      "type": "sfx",
      "id": "kettle_pour"
     },
     {
-     "f": 84,
+     "f": 169,
      "type": "sfx",
      "id": "spoon_clink"
     },
     {
-     "f": 96,
+     "f": 182,
      "type": "sfx",
      "id": "tea_stir"
     },
     {
-     "f": 150,
+     "f": 243,
      "type": "sfx",
      "id": "spoon_clink",
      "vol_db": -3.0
     },
     {
-     "f": 172,
+     "f": 270,
      "type": "sfx",
      "id": "tea_sniff"
     },
     {
-     "f": 214,
+     "f": 388,
      "type": "sfx",
      "id": "tea_slurp"
     },
     {
-     "f": 262,
+     "f": 462,
      "type": "sfx",
      "id": "teacup_clink"
     },
     {
-     "f": 282,
+     "f": 472,
      "type": "sfx",
      "id": "stool_creak",
      "vol_db": -2.0
@@ -102,7 +102,7 @@
    ]
   },
   "bellows/act_warmup": {
-   "len_f": 720,
+   "len_f": 1200,
    "phase": "G",
    "events": [
     {
@@ -136,29 +136,29 @@
      "id": "vase_nudge"
     },
     {
-     "f": 360,
+     "f": 600,
      "type": "voice",
      "id": "vo_bellows_warmup_3"
     },
     {
-     "f": 364,
+     "f": 604,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 376,
+     "f": 616,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 388,
+     "f": 628,
      "type": "sfx",
      "id": "vase_nudge"
     }
    ]
   },
   "bellows/mg_admire_reflection_horn": {
-   "len_f": null,
+   "len_f": 60,
    "phase": "G",
    "events": [
     {
@@ -170,31 +170,41 @@
      "f": 14,
      "type": "voice",
      "id": "vo_bellows_smug"
+    },
+    {
+     "f": 42,
+     "type": "sfx",
+     "id": "kiss_smack"
     }
    ]
   },
   "bellows/mg_trill": {
-   "len_f": null,
+   "len_f": 48,
    "phase": "G",
    "events": [
     {
      "f": 0,
      "type": "voice",
      "id": "vo_bellows_trill"
+    },
+    {
+     "f": 30,
+     "type": "sfx",
+     "id": "teacups_rattle"
     }
    ]
   },
   "bellows/mg_conduct_air": {
-   "len_f": null,
+   "len_f": 60,
    "phase": "G",
    "events": [
     {
-     "f": 0,
+     "f": 5,
      "type": "sfx",
      "id": "baton_swish"
     },
     {
-     "f": 15,
+     "f": 20,
      "type": "sfx",
      "id": "baton_swish",
      "vol_db": -2.0
@@ -203,27 +213,17 @@
      "f": 30,
      "type": "sfx",
      "id": "baton_swish"
-    }
-   ]
-  },
-  "bellows/mg_admire_in_kettle": {
-   "len_f": null,
-   "phase": "G",
-   "events": [
-    {
-     "f": 6,
-     "type": "sfx",
-     "id": "glint"
     },
     {
-     "f": 14,
-     "type": "voice",
-     "id": "vo_bellows_smug"
+     "f": 42,
+     "type": "sfx",
+     "id": "bow_creak",
+     "vol_db": -4.0
     }
    ]
   },
   "bellows/mg_hum": {
-   "len_f": null,
+   "len_f": 48,
    "phase": "G",
    "events": [
     {
@@ -233,14 +233,40 @@
     }
    ]
   },
+  "bellows/mg_admire_in_kettle": {
+   "len_f": 48,
+   "phase": "G",
+   "events": [
+    {
+     "f": 6,
+     "type": "sfx",
+     "id": "glint"
+    },
+    {
+     "f": 14,
+     "type": "voice",
+     "id": "vo_bellows_smug"
+    }
+   ]
+  },
   "bellows/mg_pinkie_up": {
-   "len_f": null,
+   "len_f": 48,
    "phase": "G",
    "events": [
     {
      "f": 10,
      "type": "sfx",
      "id": "teacup_clink"
+    },
+    {
+     "f": 14,
+     "type": "sfx",
+     "id": "pinkie_wobble"
+    },
+    {
+     "f": 30,
+     "type": "voice",
+     "id": "vo_bellows_bliss"
     }
    ]
   },
@@ -320,11 +346,11 @@
    ]
   },
   "bellows/loco_idle": {
-   "len_f": null,
+   "len_f": 240,
    "phase": "G",
    "events": [
     {
-     "f": 0,
+     "f": 170,
      "type": "sfx",
      "id": "cravat_tug",
      "vol_db": -4.0
@@ -332,7 +358,7 @@
    ]
   },
   "bellows/loco_strut": {
-   "len_f": null,
+   "len_f": 32,
    "phase": "G",
    "events": [
     {
@@ -350,7 +376,7 @@
    ]
   },
   "bellows/loco_blind_shuffle": {
-   "len_f": null,
+   "len_f": 24,
    "phase": "G",
    "events": [
     {
@@ -359,7 +385,7 @@
      "id": "slipper_scuff"
     },
     {
-     "f": 24,
+     "f": 12,
      "type": "sfx",
      "id": "slipper_scuff",
      "vol_db": -2.0
@@ -401,7 +427,7 @@
    ]
   },
   "hush/loco_walk": {
-   "len_f": null,
+   "len_f": 80,
    "phase": "G",
    "events": [
     {
@@ -411,6 +437,36 @@
     },
     {
      "f": 10,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 20,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 30,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 40,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 50,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 60,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    },
+    {
+     "f": 70,
      "type": "sfx",
      "id": "step_pizz_up"
     }
@@ -609,6 +665,18 @@
     }
    ]
   },
+  "hush/idle_fidget_clarence": {
+   "len_f": 80,
+   "phase": "G",
+   "events": [
+    {
+     "f": 12,
+     "type": "sfx",
+     "id": "clarence_smitten",
+     "vol_db": -6.0
+    }
+   ]
+  },
   "hush/act_squeak": {
    "len_f": 18,
    "phase": "G",
@@ -654,7 +722,8 @@
     "bellows/act_warmup",
     "bellows/mg_admire_reflection_horn",
     "bellows/mg_trill",
-    "bellows/mg_conduct_air"
+    "bellows/mg_conduct_air",
+    "bellows/mg_hum"
    ]
   },
   {
@@ -663,7 +732,6 @@
    "clips": [
     "bellows/act_tea",
     "bellows/mg_admire_in_kettle",
-    "bellows/mg_hum",
     "bellows/mg_pinkie_up"
    ]
   },

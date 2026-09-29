@@ -30,6 +30,8 @@ extends RefCounted
 
 const DEAD_INPUT_TICKS := 180
 const DEAD_LAUGH_TICKS := 300
+## "Long ago" for last-seen clocks.
+const NEVER := -1073741824
 ## Ruling L1: edge beats may carry at most this share of the beat credit.
 const EDGE_SHARE_MAX := 1.0 / 3.0
 const ALIVE_REASONS: PackedStringArray = ["input", "laugh", "reacting", "beat_room", "beat_pip", "beat_edge"]
@@ -172,10 +174,10 @@ static func dead_air(log: SolverLog, laugh_fn: Callable = Callable()) -> Diction
 	var n := log.size()
 	var last_input := log.start_tick
 	var last_laugh := log.start_tick
-	var last_beat := {"room": -1 << 30, "pip": -1 << 30, "edge": -1 << 30}
+	var last_beat := {"room": NEVER, "pip": NEVER, "edge": NEVER}
 	var hide_start := -1
-	var anchor_drop := -1 << 30
-	var anchor_react := -1 << 30
+	var anchor_drop := NEVER
+	var anchor_react := NEVER
 	var repress := maxi(0, log.ff_repress_ticks)
 	var dead_sim := 0
 	var w_all := 0          # thirds of a tick (gate)
@@ -299,7 +301,7 @@ static func dead_air_mask(log: SolverLog, is_laugh: Callable = Callable()) -> Pa
 	var react: Dictionary = ck["react"]
 	var last_input := log.start_tick
 	var last_laugh := log.start_tick
-	var last_beat := -1 << 30
+	var last_beat := NEVER
 	for i in n:
 		var t := log.ticks[i]
 		if log.input[i] == 1:
@@ -324,7 +326,7 @@ static func ff_mask(log: SolverLog, is_laugh: Callable = Callable()) -> PackedBy
 	var out := PackedByteArray()
 	out.resize(log.size())
 	var hide_start := -1
-	var anchor := -1 << 30
+	var anchor := NEVER
 	for i in log.size():
 		var t := log.ticks[i]
 		var hidden := log.hush_hidden[i] != 0

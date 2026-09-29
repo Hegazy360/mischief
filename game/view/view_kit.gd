@@ -8,6 +8,7 @@ class_name ViewKit
 extends RefCounted
 
 const HIRES_PATH := "res://view/tex/hi_res_tex.gd"
+const UI_STRINGS := "res://ui/theme/ui_strings.gd"
 const FONT_DIRS: PackedStringArray = ["res://ui/theme/fonts", "res://ui/fonts"]
 const DISPLAY_FONT_NAMES: PackedStringArray = ["LilitaOne-Regular.ttf", "LilitaOne.ttf", "lilita_one.ttf"]
 const UI_FONT_NAMES: PackedStringArray = ["Nunito-ExtraBold.ttf", "NunitoExtraBold.ttf", "nunito_extrabold.ttf"]
@@ -18,6 +19,7 @@ const CREAM := Color("#FFF4E0")
 static var _tex_cache: Dictionary = {}
 static var _script_cache: Dictionary = {}
 static var _json_cache: Dictionary = {}
+static var _words: Dictionary = {}
 static var _display_font: Font = null
 static var _ui_font: Font = null
 
@@ -72,6 +74,19 @@ static func clear_json_cache() -> void:
 	_json_cache.clear()
 
 
+## Player-facing words (s2-ui `fx.*` keys, UiStrings): the string for `key` when the key
+## exists, else `fallback` (brief §4.2.17: today's literal until the key lands). Cached.
+static func word(key: String, fallback: String) -> String:
+	if _words.has(key):
+		return _words[key]
+	var out := fallback
+	var us := soft_script(UI_STRINGS)
+	if us != null and us.has_method("has") and bool(us.call("has", key)):
+		out = ViewKit.s(us.call("t", key), fallback)
+	_words[key] = out
+	return out
+
+
 ## Texture for an art path: HiResTex (owner `rig`, soft) at ART_SCALE with a 1× size
 ## override when it exists, else the imported texture; null when missing. Cached.
 static func tex(path: String) -> Texture2D:
@@ -100,6 +115,9 @@ static func svg_tex(key: String, svg: String, scale: float = 2.0) -> Texture2D:
 		return _tex_cache[k]
 	var img := Image.new()
 	var t: Texture2D = null
+	var ts := soft_script("res://view/tex/tex_stats.gd")
+	if ts != null and ts.has_method("note_build"):
+		ts.call("note_build", "fx")
 	if img.load_svg_from_string(svg, scale) == OK:
 		var it := ImageTexture.create_from_image(img)
 		it.set_size_override(Vector2i(int(round(img.get_width() / scale)), int(round(img.get_height() / scale))))

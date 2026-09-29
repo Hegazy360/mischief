@@ -1,8 +1,14 @@
-## RigPlayer — plays data-driven clips on a flat-cutout rig (TECH §5.3). One Node2D that
-## draws the whole character from ONE atlas page in `_draw()`: textured parts as batched
-## rects (`draw_set_transform_matrix` + `draw_texture_rect_region`), rubber-hose limbs (and
-## the hands / feet that end them) as one textured triangle array per z-run. A character is
-## typically 4–6 draw calls (budget ≤ 12).
+## RigPlayer — plays data-driven clips on a flat-cutout rig (TECH §5.3). One Node2D whose
+## parts are RenderingServer canvas items under ONE container item (s2-rig §4.3): each
+## textured part records its atlas rect once (again only when its texture variant changes)
+## and per frame only its transform is sent — rects on the same atlas page batch into one
+## draw call; rubber-hose limbs (and the hands / feet that end them) are one textured
+## triangle array per z-run. A character is typically 4–6 draw calls (budget ≤ 12).
+## Textures: the base atlas (every part variant, face and prop the everyday look uses) is
+## built at setup; each residue look's extra textures (overlays, costume props, residue-only
+## variants) are a LAZY look page, built on its first `set_residue` or ahead of time by
+## `warm_looks(keys, budget_ms)` (Boot warms the Night's looks under the curtain). Pages carry
+## mip chains (LINEAR_WITH_MIPMAPS: no shimmer at the overview's 0.5× or in the PiP).
 ##
 ## Layers, evaluated every frame (comedy.md §5.3): base clip (crossfaded, default 6 f;
 ## `blend_in: 0` = pose pop) → masked overlay clip → additive clip → procedural additive
@@ -48,6 +54,8 @@ const TURN_MIN := 0.15
 const LOOK_RATE := 12.0
 const HITSTOP_SHAKE_PX := 3.0
 
+const RC := RigDef.ROOT_CH
+const ST := RigDef.STRIDE
 const K_LIMB := 0
 const K_PART := 1
 const K_OVERLAY := 2
@@ -144,9 +152,65 @@ var _static: PackedFloat32Array = PackedFloat32Array()
 var _slot0: PackedInt32Array = PackedInt32Array()      ## first atlas slot of part p
 var _slot_region: Array[Rect2] = []
 var _slot_uv: Array[Rect2] = []
-var _slot_page: PackedInt32Array = PackedInt32Array()
+var _slot_page: PackedInt32Array = PackedInt32Array()  ## global page index (-1 = not built yet)
 var _slot_size: PackedVector2Array = PackedVector2Array()
 var _slot_rect: Array[Rect2] = []      ## trimmed 1× rect inside the canvas (AtlasSet.draw_rect)
+var _slot_draw: Array[Rect2] = []      ## the rect drawn in part space (pivot applied)
+var _slot_path: PackedStringArray = PackedStringArray()
+var _slot_ready: PackedByteArray = PackedByteArray()
+var _path_slots: Dictionary = {}       ## texture path → PackedInt32Array of slots
+# Pages: the base atlas + every look page registered so far (global page index).
+var _pages: Array[Texture2D] = []
+var _page_rid: Array[RID] = []
+var _page_set: Array[AtlasSet] = []
+var _page_local: PackedInt32Array = PackedInt32Array()
+var _sets_in: Dictionary = {}          ## atlas key → true (registered)
+var _look_sets: Dictionary = {}        ## residue kind → AtlasSet
+var _look_of_path: Dictionary = {}     ## look-only path → residue kind that has it
+var _warm_pending: PackedStringArray = PackedStringArray()
+var _warm_budget: float = 4.0
+var _art_s: float = 2.0
+var _tex_override: PackedInt32Array = PackedInt32Array()  ## per part: variant (-1 = none)
+var _override_parts: PackedInt32Array = PackedInt32Array()  ## parts with an override
+# Render items (RenderingServer canvas items under _ci_root).
+var _ci_root: RID = RID()
+var _root_xf: Transform2D = Transform2D(0.0, Vector2(9.0, 9.0), 0.0, Vector2.ZERO)
+var _part_ci: Array[RID] = []
+var _part_rec: PackedInt32Array = PackedInt32Array()
+var _part_col: PackedColorArray = PackedColorArray()
+var _part_shown: PackedByteArray = PackedByteArray()
+var _ghost_ci: Array[RID] = []          ## 2 per part (created on its first smear)
+var _ghost_rec: PackedInt32Array = PackedInt32Array()
+var _ghost_on: PackedByteArray = PackedByteArray()
+var _ov_ci: Array[RID] = []
+var _ov_rec: PackedInt32Array = PackedInt32Array()
+var _ov_alpha: PackedFloat32Array = PackedFloat32Array()
+var _ov_shown: PackedByteArray = PackedByteArray()
+var _prop_ci: Array[RID] = []
+var _prop_rec: PackedInt32Array = PackedInt32Array()
+var _prop_shown: PackedByteArray = PackedByteArray()
+var _part_in_seq: PackedByteArray = PackedByteArray()  ## rect part in the last layout
+var _part_drawn: PackedByteArray = PackedByteArray()   ## rect part visible this frame
+var _item_vi: PackedInt32Array = PackedInt32Array()   ## pose index of the item's vis channel (-1 none)
+# What the draw order depends on, as of the last sort (skip the sort while it is unchanged).
+var _sig: PackedInt64Array = PackedInt64Array()
+var _sig_prev: PackedInt64Array = PackedInt64Array()
+var _pm_prev: PackedInt32Array = PackedInt32Array()
+var _ps_prev: PackedInt32Array = PackedInt32Array()
+var _pst_prev: PackedInt32Array = PackedInt32Array()
+var _fo_prev: PackedInt32Array = PackedInt32Array()
+var _res_prev: PackedByteArray = PackedByteArray()
+var _ovr_prev: PackedInt32Array = PackedInt32Array()
+var _static_ver: int = 0
+var _slots_ver: int = 0
+## Skip the per-frame sort when nothing discrete changed (true in game; tests may turn it off).
+static var skip_unchanged_sort: bool = true
+var _filter: int = RenderingServer.CANVAS_ITEM_TEXTURE_FILTER_LINEAR
+var _ntex: PackedInt32Array = PackedInt32Array()      ## texture variants per part
+var _nomirror: PackedByteArray = PackedByteArray()
+var _textured: PackedByteArray = PackedByteArray()
+var _part_a: PackedFloat32Array = PackedFloat32Array() ## alpha last sent
+var _part_tt: PackedInt32Array = PackedInt32Array()    ## tint tier last sent
 var _tri_part: PackedByteArray = PackedByteArray()
 var _tri_list: PackedInt32Array = PackedInt32Array()   ## parts drawn as quads in triangle runs
 var _tri_pg: PackedInt32Array = PackedInt32Array()     ## page each tri part had at the last layout
@@ -226,6 +290,16 @@ class _Run extends RefCounted:
 	var uvs: PackedVector2Array = PackedVector2Array()
 	var cols: PackedColorArray = PackedColorArray()
 	var idx: PackedInt32Array = PackedInt32Array()
+	## The run as a dynamic 2D mesh: recorded once; per frame only its vertex positions are
+	## uploaded (no polygon buffers created / freed every frame). `attr_dirty` = uvs / colours
+	## changed (a hand's texture variant, tint, smear ghosts): the mesh is rebuilt.
+	var mesh: RID = RID()
+	var attr_dirty: bool = true
+	var qslot: PackedInt32Array = PackedInt32Array()   ## per item: slot + ghost flag last written
+	var qcol: PackedColorArray = PackedColorArray()     ## per item: colour last written
+	## The run's own canvas item (reused with the run across layouts) and its identity.
+	var ci: RID = RID()
+	var sig: String = ""
 
 
 func _ready() -> void:
@@ -252,14 +326,26 @@ func setup(p_rig_id: String, p_skin: String = "") -> void:
 		push_warning("RigPlayer: rig '%s' not found" % p_rig_id)
 		return
 	poses = PoseLib.for_rig(p_rig_id)
-	var core := rig.core_texture_paths(p_skin)
-	var paths := core.duplicate()
-	for q in rig.all_texture_paths(p_skin):
-		if not core.has(q):
-			paths.append(q)
 	var s := HiResTex.resolve_scale(art_scale)
-	atlas = AtlasBuilder.build("rig:%s:%s:%.2f" % [p_rig_id, p_skin, s], paths, s, {}, core.size())
+	_art_s = s
+	atlas = AtlasBuilder.build(base_atlas_key(p_rig_id, p_skin, s), rig.base_texture_paths(p_skin), s, {}, rig.base_core_count(p_skin))
+	_free_items()
+	_pages.clear()
+	_page_rid.clear()
+	_page_set.clear()
+	_page_local = PackedInt32Array()
+	_sets_in.clear()
+	_look_sets.clear()
+	_look_of_path.clear()
+	_warm_pending = PackedStringArray()
+	for kind in rig.residues:
+		for lp in rig.look_texture_paths(String(kind), p_skin):
+			if not _look_of_path.has(lp):
+				_look_of_path[lp] = String(kind)
 	var n := rig.names.size()
+	_tex_override.resize(n)
+	_tex_override.fill(-1)
+	_override_parts = PackedInt32Array()
 	_pose = rig.rest.duplicate()
 	_a = rig.rest.duplicate()
 	_b = rig.rest.duplicate()
@@ -306,7 +392,170 @@ func setup(p_rig_id: String, p_skin: String = "") -> void:
 	_fsx = 1.0
 	_turn_t = -1.0
 	_build_draw_cache()
+	_register_set(atlas)
 	RigSampler.solve(rig, _pose, _xf)
+	queue_redraw()
+
+
+## The AtlasBuilder key of a rig's base atlas (shared by every player of that rig / skin /
+## scale).
+static func base_atlas_key(p_rig_id: String, p_skin: String, s: float) -> String:
+	return "rig:%s:%s:%.2f" % [p_rig_id, p_skin, s]
+
+
+## The AtlasBuilder key of a residue look's page.
+static func look_atlas_key(p_rig_id: String, p_skin: String, s: float, kind: String) -> String:
+	return "rig:%s:%s:%.2f:look:%s" % [p_rig_id, p_skin, s, kind]
+
+
+## Build the look pages of `keys` (residue kinds: "SOAKED", "COSTUME:jelly_helmet",
+## "COMBO:dough_man") ahead of time: rasterisation, packing and page composition run on
+## worker threads; this thread only polls (within `budget_ms`) and uploads at most ONE
+## finished look page per call (~1–3 ms for a look). Unfinished looks keep warming in the
+## following frames' advance() under the same budget, so one call is enough (Boot's warm
+## list); calling it every frame until it returns true is fine too. True when every look is
+## ready. Looks without extra textures (and unknown kinds) are ready at once.
+func warm_looks(keys: PackedStringArray, budget_ms: float = 4.0) -> bool:
+	if rig == null:
+		return true
+	_warm_budget = maxf(0.5, budget_ms)
+	for k in keys:
+		if not _warm_pending.has(k) and not look_ready(k):
+			_warm_pending.append(k)
+	return _pump_warm(_warm_budget)
+
+
+## True when look `kind`'s page is built (or it needs none).
+func look_ready(kind: String) -> bool:
+	if rig == null or not rig.residues.has(kind):
+		return true
+	if _look_sets.has(kind):
+		return true
+	return rig.look_texture_paths(kind, skin).is_empty()
+
+
+## True when every look of `keys` is ready.
+func looks_ready(keys: PackedStringArray) -> bool:
+	for k in keys:
+		if not look_ready(k):
+			return false
+	return true
+
+
+## Texture memory this player's pages hold (bytes; pages shared with other players count).
+func texture_memory_bytes() -> int:
+	var b := 0
+	for k in _sets_in:
+		var st: AtlasSet = AtlasBuilder.get_set(String(k))
+		if st != null:
+			b += st.memory_bytes()
+	return b
+
+
+## A persistent texture variant for one part ("" clears): the view's temper sideburns and the
+## BLINDED bouffant. It beats residue swaps; a clip's explicit tex key beats it.
+func set_part_texture(part: String, variant: String) -> void:
+	if rig == null:
+		return
+	var i := rig.idx(part)
+	if i < 0:
+		return
+	_tex_override[i] = rig.tex_index(i, variant) if variant != "" else -1
+	_override_parts = PackedInt32Array()
+	for q in _tex_override.size():
+		if _tex_override[q] >= 0:
+			_override_parts.append(q)
+	if _tex_override[i] >= 0:
+		_ensure_slot(_slot0[i] + _tex_override[i])
+
+
+func _pump_warm(budget_ms: float) -> bool:
+	if _warm_pending.is_empty():
+		return true
+	var t0 := Time.get_ticks_usec()
+	var i := 0
+	while i < _warm_pending.size():
+		var k := _warm_pending[i]
+		if look_ready(k):
+			_warm_pending.remove_at(i)
+			continue
+		var left := budget_ms - float(Time.get_ticks_usec() - t0) / 1000.0
+		if left <= 0.0:
+			break
+		var key := look_atlas_key(rig_id, skin, _art_s, k)
+		if AtlasBuilder.warm(key, rig.look_texture_paths(k, skin), maxi(1, int(left)), _art_s):
+			_attach_look(k, AtlasBuilder.get_set(key))
+			_warm_pending.remove_at(i)
+			break   # at most one page upload per call
+		i += 1
+	return _warm_pending.is_empty()
+
+
+## Build look `kind`'s page now (blocking) when it is missing — its first set_residue.
+func _ensure_look(kind: String) -> void:
+	if look_ready(kind):
+		return
+	var key := look_atlas_key(rig_id, skin, _art_s, kind)
+	var st := AtlasBuilder.get_set(key)
+	if st == null:
+		st = AtlasBuilder.build(key, rig.look_texture_paths(kind, skin), _art_s)
+	_attach_look(kind, st)
+	_warm_pending.erase(kind)
+
+
+func _attach_look(kind: String, st: AtlasSet) -> void:
+	if st == null:
+		return
+	_look_sets[kind] = st
+	_register_set(st)
+
+
+## A slot whose texture is on a look page not built yet: build that look now.
+func _ensure_slot(slot: int) -> void:
+	if slot < 0 or slot >= _slot_ready.size() or _slot_ready[slot] == 1:
+		return
+	var kind := String(_look_of_path.get(_slot_path[slot], ""))
+	if kind != "":
+		_ensure_look(kind)
+	if _slot_ready[slot] == 0:
+		_slot_ready[slot] = 2   # missing from every set: draw nothing, stop asking
+
+
+## Add an atlas set's pages to the player and fill every slot whose texture it holds.
+func _register_set(st: AtlasSet) -> void:
+	if st == null or _sets_in.has(st.key):
+		return
+	_sets_in[st.key] = true
+	var g0 := _pages.size()
+	for pi in st.pages.size():
+		_pages.append(st.pages[pi])
+		_page_rid.append(st.pages[pi].get_rid())
+		_page_set.append(st)
+		_page_local.append(pi)
+	for q in st.paths():
+		var slots: Variant = _path_slots.get(q, null)
+		if slots == null:
+			continue
+		for sl in slots:
+			if _slot_ready[sl] == 1:
+				continue
+			_slot_region[sl] = st.region(q)
+			_slot_uv[sl] = st.uv_rect(q)
+			_slot_page[sl] = g0 + maxi(0, st.page_index(q))
+			if _slot_size[sl] == Vector2.ZERO:
+				_slot_size[sl] = st.size_1x(q)
+			_slot_rect[sl] = st.draw_rect(q)
+			_slot_draw[sl] = Rect2(_slot_draw[sl].position + _slot_rect[sl].position, _slot_rect[sl].size)
+			_slot_ready[sl] = 1
+	# Re-record every item (a slot may have become drawable) and re-layout (run pages).
+	_slots_ver += 1
+	for r in _runs:
+		r.qslot.fill(-1)
+		r.attr_dirty = true
+	_part_rec.fill(-1)
+	_prop_rec.fill(-1)
+	_ov_rec.fill(-1)
+	_layout_dirty = true
 	queue_redraw()
 
 
@@ -519,6 +768,9 @@ func _refresh_residues() -> void:
 				props.set_state(pi, "hidden")
 				_prop_by_res.erase(pi)
 	var changed := on != _res_on
+	for i4 in _res_kinds.size():
+		if on[i4] == 1 and _res_on[i4] == 0:
+			_ensure_look(_res_kinds[i4])   # lazy: the look's page is built on first use
 	_res_on = on
 	_apply_limb_fills()
 	if changed and not _slot0.is_empty():
@@ -559,6 +811,7 @@ func look_toward(world_pos: Vector2, weight: float) -> void:
 ## (breathing, springs, face, props) still apply.
 func set_static_pose(pose: PackedFloat32Array) -> void:
 	_static = pose.duplicate()
+	_static_ver += 1
 	_plan = null
 	_from_plan = null
 	_from_snap = false
@@ -752,6 +1005,16 @@ func shiver(frames: float, amp_deg: float = 2.0) -> void:
 func advance(dt: float) -> void:
 	if rig == null:
 		return
+	if profiling:
+		var a0 := Time.get_ticks_usec()
+		var before := prof[0] + prof[1] + prof[2] + prof[3]
+		_advance(dt)
+		prof[8] += Time.get_ticks_usec() - a0 - (prof[0] + prof[1] + prof[2] + prof[3] - before)
+		return
+	_advance(dt)
+
+
+func _advance(dt: float) -> void:
 	var vdt := maxf(0.0, dt * time_scale)
 	var frames := vdt * 60.0
 	var clip_frames := 0.0 if paused else frames
@@ -791,6 +1054,8 @@ func advance(dt: float) -> void:
 			_fsx = float(_facing) * lerpf(TURN_MIN, 1.0, (_turn_t - TURN_FRAMES * 0.5) / (TURN_FRAMES * 0.5))
 	face.advance(frames)
 	_update_pose(vdt)
+	if not _warm_pending.is_empty():
+		_pump_warm(_warm_budget)
 	queue_redraw()
 
 
@@ -895,6 +1160,7 @@ func _handle_event(e: Dictionary) -> void:
 				face.set_face(pr)
 		"smear":
 			var p := rig.idx(String(e.get("part", "")))
+			_smearing = true   # history + countdown run even on clips without smear.auto
 			if p >= 0:
 				_smear_t[p] = float(e.get("frames", SMEAR_FRAMES))
 				_smear_len[p] = clampf(float(e.get("stretch", 1.6)), 1.0, 2.0)
@@ -911,11 +1177,12 @@ func _handle_event(e: Dictionary) -> void:
 
 
 func _update_pose(vdt: float) -> void:
+	var t0 := Time.get_ticks_usec() if profiling else 0
 	_prop_frame += vdt * 60.0
 	# 1. base (+ crossfade)
 	if _plan != null:
-		_plan.sample(_frame, _a)
 		if _from_plan != null or _from_snap:
+			_plan.sample(_frame, _a)
 			if _from_snap:
 				RigSampler.copy(_snap, _b)
 			else:
@@ -927,13 +1194,14 @@ func _update_pose(vdt: float) -> void:
 				_from_plan = null
 				_from_snap = false
 		else:
-			RigSampler.copy(_a, _pose)
+			_plan.sample(_frame, _pose)   # straight into the pose: no copy
 			_fade_w = 1.0
 		_track_face_keys()
 	elif _static.size() == _pose.size():
 		RigSampler.copy(_static, _pose)
 	else:
 		RigSampler.copy(rig.rest, _pose)
+	var t1 := Time.get_ticks_usec() if profiling else 0
 	# 2. overlay (the outgoing one underneath while it fades), 3. additive clip
 	if _ov_prev.plan != null and _ov_prev.w > 0.0:
 		_ov_prev.plan.sample(_ov_prev.frame, _tmp)
@@ -960,19 +1228,25 @@ func _update_pose(vdt: float) -> void:
 	# 5. face
 	face.look = _look_pupil
 	face.apply(_pose)
-	# 6. residue textures (only over default textures: a clip's explicit swap wins) and
-	#    face overlays (sweat, singe…) shown while the residue is on.
+	# 6. part texture overrides (set_part_texture), then residue textures — each only over a
+	#    part's default texture (a clip's explicit swap wins) — and face overlays (sweat,
+	#    singe…) shown while the residue is on.
+	for tp in _override_parts:
+		var tb := RigDef.ROOT_CH + tp * RigDef.STRIDE + RigDef.C_TEX
+		if _pose[tb] == rig.rest[tb]:
+			_pose[tb] = float(_tex_override[tp])
 	for r in _res_kinds.size():
 		if _res_on[r] == 0:
 			continue
 		var res: RigDef.RigResidue = rig.residues[_res_kinds[r]]
 		for k in res.tex_part.size():
 			var b := RigDef.ROOT_CH + res.tex_part[k] * RigDef.STRIDE + RigDef.C_TEX
-			if int(_pose[b]) == 0:
+			if _pose[b] == rig.rest[b]:
 				_pose[b] = float(res.tex_var[k])
 		for fs in res.face_slots:
 			var fb := RigDef.ROOT_CH + rig.face_slot_part[fs] * RigDef.STRIDE
 			_pose[fb + RigDef.C_VIS] = 1.0
+	var t2 := Time.get_ticks_usec() if profiling else 0
 	# 7. springs (driven by last frame's motion), 8. limits, 9. FK
 	if springs_enabled:
 		springs.step(vdt)
@@ -982,8 +1256,15 @@ func _update_pose(vdt: float) -> void:
 	RigSampler.solve(rig, _pose, _xf)
 	if springs_enabled:
 		springs.feed(_xf, global_position, _fsx, vdt)
+	var t3 := Time.get_ticks_usec() if profiling else 0
 	# 11. smear history
 	_update_smears(vdt * 60.0)
+	if profiling:
+		var t4 := Time.get_ticks_usec()
+		prof[0] += t1 - t0
+		prof[1] += t2 - t1
+		prof[2] += t3 - t2
+		prof[3] += t4 - t3
 
 
 func _track_face_keys() -> void:
@@ -1026,30 +1307,42 @@ func _update_smears(frames: float) -> void:
 		return
 	_smearing = false
 	var df := _clip_df
+	# History by whole arrays (no per-part copies): ghost 2 ← ghost 1 ← last frame ← now.
+	if _hist > 0:
+		var spare := _g2
+		var g1_old := _g1
+		if _hist > 1:
+			_g2 = g1_old
+			_g1 = _last_xf
+			_last_xf = spare
+		else:
+			spare.assign(_last_xf)
+			_g2 = spare
+			_g1 = _last_xf
+			_last_xf = g1_old
+		_last_xf.assign(_xf)
+	else:
+		_g1.assign(_xf)
+		_g2.assign(_xf)
+		_last_xf.assign(_xf)
+	var detect := auto and _hist > 0 and df > 0.25 and df < 2.5
 	for p in n:
 		if _smear_t[p] > 0.0:
 			_smear_t[p] = maxf(0.0, _smear_t[p] - frames)
 			_smearing = true
-		if not rig.is_textured(p):
+		if _textured[p] == 0:
 			continue
 		var cur := _xf[p]
 		var c := cur * _center[p]
 		var rot := cur.get_rotation()
-		if _hist > 0:
-			_g2[p] = _g1[p] if _hist > 1 else _last_xf[p]
-			_g1[p] = _last_xf[p]
-			if auto and df > 0.25 and df < 2.5:
-				var mv := c - _last_c[p]
-				var v := mv.length() / df
-				var av := absf(rad_to_deg(wrapf(rot - _last_rot[p], -PI, PI))) / df
-				if v > SMEAR_PX or av > SMEAR_ROT:
-					_smear_t[p] = SMEAR_FRAMES
-					_smear_dir[p] = mv / mv.length() if v > SMEAR_PX else Vector2.ZERO
-					_smear_len[p] = clampf(1.0 + v / 80.0, 1.0, 2.0) if v > SMEAR_PX else 1.0
-		else:
-			_g1[p] = cur
-			_g2[p] = cur
-		_last_xf[p] = cur
+		if detect:
+			var mv := c - _last_c[p]
+			var v := mv.length() / df
+			var av := absf(rad_to_deg(wrapf(rot - _last_rot[p], -PI, PI))) / df
+			if v > SMEAR_PX or av > SMEAR_ROT:
+				_smear_t[p] = SMEAR_FRAMES
+				_smear_dir[p] = mv / mv.length() if v > SMEAR_PX else Vector2.ZERO
+				_smear_len[p] = clampf(1.0 + v / 80.0, 1.0, 2.0) if v > SMEAR_PX else 1.0
 		_last_c[p] = c
 		_last_rot[p] = rot
 	if df > 0.0 or _hist == 0:
@@ -1090,6 +1383,10 @@ func _apply_limb_fills() -> void:
 			var res: RigDef.RigResidue = rig.residues[_res_kinds[r]]
 			for li2 in res.limb_fill:
 				_limb_fill[li2] = res.limb_fill[li2]
+	# Limb colours are baked into the runs' static arrays: rebuild the runs.
+	_free_runs()
+	_runs.clear()
+	_keys_prev.resize(0)
 	_layout_dirty = true
 
 
@@ -1102,22 +1399,35 @@ func _build_draw_cache() -> void:
 	_slot_page = PackedInt32Array()
 	_slot_size = PackedVector2Array()
 	_slot_rect.clear()
+	_slot_draw.clear()
+	_slot_path = PackedStringArray()
+	_slot_ready = PackedByteArray()
+	_path_slots.clear()
 	_center.resize(n)
 	_tri_part.resize(n)
 	_tri_part.fill(0)
-	var add_slot := func(path: String, size_1x: Vector2) -> void:
+	var add_slot := func(path: String, size_1x: Vector2, pivot: Vector2) -> void:
 		var q := rig.skin_path(path, skin)
-		_slot_region.append(atlas.region(q))
-		_slot_uv.append(atlas.uv_rect(q))
-		_slot_page.append(maxi(0, atlas.page_index(q)))
-		_slot_size.append(size_1x if size_1x != Vector2.ZERO else atlas.size_1x(q))
-		_slot_rect.append(atlas.draw_rect(q))
+		var sl := _slot_region.size()
+		_slot_region.append(Rect2())
+		_slot_uv.append(Rect2())
+		_slot_page.append(-1)
+		_slot_size.append(size_1x)
+		_slot_rect.append(Rect2())
+		_slot_draw.append(Rect2(-pivot, Vector2.ZERO))
+		_slot_path.append(q)
+		_slot_ready.append(0)
+		if not _path_slots.has(q):
+			_path_slots[q] = PackedInt32Array()
+		var arr: PackedInt32Array = _path_slots[q]
+		arr.append(sl)
+		_path_slots[q] = arr
 	for p in n:
 		_slot0[p] = _slot_region.size()
 		var files: PackedStringArray = rig.tex_files[p]
 		var sizes: PackedVector2Array = rig.tex_sizes[p]
 		for v in files.size():
-			add_slot.call(files[v], sizes[v])
+			add_slot.call(files[v], sizes[v], rig.pivot[p])
 		var s0 := sizes[0] if not sizes.is_empty() else Vector2.ZERO
 		_center[p] = s0 * 0.5 - rig.pivot[p]
 	# Limb ends (the part after a limb's last bone, or the last joint when textured) join the
@@ -1147,19 +1457,27 @@ func _build_draw_cache() -> void:
 			_ov_part.append(res.overlay_part[k])
 			_ov_res.append(r)
 			_ov_slot.append(_slot_region.size())
-			add_slot.call(res.overlay_file[k], res.overlay_size[k])
+			add_slot.call(res.overlay_file[k], res.overlay_size[k], rig.pivot[res.overlay_part[k]])
 	_prop_slot0 = PackedInt32Array()
 	for pr in rig.props:
 		var prd: RigDef.RigProp = pr
 		_prop_slot0.append(_slot_region.size())
 		for k2 in prd.state_files.size():
-			add_slot.call(prd.state_files[k2], prd.state_sizes[k2])
-	_rebuild_items()
+			add_slot.call(prd.state_files[k2], prd.state_sizes[k2], prd.pivot)
 	_is_tint.resize(n)
 	_is_tint.fill(0)
 	for tp in rig.tint_parts:
 		_is_tint[tp] = 1
+	_ntex.resize(n)
+	_nomirror.resize(n)
+	_textured.resize(n)
+	for q in n:
+		_ntex[q] = maxi(1, rig.tex_files[q].size())
+		_nomirror[q] = rig.no_mirror[q]
+		_textured[q] = 1 if rig.is_textured(q) else 0
 	_curve.resize(LineLimb.SAMPLES)
+	_build_items()
+	_rebuild_items()
 	_layout_dirty = true
 
 
@@ -1177,9 +1495,10 @@ func _rebuild_items() -> void:
 			_items.append((K_OVERLAY << 16) | o)
 	for pi in rig.props.size():
 		_items.append((K_PROP << 16) | pi)
-	# z source per item: a pose index + offset (props: -1, computed by _item_z).
+	# z / vis sources per item: pose indices (props: -1, computed by _item_z / props.mode).
 	_item_zi.resize(_items.size())
 	_item_zo.resize(_items.size())
+	_item_vi.resize(_items.size())
 	for k in _items.size():
 		var code := _items[k]
 		var kind := code >> 16
@@ -1189,12 +1508,16 @@ func _rebuild_items() -> void:
 			K_LIMB:
 				var lb: RigDef.RigLimb = rig.limbs[i]
 				_item_zi[k] = RigDef.ch(lb.joints[0], RigDef.C_Z) if not lb.joints.is_empty() else -1
+				_item_vi[k] = RigDef.ch(lb.joints[0], RigDef.C_VIS) if not lb.joints.is_empty() else -1
 			K_PART:
 				_item_zi[k] = RigDef.ch(i, RigDef.C_Z)
+				_item_vi[k] = RigDef.ch(i, RigDef.C_VIS)
 			K_OVERLAY:
 				_item_zi[k] = RigDef.ch(_ov_part[i], RigDef.C_Z)
+				_item_vi[k] = RigDef.ch(_ov_part[i], RigDef.C_VIS)
 			_:
 				_item_zi[k] = -1
+				_item_vi[k] = -1
 	_keys.resize(_items.size())
 	_keys_prev.resize(0)
 	_layout_dirty = true
@@ -1248,11 +1571,35 @@ func _item_z(code: int) -> int:
 	return 0
 
 
+## Sort keys (z << 18 | item code; hidden items last) — the layout is rebuilt only when they
+## change. A drawn part whose texture sits on a look page not built yet builds it here.
 func _sort_items() -> void:
 	var n := _items.size()
 	for k in n:
 		var code := _items[k]
-		if not _item_drawn(code):
+		var kind := code >> 16
+		var vi := _item_vi[k]
+		var drawn := true
+		if kind == K_PART:
+			var p := code & 0xFFFF
+			drawn = _pose[vi] >= 0.5 and _pose[vi + 1] > 0.001
+			if drawn:
+				var tv := int(_pose[vi - 1])
+				var nt := _ntex[p]
+				var sl := _slot0[p] + (0 if tv < 0 else (tv if tv < nt else nt - 1))
+				if _slot_ready[sl] != 1:
+					_ensure_slot(sl)
+					drawn = _slot_ready[sl] == 1
+			if _tri_part[p] == 0:
+				_part_drawn[p] = 1 if drawn else 0
+				# A rect part that blinks off stays in the layout (hidden, not re-laid-out).
+				if not drawn and _part_in_seq[p] == 1:
+					drawn = true
+		elif kind == K_PROP:
+			drawn = props.mode[code & 0xFFFF] != PropSim.HIDDEN
+		elif vi >= 0:
+			drawn = _pose[vi] >= 0.5
+		if not drawn:
 			_keys[k] = HIDDEN_KEY | code   # sorted last, skipped by the layout
 			continue
 		var zi := _item_zi[k]
@@ -1274,48 +1621,370 @@ func _sort_items() -> void:
 			break
 
 
-## Atlas page of part `p`'s current texture variant.
+## True when nothing the draw order depends on changed since the last sort: the base / overlay
+## key segments (discrete channels step only on keys), crossfades, the face overrides and blink
+## phase, props, residues, texture overrides, static pose and page registrations. Anything
+## continuous that could hide a part (animated alpha, a crossfade, an additive layer) → false.
+func _discrete_same() -> bool:
+	if _layout_dirty or _ad.plan != null or _from_plan != null or _from_snap:
+		return false
+	_sig.resize(12)
+	if _plan == null:
+		_sig[0] = -1
+		_sig[1] = _static_ver
+	else:
+		if _plan.in_tail(_frame):
+			var tt := _frame - float(_plan.tail_start)
+			if tt < float(_plan.tail_blend) or _plan.tail.live_alpha():
+				return false
+			_sig[1] = (1 << 32) + _plan.tail.segment_at(tt)
+		else:
+			if _plan.clip.live_alpha():
+				return false
+			_sig[1] = _plan.clip.segment_at(_plan.src_frame(_frame))
+		_sig[0] = _plan.get_instance_id()
+	if not _layer_sig(_ov, 2) or not _layer_sig(_ov_prev, 4):
+		return false
+	_sig[6] = face.blink_phase() * 2 + (1 if face.suppressed else 0)
+	_sig[7] = _slots_ver
+	_sig[8] = 0
+	var same := _sig == _sig_prev
+	if face._override != _fo_prev:
+		_fo_prev = face._override.duplicate()
+		same = false
+	if props.mode != _pm_prev or props.socket != _ps_prev or props.state != _pst_prev:
+		_pm_prev = props.mode.duplicate()
+		_ps_prev = props.socket.duplicate()
+		_pst_prev = props.state.duplicate()
+		same = false
+	if _res_on != _res_prev:
+		_res_prev = _res_on.duplicate()
+		same = false
+	if _tex_override != _ovr_prev:
+		_ovr_prev = _tex_override.duplicate()
+		same = false
+	if not same:
+		_sig_prev = _sig.duplicate()
+	return same
+
+
+## An overlay layer's part of the signature at `_sig[at]`, `_sig[at + 1]`; false when it can
+## change visibility continuously (animated alpha).
+func _layer_sig(ly: _Layer, at: int) -> bool:
+	if ly.plan != null and ly.w > 0.0:
+		if ly.plan.clip.live_alpha():
+			return false
+		_sig[at] = ly.plan.get_instance_id()
+		_sig[at + 1] = ly.plan.clip.segment_at(ly.frame) * 2 + (1 if ly.weight() >= 0.5 else 0)
+	else:
+		_sig[at] = 0
+		_sig[at + 1] = 0
+	return true
+
+
+## Atlas page (global index) of part `p`'s current texture variant (-1 = not built).
 func _cur_page(p: int) -> int:
 	var b := RigDef.ROOT_CH + p * RigDef.STRIDE
 	return _slot_page[_slot0[p] + clampi(int(_pose[b + RigDef.C_TEX]), 0, rig.tex_files[p].size() - 1)]
 
 
-## Cumulative CPU time spent in _draw() by every RigPlayer (µs) and draw count — perf logs.
+## Cumulative CPU time spent in _draw() (the render sync) by every RigPlayer (µs) and draw
+## count — perf logs.
 static var draw_us: int = 0
 static var draw_count: int = 0
+## Per-section CPU µs of every player since the last reset (RigPerf --breakdown): sample,
+## layers+face+residues, springs+limits+FK, smears, sort, layout, parts, limb runs, advance
+## overhead. Off unless `profiling`.
+static var profiling: bool = false
+static var prof: PackedInt64Array = PackedInt64Array([0, 0, 0, 0, 0, 0, 0, 0, 0])
+const PROF_NAMES: PackedStringArray = ["sample", "layers+face", "springs+FK", "smears", "sort", "layout", "parts", "limb runs", "advance other"]
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_free_items()
+
+
+## The node's own canvas item draws nothing: _draw is the per-frame render sync that sends
+## the parts' transforms / textures / colours to their canvas items.
 func _draw() -> void:
-	if rig == null or atlas == null or atlas.pages.is_empty():
+	if rig == null or _pages.is_empty():
 		return
 	var t0 := Time.get_ticks_usec()
-	_draw_all()
+	_sync_render()
 	draw_us += Time.get_ticks_usec() - t0
 	draw_count += 1
 
 
-func _draw_all() -> void:
-	_sort_items()
+# --- render items ------------------------------------------------------------------------------
+
+## Create the container and one canvas item per textured part and prop (overlays, ghosts and
+## runs are created on first use). Every item uses the node's material and draws with the
+## atlas filter (LINEAR_WITH_MIPMAPS when the pages have mips).
+func _build_items() -> void:
+	_free_items()
+	var n := rig.names.size()
+	_filter = RenderingServer.CANVAS_ITEM_TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if atlas != null and atlas.mipmaps else RenderingServer.CANVAS_ITEM_TEXTURE_FILTER_LINEAR
+	_ci_root = RenderingServer.canvas_item_create()
+	RenderingServer.canvas_item_set_parent(_ci_root, get_canvas_item())
+	RenderingServer.canvas_item_set_draw_index(_ci_root, -1)
+	RenderingServer.canvas_item_set_use_parent_material(_ci_root, true)
+	RenderingServer.canvas_item_set_visibility_layer(_ci_root, visibility_layer)
+	_root_xf = Transform2D(0.0, Vector2(9.0, 9.0), 0.0, Vector2.ZERO)
+	_part_ci.resize(n)
+	_part_rec.resize(n)
+	_part_rec.fill(-1)
+	_part_col.resize(n)
+	_part_col.fill(Color(-1, -1, -1, -1))
+	_part_a.resize(n)
+	_part_a.fill(-1.0)
+	_part_tt.resize(n)
+	_part_tt.fill(-1)
+	_part_shown.resize(n)
+	_part_shown.fill(0)
+	_ghost_ci.resize(n * 2)
+	_ghost_ci.fill(RID())
+	_ghost_rec.resize(n)
+	_ghost_rec.fill(-1)
+	_ghost_on.resize(n)
+	_ghost_on.fill(0)
+	for p in n:
+		_part_ci[p] = _new_item() if rig.is_textured(p) and _tri_part[p] == 0 else RID()
+	_ov_ci.resize(_ov_part.size())
+	_ov_ci.fill(RID())
+	_ov_rec.resize(_ov_part.size())
+	_ov_rec.fill(-1)
+	_ov_alpha.resize(_ov_part.size())
+	_ov_alpha.fill(-1.0)
+	_ov_shown.resize(_ov_part.size())
+	_ov_shown.fill(0)
+	_prop_ci.resize(rig.props.size())
+	_prop_rec.resize(rig.props.size())
+	_prop_rec.fill(-1)
+	_prop_shown.resize(rig.props.size())
+	_prop_shown.fill(0)
+	for pi in rig.props.size():
+		_prop_ci[pi] = _new_item()
+	_part_in_seq.resize(n)
+	_part_in_seq.fill(0)
+	_part_drawn.resize(n)
+	_part_drawn.fill(0)
+
+
+func _new_item() -> RID:
+	var ci := RenderingServer.canvas_item_create()
+	RenderingServer.canvas_item_set_parent(ci, _ci_root)
+	RenderingServer.canvas_item_set_use_parent_material(ci, true)
+	RenderingServer.canvas_item_set_default_texture_filter(ci, _filter)
+	RenderingServer.canvas_item_set_visibility_layer(ci, visibility_layer)
+	RenderingServer.canvas_item_set_visible(ci, false)
+	return ci
+
+
+func _free_items() -> void:
+	_free_runs()
+	for arr in [_part_ci, _ghost_ci, _ov_ci, _prop_ci]:
+		for r in arr:
+			if (r as RID).is_valid():
+				RenderingServer.free_rid(r)
+	_part_ci.clear()
+	_ghost_ci.clear()
+	_ov_ci.clear()
+	_prop_ci.clear()
+	_runs.clear()
+	if _ci_root.is_valid():
+		RenderingServer.free_rid(_ci_root)
+	_ci_root = RID()
+
+
+func _set_shown(ci: RID, flags: PackedByteArray, i: int, on: bool) -> void:
+	var v := 1 if on else 0
+	if flags[i] != v:
+		flags[i] = v
+		RenderingServer.canvas_item_set_visible(ci, on)
+
+
+## Record slot `slot`'s atlas rect into canvas item `ci` (once per texture change).
+func _record(ci: RID, slot: int) -> void:
+	RenderingServer.canvas_item_clear(ci)
+	if slot >= 0 and _slot_ready[slot] == 1:
+		RenderingServer.canvas_item_add_texture_rect_region(ci, _slot_draw[slot], _page_rid[_slot_page[slot]], _slot_region[slot])
+
+
+## Per frame: sort, re-layout when the z order changed, then per item one transform (and a
+## colour / texture only when they change); limb runs rebuild their triangles.
+func _sync_render() -> void:
+	var t0 := Time.get_ticks_usec() if profiling else 0
+	if not skip_unchanged_sort or not _discrete_same():
+		_sort_items()
+	var t1 := Time.get_ticks_usec() if profiling else 0
 	if _layout_dirty:
 		_rebuild_layout()
+	var t2 := Time.get_ticks_usec() if profiling else 0
+	var run_us := 0
 	var cx := _char_xf()
-	var ci := get_canvas_item()
+	if cx != _root_xf:
+		_root_xf = cx
+		RenderingServer.canvas_item_set_transform(_ci_root, cx)
 	for code in _seq:
 		var kind := code >> 16
 		var i := code & 0xFFFF
-		if kind == K_RUN:
+		if kind == K_PART:
+			if _part_drawn[i] == 1:
+				_set_shown(_part_ci[i], _part_shown, i, true)
+				_sync_part(i)
+			else:
+				_set_shown(_part_ci[i], _part_shown, i, false)
+				if _ghost_on[i] == 1:
+					_hide_ghosts(i)
+		elif kind == K_RUN:
+			var r0 := Time.get_ticks_usec() if profiling else 0
 			var run: _Run = _runs[i]
 			_fill_run(run, Transform2D.IDENTITY)
-			draw_set_transform_matrix(cx)
-			RenderingServer.canvas_item_add_triangle_array(ci, run.idx, run.pts, run.cols, run.uvs, _empty_i, _empty_f,
-				atlas.pages[run.page].get_rid())
-		elif kind == K_PART:
-			_draw_part(i, cx)
+			_submit_run(run, run.ci)
+			if profiling:
+				run_us += Time.get_ticks_usec() - r0
 		elif kind == K_OVERLAY:
-			_draw_overlay(i, cx)
+			_sync_overlay(i)
 		elif kind == K_PROP:
-			_draw_prop(i, cx)
-	draw_set_transform_matrix(Transform2D.IDENTITY)
+			_sync_prop(i)
+	if profiling:
+		var t3 := Time.get_ticks_usec()
+		prof[4] += t1 - t0
+		prof[5] += t2 - t1
+		prof[6] += t3 - t2 - run_us
+		prof[7] += run_us
+
+
+## Limb runs draw as dynamic meshes (true) or as per-frame triangle arrays (false: the Stage-1
+## path, kept for comparison).
+static var mesh_runs: bool = true
+const RUN_AABB := AABB(Vector3(-4000.0, -6000.0, -1.0), Vector3(8000.0, 8000.0, 2.0))
+
+
+## Send a run to its canvas item: positions only when the mesh is current, else rebuild it.
+func _submit_run(run: _Run, rci: RID) -> void:
+	if not mesh_runs:
+		RenderingServer.canvas_item_clear(rci)
+		RenderingServer.canvas_item_add_triangle_array(rci, run.idx, run.pts, run.cols, run.uvs, _empty_i, _empty_f, _page_rid[run.page])
+		return
+	if run.mesh.is_valid() and not run.attr_dirty:
+		RenderingServer.mesh_surface_update_vertex_region(run.mesh, 0, 0, run.pts.to_byte_array())
+		return
+	if not run.mesh.is_valid():
+		run.mesh = RenderingServer.mesh_create()
+	else:
+		RenderingServer.mesh_clear(run.mesh)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = run.pts
+	arrays[Mesh.ARRAY_COLOR] = run.cols
+	arrays[Mesh.ARRAY_TEX_UV] = run.uvs
+	arrays[Mesh.ARRAY_INDEX] = run.idx
+	RenderingServer.mesh_add_surface_from_arrays(run.mesh, RenderingServer.PRIMITIVE_TRIANGLES, arrays, [], {},
+		RenderingServer.ARRAY_FLAG_USE_2D_VERTICES | RenderingServer.ARRAY_FLAG_USE_DYNAMIC_UPDATE)
+	RenderingServer.mesh_set_custom_aabb(run.mesh, RUN_AABB)
+	RenderingServer.canvas_item_clear(rci)
+	RenderingServer.canvas_item_add_mesh(rci, run.mesh, Transform2D.IDENTITY, Color.WHITE, _page_rid[run.page])
+	run.attr_dirty = false
+
+
+func _free_runs() -> void:
+	for run in _runs:
+		_free_run(run)
+
+
+func _free_run(run: _Run) -> void:
+	if run.mesh.is_valid():
+		RenderingServer.free_rid(run.mesh)
+		run.mesh = RID()
+	if run.ci.is_valid():
+		RenderingServer.free_rid(run.ci)
+		run.ci = RID()
+
+
+func _sync_part(p: int) -> void:
+	var b := RC + p * ST
+	var tv := int(_pose[b + RigDef.C_TEX])
+	var nt := _ntex[p]
+	var slot := _slot0[p] + (0 if tv < 0 else (tv if tv < nt else nt - 1))
+	var ci := _part_ci[p]
+	if slot != _part_rec[p]:
+		_record(ci, slot)
+		_part_rec[p] = slot
+	var a := _pose[b + RigDef.C_ALPHA]
+	var tt := _tint_tier if _is_tint[p] == 1 else 0
+	if a != _part_a[p] or tt != _part_tt[p]:
+		_part_a[p] = a
+		_part_tt[p] = tt
+		_part_col[p] = _part_color(p, a)
+		RenderingServer.canvas_item_set_self_modulate(ci, _part_col[p])
+	if _smear_t[p] > 0.0:
+		RenderingServer.canvas_item_set_transform(ci, _part_xf(p))
+		_sync_ghosts(p, slot, _part_col[p])
+		return
+	if _ghost_on[p] == 1:
+		_hide_ghosts(p)
+	if _nomirror[p] == 0 or _fsx >= 0.0:
+		RenderingServer.canvas_item_set_transform(ci, _xf[p])
+	else:
+		RenderingServer.canvas_item_set_transform(ci, _flip(p, _xf[p]))
+
+
+## The two smear ghosts of part `p` (previous transforms, alpha 0.25 / 0.45), just under it.
+func _sync_ghosts(p: int, slot: int, col: Color) -> void:
+	var g2 := _ghost_ci[p * 2]
+	if not g2.is_valid():
+		g2 = _new_item()
+		_ghost_ci[p * 2] = g2
+		_ghost_ci[p * 2 + 1] = _new_item()
+		_layout_dirty = true   # draw indices next frame
+	var g1 := _ghost_ci[p * 2 + 1]
+	if _ghost_rec[p] != slot:
+		_ghost_rec[p] = slot
+		_record(g2, slot)
+		_record(g1, slot)
+	RenderingServer.canvas_item_set_transform(g2, _flip(p, _g2[p]))
+	RenderingServer.canvas_item_set_transform(g1, _flip(p, _g1[p]))
+	RenderingServer.canvas_item_set_self_modulate(g2, Color(col.r, col.g, col.b, col.a * GHOST_ALPHA_2))
+	RenderingServer.canvas_item_set_self_modulate(g1, Color(col.r, col.g, col.b, col.a * GHOST_ALPHA_1))
+	if _ghost_on[p] == 0:
+		_ghost_on[p] = 1
+		RenderingServer.canvas_item_set_visible(g2, true)
+		RenderingServer.canvas_item_set_visible(g1, true)
+
+
+func _hide_ghosts(p: int) -> void:
+	_ghost_on[p] = 0
+	if _ghost_ci[p * 2].is_valid():
+		RenderingServer.canvas_item_set_visible(_ghost_ci[p * 2], false)
+		RenderingServer.canvas_item_set_visible(_ghost_ci[p * 2 + 1], false)
+
+
+func _sync_overlay(o: int) -> void:
+	var ci := _ov_ci[o]
+	var slot := _ov_slot[o]
+	if _ov_rec[o] != slot:
+		_ov_rec[o] = slot
+		_record(ci, slot)
+	var p := _ov_part[o]
+	var a := _pose[RigDef.ROOT_CH + p * RigDef.STRIDE + RigDef.C_ALPHA]
+	if a != _ov_alpha[o]:
+		_ov_alpha[o] = a
+		RenderingServer.canvas_item_set_self_modulate(ci, Color(1, 1, 1, a))
+	RenderingServer.canvas_item_set_transform(ci, _part_xf(p))
+
+
+func _sync_prop(i: int) -> void:
+	var pr: RigDef.RigProp = rig.props[i]
+	var slot := _prop_slot0[i] + clampi(props.state[i], 0, pr.state_files.size() - 1)
+	if _slot_ready[slot] != 1:
+		_ensure_slot(slot)
+	var ci := _prop_ci[i]
+	if _prop_rec[i] != slot:
+		_prop_rec[i] = slot
+		_record(ci, slot)
+	RenderingServer.canvas_item_set_transform(ci, _prop_xf(i))
 
 
 func _rebuild_layout() -> void:
@@ -1324,6 +1993,9 @@ func _rebuild_layout() -> void:
 	for tp in _tri_list:
 		_tri_pg[tp] = _cur_page(tp)
 	_seq = PackedInt32Array()
+	var old := {}
+	for r0 in _runs:
+		old[r0.sig] = r0
 	_runs.clear()
 	var cur: _Run = null
 	for key in _keys:
@@ -1347,9 +2019,23 @@ func _rebuild_layout() -> void:
 		if pg >= 0 and cur.page < 0:
 			cur.page = pg
 		cur.items.append(code)
+	# Runs whose page and items did not change keep their mesh and canvas item.
+	for ri in _runs.size():
+		var nr: _Run = _runs[ri]
+		if nr.page < 0:
+			nr.page = 0
+		nr.sig = "%d|%s" % [nr.page, nr.items]
+		var prev: _Run = old.get(nr.sig, null)
+		if prev != null:
+			old.erase(nr.sig)
+			_runs[ri] = prev
+	for gone in old.values():
+		_free_run(gone)
 	for run in _runs:
-		if run.page < 0:
-			run.page = 0
+		if run.ci.is_valid():
+			continue
+		run.ci = _new_item()
+		RenderingServer.canvas_item_set_visible(run.ci, true)
 		var nv := 0
 		var nt := 0
 		for code2 in run.items:
@@ -1364,9 +2050,14 @@ func _rebuild_layout() -> void:
 		run.uvs.resize(nv)
 		run.cols.resize(nv)
 		run.idx.resize(nt * 3)
+		run.qslot.resize(run.items.size())
+		run.qslot.fill(-1)
+		run.qcol.resize(run.items.size())
+		run.qcol.fill(Color(-1, -1, -1, -1))
+		run.attr_dirty = true
 		var w := 0
-		var line_uv := atlas.builtin_uv(AtlasSet.LINE, run.page)
-		var disc_uv := atlas.builtin_uv(AtlasSet.DISC, run.page)
+		var line_uv := _page_set[run.page].builtin_uv(AtlasSet.LINE, _page_local[run.page])
+		var disc_uv := _page_set[run.page].builtin_uv(AtlasSet.DISC, _page_local[run.page])
 		for j in run.items.size():
 			var code3 := run.items[j]
 			if (code3 >> 16) == K_LIMB:
@@ -1377,6 +2068,51 @@ func _rebuild_layout() -> void:
 			else:
 				LineLimb.write_quad_indices(run.idx, w, run.vbase[j])
 				w += LineLimb.QUAD_TRIS * 3
+	_apply_layout()
+
+
+## Draw order (draw index = sequence position; ghosts just under their part) and visibility of
+## every canvas item for the new layout.
+func _apply_layout() -> void:
+	var want_part := PackedByteArray()
+	want_part.resize(_part_ci.size())
+	var want_ov := PackedByteArray()
+	want_ov.resize(_ov_ci.size())
+	var want_prop := PackedByteArray()
+	want_prop.resize(_prop_ci.size())
+	for k in _seq.size():
+		var code := _seq[k]
+		var kind := code >> 16
+		var i := code & 0xFFFF
+		var di := k * 4 + 3
+		match kind:
+			K_PART:
+				want_part[i] = 1
+				RenderingServer.canvas_item_set_draw_index(_part_ci[i], di)
+				if _ghost_ci[i * 2].is_valid():
+					RenderingServer.canvas_item_set_draw_index(_ghost_ci[i * 2], di - 2)
+					RenderingServer.canvas_item_set_draw_index(_ghost_ci[i * 2 + 1], di - 1)
+			K_RUN:
+				RenderingServer.canvas_item_set_draw_index((_runs[i] as _Run).ci, di)
+			K_OVERLAY:
+				if not _ov_ci[i].is_valid():
+					_ov_ci[i] = _new_item()
+				want_ov[i] = 1
+				RenderingServer.canvas_item_set_draw_index(_ov_ci[i], di)
+			K_PROP:
+				want_prop[i] = 1
+				RenderingServer.canvas_item_set_draw_index(_prop_ci[i], di)
+	for p in _part_ci.size():
+		_part_in_seq[p] = want_part[p]
+		if _part_ci[p].is_valid():
+			_set_shown(_part_ci[p], _part_shown, p, want_part[p] == 1 and _part_drawn[p] == 1)
+			if want_part[p] == 0 and _ghost_on[p] == 1:
+				_hide_ghosts(p)
+	for o in _ov_ci.size():
+		if _ov_ci[o].is_valid():
+			_set_shown(_ov_ci[o], _ov_shown, o, want_ov[o] == 1)
+	for pi in _prop_ci.size():
+		_set_shown(_prop_ci[pi], _prop_shown, pi, want_prop[pi] == 1)
 
 
 func _fill_run(run: _Run, cx: Transform2D) -> void:
@@ -1389,15 +2125,16 @@ func _fill_run(run: _Run, cx: Transform2D) -> void:
 			var jn := lb.joints.size()
 			if _joints.size() < jn:
 				_joints.resize(jn)
-			var vis := true
-			for k in jn:
-				_joints[k] = _xf[lb.joints[k]].origin
-			vis = _pose[RigDef.ROOT_CH + lb.joints[0] * RigDef.STRIDE + RigDef.C_VIS] > 0.5
-			if not vis:
+			if _pose[RigDef.ROOT_CH + lb.joints[0] * RigDef.STRIDE + RigDef.C_VIS] <= 0.5:
 				LineLimb.collapse(run.pts, vb, LineLimb.VERTS)
 				continue
-			LineLimb.curve(_joints, jn, _curve)
-			LineLimb.write_positions(_curve, lb.width * 0.5 + lb.outline, lb.width * 0.5, cx, run.pts, vb)
+			for k in jn:
+				_joints[k] = _xf[lb.joints[k]].origin
+			if cx == Transform2D.IDENTITY:
+				LineLimb.write_limb(_joints, jn, lb.width * 0.5 + lb.outline, lb.width * 0.5, run.pts, vb, _curve)
+			else:
+				LineLimb.curve(_joints, jn, _curve)
+				LineLimb.write_positions(_curve, lb.width * 0.5 + lb.outline, lb.width * 0.5, cx, run.pts, vb)
 		else:
 			var b := RigDef.ROOT_CH + i * RigDef.STRIDE
 			var alpha := _pose[b + RigDef.C_ALPHA]
@@ -1405,10 +2142,15 @@ func _fill_run(run: _Run, cx: Transform2D) -> void:
 				LineLimb.collapse(run.pts, vb, LineLimb.QUAD_VERTS)
 				continue
 			var slot := _slot0[i] + clampi(int(_pose[b + RigDef.C_TEX]), 0, rig.tex_files[i].size() - 1)
-			var r := Rect2(-rig.pivot[i] + _slot_rect[slot].position, _slot_rect[slot].size)
+			var r: Rect2 = _slot_draw[slot]
 			var uv: Rect2 = _slot_uv[slot]
 			var col := _part_color(i, alpha)
 			var main := _part_xf(i)
+			var qk := slot * 2 + (1 if _smear_t[i] > 0.0 else 0)
+			if qk != run.qslot[j] or col != run.qcol[j]:
+				run.qslot[j] = qk
+				run.qcol[j] = col
+				run.attr_dirty = true
 			if _smear_t[i] > 0.0:
 				var c2 := col
 				c2.a *= GHOST_ALPHA_2
@@ -1443,52 +2185,10 @@ func _flip(p: int, xf: Transform2D) -> Transform2D:
 
 
 func _part_color(p: int, alpha: float) -> Color:
-	var col := Color(1, 1, 1, alpha)
 	if _tint_tier > 0 and _is_tint[p] == 1 and not rig.tint_tiers.is_empty():
 		var t := rig.tint_tiers[mini(_tint_tier, rig.tint_tiers.size() - 1)]
-		col = Color(t.r, t.g, t.b, alpha)
-	return col
-
-
-func _draw_part(p: int, cx: Transform2D) -> void:
-	var b := RigDef.ROOT_CH + p * RigDef.STRIDE
-	var alpha := _pose[b + RigDef.C_ALPHA]
-	if _pose[b + RigDef.C_VIS] < 0.5 or alpha <= 0.001:
-		return
-	var slot := _slot0[p] + clampi(int(_pose[b + RigDef.C_TEX]), 0, rig.tex_files[p].size() - 1)
-	var tex: Texture2D = atlas.pages[_slot_page[slot]]
-	var r := Rect2(-rig.pivot[p] + _slot_rect[slot].position, _slot_rect[slot].size)
-	var region: Rect2 = _slot_region[slot]
-	var col := _part_color(p, alpha)
-	if _smear_t[p] > 0.0:
-		draw_set_transform_matrix(cx * _flip(p, _g2[p]))
-		draw_texture_rect_region(tex, r, region, Color(col.r, col.g, col.b, col.a * GHOST_ALPHA_2))
-		draw_set_transform_matrix(cx * _flip(p, _g1[p]))
-		draw_texture_rect_region(tex, r, region, Color(col.r, col.g, col.b, col.a * GHOST_ALPHA_1))
-	draw_set_transform_matrix(cx * _part_xf(p))
-	draw_texture_rect_region(tex, r, region, col)
-
-
-func _draw_overlay(o: int, cx: Transform2D) -> void:
-	if _res_on[_ov_res[o]] == 0:
-		return
-	var p := _ov_part[o]
-	var b := RigDef.ROOT_CH + p * RigDef.STRIDE
-	if _pose[b + RigDef.C_VIS] < 0.5:
-		return
-	var slot := _ov_slot[o]
-	draw_set_transform_matrix(cx * _part_xf(p))
-	draw_texture_rect_region(atlas.pages[_slot_page[slot]], Rect2(-rig.pivot[p] + _slot_rect[slot].position, _slot_rect[slot].size), _slot_region[slot],
-		Color(1, 1, 1, _pose[b + RigDef.C_ALPHA]))
-
-
-func _draw_prop(i: int, cx: Transform2D) -> void:
-	if props.mode[i] == PropSim.HIDDEN:
-		return
-	var pr: RigDef.RigProp = rig.props[i]
-	var slot := _prop_slot0[i] + clampi(props.state[i], 0, pr.state_files.size() - 1)
-	draw_set_transform_matrix(cx * _prop_xf(i))
-	draw_texture_rect_region(atlas.pages[_slot_page[slot]], Rect2(-pr.pivot + _slot_rect[slot].position, _slot_rect[slot].size), _slot_region[slot])
+		return Color(t.r, t.g, t.b, alpha)
+	return Color(1, 1, 1, alpha)
 
 
 # --- helpers ---------------------------------------------------------------------------------

@@ -1,5 +1,11 @@
 # Solver review: the bot, fairness fuzz, lints and CI (Stage 1)
 
+> **Stage 2 (s2-sim, batch 1):** `solve_report.md/.json` and `timelines/` are refreshed with the D1 gate — dead air
+> in real time with the persona's ⏩ latch and visible micro-gag beats, the scenario routes, `g0_sneeze`, a BEATS
+> and an FF row in every timeline. The before/after tables, `alive_by`, edge share and the ⏩ model are in
+> [../s2-sim/index.md](../s2-sim/index.md). The Stage-1 text below is kept as the record of the starting point.
+
+
 These are the headless proofs that each final Night can be completed, 3-starred and played fairly,
 plus the numbers the owner's fun gate cares about. Everything here was run on the real `SimWorld`
 with the real `game/data` (Prologue, Night 1 and Night 2 are `final`) on 2026-09-29.

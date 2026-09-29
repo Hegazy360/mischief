@@ -16,6 +16,8 @@ var prop_rect: Rect2 = Rect2()
 var outline_tex: Texture2D = null
 var outline_pos: Vector2 = Vector2.ZERO
 var outline_scale: Vector2 = Vector2.ONE
+## The outline pulse colour (PropView.outline_tint: gold on the pale rooms).
+var tint: Color = OUTLINE_COLOR
 var highlighted: bool = false:
 	set(v):
 		if highlighted != v:
@@ -51,10 +53,10 @@ func tick(dt: float, phase_offset: float) -> void:
 
 func _draw() -> void:
 	if outline_tex != null:
-		draw_texture_rect(outline_tex, Rect2(outline_pos, outline_tex.get_size() * outline_scale), false, OUTLINE_COLOR)
+		draw_texture_rect(outline_tex, Rect2(outline_pos, outline_tex.get_size() * outline_scale), false, tint)
 	else:
 		var r := prop_rect.grow(6.0)
-		var c := Color(OUTLINE_COLOR, 0.95)
+		var c := Color(tint, 0.95)
 		draw_line(r.position, Vector2(r.end.x, r.position.y), c, 5.0)
 		draw_line(Vector2(r.end.x, r.position.y), r.end, c, 5.0)
 		draw_line(r.end, Vector2(r.position.x, r.end.y), c, 5.0)

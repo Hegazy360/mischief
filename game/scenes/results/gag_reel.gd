@@ -27,6 +27,8 @@ const PRE_TICKS := 12
 const FX_LAYER_BIT := 2
 const DUCK_DB := -6.0
 const DUCK_BUSES: PackedStringArray = ["SFX", "Voice"]
+## Reel zoom relative to the main camera's framing outside a gag punch-in.
+const CLOSE_UP := 1.7
 
 
 ## Per-Night recording of reel moments (pure data + world clones).
@@ -143,6 +145,7 @@ var _to_tick: int = 0
 var _world_saved: Object = null
 var _bus_saved: Dictionary = {}
 var _elapsed: float = 0.0
+var _snap_cam: bool = true
 
 
 func _init() -> void:
@@ -239,6 +242,7 @@ func _next() -> void:
 	cam.snap_now()
 	cam.reset_motion()
 	_to_tick = w.y
+	_snap_cam = true
 	played.append(Vector2i(w.x, w.y))
 	drv.set_paused(false)
 	moment_started.emit(index, m)
@@ -257,9 +261,20 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	var cam: CameraDirector = night.get("cam")
 	if cam != null:
-		reel_cam.global_position = cam.get_screen_center_position()
+		# The main camera's punch-in while a gag plays; otherwise a closer shot on Bellows (the reel
+		# is about his reactions and must read in a 704-px slot on a phone).
 		var vw := maxf(1.0, cam.view_size().x)
-		reel_cam.zoom = cam.zoom * (float(SIZE.x) / vw)
+		# never wider than CLOSE_UP × the base framing: a 704-px slot needs a close shot
+		var z := maxf(cam.zoom.x, cam.base_zoom() * CLOSE_UP) * (float(SIZE.x) / vw)
+		var focus := cam.get_screen_center_position()
+		var wv: WorldView = night.get("world_view")
+		if wv != null and wv.bellows_view != null and wv.bellows_view.visible:
+			# the reel is about his reactions: centre on him (the punch-in's own focus is him too)
+			focus = focus.lerp(wv.bellows_view.global_position + Vector2(0, -190), 0.85)
+		var k := 1.0 if _snap_cam else clampf(delta * 6.0, 0.0, 1.0)
+		_snap_cam = false
+		reel_cam.global_position = reel_cam.global_position.lerp(focus, k)
+		reel_cam.zoom = reel_cam.zoom.lerp(Vector2(z, z), k)
 	var drv: SimDriver = night.get("driver")
 	if int(drv.world.get("tick")) >= _to_tick or bool(drv.world.get("ended")) or _elapsed >= budget_s:
 		_end_moment()

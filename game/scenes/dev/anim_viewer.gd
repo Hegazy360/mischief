@@ -18,6 +18,8 @@ const USAGE := """AnimViewer — user args (after `--`):
   --looks=K1,K2            residue looks on (SOAKED, FRAZZLED:blind, COSTUME:jelly_helmet, COMBO:dough_man…);
                            --residue= is the same
   --tint=<tier>            temper tint tier (0..3)
+  --prop=<id>:<state>[,…]  prop states on rig 1 (specs:on, clarence:smitten, stool:hidden…)
+  --part-tex=<part>:<variant>[,…]  persistent part textures (bouffant:flipped — the BLINDED hair)
   --tier=1..3 --suppressed  reaction tier remap / suppressed settle
   --frame=N --paused       start at frame N / paused
   --facing=-1              face left
@@ -124,7 +126,8 @@ static func parse_args(args: PackedStringArray) -> Dictionary:
 		"overlay": "", "overlay_at": 12, "overlay_gap": 30, "room": "", "x": NAN, "station": "",
 		"rig2": "", "clip2": "", "pose2": "", "x2": 260.0, "facing2": -1, "skin2": "", "looks2": PackedStringArray(),
 		"attach2": PackedStringArray(), "zoom": 1.0, "once": false, "clean": false, "sound": false, "blips": false,
-		"juice": true, "help": false, "unknown": PackedStringArray()}
+		"juice": true, "help": false, "props": PackedStringArray(), "part_tex": PackedStringArray(),
+		"unknown": PackedStringArray()}
 	for a in args:
 		var k := a
 		var v := ""
@@ -146,6 +149,14 @@ static func parse_args(args: PackedStringArray) -> Dictionary:
 				o["looks"] = l
 			"--tint":
 				o["tint"] = clampi(int(v), 0, 9)
+			"--prop":
+				var pl: PackedStringArray = o["props"]
+				pl.append_array(v.split(",", false))
+				o["props"] = pl
+			"--part-tex":
+				var tl: PackedStringArray = o["part_tex"]
+				tl.append_array(v.split(",", false))
+				o["part_tex"] = tl
 			"--tier":
 				o["tier"] = clampi(int(v), 1, 3)
 			"--suppressed":
@@ -287,11 +298,13 @@ func _ready() -> void:
 	add_child(_cam)
 	_cam.make_current()
 	_blip_player = AudioStreamPlayer.new()
+	_blip_player.name = "Blips"
 	add_child(_blip_player)
 	_build_ui()
 	get_viewport().size_changed.connect(_layout)
 	_load_rig(rig_id)
 	_layout()
+	_update_camera(0.0)   # frame 0 (a capture's first PNG) already framed
 
 
 func _new_player() -> RigPlayer:
@@ -315,6 +328,7 @@ func _load_rig(id: String) -> void:
 	for kind in cfg.get("looks", PackedStringArray()):
 		player.set_residue(String(kind), true)
 	player.set_tint_tier(int(cfg.get("tint", 0)))
+	_apply_prop_args()
 	if player2 != null:
 		player2.setup(String(cfg["rig2"]), String(cfg["skin2"]))
 		player2.set_facing(int(cfg["facing2"]), false)
@@ -339,6 +353,18 @@ func _load_rig(id: String) -> void:
 				cid = c
 	if cid != "":
 		_play(cid, int(cfg.get("frame", 0)))
+
+
+## --prop=id:state and --part-tex=part:variant on rig 1 (re-applied after every replay).
+func _apply_prop_args() -> void:
+	for ps in cfg.get("props", PackedStringArray()):
+		var kv := String(ps).split(":")
+		if kv.size() == 2:
+			player.set_prop_state(kv[0], kv[1])
+	for pt in cfg.get("part_tex", PackedStringArray()):
+		var kv2 := String(pt).split(":")
+		if kv2.size() == 2:
+			player.set_part_texture(kv2[0], kv2[1])
 
 
 ## World x of rig 1 (room mode: --x / --station / the room centre) and rig 2 beside it.
@@ -380,6 +406,7 @@ func _play(cid: String, start: int = 0) -> void:
 		p.springs.reset()
 		p.reset_layers()
 	player.play(cid, opts)
+	_apply_prop_args()
 	if player2 != null:
 		if clip2_id != "":
 			player2.play(clip2_id, {"blend_in": 0, "seed": 1, "speed": walk_speed} if walk_speed > 0.0 else {"blend_in": 0, "seed": 1})
@@ -491,7 +518,12 @@ func _rest_centre() -> Vector2:
 	var z := float(cfg.get("zoom", 1.0))
 	var fx := 0.5 if clean else 0.34
 	var fy := ROOM_FLOOR_FRAC if backdrop != null else (0.84 if clean else 0.72)
-	return Vector2(_rig_x, 0.0) + Vector2((0.5 - fx) * vs.x, (0.5 - fy) * vs.y) / z
+	var c := Vector2(_rig_x, 0.0) + Vector2((0.5 - fx) * vs.x, (0.5 - fy) * vs.y) / z
+	# Zoomed in (close-ups, cast shots): slide toward the character's middle so the head stays
+	# in frame (a 380 px Bellows at 2× is taller than the space above the floor).
+	if z > 1.0 and player != null and player.rig != null:
+		c.y = lerpf(c.y, -player.rig.height_px * 0.5, clampf((z - 1.0) / 0.8, 0.0, 1.0))
+	return c
 
 
 func _update_camera(delta: float) -> void:

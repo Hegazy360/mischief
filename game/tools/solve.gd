@@ -5,7 +5,8 @@
 ##                          [--max-macros=400] [--timeline=/abs/dir] [--dump-events=/abs/dir]
 ##                          [--dump-cmds=/abs/dir] [--baseline=/abs/report.json] [--pregate]
 ##   (= tools/scripts/sandbox.sh solve -s res://tools/solve.gd -- …)
-## `--route=all` runs every route of the solution file (ideal, required, slow and the `scenario` routes).
+## `--route=all` runs every route of the solution file (ideal, required, slow and the `scenario` routes; a `final`
+## episode missing one of ideal / required / slow fails, a draft one — `g0_sneeze` — runs just what its file has).
 ## `--dump-cmds=/abs/dir` writes `<episode>_<route>.cmds.json` per run in the `sim_run.gd --cmds` format
 ## ({"cmds": [[tick, cmd], …]} + episode, route, persona, ticks, hash): replaying it through sim_run gives the
 ## same final hash (NightScene's e2e driver and ViewSandbox `--sim --cmds` replay them).
@@ -113,6 +114,9 @@ func run(a: Dictionary) -> int:
 			failed += 1
 		var names := want_routes.duplicate()
 		if String(a["route"]) == "all":
+			# a `final` Night must have ideal / required / slow; a draft (the g0_sneeze dev scene) only what its file has
+			if SolverData.sv(data.episode(ep).get("status", "draft")) != "final":
+				names = PackedStringArray()
 			for n in sol.route_names():
 				if not names.has(n):
 					names.append(n)
@@ -288,20 +292,10 @@ func run_route(db: Object, data: SolverData, ep: String, sol: SolutionDef, rn: S
 	return rep
 
 
-## Write a run's commands in the `sim_run.gd --cmds` format: {"cmds": [[tick, cmd], …], episode, route,
-## persona, ticks (the run's last tick), hash (its final state hash)}. Returns OK or an error code.
+## Write a run's commands in the `sim_run.gd --cmds` format (SolverLog.write_cmds): {episode, route, persona,
+## ticks (the run's last tick), hash (its final state hash), cmds: [[tick, cmd], …]}. Returns OK or an error code.
 static func write_cmds(path: String, lg: SolverLog, ep: String, rn: String) -> int:
-	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	if f == null:
-		return FileAccess.get_open_error()
-	var rows := PackedStringArray()
-	for c in lg.cmds:
-		rows.append("  [%d, %s]" % [int(c[0]), JSON.stringify(c[1])])
-	f.store_string("{\"episode\": %s, \"route\": %s, \"persona\": %s, \"ticks\": %d, \"hash\": %d,\n \"cmds\": [\n%s\n]}\n" % [
-		JSON.stringify(ep), JSON.stringify(rn), JSON.stringify(lg.persona), lg.last_tick(), lg.final_hash, ",\n".join(rows)])
-	f.close()
-	return OK
+	return lg.write_cmds(path, {"episode": ep, "route": rn})
 
 
 ## Planner proofs (+ `_auto/` output). Returns {ok, proofs, wrote}. ★★★ counts as proven when the

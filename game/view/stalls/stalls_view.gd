@@ -1,17 +1,25 @@
 ## StallsView — the visible laugh track (GDD §1.2, §4.10, §6.5; TECH §5.10): 24 silhouetted
 ## heads along the bottom-centre band (x from S+800 to W−S−312), drawn from ONE atlas in
-## `_draw()` (one batched draw call). Resting they peek up 40 px at alpha 0.6; they react per
-## laugh tier — T0 two heads nudge, T1 bob, T2 bounce, T3 rise +60 px, T4 everyone stands and
-## one head tumbles out of its seat — and do the specials: shush (lean), gasp (jolt),
-## "BEHIND YOU!" (rise + point), boo, aww, the PIPE-DOWN! chant, relief. Alpha 1.0 during
-## reaction holds. No input handling at all (put it on a CanvasLayer at layer 9, under the
-## HUD). Atlas: `res://data/rigs/stalls/stalls.json` (owner `art-hush`) when present, else
-## built-in rounded silhouettes (bowlers, beehives, a shiny bald head, a toddler on a
-## shoulder…).
+## `_draw()` (one batched draw call). Resting they peek up 40 px at `alpha_rest` (0.6); they react
+## per laugh tier — T0 two heads nudge, T1 bob, T2 bounce, T3 rise +60 px, T4 everyone stands and
+## one head tumbles heels-over-head in its seat (`tumble` frames, 8 f each) — and do the specials:
+## `shush` (lean toward `face_dir`), `gasp` (jolt), `behind_you` (rise + the `point` frame + the
+## `fx.behind_you` balloon), `boo`, `aww`, `chant`, `relief` (a collective exhale, then a titter).
+## `alpha_hold` (1.0) during reaction holds. No input handling at all (a CanvasLayer at layer 9,
+## under the HUD).
+##
+## Data (art-hush / s2-anim-hush): `res://data/rigs/stalls/stalls.json` — heads (frames rest /
+## laugh / lean / point, `size` canvas + `pivot` bottom centre, `face_dir`), `layout` (seat order),
+## `tumble` frames, `alpha_rest` / `alpha_hold`; `res://data/anim/stalls/tiers.json` (optional) —
+## per tier `heads_pct`, `rise_px`, `bob_hz`, `bounce_px`, `frame`, `hold_s`, `delay_ms` (per-head
+## pattern), `stand`, `tumble {head, frames, f_per_frame}`, and per special the same keys. The
+## built-in constants (DEFAULT_TIERS / DEFAULT_SPECIALS) apply when a file or a key is missing,
+## and built-in rounded silhouettes when the art is.
 class_name StallsView
 extends Node2D
 
 const STALLS_JSON := "res://data/rigs/stalls/stalls.json"
+const TIERS_JSON := "res://data/anim/stalls/tiers.json"
 const HEADS := 24
 const REST_PX := 40.0
 const REST_ALPHA := 0.6
@@ -21,21 +29,55 @@ const SPRING_C := 13.0
 const BAND_LEFT := 800.0
 const BAND_RIGHT := 312.0
 const BALLOON_S := 1.6
-## Durations (s) of each reaction.
-const DUR := {0: 0.8, 1: 1.2, 2: 2.0, 3: 3.0, 4: 4.5}
+const TUMBLE_F_PER_FRAME := 8
+## Motion per laugh tier (the GDD §6.5 table as data; tiers.json overrides key by key).
+const DEFAULT_TIERS := {
+	"t0": {"heads_pct": 0.09, "rise_px": 6.0, "bob_hz": 0.0, "bounce_px": 0.0, "frame": "lean", "hold_s": 0.8},
+	"t1": {"heads_pct": 1.0, "rise_px": 0.0, "bob_hz": 3.0, "bounce_px": 9.0, "frame": "rest", "hold_s": 1.2},
+	"t2": {"heads_pct": 1.0, "rise_px": 8.0, "bob_hz": 4.0, "bounce_px": 16.0, "frame": "laugh", "hold_s": 2.0},
+	"t3": {"heads_pct": 1.0, "rise_px": 60.0, "bob_hz": 4.0, "bounce_px": 14.0, "frame": "laugh", "hold_s": 3.0},
+	"t4": {"heads_pct": 1.0, "rise_px": 82.0, "bob_hz": 3.2, "bounce_px": 22.0, "frame": "laugh", "hold_s": 4.5,
+		"stand": true, "tumble": {"head": "", "frames": 4, "f_per_frame": 8}},
+}
+const DEFAULT_SPECIALS := {
+	"shush": {"heads_pct": 1.0, "rise_px": 0.0, "lean": 0.2, "frame": "lean", "hold_s": 1.6},
+	"gasp": {"heads_pct": 1.0, "rise_px": 16.0, "frame": "rest", "hold_s": 0.7},
+	"behind_you": {"heads_pct": 0.34, "rise_px": 42.0, "frame": "point", "hold_s": 1.6},
+	"boo": {"heads_pct": 1.0, "rise_px": 6.0, "lean": -0.15, "frame": "rest", "hold_s": 1.6},
+	"aww": {"heads_pct": 1.0, "rise_px": -8.0, "frame": "rest", "hold_s": 1.6},
+	"relief": {"heads_pct": 1.0, "rise_px": -6.0, "bob_hz": 3.0, "bounce_px": 8.0, "frame": "rest", "hold_s": 1.4},
+	"chant": {"heads_pct": 1.0, "rise_px": 0.0, "bob_hz": 2.0, "bounce_px": 18.0, "frame": "laugh", "hold_s": 3.0},
+	"ooh": {"heads_pct": 1.0, "rise_px": 10.0, "frame": "rest", "hold_s": 0.8},
+}
+## Balloon words per special (s2-ui `fx.*` keys, with today's literal as the fallback).
+const BALLOONS := {"behind_you": ["fx.behind_you", "BEHIND YOU!"], "boo": ["fx.boo", "BOO!"], "aww": ["fx.aww", "Awww…"],
+	"chant": ["fx.chant", "PIPE-DOWN!"], "shush": ["fx.shush", "SHHH!"], "ooh": ["fx.ooh", "Ooooh!"]}
 
 var reduce_motion: bool = false
 ## Test hook: a fixed canvas size.
 var view_size_override: Vector2 = Vector2.ZERO
 ## Symmetric side inset S (logical px); refreshed from SafeArea when available.
 var side_inset: float = 0.0
+var alpha_rest: float = REST_ALPHA
+var alpha_hold: float = 1.0
 
 var _atlas: Texture2D = null
-## Per head: atlas regions for rest / laugh / lean, drawn size (1×).
+## Per seat: atlas regions for rest / laugh / lean / point, drawn canvas size and pivot.
 var _rest: Array[Rect2] = []
 var _laugh: Array[Rect2] = []
 var _lean: Array[Rect2] = []
+var _point: Array[Rect2] = []
 var _size: Array[Vector2] = []
+var _pivot: Array[Vector2] = []
+## Silhouette height above the pivot (stalls.json `h`): the part that peeks over the edge.
+var _sil_h := PackedFloat32Array()
+var _face := PackedFloat32Array()
+var _ids := PackedStringArray()
+var _tumble_r: Array[Rect2] = []
+var _tumble_size := Vector2.ZERO
+var _tumble_pivot := Vector2.ZERO
+var _tiers: Dictionary = {}
+var _specials: Dictionary = {}
 var _x := PackedFloat32Array()
 var _row := PackedInt32Array()
 var _y := PackedFloat32Array()
@@ -44,6 +86,7 @@ var _rot := PackedFloat32Array()
 var _phase := PackedFloat32Array()
 var _mode := "rest"
 var _tier := -1
+var _spec: Dictionary = {}
 var _t := 0.0
 var _dur := 0.0
 var _alpha := REST_ALPHA
@@ -65,6 +108,7 @@ func _init() -> void:
 func _ready() -> void:
 	_font = ViewKit.display_font()
 	reduce_motion = bool(ViewKit.setting("reduce_motion", false))
+	_load_tables()
 	_build_atlas()
 	_layout_heads()
 
@@ -76,6 +120,33 @@ func view_size() -> Vector2:
 	return get_viewport_rect().size if is_inside_tree() else Vector2(2400, 1080)
 
 
+func _load_tables() -> void:
+	_tiers = DEFAULT_TIERS.duplicate(true)
+	_specials = DEFAULT_SPECIALS.duplicate(true)
+	var v: Variant = ViewKit.json(TIERS_JSON)
+	if not (v is Dictionary):
+		return
+	var t: Variant = (v as Dictionary).get("tiers", {})
+	if t is Dictionary:
+		for k in t:
+			if (t as Dictionary)[k] is Dictionary:
+				var base: Dictionary = _tiers.get(ViewKit.s(k), {})
+				base.merge((t as Dictionary)[k], true)
+				_tiers[ViewKit.s(k)] = base
+	var sp: Variant = (v as Dictionary).get("specials", {})
+	if sp is Dictionary:
+		for k2 in sp:
+			if (sp as Dictionary)[k2] is Dictionary:
+				var b2: Dictionary = _specials.get(ViewKit.s(k2), {})
+				b2.merge((sp as Dictionary)[k2], true)
+				_specials[ViewKit.s(k2)] = b2
+
+
+## The motion row for tier `n` (t0–t4) — tiers.json over the built-in table.
+func tier_row(n: int) -> Dictionary:
+	return _tiers.get("t%d" % clampi(n, 0, 4), {})
+
+
 # --- public reactions ----------------------------------------------------------------------
 
 ## A laugh of tier 0–4 (GDD §6.5).
@@ -83,49 +154,49 @@ func react(tier: int) -> void:
 	tier = clampi(tier, 0, 4)
 	_tier = tier
 	_mode = "laugh"
+	_spec = tier_row(tier)
 	_t = 0.0
-	_dur = float(DUR[tier])
+	_dur = float(_spec.get("hold_s", 1.0))
 	_laughs += 1
 	if tier == 0:
 		_nudge_a = (_laughs * 7) % (HEADS - 1)
 	if tier == 4 and _tumble < 0:
-		_tumble = (_laughs * 5 + 3) % 12
+		_tumble = _tumble_seat()
 		_tumble_t = 0.0
 
 
-## Specials: shush, gasp, behind_you, boo, aww, chant, relief, ooh.
+func _tumble_seat() -> int:
+	var tb: Variant = _spec.get("tumble", {})
+	var id := ViewKit.s((tb as Dictionary).get("head", "")) if tb is Dictionary else ""
+	if id != "":
+		var i := _ids.find(id)
+		if i >= 0:
+			return i
+	return (_laughs * 5 + 3) % 12
+
+
+## Specials: shush, gasp, behind_you, boo, aww, chant, relief, ooh (t0–t4 = laughs).
 func special(kind: String) -> void:
 	match kind:
-		"relief":
-			react(1)
-			return
 		"t0", "t1", "t2", "t3", "t4":
 			react(int(kind.substr(1)))
 			return
+		"shh":
+			kind = "shush"
+		"rest":
+			_mode = "rest"
+			_tier = -1
+			_t = 0.0
+			_dur = 0.0
+			_balloon = ""
+			return
 	_mode = kind
 	_tier = -1
+	_spec = _specials.get(kind, {"hold_s": 1.6})
 	_t = 0.0
-	_dur = 1.6 if kind != "chant" else 3.0
-	match kind:
-		"behind_you":
-			_balloon = "BEHIND YOU!"
-		"boo":
-			_balloon = "BOO!"
-		"aww":
-			_balloon = "Awww…"
-		"chant":
-			_balloon = "PIPE-DOWN!"
-		"shush", "shh":
-			_mode = "shush"
-			_balloon = "SHHH!"
-		"gasp":
-			_dur = 0.7
-			_balloon = ""
-		"ooh":
-			_dur = 0.8
-			_balloon = "Ooooh!"
-		_:
-			_balloon = ""
+	_dur = float(_spec.get("hold_s", 1.6))
+	var bw: Variant = BALLOONS.get(kind, null)
+	_balloon = ViewKit.word(ViewKit.s(bw[0]), ViewKit.s(bw[1])) if bw is Array else ""
 	_balloon_t = 0.0 if _balloon != "" else 99.0
 
 
@@ -151,20 +222,53 @@ func tumbling() -> int:
 	return _tumble
 
 
+## The tumble frame the tumbler shows now (0–3; −1 none): 8 f per frame, then holds the last.
+func tumble_frame() -> int:
+	if _tumble < 0:
+		return -1
+	var fpf := TUMBLE_F_PER_FRAME
+	var tb: Variant = tier_row(4).get("tumble", {})
+	if tb is Dictionary:
+		fpf = maxi(1, int((tb as Dictionary).get("f_per_frame", fpf)))
+	var n := maxi(1, _tumble_r.size())
+	return mini(int(_tumble_t * 60.0 / float(fpf)), n - 1)
+
+
+## Seat ids in layout order (tests).
+func seat_ids() -> PackedStringArray:
+	return _ids
+
+
+## The frame a seat shows now ("rest", "laugh", "lean", "point").
+func frame_of(i: int) -> String:
+	if _mode == "rest":
+		return "rest"
+	if not _selected(i):
+		return "rest"
+	if _mode == "laugh" and _tier == 0:
+		return "lean" if (i == _nudge_a or i == _nudge_a + 1) else "rest"
+	return ViewKit.s(_spec.get("frame", "rest"))
+
+
 # --- atlas ---------------------------------------------------------------------------------
 
 func _build_atlas() -> void:
 	_rest.clear()
 	_laugh.clear()
 	_lean.clear()
+	_point.clear()
 	_size.clear()
+	_pivot.clear()
+	_face.resize(HEADS)
+	_ids.resize(HEADS)
+	_sil_h.resize(HEADS)
 	if _atlas_from_json():
 		return
 	_atlas_fallback()
 
 
-## art-hush's atlas: heads[i].frames.{rest, laugh, lean} = texture paths (or [x, y, w, h] on a
-## "sheet"). Packs every frame into one runtime texture.
+## art-hush's atlas: heads (ordered by `layout`) with frames {rest, laugh, lean, point} as texture
+## paths, plus the `tumble` frames; everything is packed into ONE runtime texture.
 func _atlas_from_json() -> bool:
 	var v: Variant = ViewKit.json(STALLS_JSON)
 	if not (v is Dictionary):
@@ -173,51 +277,67 @@ func _atlas_from_json() -> bool:
 	var heads: Array = d.get("heads", [])
 	if heads.is_empty():
 		return false
-	var sheet_path := ViewKit.s(d.get("sheet", ""))
-	if sheet_path != "":
-		var st := ViewKit.tex(sheet_path)
-		if st == null:
-			return false
-		_atlas = st
-		for i in HEADS:
-			var h: Dictionary = heads[i % heads.size()]
-			var fr: Dictionary = h.get("frames", {})
-			var r := _rect_of(fr.get("rest", null))
-			_rest.append(r)
-			_laugh.append(_rect_of(fr.get("laugh", fr.get("rest", null))))
-			_lean.append(_rect_of(fr.get("lean", fr.get("rest", null))))
-			_size.append(Vector2(float(h.get("w", r.size.x)), float(h.get("h", r.size.y))))
-		return true
-	# Paths per frame: blit into one image.
+	alpha_rest = float(d.get("alpha_rest", REST_ALPHA))
+	alpha_hold = float(d.get("alpha_hold", 1.0))
+	_alpha = alpha_rest
+	var by_id := {}
+	for h in heads:
+		if h is Dictionary:
+			by_id[ViewKit.s((h as Dictionary).get("id", ""))] = h
+	var order: Array = []
+	for id in d.get("layout", []):
+		if by_id.has(ViewKit.s(id)):
+			order.append(by_id[ViewKit.s(id)])
+	for h2 in heads:
+		if not order.has(h2):
+			order.append(h2)
 	var imgs: Array[Image] = []
-	var keys: Array = []
-	for i in mini(HEADS, heads.size()):
-		var h2: Dictionary = heads[i]
-		var fr2: Dictionary = h2.get("frames", {})
-		for k in ["rest", "laugh", "lean"]:
-			var p: Variant = fr2.get(k, fr2.get("rest", null))
+	var n := mini(HEADS, order.size())
+	for i in n:
+		var hd: Dictionary = order[i]
+		var fr: Dictionary = hd.get("frames", {})
+		for k in ["rest", "laugh", "lean", "point"]:
+			var p: Variant = fr.get(k, fr.get("rest", null))
 			var img := _image_of(ViewKit.s(p) if p is String else "")
 			if img == null:
 				return false
 			imgs.append(img)
-			keys.append([i, k, Vector2(float(h2.get("w", img.get_width())), float(h2.get("h", img.get_height())))])
+	var tumble: Array = d.get("tumble", []) if d.get("tumble", []) is Array else []
+	var nt := 0
+	for tf in tumble:
+		if tf is Dictionary:
+			var ti := _image_of(ViewKit.s((tf as Dictionary).get("file", "")))
+			if ti != null:
+				imgs.append(ti)
+				nt += 1
+				_tumble_size = _v2((tf as Dictionary).get("size", [ti.get_width(), ti.get_height()]))
+				_tumble_pivot = _v2((tf as Dictionary).get("pivot", [_tumble_size.x * 0.5, _tumble_size.y]))
 	var rects := _pack(imgs)
 	if rects.is_empty():
 		return false
-	var n := heads.size()
 	for i in HEADS:
-		var src := i % mini(n, HEADS)
-		_rest.append(rects[src * 3])
-		_laugh.append(rects[src * 3 + 1])
-		_lean.append(rects[src * 3 + 2])
-		_size.append(keys[src * 3][2])
+		var src := i % n
+		var hd2: Dictionary = order[src]
+		_rest.append(rects[src * 4])
+		_laugh.append(rects[src * 4 + 1])
+		_lean.append(rects[src * 4 + 2])
+		_point.append(rects[src * 4 + 3])
+		var sz := _v2(hd2.get("size", [rects[src * 4].size.x, rects[src * 4].size.y]))
+		_size.append(sz)
+		_pivot.append(_v2(hd2.get("pivot", [sz.x * 0.5, sz.y])))
+		_face[i] = float(hd2.get("face_dir", 1))
+		_ids[i] = ViewKit.s(hd2.get("id", ""))
+		_sil_h[i] = float(hd2.get("h", sz.y))
+	_tumble_r.clear()
+	for k2 in nt:
+		_tumble_r.append(rects[n * 4 + k2])
 	return true
 
 
-func _rect_of(v: Variant) -> Rect2:
-	if v is Array and (v as Array).size() >= 4:
-		return Rect2(float(v[0]), float(v[1]), float(v[2]), float(v[3]))
-	return Rect2(0, 0, 64, 64)
+static func _v2(v: Variant) -> Vector2:
+	if v is Array and (v as Array).size() >= 2:
+		return Vector2(float(v[0]), float(v[1]))
+	return Vector2.ZERO
 
 
 func _image_of(path: String) -> Image:
@@ -242,7 +362,7 @@ func _image_of(path: String) -> Image:
 ## Shelf-pack images into one atlas texture; returns their rects (empty on failure).
 func _pack(imgs: Array[Image]) -> Array[Rect2]:
 	var out: Array[Rect2] = []
-	var w := 1024
+	var w := 2048
 	var x := 2
 	var y := 2
 	var row_h := 0
@@ -261,6 +381,9 @@ func _pack(imgs: Array[Image]) -> Array[Rect2]:
 	for i in imgs.size():
 		atlas.blit_rect(imgs[i], Rect2i(0, 0, imgs[i].get_width(), imgs[i].get_height()), Vector2i(out[i].position))
 	_atlas = ImageTexture.create_from_image(atlas)
+	var ts := ViewKit.soft_script("res://view/tex/tex_stats.gd")
+	if ts != null and ts.has_method("note_build"):
+		ts.call("note_build", "stalls")
 	return out
 
 
@@ -279,7 +402,12 @@ func _atlas_fallback() -> void:
 		_rest.append(r)
 		_laugh.append(r)
 		_lean.append(r)
+		_point.append(r)
 		_size.append(cell)
+		_pivot.append(Vector2(cell.x * 0.5, cell.y))
+		_face[i] = 1.0 if i % 2 == 0 else -1.0
+		_ids[i] = "fallback_%d" % i
+		_sil_h[i] = cell.y
 
 
 ## One silhouette (flat #FFFFFF, tinted at draw time) in a 120 × 130 cell; the head sits on
@@ -291,26 +419,26 @@ static func _head_svg(i: int, cx: float, top: float) -> String:
 	var hy := b - 40.0 - hr
 	s += "<circle cx='%.1f' cy='%.1f' r='%.1f' fill='#FFFFFF'/>" % [cx, hy, hr]
 	match i % 8:
-		0:  # bowler
+		0:
 			s += "<ellipse cx='%.1f' cy='%.1f' rx='%.1f' ry='6' fill='#FFFFFF'/>" % [cx, hy - hr * 0.55, hr * 1.35]
 			s += "<path d='M%.1f %.1f C%.1f %.1f %.1f %.1f %.1f %.1f Z' fill='#FFFFFF'/>" % [cx - hr * 0.85, hy - hr * 0.5, cx - hr * 0.8, hy - hr * 1.9, cx + hr * 0.8, hy - hr * 1.9, cx + hr * 0.85, hy - hr * 0.5]
-		1:  # beehive
+		1:
 			s += "<ellipse cx='%.1f' cy='%.1f' rx='%.1f' ry='%.1f' fill='#FFFFFF'/>" % [cx, hy - hr * 1.3, hr * 0.85, hr * 1.25]
-		2:  # shiny bald head (highlight drawn by the lighter inner disc at runtime? keep a notch)
+		2:
 			s += "<circle cx='%.1f' cy='%.1f' r='%.1f' fill='#FFFFFF'/>" % [cx, hy - 3, hr + 3]
-		3:  # top hat
+		3:
 			s += "<rect x='%.1f' y='%.1f' width='%.1f' height='%.1f' fill='#FFFFFF'/>" % [cx - hr * 0.7, hy - hr * 2.4, hr * 1.4, hr * 1.9]
 			s += "<ellipse cx='%.1f' cy='%.1f' rx='%.1f' ry='5' fill='#FFFFFF'/>" % [cx, hy - hr * 0.55, hr * 1.3]
-		4:  # feathered hat
+		4:
 			s += "<ellipse cx='%.1f' cy='%.1f' rx='%.1f' ry='%.1f' fill='#FFFFFF'/>" % [cx, hy - hr * 0.7, hr * 1.2, hr * 0.5]
 			s += "<path d='M%.1f %.1f C%.1f %.1f %.1f %.1f %.1f %.1f' fill='none' stroke='#FFFFFF' stroke-width='7' stroke-linecap='round'/>" % [cx + hr * 0.4, hy - hr, cx + hr * 1.2, hy - hr * 2.2, cx + hr * 1.8, hy - hr * 2.0, cx + hr * 2.0, hy - hr * 2.6]
-		5:  # curlers
+		5:
 			for k in 4:
 				s += "<circle cx='%.1f' cy='%.1f' r='%.1f' fill='#FFFFFF'/>" % [cx - hr * 0.75 + float(k) * hr * 0.5, hy - hr * 0.9, hr * 0.3]
-		6:  # toddler on a shoulder
+		6:
 			s += "<circle cx='%.1f' cy='%.1f' r='%.1f' fill='#FFFFFF'/>" % [cx + hr * 0.5, hy - hr * 1.9, hr * 0.62]
 			s += "<rect x='%.1f' y='%.1f' width='%.1f' height='%.1f' rx='6' fill='#FFFFFF'/>" % [cx + hr * 0.05, hy - hr * 1.4, hr * 0.9, hr * 0.9]
-		7:  # flat cap + bun
+		7:
 			s += "<path d='M%.1f %.1f L%.1f %.1f L%.1f %.1f Z' fill='#FFFFFF'/>" % [cx - hr, hy - hr * 0.4, cx + hr * 1.5, hy - hr * 0.55, cx - hr * 0.2, hy - hr * 1.15]
 	return s
 
@@ -365,7 +493,7 @@ func advance(delta: float) -> void:
 	if _mode != "rest" and _t >= _dur:
 		_mode = "rest"
 		_tier = -1
-	var want_alpha := REST_ALPHA if _mode == "rest" else 1.0
+	var want_alpha := alpha_rest if _mode == "rest" else alpha_hold
 	_alpha = move_toward(_alpha, want_alpha, delta * (4.0 if want_alpha > _alpha else 1.2))
 	_balloon_t += delta
 	if _tumble >= 0:
@@ -381,63 +509,83 @@ func advance(delta: float) -> void:
 	queue_redraw()
 
 
+## True when seat `i` takes part in the current reaction (`heads_pct` of the seats, spread).
+func _selected(i: int) -> bool:
+	var pct := float(_spec.get("heads_pct", 1.0))
+	if pct >= 0.999:
+		return true
+	return float((i * 7 + _laughs * 5) % HEADS) < pct * float(HEADS)
+
+
+## This seat's start delay (s) from `delay_ms` (a per-head pattern, repeated).
+func _delay(i: int) -> float:
+	var dm: Variant = _spec.get("delay_ms", null)
+	if dm is Array and not (dm as Array).is_empty():
+		return float((dm as Array)[i % (dm as Array).size()]) / 1000.0
+	return 0.0
+
+
 ## Upward rise (px, positive = up) this head wants right now.
 func _target_rise(i: int) -> float:
-	var ph := _phase[i]
-	var u := clampf(_t / maxf(0.01, _dur), 0.0, 1.0)
-	var env := sin(u * PI) if u < 1.0 else 0.0
+	if _mode == "rest":
+		return 0.0
 	var m := 0.6 if reduce_motion else 1.0
-	match _mode:
-		"laugh":
-			match _tier:
-				0:
-					return 6.0 * env if i == _nudge_a or i == _nudge_a + 1 else 0.0
-				1:
-					return absf(sin(_t * TAU * 3.0 + ph)) * 9.0 * env * m
-				2:
-					return (8.0 + absf(sin(_t * TAU * 4.0 + ph)) * 16.0) * env * m
-				3:
-					return (60.0 * minf(1.0, _t * 4.0) + absf(sin(_t * TAU * 4.0 + ph)) * 14.0) * (1.0 if u < 0.8 else env * 2.0) * m
-				4:
-					if i == _tumble:
-						return -140.0 * minf(1.0, _tumble_t * 1.2) + 60.0 * maxf(0.0, 1.0 - _tumble_t * 3.0)
-					return (82.0 + (float(i % 3) * 8.0) + absf(sin(_t * TAU * 3.2 + ph)) * 22.0) * (1.0 if u < 0.85 else env * 3.0) * m
-		"gasp":
-			return 16.0 * (1.0 if _t < 0.45 else env)
-		"behind_you":
-			return 42.0 * env if i % 3 == 0 else 8.0 * env
-		"chant":
-			return absf(sin(_t * TAU * 2.0)) * 18.0 * env
-		"ooh":
-			return 10.0 * env
-		"aww":
-			return -8.0 * env
-		"boo":
-			return 6.0 * env
-	if i == _tumble and _tumble_t < 5.0:
-		return -140.0 * minf(1.0, _tumble_t * 1.2)
-	return 0.0
+	if i == _tumble and _mode == "laugh":
+		return 30.0
+	if _mode == "laugh" and _tier == 0:
+		var u0 := clampf(_t / maxf(0.01, _dur), 0.0, 1.0)
+		return float(_spec.get("rise_px", 6.0)) * sin(u0 * PI) if (i == _nudge_a or i == _nudge_a + 1) else 0.0
+	if not _selected(i):
+		return 2.0 * sin(clampf(_t / maxf(0.01, _dur), 0.0, 1.0) * PI)
+	var t := _t - _delay(i)
+	if t < 0.0:
+		return 0.0
+	var span := maxf(0.01, _dur - _delay(i))
+	var u := clampf(t / span, 0.0, 1.0)
+	var env := sin(u * PI) if u < 1.0 else 0.0
+	var rise := float(_spec.get("rise_px", 0.0))
+	var bob := float(_spec.get("bob_hz", 0.0))
+	var bounce := float(_spec.get("bounce_px", 0.0))
+	var hold_env := env
+	if rise >= 40.0:
+		# Big rises stand up fast and hold, then sit down in the last fifth.
+		hold_env = minf(1.0, t * 4.0) if u < 0.8 else env * 2.0
+	if _mode == "gasp":
+		hold_env = 1.0 if t < 0.45 else env
+	var wobble := absf(sin(t * TAU * bob + _phase[i])) * bounce if bob > 0.0 else 0.0
+	return (rise * hold_env + wobble * env) * m + (float(i % 3) * 8.0 * hold_env if bool(_spec.get("stand", false)) else 0.0)
 
 
 func _target_rot(i: int) -> float:
 	var u := clampf(_t / maxf(0.01, _dur), 0.0, 1.0)
 	var env := sin(u * PI) if u < 1.0 else 0.0
-	if i == _tumble:
+	if i == _tumble and _tumble_r.is_empty():
 		return _tumble_t * 9.0
+	if _mode == "rest":
+		return 0.0
+	var fd := _face[i] if _face.size() > i else 1.0
 	match _mode:
 		"laugh":
 			if _tier == 0 and (i == _nudge_a or i == _nudge_a + 1):
 				return (0.25 if i == _nudge_a else -0.25) * env
 			if _tier >= 2:
-				return -0.18 * env * sin(_t * 6.0 + _phase[i])
-		"shush":
-			var cx := view_size().x * 0.5
-			return (0.2 if _x[i] < cx else -0.2) * env
-		"boo":
-			return -0.15 * env
-		"aww":
-			return 0.1 * env * (1.0 if i % 2 == 0 else -1.0)
+				return -0.18 * fd * env * absf(sin(_t * 6.0 + _phase[i]))
+		_:
+			var lean := float(_spec.get("lean", 0.0))
+			if lean != 0.0:
+				return lean * fd * env
 	return 0.0
+
+
+func _region(i: int) -> Rect2:
+	match frame_of(i):
+		"laugh":
+			return _laugh[i]
+		"lean":
+			return _lean[i]
+		"point":
+			return _point[i]
+	return _rest[i]
 
 
 func _draw() -> void:
@@ -450,18 +598,20 @@ func _draw() -> void:
 		for i in HEADS:
 			if _row[i] != pass_row:
 				continue
-			var sz := _size[i]
 			var sc := 0.62 if pass_row == 1 else 0.8
-			var src := _rest[i]
-			if _mode == "laugh" and _tier >= 2:
-				src = _laugh[i]
-			elif _mode == "shush" or (_mode == "laugh" and _tier == 0):
-				src = _lean[i]
 			var rise := REST_PX + (-_y[i])
 			var col := Color(FILL.lightened(0.12 if pass_row == 1 else 0.0), _alpha * (0.8 if pass_row == 1 else 1.0))
-			var feet := Vector2(_x[i], bottom - rise + sz.y * sc)
+			var tf := tumble_frame() if i == _tumble else -1
+			if tf >= 0 and not _tumble_r.is_empty():
+				var feet_t := Vector2(_x[i], bottom - rise + _tumble_size.y * sc * 0.8)
+				draw_set_transform(feet_t, 0.0, Vector2(sc * (_face[i] if _face[i] != 0.0 else 1.0), sc))
+				draw_texture_rect_region(_atlas, Rect2(-_tumble_pivot, _tumble_size), _tumble_r[tf], col)
+				continue
+			var sz := _size[i]
+			var piv := _pivot[i]
+			var feet := Vector2(_x[i], bottom - rise + _sil_h[i] * sc)
 			draw_set_transform(feet, _rot[i], Vector2(sc, sc))
-			draw_texture_rect_region(_atlas, Rect2(-sz.x * 0.5, -sz.y, sz.x, sz.y), src, col)
+			draw_texture_rect_region(_atlas, Rect2(-piv, sz), _region(i), col)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if _balloon != "" and _balloon_t < BALLOON_S and _font != null:
 		var fs := 44

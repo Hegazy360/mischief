@@ -304,10 +304,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	var now := UiKit.now_ms()
 	var c := size * 0.5
-	var k := 1.0
-	var pt := float(now - _pop_ms) / float(POP_MS)
-	if pt >= 0.0 and pt < 1.0 and not UiKit.reduce_motion():
-		k = 1.0 + (_pop_peak - 1.0) * sin(pt * PI)
+	var k := pop_scale(now)
 	if is_pressed or _toggled:
 		k *= UiKit.PRESS_SCALE
 	draw_set_transform(c, 0.0, Vector2(k, k))
@@ -400,13 +397,30 @@ func _draw_ring(now: int) -> void:
 	draw_arc(Vector2.ZERO, RING_R, 0.0, TAU, 72, Color(UiKit.NAVY, 0.55), RING_W + 8.0, true)
 	if ring_frac <= 0.0:
 		return
-	var col := UiKit.YELLOW.lerp(UiKit.GREEN, ring_frac)
-	var w := RING_W
-	if ring_frac >= PULSE_FROM and ring_frac < 1.0:
-		var s := 0.5 + 0.5 * sin(float(now) * 0.001 * TAU * PULSE_HZ)
-		w += 5.0 * s
-		col = col.lightened(0.25 * s)
-	UiKit.draw_ring(self, Vector2.ZERO, RING_R, ring_frac, w, col)
+	var col := ring_color(ring_frac)
+	var s := ring_pulse(ring_frac, now)
+	UiKit.draw_ring(self, Vector2.ZERO, RING_R, ring_frac, RING_W + 5.0 * s, col.lightened(0.25 * s))
+
+
+## The RIG ring's colour at `frac`: yellow → green (GDD §3.2).
+static func ring_color(frac: float) -> Color:
+	return UiKit.YELLOW.lerp(UiKit.GREEN, clampf(frac, 0.0, 1.0))
+
+
+## The ring's pulse 0..1 at `now_ms`: a PULSE_HZ (3 Hz) throb over the last 20 % only.
+static func ring_pulse(frac: float, now_ms: int) -> float:
+	if frac < PULSE_FROM or frac >= 1.0:
+		return 0.0
+	return 0.5 + 0.5 * sin(float(now_ms) * 0.001 * TAU * PULSE_HZ)
+
+
+## The face's scale pop at `now_ms` (1.0 = none): 1.08× on arriving at a rig point, 1.0 → 1.18 →
+## 1.0 over POP_MS when the ring completes (tests).
+func pop_scale(now_ms: int) -> float:
+	var pt := float(now_ms - _pop_ms) / float(POP_MS)
+	if pt < 0.0 or pt >= 1.0 or UiKit.reduce_motion():
+		return 1.0
+	return 1.0 + (_pop_peak - 1.0) * sin(pt * PI)
 
 
 func _draw_tag(now: int) -> void:

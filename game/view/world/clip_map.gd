@@ -338,6 +338,13 @@ static func _reaction(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, out:
 
 
 static func _base_oneshot(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, out: Pick, c: Ctx, key: String) -> bool:
+	# The two-rig link (the Lecture dangle) is staging, not a clip: it holds even while the
+	# dangle clip is still a fallback.
+	var row0 := ClipRules.row(key, c.rig)
+	var att0: Variant = row0.get("attach", null)
+	if att0 is Dictionary:
+		var skins0: Variant = (att0 as Dictionary).get("skins", [""])
+		out.attach = skins0 is Array and (skins0 as Array).has(c.skin)
 	var e: Variant = ClipMap.entry(map, key, c.skin)
 	if e == null:
 		ClipMap._want(out, key, key)
@@ -370,10 +377,6 @@ static func _base_oneshot(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, 
 	out.loop = bool(row.get("loop", false))
 	if e is Dictionary and (e as Dictionary).has("loop"):
 		out.loop = bool((e as Dictionary)["loop"])
-	var att: Variant = row.get("attach", null)
-	if att is Dictionary:
-		var skins: Variant = (att as Dictionary).get("skins", [""])
-		out.attach = skins is Array and (skins as Array).has(c.skin)
 	return true
 
 

@@ -244,3 +244,41 @@ func test_music_meta_in_map() -> void:
 		bpms.append(float((music.get("mus_chain_%d" % (i + 1), {}) as Dictionary).get("bpm", 0.0)))
 	for i in 3:
 		assert_lt(bpms[i], bpms[i + 1], "chain tempos step up")
+
+
+# --- the AudioDirector's names (view request: confirm the ids it plays) ------------------
+
+## Every id / kind `view/audio_director.gd` plays by name (its fallback footsteps, its built-in default
+## cues, its laugh path and the Stalls' specials) resolves in the Audio autoload.
+func test_audio_director_names_resolve() -> void:
+	if not FileAccess.file_exists(MAP):
+		skip("sfx_map.json not generated")
+		return
+	var ids: PackedStringArray = ["bellows_step", "rig_done", "dive", "pop_out", "clarence_squeak", "door_jiggle",
+		"door_slam_bonk", "tomato_splat", "stomp_quake", "specs_tink", "woodblock_bonk"]
+	for i in range(1, 9):
+		ids.append("step_pizz_%d" % i)
+	for id: String in ids:
+		assert_true(audio.has_sfx(id), "AudioDirector id '%s' resolves" % id)
+	for s: String in ["rigged", "bit", "spot", "near_miss", "alert", "caught", "fizzle", "combo", "meltdown"]:
+		assert_true(audio.has_sfx("sting_" + s), "sting %s" % s)
+	# laugh tiers + StallsView.special() kinds (shush is the Stalls' spelling of shh)
+	for k: String in ["t0", "t1", "t2", "t3", "t4", "relief", "gasp", "shush", "behind_you", "boo", "aww", "chant",
+			"ooh", "cheer", "bow_chant"]:
+		assert_true(audio.CROWD_KINDS.has(k), "crowd kind %s" % k)
+		audio.crowd(k)
+		var bank := "crowd_" + String(audio.CROWD_ALIASES.get(k, k))
+		assert_true(String(audio.last_pick(bank)).begins_with(bank + "_"), "crowd(%s) plays a %s take" % [k, bank])
+	# the director's laugh-tier names in clip `laugh` events
+	var names: Dictionary = (cues.get("laugh_tiers", {}) as Dictionary).get("names", {})
+	for n: String in ["titter", "chuckle", "laugh", "big", "roar"]:
+		assert_true(names.has(n), "laugh tier name %s" % n)
+
+
+## The events added in Stage 2 have cues: command feedback (event-level, UI bus) — and a micro-gag
+## has none (its sounds are the mg_<id> clip's events, L12).
+func test_stage2_event_cues() -> void:
+	var events: Dictionary = cues.get("events", {})
+	assert_true(events.has("cmd_queued") and events.has("cmd_rejected"), "command feedback cues")
+	assert_false(events.has("micro_gag"), "no event-level micro-gag sound (clip events own them)")
+	assert_false(cues.has("micro_gags"), "no cues.json micro-gag map")

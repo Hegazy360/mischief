@@ -26,8 +26,9 @@
       {"a": "warmup", "gate": {"until": "first_rig", "plus_s": 2, "max_s": 25, "first_loop_only": true}},
       {"a": "tea"},
       {"a": "pickles"},
-      {"a": "paper"},
-      {"a": "rinse"}
+      {"a": "rinse"},
+      {"a": "tea"},
+      {"a": "paper"}
     ]
   },
   "cast": {"beryl": null, "delphine": null},

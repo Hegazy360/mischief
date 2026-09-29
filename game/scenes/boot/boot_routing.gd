@@ -14,6 +14,10 @@ const CONFIG := "res://scenes/boot/boot_config.json"
 const PROLOGUE := "p00_curtain_up"
 const SLICE_NIGHTS: PackedStringArray = ["n01_throat_tea", "n02_something_fishy"]
 
+## Set by the e2e driver (debug) before Boot routes on its third frame: a `start` value that wins over
+## boot_config.json and `--start`.
+static var override_start: String = ""
+
 
 ## `start` from boot_config.json ("auto" when missing / invalid).
 static func read_config(path: String = CONFIG) -> String:

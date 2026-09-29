@@ -23,7 +23,15 @@ static var _cache: Dictionary = {}
 
 ## Preset → Vector2 resting pupil offset in px (faces.json `gaze`).
 var gaze: Dictionary = {}
+## Pose → its `props` ({prop: {socket, state}}) and `residues` ([kinds]) notes, as authored
+## (tools show them: AnimViewer --pose, the pose sheet; clips set props by events).
+var pose_props: Dictionary = {}
+var pose_residues: Dictionary = {}
 var _warned: Dictionary = {}
+
+## Keys a pose entry may carry; any other key warns once and is ignored.
+const POSE_KEYS: PackedStringArray = ["base", "mirror", "mirror_of", "root", "bones", "face", "tags", "silhouette",
+	"props", "residues", "notes", "doc", "_comment"]
 
 var rig: RigDef
 var path: String = ""
@@ -136,18 +144,20 @@ func apply_preset(out: PackedFloat32Array, preset: String) -> void:
 
 
 ## Applies a JSON channel dictionary ({"rot": 5, "tex": "fist"}) to part `i` of `out`.
-## Unknown channels / variants go to `errs` prefixed with `where`.
-func apply_channels(out: PackedFloat32Array, i: int, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
+## A variant name that does not resolve goes to `errs` (prefixed with `where`); an unknown
+## channel or a value of the wrong type goes to `errs` too, or — `tolerant` (poses.json) —
+## warns once per key and is skipped.
+func apply_channels(out: PackedFloat32Array, i: int, chans: Dictionary, where: String, errs: PackedStringArray, tolerant: bool = false) -> void:
 	var b := RigDef.ROOT_CH + i * RigDef.STRIDE
 	for cn in chans:
 		var c := RigDef.CHANNELS.find(str(cn))
 		if c < 0:
-			errs.append("%s: unknown channel '%s' on '%s'" % [where, cn, rig.names[i]])
+			_problem(errs, tolerant, "chan:" + str(cn), "%s: unknown channel '%s' on '%s' — skipped" % [where, cn, rig.names[i]])
 			continue
 		var v: Variant = chans[cn]
 		if c == RigDef.C_TEX:
 			if not (v is String or v is StringName or _is_num(v)):
-				errs.append("%s: part '%s' tex must be a variant name (got %s)" % [where, rig.names[i], str(v)])
+				_problem(errs, tolerant, "type:tex", "%s: part '%s' tex must be a variant name (got %s) — skipped" % [where, rig.names[i], str(v)])
 				continue
 			var vi := rig.tex_index(i, str(v)) if (v is String or v is StringName) else int(v)
 			if vi < 0 or vi >= rig.tex_names[i].size():
@@ -156,26 +166,33 @@ func apply_channels(out: PackedFloat32Array, i: int, chans: Dictionary, where: S
 			out[b + c] = float(vi)
 		elif c == RigDef.C_VIS:
 			if not (v is bool or _is_num(v)):
-				errs.append("%s: part '%s' vis must be a bool (got %s)" % [where, rig.names[i], str(v)])
+				_problem(errs, tolerant, "type:vis", "%s: part '%s' vis must be a bool (got %s) — skipped" % [where, rig.names[i], str(v)])
 				continue
 			out[b + c] = 1.0 if (v is bool and v) or (not (v is bool) and float(v) > 0.5) else 0.0
 		elif _is_num(v):
 			out[b + c] = float(v)
 		else:
-			errs.append("%s: part '%s' channel '%s' must be a number (got %s)" % [where, rig.names[i], cn, str(v)])
+			_problem(errs, tolerant, "type:" + str(cn), "%s: part '%s' channel '%s' must be a number (got %s) — skipped" % [where, rig.names[i], cn, str(v)])
 
 
-## Applies a JSON root dictionary ({"y": 10, "sx": 1.1}) to `out`.
-func apply_root(out: PackedFloat32Array, chans: Dictionary, where: String, errs: PackedStringArray) -> void:
+## Applies a JSON root dictionary ({"y": 10, "sx": 1.1}) to `out` (`tolerant`: as above).
+func apply_root(out: PackedFloat32Array, chans: Dictionary, where: String, errs: PackedStringArray, tolerant: bool = false) -> void:
 	for cn in chans:
 		var c := RigDef.ROOT_CHANNELS.find(str(cn))
 		if c < 0:
-			errs.append("%s: unknown root channel '%s'" % [where, cn])
+			_problem(errs, tolerant, "rootchan:" + str(cn), "%s: unknown root channel '%s' — skipped" % [where, cn])
 			continue
 		if not _is_num(chans[cn]):
-			errs.append("%s: root channel '%s' must be a number (got %s)" % [where, cn, str(chans[cn])])
+			_problem(errs, tolerant, "roottype:" + str(cn), "%s: root channel '%s' must be a number (got %s) — skipped" % [where, cn, str(chans[cn])])
 			continue
 		out[c] = float(chans[cn])
+
+
+func _problem(errs: PackedStringArray, tolerant: bool, key: String, msg: String) -> void:
+	if tolerant:
+		_warn_once(key, msg)
+	else:
+		errs.append(msg)
 
 
 ## Swaps every mirror pair of `src` into `out` (all channels but z; tex by variant name).
@@ -294,8 +311,14 @@ func _resolve(n: String) -> PackedFloat32Array:
 		return rig.rest
 	_resolving[n] = true
 	var out := rig.rest.duplicate()
-	var d: Dictionary = _raw.get(n, {}) if _raw.get(n, {}) is Dictionary else {}
+	var raw: Variant = _raw.get(n, {})
+	var d: Dictionary = raw if raw is Dictionary else {}
 	var where := "%s: pose '%s'" % [path, n]
+	if not (raw is Dictionary):
+		_warn_once("pose:" + n, "%s is not an object (got %s) — it is the rest pose" % [where, type_string(typeof(raw))])
+	for pk in d:
+		if not POSE_KEYS.has(str(pk)):
+			_warn_once("posekey:" + str(pk), "%s: unknown key '%s' — ignored (warned once per key)" % [where, pk])
 	var mirror := str(_mirror_of.get(n, d.get("mirror", d.get("mirror_of", ""))))
 	var face := ""
 	var tg := PackedStringArray()
@@ -318,8 +341,12 @@ func _resolve(n: String) -> PackedFloat32Array:
 				face = face_of(base)
 	var rv: Variant = d.get("root", {})
 	if rv is Dictionary:
-		apply_root(out, rv, where, errors)
+		apply_root(out, rv, where, errors, true)
+	elif rv != null:
+		_warn_once("root:" + n, "%s: 'root' must be an object of channels — skipped" % where)
 	var bv: Variant = d.get("bones", {})
+	if not (bv is Dictionary) and bv != null:
+		_warn_once("bones:" + n, "%s: 'bones' must be an object of parts — skipped" % where)
 	if bv is Dictionary:
 		for pn in bv:
 			var i := rig.idx(str(pn))
@@ -327,17 +354,26 @@ func _resolve(n: String) -> PackedFloat32Array:
 				errors.append("%s: bone '%s' is not a part of %s" % [where, pn, rig.id])
 				continue
 			if bv[pn] is Dictionary:
-				apply_channels(out, i, bv[pn], where, errors)
+				apply_channels(out, i, bv[pn], where, errors, true)
 			else:
-				errors.append("%s: bone '%s' must be a channel object" % [where, pn])
+				_warn_once("bone:%s:%s" % [n, pn], "%s: bone '%s' must be a channel object — skipped" % [where, pn])
 	if d.has("face"):
 		face = str(d["face"]) if d["face"] != null else ""
 		if face != "" and not presets.has(face):
 			errors.append("%s: face preset '%s' unknown" % [where, face])
 	if face != "":
 		apply_preset(out, face)
-	if d.get("tags", null) is Array:
-		tg = PackedStringArray(d["tags"])
+	var tv: Variant = d.get("tags", null)
+	if tv is Array:
+		tg = PackedStringArray()
+		for t in tv:
+			tg.append(str(t))
+	elif tv != null:
+		_warn_once("tags:" + n, "%s: 'tags' must be a list — skipped" % where)
+	if d.get("props", null) is Dictionary:
+		pose_props[n] = d["props"]
+	if d.get("residues", null) is Array:
+		pose_residues[n] = PackedStringArray(Array(d["residues"]).map(func(x: Variant) -> String: return str(x)))
 	poses[n] = out
 	faces[n] = face
 	tags[n] = tg

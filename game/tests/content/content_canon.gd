@@ -79,7 +79,11 @@ const ACTIVITIES: Array[String] = ["warmup", "tea", "pickles", "snack", "rinse",
 	"polish", "cloak", "answer_door", "host_tea", "tango", "rehearse", "hunt"]
 
 const DETOURS: Array[String] = ["fixup_dry", "fixup_sink", "fixup_honey", "fixup_mirror", "curious", "herd_beryl",
-	"search"]
+	"search", "exit"]
+
+## Activity durations changed by lead decision D1 (Stage 2; `docs/review/s2-content/d1_changes.md`, to be folded
+## into GDD §4.1.1): Act I loops ≤ 60 s, no `dur_s` below 5 s. Every other activity keeps its GDD §4.1.1 value.
+const D1_DURATIONS := {"warmup": 8, "tea": 8, "pickles": 5, "snack": 5, "paper": 8, "fire": 5, "mirror": 5}
 
 const PRANKS: Array[String] = ["achoo_ria", "tap_dance", "kettle_drum", "in_a_pickle", "cold_open", "allegro_go_go",
 	"lift_off", "eye_popping_news", "bellows_blows", "prima_ballerina", "grand_exit", "it_takes_two",

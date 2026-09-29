@@ -34,8 +34,14 @@ NOTES = [
     "  one beat per fix-up detour (`steam_sideburns`, `scrub_nose`,",
     "  `honey_test_note`, `comb_flourish`); walk beats `walk_hum`, `cravat_tug`, `walk_scale`.",
     "- `emote` is null only where the gag has no face (`peer_under_piano`: his head is under the piano).",
-    "- The `dur_s` column shows the file's current value; the D1 durations land with the retuned routes",
-    "  (`d1_changes.md`). Every `at_s` already fits the D1 durations.",
+    "- `dur_s` is the D1 value (`d1_changes.md`: warmup/tea/paper 8 s, pickles/snack/fire/mirror 5 s); a gated",
+    "  warm-up keeps performing past it and repeats its list every `mg_cycle_s`.",
+    "- The Prologue walk-off is the detour `exit` (icon `exit.svg`, clip `bellows/loco_stomp`): no timed beats;",
+    "  the walk beats play on the way to the stairs.",
+    "",
+    "**Final (Stage 2 batch 1).** No id was renamed after the first publication; the list above is complete for the",
+    "slice. Measured on the authored routes (`docs/review/s2-content/index.md`): most beats land in Hush's room or",
+    "next door (`room`/`pip`), edge-bubble beats ≤ ⅓ of the beat credit on every route.",
 ]
 
 

@@ -14,6 +14,10 @@ const PATH := "res://data/anim/clip_rules.json"
 static var _rows: Array = []
 static var _by_key: Dictionary = {}
 static var _loaded_from: String = ""
+## rig → {key → row}.
+static var _by_rig: Dictionary = {}
+static var _wild_hits: Dictionary = {}
+const _EMPTY := {}
 ## Test hook: rows used instead of the file (null = the file).
 static var override_rows: Variant = null
 
@@ -27,15 +31,24 @@ static func rows() -> Array:
 ## The row for `key` on `rig` ({} when none). `bit:<id>` / `mg:<id>` match their `*` rows.
 static func row(key: String, rig: String) -> Dictionary:
 	_ensure()
-	var k := "%s|%s" % [rig, key]
-	if _by_key.has(k):
-		return _by_key[k]
+	var per: Variant = _by_rig.get(rig, null)
+	if not (per is Dictionary):
+		return _EMPTY
+	var hit: Variant = (per as Dictionary).get(key, null)
+	if hit is Dictionary:
+		return hit
+	# `bit:<id>` / `mg:<id>` → their `*` row; remembered per key (no string building per frame).
+	var miss: Variant = _wild_hits.get(rig, {}).get(key, null) if _wild_hits.has(rig) else null
+	if miss is Dictionary:
+		return miss
+	var out: Dictionary = _EMPTY
 	var w := ClipRules.wildcard_of(key)
-	if w != "":
-		var k2 := "%s|%s" % [rig, w]
-		if _by_key.has(k2):
-			return _by_key[k2]
-	return {}
+	if w != "" and (per as Dictionary).get(w, null) is Dictionary:
+		out = (per as Dictionary)[w]
+	if not _wild_hits.has(rig):
+		_wild_hits[rig] = {}
+	(_wild_hits[rig] as Dictionary)[key] = out
+	return out
 
 
 ## "base" | "overlay" | "fx" | "none" for a key ("base" when the table has no row).
@@ -51,9 +64,10 @@ static func mask_of(key: String, rig: String) -> String:
 
 ## The `*` form of an expandable key: "bit:bit_tea" → "bit:*", "mg:hum" → "mg:*"; else "".
 static func wildcard_of(key: String) -> String:
-	for p in ["bit:", "mg:"]:
-		if key.begins_with(p) and key != p + "*":
-			return p + "*"
+	if key.begins_with("bit:") and key != "bit:*":
+		return "bit:*"
+	if key.begins_with("mg:") and key != "mg:*":
+		return "mg:*"
 	return ""
 
 
@@ -61,6 +75,8 @@ static func wildcard_of(key: String) -> String:
 static func invalidate() -> void:
 	_rows = []
 	_by_key = {}
+	_by_rig = {}
+	_wild_hits = {}
 	_loaded_from = ""
 
 
@@ -70,6 +86,8 @@ static func _ensure() -> void:
 		return
 	_rows = []
 	_by_key = {}
+	_by_rig = {}
+	_wild_hits = {}
 	_loaded_from = src
 	var list: Variant = override_rows
 	if list == null:
@@ -85,3 +103,7 @@ static func _ensure() -> void:
 		var k := "%s|%s" % [ViewKit.s(rd.get("rig", "")), ViewKit.s(rd.get("key", ""))]
 		if not _by_key.has(k):
 			_by_key[k] = rd
+			var rg := ViewKit.s(rd.get("rig", ""))
+			if not _by_rig.has(rg):
+				_by_rig[rg] = {}
+			(_by_rig[rg] as Dictionary)[ViewKit.s(rd.get("key", ""))] = rd

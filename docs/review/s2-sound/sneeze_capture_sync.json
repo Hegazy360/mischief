@@ -1,0 +1,199 @@
+{
+ "frames": 231,
+ "onsets": [
+  1,
+  4,
+  21,
+  24,
+  45,
+  48,
+  63,
+  76,
+  79,
+  94,
+  100,
+  117,
+  132,
+  159,
+  169,
+  177,
+  184,
+  190,
+  195,
+  200,
+  204,
+  218
+ ],
+ "worst_offset_f": 1,
+ "no_onset_within_6f": 0,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ],
+ "events": [
+  {
+   "engine_frame": 0,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 0,
+   "onset": 1,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 0,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 1,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 20,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 20,
+   "onset": 21,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 20,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah2",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 21,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 44,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 44,
+   "onset": 45,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 44,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_ah3",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 45,
+   "offset_f": 1
+  },
+  {
+   "engine_frame": 76,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 76,
+   "onset": 76,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 76,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_hm",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 76,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 94,
+   "type": "voice",
+   "id": "vo_bellows_sneeze_choo",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 94,
+   "onset": 94,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 94,
+   "type": "audio",
+   "id": "vo_bellows_sneeze_choo_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 94,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 100,
+   "type": "sfx",
+   "id": "stool_scrape",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 95,
+   "onset": 100,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 100,
+   "type": "audio",
+   "id": "stool_scrape",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 100,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 101,
+   "type": "sfx",
+   "id": "slide_up_flight",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 96,
+   "onset": 100,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 101,
+   "type": "audio",
+   "id": "slide_up_flight",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 100,
+   "offset_f": -1
+  },
+  {
+   "engine_frame": 117,
+   "type": "sfx",
+   "id": "sink_crash",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 112,
+   "onset": 117,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 117,
+   "type": "audio",
+   "id": "sink_crash",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 117,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 159,
+   "type": "sfx",
+   "id": "ladle_spin",
+   "clip": "bellows/rx_sneeze_blast_a",
+   "clip_frame": 154,
+   "onset": 159,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 159,
+   "type": "audio",
+   "id": "ladle_spin",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 159,
+   "offset_f": 0
+  }
+ ]
+}

@@ -1,0 +1,468 @@
+{
+  "version": 1,
+  "clip": "hush/act_tinker_s",
+  "rig": "hush",
+  "loop": true,
+  "length": 90,
+  "layer": "base",
+  "mask": null,
+  "doc": "Rig tier S (1.5 s): frantic, 90 f loop, a glance back at f40.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "act",
+    "tinker",
+    "rig"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "face": "frantic"
+    },
+    {
+      "f": 4,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 27.5
+        },
+        "head": {
+          "rot": 19.0
+        }
+      }
+    },
+    {
+      "f": 9,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 25.0
+        },
+        "head": {
+          "rot": 10.0
+        }
+      }
+    },
+    {
+      "f": 13,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 20.0
+        }
+      }
+    },
+    {
+      "f": 18,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 24.5
+        },
+        "head": {
+          "rot": 9.0
+        }
+      }
+    },
+    {
+      "f": 22,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 27.0
+        },
+        "head": {
+          "rot": 18.0
+        }
+      }
+    },
+    {
+      "f": 27,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 24.0
+        },
+        "head": {
+          "rot": 8.0
+        }
+      }
+    },
+    {
+      "f": 31,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 27.5
+        },
+        "head": {
+          "rot": 19.0
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine"
+    },
+    {
+      "f": 40,
+      "pose": "h_tinker_s_a",
+      "ease": "out_quad",
+      "face": "worried",
+      "set": {
+        "torso": {
+          "rot": 16.0
+        },
+        "head": {
+          "rot": -14.0
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 16.0
+        },
+        "head": {
+          "rot": -14.0
+        }
+      }
+    },
+    {
+      "f": 48,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "face": "frantic",
+      "set": {
+        "torso": {
+          "rot": 25.0
+        },
+        "head": {
+          "rot": 14.0
+        }
+      }
+    },
+    {
+      "f": 53,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 27.5
+        },
+        "head": {
+          "rot": 15.0
+        }
+      }
+    },
+    {
+      "f": 57,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 24.5
+        },
+        "head": {
+          "rot": 13.0
+        }
+      }
+    },
+    {
+      "f": 62,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 28.0
+        },
+        "head": {
+          "rot": 16.0
+        }
+      }
+    },
+    {
+      "f": 66,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 25.0
+        },
+        "head": {
+          "rot": 14.0
+        }
+      }
+    },
+    {
+      "f": 71,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 27.5
+        },
+        "head": {
+          "rot": 15.0
+        }
+      }
+    },
+    {
+      "f": 75,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 24.0
+        },
+        "head": {
+          "rot": 12.0
+        }
+      }
+    },
+    {
+      "f": 80,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine",
+      "set": {
+        "torso": {
+          "rot": 27.0
+        },
+        "head": {
+          "rot": 14.0
+        }
+      }
+    },
+    {
+      "f": 85,
+      "pose": "h_tinker_s_b",
+      "ease": "out_quad",
+      "set": {
+        "torso": {
+          "rot": 25.5
+        },
+        "head": {
+          "rot": 15.0
+        }
+      }
+    },
+    {
+      "f": 90,
+      "pose": "h_tinker_s_a",
+      "ease": "in_out_sine"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 1,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "tinker_frantic"
+    },
+    {
+      "f": 6,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 8,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 10,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 15,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 17,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 19,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 24,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 26,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 28,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 33,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 35,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 45,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 48,
+      "type": "sfx",
+      "id": "tinker_frantic",
+      "vol_db": -2.0
+    },
+    {
+      "f": 50,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 52,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 54,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 59,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 61,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 63,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 68,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 70,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 72,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 77,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 79,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 81,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 87,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    },
+    {
+      "f": 89,
+      "type": "smear",
+      "part": "hand_l",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

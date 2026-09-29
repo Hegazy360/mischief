@@ -4,7 +4,10 @@
 ##       [--cmds=/abs/path.json] [--ticks=N] [--dump] [--relaxed] [--seed=N]
 ##       [--golden=check|update] [--golden-file=/abs/or/res/path.json] [--every=N]
 ##
-## --cmds: {"cmds": [[tick, cmd], ...]} or a bare [[tick, cmd], ...] list (commands apply at that tick).
+## --cmds: {"cmds": [[tick, cmd], ...]} or a bare [[tick, cmd], ...] list (commands apply at that tick; SimReplay).
+## A dump from `solve.sh --dump-cmds` / `fuzz.sh --dump-cmds` also carries `episode`, `ticks` and `hash`: they are
+## the defaults for --episode / --ticks, and the run reports whether its final hash matches the dump's
+## (exit 1 when it does not).
 ## --dump prints every event as a JSON line. Always prints a summary and the final state hash.
 ## --golden=check replays the golden file's cmds and compares its checkpoints (exit 1 on mismatch);
 ## --golden=update rewrites the file with checkpoints every --every ticks (default 600) + the last tick.
@@ -29,6 +32,7 @@ func _run(args: Dictionary) -> int:
 	var golden_file := str(args.get("golden-file", "res://tests/sim/golden/%s.json" % ep))
 	var cmds: Array = []
 	var ticks := int(args.get("ticks", "3600"))
+	var want_hash := -1
 	var checkpoints: Array = []
 	if golden_mode == "check":
 		var g: Variant = _read_json(golden_file)
@@ -42,11 +46,16 @@ func _run(args: Dictionary) -> int:
 		if g.has("data"):
 			data = str(g["data"])
 	elif args.has("cmds"):
-		var c: Variant = _read_json(str(args["cmds"]))
-		if typeof(c) == TYPE_DICTIONARY:
-			cmds = c.get("cmds", [])
-		elif typeof(c) == TYPE_ARRAY:
-			cmds = c
+		var c := SimReplay.load_file(str(args["cmds"]))
+		if c.is_empty():
+			print("[sim_run] cannot read cmds %s" % args["cmds"])
+			return 1
+		cmds = c["cmds"]
+		if ep == "" and str(c["episode"]) != "":
+			ep = str(c["episode"])
+		if not args.has("ticks") and int(c["ticks"]) > 0:
+			ticks = int(c["ticks"])
+		want_hash = int(c["hash"])
 	var db := ContentDB.load_dir(data)
 	if not db.errors.is_empty():
 		print("[sim_run] content errors in %s (%d):" % [data, db.errors.size()])
@@ -59,13 +68,7 @@ func _run(args: Dictionary) -> int:
 	if w == null:
 		print("[sim_run] unknown episode '%s'" % ep)
 		return 1
-	var by_tick := {}
-	for e in cmds:
-		if typeof(e) == TYPE_ARRAY and (e as Array).size() >= 2:
-			var t := int(e[0])
-			if not by_tick.has(t):
-				by_tick[t] = []
-			(by_tick[t] as Array).append(e[1])
+	var by_tick := SimReplay.by_tick(cmds)
 	var every := int(args.get("every", "600"))
 	var dump := args.has("dump")
 	var want := {}
@@ -101,6 +104,11 @@ func _run(args: Dictionary) -> int:
 		done.append("%s%s" % [l["id"], "✓" if l["done"] else ""])
 	print("[sim_run] lines: %s" % ", ".join(done))
 	print("[sim_run] hash %d" % w.state_hash())
+	if want_hash >= 0 and golden_mode == "":
+		var same := w.state_hash() == want_hash
+		print("[sim_run] dump hash %d: %s" % [want_hash, "MATCH" if same else "MISMATCH"])
+		if not same:
+			return 1
 	if golden_mode == "update":
 		var out := {"episode": ep, "data": data, "ticks": ticks, "cmds": cmds, "checkpoints": got}
 		var f := FileAccess.open(golden_file, FileAccess.WRITE)

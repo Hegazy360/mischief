@@ -68,7 +68,7 @@ func _draw() -> void:
 	# SPOTTED! stamp, popping in over 4 frames.
 	if _font != null:
 		var fs := 110
-		var txt := "SPOTTED!"
+		var txt := ViewKit.word("fx.spotted", "SPOTTED!")
 		var u := clampf(_t / (4.0 / 60.0), 0.0, 1.0)
 		var sc := lerpf(1.7, 1.0, ViewKit.ease_out_cubic(u))
 		var w := _font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
@@ -82,4 +82,4 @@ func _draw() -> void:
 		draw_rect(chip, Color(ink, 0.85))
 		if int(_t * 3.0) % 2 == 0:
 			draw_circle(chip.position + Vector2(34, 32), 13.0, RED)
-		draw_string(_font, chip.position + Vector2(60, 48), "REPLAY", HORIZONTAL_ALIGNMENT_LEFT, -1, 44, PAPER)
+		draw_string(_font, chip.position + Vector2(60, 48), ViewKit.word("fx.replay", "REPLAY"), HORIZONTAL_ALIGNMENT_LEFT, -1, 44, PAPER)

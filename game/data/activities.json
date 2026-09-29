@@ -4,7 +4,7 @@
     "warmup": {
       "name": "Warm-up",
       "station": "st_gramophone",
-      "dur_s": 10,
+      "dur_s": 8,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -51,7 +51,7 @@
     "tea": {
       "name": "Tea",
       "station": "st_tea",
-      "dur_s": 10,
+      "dur_s": 8,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -83,7 +83,7 @@
     "pickles": {
       "name": "Pickles",
       "station": "st_pickles",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -108,7 +108,7 @@
     "snack": {
       "name": "Snack",
       "station": "st_fridge",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -158,7 +158,7 @@
     "paper": {
       "name": "Newspaper",
       "station": "st_recliner",
-      "dur_s": 12,
+      "dur_s": 8,
       "facing": 1,
       "specs": true,
       "awareness": "normal",
@@ -190,7 +190,7 @@
     "fire": {
       "name": "Fire",
       "station": "st_fireplace",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": -1,
       "specs": false,
       "awareness": "normal",
@@ -215,7 +215,7 @@
     "mirror": {
       "name": "Mirror",
       "station": "st_hall_mirror",
-      "dur_s": 6,
+      "dur_s": 5,
       "facing": 1,
       "specs": false,
       "awareness": "normal",
@@ -845,6 +845,17 @@
       "specs": true,
       "desc": "Lost her: specs on, searches the room.",
       "icon": "res://art/icons/activities/search.svg"
+    },
+    "exit": {
+      "name": "Exit",
+      "desc": "The scripted walk-off (Prologue, bellows.exit): 'Hmph!' He stomps off toward the stairs. No hooks; the walk beats play on the way.",
+      "kind": null,
+      "dur_s": 0,
+      "mark_s": null,
+      "clip": "bellows/loco_stomp",
+      "specs": false,
+      "icon": "res://art/icons/activities/exit.svg",
+      "micro_gags": []
     }
   },
   "walk_beats": {

@@ -349,14 +349,20 @@ func test_solutions_reference_real_content() -> void:
 	assert_has(n1_pranks, "achoo_ria", "N1 ideal rigs ACHOO-RIA! (HOT & COLD)")
 	assert_has(n1_pranks, "tap_dance", "N1 ideal rigs TAP DANCE (HOT & COLD)")
 	var n2: Array = C.read("solutions/n02_something_fishy.json")["routes"]["ideal"]["steps"]
+	# TIME'S UP lands (the Big Number unseals and re-arms it), he is rigged again, then Hush stands in
 	var saw_times_up := false
+	var rearmed := false
 	var chained := false
 	for s in n2:
-		if s.get("do") == "wait_event" and s.get("match", {}).get("prank") == "times_up" and s.get("event") == "prank_fire":
+		if s.get("do") == "wait_event" and s.get("match", {}).get("prank") == "times_up" \
+				and s.get("event") in ["prank_fire", "reaction_end"]:
 			saw_times_up = true
+		if saw_times_up and s.get("do") == "rig" and s.get("prank") == "times_up":
+			rearmed = true
 		if saw_times_up and s.get("do") == "stand_in":
 			chained = true
-	assert_true(chained, "N2 ideal stands in for MIRROR, MIRROR after TIME'S UP fires")
+	assert_true(rearmed, "N2 ideal re-rigs TIME'S UP after it lands (rearm_on_unseal)")
+	assert_true(chained, "N2 ideal stands in for MIRROR, MIRROR after TIME'S UP lands")
 
 
 func test_against_house_json_if_present() -> void:

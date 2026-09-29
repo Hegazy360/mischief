@@ -21,92 +21,97 @@ Beats from `reactions.json`: ah 0–20, ahh 20–44, AHHH 44–74, false stop 74
 | bellows/rx_sneeze_blast_a | 94 | voice | vo_bellows_sneeze_choo | 0 | 33 | **CHOO!** on the accent pop (the 5-f hit-stop sits inside it) |
 | bellows/rx_sneeze_blast_a | 95 | sfx | stool_scrape | 0 | 12 | the stool's legs judder back as the recoil starts (first frame after the pop) |
 | bellows/rx_sneeze_blast_a | 96 | sfx | slide_up_flight | 0 | 17 | slide whistle rising over the flight f96–112, ending on the landing |
-| bellows/rx_sneeze_blast_a | 112 | sfx | sink_crash | 0 | 34 | into the sink on the contact frame (= `knock_on` 112): BONG + crockery + splash |
-| bellows/rx_sneeze_blast_a | 154 | sfx | ladle_spin | 0 | 126 | 300 ms of silence after the crash, then one ladle spinning to rest, then drips |
+| bellows/rx_sneeze_blast_a | 112 | sfx | sink_crash | 0 | 21 | into the sink on the contact frame (= `knock_on` 112): BONG + crockery + splash |
+| bellows/rx_sneeze_blast_a | 154 | sfx | ladle_spin | 0 | 96 | 300 ms of silence after the crash, then one ladle spinning to rest, then drips |
 
-### `bellows/act_tea` (length: the anim task's)
+### `bellows/act_tea` (480 f)
 
-Frames are for a **300-f reference loop** (he sits on the stool facing −1 throughout; the `decor` event hides the house stool). Keep the order; put each event on your action's contact frame ± 1 f and keep them ≥ 12 f apart. No voice in the loop — the tea micro-gags carry his hum.
-
-| clip | f | type | id | vol_db | len_f | beat / what it is |
-|---|---|---|---|---|---|---|
-| bellows/act_tea | 10 | sfx | kettle_pour | 0 | 63 | the kettle tips: water into the cup, pitch rising as it fills |
-| bellows/act_tea | 84 | sfx | spoon_clink | 0 | 7 | the spoon dips in: ting |
-| bellows/act_tea | 96 | sfx | tea_stir | 0 | 49 | stir: ting-ting-ting round the cup |
-| bellows/act_tea | 150 | sfx | spoon_clink | -3 | 7 | tap, tap on the rim |
-| bellows/act_tea | 172 | sfx | tea_sniff | 0 | 34 | leans in: sniff-SNIIIFF (the pepper is in there…) |
-| bellows/act_tea | 214 | sfx | tea_slurp | 0 | 28 | lip contact: the posh slurp, pinkie up |
-| bellows/act_tea | 262 | sfx | teacup_clink | 0 | 10 | the cup goes down on its saucer |
-| bellows/act_tea | 282 | sfx | stool_creak | -2 | 23 | shifts his weight: the stool creaks |
-
-### `bellows/act_warmup` (720 f)
-
-A **720-f loop** with two phrases 6 s apart (the ≤ 1 sung line per 6 s rule, outside reactions). The phrase ids are fixed files (not the bank) so each note's `vase_nudge` frame is exact; the style switch maps them to the tuba takes with the same timing. The micro-gags between the phrases carry no singing.
+The **480-f (8 s, the D1 `dur_s`) pass**, phase-locked to the activity start, at `s2-anim-bellows`' contact frames: the two tea micro-gags overlay it at 2.0 s (f120–168) and 7.0 s (f420–468), so the base clip is quiet there. ACHOO-RIA! fires on the sip (`trigger.mark_s` 7.0 = f420): the slurp at f388 is the last thing heard before the sneeze's 'ah…' at the reaction's f0. He sits on the stool facing −1 throughout (the `decor` event hides the house stool). No voice in the base clip — the micro-gags carry his voice.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/act_warmup | 0 | voice | vo_bellows_warmup_1 | 0 | 98 | the phrase mi-mi-mi-mi-MIIII (C3 E3 G3 C4, C4 held) — one sung line per 6 s (GDD §9.5) |
+| bellows/act_tea | 40 | sfx | kettle_pour | 0 | 63 | the kettle tips (pose b_stool_pour_a): water into the cup, pitch rising as it fills |
+| bellows/act_tea | 169 | sfx | spoon_clink | 0 | 7 | the spoon dips in: ting |
+| bellows/act_tea | 182 | sfx | tea_stir | 0 | 49 | stir: ting-ting-ting round the cup |
+| bellows/act_tea | 243 | sfx | spoon_clink | -3 | 7 | tap, tap on the rim |
+| bellows/act_tea | 270 | sfx | tea_sniff | 0 | 34 | leans in: sniff-SNIIIFF (the pepper is in there…) |
+| bellows/act_tea | 388 | sfx | tea_slurp | 0 | 28 | lips meet the cup: the posh slurp (the sip ACHOO-RIA! fires on at 7.0 s) |
+| bellows/act_tea | 462 | sfx | teacup_clink | 0 | 10 | the cup goes down on its saucer (unarmed runs only) |
+| bellows/act_tea | 472 | sfx | stool_creak | -2 | 23 | shifts his weight: the stool creaks |
+
+### `bellows/act_warmup` (1200 f)
+
+A **1200-f loop (20 s = the warm-up's `mg_cycle_s`), phase-locked to the activity start**, with two phrases 10 s apart (the ≤ 1 sung line per 6 s rule, outside reactions). The micro-gags overlay it at 2, 7, 12 and 17 s; the phrases (f0–98, f600–682) sit clear of every micro-gag's voice (the horn's 'mm-HM' f134, the trill f420, the hum f1020). **No 720-f loop can do this** (its phrases drift against the 20-s gag cycle and one always lands on the trill or the hum); a 600-f loop works with only the f0 phrase and its nudges. Re-timing a 720-f clip with phrase 2 at f360: keep f0–345, shift the keys f346–720 by +240 (phrase 2's breath at f586, the phrase at f600) and hold the rest poses to f1200. The phrase ids are fixed files (not the bank) so each note's `vase_nudge` frame is exact; the style switch maps them to the tuba takes with the same timing.
+
+| clip | f | type | id | vol_db | len_f | beat / what it is |
+|---|---|---|---|---|---|---|
+| bellows/act_warmup | 0 | voice | vo_bellows_warmup_1 | 0 | 98 | the phrase mi-mi-mi-mi-MIIII (C3 E3 G3 C4, C4 held) — one sung line per 10 s (GDD §9.5: ≤ 1 per 6 s) |
 | bellows/act_warmup | 5 | sfx | vase_nudge | 0 | 9 | note 1 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
 | bellows/act_warmup | 15 | sfx | vase_nudge | 0 | 9 | note 2 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
 | bellows/act_warmup | 25 | sfx | vase_nudge | 0 | 9 | note 3 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
 | bellows/act_warmup | 35 | sfx | vase_nudge | 0 | 9 | note 4 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
 | bellows/act_warmup | 46 | sfx | vase_nudge | 0 | 9 | note 5 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
-| bellows/act_warmup | 360 | voice | vo_bellows_warmup_3 | 0 | 82 | the phrase la-la-LAAA (D3 A3, D4 held) — one sung line per 6 s (GDD §9.5) |
-| bellows/act_warmup | 364 | sfx | vase_nudge | 0 | 9 | note 1 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
-| bellows/act_warmup | 376 | sfx | vase_nudge | 0 | 9 | note 2 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
-| bellows/act_warmup | 388 | sfx | vase_nudge | 0 | 9 | note 3 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
+| bellows/act_warmup | 600 | voice | vo_bellows_warmup_3 | 0 | 82 | the phrase la-la-LAAA (D3 A3, D4 held) — one sung line per 10 s (GDD §9.5: ≤ 1 per 6 s) |
+| bellows/act_warmup | 604 | sfx | vase_nudge | 0 | 9 | note 1 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
+| bellows/act_warmup | 616 | sfx | vase_nudge | 0 | 9 | note 2 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
+| bellows/act_warmup | 628 | sfx | vase_nudge | 0 | 9 | note 3 lands: the vase scoots 10–14 px along the mantel (s2-view nudges it on this event) |
 
-### `bellows/mg_admire_reflection_horn` (length: the anim task's)
+### `bellows/mg_admire_reflection_horn` (60 f)
 
-Warm-up, emote `smug`.
+Warm-up at 2.0 s, emote `smug`.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/mg_admire_reflection_horn | 6 | sfx | glint | 0 | 24 | the brass horn gleams back at him |
+| bellows/mg_admire_reflection_horn | 6 | sfx | glint | 0 | 24 | his face blooms huge in the brass: the horn gleams back |
 | bellows/mg_admire_reflection_horn | 14 | voice | vo_bellows_smug | 0 | 32 | pleased with himself: 'mm-HM!' |
+| bellows/mg_admire_reflection_horn | 42 | sfx | kiss_smack | 0 | 13 | …and blows it a kiss (pose b_mg_kiss_throw): mwah! |
 
-### `bellows/mg_trill` (length: the anim task's)
+### `bellows/mg_trill` (48 f)
 
-Warm-up, emote `sing`. ≈ 1.0 s; if `len_f` is shorter, the tail rides the blend-out.
-
-| clip | f | type | id | vol_db | len_f | beat / what it is |
-|---|---|---|---|---|---|---|
-| bellows/mg_trill | 0 | voice | vo_bellows_trill | 0 | 58 | a motorboat lip trill up and down (brrrrr) — a noise, not a sung line |
-
-### `bellows/mg_conduct_air` (length: the anim task's)
-
-Warm-up. One swish per downbeat of the conducting finger.
+Warm-up at 7.0 s, emote `sing`. A vocal flourish, not a sung line.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/mg_conduct_air | 0 | sfx | baton_swish | 0 | 11 | downbeat 1 of his finger |
-| bellows/mg_conduct_air | 15 | sfx | baton_swish | -2 | 11 | downbeat 2 |
+| bellows/mg_trill | 0 | voice | vo_bellows_trill | 0 | 59 | a falsetto coloratura trill (C5↔D5), a run up to G5, a delighted 'hm!' |
+| bellows/mg_trill | 30 | sfx | teacups_rattle | 0 | 30 | the teacups on the mantel chatter at his top note |
+
+### `bellows/mg_conduct_air` (60 f)
+
+Warm-up at 12.0 s, emote `smug`. No voice (the f600 phrase ended at f682).
+
+| clip | f | type | id | vol_db | len_f | beat / what it is |
+|---|---|---|---|---|---|---|
+| bellows/mg_conduct_air | 5 | sfx | baton_swish | 0 | 11 | downbeat 1 of his pinkie baton (b_mg_conduct_down) |
+| bellows/mg_conduct_air | 20 | sfx | baton_swish | -2 | 11 | downbeat 2 |
 | bellows/mg_conduct_air | 30 | sfx | baton_swish | 0 | 11 | downbeat 3 (the flourish) |
+| bellows/mg_conduct_air | 42 | sfx | bow_creak | -4 | 26 | …then bows to his invisible orchestra (b_mg_bow_head): his stays creak |
 
-### `bellows/mg_admire_in_kettle` (length: the anim task's)
+### `bellows/mg_hum` (48 f)
 
-Tea, emote `smug`.
-
-| clip | f | type | id | vol_db | len_f | beat / what it is |
-|---|---|---|---|---|---|---|
-| bellows/mg_admire_in_kettle | 6 | sfx | glint | 0 | 24 | the kettle's chrome gleams |
-| bellows/mg_admire_in_kettle | 14 | voice | vo_bellows_smug | 0 | 32 | 'mm-HM!' (the bank never repeats the horn's take) |
-
-### `bellows/mg_hum` (length: the anim task's)
-
-Tea, emote `hum`.
+Warm-up at 17.0 s (moved from the tea by `s2-content`), emote `hum`. The longest take is 74 f: the tail rides the blend-out.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/mg_hum | 0 | voice | vo_bellows_hum | 0 | 74 | hm-hm-hmm… (bank of 4; the only sung line of the tea loop) |
+| bellows/mg_hum | 0 | voice | vo_bellows_hum | 0 | 74 | hums along to his record, eyes shut: hm-hm-hmm… (bank of 4) |
 
-### `bellows/mg_pinkie_up` (length: the anim task's)
+### `bellows/mg_admire_in_kettle` (48 f)
 
-Tea, emote `smug`.
+Tea at 2.0 s, emote `smug`.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/mg_pinkie_up | 10 | sfx | teacup_clink | 0 | 10 | the cup leaves the saucer as the pinkie flicks up |
+| bellows/mg_admire_in_kettle | 6 | sfx | glint | 0 | 24 | the kettle's chrome gleams: he catches his reflection |
+| bellows/mg_admire_in_kettle | 14 | voice | vo_bellows_smug | 0 | 32 | pats his bouffant: 'mm-HM!' (the bank never repeats the horn's take) |
+
+### `bellows/mg_pinkie_up` (48 f)
+
+Tea at 7.0 s (the sip), emote `yum` — unarmed runs only: when ACHOO-RIA! is armed the sneeze starts here instead and its 'ah…' answers the sip.
+
+| clip | f | type | id | vol_db | len_f | beat / what it is |
+|---|---|---|---|---|---|---|
+| bellows/mg_pinkie_up | 10 | sfx | teacup_clink | 0 | 10 | the cup chinks as the pinkie cocks up (b_mg_pinkie) |
+| bellows/mg_pinkie_up | 14 | sfx | pinkie_wobble | 0 | 12 | the pinkie cocked so high it quivers (f10–34): a tiny high twang |
+| bellows/mg_pinkie_up | 30 | voice | vo_bellows_bliss | 0 | 32 | eyes shut: a contented, falling 'Ahhh.' (rides the blend-out) |
 
 ### `bellows/beat_slow_burn` (70 f)
 
@@ -140,15 +145,15 @@ Stare 0–70, blink at 40: **no sound on the blink**, nothing after the note.
 | bellows/beat_tear | 24 | sfx | tear_plink | 0 | 12 | the tear lands (`tear` 24) |
 | bellows/beat_tear | 42 | sfx | sniffle | 0 | 20 | he sniffs it back |
 
-### `bellows/loco_idle` (length: the anim task's)
+### `bellows/loco_idle` (240 f)
 
 Breathing is silent; only the fidget's tug makes a sound.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
-| bellows/loco_idle | 0 | sfx | cravat_tug | -4 | 9 | on the cravat-tug fidget's tug frame (not every loop: only the fidget) |
+| bellows/loco_idle | 170 | sfx | cravat_tug | -4 | 9 | the cravat-tug fidget's tug frame |
 
-### `bellows/loco_strut` (length: the anim task's)
+### `bellows/loco_strut` (32 f)
 
 A 32-f cycle at the L3 cadence (≈ 15–16 f per step): one event per foot plant, on the plant frame. Hush hears where he is from these (the director attenuates by rooms; entry warnings boost them +6 dB), so the entry warning no longer plays its own slipper steps.
 
@@ -157,14 +162,14 @@ A 32-f cycle at the L3 cadence (≈ 15–16 f per step): one event per foot plan
 | bellows/loco_strut | 0 | sfx | bellows_step | -2 | 18 | foot plant 1 (the slipper 'fwip' + weight) |
 | bellows/loco_strut | 16 | sfx | bellows_step | -2 | 18 | foot plant 2 |
 
-### `bellows/loco_blind_shuffle` (length: the anim task's)
+### `bellows/loco_blind_shuffle` (24 f)
 
 FRAZZLED, arms out. One scuff per foot slide.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
 | bellows/loco_blind_shuffle | 0 | sfx | slipper_scuff | 0 | 18 | foot 1 slides forward, feeling for the floor |
-| bellows/loco_blind_shuffle | 24 | sfx | slipper_scuff | -2 | 18 | foot 2 |
+| bellows/loco_blind_shuffle | 12 | sfx | slipper_scuff | -2 | 18 | foot 2 |
 
 ### `bellows/cue_doorframe_bonk` (36 f)
 
@@ -184,14 +189,20 @@ The door-slam stun (and the curtain-call bonk): the door itself is the event-lev
 | bellows/st_bonk | 0 | sfx | woodblock_bonk | 0 | 13 | the bonk (accent 0) |
 | bellows/st_bonk | 6 | sfx | dizzy_tweets | -3 | 83 | stars orbit (`stars` 6–60) |
 
-### `hush/loco_walk` (length: the anim task's)
+### `hush/loco_walk` (80 f)
 
-`step_pizz_up` is a *cycle*: each event plays the next note, up E4 → E5 and back down; after 0.8 s without a step the next walk starts at the bottom again.
+An 80-f cycle, 8 footfalls. `step_pizz_up` is a *cycle*: each event plays the next note, up E4 → E5 and back down; after 0.8 s without a step the next walk starts at the bottom again.
 
 | clip | f | type | id | vol_db | len_f | beat / what it is |
 |---|---|---|---|---|---|---|
 | hush/loco_walk | 0 | sfx | step_pizz_up | 0 | 22 | footfall 1: the next pizzicato note of the E-minor scale |
 | hush/loco_walk | 10 | sfx | step_pizz_up | 0 | 22 | footfall 2 (10 f per step) |
+| hush/loco_walk | 20 | sfx | step_pizz_up | 0 | 22 | footfall 3 (10 f per step) |
+| hush/loco_walk | 30 | sfx | step_pizz_up | 0 | 22 | footfall 4 (10 f per step) |
+| hush/loco_walk | 40 | sfx | step_pizz_up | 0 | 22 | footfall 5 (10 f per step) |
+| hush/loco_walk | 50 | sfx | step_pizz_up | 0 | 22 | footfall 6 (10 f per step) |
+| hush/loco_walk | 60 | sfx | step_pizz_up | 0 | 22 | footfall 7 (10 f per step) |
+| hush/loco_walk | 70 | sfx | step_pizz_up | 0 | 22 | footfall 8 (10 f per step) |
 
 ### `hush/loco_run` (length: the anim task's)
 
@@ -284,6 +295,14 @@ After `rigged` (the sting 'ding + 3 pizz' is event-level).
 |---|---|---|---|---|---|---|
 | hush/freeze_4 | 5 | sfx | freeze_clack | 0 | 13 | the woodblock CLACK as the statue pose lands (end of the 6-f pop) |
 
+### `hush/idle_fidget_clarence` (80 f)
+
+Idle flavour fidget (placed by `s2-anim-hush`; published here so the sound has one owner).
+
+| clip | f | type | id | vol_db | len_f | beat / what it is |
+|---|---|---|---|---|---|---|
+| hush/idle_fidget_clarence | 12 | sfx | clarence_smitten | -6 | 48 | the fidget: she gives Clarence a fond squeeze — his smitten little sigh |
+
 ### `hush/act_squeak` (18 f)
 
 **No sound in this clip.** Clarence's squeak stays event-level (`squeak` → `clarence_squeak`): a tap must answer at once, including when the arm is an overlay or a fallback.
@@ -300,8 +319,8 @@ _(no clip events)_
 | reaction_start | — | bellows/rx_sneeze_blast_a |
 | reaction_accent | — | bellows/rx_sneeze_blast_a |
 | reaction_end | — | bellows/beat_slow_burn, bellows/beat_dignity_fail, bellows/beat_bow_topple, bellows/beat_tear |
-| b_activity | id=warmup | bellows/act_warmup, bellows/mg_admire_reflection_horn, bellows/mg_trill, bellows/mg_conduct_air |
-| b_activity | id=tea | bellows/act_tea, bellows/mg_admire_in_kettle, bellows/mg_hum, bellows/mg_pinkie_up |
+| b_activity | id=warmup | bellows/act_warmup, bellows/mg_admire_reflection_horn, bellows/mg_trill, bellows/mg_conduct_air, bellows/mg_hum |
+| b_activity | id=tea | bellows/act_tea, bellows/mg_admire_in_kettle, bellows/mg_pinkie_up |
 | micro_gag | — | bellows/mg_admire_reflection_horn, bellows/mg_trill, bellows/mg_conduct_air, bellows/mg_admire_in_kettle, bellows/mg_hum, bellows/mg_pinkie_up |
 | b_room | — | bellows/loco_strut, bellows/loco_blind_shuffle |
 | entry_warning | — | bellows/loco_strut, bellows/loco_blind_shuffle |

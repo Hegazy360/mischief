@@ -31,6 +31,7 @@ signal curtain_call_action(action: String)
 enum Phase { BUILD, COLD_OPEN, LOADING, WARM, RISING, PLAY, END, CURTAIN_CALL }
 
 const PHASE_NAMES: PackedStringArray = ["BUILD", "COLD_OPEN", "LOADING", "WARM", "RISING", "PLAY", "END", "CURTAIN_CALL"]
+const SCENE := "res://scenes/night/NightScene.tscn"
 const FTUE_DIRECTOR := "res://ui/ftue/ftue_director.gd"
 const COLD_OPEN_PLAYER := "res://ui/ftue/cold_open_player.gd"
 const HAPTICS_DIRECTOR := "res://view/haptics_director.gd"
@@ -82,14 +83,26 @@ var env := HudPresenter.HudEnv.new()
 var night_input := NightInput.new()
 var replay := CmdReplay.new()
 
-## Engine ms of the first allowed rise (Boot passes the launch target; 0 = as soon as ready).
+## Process ms (DeviceLog.process_ms) of the first allowed rise (Boot passes the launch target, ≈ 2.3 s;
+## 0 = as soon as warm) and of the latest (rise even when not warm).
 var rise_at_ms: int = 0
+var rise_cap_ms: int = 0
 ## Tick-0 bookkeeping for the sim clock contract (tests / e2e).
 var rise_frame: int = -1
 var frame_n: int = 0
 var events_before_rise: int = 0
 ## Retry measurement.
 var last_retry_ms: int = -1
+## Curtain time (s) when input went live (half up, design 0.4 s) and that frame's delta (the
+## quantisation: live at most one frame after 0.4 s).
+var input_live_s: float = -1.0
+## Wall ms of `_build()` (the scene tree, rooms, rigs, atlases) — the launch budget's biggest item.
+var build_ms: int = -1
+var input_live_dt: float = 0.0
+## Sim cost per tick (ms, smoothed; the debug overlay's "sim ms"): measured from the frame start
+## (a probe node that runs before the SimDriver) to each `ticked`, incl. the tick's event handlers.
+var sim_ms_per_tick: float = 0.0
+var _tick_t0: int = 0
 
 var _has_ctx: bool = false
 var _ctx: Dictionary = {}
@@ -111,9 +124,18 @@ var _live_input: bool = false
 var _play_s: float = 0.0
 var _prank_fires: int = 0
 var _catches: int = 0
+## "+NEW!" candidates besides the reel's reactions: `bit:<id>`, `combo:<id>` (+ their captions).
+var _seen_extra: Array = []
+## What the player already maxed (the why line skips those): link peak, near misses, bits, …
+var _stats := {"link": 0, "near_miss": 0, "bits": 0, "meltdown": 0, "combo": 0, "embarrassed": 0}
 
 
 # --- lifecycle --------------------------------------------------------------------------------
+
+func _init() -> void:
+	# in the group before _ready, so drivers (e2e, tests) can hook `ready` and see tick 0
+	add_to_group("night_scene")
+
 
 ## Router / Boot hook (before _ready).
 func setup(p: Dictionary) -> void:
@@ -122,7 +144,6 @@ func setup(p: Dictionary) -> void:
 
 func _ready() -> void:
 	process_priority = 10
-	add_to_group("night_scene")
 	if params.is_empty() and get_tree().current_scene == self:
 		cli_args = NightArgs.parse(OS.get_cmdline_user_args())
 		cli = true
@@ -134,7 +155,11 @@ func _ready() -> void:
 	relaxed = bool(params.get("relaxed", ViewKit.setting("relaxed", false)))
 	from = String(params.get("from", "router"))
 	rise_at_ms = int(params.get("rise_at_ms", 0))
+	rise_cap_ms = int(params.get("rise_cap_ms", 0))
+	var t0 := Time.get_ticks_msec()
 	_build()
+	build_ms = Time.get_ticks_msec() - t0
+	DeviceLog.note("night_build_ms", build_ms)
 	if world == null:
 		return
 	var cmds: Array = params.get("cmds", [])
@@ -142,8 +167,10 @@ func _ready() -> void:
 		cmds = NightArgs.read_cmds(String(cli_args["cmds_path"]))
 	if not cmds.is_empty():
 		set_replay(cmds)
-	if cli and (int(cli_args.get("seek_tick", -1)) >= 0 or bool(cli_args.get("no_curtain", false)) or bool(cli_args.get("paused", false))):
+	if cli and (int(cli_args.get("seek_tick", -1)) >= 0 or bool(cli_args.get("no_curtain", false)) or bool(cli_args.get("paused", false))
+			or String(cli_args.get("curtain_call", "")) != "" or String(cli_args.get("open", "")) != ""):
 		_start_cli_now()
+		_cli_after_start.call_deferred()
 	else:
 		_begin_flow()
 
@@ -172,6 +199,9 @@ func _build() -> void:
 		push_error("NightScene: SimWorld.create(%s) failed" % episode_id)
 		return
 	_has_ctx = world.has_method("action_context")
+	var probe := _FrameStart.new()
+	probe.night = self
+	add_child(probe)
 	driver = SimDriver.new()
 	add_child(driver)
 	# Our tick handler runs first: it swallows `title_card` before the views see it.
@@ -181,6 +211,10 @@ func _build() -> void:
 	cam = CameraDirector.new()
 	cam.time_source = driver
 	world_view = WorldView.new()
+	if world_view == null:
+		push_error("NightScene: WorldView did not compile")
+		world = null
+		return
 	world_view.cam = cam
 	add_child(world_view)
 	world_view.setup(db, world.get("episode"), driver)
@@ -275,7 +309,7 @@ func _wire_input() -> void:
 
 
 func _setup_ftue() -> void:
-	var fs := ViewKit.soft_script(FTUE_DIRECTOR)
+	var fs := ViewKit.soft_script(String(params.get("ftue_path", FTUE_DIRECTOR)))
 	if fs != null:
 		ftue = fs.new()
 		ftue.name = "FtueDirector"
@@ -367,10 +401,11 @@ func _after_cold_open() -> void:
 		return
 	if kind == "loading":
 		var lc := LoadingCard.new()
-		lc.setup(_loading_card_data())
+		var data := _loading_card_data()
 		var vt: Variant = ftue.call("loading_vignette", episode_id) if ftue != null and ftue.has_method("loading_vignette") else null
-		if vt is Texture2D and lc.has_method("set_icon_texture"):
-			lc.call("set_icon_texture", vt)
+		if vt is Texture2D:
+			data["icon"] = vt
+		lc.setup(data)
 		_card = lc
 		curtain_layer.add_child(lc)
 		lc.closed.connect(func(_a: String) -> void: _on_card_closed(), CONNECT_ONE_SHOT)
@@ -419,19 +454,26 @@ func _warm_ready() -> bool:
 	return _warm_since >= WARM_CAP_S
 
 
-## Rise now if the warm-up is done (or its cap passed) and the launch target was reached.
+## Rise now if the warm-up is done (or its cap passed) and the launch target was reached; always at
+## the launch cap (Boot: 3.0 s from process start).
 func _maybe_rise() -> void:
 	if phase != Phase.WARM:
 		return
+	var now := DeviceLog.process_ms()
+	if rise_cap_ms > 0 and now >= rise_cap_ms:
+		start_rise()
+		return
 	if not _warm_ready():
 		return
-	if rise_at_ms > 0 and Time.get_ticks_msec() < rise_at_ms and _warm_since < WARM_CAP_S:
+	if rise_at_ms > 0 and now < rise_at_ms:
 		return
 	start_rise()
 
 
 ## The curtain starts to rise: tick 0 of the sim clock is this frame (L13).
 func start_rise(rise_s: float = NightCurtain.RISE_S) -> void:
+	if warmer != null and not warmer.done:
+		warmer.finish_now()   # the launch cap forced the rise: finish warming under the (still closed) curtain
 	_set_phase(Phase.RISING)
 	rise_frame = frame_n
 	driver.set_paused(_is_paused_by_other())
@@ -456,6 +498,9 @@ func _is_paused_by_other() -> bool:
 
 
 func _on_curtain_half_up() -> void:
+	if not _retrying:
+		input_live_s = curtain.elapsed()
+		input_live_dt = get_process_delta_time()
 	_set_live_input(true)
 
 
@@ -496,6 +541,21 @@ func _start_cli_now() -> void:
 	var hold := bool(cli_args.get("paused", false))
 	driver.set_paused(hold)
 	_set_live_input(not hold)
+
+
+## CLI shots: `--curtain-call=<reason>` / `--open=pause|script` after the start.
+func _cli_after_start() -> void:
+	var cc := String(cli_args.get("curtain_call", ""))
+	if cc != "":
+		_on_night_end(cc)
+		return
+	match String(cli_args.get("open", "")):
+		"pause":
+			open_pause_menu()
+		"script":
+			open_script_panel()
+		"tbc":
+			_leave("to_be_continued")
 
 
 ## Run the sim headless (views muted) to `tick`, then settle gags and the PiP.
@@ -582,6 +642,10 @@ func _update_hud(delta: float) -> void:
 # --- sim events ---------------------------------------------------------------------------------
 
 func _on_ticked(events: Array) -> void:
+	var now := Time.get_ticks_usec()
+	if _tick_t0 > 0:
+		sim_ms_per_tick = lerpf(sim_ms_per_tick, float(now - _tick_t0) / 1000.0, 0.05)
+	_tick_t0 = now
 	if phase == Phase.CURTAIN_CALL:
 		return
 	# `title_card` during PLAY is swallowed (the curtain call slams the title after the fall).
@@ -618,6 +682,27 @@ func _on_ticked(events: Array) -> void:
 				DeviceLog.catch(fill, String(d.get("cause", "")))
 			"prank_fire":
 				_prank_fires += 1
+			"squeak_bit":
+				_stats["bits"] = int(_stats["bits"]) + 1
+				var bid := String(d.get("bit", d.get("id", "")))
+				if bid != "":
+					_seen_extra.append(["bit:%s" % bid, ""])
+			"combo":
+				_stats["combo"] = int(_stats["combo"]) + 1
+				var cid := String(d.get("id", ""))
+				var cap := ""
+				var cinfo: Variant = world_view.info.call("combo_caption", cid) if world_view.info != null and world_view.info.has_method("combo_caption") else ""
+				if cinfo is String:
+					cap = cinfo
+				_seen_extra.append(["combo:%s" % cid, cap])
+			"near_miss":
+				_stats["near_miss"] = int(_stats["near_miss"]) + 1
+			"meltdown_start":
+				_stats["meltdown"] = int(_stats["meltdown"]) + 1
+			"embarrassed":
+				_stats["embarrassed"] = int(_stats["embarrassed"]) + 1
+			"running_gag":
+				_stats["link"] = maxi(int(_stats["link"]), int(d.get("link", d.get("n", 0))))
 			"reaction_accent":
 				DeviceLog.mark("first_prank")
 			"all_lines_done":
@@ -644,6 +729,9 @@ func _on_audio_laugh(tier: int) -> void:
 
 
 func _all_lines_done() -> void:
+	# the bow chant belongs to Nights that end with a bow (the Prologue and Gate 0 end by themselves)
+	if episode_id == G0_EPISODE or episode_id == PROLOGUE:
+		return
 	var a := ViewKit.autoload("Audio")
 	if a != null and a.has_method("crowd"):
 		a.call("crowd", "bow_chant")
@@ -810,6 +898,8 @@ func _notification(what: int) -> void:
 ## audio, flush the device log.
 func _on_background() -> void:
 	DeviceLog.flush()
+	if driver != null:
+		CmdLog.write(episode_id, driver.cmd_log)
 	if phase == Phase.PLAY or phase == Phase.RISING:
 		if _live_input and (_pause_menu == null or not is_instance_valid(_pause_menu)):
 			open_pause_menu()
@@ -833,8 +923,9 @@ func retry() -> void:
 		curtain_call = null
 	hud.visible = true
 	stalls_layer.visible = true
-	curtain.fall(RETRY_DROP_S)
-	await curtain.fallen
+	if not curtain.is_down():
+		curtain.fall(RETRY_DROP_S)
+		await curtain.fallen
 	reset_night()
 	start_rise(RETRY_RISE_S)
 
@@ -874,6 +965,9 @@ func reset_night() -> void:
 	_play_s = 0.0
 	_prank_fires = 0
 	_catches = 0
+	_seen_extra.clear()
+	for k in _stats:
+		_stats[k] = 0
 	_spot_start_tick = -1
 	rise_frame = -1
 	model.paused = false
@@ -899,13 +993,73 @@ func _on_night_end(reason: String) -> void:
 	night_ended.emit(reason)
 	var result := collect_result()
 	_save_result(result)
+	CmdLog.write(episode_id, driver.cmd_log)
 	DeviceLog.flush()
+	result.merge(curtain_extras(result), true)
 	curtain_call = CurtainCall.new()
 	curtain_call.name = "CurtainCall"
 	add_child(curtain_call)
 	curtain_call.connect("action", _on_curtain_call_action)
-	curtain_call.call("start", self, CurtainCall.kind_for(episode_id, reason), result)
+	hud.visible = false
 	_set_phase(Phase.CURTAIN_CALL)
+	curtain_call.call("start", self, CurtainCall.kind_for(episode_id, reason), result)
+
+
+## What the curtain call shows beyond the Save result: the why line, "+NEW!" chips, the title,
+## the Gag Reel moments + the command log that re-stages them, Next availability, his residues.
+func curtain_extras(r: Dictionary) -> Dictionary:
+	var raw := episode_raw()
+	var kind := CurtainCall.kind_for(episode_id, _end_reason)
+	var n_pranks := 0
+	var lines: Array = []
+	var ep: Variant = world.get("episode")
+	for st in r.get("line_states", []):
+		var d: Dictionary = (st as Dictionary).duplicate()
+		var ld: Variant = ep.call("line", String(d.get("id", ""))) if ep is Object and (ep as Object).has_method("line") else null
+		if ld is Object:
+			d["prank"] = String((ld as Object).get("prank"))
+			d["text"] = String((ld as Object).get("text"))
+		lines.append(d)
+		n_pranks += 1
+	var barks: Variant = ViewKit.json("res://data/barks.json")
+	var templates: Dictionary = (barks as Dictionary).get("results", {}) if barks is Dictionary else {}
+	var missed: Dictionary = (barks as Dictionary).get("missed", {}) if barks is Dictionary else {}
+	var why_in := {"episode": episode_id, "prologue": kind == CurtainCall.KIND_PROLOGUE, "applause": r.get("applause", 0),
+		"catches": r.get("catches", 0), "stars": r.get("stars", []), "lines": lines,
+		"can": WhyMissed.offers(raw, n_pranks, true), "maxed": maxed_of(_stats)}
+	var why := "" if kind == CurtainCall.KIND_GATE0 else String(WhyMissed.pick(why_in, templates, missed)["text"])
+	var new_keys := PackedStringArray()
+	for m in reel_log.moments:
+		for k in (m as Dictionary).get("keys", []):
+			if _save_mark_seen(String(k)):
+				(m as Dictionary)["new"] = true
+				new_keys.append(String((m as Dictionary).get("prank", "")))
+	var captions := PackedStringArray()
+	for se in _seen_extra:
+		if _save_mark_seen(String(se[0])) and String(se[1]) != "" and not captions.has(String(se[1])):
+			captions.append(String(se[1]))
+	for pid in new_keys:
+		var pd: Variant = null
+		var pranks: Variant = db.get("pranks") if db != null else null
+		if pranks is Dictionary:
+			pd = (pranks as Dictionary).get(pid, null)
+		var cap := String((pd as Object).get("caption")) if pd is Object else pid
+		if cap != "" and not captions.has(cap):
+			captions.append(cap)
+	var best: Array = reel_log.best(1 if kind == CurtainCall.KIND_GATE0 else 3, bool(r.get("repeat", false)))
+	var residues := PackedStringArray()
+	var snap := driver.snapshot()
+	if snap != null and snap.bellows != null:
+		residues = snap.bellows.residues.duplicate()
+	return {"why": why, "new": Array(captions), "title": String(raw.get("title", "")), "moments": best,
+		"cmds": driver.cmd_log.duplicate(), "has_next": true, "residues": residues}
+
+
+## The "short" why lines the player already maxed this Night (pure).
+static func maxed_of(st: Dictionary) -> Dictionary:
+	return {"short_link": int(st.get("link", 0)) >= 3, "short_meltdown": int(st.get("meltdown", 0)) > 0,
+		"short_near_misses": int(st.get("near_miss", 0)) >= 3, "short_bits": int(st.get("bits", 0)) >= 3,
+		"short_combo": int(st.get("combo", 0)) > 0, "short_embarrassed": int(st.get("embarrassed", 0)) > 0}
 
 
 ## The Night's result for Save + the curtain call.
@@ -924,11 +1078,16 @@ func collect_result() -> Dictionary:
 		"play_s": int(round(_play_s)), "line_states": world.call("line_states") if world.has_method("line_states") else []}
 
 
+## CLI shots (`from: cli`) never write the player's save (every sandbox shares one user:// dir).
+func _save_writes() -> bool:
+	return from != "cli" and not bool(params.get("no_save", false))
+
+
 func _save_result(r: Dictionary) -> void:
 	var sv := ViewKit.autoload("Save")
-	if sv == null or episode_id == G0_EPISODE:
+	r["repeat"] = sv != null and sv.has_method("night") and not (sv.call("night", episode_id) as Dictionary).is_empty()
+	if sv == null or episode_id == G0_EPISODE or not _save_writes():
 		return
-	r["repeat"] = sv.has_method("night") and not (sv.call("night", episode_id) as Dictionary).is_empty()
 	if sv.has_method("record_result"):
 		sv.call("record_result", episode_id, {"stars": r["stars"], "applause": r["applause"], "lines": r["lines"],
 			"candles": r["candles"], "encores": r["encores"], "catches": r["catches"], "pranks": r["pranks"],
@@ -979,4 +1138,20 @@ func _save_is_seen(key: String) -> bool:
 
 func _save_mark_seen(key: String) -> bool:
 	var sv := ViewKit.autoload("Save")
+	if sv != null and not _save_writes():
+		return not _save_is_seen(key)
 	return sv != null and sv.has_method("mark_seen") and bool(sv.call("mark_seen", key))
+
+
+## Runs before the SimDriver each frame: stamps the frame start for `sim_ms_per_tick`.
+class _FrameStart:
+	extends Node
+	var night: Node = null
+
+	func _init() -> void:
+		name = "FrameStart"
+		process_priority = -101
+
+	func _process(_d: float) -> void:
+		if night != null:
+			night.set("_tick_t0", Time.get_ticks_usec())

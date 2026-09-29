@@ -10,7 +10,9 @@ has to fit:
   the tea loop       stool_creak, kettle_pour, spoon_clink (2), tea_stir, tea_sniff,
                      tea_slurp, teacup_clink
   the warm-up        vase_nudge (2): the vase scoots along the mantel on each note
-  micro-gags         glint, baton_swish (2)  (voices: vo_bellows_trill / _smug in voices.py)
+  micro-gags         glint, baton_swish (2), teacups_rattle, kiss_smack,
+                     pinkie_wobble (voices: vo_bellows_trill /
+                     _smug / _bliss in voices.py)
   last beats         bassoon_burn (slow burn: one low note, then dry silence), cravat_tug,
                      cravat_ping, bow_creak, slide_down_short, tear_plink, sad_violin, sniffle
   Bellows' feet      slipper_scuff (2): the blind shuffle
@@ -55,31 +57,34 @@ def slide_up_flight(rng):
     return I.slide_whistle(f, dur, 0.95, rng)
 
 
-@sfx("sink_crash", max_dur=0.8, level=-11.5,
-     desc="into the sink on the contact frame: metal BONG + crockery + a big splash, dense, then quiet")
+@sfx("sink_crash", max_dur=0.45, level=-11.5,
+     desc="into the sink on the contact frame: metal BONG + crockery + a big splash, dense — then CUT to silence")
 def sink_crash(rng):
-    dur = 0.62
+    # Treg-Brown: the crash is short and dense, then gated to dead silence (≥ 300 ms before the
+    # ladle at f154: the crash lands on f112 and is over by f136 — 0.40 s including its tail)
+    dur = 0.4
     n = ns(dur)
-    bong = pad(metal_hit(rng, 176, 0.6, (1.0, 2.13, 3.4, 4.9), decay=0.4), n)
-    crock = pad(_crockery(rng, 0.42), n) * env_lin([(0, 1), (0.3, 0.5), (0.45, 0)], n)
+    bong = pad(metal_hit(rng, 176, 0.4, (1.0, 2.13, 3.4, 4.9), decay=0.26), n)
+    crock = pad(_crockery(rng, 0.32), n) * env_lin([(0, 1), (0.2, 0.55), (0.32, 0)], n)
     impact = filt(white(n, rng), ("lp", 7000), ("hp", 180)) * perc(n, 0.0003, 0.05)
-    body = noise_sweep(n, rng, env_exp([(0, 3000), (0.18, 950), (dur, 650)], n), 1.4, color=-0.5) * \
-        env_lin([(0, 0.2), (0.012, 1.0), (0.2, 0.6), (0.4, 0.12), (dur, 0.0)], n)
-    drops = place([(rng.uniform(0.03, 0.34), droplet(rng, rng.uniform(900, 2600), rng.uniform(0.03, 0.06)),
-                    rng.uniform(0.2, 0.55)) for _ in range(22)], dur)
-    low = pad(thump(0.3, 140, 48), n)
+    body = noise_sweep(n, rng, env_exp([(0, 3000), (0.14, 950), (dur, 650)], n), 1.4, color=-0.5) * \
+        env_lin([(0, 0.2), (0.012, 1.0), (0.16, 0.6), (0.3, 0.1), (dur, 0.0)], n)
+    drops = place([(rng.uniform(0.03, 0.26), droplet(rng, rng.uniform(900, 2600), rng.uniform(0.03, 0.05)),
+                    rng.uniform(0.2, 0.55)) for _ in range(18)], dur)
+    low = pad(thump(0.26, 140, 48), n)
     y = bong * 0.55 + norm(crock) * 0.55 + norm(impact) * 0.8 + norm(body) * 0.9 + pad(drops, n) * 0.4 + low * 0.7
-    return reverb(y, 0.1, 0.35, keep_len=True)
+    y = reverb(y, 0.08, 0.2, keep_len=True)
+    return y * env_lin([(0, 1.0), (0.27, 1.0), (0.37, 0.0), (dur, 0.0)], n)
 
 
-@sfx("ladle_spin", max_dur=2.3, level=-17.0, tags=("keep_tail",),
+@sfx("ladle_spin", max_dur=1.8, level=-17.0, tags=("keep_tail",),
      desc="one ladle spinning to rest in the sink (accelerating, fading), then three drips")
 def ladle_spin(rng):
-    dur = 2.1
-    spin = pan_spin(rng, 1.0, 640.0)
-    drips = [(1.18, droplet(rng, 1500, 0.07), 0.55), (1.52, droplet(rng, 1250, 0.07), 0.45),
-             (1.96, droplet(rng, 1700, 0.06), 0.4)]
-    return reverb(place([(0, spin, 1.0)] + drips, dur), 0.12, 0.4, keep_len=True)
+    dur = 1.6
+    spin = pan_spin(rng, 0.85, 640.0)
+    drips = [(0.98, droplet(rng, 1500, 0.07), 0.55), (1.2, droplet(rng, 1250, 0.07), 0.45),
+             (1.48, droplet(rng, 1700, 0.06), 0.4)]
+    return reverb(place([(0, spin, 1.0)] + drips, dur), 0.12, 0.35, keep_len=True)
 
 
 # ----------------------------------------------------------------------------- the tea loop
@@ -193,6 +198,40 @@ def glint(rng):
     shimmer = 1 + 0.3 * np.sin(TAU * 13 * t)
     y = (np.sin(TAU * 4186 * t) * np.exp(-t / 0.12) + 0.45 * np.sin(TAU * 6270 * t) * np.exp(-t / 0.07)) * shimmer
     return reverb(y + pad(I.glock(midi(103), 0.2, 0.3, rng), n) * 0.3, 0.2, 0.5, keep_len=True)
+
+
+@sfx("teacups_rattle", cat="soft", max_dur=0.6, level=-20.0,
+     desc="mg_trill: the teacups on the mantel chatter on their saucers at his top note")
+def teacups_rattle(rng):
+    dur = 0.5
+    evs = []
+    t = 0.0
+    k = 0
+    while t < dur - 0.06:
+        evs.append((t, _china(rng, (2650.0, 3050.0, 2850.0)[k % 3] * rng.uniform(0.98, 1.02), 0.07,
+                              0.35 + 0.65 * math.sin(math.pi * t / dur)), 1.0))
+        t += rng.uniform(0.022, 0.034)
+        k += 1
+    return place(evs, dur)
+
+
+@sfx("kiss_smack", cat="soft", max_dur=0.35, level=-19.0,
+     desc="mg_admire_reflection_horn: he blows his reflection a kiss — a wet lip smack + a tiny 'mwah'")
+def kiss_smack(rng):
+    n = ns(0.24)
+    pop = filt(white(ns(0.012), rng), ("bp", 1800, 1.2)) * perc(ns(0.012), 0.0002, 0.005)
+    wet = sine(env_exp([(0, 900), (0.05, 1400)], ns(0.05)), ns(0.05)) * perc(ns(0.05), 0.001, 0.03)
+    forms = vowel_track([(0, "u"), (0.06, "a"), (0.16, "a")], ns(0.16), 1.0)
+    mwah = voice(env_exp([(0, 240.0), (0.16, 200.0)], ns(0.16)), forms, np.ones(ns(0.16)), breath=0.5, tilt=1.2,
+                 rng=rng, breath_amp=env_lin([(0, 0), (0.02, 0.8), (0.16, 0)], ns(0.16))) * \
+        env_lin([(0, 0), (0.02, 1), (0.1, 0.6), (0.16, 0)], ns(0.16))
+    return place([(0, pop, 1.0), (0.004, wet, 0.5), (0.03, norm(mwah), 0.45)], 0.24)[:n]
+
+
+@sfx("pinkie_wobble", cat="soft", max_dur=0.35, level=-22.0,
+     desc="mg_pinkie_up: the cocked pinkie quivers — a tiny, high, fast-wobbling twang (no thud)")
+def pinkie_wobble(rng):
+    return boing(rng, 1180, 0.28, 23, 0.07, 0.04, 0.0)
 
 
 for _k, (_lo, _hi) in ((1, (900, 4200)), (2, (1000, 4800))):

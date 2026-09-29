@@ -23,7 +23,14 @@ const SCENARIOS := {
 	"gag_punch": 732, "captions": 1818, "pip": 1080, "pip_escalate": 1215, "stare_on": 1530,
 	"near_miss": 1580, "stalls_t4": 1700, "spotted": 2418, "busted_cam": 2520, "overview": 1000,
 	"peek": 950, "full": 0,
+	# Stage 2 (s2-view): micro-gags over the tea loop, Hush's hidden eyes tracking him past the
+	# pantry, a tap held during the climb-in, the caught sequence (Busted Cam → Lecture →
+	# doorstep), the Busted Cam with rigs, the door-frame bonk cue, his legs on the stairs.
+	"micro_gag": 540, "hidden_eyes": 500, "queued_tap": 0, "caught": 2600, "busted_rig": 2548,
+	"doorframe": 930, "stairs": 0, "residue": 850, "squeak_bit": 236,
 }
+## Scenarios that switch on a scripted demo instead of the main timeline.
+const DEMOS := {"stairs": "stairs"}
 const END_TICK := 2830
 const WALK := 400.0 / 60.0
 const RUN := 720.0 / 60.0
@@ -84,6 +91,17 @@ var db: Variant = null
 var layout: HouseLayout = null
 ## Loop back to tick 0 after END_TICK (continuous sandbox runs).
 var loop: bool = true
+## A side demo ("" = the main timeline; "stairs" = Bellows coming down the stairs into the hall).
+var demo: String = ""
+var _caught_t0 := -1
+var _lecture_var := 0
+var _bit_t0 := -1
+var _bit_len := 0
+var _bit_id := ""
+var _oneshot_b := {"id": "", "t": 0, "len": 0, "variant": 0}
+var _oneshot_h := {"id": "", "t": 0, "len": 0, "variant": 0}
+var _leg_b := {"kind": ""}
+var _leg_h := {"kind": ""}
 
 var _events: Array = []
 var _script: Dictionary = {}
@@ -144,8 +162,12 @@ func reset() -> void:
 	_rig_t0 = -1
 	_busy_until = 0
 	_h_after = ""
+	_caught_t0 = -1
+	_bit_t0 = -1
 	_init_hotspots()
 	_build_script()
+	if demo == "stairs":
+		_build_stairs_demo()
 
 
 ## Run until `t` (scenario seek). Events stay queued for the caller to drain.
@@ -163,7 +185,10 @@ func step(_cmds: Array) -> void:
 		for a in acts:
 			_do(a)
 	_update_hush()
-	_update_bellows()
+	if demo == "stairs":
+		_update_stairs_demo()
+	if _leg_b.get("kind", "") != "stairs":
+		_update_bellows()
 	if _fuse > 0:
 		_fuse -= 1
 	if tick >= END_TICK:
@@ -274,6 +299,83 @@ func hush_can_see(_hotspot_id: String) -> bool:
 	return true
 
 
+## s2-sim §4.4b one-shot accessors: {id, t, len, variant} (the caught phases, the squeak bit, the
+## climb-in, the look-back); one reused Dictionary each.
+func bellows_oneshot() -> Dictionary:
+	var o := _oneshot_b
+	o["id"] = ""
+	o["t"] = 0
+	o["len"] = 0
+	o["variant"] = 0
+	if _caught_t0 >= 0 and bellows.state == "CAUGHT_HOLD":
+		var ct := tick - _caught_t0
+		if ct < 60:
+			_os(o, "caught:grab", ct, 60, 0)
+		elif ct < 192:
+			_os(o, "caught:lecture", ct - 60, 132, _lecture_var)
+		elif ct < 204:
+			_os(o, "caught:wipe", ct - 192, 12, 0)
+		else:
+			_os(o, "caught:doorstep", ct - 204, 36, 0)
+		return o
+	if _bit_t0 >= 0 and tick < _bit_t0 + _bit_len:
+		_os(o, "bit:" + _bit_id, tick - _bit_t0, _bit_len, 0)
+		return o
+	if bellows.look_back_until > tick and bellows.state != "REACTING":
+		_os(o, "look_back", 30 - (bellows.look_back_until - tick), 30, 0)
+	return o
+
+
+func hush_oneshot() -> Dictionary:
+	var o := _oneshot_h
+	o["id"] = ""
+	o["t"] = 0
+	o["len"] = 0
+	o["variant"] = 0
+	if _caught_t0 >= 0 and hush.state == "CAUGHT" or (_caught_t0 >= 0 and tick - _caught_t0 < 240 and bellows.state == "CAUGHT_HOLD"):
+		var ct := tick - _caught_t0
+		if ct < 60:
+			_os(o, "caught:busted", ct, 60, 0)
+		elif ct < 192:
+			_os(o, "caught:lecture", ct - 60, 132, _lecture_var)
+		elif ct < 204:
+			_os(o, "caught:wipe", ct - 192, 12, 0)
+		else:
+			_os(o, "caught:doorstep", ct - 204, 36, 0)
+		return o
+	if tick < 40 and demo == "":
+		_os(o, "enter", tick, 40, 0)
+	return o
+
+
+static func _os(o: Dictionary, id: String, t: int, n: int, v: int) -> void:
+	o["id"] = id
+	o["t"] = t
+	o["len"] = n
+	o["variant"] = v
+
+
+## s2-sim §4.5.2 leg accessors: {kind, from_room, to_room, from_x, to_x, progress_pm}.
+func bellows_leg() -> Dictionary:
+	return _leg_b
+
+
+func hush_leg() -> Dictionary:
+	return _leg_h
+
+
+## s2-sim §4.4 sight: {moving_px, frozen_px, to_wall, blind}.
+func sight_ranges() -> Dictionary:
+	var b := bellows
+	if b.state == "REACTING" or b.state == "MELTDOWN" or b.state == "CAUGHT_HOLD":
+		return {"moving_px": 0, "frozen_px": 0, "to_wall": false, "blind": true}
+	if b.blinded_until > tick:
+		return {"moving_px": 150, "frozen_px": 150, "to_wall": false, "blind": false}
+	if b.specs_on:
+		return {"moving_px": -1, "frozen_px": 600, "to_wall": true, "blind": false}
+	return {"moving_px": 600, "frozen_px": 250, "to_wall": false, "blind": false}
+
+
 func house_layout() -> HouseLayout:
 	return layout
 
@@ -373,8 +475,17 @@ func _build_script() -> void:
 	var sink := _hx("kitchen_sink_tap", 3810.0)
 	var pickle := _hx("kitchen_pickle_jar", 3130.0)
 	# A — tiptoe, rig, squeak, bubble, entry warning, run + dive, specs-off strip, ACHOO-RIA!
+	# A tap held during the climb-in (cmd_queued → the pulsing "…" marker until hush_go).
+	_ev(12, {"e": "_tap", "room": "kitchen", "x": honey})
+	_ev(12, {"e": "cmd_queued", "c": "go", "why": "entering", "target": "kitchen_honey"})
 	_ev(50, {"e": "hush_go", "target": "kitchen_honey", "run": false})
-	_ev(50, {"e": "_tap", "room": "kitchen", "x": honey})
+	# Micro-gags (s2-sim micro_gag events): over the warm-up, then over the tea loop.
+	_ev(110, {"e": "micro_gag", "id": "admire_reflection_horn", "activity": "warmup", "room": "parlour", "x": 1720,
+		"len": 60, "emote": "smug", "vis": "pip"})
+	_ev(566, {"e": "micro_gag", "id": "admire_in_kettle", "activity": "tea", "room": "kitchen", "x": 2940,
+		"len": 48, "emote": "smug", "vis": "room"})
+	_ev(630, {"e": "micro_gag", "id": "pinkie_up", "activity": "tea", "room": "kitchen", "x": 2940,
+		"len": 48, "emote": "yum", "vis": "room"})
 	_at(50, ["h_move", honey, WALK, ""])
 	_at(180, ["h_rig", "achoo_ria", 48])
 	_ev(180, {"e": "rig_start", "prank": "achoo_ria", "step": 0})
@@ -385,6 +496,7 @@ func _build_script() -> void:
 	_at(242, ["b_pips", 1])
 	_ev(242, {"e": "ear_pip", "n": 1})
 	_ev(244, {"e": "squeak_bit", "bit": "bit_warmup", "score": 20})
+	_at(244, ["bit", "bit_warmup", 90])
 	_at(244, ["applause", 20, "bit", "bit_warmup"])
 	_ev(300, {"e": "b_activity_end", "id": "warmup"})
 	_at(300, ["b_move", 2900.0, 5.0, 1])
@@ -413,6 +525,7 @@ func _build_script() -> void:
 	# TIME'S UP fires off screen (the escalated Gag-Cam PiP).
 	_at(850, ["b_move", 1080.0, 8.0, -1])
 	_ev(970, {"e": "b_room", "room": "parlour"})
+	_ev(968, {"e": "director_cue", "id": "laugh_doorframe"})
 	_ev(1132, {"e": "b_room", "room": "hall"})
 	_at(880, ["h_pop"])
 	_ev(880, {"e": "pop_out", "spot": "kitchen_pantry_curtain"})
@@ -503,7 +616,7 @@ func _build_script() -> void:
 	_ev(2550, {"e": "caught", "cause": "grab", "spotted_tick": 2470, "by": "bellows"})
 	_ev(2550, {"e": "busted_cam"})
 	_at(2550, ["caught"])
-	_ev(2610, {"e": "lecture", "variant": "a"})
+	_ev(2610, {"e": "lecture", "variant": 0})
 	_at(2754, ["doorstep"])
 	_ev(2754, {"e": "doorstep"})
 	_ev(2754, {"e": "tomato", "n": 1})
@@ -620,7 +733,12 @@ func _do(a: Array) -> void:
 			_spot_dir = int(a[1])
 			if _spot_dir == 0:
 				bellows.spot_meter = 0
+		"bit":
+			_bit_id = String(a[1])
+			_bit_len = int(a[2])
+			_bit_t0 = tick
 		"caught":
+			_caught_t0 = tick
 			bellows.state = "CAUGHT_HOLD"
 			hush.state = "CAUGHT"
 			hush.frozen = false
@@ -634,6 +752,55 @@ func _do(a: Array) -> void:
 			hush.x_sub = _sub(350.0)
 			hush.facing = 1
 			_tomatoes += 1
+
+
+## The stairs demo (scenario "stairs"): Hush waits in the hall by the stair foot; Bellows walks
+## the landing, comes down the stairs (a 120-tick STAIRS leg with progress) and into the hall;
+## the entry warning for the hall fires 90 ticks ahead. Loops every 420 ticks.
+func _build_stairs_demo() -> void:
+	_script.clear()
+	hush.room = "hall"
+	hush.floor = 0
+	hush.x_sub = _sub(1260.0)
+	hush.facing = 1
+	hush.state = "IDLE"
+	bellows.room = "landing"
+	bellows.floor = 1
+	bellows.x_sub = _sub(1500.0)
+	bellows.facing = -1
+	bellows.activity_id = ""
+	_perform = false
+	_at(10, ["b_move", 1060.0, 4.0, -1])
+	_ev(30, {"e": "entry_warning", "room": "hall", "eta": 90})
+
+
+func _update_stairs_demo() -> void:
+	var t := tick % 420
+	var b := bellows
+	_leg_b = {"kind": ""}
+	if t >= 120 and t < 240:
+		var pm := (t - 120) * 1000 / 120
+		_leg_b = {"kind": "stairs", "from_room": "landing", "to_room": "hall", "from_x": 1050, "to_x": 1450,
+			"from_floor": 1, "to_floor": 0, "progress_pm": pm}
+		b.room = "hall"
+		b.floor = 0
+		b.x_sub = _sub(1450.0)
+		b.state = "ROUTINE"
+		b.facing = 1
+		_bx_target = -1.0
+	elif t == 240:
+		_events.append({"e": "b_room", "t": tick, "room": "hall"})
+		_bx_target = 1180.0
+		_bx_speed = 4.0
+		b.facing = -1
+	elif t == 0 and tick > 0:
+		b.room = "landing"
+		b.floor = 1
+		b.x_sub = _sub(1500.0)
+		_bx_target = 1060.0
+		_bx_speed = 4.0
+		b.facing = -1
+		_events.append({"e": "entry_warning", "t": tick, "room": "hall", "eta": 90})
 
 
 func _busy(ticks: int, state: String, then: String) -> void:

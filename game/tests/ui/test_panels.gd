@@ -136,7 +136,8 @@ func test_loading_card_timing() -> void:
 	_add(p)
 	var got := []
 	p.closed.connect(func(a: String) -> void: got.append(a))
-	var t0 := UiKit.now_ms()
+	# the card's own clock (its curtain art rasterises in _ready, which can take a while on a busy box)
+	var t0 := p._open_ms
 	UiKit.now_override = t0 + 500
 	p._scrim_tap(Vector2.ZERO)
 	assert_eq(got, [], "taps in the first second are ignored")

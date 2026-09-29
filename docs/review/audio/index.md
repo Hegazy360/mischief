@@ -58,7 +58,7 @@ applause and stomps. `crowd_*_fallback.png`: the kazoo choir's harmonic stacks, 
 
 | Demo | What to judge |
 |---|---|
-| [demo_sneeze_sequence.wav](ab/demo_sneeze_sequence.wav) | ACHOO-RIA! at the GDD timings: ah (20 f) … ahh (24 f) … AHHH (30 f) … false stop (20 f) … **CHOO** + stool zip + sink + the laugh from the hold. Each "ah" is louder and higher than the last (−21 / −18 / −15.5 → CHOO −11.5 dB). |
+| [demo_sneeze_sequence.wav](ab/demo_sneeze_sequence.wav) | ACHOO-RIA! **in context** (Stage 2, `tools/audio/gate0.py`): the tea's sniff and sip, then `rx_sneeze_blast_a`'s clip events at their frames — ah f0 … ahh f20 … AHHH f44 … a relieved "hm." f76 … **CHOO** f94 (+ the 5-f hit-stop), stool scrape, slide whistle over the flight, the sink crash f112 → 350 ms of silence → one ladle spinning to rest → drips — and the Stalls' T3 laugh at the hold. Each "ah" is louder and higher than the last (−17.5 / −15.5 / −13.5 → CHOO −10.5 dB). The Gate-0 A/B pages are in [`docs/review/s2-sound/gate0/`](../s2-sound/gate0/index.md). |
 | [demo_tiptoe_walk.wav](ab/demo_tiptoe_walk.wav) | Hush tiptoes: one pizzicato note per footfall, walking up the E-minor scale. |
 | [demo_adaptive_music.wav](ab/demo_adaptive_music.wav) | sneak → a sting (music ducks −6 dB) → the suspense layer fades in during a "?" → near miss → Running Gag links 1–4 switch Mountain King sections **on bar lines** at 120 / 140 / 168 / 210 bpm → the gag ends, back to sneak. |
 

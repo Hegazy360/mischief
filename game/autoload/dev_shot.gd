@@ -1,16 +1,35 @@
-## DevShot — developer screenshot helper (no-op unless requested on the command line).
-## Usage: godot --path game res://scenes/x.tscn -- --shot=/abs/out.png --frames=60
-## Optional: --shot-seq=/abs/dir --every=10 --count=6 to capture a sequence.
+## DevShot — developer screenshot helper, and the host of the device log + debug overlay (ruling L7:
+## no new autoloads in Stage 2).
+##
+## Screenshots (no-op unless requested on the command line):
+##   godot --path game res://scenes/x.tscn -- --shot=/abs/out.png --frames=60
+## Optional: `--shot-seq=/abs/dir --every=10 --count=6 [--seq-from=N]` captures a sequence (frame
+## N + every·k); with `--shot` too, `--frames` is auto-extended to seq-from + every × count (a warning
+## says so) — the old "the sequence captures nothing" trap.
 ## `--perf-log[=WARMUP]` (with --shot) samples the render stats of every frame after WARMUP
-## (default 30) and prints them on quit (draw calls, objects, process time, live particles): `[perf] … draw calls avg A p95 P max M …`.
+## (default 30) and prints them on quit (draw calls, objects, process time, live particles):
+## `[perf] … draw calls avg A p95 P max M …`.
 ## `--e2e` spawns the end-to-end driver res://tools/e2e.gd (see tools/scripts/e2e.sh).
+## `--overlay` shows the debug overlay from the start (shots).
+##
+## Device log + overlay (active when `OS.is_debug_build() or OS.has_feature("mnd_devlog")` — the debug
+## APK and the L17 profile APK; inert otherwise): `DeviceLog.begin_session()` at startup,
+## `DeviceLog.frame(dt)` every frame, `DeviceLog.flush()` on WM close / application paused / focus out.
+## A three-finger tap on any screen toggles the DebugOverlay (its own CanvasLayer 100); the tap is
+## watched in `_input` without ever marking an event handled, so gameplay never loses a touch.
 extends Node
+
+const OVERLAY_LAYER := 100
+const TAP_WINDOW_MS := 300
+const TAP_MAX_MS := 600
+const TAP_SLOP := 60.0
 
 var _out := ""
 var _frames := 60
 var _seq_dir := ""
 var _every := 10
 var _count := 0
+var _seq_from := 0
 var _n := 0
 var _taken := 0
 var _perf := false
@@ -19,10 +38,21 @@ var _dc := PackedFloat32Array()
 var _proc_ms := PackedFloat32Array()
 var _objects_max := 0
 var _particles_max := 0
+var _shooting := false
+var _devlog := false
+var _overlay_layer: CanvasLayer = null
+var overlay: DebugOverlay = null
+# three-finger tap tracking
+var _touch_down := {}          # index → position at touch-down
+var _touch_peak := 0
+var _touch_first_ms := 0
+var _touch_moved := false
 
 
 func _ready() -> void:
-	for a in OS.get_cmdline_user_args():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	var args := OS.get_cmdline_user_args()
+	for a in args:
 		if a.begins_with("--shot="):
 			_out = a.substr(7)
 		elif a.begins_with("--frames="):
@@ -33,17 +63,41 @@ func _ready() -> void:
 			_every = maxi(1, int(a.substr(8)))
 		elif a.begins_with("--count="):
 			_count = int(a.substr(8))
+		elif a.begins_with("--seq-from="):
+			_seq_from = maxi(0, int(a.substr(11)))
 		elif a == "--perf-log":
 			_perf = true
 		elif a.begins_with("--perf-log="):
 			_perf = true
 			_perf_from = maxi(0, int(a.substr(11)))
-	if OS.get_cmdline_user_args().has("--e2e"):
+	var need := seq_frames_needed(_seq_from, _every, _count)
+	if _out != "" and _seq_dir != "" and _frames < need:
+		push_warning("DevShot: --frames=%d is shorter than the sequence (seq-from %d + every %d × count %d); extended to %d" % [
+			_frames, _seq_from, _every, _count, need])
+		_frames = need
+	if args.has("--e2e"):
 		_spawn_e2e.call_deferred()
-	if _out == "" and _seq_dir == "":
-		set_process(false)
-	else:
-		process_mode = Node.PROCESS_MODE_ALWAYS
+	_shooting = _out != "" or _seq_dir != ""
+	_devlog = DeviceLog.active()
+	if _devlog:
+		DeviceLog.begin_session()
+		_overlay_layer = CanvasLayer.new()
+		_overlay_layer.layer = OVERLAY_LAYER
+		_overlay_layer.name = "DebugOverlayLayer"
+		add_child(_overlay_layer)
+		overlay = DebugOverlay.new()
+		_overlay_layer.add_child(overlay)
+		if args.has("--overlay"):
+			overlay.set_shown.call_deferred(true)
+	set_process(_shooting or _devlog)
+	set_process_input(_devlog)
+
+
+## Frames a `--shot` run needs so a sequence completes: seq-from + every × count (+1).
+static func seq_frames_needed(seq_from: int, every: int, count: int) -> int:
+	if count <= 0:
+		return 0
+	return seq_from + maxi(1, every) * count + 1
 
 
 ## --e2e: the end-to-end driver (res://tools/e2e.gd — not exported, so a no-op in builds).
@@ -62,11 +116,15 @@ func _spawn_e2e() -> void:
 	get_tree().root.add_child(n)
 
 
-func _process(_d: float) -> void:
+func _process(d: float) -> void:
+	if _devlog:
+		DeviceLog.frame(d)
+	if not _shooting:
+		return
 	_n += 1
 	if _perf and _n > _perf_from:
 		_sample()
-	if _seq_dir != "" and _n % _every == 0 and _taken < _count:
+	if _seq_dir != "" and _n >= _seq_from and (_n - _seq_from) % _every == 0 and _taken < _count:
 		_save("%s/frame_%03d.png" % [_seq_dir, _taken])
 		_taken += 1
 		if _taken >= _count and _out == "":
@@ -77,9 +135,50 @@ func _process(_d: float) -> void:
 		_quit()
 
 
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+			if _devlog:
+				DeviceLog.flush()
+
+
+## Three-finger tap (all three down within TAP_WINDOW_MS, lifted within TAP_MAX_MS, no drag) toggles
+## the overlay. Never consumes the event.
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		var st := event as InputEventScreenTouch
+		var now := Time.get_ticks_msec()
+		if st.pressed:
+			if _touch_down.is_empty():
+				_touch_first_ms = now
+				_touch_peak = 0
+				_touch_moved = false
+			_touch_down[st.index] = st.position
+			_touch_peak = maxi(_touch_peak, _touch_down.size())
+			if _touch_down.size() == 3 and now - _touch_first_ms > TAP_WINDOW_MS:
+				_touch_moved = true
+		else:
+			_touch_down.erase(st.index)
+			if _touch_down.is_empty():
+				if _touch_peak == 3 and not _touch_moved and now - _touch_first_ms <= TAP_MAX_MS:
+					toggle_overlay()
+				_touch_peak = 0
+	elif event is InputEventScreenDrag:
+		var sd := event as InputEventScreenDrag
+		if _touch_down.has(sd.index) and (sd.position - (_touch_down[sd.index] as Vector2)).length() > TAP_SLOP:
+			_touch_moved = true
+
+
+## Show / hide the debug overlay (no-op when the log is inactive).
+func toggle_overlay() -> void:
+	if overlay != null:
+		overlay.toggle()
+
+
 ## Print the perf summary (if sampled) and quit.
 func _quit() -> void:
-	set_process(false)
+	_shooting = false
+	set_process(_devlog)
 	if _perf:
 		print(perf_summary())
 	get_tree().quit()

@@ -1,0 +1,9 @@
+{"version":1,"clip":"bellows/loco_turn","rig":"bellows","loop":false,"length":6,"layer":"base","mask":null,"doc":"A 6-f harrumph turn over RigPlayer.set_facing: squashes tall, chin up, 'hmph'.","blend_in":2,"blend_out":4,"tags":["loco","turn"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_idle_lapel","ease":"linear","face":"irked"},
+{"f":3,"pose":"b_turn_hmph","ease":"out_quad"},
+{"f":6,"pose":"b_idle_lapel","ease":"out_back","face":"pompous"}
+],
+"events":[
+
+]}

@@ -32,7 +32,7 @@ EXPLICIT: dict[str, str] = {
     "front_door": "door_front", "back_door": "door_back", "cupboard_door": "cupboard", "handle_jiggle": "door_jiggle",
     "entry_warning": "door_jiggle", "door_slam": "door_slam_bonk", "slam": "door_slam_bonk", "knocker": "knocker_bonk",
     # --- props (activity micro-gags and reaction clips)
-    "pepper": "pepper_shake", "stool": "stool_scrape", "stool_zip": "stool_scrape", "splash": "sink_splash", "tap_spray": "spray_blast",
+    "pepper": "pepper_shake", "stool": "stool_scrape", "stool_zip": "stool_scrape", "splash": "sink_crash", "tap_spray": "spray_blast",
     "spray": "spray_blast", "hose": "hose_wrestle", "kettle": "kettle_melody", "kettle_squeak": "kettle_melody",
     "lid": "lid_boink", "jar": "jar_strain", "pop": "onion_pop", "onion": "onion_pop", "pinball": "pinball_bonk",
     "slip": "slip_whoosh", "thud": "slip_thud", "gramophone": "gramophone_speedup", "record_speedup": "gramophone_speedup",
@@ -86,7 +86,7 @@ RULES: list[tuple[str, str]] = [
     (r"slide_?up|rise", "slide_up"), (r"slide_?down|fall", "slide_down"), (r"whoosh|swish|swoosh", "whoosh"),
     (r"zip", "zip"), (r"crash|smash|shatter", "crash_tail"), (r"scratch|record", "record_scratch"),
     (r"tweet|bird|dizzy", "dizzy_tweets"), (r"stamp", "stamp_thunk"), (r"sneeze|achoo|choo", "vo_bellows_sneeze_choo"),
-    (r"splash|water|drench|sink", "sink_splash"), (r"spray|squirt|jet", "spray_blast"), (r"hose", "hose_wrestle"),
+    (r"splash|water|drench|sink", "sink_crash"), (r"spray|squirt|jet", "spray_blast"), (r"hose", "hose_wrestle"),
     (r"kettle|whistle", "kettle_melody"), (r"lid", "lid_boink"), (r"strain|jar", "jar_strain"),
     (r"pop", "onion_pop"), (r"pan|pot|clang|ting", "pinball_bonk"), (r"slip", "slip_whoosh"),
     (r"thud|land|flop_down", "slip_thud"), (r"gramophone|needle", "gramophone_speedup"),

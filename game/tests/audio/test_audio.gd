@@ -168,8 +168,9 @@ func test_bus_volume_mapping() -> void:
 
 
 func test_settings_keys_drive_volumes() -> void:
-	if tree.root.get_node_or_null("Settings") != null:
-		skip("a real Settings autoload is registered")
+	var real := tree.root.get_node_or_null("Settings")
+	if real != null and not real.has_meta("fake_settings"):
+		_settings_volumes_real(real)
 		return
 	audio.free()
 	var sc := GDScript.new()
@@ -191,6 +192,30 @@ func test_settings_keys_drive_volumes() -> void:
 	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "changed() re-applies")
 	fake.emit_signal("changed", "haptics", false)
 	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001)
+
+
+## The same against the registered Settings autoload (values restored afterwards).
+func _settings_volumes_real(real: Node) -> void:
+	var keys := ["music_vol", "sfx_vol", "voice_vol", "crowd_vol"]
+	var saved := {}
+	for k: String in keys:
+		saved[k] = real.call("get_value", k)
+	for kv: Array in [["music_vol", 0.25], ["sfx_vol", 0.5], ["voice_vol", 0.75], ["crowd_vol", 0.0]]:
+		real.call("set_value", kv[0], kv[1])
+	audio.free()
+	audio = _make()
+	assert_almost_eq(audio.bus_volume("Music"), 0.25, 0.0001, "music_vol applied on ready")
+	assert_almost_eq(audio.bus_volume("SFX"), 0.5, 0.0001)
+	assert_almost_eq(audio.bus_volume("UI"), 0.5, 0.0001, "UI follows sfx_vol")
+	assert_almost_eq(audio.bus_volume("Voice"), 0.75, 0.0001)
+	assert_true(AudioServer.is_bus_mute(AudioServer.get_bus_index("Crowd")), "crowd_vol 0 mutes")
+	real.call("set_value", "music_vol", 1.0)
+	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "changed() re-applies")
+	real.call("set_value", "haptics", not bool(real.call("get_value", "haptics")))
+	real.call("set_value", "haptics", not bool(real.call("get_value", "haptics")))
+	assert_almost_eq(audio.bus_volume("Music"), 1.0, 0.0001, "a non-volume key changes nothing")
+	for k: String in keys:
+		real.call("set_value", k, saved[k])
 
 
 # --- ducking -------------------------------------------------------------------------------

@@ -23,7 +23,7 @@ REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 ART = os.path.join(REPO, "game", "art", "house")
 DATA = os.path.join(REPO, "game", "data", "house", "house.json")
 
-PROP_MODULES = ["props_kitchen", "props_hall", "props_parlour", "props_grey"]
+PROP_MODULES = ["props_kitchen", "props_hall", "props_parlour", "props_edge", "props_grey"]
 ROOM_MODULES = ["rooms_final", "rooms_grey", "rooms_upper"]   # later modules replace earlier ones
 
 
@@ -67,7 +67,7 @@ def build(report=False):
             continue
         m.build(reg)
     # stage, items, activity icons
-    for mod in ("stage", "icons_items", "icons_activities"):
+    for mod in ("stage", "icons_items", "icons_activities", "cold"):
         try:
             m = importlib.import_module(mod)
         except ModuleNotFoundError as e:

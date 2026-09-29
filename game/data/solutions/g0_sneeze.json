@@ -21,7 +21,9 @@
         "lines": ["sneeze"],
         "catches_max": 0,
         "first_prank_s_max": 30,
-        "duration_s": [15, 45]
+        "duration_s": [15, 45],
+        "dead_air_pct_max": 20,
+        "max_gap_s_max": 12
       }
     }
   }

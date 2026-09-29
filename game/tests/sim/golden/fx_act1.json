@@ -2,7 +2,7 @@
   "episode": "fx_act1",
   "data": "res://tests/sim/fixtures",
   "ticks": 18000,
-  "reason": "s2-sim: state hash now covers the micro-gag clock (mg_last_t, mg_walk_i, walk_t, walk_len), the one-shot starts (bit_id/bit_t0, specs_t0, curious_t0, fizzle_t0; Hush yank/near-miss/wink ticks) and the last-beat fields (rx_count, rx_last_beat, rx_beat_len). Behaviour unchanged: applause 409, lines tap/pickle/achoo; 727 events = the Stage-1 711 + 16 cmd_queued (the fixture has no micro_gags, no clip_timings).",
+  "reason": "s2-sim: state hash covers the micro-gag clock (mg_last_t, mg_walk_i, walk_t, walk_len), the one-shot starts (bit_id/bit_t0, specs_t0, curious_t0 - set when CURIOUS begins -, fizzle_t0; Hush yank/near-miss/wink ticks) and the last-beat fields (rx_count, rx_last_beat, rx_beat_len). Behaviour unchanged: the replay's 727 events are identical to the pre-change run (applause 409, lines tap/pickle/achoo; = the Stage-1 711 + 16 cmd_queued). The fixture has no micro_gags and no clip_timings.",
   "cmds": [
     [
       1.0,
@@ -2668,75 +2668,75 @@
     ],
     [
       7800,
-      21410297
+      3216279469
     ],
     [
       8400,
-      3539609610
+      1609588606
     ],
     [
       9000,
-      2367632151
+      3261934511
     ],
     [
       9600,
-      161166630
+      3836426262
     ],
     [
       10200,
-      4098213570
+      3940979638
     ],
     [
       10800,
-      198930241
+      3964259661
     ],
     [
       11400,
-      2518884600
+      2810099328
     ],
     [
       12000,
-      3657485362
+      773388754
     ],
     [
       12600,
-      1539552493
+      3914121689
     ],
     [
       13200,
-      429041758
+      1817167230
     ],
     [
       13800,
-      2685586776
+      3082415588
     ],
     [
       14400,
-      1270257708
+      157463488
     ],
     [
       15000,
-      2671082405
+      2753053107
     ],
     [
       15600,
-      1187254294
+      516097920
     ],
     [
       16200,
-      2831753784
+      2072011866
     ],
     [
       16800,
-      2783345925
+      1796040279
     ],
     [
       17400,
-      938718418
+      884133440
     ],
     [
       18000,
-      168281455
+      1978273757
     ]
   ]
 }

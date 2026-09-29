@@ -87,13 +87,16 @@ func unseal_bn(w: SimWorld) -> void:
 
 ## The prank Hush can rig at rig point `hs` right now (its current step is there), -1 if none.
 func rig_target(w: SimWorld, hs: int) -> int:
-	for p in w.db.prank_list:
-		var s := state[p.idx]
+	if hs < 0 or hs >= w.db.pranks_at_hs.size():
+		return -1
+	for pi in w.db.pranks_at_hs[hs]:
+		var s := state[pi]
 		if s != AVAILABLE and s != IN_PROGRESS:
 			continue
-		var si := step[p.idx]
+		var p := w.db.prank_list[pi]
+		var si := step[pi]
 		if si < p.steps.size() and p.steps[si].at_idx == hs:
-			return p.idx
+			return pi
 	return -1
 
 

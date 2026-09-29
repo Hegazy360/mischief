@@ -98,7 +98,7 @@ func test_hold_total() -> void:
 func test_check_expect_all_keys() -> void:
 	var rep := {"stars": [true, false, true], "applause": 95.0, "lines": ["a", "b"], "catches": [{"t": 1, "cause": "x"}],
 		"duration_s": 400.0, "first_player_laugh_launch_s": 12.0, "first_prank_launch_s": 25.0, "launch_offset_s": 2.3,
-		"laughs": [{"t": 5.0}, {"t": 40.0}, {"t": 80.0}], "dead_air_pct": 25.0, "max_gap_s": 11.0}
+		"laughs": [{"t": 5.0}, {"t": 40.0}, {"t": 80.0}], "dead_air_ff_pct": 25.0, "max_gap_ff_s": 11.0}
 	var ok_expect := {"stars": [true, null, null], "applause": [90, 140], "lines": ["a"], "catches_max": 1,
 		"duration_s": [100, 500], "first_player_laugh_s_max": 15, "first_prank_s_max": 30, "laughs_by_s": [[45, 2]],
 		"dead_air_pct_max": 30, "max_gap_s_max": 12}
@@ -111,7 +111,7 @@ func test_check_expect_all_keys() -> void:
 	var all := "\n".join(f)
 	for needle in ["stars[1]", "stars[2]", "applause 95.0 < min", "line 'c' not done", "1 catch(es) > max 0",
 			"duration 400.0 s > max", "first player laugh at 12.00 s", "first prank at 25.00 s", "2 laugh(s) by 75 s",
-			"dead air 25.0", "longest gap 11.0"]:
+			"dead air ⏩ 25.0", "longest gap ⏩ 11.0"]:
 		assert_has(all, needle)
 
 
@@ -138,11 +138,14 @@ func test_fallback_is_laugh_mirrors_tech() -> void:
 
 
 func test_ff_weighted_dead_air() -> void:
-	# 600 ticks, input only at 1: 301..600 dead. Hidden from 301 on: those ticks weigh 1/3.
+	# 600 ticks, input only at 1: 301..600 dead. Hidden from 301 on: those ticks weigh 1/3 (a persona that
+	# re-presses ⏩ at once — the naive Stage-1 weighting; the latch delay is covered in test_s2_gate.gd).
 	var lg := SolverLog.new()
+	lg.ff_repress_ticks = 0
 	for t in range(1, 601):
 		lg.add_sample(t, {"input": t == 1, "hidden": "kitchen_pantry_curtain" if t > 300 else ""})
 	var r := Metrics.compute(lg, SolverHooks.fallback_is_laugh)
+	assert_almost_eq(float(r["dead_air_ff_naive_pct"]), float(r["dead_air_ff_pct"]), 0.01, "no delay: latch = naive")
 	assert_almost_eq(float(r["dead_air_pct"]), 50.0, 0.1)
 	assert_almost_eq(float(r["dead_air_ff_pct"]), 100.0 * 300 / (300 * 3 + 300), 0.1, "300 hidden dead ticks of 1200 thirds")
 	assert_almost_eq(float(r["real_time_ff_s"]), 400 / 60.0, 0.02, "300 visible + 300/3 hidden ticks")

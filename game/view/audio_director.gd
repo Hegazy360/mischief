@@ -17,6 +17,12 @@
 ## Without clip events (stand-in puppets) it synthesises footsteps: his slipper strut (every
 ## 28 f, crescendo during an entry warning) and Hush's pizzicato tiptoe walking up a scale.
 ## Emits `laugh(tier)` and `crowd_special(kind)` for the Stalls (they react with no Audio).
+##
+## Sound ownership (ruling L12): clip `sfx` / `voice` / `laugh` events play on their frame; every
+## cues.json `delay_s` counts in **view time** (JuiceClock-scaled, so a 5-f hit-stop holds a
+## pending splash); an event-level cue whose sound is one the clip now playing on that actor
+## already carries is skipped (debug warning once — `s2-sound` deletes the duplicate), and no
+## sound id ever plays twice within `REPEAT_GUARD_S` (100 ms).
 class_name AudioDirector
 extends Node
 
@@ -30,6 +36,8 @@ const DELAYED := 24
 const B_STEP_F := 28.0
 const H_STEP_F := 10.0
 const TIER_KINDS: PackedStringArray = ["t0", "t1", "t2", "t3", "t4"]
+## No sound id twice within this long (real seconds).
+const REPEAT_GUARD_S := 0.1
 const BELLOWS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_next", "b_detour", "b_room", "entry_warning",
 	"doorway_pause", "specs", "glyph", "look_back", "ear_pip", "squeak_bit", "head_turn", "lure", "lure_fatigue",
 	"door_slam", "wheeze", "meltdown_stomp", "bump", "prank_fire", "reaction_start", "reaction_accent", "reaction_end",
@@ -82,6 +90,8 @@ var chain_max: int = 4
 ## Test hook: calls are recorded here as [method, args…] when `record` is true.
 var record: bool = false
 var calls: Array = []
+## With `record`: the real-time second each call was made (parallel to `calls`).
+var call_times: PackedFloat32Array = PackedFloat32Array()
 ## No Audio calls at all (scenario seeks); signals still fire.
 var muted: bool = false
 
@@ -107,6 +117,12 @@ var _react_sig := false
 ## Delayed actions: [remaining_s, action, event] (fixed ring).
 var _delayed: Array = []
 var _now := 0.0
+var _last_played: Dictionary = {}
+var _dup_warned: Dictionary = {}
+## Sound ids skipped because the playing clip owns them (tests / debug).
+var skipped_dups: int = 0
+## Sound ids suppressed by the 100 ms repeat guard (tests / debug).
+var skipped_repeats: int = 0
 
 
 func _init() -> void:
@@ -331,12 +347,14 @@ func _do(act: Dictionary, ev: Dictionary, snap: ViewSnapshot) -> void:
 	var vol := float(act.get("vol_db", 0.0)) + _atten_of(pan_mode, ev, snap)
 	var sfx: Variant = act.get("sfx", null)
 	if sfx is String:
-		_call("play_sfx", [ViewKit.s(sfx), pan, vol, 1.0])
+		if not _clip_owns(ViewKit.s(sfx), ev):
+			_play("play_sfx", ViewKit.s(sfx), [ViewKit.s(sfx), pan, vol, 1.0])
 	elif sfx is Array:
 		for x in sfx:
-			_call("play_sfx", [ViewKit.s(x), pan, vol, 1.0])
-	if act.has("voice"):
-		_call("play_voice", [ViewKit.s(act["voice"]), vol, pan])
+			if not _clip_owns(ViewKit.s(x), ev):
+				_play("play_sfx", ViewKit.s(x), [ViewKit.s(x), pan, vol, 1.0])
+	if act.has("voice") and not _clip_owns(ViewKit.s(act["voice"]), ev):
+		_play("play_voice", ViewKit.s(act["voice"]), [ViewKit.s(act["voice"]), vol, pan])
 	if act.has("sting"):
 		_call("sting", [ViewKit.s(act["sting"])])
 	if act.has("crowd"):
@@ -432,9 +450,10 @@ func on_clip_event(ev: Dictionary) -> void:
 			if id.contains("step") or id.contains("slipper") or id.contains("pizz"):
 				_clip_steps = true
 			_clip_sfx_t = _now
-			_call("play_sfx", [id, pan, vol + float(ev.get("vol_db", 0.0)), float(ev.get("pitch", 1.0))])
+			_play("play_sfx", id, [id, pan, vol + float(ev.get("vol_db", 0.0)), float(ev.get("pitch", 1.0))])
 		"voice":
-			_call("play_voice", [ViewKit.s(ev.get("id", ev.get("bank", ""))), vol, pan])
+			var vid := ViewKit.s(ev.get("id", ev.get("bank", "")))
+			_play("play_voice", vid, [vid, vol + float(ev.get("vol_db", 0.0)), pan])
 		"laugh":
 			var tier := ViewKit.s(ev.get("tier", "auto"))
 			if tier != "auto":
@@ -464,7 +483,7 @@ func advance(delta: float) -> void:
 	for slot in _delayed:
 		if float(slot[0]) < 0.0:
 			continue
-		slot[0] = float(slot[0]) - delta
+		slot[0] = float(slot[0]) - vdt
 		if float(slot[0]) <= 0.0:
 			slot[0] = -1.0
 			var act: Dictionary = slot[1]
@@ -508,6 +527,59 @@ func _fallback_steps(snap: ViewSnapshot, vdt: float) -> void:
 			_call("play_sfx", ["step_pizz_%d" % _h_note, 0.0, -4.0 if not h.running else 0.0, 1.0])
 
 
+## Play a sound unless the same id played < 100 ms ago (the repeat guard).
+func _play(method: String, id: String, args: Array) -> void:
+	if id != "":
+		var last := float(_last_played.get(id, -1.0))
+		if last >= 0.0 and _now - last < REPEAT_GUARD_S:
+			skipped_repeats += 1
+			return
+		_last_played[id] = _now
+	_call(method, args)
+
+
+## True when the clip now playing on the event's actor carries sound `id` itself (L12): the
+## event-level cue would double it. Warns once per id (s2-sound deletes the duplicate).
+func _clip_owns(id: String, ev: Dictionary) -> bool:
+	if id == "" or world_view == null:
+		return false
+	var e := ViewKit.s(ev.get("e", ""))
+	var actors: Array = [world_view.bellows_view] if BELLOWS_EVENTS.has(e) else [world_view.hush_view, world_view.bellows_view]
+	for cv in actors:
+		if cv == null:
+			continue
+		var c: CharacterView = cv
+		if AudioDirector.clip_sounds(c.current_clip()).has(id) or AudioDirector.clip_sounds(c.overlay_clip()).has(id):
+			skipped_dups += 1
+			if not _dup_warned.has(id):
+				_dup_warned[id] = true
+				push_warning("AudioDirector: cues.json '%s' repeats sound '%s' of the playing clip (L12) — skipped" % [e, id])
+			return true
+	return false
+
+
+static var _sounds_cache: Dictionary = {}
+
+
+## The sound ids (sfx / voice) a clip's events play (cached; empty for unknown clips).
+static func clip_sounds(clip_id: String) -> PackedStringArray:
+	if clip_id == "" or clip_id.begins_with("#"):
+		return PackedStringArray()
+	if _sounds_cache.has(clip_id):
+		return _sounds_cache[clip_id]
+	var out := PackedStringArray()
+	if ClipMap.clip_exists(clip_id):
+		var c: Variant = ClipLib.get_clip(clip_id)
+		if c != null:
+			for e in (c as Object).get("events"):
+				if e is Dictionary:
+					var t := ViewKit.s((e as Dictionary).get("type", ""))
+					if t == "sfx" or t == "voice":
+						out.append(ViewKit.s((e as Dictionary).get("id", (e as Dictionary).get("bank", ""))))
+	_sounds_cache[clip_id] = out
+	return out
+
+
 func _set_music(state: String) -> void:
 	if state == _music:
 		return
@@ -532,5 +604,6 @@ func _call(method: String, args: Array) -> void:
 		var row := [method]
 		row.append_array(args)
 		calls.append(row)
+		call_times.append(_now)
 	if not muted and _audio != null and _audio.has_method(method):
 		_audio.callv(method, args)

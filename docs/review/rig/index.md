@@ -69,3 +69,15 @@ delivered, run through the same tools.
 
 The headless test measures the pure sampler at ≈ 0.06–0.08 ms per frame for 21 parts and `RigPlayer.advance`
 at ≈ 0.05 ms, with zero allocations after warm-up.
+
+## Recipe for animators — Stage 2 (s2-rig; the Stage-1 recipe above still holds)
+1. **Micro-gags are overlays:** `"layer": "overlay", "mask": "upper"` (a rig.json `masks` name or a part list), `blend_in`/`blend_out` ≥ 4 f (default 6). The root, the feet and their ancestors are never written (`"touch_legs": true` to allow), so the walk underneath keeps its planted feet. Lint A23 checks it.
+2. **Watch it over the base:** `shot.sh res://scenes/dev/AnimViewer.tscn out.png 90 <sb> -- --rig=bellows --clip=loco_strut --overlay=mg_conduct_air --room=kitchen` (the overlay replays every `--overlay-gap` frames; `--overlay-at` delays the first).
+3. **In the real set:** `--room=<id>` (house.json art at game scale, decor shown / hidden by your `decor` events), `--station=st_tea` or `--x=`, `--zoom=`, `--clean` for cast shots; `--skin=pip`, `--looks=SOAKED,COSTUME:jelly_helmet`, `--tint=2`, `--prop=specs:on`, `--part-tex=bouffant:flipped`.
+4. **Two rigs:** `--rig2=hush --clip2=lec_dangled --x2=180 [--attach2=hand_r:grip,braces_loop:grab]` (the Lecture dangle, the HOT & COLD hand-off). `--help` lists every flag.
+5. **House props in a clip:** `{"f": 92, "type": "decor", "id": "kitchen_stool", "visible": false}` hides the house sprite while your prop rides the gag (lint A28 checks the id against house.json).
+6. **Lengths are contracts:** `bit_*` = its squeak bit's `len_f` ± 2 (A24), `mg_*` = its micro-gag's `len_f` ± 12 (A25), every sim-timed state / one-shot = the SliceClips `expect_f` exactly, or loops where the row allows (A29). Cold opens / curtain call (tag `cold` / `curtain`) may run to 420 f and hold 90 f (A26). Walks mapped with `speed_px_s` must not slide at that speed (A27).
+7. **Sheets:** `anim_sheet.sh bellows mg_hum <dir> --base=loco_strut` draws the overlay over its base with the base-only pose as a blue ghost in every cell; `--rig2=hush --clip2=<clip> --x2=300` adds the second rig to every cell.
+8. **Hear it, in game too:** `capture.sh res://scenes/boot/Boot.tscn 2400 out.gif -- --e2e --e2e-scenario=g0_sneeze` captures the real game with its own audio; every run writes `<out>_strip.png` (numbered cells every `STRIP_EVERY` frames — what reviewers read), `_sync.json` (each sound vs its onset, ± 1 f) and GIFs ≤ 4 MB.
+9. **Lint strict before you hand over:** `sandbox.sh <sb> -s res://tools/anim/lint_anim.gd -- --all --strict` (the pre-gate: every WARN is an ERROR).
+10. **Perf is shared:** `shot.sh res://scenes/dev/RigPerf.tscn out.png 600 <sb> -- --rig=bellows --clip=rx_sneeze_blast_a --perf-log` prints the per-character medians (≤ 0.25 ms, ≤ 12 draw calls); residue looks cost no memory until used (`RigPlayer.warm_looks` builds them under the curtain).

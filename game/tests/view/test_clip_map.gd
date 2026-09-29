@@ -390,7 +390,7 @@ func test_default_maps_use_the_schema() -> void:
 		var m := ClipMap.load_map(rig)
 		assert_true(m.has("idle"), "%s map has idle" % rig)
 	var h := ClipMap.load_map("hush")
-	assert_eq((h["freeze"] as Array).size(), 8, "8 freeze poses")
+	assert_ge(ClipMap.clips_of(h["freeze"]).size(), 4, "freeze poses (a list, or {clip: [list]})")
 	for k in ["stairs_up", "stairs_down", "door", "rigging@q", "rigging@s", "rigging@b", "oneshot:enter",
 			"oneshot:caught:busted", "oneshot:caught:lecture", "oneshot:caught:doorstep", "flavour:snicker",
 			"flavour:glance", "flavour:shrug", "flavour:pickup", "freeze_midjob", "idle_fidgets", "skin:pip"]:

@@ -35,9 +35,15 @@ func test_achoo_gag_punches_with_hitstop_and_caption() -> void:
 	_until_tick(682)
 	assert_true(_sb.cam.is_gag_active(), "gag requested at reaction_start")
 	assert_eq(_sb.cam.gag_phase(), CameraDirector.GagPhase.APPROACH)
-	_until_tick(772)
-	kinds.append(String(_sb.driver.juice.last_kind()))
-	assert_eq(kinds[0], "hit_big", "5-frame hit-stop at the accent")
+	# The accent: the sim's reaction_accent (FakeWorld tick 772) or — with the real rig clip — the
+	# clip's own cam / hitstop keys on its accent frame (a couple of frames either side).
+	var n := 0
+	var hit := false
+	while _sb.driver.snapshot().tick < 782 and n < 400:
+		_sb._process(DT)
+		n += 1
+		hit = hit or String(_sb.driver.juice.last_kind()) == "hit_big"
+	assert_true(hit, "5-frame hit-stop at the accent")
 	assert_ne(_sb.cam.gag_phase(), CameraDirector.GagPhase.APPROACH, "punched in")
 	for i in 14:
 		_sb._process(DT)

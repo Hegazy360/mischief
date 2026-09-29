@@ -17,7 +17,8 @@ const HIT := 144.0
 const FACE := 112.0
 ## The emote vocabulary (s2-sim §4.1; the same list the content validator accepts).
 const EMOTES: PackedStringArray = ["sing", "hum", "smug", "laugh", "tut", "sniff", "yum", "yawn"]
-const PUFF := 76.0
+## The pictogram puff (a cream thought-cloud beside the face; px at scale 1).
+const PUFF := 100.0
 const POP_MS := 240
 const POP_PEAK := 1.2
 const PUFF_IN_MS := 160
@@ -150,18 +151,55 @@ func _draw_puff(now: int, r: float) -> void:
 		a = 1.0 - clampf(float(now - _clear_ms) / float(PUFF_OUT_MS), 0.0, 1.0)
 	if a <= 0.0:
 		return
-	# toward the middle of the screen: a bubble on the right edge puffs to its upper-left
-	var sx := -1.0 if dir.x > 0.35 else 1.0
+	# toward the middle of the screen: a bubble on the right edge puffs to its left, level with
+	# the face's upper half (clear of the corner buttons above it)
+	var sx := puff_side()
 	var t := float(now - _emote_ms) * 0.001
 	var bob := 0.0 if UiKit.reduce_motion() else sin(t * TAU * 1.4) * 6.0
 	var rise := 0.0 if UiKit.reduce_motion() else minf(1.0, t / 0.35) * 14.0
-	var ctr := Vector2(sx * (r + PUFF * 0.28), -r - PUFF * 0.18 - rise + bob)
+	var ctr := puff_offset(dir, r) + Vector2(0, bob - rise)
 	var s := PUFF * (0.6 + 0.4 * a)
-	# a small plum thought-cloud behind the pictogram so it reads over any wallpaper
-	var tail := ctr - Vector2(sx * s * 0.34, -s * 0.44)
-	draw_circle(ctr + Vector2(0, 4), s * 0.56, Color(UiKit.NAVY, 0.3 * a))
-	draw_circle(ctr, s * 0.56, Color(UiKit.NAVY, a))
-	draw_circle(ctr, s * 0.56 - 5.0, Color(UiKit.PLUM, 0.92 * a))
-	draw_circle(tail, 9.0, Color(UiKit.NAVY, a))
-	draw_circle(tail, 5.0, Color(UiKit.PLUM, 0.92 * a))
-	UiKit.draw_icon(self, _tex_puff, Rect2(ctr - Vector2(s, s) * 0.42, Vector2(s, s) * 0.84), Color(1, 1, 1, a))
+	# a cream comic thought-cloud (navy outline, two tail dots toward his face)
+	var rr := s * 0.5
+	var anchor := Vector2(sx * r * 0.8, -r * 0.2) if not puff_above(dir) else Vector2(r * 0.5, -r * 0.8)
+	var t1 := ctr.lerp(anchor, 0.62)
+	var t2 := ctr.lerp(anchor, 0.86)
+	draw_circle(ctr + Vector2(0, 5), rr + 5.0, Color(UiKit.NAVY, 0.3 * a))
+	draw_circle(ctr, rr + 5.0, Color(UiKit.NAVY, a))
+	draw_circle(ctr, rr, Color(UiKit.CREAM, a))
+	draw_circle(t1, 11.0, Color(UiKit.NAVY, a))
+	draw_circle(t1, 7.0, Color(UiKit.CREAM, a))
+	draw_circle(t2, 7.0, Color(UiKit.NAVY, a))
+	draw_circle(t2, 4.0, Color(UiKit.CREAM, a))
+	UiKit.draw_icon(self, _tex_puff, Rect2(ctr - Vector2(rr, rr) * 0.84, Vector2(rr, rr) * 1.68), Color(1, 1, 1, a))
+
+
+## Which side the puff floats on: −1 = left of the face (the bubble sits on the right edge), +1 =
+## right.
+func puff_side() -> float:
+	return -1.0 if dir.x > 0.35 else 1.0
+
+
+## True when the puff floats ABOVE the bubble (it sits at the bottom centre, between the thumb
+## clusters, its label above it: the puff goes over the label, where nothing is touchable).
+static func puff_above(d: Vector2) -> bool:
+	var n := d.normalized() if d.length_squared() > 0.0 else Vector2.RIGHT
+	return n.y > 0.5 and absf(n.y) > absf(n.x)
+
+
+## The puff's resting centre relative to the bubble's centre for a bubble pointing `d` (face radius
+## `r`, unscaled px): beside the face toward the screen centre, or above the label for a
+## bottom-centre bubble.
+static func puff_offset(d: Vector2, r: float = FACE * 0.5) -> Vector2:
+	if puff_above(d):
+		return Vector2(r * 0.4, -r - 64.0 - PUFF * 0.5)
+	var side := -1.0 if d.normalized().x > 0.35 else 1.0
+	return Vector2(side * (r + PUFF * 0.66), -r * 0.35)
+
+
+## Everything the puff can cover (its cloud + outline, the bob and the rise), relative to the
+## bubble's centre, unscaled px (layout tests).
+static func puff_bounds(d: Vector2) -> Rect2:
+	var c := puff_offset(d)
+	var rr := PUFF * 0.5 + 5.0
+	return Rect2(c.x - rr, c.y - rr - 14.0 - 6.0, rr * 2.0, rr * 2.0 + 14.0 + 12.0)

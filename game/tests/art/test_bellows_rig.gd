@@ -249,3 +249,127 @@ func _assert_no_errors(obj: Variant, what: String) -> void:
 			if errs is Array or errs is PackedStringArray:
 				assert_eq((errs as Array).size() if errs is Array else (errs as PackedStringArray).size(), 0,
 					what + " errors: %s" % [errs])
+
+
+# --- Stage 2 (s2-anim-bellows Phase G): rig keys, the stool, the sip cup, the sneeze poses ------------------
+
+func test_rig_requests_breath_look_masks() -> void:
+	var rig := _rig()
+	var parts: Dictionary = rig.get("parts", {})
+	var br: Dictionary = rig.get("breath", {})
+	assert_eq(br.get("part"), "belly", "breathing on the belly (rig request RIG-11)")
+	assert_almost_eq(float(br.get("amp", 0)), 0.025, 0.0001)
+	assert_almost_eq(float(br.get("period_s", 0)), 4.0, 0.0001)
+	var lk: Dictionary = rig.get("look", {})
+	assert_eq(lk.get("part"), "head", "look on the head (RIG-12)")
+	assert_eq(int(lk.get("max_deg", 0)), 20)
+	var masks: Dictionary = rig.get("masks", {})
+	for m: String in ["upper", "arms", "head"]:
+		assert_has(masks, m, "mask " + m)
+	var slots: Dictionary = rig.get("face", {}).get("slots", {})
+	for m: String in masks:
+		for p: String in masks[m]:
+			var ok := parts.has(p) or (p.begins_with("face_") and slots.has(p.substr(5)))
+			assert_true(ok, "mask %s: %s is a part or face slot" % [m, p])
+	var upper: Array = masks.get("upper", [])
+	for p: String in ["head", "nose", "bouffant", "sideburn_r", "sideburn_l", "cravat", "arm_upper_r", "hand_r",
+			"arm_upper_l", "hand_l", "face_eyes", "face_mouth"]:
+		assert_has(upper, p, "upper mask has " + p)
+	for p: String in ["torso", "belly", "leg_upper_r", "leg_upper_l", "foot_r", "foot_l", "coat_tails"]:
+		assert_false(upper.has(p), "upper mask never touches " + p)
+
+
+func test_stool_prop_matches_the_house_stool() -> void:
+	var rig := _rig()
+	var st: Dictionary = rig.get("props", {}).get("stool", {})
+	assert_false(st.is_empty(), "stool prop")
+	assert_eq(st.get("states"), ["under", "flying"], "stool states")
+	assert_eq(st.get("socket"), "torso:seat")
+	assert_true(bool(st.get("hidden", false)), "hidden until the sneeze shows it")
+	assert_has(rig.get("parts", {}).get("torso", {}).get("sockets", {}), "seat")
+	var house: Variant = load_json("res://data/house/house.json")
+	var decor := {}
+	if house is Dictionary:
+		for d: Dictionary in (house as Dictionary).get("decor", []):
+			if String(d.get("id", "")) == "kitchen_stool":
+				decor = d
+	if decor.is_empty():
+		skip("house.json has no kitchen_stool decor")
+		return
+	# same canvas as the house decor (s2-art contract 94 x 163): the prop drawn by a facing -1 rig covers the decor
+	assert_eq(st.get("size"), [int(decor["size"][0]), int(decor["size"][1])], "prop canvas = decor canvas")
+	# the socket puts the stool's cushion (seat pivot) under the barrel's seat point: pivot - seat = 68 px
+	var seat: Array = (decor.get("pivots", {}) as Dictionary).get("seat", [47, 6])
+	assert_almost_eq(float(st["pivot"][0]), float(seat[0]), 0.01, "pivot on the centre line")
+	var tsock: Array = rig["parts"]["torso"]["sockets"]["seat"]
+	var tpiv: Array = rig["parts"]["torso"]["pivot"]
+	assert_almost_eq(float(tsock[1]) - float(tpiv[1]), 25.0 + float(st["pivot"][1]) - float(seat[1]), 0.1,
+		"torso:seat = barrel bottom + (stool pivot - cushion)")
+	for s: String in ["under", "flying"]:
+		assert_true(FileAccess.file_exists(String(st["tex"][s])), "stool " + s + " texture")
+
+
+func test_teacup_sip_state_and_stage2_faces() -> void:
+	var tc: Dictionary = _rig().get("props", {}).get("teacup", {})
+	assert_eq(tc.get("states"), ["held", "sip"], "teacup held / sip (mirrored: handle forward, mouth clear)")
+	var presets: Dictionary = _faces().get("presets", {})
+	for p: String in ["sneeze_build3", "sneeze_gasp", "sip", "relief", "dazed_open", "kiss", "trill", "sly_smile", "hum"]:
+		assert_has(presets, p, "preset " + p)
+
+
+func test_sneeze_and_stool_poses() -> void:
+	var names := _pose_names(_poses())
+	for p: String in ["b_stool_sit", "b_stool_sip", "b_stool_ahh", "b_stool_ah1", "b_stool_ah2", "b_stool_ah3",
+			"b_stool_relief", "b_stool_resip", "b_stool_hup", "b_stool_choo", "b_fly_a", "b_fly_b", "b_sink_land",
+			"b_sink_sit", "b_sink_sip", "b_sink_dunk", "b_sink_pop", "b_blind_land", "b_blind_stand", "b_idle_lapel",
+			"b_strut_0", "b_strut_m0", "b_shuffle_0", "b_shuffle_m0", "b_bonk_flat", "b_blind_bonk", "b_turn_hmph"]:
+		assert_has(names, p, "pose " + p)
+	# the sip / "Ahhh" poses hand the stool socket to the decor: dead upright root and torso
+	var poses: Dictionary = _poses().get("poses", {})
+	for p: String in ["b_stool_sip", "b_stool_ahh"]:
+		var pd: Dictionary = poses.get(p, {})
+		assert_eq(float(pd.get("root", {}).get("rot", 99)), 0.0, p + " root rot 0")
+		assert_eq(float(pd.get("bones", {}).get("torso", {}).get("rot", 0)), 0.0, p + " torso rot 0")
+
+
+func test_sneeze_accent_changes_the_silhouette() -> void:
+	## The CHOO is no longer a flat lunge: HUP (tall, compact, f93) -> CHOO -> blown back (f97, the accent's end)
+	## changes the bounding box by >= 15 % (GDD §9.3, lint A18; validate.py checks the HUP -> CHOO ink bbox too).
+	var c := ClipLib.get_clip("bellows/rx_sneeze_blast_a")
+	if c == null:
+		skip("the sneeze clip is not authored")
+		return
+	var rig := c.rig
+	var a := rig.rest.duplicate()
+	var b := rig.rest.duplicate()
+	RigSampler.sample(c, float(c.beat("accent").x - 1), a)
+	RigSampler.sample(c, float(c.beat("accent").y), b)
+	var xa: Array[Transform2D] = []
+	var xb: Array[Transform2D] = []
+	RigSampler.solve(rig, a, xa)
+	RigSampler.solve(rig, b, xb)
+	var ba := RigBounds.bbox(rig, a, xa)
+	var bb := RigBounds.bbox(rig, b, xb)
+	var ch := maxf(absf(bb.size.x - ba.size.x) / ba.size.x, absf(bb.size.y - ba.size.y) / ba.size.y)
+	ch = maxf(ch, absf(bb.get_area() - ba.get_area()) / ba.get_area())
+	assert_ge(ch, 0.15, "anticipation -> accent bbox change %.0f %%" % (ch * 100.0))
+
+
+func test_tiptoe_slippers_stay_on_the_floor() -> void:
+	## RIG-13: the tutu costumes swap flat -> tiptoe slippers on any pose. The tiptoe slipper is drawn on pointe
+	## with its tip at the flat sole's depth (tools/art/bellows/parts_body.py FOOT_SOLE; validate.py checks the
+	## planted poses), on the same canvas as the flat one, so the lint's sole line is the same for both.
+	var rig := _rig()
+	for side: String in ["r", "l"]:
+		var fp: Dictionary = rig.get("parts", {}).get("foot_" + side, {})
+		assert_has(fp.get("tex", {}), "tiptoe")
+		assert_eq(_svg_size(String(fp["tex"]["flat"])), _svg_size(String(fp["tex"]["tiptoe"])),
+			"foot_%s flat / tiptoe share one canvas" % side)
+
+
+func _svg_size(path: String) -> String:
+	var t := FileAccess.get_file_as_string(path)
+	var re := RegEx.new()
+	re.compile("width=\"([0-9.]+)\" height=\"([0-9.]+)\"")
+	var m := re.search(t)
+	return "%sx%s" % [m.get_string(1), m.get_string(2)] if m != null else ""

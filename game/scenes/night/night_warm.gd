@@ -106,6 +106,14 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 				_add(looks, "%s:blind" % k)
 			if k == "COSTUME" and rd.get("look") != null:
 				_add(looks, "COSTUME:%s" % String(rd["look"]))
+	# Every basic residue look too: landings and knock-ons leave residues no prank lists (the sneeze
+	# into the sink SOAKs him), and a missed page would be built on the CHOO.
+	var rdefs: Dictionary = (rj as Dictionary).get("residues", {}) if rj is Dictionary else {}
+	for k in rdefs:
+		var ks := String(k)
+		if ks != "COSTUME" and not ks.begins_with("COSTUME"):
+			_add(kinds, ks)
+			_add(looks, ks)
 	# Combos: both residues possible tonight AND allowed by rules.combos (absent = all, [] = none).
 	var rules: Dictionary = e.get("rules", {}) if e.get("rules") is Dictionary else {}
 	var allowed: Variant = rules.get("combos", null)
@@ -139,10 +147,76 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	audio.sort()
 	var all_captions := captions.duplicate()
 	all_captions.append_array(STAMP_TEXTS)
+	var textures := lazy_textures(data_root)
+	# Per rig: every look page its rig.json defines that tonight can show — basic residues (+ their
+	# `blind` variant), the Night's costumes, the combos `rules.combos` allows (a rig look the rules
+	# forbid is not warmed: it must not appear, TECH L4).
+	var costumes := PackedStringArray()
+	for k in looks:
+		if String(k).begins_with("COSTUME:"):
+			costumes.append(String(k))
+	var rig_looks := {}
+	for rig in ["bellows", "hush"]:
+		var rl := PackedStringArray()
+		var rjd: Variant = _read("%s/rigs/%s/rig.json" % [data_root, rig])
+		var rres: Dictionary = (rjd as Dictionary).get("residues", {}) if rjd is Dictionary else {}
+		for k in rres:
+			var ks := String(k)
+			if ks.begins_with("COMBO:"):
+				if combo_ids.has(ks.substr(6)):
+					_add(rl, ks)
+			elif ks.begins_with("COSTUME"):
+				if costumes.has(ks):
+					_add(rl, ks)
+			else:
+				_add(rl, ks)
+				if rres[k] is Dictionary and (rres[k] as Dictionary).has("blind"):
+					_add(rl, "%s:blind" % ks)
+		if rig == "bellows":
+			for k in looks:
+				_add(rl, String(k))
+		rl.sort()
+		rig_looks[rig] = rl
 	return {"episode": episode_id, "rigs": PackedStringArray(["hush", "bellows"]), "rooms": rooms, "props": props,
-		"pranks": night_pranks, "looks": {"bellows": looks, "hush": PackedStringArray()}, "combos": combo_ids,
+		"pranks": night_pranks, "looks": rig_looks, "combos": combo_ids,
 		"fx": FX_KINDS.duplicate(), "captions": all_captions, "fonts": FONT_SIZES.duplicate(true), "audio": audio,
-		"pip": true}
+		"textures": textures, "pip": true}
+
+
+## Textures the view loads lazily (HiResTex rasters through ViewKit.tex): the awareness glyphs and
+## badges, every activity / detour icon the thought bubble can show (+ exit), the falling / quake
+## props and the particle sprites. Rasterised under the curtain so none is built on a gag.
+static func lazy_textures(data_root: String = "res://data") -> PackedStringArray:
+	var out := PackedStringArray()
+	for g in ["specs_off", "specs_on", "blinded", "asleep", "stars"]:
+		_add_if(out, "res://art/ui/glyph_%s.svg" % g)
+	for b in ["badge_gold", "badge_hide", "badge_in_use", "badge_needs"]:
+		_add_if(out, "res://art/ui/%s.svg" % b)
+	var aj: Variant = _read("%s/activities.json" % data_root)
+	var acts: Dictionary = (aj as Dictionary).get("activities", {}) if aj is Dictionary else {}
+	for id in acts:
+		var ad: Variant = acts[id]
+		var icon := String((ad as Dictionary).get("icon", "")) if ad is Dictionary and (ad as Dictionary).get("icon") != null else ""
+		_add_if(out, icon if icon != "" else "res://art/icons/activities/%s.svg" % String(id))
+	_add_if(out, "res://art/icons/activities/exit.svg")
+	# the curtain call's art (the title card slams after the Prologue; the valance drops on him)
+	for f in ["title_card.svg", "title_card_bulbs_a.svg", "title_card_bulbs_b.svg", "curtain_valance.svg"]:
+		_add_if(out, "res://art/house/stage/" + f)
+	for d in ["res://art/icons/activities", "res://art/house/props", "res://art/fx/props", "res://art/fx/particles"]:
+		var files := DirAccess.get_files_at(d) if DirAccess.dir_exists_absolute(d) else PackedStringArray()
+		for f in files:
+			if not f.ends_with(".svg"):
+				continue
+			if d == "res://art/house/props" and not f.contains("falling"):
+				continue
+			_add_if(out, d.path_join(f))
+	out.sort()
+	return out
+
+
+static func _add_if(arr: PackedStringArray, path: String) -> void:
+	if path != "" and not arr.has(path) and (FileAccess.file_exists(path) or ResourceLoader.exists(path)):
+		arr.append(path)
 
 
 static func _add(arr: PackedStringArray, v: String) -> void:

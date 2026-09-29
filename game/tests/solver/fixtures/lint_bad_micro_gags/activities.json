@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "activities": {
+    "warmup": {
+      "station": "st_gramophone",
+      "dur_s": 20,
+      "facing": -1,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_warmup",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_warmup",
+      "icon": "res://art/icons/activities/warmup.svg",
+      "micro_gags": [
+        {
+          "id": "trill",
+          "at_s": 2.0,
+          "emote": "sing"
+        },
+        {
+          "id": "hum",
+          "at_s": 14.0,
+          "emote": "hum"
+        }
+      ]
+    },
+    "tea": {
+      "station": "st_tea",
+      "dur_s": 10,
+      "facing": 1,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": "bit_tea",
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_tea",
+      "icon": "res://art/icons/activities/tea.svg",
+      "micro_gags": [
+        {
+          "id": "sip",
+          "at_s": 2.0,
+          "emote": "wink"
+        },
+        {
+          "id": "pinkie_up",
+          "at_s": 4.0
+        }
+      ]
+    },
+    "rinse": {
+      "station": "st_sink",
+      "dur_s": 5,
+      "facing": 1,
+      "specs": false,
+      "awareness": "normal",
+      "squeak_bit": null,
+      "panto": false,
+      "bend": false,
+      "in_use": null,
+      "clip": "bellows/act_rinse",
+      "icon": "res://art/icons/activities/rinse.svg",
+      "micro_gags": [
+        "gargle"
+      ]
+    }
+  },
+  "squeak_bits": {
+    "bit_warmup": {
+      "clip": "bellows/bit_warmup",
+      "len_f": 90
+    },
+    "bit_tea": {
+      "clip": "bellows/bit_tea",
+      "len_f": 90
+    }
+  },
+  "walk_beats": {
+    "min_leg_s": 5.0,
+    "every_s": 6.0,
+    "ids": [
+      {
+        "id": "walk_hum",
+        "emote": "whistle"
+      }
+    ]
+  }
+}

@@ -164,7 +164,7 @@ func _reject(w: SimWorld, c: String, why: String) -> void:
 	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": why})
 
 
-## A go/move while busy becomes the single queued command (a newer one replaces it, TECH §3.5) and
+## A go/move while busy (or a POP OUT tapped mid-dive) becomes the single queued command (a newer one replaces it, TECH §3.5) and
 ## says so at once — `cmd_queued {c, why, target}`, why = "entering" during the climb-in, else
 ## "busy" — so a held tap is never silent (the view shows it as queued).
 ## `target` is always a hotspot id or "<room>:<x px>" (the view anchors its queued marker there).
@@ -524,6 +524,10 @@ func _go_pin(w: SimWorld, want_run: bool) -> void:
 
 
 func _cmd_pop_out(w: SimWorld, want_run: bool) -> void:
+	if state == DIVING and at_hotspot >= 0:
+		# tapped while still diving in (the button already says POP OUT): she pops out the moment the dive ends
+		_queue(w, SimCmd.POP_OUT, {"c": SimCmd.POP_OUT, "run": want_run}, w.db.house.hotspots[at_hotspot].id)
+		return
 	if state != HIDDEN:
 		_reject(w, SimCmd.POP_OUT, "not_hidden")
 		return

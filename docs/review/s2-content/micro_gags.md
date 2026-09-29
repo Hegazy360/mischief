@@ -18,26 +18,32 @@ Each gag is written as a one-second joke readable at 50 px; the animator builds 
   one beat per fix-up detour (`steam_sideburns`, `scrub_nose`,
   `honey_test_note`, `comb_flourish`); walk beats `walk_hum`, `cravat_tug`, `walk_scale`.
 - `emote` is null only where the gag has no face (`peer_under_piano`: his head is under the piano).
-- The `dur_s` column shows the file's current value; the D1 durations land with the retuned routes
-  (`d1_changes.md`). Every `at_s` already fits the D1 durations.
+- `dur_s` is the D1 value (`d1_changes.md`: warmup/tea/paper 8 s, pickles/snack/fire/mirror 5 s); a gated
+  warm-up keeps performing past it and repeats its list every `mg_cycle_s`.
+- The Prologue walk-off is the detour `exit` (icon `exit.svg`, clip `bellows/loco_stomp`): no timed beats;
+  the walk beats play on the way to the stairs.
+
+**Final (Stage 2 batch 1).** No id was renamed after the first publication; the list above is complete for the
+slice. Measured on the authored routes (`docs/review/s2-content/index.md`): most beats land in Hush's room or
+next door (`room`/`pip`), edge-bubble beats ≤ ⅓ of the beat credit on every route.
 
 ## Slice activities and detours (Gate 0, Prologue, Night 1, Night 2)
 
 | activity | dur_s | cycle | id | at_s | len_f | emote | the gag (one line) | Nights |
 |---|---|---|---|---|---|---|---|---|
-| `warmup` | 10 | 20.0 | `admire_reflection_horn` | 2.0 | 60 | smug | Leans into the gramophone horn, sees his face bloom huge in the brass, blows it a kiss. | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `warmup` | 10 | 20.0 | `trill` | 7.0 | 48 | sing | A trill so high the teacups on the mantel rattle; he taps his throat, delighted. | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `warmup` | 10 | 20.0 | `conduct_air` | 12.0 | 60 | smug | Conducts an invisible orchestra with his pinkie as a baton, then bows to it. | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `warmup` | 10 | 20.0 | `hum` | 17.0 | 48 | hum | Hums along to his own record, eyes shut, swaying like a metronome. | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `tea` | 10 | — | `admire_in_kettle` | 2.0 | 48 | smug | Catches his reflection in the kettle, pats his bouffant, winks at it. | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `tea` | 10 | — | `pinkie_up` | 7.0 | 48 | yum | A long sip with the pinkie cocked so high it wobbles; eyes shut: 'Ahhh.' | g0_sneeze, p00_curtain_up, n01_throat_tea |
-| `pickles` | 6 | — | `sniff_jar` | 2.0 | 48 | sniff | Unscrews the jar an inch, sniffs, his eyes water, screws it back tight. | n01_throat_tea |
-| `snack` | 6 | — | `lick_lips` | 2.0 | 48 | yum | Holds a wobbling trifle up to the fridge light and licks his lips; a drool drop falls. | n02_something_fishy |
+| `warmup` | 8 | 20.0 | `admire_reflection_horn` | 2.0 | 60 | smug | Leans into the gramophone horn, sees his face bloom huge in the brass, blows it a kiss. | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `warmup` | 8 | 20.0 | `trill` | 7.0 | 48 | sing | A trill so high the teacups on the mantel rattle; he taps his throat, delighted. | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `warmup` | 8 | 20.0 | `conduct_air` | 12.0 | 60 | smug | Conducts an invisible orchestra with his pinkie as a baton, then bows to it. | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `warmup` | 8 | 20.0 | `hum` | 17.0 | 48 | hum | Hums along to his own record, eyes shut, swaying like a metronome. | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `tea` | 8 | — | `admire_in_kettle` | 2.0 | 48 | smug | Catches his reflection in the kettle, pats his bouffant, winks at it. | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `tea` | 8 | — | `pinkie_up` | 7.0 | 48 | yum | A long sip with the pinkie cocked so high it wobbles; eyes shut: 'Ahhh.' | g0_sneeze, p00_curtain_up, n01_throat_tea |
+| `pickles` | 5 | — | `sniff_jar` | 2.0 | 48 | sniff | Unscrews the jar an inch, sniffs, his eyes water, screws it back tight. | n01_throat_tea |
+| `snack` | 5 | — | `lick_lips` | 2.0 | 48 | yum | Holds a wobbling trifle up to the fridge light and licks his lips; a drool drop falls. | n02_something_fishy |
 | `rinse` | 5 | — | `gargle_hum` | 2.0 | 60 | hum | Gargles a tune with the rinse water: a bubbly high note, then spits it out proudly. | n01_throat_tea |
-| `paper` | 12 | — | `tut` | 2.0 | 48 | tut | Reads a bad review: 'Tut. Tut. TUT!' and flicks the page at it. | n01_throat_tea, n02_something_fishy |
-| `paper` | 12 | — | `chuckle_at_own_photo` | 7.0 | 48 | laugh | Finds his own photo, kisses it, and chuckles behind the paper. | n01_throat_tea, n02_something_fishy |
-| `fire` | 6 | — | `warm_hands` | 2.0 | 48 | smug | Warms his hands, then turns and warms his bottom, eyes rolling in bliss. | n02_something_fishy |
-| `mirror` | 6 | — | `kiss_reflection` | 2.0 | 48 | smug | Kisses his reflection, then jealously polishes the lip mark off with his sleeve. | n02_something_fishy |
+| `paper` | 8 | — | `tut` | 2.0 | 48 | tut | Reads a bad review: 'Tut. Tut. TUT!' and flicks the page at it. | n01_throat_tea, n02_something_fishy |
+| `paper` | 8 | — | `chuckle_at_own_photo` | 7.0 | 48 | laugh | Finds his own photo, kisses it, and chuckles behind the paper. | n01_throat_tea, n02_something_fishy |
+| `fire` | 5 | — | `warm_hands` | 2.0 | 48 | smug | Warms his hands, then turns and warms his bottom, eyes rolling in bliss. | n02_something_fishy |
+| `mirror` | 5 | — | `kiss_reflection` | 2.0 | 48 | smug | Kisses his reflection, then jealously polishes the lip mark off with his sleeve. | n02_something_fishy |
 | `phone` | 8 | — | `pompous_laugh` | 2.0 | 60 | laugh | Throws his head back at his agent's joke: 'HA-ha-HAAA!' - the receiver at arm's length. | n02_something_fishy |
 | `phone` | 8 | — | `twirl_cord` | 7.0 | 48 | smug | Twirls the phone cord round his finger and gets it knotted round his wrist. | n02_something_fishy |
 | `clock` | 5 | — | `check_pocket_watch` | 2.0 | 48 | tut | Checks his pocket watch against the clock, tuts, and shakes the watch. | n02_something_fishy |

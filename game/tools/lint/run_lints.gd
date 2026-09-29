@@ -6,7 +6,9 @@
 ##
 ## Prints one line per lint (`[lint] content: OK …` / `FAIL n error(s)` + each error) and a summary;
 ## exits 1 when any lint fails. A lint whose inputs don't exist yet is SKIPPED with a clear line
-## (exit 0) unless `--strict`.
+## (exit 0) unless `--strict`. The content lint includes the D1 micro-gag cadence + emote rules; its clip
+## coverage (every clip of `SliceClips.build()` exists under data/anim/, BeatLint) prints WARNINGs, which
+## `--strict` (the pre-gate) turns into errors. `--json` also lists the coverage (`coverage {missing, source}`).
 extends SceneTree
 
 
@@ -49,9 +51,23 @@ func _initialize() -> void:
 				if strict:
 					for m in missing:
 						errs.append("%s/%s: missing" % [data_root, m])
+			var cov := BeatLint.coverage(parts, data_root)
+			var cmiss: PackedStringArray = cov["missing"]
+			if strict:
+				for c in cmiss:
+					errs.append("anim coverage: %s is in the slice manifest (%s) but data/anim/%s.json does not exist" % [c, cov["source"], c])
 			failed += _print("content", errs, "%d episodes, %d pranks" % [(parts["episodes"] as Dictionary).size(),
 				((parts["pranks"] as Dictionary).get("pranks", {}) as Dictionary).size()])
-			report["content"] = {"errors": Array(errs)}
+			if not strict:
+				if cmiss.is_empty():
+					print("[lint] content coverage: OK (%d clips from %s)" % [int(cov["rows"]), cov["source"]])
+				else:
+					print("[lint] content coverage: WARN %d of %d clip(s) from %s missing under %s/anim (errors with --strict)" % [
+						cmiss.size(), int(cov["rows"]), cov["source"], data_root])
+					for c in cmiss:
+						print("  - WARN missing clip %s" % c)
+			report["content"] = {"errors": Array(errs), "coverage": {"missing": Array(cmiss), "source": cov["source"],
+				"rows": cov["rows"]}}
 	if "hotspot" in want:
 		var hp := "%s/house/house.json" % data_root
 		if not FileAccess.file_exists(hp):

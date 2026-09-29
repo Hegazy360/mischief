@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "frame": [2400, 1080],
+  "sets": {
+    "n01_throat_tea": {
+      "episode": "n01_throat_tea",
+      "time": "dawn",
+      "size": [2400, 1080],
+      "safe": [240, 0, 1920, 1080],
+      "layers": [
+        {
+          "id": "bg",
+          "art": "res://art/house/cold/n01_bg.svg",
+          "pos": [0, 0],
+          "size": [2400, 1080],
+          "z": -2
+        },
+        {
+          "id": "window_no9",
+          "art": "res://art/house/cold/n01_window_no9.svg",
+          "pos": [1670, 230],
+          "size": [450, 540],
+          "z": 0,
+          "state": "intact"
+        },
+        {
+          "id": "birds",
+          "art": "res://art/house/cold/n01_birds.svg",
+          "pos": [1640, 60],
+          "size": [420, 240],
+          "z": 0,
+          "state": "perched"
+        },
+        {
+          "id": "sill_no7",
+          "art": "res://art/house/cold/n01_sill_fg.svg",
+          "pos": [560, 680],
+          "size": [520, 232],
+          "z": 2
+        }
+      ],
+      "anchors": {
+        "bellows": [812, 796],
+        "bellows_face": [812, 496],
+        "megaphone_mouth": [1042, 546],
+        "window_no7": [820, 525],
+        "window_no9": [1830, 515],
+        "crack": [1890, 456],
+        "birds": [1830, 242]
+      },
+      "actors": {
+        "bellows": {
+          "facing": 1,
+          "scale": 1.0,
+          "pose": "b_sing_big",
+          "behind": "sill_no7"
+        }
+      },
+      "states": {
+        "window_no9": {
+          "intact": "res://art/house/cold/n01_window_no9.svg",
+          "cracked": "res://art/house/cold/n01_window_no9_cracked.svg"
+        },
+        "birds": {
+          "perched": "res://art/house/cold/n01_birds.svg",
+          "flown": "res://art/house/cold/n01_birds_flown.svg"
+        }
+      }
+    },
+    "n02_something_fishy": {
+      "episode": "n02_something_fishy",
+      "time": "day",
+      "size": [2400, 1080],
+      "safe": [240, 0, 1920, 1080],
+      "layers": [
+        {
+          "id": "bg",
+          "art": "res://art/house/cold/n02_bg.svg",
+          "pos": [0, 0],
+          "size": [2400, 1080],
+          "z": -2
+        },
+        {
+          "id": "box",
+          "art": "res://art/house/cold/n02_box.svg",
+          "pos": [588, 654],
+          "size": [340, 228],
+          "z": 0,
+          "state": "empty"
+        },
+        {
+          "id": "balloon",
+          "art": "res://art/house/cold/n02_balloon.svg",
+          "pos": [1150, 240],
+          "size": [1276, 640],
+          "z": 0,
+          "state": "whole"
+        }
+      ],
+      "anchors": {
+        "bellows": [1040, 900],
+        "bellows_face": [1040, 600],
+        "balloon": [1300, 455],
+        "string_in": [2400, 800],
+        "box": [728, 734],
+        "door": [500, 860],
+        "sign": [1500, 770]
+      },
+      "actors": {
+        "bellows": {
+          "facing": 1,
+          "scale": 1.0,
+          "pose": "b_lecture_wag_a"
+        }
+      },
+      "states": {
+        "balloon": {
+          "whole": "res://art/house/cold/n02_balloon.svg",
+          "popped": "res://art/house/cold/n02_balloon_popped.svg",
+          "none": ""
+        },
+        "box": {
+          "empty": "res://art/house/cold/n02_box.svg",
+          "string": "res://art/house/cold/n02_box_string.svg"
+        }
+      }
+    }
+  }
+}

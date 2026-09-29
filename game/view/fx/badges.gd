@@ -69,6 +69,17 @@ func set_current_room(room: String) -> void:
 ## Long-press reveal: every badge in view for 2 s.
 func reveal() -> void:
 	_reveal = REVEAL_S
+	queue_redraw()
+
+
+## End a reveal early (the finger lifted onto a hotspot).
+func stop_reveal() -> void:
+	_reveal = 0.0
+	queue_redraw()
+
+
+func revealing() -> bool:
+	return _reveal > 0.0
 
 
 func tick(dt: float, unit: float) -> void:

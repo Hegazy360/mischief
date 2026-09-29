@@ -24,6 +24,10 @@ var primer_parent: Node = null
 var _steps: Array = []
 var _t0: int = 0
 var _primer: Node2D = null
+var _tex_i: int = 0
+var _blocking: bool = false
+## Lazy textures rasterised so far (tests, the report).
+var textures_warmed: int = 0
 
 
 ## Begin warming `p_list` for `wv` (WorldView) and `p_pip` (PipView).
@@ -35,8 +39,10 @@ func start(p_list: Dictionary, wv: Node, p_pip: Node, p_primer_parent: Node) -> 
 	done = false
 	ran = PackedStringArray()
 	_t0 = Time.get_ticks_msec()
+	_tex_i = 0
 	_steps = [["looks_bellows", _warm_looks.bind("bellows")], ["looks_hush", _warm_looks.bind("hush")],
-		["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["fonts_done", _free_primer]]
+		["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
+		["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer]]
 	set_process(true)
 
 
@@ -46,26 +52,41 @@ func _process(_d: float) -> void:
 		return
 	var t := Time.get_ticks_msec()
 	while not _steps.is_empty() and Time.get_ticks_msec() - t < BUDGET_MS:
-		var s: Array = _steps.pop_front()
-		(s[1] as Callable).call()
+		var s: Array = _steps[0]
+		var r: Variant = (s[1] as Callable).call()
+		if r is bool and not bool(r):
+			break   # a resumable step (textures) spent this frame's budget; it continues next frame
+		_steps.pop_front()
 		ran.append(String(s[0]))
 		if String(s[0]) == "fonts":
 			break   # the primer draws this frame; free it next frame
 	if _steps.is_empty():
 		done = true
 		elapsed_ms = Time.get_ticks_msec() - _t0
+		DeviceLog.note("warm_ms", elapsed_ms)
 		finished.emit(elapsed_ms)
 
 
-## Run every step now (tests, a seek that needs a warm world at once).
+## Run every step now (tests, a seek that needs a warm world at once, a rise forced by the launch cap
+## before the warm-up finished: the hitch then lands on the rise frame, under the curtain, never on a
+## gag). Look pages are built to completion (≤ 1.5 s guard).
 func finish_now() -> void:
+	_blocking = true
 	while not _steps.is_empty():
-		var s: Array = _steps.pop_front()
-		(s[1] as Callable).call()
+		var s: Array = _steps[0]
+		var r: Variant = (s[1] as Callable).call()
+		if r is bool and not bool(r):
+			continue   # resumable: call again until done
+		_steps.pop_front()
 		ran.append(String(s[0]))
+	# looks that started warming in the background: build the rest now
+	_warm_looks("bellows")
+	_warm_looks("hush")
+	_blocking = false
 	if not done:
 		done = true
 		elapsed_ms = Time.get_ticks_msec() - _t0
+		DeviceLog.note("warm_ms", elapsed_ms)
 		finished.emit(elapsed_ms)
 
 
@@ -78,7 +99,10 @@ func _warm_looks(actor: String) -> void:
 	var rig: Variant = (cv as Node).get("rig")
 	var looks: Variant = (list.get("looks", {}) as Dictionary).get(actor, PackedStringArray())
 	if rig is Node and (rig as Node).has_method("warm_looks") and looks is PackedStringArray and not (looks as PackedStringArray).is_empty():
-		(rig as Node).call("warm_looks", looks)
+		var ok := bool((rig as Node).call("warm_looks", looks))
+		var t0 := Time.get_ticks_msec()
+		while _blocking and not ok and Time.get_ticks_msec() - t0 < 1500:
+			ok = bool((rig as Node).call("warm_looks", looks, 50.0))
 
 
 func _warm_fonts() -> void:
@@ -99,6 +123,30 @@ func _free_primer() -> void:
 func _warm_pip() -> void:
 	if pip != null and pip.has_method("warm"):
 		pip.call("warm")
+
+
+## Rasterise the lazy view textures (ViewKit.tex caches them) a few per frame. False until done.
+func _warm_textures() -> bool:
+	var paths: Variant = list.get("textures", PackedStringArray())
+	if not (paths is PackedStringArray):
+		return true
+	var arr: PackedStringArray = paths
+	var t := Time.get_ticks_msec()
+	while _tex_i < arr.size():
+		ViewKit.tex(arr[_tex_i])
+		_tex_i += 1
+		textures_warmed += 1
+		if Time.get_ticks_msec() - t >= BUDGET_MS:
+			return _tex_i >= arr.size()
+	return true
+
+
+## The HUD's own rasters the Night will ask for (PiP awareness glyphs, badges).
+func _warm_ui_icons() -> void:
+	for g in ["specs_off", "specs_on", "blinded", "asleep", "stars"]:
+		UiIcons.glyph(g)
+	for b in ["gold", "hide", "in_use", "needs"]:
+		UiIcons.badge(b)
 
 
 func _warm_audio() -> void:

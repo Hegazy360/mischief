@@ -365,6 +365,7 @@ static func _to_texture(img: Image, s: float, path: String) -> Texture2D:
 	if base != img.get_size():
 		tex.set_size_override(base)
 	_stats["rasters"] = int(_stats["rasters"]) + 1
+	TexStats.note_build("hires", path)
 	return tex
 
 

@@ -108,6 +108,48 @@ func test_hotspot_rules() -> void:
 	assert_has(st, "station st_sink in parlour, GDD §7.1 puts it in kitchen")
 
 
+func test_hotspot_rules_across_the_floor_stacks_and_doors() -> void:
+	var e := _hot("lint_bad_hotspot_floor")
+	assert_has(e, "floor 0: parlour_piano_back and kitchen_honey hit boxes overlap", "a box straddling the wall meets the next room's")
+	assert_has(e, "door kitchen_hatch is tappable but names no link")
+	assert_false(e.contains("kitchen_window"), "a non-tappable door with no link (the Prologue window), stacked over the tap: fine\n%s" % e)
+	assert_has(e, "stack [\"kitchen_honey\",\"kitchen_pantry_curtain\"]: kitchen_honey is not in the same column")
+	assert_has(e, "has unknown members")
+
+
+func test_micro_gag_cadence_and_emotes() -> void:
+	var e := _content("lint_bad_micro_gags")
+	assert_has(e, "warmup: 12.0 s without a micro-gag (2.0 s → 14.0 s; D1 max 8 s)")
+	assert_has(e, "tea: micro-gags only 2.0 s apart (2.0 s → 4.0 s; min 5 s)")
+	assert_has(e, "activities.tea micro_gags 'sip' emote 'wink' not in")
+	assert_has(e, "walk_beats 'walk_hum' emote 'whistle' not in")
+	assert_false(e.contains("the end at 20.0"), "14 s → the 20 s end is only 6 s")
+	assert_false(e.contains("rinse"), "a 5 s rinse needs no beat")
+	var g := _content("lint_bad_mg_gated")
+	assert_has(g, "rinse: no micro_gags, but a gated Night holds him here")
+	# the cycle of a gated activity is checked with its wrap
+	var c := BeatLint.cadence("warmup", {"dur_s": 10, "micro_gags": [{"id": "a", "at_s": 2.0}, {"id": "b", "at_s": 7.0}], "mg_cycle_s": 16.0}, true)
+	assert_has("\n".join(c), "11.0 s without a micro-gag (7.0 s → 18.0 s", "7 → 16 + 2")
+	assert_eq(BeatLint.cadence("warmup", {"dur_s": 10, "micro_gags": [{"id": "a", "at_s": 2.0}, {"id": "b", "at_s": 7.0}], "mg_cycle_s": 10.0}, true),
+		PackedStringArray(), "2, 7, 12, 17 …")
+	assert_eq(BeatLint.cadence("tea", {"dur_s": 10, "micro_gags": ["a", "b"]}, false), PackedStringArray(), "legacy 2 + 8: gaps 2, 6, 2")
+	var used := BeatLint.used_by_final(ContentLint.load_parts(GOOD))
+	assert_has(used, "warmup")
+	assert_false(used.has("curious"), "beats never play while curious")
+
+
+func test_clip_coverage_warns_and_lists_the_missing() -> void:
+	var parts := ContentLint.load_parts(GOOD)
+	var cov := BeatLint.coverage(parts, GOOD)
+	assert_eq(str(cov["source"]), "fallback", "a fixture dir: the lint's own derivation")
+	var miss: PackedStringArray = cov["missing"]
+	assert_has(miss, "bellows/mg_trill", "micro-gag clips")
+	assert_gt(int(cov["rows"]), 0)
+	var real := BeatLint.coverage(ContentLint.load_parts("res://data"), "res://data")
+	print("  [real data] clip coverage from %s: %d of %d missing" % [real["source"], (real["missing"] as PackedStringArray).size(), int(real["rows"])])
+	assert_has(["SliceClips", "fallback"], str(real["source"]))
+
+
 func test_hotspot_stacked_objects_pass() -> void:
 	var h := {"rooms": [{"id": "kitchen", "x0": 2800, "x1": 3900}], "stations": [], "hotspots": [
 		{"id": "kitchen_fridge", "room": "kitchen", "use_x": 3300, "rect": [3220, -170, 160, 170]},

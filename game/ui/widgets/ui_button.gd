@@ -81,9 +81,14 @@ func _draw() -> void:
 	UiKit.draw_chunky_rect(self, r, radius, f, s, UiKit.BUTTON_OUTLINE, 12.0)
 	var fnt := UiKit.display_font() if display_font else UiKit.ui_font()
 	var fs := UiKit.text_size(font_size)
-	var tw := 0.0 if text == "" else fnt.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var ip := icon_px if icon_px > 0.0 else r.size.y * 0.62
 	var gap := 18.0 if (icon != null and text != "") else 0.0
+	# the label always fits the face (Text +20 % shrinks it back, never below SIZE_MIN)
+	var room := r.size.x - 36.0 - (ip + gap if icon != null else 0.0)
+	var tw := 0.0 if text == "" else fnt.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	while text != "" and tw > room and fs > UiKit.SIZE_MIN:
+		fs -= 2
+		tw = fnt.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var total := tw + (ip + gap if icon != null else 0.0)
 	var x := -total * 0.5
 	var cy := -5.0

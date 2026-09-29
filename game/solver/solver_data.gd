@@ -12,10 +12,22 @@
 class_name SolverData
 extends RefCounted
 
-## Detour activity ids (TECH §14), plus `exit` (an episode's scripted walk-off, `bellows.exit`).
-## Everything else in `b_activity` is a loop activity.
-const DETOUR_IDS: PackedStringArray = ["fixup_dry", "fixup_sink", "fixup_honey", "fixup_mirror", "curious",
-	"herd_beryl", "search", "exit"]
+## Detour activity ids: the sim's `ActivityDef.DETOUR_IDS` (TECH §14), plus `exit` (an episode's scripted
+## walk-off, `bellows.exit`). Everything else in `b_activity` is a loop activity. Use `is_detour()`.
+static var DETOUR_IDS: PackedStringArray = _detour_ids()
+
+
+static func _detour_ids() -> PackedStringArray:
+	var out := PackedStringArray(ActivityDef.DETOUR_IDS)
+	out.append("exit")
+	return out
+
+
+## True for a detour (or the scripted exit) activity id.
+static func is_detour(id: String) -> bool:
+	return id == "exit" or ActivityDef.DETOUR_IDS.has(id)
+
+
 ## Rig prep tiers → ticks (TECH §3.7.4 / GDD §5.1).
 const PREP_TICKS := {"Q": 48, "S": 90, "B": 150}
 ## Size weights for prank-line bases (TECH §3.2): tenths per weight unit.

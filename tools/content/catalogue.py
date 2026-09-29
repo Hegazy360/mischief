@@ -9,7 +9,9 @@ It then diffs the data against docs/GDD.md by parsing the GDD text:
   * §5.7 catalogue: every `#n `id` CAPTION** (size)` entry -> caption, size and Nights must match pranks.json;
   * §7.2 episodes: the backticked activities of each Night's "Loop" bullet must equal the episode loop, and
     every Script line text must appear as a quoted string in that Night's GDD block.
-Any mismatch is printed and the exit code is 1.
+Any mismatch is printed and the exit code is 1 — except the documented D1 deviations in `DEVIATIONS` below
+(`docs/review/s2-content/d1_changes.md`): a listed field is accepted only when the data equals the documented
+value exactly (anything else still fails), and an entry the GDD has caught up with is reported as stale.
 
 Usage: python3 tools/content/catalogue.py [--no-write] [--out docs/review/content/catalogue.md]
 """
@@ -31,6 +33,18 @@ for i, e in enumerate(EP_ORDER[1:11], start=1):
     NIGHT_TOKEN[str(i)] = e
 SHORT = {v: k for k, v in NIGHT_TOKEN.items()}
 PREP = {"Q": "Q 0.8 s", "S": "S 1.5 s", "B": "B 2.5 s"}
+# Documented GDD deviations (Stage 2, lead decision D1): {episode: {field: (exact data value, reason)}}.
+# The orchestrator folds them into GDD §7.2; once the GDD text matches, the entry is reported stale.
+DEVIATIONS = {
+    "n01_throat_tea": {
+        "loop": (["warmup", "tea", "pickles", "rinse", "tea", "paper"],
+                 "D1: two kettle windows per loop and a 58.7 s loop (d1_changes.md N01-1)"),
+    },
+    "n02_something_fishy": {
+        "loop": (["paper", "fire", "snack", "mirror", "phone", "clock"],
+                 "D1: the same cycle rotated to start kitchen-side, first prank 19.4 s (d1_changes.md N02-1)"),
+    },
+}
 
 
 def load(rel):
@@ -204,8 +218,9 @@ def export(pranks, das, items, eps, out_path):
 
 
 # ---------------------------------------------------------------- diff
-def diff(pranks, das, eps, text):
+def diff(pranks, das, eps, text, notes=None):
     errs = []
+    notes = notes if notes is not None else []
     cat = gdd_catalogue(text)
     if len(cat) != 32:
         errs.append("GDD §5.7 parse found %d entries (expected 32)" % len(cat))
@@ -240,8 +255,14 @@ def diff(pranks, das, eps, text):
             continue
         want = gdd_loop(blocks[eid])
         have = [e["a"] for e in eps[eid]["bellows"]["loop"]]
+        dev = DEVIATIONS.get(eid, {}).get("loop")
         if want != have:
-            errs.append("%s: loop GDD %s vs data %s" % (eid, want, have))
+            if dev is not None and have == dev[0]:
+                notes.append("ACCEPTED %s: loop GDD %s vs data %s — %s" % (eid, want, have, dev[1]))
+            else:
+                errs.append("%s: loop GDD %s vs data %s" % (eid, want, have))
+        elif dev is not None:
+            notes.append("STALE %s: the GDD loop now matches the data; drop the DEVIATIONS entry" % eid)
         quoted = set(re.findall(r'"([^"]+)"', " ".join(blocks[eid].split())))
         for ln in eps[eid]["script"]:
             if ln["text"] not in quoted:
@@ -263,7 +284,10 @@ def main():
     if not a.no_write:
         export(pranks, das, items, eps, a.out)
         print("[catalogue] wrote %s" % os.path.relpath(a.out, ROOT))
-    errs = diff(pranks, das, eps, text)
+    notes = []
+    errs = diff(pranks, das, eps, text, notes)
+    for n in notes:
+        print("[catalogue] " + n)
     for e in errs:
         print("[catalogue] MISMATCH " + e)
     print("[catalogue] %d pranks, %d episodes, %d mismatches vs GDD" % (len(pranks), len(eps), len(errs)))

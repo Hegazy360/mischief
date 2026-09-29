@@ -1,0 +1,22 @@
+{"episode": "n01_throat_tea", "hash": 4031201108, "persona": "scenario", "route": "caught", "ticks": 5200,
+ "cmds": [
+  [1, {"c":"go","hotspot":"kitchen_sink_tap","run":false}],
+  [3, {"c":"rig","on":true}],
+  [51, {"c":"rig","on":false}],
+  [490, {"c":"go","hotspot":"kitchen_honey","run":false}],
+  [618, {"c":"rig","on":true}],
+  [1213, {"c":"go","hotspot":"hall_confiscated_box","run":false}],
+  [1359, {"c":"pick","item":"squeaker"}],
+  [1361, {"c":"go","hotspot":"hall_coat_cupboard","run":false}],
+  [2971, {"c":"pop_out","run":false}],
+  [2972, {"c":"go","hotspot":"parlour_piano_back","run":false}],
+  [3539, {"c":"pop_out","run":false}],
+  [3540, {"c":"go","hotspot":"kitchen_kettle","run":false}],
+  [3721, {"c":"rig","on":true}],
+  [3769, {"c":"rig","on":false}],
+  [3770, {"c":"go","hotspot":"kitchen_pickle_jar","run":false}],
+  [3796, {"c":"rig","on":true}],
+  [3886, {"c":"rig","on":false}],
+  [3887, {"c":"go","hotspot":"kitchen_table","run":false}],
+  [5200, {"c":"bow"}]
+]}

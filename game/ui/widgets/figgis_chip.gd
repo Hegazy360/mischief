@@ -31,6 +31,8 @@ const RIG_ID := "figgis"
 const CARD_PROP := "card"
 const CARD_SOCKET := "body:card"
 const REACT_SEC := 1.6
+## The chip's rig advances at 30 Hz.
+const RIG_STEP := 1.0 / 30.0
 const PSST_TAIL: PackedVector2Array = [Vector2(HIT + 10.0, 52.0), Vector2(HIT - 10.0, 66.0), Vector2(HIT + 14.0, 64.0)]
 const PSST_TAIL_FLIP: PackedVector2Array = [Vector2(-10.0, 52.0), Vector2(10.0, 66.0), Vector2(-14.0, 64.0)]
 const MOOD_CLIPS := {"idle": "figgis/f_idle", "psst": "figgis/f_psst", "point": "figgis/f_point_card",
@@ -69,6 +71,8 @@ var _psst: String = "psst!"
 var _ink: _CardInk = null
 var _icon_rect := Rect2(16, 13, 48, 32)
 var _card_pivot := Vector2(40, 50)
+var _idle_drawn: bool = false
+var _rig_acc: float = 0.0
 
 
 func _init() -> void:
@@ -114,7 +118,15 @@ func _setup_rig() -> void:
 	_ink = _CardInk.new()
 	_ink.chip = self
 	add_child(_ink)
-	level = Level.CLIPS if ClipLib.get_clip(String(MOOD_CLIPS["idle"])) != null else Level.POSES
+	level = level_for(true, ClipLib.get_clip(String(MOOD_CLIPS["idle"])) != null)
+
+
+## The fallback chain (pure): clips when the rig and its f_idle clip exist, else the rig's poses,
+## else the single-image bust.
+static func level_for(has_rig: bool, has_idle_clip: bool) -> int:
+	if not has_rig:
+		return Level.SVG
+	return Level.CLIPS if has_idle_clip else Level.POSES
 
 
 ## rig.json `props.card.icon_rect` (card canvas px), read from the file (RigDef keeps only what
@@ -157,6 +169,10 @@ func show_card(icons: PackedStringArray, seconds: float = CARD_SEC) -> void:
 	_card_icons.clear()
 	_card_keys = icons.duplicate()
 	for k in icons:
+		# barks.json cards spell the arrow out ("item", "arrow", "target"); the card draws its own
+		# arrows between the icons, so an explicit one is only a separator
+		if k == "" or k == "arrow":
+			continue
 		var t := UiIcons.card(k)
 		if t != null:
 			_card_icons.append(t)
@@ -229,6 +245,8 @@ func _set_mood(m: String) -> void:
 	if rig == null:
 		mood_source = "svg"
 		return
+	# the card prop is up only while he points at it or beams over it
+	rig.set_prop_state(CARD_PROP, "shown" if (m == "point" or m == "proud") else "hidden")
 	var clip := String(MOOD_CLIPS.get(m, ""))
 	if level == Level.CLIPS and clip != "" and ClipLib.get_clip(clip) != null:
 		rig.play(clip, {"blend_in": 4})
@@ -274,12 +292,22 @@ func _process(delta: float) -> void:
 		rig.scale = Vector2(k, k)
 		rig.position = Vector2(HIT * 0.5, HIT * 0.5 + VISUAL * 0.5 * k + bob)
 		rig.modulate = Color(1, 1, 1, 0.78) if state == State.GHOST else Color.WHITE
-		rig.advance(delta)
+		# a 128 px bust: 30 Hz animation is plenty and halves the rig's cost (budget 0.1 ms)
+		_rig_acc += delta
+		if _rig_acc >= RIG_STEP:
+			rig.advance(_rig_acc)
+			_rig_acc = 0.0
 		if _ink != null:
 			_ink.visible = card_prop_up() and not _card_icons.is_empty()
 			if _ink.visible:
 				_ink.queue_redraw()
-	queue_redraw()
+	# the chip's own drawing (shadow, bubble, card) changes only outside plain idle
+	if state != State.IDLE or is_pressed or rig == null or _react_mood != "":
+		queue_redraw()
+		_idle_drawn = false
+	elif not _idle_drawn:
+		queue_redraw()
+		_idle_drawn = true
 
 
 func _draw() -> void:

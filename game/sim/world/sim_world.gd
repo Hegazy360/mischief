@@ -279,72 +279,77 @@ func hush_can_see(hotspot_id: String) -> bool:
 ## {verb: "rig"|"rig_dim"|"freeze"|"pop_out"|"go"|"none", prank, step, item_needed, item_have: bool,
 ##  target_icon, ring_pm (0–1000, the current step), tier_ticks (Q 48 / S 90 / B 150), container (holds the
 ##  missing item), danger: "green"|"amber"|"red"}. RIG at an available rig point with what it needs (dimmed
-## when the item is missing); FREEZE everywhere else while not hidden; POP OUT when hidden (GO with a pin);
-## `none` while caught, bowing or climbing in. Danger rim: red = he is in her room; amber = next door or
-## heading here; green otherwise.
+## when the item is missing); FREEZE everywhere else while not hidden; POP OUT when hidden or diving in (a tap
+## mid-dive is queued; GO with a pin); `none` while caught, bowing, climbing in or after the end. Danger rim: red =
+## he is in her room; amber = one link away (doorway, door, stairs) or his path ends in her room; green otherwise.
+## ≤ 5 µs (the rig-point scan uses ContentDB.pranks_at_hs).
 func action_context() -> Dictionary:
-	var o := _ac
-	o["verb"] = "none"
-	o["prank"] = ""
-	o["step"] = 0
-	o["item_needed"] = ""
-	o["item_have"] = false
-	o["target_icon"] = ""
-	o["ring_pm"] = 0
-	o["tier_ticks"] = 0
-	o["container"] = ""
-	o["danger"] = _danger_rim()
+	var verb := "none"
+	var prank := ""
+	var step_i := 0
+	var needs := ""
+	var have := false
+	var icon := ""
+	var ring := 0
+	var tier_t := 0
+	var cont := ""
 	var hu := hush
-	if ended or hu.entering or hu.state == SimHush.CAUGHT or hu.state == SimHush.BOWING:
-		return o
-	if hu.state == SimHush.HIDDEN or hu.state == SimHush.DIVING:
-		o["verb"] = "go" if (hu.pin_room >= 0 or hu.pin_hs >= 0) else "pop_out"
-		return o
-	o["verb"] = "freeze"
-	var hs := hu.at_hotspot
-	if hs < 0 or hu.path != null or db.house.hotspots[hs].kind != HotspotDef.RIG_POINT:
-		return o
-	if not (hu.state == SimHush.IDLE or hu.state == SimHush.PICK_WINDOW or hu.state == SimHush.RIGGING
-			or hu.state == SimHush.SQUEAKING or (hu.state == SimHush.FROZEN and hu.frozen_by_rig)):
-		return o
-	var pi := hu.rig_prank if hu.state == SimHush.RIGGING or hu.frozen_by_rig else pranks.rig_target(self, hs)
-	if pi < 0:
-		return o
-	var pd := db.prank_list[pi]
-	var si: int = pranks.step[pi]
-	if si >= pd.steps.size():
-		return o
-	var st := pd.steps[si]
-	o["prank"] = pd.id
-	o["step"] = si
-	o["item_needed"] = st.needs
-	var have := st.needs == "" or hu.uses_of(st.needs) > 0
+	var hst := hu.state
+	if not (ended or hu.entering or hst == SimHush.CAUGHT or hst == SimHush.BOWING):
+		if hst == SimHush.HIDDEN or hst == SimHush.DIVING:
+			verb = "go" if (hu.pin_room >= 0 or hu.pin_hs >= 0) else "pop_out"
+		else:
+			verb = "freeze"
+			var hs := hu.at_hotspot
+			var by_rig := hst == SimHush.RIGGING or (hst == SimHush.FROZEN and hu.frozen_by_rig)
+			if hs >= 0 and hu.path == null and (by_rig or hst == SimHush.IDLE or hst == SimHush.PICK_WINDOW
+					or hst == SimHush.SQUEAKING) and hs < db.hs_is_rig.size() and db.hs_is_rig[hs] == 1:
+				var pi := hu.rig_prank if by_rig else pranks.rig_target(self, hs)
+				if pi >= 0:
+					var pd := db.prank_list[pi]
+					var si: int = pranks.step[pi]
+					if si < pd.steps.size():
+						var st := pd.steps[si]
+						prank = pd.id
+						step_i = si
+						needs = st.needs
+						if needs == "":
+							have = true
+						else:
+							var ci := hu.carrying.find(needs)
+							have = ci >= 0 and hu.carry_uses[ci] > 0
+						icon = db.hs_icon[hs]
+						tier_t = st.prep_ticks
+						ring = mini(1000, pranks.prog[pi] * 1000 / maxi(1, tier_t)) if pranks.state[pi] < Pranks.RIGGED else 1000
+						if have:
+							verb = "rig"
+						else:
+							verb = "rig_dim"
+							cont = st.needs_src
+	var o := _ac
+	o["verb"] = verb
+	o["prank"] = prank
+	o["step"] = step_i
+	o["item_needed"] = needs
 	o["item_have"] = have
-	var h := db.house.hotspots[hs]
-	o["target_icon"] = str(h.art.get("icon", h.art.get("idle", "")))
-	o["ring_pm"] = pranks.progress_pm(self, pi)
-	o["tier_ticks"] = st.prep_ticks
-	if have:
-		o["verb"] = "rig"
-	else:
-		o["verb"] = "rig_dim"
-		var it: ItemDef = db.items.get(st.needs, null)
-		o["container"] = it.source if it != null else ""
-	return o
-
-
-## "green" | "amber" | "red" (GDD §3.2 rim): red = Bellows is in Hush's room; amber = one link away or his
-## path ends in her room; green otherwise.
-func _danger_rim() -> String:
-	var hr := hush.room
+	o["target_icon"] = icon
+	o["ring_pm"] = ring
+	o["tier_ticks"] = tier_t
+	o["container"] = cont
+	var dg := "green"
+	var hr := hu.room
 	var br := bellows.room
-	if hr < 0 or br < 0:
-		return "green"
-	if br == hr:
-		return "red"
-	if db.nav.linked(br, hr) or (bellows.path != null and not bellows.path.is_done() and bellows.path.final_room() == hr):
-		return "amber"
-	return "green"
+	if hr >= 0 and br >= 0:
+		if br == hr:
+			dg = "red"
+		elif (db.nav.link_adj[br] & (1 << hr)) != 0:
+			dg = "amber"
+		else:
+			var bp := bellows.path
+			if bp != null and not bp.is_done() and bp.final_room() == hr:
+				dg = "amber"
+	o["danger"] = dg
+	return o
 
 
 ## Bellows' current one-shot beat (SimOneshots): {id ("" none), t, len, variant}. Reused Dictionary.

@@ -130,7 +130,11 @@ func test_activities_match_canon() -> void:
 		"feed_beryl": 6, "roses": 8, "marrow": 6, "stroll": 6, "polish": 8, "cloak": 6, "answer_door": 6,
 		"host_tea": 14, "tango": 12, "rehearse": 14, "hunt": 6}
 	for id in durs:
-		assert_eq(int(acts[id]["dur_s"]), durs[id], "%s duration (GDD §4.1.1)" % id)
+		if C.D1_DURATIONS.has(id):
+			assert_eq(int(acts[id]["dur_s"]), int(C.D1_DURATIONS[id]), "%s duration (D1 deviation from GDD §4.1.1)" % id)
+		else:
+			assert_eq(int(acts[id]["dur_s"]), durs[id], "%s duration (GDD §4.1.1)" % id)
+		assert_true(float(acts[id]["dur_s"]) >= 5.0, "%s dur_s >= 5 s (the bubble ring reads)" % id)
 	for id in bits:
 		var bit: Dictionary = bits[id]
 		assert_eq(bit.get("clip"), "bellows/%s" % id, "%s clip" % id)

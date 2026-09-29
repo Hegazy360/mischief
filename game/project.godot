@@ -6,7 +6,7 @@ config_version=5
 [application]
 
 config/name="Mischief Next Door"
-config/description="Sneak around your grumpy neighbour's house and prank him on live TV."
+config/description="A silent mime pranks the loudest man alive: sneak, rig, freeze in plain sight."
 run/main_scene="res://scenes/boot/Boot.tscn"
 config/version="0.1.0"
 config/features=PackedStringArray("4.7", "GL Compatibility")

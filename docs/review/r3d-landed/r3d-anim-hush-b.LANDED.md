@@ -27,3 +27,15 @@ DONE hush/freeze_7 7aa7faf263e19cff1e385dbd1b0bd86275ab8c93ec0ca02b6743cb4efed0f
 DONE hush/freeze_8 89102f82212fc5cc916dd9816fe32b0271bc4494927e9b819b62e3a8ff70386b
 REQUESTS
   r3d-anim (hush3d/map.json): "state:rummage": {"clip": "hush/act_rummage", "loop": true}, "state:pick_window": {"clip": "hush/act_rummage", "loop": true}, "oneshot:wheeze": {"clip": "hush/act_wheeze", "loop": true}, "flavour:shrug": "hush/st_shrug" (overlay upper), "oneshot:yanked": "hush/st_yanked", "freeze": add "hush/freeze_5".."hush/freeze_8" to the freeze_1..4 variation list.
+19:51Z re-baked all 18 on r3d-anim's updated lib (clip.py/pose.py 19:25-19:29), lint --strict clean; band clips gain the optional sidecar field reach_offset [dx, y, dz]; rig_low's bracing glove moved under the shoulder (IK within 0.033 m); st_shrug palms-up IK; freeze_6 arms in a V; 8-statue 64 px IoU max 0.57 (docs/review/r3d-anim-hush-b/statues_8.json)
+DONE hush/st_shrug 902c8d009b5bff6fe4b7d32b69130aa68cfea243cb57aefe962bd411b1cd6202
+DONE hush/rig_mid bfa9d2ec74b28ea804af977cea1bdecf70203bb910f4d3bcab727946c3ee1677
+DONE hush/rig_high 262d1bb74e7ebc35d2a98deae7005b1459be982c71174bf1855f69a04efa630b
+DONE hush/rig_low 21e9c11899dc55a66ea31aaa14c40b8183bb306c42fa21ab81cc16761f112ec1
+DONE hush/freeze_6 986040cfdeda52a5d91503e601c772f10b965dc028036866ed72edf2e9f0449e
+20:00Z lead note D8: runtime camera gaze (sidecar "gaze", c.look_camera) on the face beats — st_shrug 0-18, st_yanked 0-25 + 27-36, idle_fidget_proud 6-78, idle_fidget_clarence 52-76 (after the head-riding shush), act_wheeze 0-60; motion unchanged; rebaked, lint --strict clean
+DONE hush/st_shrug 1e0918d4f0f7684be319d6f4b7bfb3874f480691c47bf686976ea9c5d16b4d35
+DONE hush/st_yanked 4027c56eb132c6847a4634567b11c661f74179f8ec6daa84f1e33be1ddd63fd1
+DONE hush/idle_fidget_proud fea1f677465438b4e100eddb2c0ea30e9b4fa7a2be84942c3eb6af0b3b20169c
+DONE hush/idle_fidget_clarence db1ad080f81e637ab3acd8a028d97a3b7deaff4ce8bb4d40765897d509856eda
+DONE hush/act_wheeze 52fe603f0aa9aa35609fdfd953764d4f95ba7d2fbe6b8636f7fb304b15948f48

@@ -1,0 +1,95 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_allegro_go_go",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/rig_allegro_go_go.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [
+    {
+      "f": 13,
+      "type": "sfx",
+      "id": "creak"
+    },
+    {
+      "f": 13,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 22,
+      "type": "sfx",
+      "id": "clack"
+    },
+    {
+      "f": 22,
+      "type": "mark",
+      "name": "accent"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "curious"
+    },
+    {
+      "f": 5,
+      "preset": "sneak"
+    },
+    {
+      "f": 13,
+      "preset": "determined"
+    },
+    {
+      "f": 17,
+      "preset": "frantic"
+    },
+    {
+      "f": 26,
+      "preset": "grin"
+    },
+    {
+      "f": 40,
+      "preset": "smug"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/rig_allegro_go_go.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      17,
+      18,
+      22
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 7.8,
+    "z": -1.3,
+    "facing": 1,
+    "cheat_deg": 10.0
+  }
+}

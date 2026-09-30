@@ -1,0 +1,319 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/rx_dizzy_spin_a",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/rx_dizzy_spin_a.res",
+  "length": 169,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      70,
+      86
+    ],
+    "accent": [
+      86,
+      89
+    ],
+    "hold": [
+      89,
+      149
+    ],
+    "settle": [
+      149,
+      169
+    ],
+    "needle_screech": [
+      0,
+      12
+    ],
+    "chipmunk_babble": [
+      12,
+      40
+    ],
+    "spins_like_a_top": [
+      40,
+      70
+    ],
+    "wobble": [
+      70,
+      86
+    ],
+    "collapse": [
+      86,
+      89
+    ],
+    "dizzy_orbiting_notes": [
+      89,
+      149
+    ],
+    "sits_up": [
+      149,
+      169
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "baton"
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "record_scratch"
+    },
+    {
+      "f": 3,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "belly"
+      ],
+      "kick": 0.5
+    },
+    {
+      "f": 12,
+      "type": "voice",
+      "id": "vo_bellows_dizzy_babble"
+    },
+    {
+      "f": 40,
+      "type": "sfx",
+      "id": "spin"
+    },
+    {
+      "f": 40,
+      "type": "jiggle",
+      "bones": [
+        "tail_l",
+        "tail_r",
+        "bouffant"
+      ],
+      "kick": 0.8
+    },
+    {
+      "f": 86,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 86,
+      "type": "hitstop",
+      "frames": 5
+    },
+    {
+      "f": 86,
+      "type": "cam",
+      "op": "punch",
+      "zoom": 1.4,
+      "in": 11,
+      "hold": 70,
+      "out": 21,
+      "yaw": 4
+    },
+    {
+      "f": 86,
+      "type": "shake",
+      "trauma": 0.45
+    },
+    {
+      "f": 86,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "belly",
+        "tail_l",
+        "tail_r"
+      ],
+      "kick": 0.9
+    },
+    {
+      "f": 88,
+      "type": "sfx",
+      "id": "thud"
+    },
+    {
+      "f": 89,
+      "type": "sfx",
+      "id": "dizzy_tweets"
+    },
+    {
+      "f": 94,
+      "type": "laugh",
+      "tier": "auto"
+    },
+    {
+      "f": 149,
+      "type": "voice",
+      "id": "vo_bellows_ugh"
+    },
+    {
+      "f": 165,
+      "type": "prop",
+      "op": "hide",
+      "prop": "baton"
+    },
+    {
+      "f": 169,
+      "type": "mark",
+      "name": "release"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "inhale"
+    },
+    {
+      "f": 3,
+      "preset": "shock"
+    },
+    {
+      "f": 12,
+      "preset": "wild_take"
+    },
+    {
+      "f": 15,
+      "preset": "huh"
+    },
+    {
+      "f": 18,
+      "preset": "wild_take"
+    },
+    {
+      "f": 21,
+      "preset": "sing_big"
+    },
+    {
+      "f": 24,
+      "preset": "wild_take"
+    },
+    {
+      "f": 27,
+      "preset": "huh"
+    },
+    {
+      "f": 30,
+      "preset": "wild_take"
+    },
+    {
+      "f": 33,
+      "preset": "antic"
+    },
+    {
+      "f": 39,
+      "preset": "wild_take"
+    },
+    {
+      "f": 56,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 78,
+      "preset": "terrified"
+    },
+    {
+      "f": 86,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 92,
+      "preset": "dazed"
+    },
+    {
+      "f": 108,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 122,
+      "preset": "dazed"
+    },
+    {
+      "f": 136,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 146,
+      "preset": "dazed"
+    },
+    {
+      "f": 149,
+      "preset": "antic"
+    },
+    {
+      "f": 157,
+      "preset": "irked"
+    },
+    {
+      "f": 163,
+      "preset": "furious"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/rx_dizzy_spin_a.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      3,
+      86
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 8,
+      "f1": 36,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 92,
+      "f1": 147,
+      "at": "camera",
+      "weight": 0.6,
+      "blend": 8
+    },
+    {
+      "f0": 160,
+      "f1": 169,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 4
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "reaction",
+    "take",
+    "dizzy",
+    "spin"
+  ]
+}

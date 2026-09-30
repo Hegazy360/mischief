@@ -55,4 +55,6 @@ def build(ctx):
     c.face(26, "shush")
     c.face(54, "happy")
     c.face(68, "neutral")
+    # lead note D8: the happy beat faces the camera — only after the shush (whose finger rides the head) has eased out
+    c.look_camera(52, 76, weight=0.9, blend=6)
     return c

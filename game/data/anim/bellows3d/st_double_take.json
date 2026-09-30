@@ -1,0 +1,99 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_double_take",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_double_take.res",
+  "length": 18,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 4,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      3,
+      8
+    ],
+    "accent": [
+      8,
+      11
+    ],
+    "hold": [
+      11,
+      18
+    ]
+  },
+  "events": [
+    {
+      "f": 9,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r",
+        "belly",
+        "tail_l",
+        "tail_r"
+      ],
+      "kick": 0.8
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 3,
+      "preset": "neutral"
+    },
+    {
+      "f": 8,
+      "preset": "shock"
+    },
+    {
+      "f": 11,
+      "preset": "wild_take"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_double_take.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      9
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 8,
+      "f1": 18,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 2
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "take",
+    "fallback"
+  ]
+}

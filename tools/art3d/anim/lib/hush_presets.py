@@ -27,10 +27,12 @@ PAWS = sym({"clavicle_l": [("z", -8), ("y", -8)], "upperarm_l": [("y", 30), ("z"
 # gloves at the chin (the snicker, the shush)
 CHIN = sym({"clavicle_l": [("y", -10)], "upperarm_l": [("y", 34), ("z", -92)], "lowerarm_l": [("y", -104), ("z", -8)],
             "hand_l": [("x", -30), ("z", -22)]})
-# fists pumping (the run), per phase k in -1..1 (left arm forward at +1)
+# fists pumping (the run), per phase k in -1..1 (left arm forward at +1): the lowered arm swings about armature x
 def run_arms(k):
-    l = {"upperarm_l": [("y", 62), ("z", -8 - 42 * k)], "lowerarm_l": [("z", -78 - 12 * max(0, k))], "hand_l": [("x", -10)]}
-    r = mirror_side({"upperarm_l": [("y", 62), ("z", -8 + 42 * k)], "lowerarm_l": [("z", -78 - 12 * max(0, -k))], "hand_l": [("x", -10)]})
+    l = {"upperarm_l": [("y", 62), ("z", -8), ("x", -48 * k)], "lowerarm_l": [("z", -78 - 12 * max(0, k))],
+         "hand_l": [("x", -10)]}
+    r = mirror_side({"upperarm_l": [("y", 62), ("z", -8), ("x", 48 * k)], "lowerarm_l": [("z", -78 - 12 * max(0, -k))],
+                     "hand_l": [("x", -10)]})
     return merge(l, r)
 
 

@@ -78,6 +78,35 @@ func test_a_real_double_is_still_reported() -> void:
 	assert_almost_eq(float(d[0]["dt"]), 0.05, 0.001)
 
 
+## A crowd (the director's `laugh` / `crowd_special`) answers every laugh cue still waiting, on the cue's own clock:
+## a crowd fired in the same tick as its cue reads 0 s, not a frame early (r3d-night).
+func test_a_crowd_answers_the_waiting_laugh_cues() -> void:
+	p._t = 30.0
+	p._on_ticked([{"e": "director_cue", "id": "laugh_relief", "t": 3238}])
+	p._on_crowd()   # what attach() wires to AudioDirector.laugh / crowd_special
+	assert_almost_eq(float(p._cues[0]["crowd_t"]) - float(p._cues[0]["t"]), 0.0, 0.0001, "same tick: 0 s")
+	p._t = 31.0
+	p._on_ticked([{"e": "director_cue", "id": "laugh_picture", "t": 3273}])
+	p._t = 31.2
+	p._on_crowd()
+	assert_almost_eq(float(p._cues[1]["crowd_t"]) - float(p._cues[1]["t"]), 0.2, 0.0001)
+	assert_almost_eq(float(p._cues[0]["crowd_t"]), 30.0, 0.0001, "an answered cue keeps its crowd")
+	# the director (connected to `ticked` before the probe) fires the crowd first, the cue is recorded after it
+	p._t = 40.0
+	p._on_crowd()
+	p._on_ticked([{"e": "director_cue", "id": "laugh_relief", "t": 3900}])
+	assert_almost_eq(float(p._cues[2]["crowd_t"]) - float(p._cues[2]["t"]), 0.0, 0.0001, "a crowd earlier in the same tick counts")
+
+
+## Six frames at a fixed 60 fps sum to 0.09999… s in float: not "within 100 ms" (N01 bellows_step, r3d-night);
+## a 98 ms gap still is.
+func test_six_frames_at_60_fps_are_not_a_double() -> void:
+	var sounds := [[159.8, "play_sfx", "bellows_step"], [159.8 + 6.0 / 60.0 - 0.00002, "play_sfx", "bellows_step"]]
+	assert_eq(E2eProbe.doubles(sounds).size(), 0)
+	sounds = [[1.0, "play_sfx", "x"], [1.098, "play_sfx", "x"]]
+	assert_eq(E2eProbe.doubles(sounds).size(), 1, "98 ms is a double")
+
+
 ## The texture-memory gate (s2-fix G #7): every route fails above 256 MB over the whole Night on a
 ## rendered run; a headless run (peak 0) is not judged.
 func test_texture_peak_gate() -> void:

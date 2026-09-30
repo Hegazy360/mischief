@@ -1,0 +1,208 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/act_warmup",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/act_warmup.res",
+  "length": 480,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 10,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "needle": [
+      6,
+      30
+    ],
+    "phrase1": [
+      40,
+      250
+    ],
+    "top_note": [
+      100,
+      160
+    ],
+    "phrase2": [
+      250,
+      456
+    ],
+    "low_note": [
+      350,
+      405
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "baton"
+    },
+    {
+      "f": 24,
+      "type": "set_anim",
+      "hotspot": "parlour_gramophone",
+      "anim": "play"
+    },
+    {
+      "f": 24,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 40,
+      "type": "voice",
+      "id": "vo_bellows_warmup_1"
+    },
+    {
+      "f": 45,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 55,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 65,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 75,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 86,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 250,
+      "type": "voice",
+      "id": "vo_bellows_warmup_3"
+    },
+    {
+      "f": 254,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 266,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    },
+    {
+      "f": 278,
+      "type": "sfx",
+      "id": "vase_nudge",
+      "sync": false
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 14,
+      "preset": "suspicious"
+    },
+    {
+      "f": 24,
+      "preset": "smug"
+    },
+    {
+      "f": 34,
+      "preset": "inhale"
+    },
+    {
+      "f": 40,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 100,
+      "preset": "sing_big"
+    },
+    {
+      "f": 160,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 210,
+      "preset": "sing_small"
+    },
+    {
+      "f": 250,
+      "preset": "sing_big"
+    },
+    {
+      "f": 300,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 350,
+      "preset": "sing_small"
+    },
+    {
+      "f": 405,
+      "preset": "sing_big"
+    },
+    {
+      "f": 430,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 456,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/act_warmup.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 40,
+      "f1": 456,
+      "at": "camera",
+      "weight": 0.5,
+      "blend": 10
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  }
+}

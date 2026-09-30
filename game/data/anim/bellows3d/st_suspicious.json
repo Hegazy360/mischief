@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_suspicious",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_suspicious.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": "sim",
+  "beats": {
+    "halt": [
+      0,
+      8
+    ],
+    "sniff": [
+      8,
+      14
+    ],
+    "lean_in": [
+      14,
+      18
+    ],
+    "search": [
+      18,
+      48
+    ],
+    "hmm": [
+      48,
+      60
+    ]
+  },
+  "events": [
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "sniffle",
+      "vol_db": -4.0,
+      "sync": false
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 8,
+      "preset": "sniff"
+    },
+    {
+      "f": 16,
+      "preset": "suspicious"
+    },
+    {
+      "f": 48,
+      "preset": "huh"
+    },
+    {
+      "f": 55,
+      "preset": "irked"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_suspicious.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 14,
+      "f1": 52,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 7
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "curious"
+  ]
+}

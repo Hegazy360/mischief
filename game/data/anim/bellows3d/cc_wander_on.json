@@ -1,0 +1,113 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/cc_wander_on",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/cc_wander_on.res",
+  "length": 144,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 16,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 32,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 48,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 64,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 80,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 96,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 112,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 128,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    },
+    {
+      "f": 144,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -4.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "hum"
+    },
+    {
+      "f": 64,
+      "preset": "blissful"
+    },
+    {
+      "f": 112,
+      "preset": "hum"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": 1.2,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/cc_wander_on.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/loco_run",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/loco_run.res",
+  "length": 24,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "fx",
+      "id": "dust_puff"
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "step_pizz_up",
+      "vol_db": 2.0
+    },
+    {
+      "f": 12,
+      "type": "fx",
+      "id": "dust_puff"
+    },
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "step_pizz_up",
+      "vol_db": 2.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "determined"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 1.44,
+  "speed_m_s": 3.6,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/loco_run.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

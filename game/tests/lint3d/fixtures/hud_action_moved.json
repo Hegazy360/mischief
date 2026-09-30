@@ -1,0 +1,231 @@
+{
+ "episode": "p00_curtain_up",
+ "scenario": "fixture",
+ "view": "3d",
+ "pip_on_share": 0.2,
+ "pip_longest_s": 2.0,
+ "pip_windows": [
+  [
+   48,
+   170
+  ]
+ ],
+ "overlays": {
+  "max": 2,
+  "loud_max": 1,
+  "samples": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    31,
+    1,
+    0
+   ]
+  ]
+ },
+ "hud_pieces": [
+  {
+   "frame": 1,
+   "tick": 48,
+   "pieces": [
+    {
+     "name": "pause",
+     "rect": [
+      24.0,
+      24.0,
+      144.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "script",
+     "rect": [
+      192.0,
+      24.0,
+      312.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "clarence",
+     "rect": [
+      32.0,
+      880.0,
+      168.0,
+      168.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "action",
+     "rect": [
+      2112.0,
+      500.0,
+      240.0,
+      240.0
+     ],
+     "always_on": true,
+     "persistent": true
+    }
+   ]
+  },
+  {
+   "frame": 31,
+   "tick": 78,
+   "pieces": [
+    {
+     "name": "pause",
+     "rect": [
+      24.0,
+      24.0,
+      144.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "script",
+     "rect": [
+      192.0,
+      24.0,
+      312.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "clarence",
+     "rect": [
+      32.0,
+      880.0,
+      168.0,
+      168.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "action",
+     "rect": [
+      2112.0,
+      500.0,
+      240.0,
+      240.0
+     ],
+     "always_on": true,
+     "persistent": true
+    }
+   ]
+  },
+  {
+   "frame": 61,
+   "tick": 108,
+   "pieces": [
+    {
+     "name": "pause",
+     "rect": [
+      24.0,
+      24.0,
+      144.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "script",
+     "rect": [
+      192.0,
+      24.0,
+      312.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "clarence",
+     "rect": [
+      32.0,
+      880.0,
+      168.0,
+      168.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "action",
+     "rect": [
+      2112.0,
+      500.0,
+      240.0,
+      240.0
+     ],
+     "always_on": true,
+     "persistent": true
+    }
+   ]
+  },
+  {
+   "frame": 91,
+   "tick": 138,
+   "pieces": [
+    {
+     "name": "pause",
+     "rect": [
+      24.0,
+      24.0,
+      144.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "script",
+     "rect": [
+      192.0,
+      24.0,
+      312.0,
+      144.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "clarence",
+     "rect": [
+      32.0,
+      880.0,
+      168.0,
+      168.0
+     ],
+     "always_on": true,
+     "persistent": true
+    },
+    {
+     "name": "action",
+     "rect": [
+      2112.0,
+      500.0,
+      240.0,
+      240.0
+     ],
+     "always_on": true,
+     "persistent": true
+    }
+   ]
+  }
+ ]
+}

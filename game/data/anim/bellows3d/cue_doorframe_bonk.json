@@ -1,0 +1,117 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/cue_doorframe_bonk",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/cue_doorframe_bonk.res",
+  "length": 36,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 4,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      0,
+      3
+    ],
+    "accent": [
+      3,
+      7
+    ],
+    "hold": [
+      7,
+      31
+    ],
+    "settle": [
+      31,
+      36
+    ]
+  },
+  "events": [
+    {
+      "f": 4,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 4,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r",
+        "belly"
+      ],
+      "kick": 0.8
+    },
+    {
+      "f": 4,
+      "type": "shake",
+      "trauma": 0.2
+    },
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "woodblock_bonk"
+    },
+    {
+      "f": 7,
+      "type": "voice",
+      "id": "vo_bellows_oof",
+      "vol_db": -2.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    },
+    {
+      "f": 4,
+      "preset": "shock"
+    },
+    {
+      "f": 11,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 18,
+      "preset": "dazed"
+    },
+    {
+      "f": 31,
+      "preset": "huh"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/cue_doorframe_bonk.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      4
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "tags": [
+    "cue",
+    "overlay",
+    "blind"
+  ]
+}

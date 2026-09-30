@@ -108,7 +108,7 @@ static func violation_issues(night: String, route: String, mode: String, aspect:
 # --- the replay ----------------------------------------------------------------------------------------
 
 ## Replays one route through the real view stack under `parent` (in the SceneTree). `cmds` = a sim_run --cmds
-## Dictionary (solve.sh --dump-cmds). Returns {rows: [[tick, sim, reason, on_screen, window, badge, hush_room,
+## Dictionary (solve.sh --dump-cmds; the replay stops at its `ticks`, the solver's run length, or when the Night ends). Returns {rows: [[tick, sim, reason, on_screen, window, badge, hush_room,
 ## bellows_room, cam_x]], share: PipView3D.share(), frames, ended, ms}.
 static func replay(parent: Node, db: ContentDB, episode_id: String, cmds: Dictionary, mode: String, aspect: String,
 		max_frames: int = 30000) -> Dictionary:
@@ -149,6 +149,7 @@ static func replay(parent: Node, db: ContentDB, episode_id: String, cmds: Dictio
 	var rooms := db.house.rooms
 	var rows: Array = []
 	var frames := 0
+	var end_tick := int(cmds.get("ticks", -1))
 	while frames < max_frames:
 		vt += DT
 		driver.juice.test_now_us = int(vt * 1000000.0)
@@ -166,6 +167,10 @@ static func replay(parent: Node, db: ContentDB, episode_id: String, cmds: Dictio
 			1 if bool(v.get("on_screen", false)) else 0, 1 if bool(v.get("window", false)) else 0,
 			1 if bool(v.get("badge", false)) else 0, s.hush.room, s.bellows.room, snappedf(cam.aim().x, 0.01)])
 		if s.ended:
+			out["ended"] = true
+			break
+		# the solver's run length (a scenario route may stop before the Night ends: a catch, a chase)
+		if end_tick > 0 and s.tick >= end_tick:
 			out["ended"] = true
 			break
 	out["rows"] = rows

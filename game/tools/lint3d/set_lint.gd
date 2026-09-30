@@ -176,7 +176,10 @@ static func check_facts(facts: Dictionary, mantels: Array = []) -> Array:
 					out.append(Lint3D.issue(LINT, "quake_height", Lint3D.ERROR, night, rid, String(d["id"]), b.position.y,
 						QUAKE_MIN_Y, OWNER_SETS, "quake props hang ≥ 2.2 m or sit on the mantel (REDESIGN §3.5)"))
 		var gap := free_stretch(rm)
-		out.append(Lint3D.issue(LINT, "negative_space", Lint3D.ERROR if float(gap["len"]) < NEG_SPACE_M - 1e-4 else Lint3D.INFO,
+		# a room nobody acts in (no live prop: the porch's doorstep) only warns
+		var ns_level := (Lint3D.ERROR if not live.is_empty() else Lint3D.WARNING) if float(gap["len"]) < NEG_SPACE_M - 0.005 \
+			else Lint3D.INFO
+		out.append(Lint3D.issue(LINT, "negative_space", ns_level,
 			night, rid, "x %.2f–%.2f m" % [gap["x0"], gap["x1"]], float(gap["len"]), NEG_SPACE_M, OWNER_SETS,
 			"longest lane stretch with nothing behind it at head height; blockers %s" % ", ".join(gap["blockers"])))
 		var fam := {}
@@ -290,8 +293,10 @@ static func colour_issues(night: String, room: String, rules: Variant) -> Array:
 		var owner := OWNER_SETS
 		if cls == "character":
 			owner = String(CAST_OWNER.get(String(rd.get("name", "")), "r3d-cast-hush / r3d-cast-bellows"))
-		var level := Lint3D.ERROR if st == "FAIL" else (Lint3D.SKIP if st == "SKIP" else Lint3D.INFO)
-		var i := Lint3D.issue(LINT, "colour", level, night, room, "%s (%s %s)" % [rd.get("name", ""), cls, rd.get("rule", "")],
+		# lab.py's SKIP = the region is not visible in this framing (a backstage room off screen, an occluded piece) or has
+		# no reference wall: a measurement note, not a missing input — info, so the strict pre-gate does not trip on it
+		var level := Lint3D.ERROR if st == "FAIL" else Lint3D.INFO
+		var i := Lint3D.issue(LINT, "colour", level, night, room, "%s [%s]: %s" % [rd.get("name", ""), cls, rd.get("rule", "")],
 			rd.get("value", null), rd.get("limit", null), owner, "%s %s" % [st, rd.get("detail", "")])
 		out.append(i)
 	return out

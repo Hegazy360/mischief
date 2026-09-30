@@ -1,0 +1,129 @@
+{
+  "rules": "set",
+  "thresholds": {
+    "wall_lit_L": [
+      62.0,
+      76.0
+    ],
+    "wall_lit_C_max": 28.0,
+    "wall_dim_L": [
+      45.0,
+      58.0
+    ],
+    "wall_dim_C_max": 15.0,
+    "wainscot_dL": [
+      8.0,
+      10.0
+    ],
+    "floor_L": [
+      40.0,
+      50.0
+    ],
+    "dressing_C_max": 30.0,
+    "dressing_dL_max": 15.0,
+    "live_C_min": 45.0,
+    "char_hi": 85.0,
+    "char_lo": 40.0,
+    "char_share_min": 0.2
+  },
+  "results": [
+    {
+      "name": "fx_wall",
+      "class": "wall",
+      "rule": "lit wall L*",
+      "value": 74.36,
+      "limit": [
+        62.0,
+        76.0
+      ],
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fx_wall",
+      "class": "wall",
+      "rule": "lit wall C*",
+      "value": 27.73,
+      "limit": 28.0,
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fx_wainscot",
+      "class": "wainscot",
+      "rule": "wainscot \u0394L* (wall \u2212 wainscot)",
+      "value": 8.98,
+      "limit": [
+        8.0,
+        10.0
+      ],
+      "status": "PASS",
+      "detail": "vs fx_wall"
+    },
+    {
+      "name": "fx_floor",
+      "class": "floor",
+      "rule": "floor L*",
+      "value": 43.44,
+      "limit": [
+        40.0,
+        50.0
+      ],
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fx_window",
+      "class": "dressing",
+      "rule": "dressing C*",
+      "value": 15.56,
+      "limit": 30.0,
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fx_window",
+      "class": "dressing",
+      "rule": "dressing |\u0394L*|",
+      "value": 0.56,
+      "limit": 15.0,
+      "status": "PASS",
+      "detail": "vs fx_wall"
+    },
+    {
+      "name": "fx_rug_c40",
+      "class": "dressing",
+      "rule": "dressing C*",
+      "value": 40.36,
+      "limit": 30.0,
+      "status": "FAIL",
+      "detail": ""
+    },
+    {
+      "name": "fx_rug_c40",
+      "class": "dressing",
+      "rule": "dressing |\u0394L*|",
+      "value": 4.11,
+      "limit": 15.0,
+      "status": "PASS",
+      "detail": "vs fx_wall"
+    },
+    {
+      "name": "fx_honey",
+      "class": "live_prop",
+      "rule": "live prop C*",
+      "value": 74.68,
+      "limit": 45.0,
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "counts": {
+    "PASS": 8,
+    "FAIL": 1,
+    "SKIP": 0,
+    "EXEMPT": 0,
+    "INFO": 0
+  },
+  "pass": false
+}

@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/loco_blind_shuffle",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/loco_blind_shuffle.res",
+  "length": 24,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "slipper_scuff"
+    },
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "slipper_scuff",
+      "vol_db": -2.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 0.48,
+  "speed_m_s": 1.2,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/loco_blind_shuffle.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

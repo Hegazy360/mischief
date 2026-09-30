@@ -15,16 +15,17 @@ def build(ctx):
     stand = merge(ARMS_DOWN, STAND, gloves(18, 12), head())
     GRAB_R = {"clavicle_r": [("y", 4)], "upperarm_r": [("y", -64), ("z", 36)], "lowerarm_r": [("z", 96)],
               "hand_r": [("x", -20)]}
-    THRUST_R = {"clavicle_r": [("y", 12), ("z", 10)], "upperarm_r": [("y", -6), ("z", 70)], "lowerarm_r": [("z", 18)],
-                "hand_r": [("x", -24), ("y", -10)]}
-    RECOIL = merge(THRUST_R, {"upperarm_r": [("y", 0), ("z", 60)], "lowerarm_r": [("z", 34)]})
+    # held up in front of her face like a bicycle horn, the elbow out: squeeze!
+    THRUST_R = {"clavicle_r": [("y", 14), ("z", 8)], "upperarm_r": [("y", 22), ("z", 52)], "lowerarm_r": [("z", 58)],
+                "hand_r": [("x", -30), ("y", -10)]}
+    RECOIL = merge(THRUST_R, {"upperarm_r": [("y", 30), ("z", 44)], "lowerarm_r": [("z", 70)]})
     c.key(0, stand)
     c.key(3, merge(stand, GRAB_R, glove("r", 50, 30), lean(fwd=6, turn=-10), head(x=14, z=-10)), "out_quad")   # grab
     c.key(6, merge(stand, THRUST_R, glove("r", 40, 30), lean(fwd=-6, turn=12), head(x=-8, z=16)), "out_back")    # out!
     c.key(8, merge(stand, THRUST_R, glove("r", 92, 60), lean(fwd=-2, turn=12), head(x=-4, z=18),
                    {"clavicle_r": [("y", 16), ("z", 12)]}), "pop")                                              # SQUEEZE
     c.key(11, merge(stand, RECOIL, glove("r", 50, 30), lean(fwd=-8, turn=10), head(x=-10, z=14)), "out_quad")
-    c.key(14, merge(stand, GRAB_R, glove("r", 50, 30), lean(fwd=4, turn=-6), head(x=10, z=-4)), "in_out_sine")  # tuck
+    c.key(15, merge(stand, GRAB_R, glove("r", 50, 30), lean(fwd=4, turn=-6), head(x=10, z=-4)), "in_out_sine")  # tuck
     c.key(L, stand, "in_out_sine")
     # Clarence's own squash (his body bone) and comb flare on the squeeze
     def squash(f):

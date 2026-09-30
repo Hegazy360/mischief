@@ -1,0 +1,97 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_bonk",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_bonk.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "accent": [
+      0,
+      3
+    ],
+    "dazed": [
+      6,
+      60
+    ],
+    "shake": [
+      48,
+      54
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "belly"
+      ],
+      "kick": 0.8
+    },
+    {
+      "f": 0,
+      "type": "shake",
+      "trauma": 0.35
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "woodblock_bonk"
+    },
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "dizzy_tweets",
+      "vol_db": -3.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "wild_take"
+    },
+    {
+      "f": 6,
+      "preset": "dazed"
+    },
+    {
+      "f": 48,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 56,
+      "preset": "dazed"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_bonk.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      0
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

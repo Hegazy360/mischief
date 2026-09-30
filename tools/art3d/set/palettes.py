@@ -23,7 +23,7 @@ STAGE = {
 
 KITCHEN = {
     "wall": ("#C5B187", False), "wainscot": ("#A5926C", False), "rail": ("#9D8C6F", False),
-    "floor_a": ("#966A4A", False), "floor_b": ("#8E6344", False), "skirt": ("#8C7A5E", False),
+    "floor_a": ("#926647", False), "floor_b": ("#8A6043", False), "skirt": ("#8C7A5E", False),
     "counter": ("#A89A78", False), "counter_dk": ("#968867", False), "worktop": ("#CFC4A6", False),
     "basin": ("#DCDCD2", False), "basin_in": ("#B9BAB2", False), "rack": ("#A08B68", False), "shelf": ("#96805F", False),
     "handle": ("#7E6E56", False), "window_frame": ("#CFC3A6", False), "pane": ("#A9C6D2", True),
@@ -35,7 +35,7 @@ KITCHEN = {
 
 PARLOUR = {
     "wall": ("#C9A6A2", False), "wainscot": ("#A48783", False), "rail": ("#9D8380", False),
-    "floor_a": ("#966A4A", False), "floor_b": ("#8E6344", False), "skirt": ("#8A7270", False),
+    "floor_a": ("#926647", False), "floor_b": ("#8A6043", False), "skirt": ("#8A7270", False),
     "stone": ("#B7A9A5", False), "stone_dk": ("#9E918D", False), "mantel": ("#A08A86", False),
     "firebox": ("#2A2230", False), "ember": ("#E8743A", True), "flame": ("#FFB44A", True),
     "window_frame": ("#CEBDB9", False), "pane": ("#A9C6D2", True),
@@ -46,7 +46,7 @@ PARLOUR = {
 
 HALL = {
     "wall": ("#A5B298", False), "wainscot": ("#86917A", False), "rail": ("#838C78", False),
-    "floor_a": ("#966A4A", False), "floor_b": ("#8E6344", False), "skirt": ("#7A8270", False),
+    "floor_a": ("#926647", False), "floor_b": ("#8A6043", False), "skirt": ("#7A8270", False),
     "stair": ("#8E9580", False), "stair_dk": ("#7C836F", False), "stair_void": ("#1A1522", False),
     "door": ("#6A8E6E", False), "door_frame": ("#D9D2BE", False), "knocker": ("#C9A24A", False),
     "window_frame": ("#BEC3B3", False), "pane": ("#A9C6D2", True),

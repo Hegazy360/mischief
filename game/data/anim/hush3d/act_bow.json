@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_bow",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_bow.res",
+  "length": 150,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 28,
+      "type": "sfx",
+      "id": "bow_creak"
+    },
+    {
+      "f": 28,
+      "type": "mark",
+      "name": "accent"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "proud"
+    },
+    {
+      "f": 20,
+      "preset": "happy"
+    },
+    {
+      "f": 62,
+      "preset": "laugh"
+    },
+    {
+      "f": 92,
+      "preset": "wink"
+    },
+    {
+      "f": 104,
+      "preset": "happy"
+    },
+    {
+      "f": 122,
+      "preset": "proud"
+    }
+  ],
+  "cheat_deg": 40.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_bow.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

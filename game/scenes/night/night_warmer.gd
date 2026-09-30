@@ -38,6 +38,12 @@ var octx: Object = null
 var materials_drawn: int = 0
 var instanced_drawn: int = 0
 var clips_warmed: int = 0
+## Scenes the view builds lazily in PLAY (CharacterView3D's freeze plinth at the first freeze): their materials join
+## the warm rig, so their shaders compile under the curtain.
+const LAZY_SCENES: PackedStringArray = ["res://art3d/chars/hush/plinth.glb"]
+## Every shader key the warm-up drew (the registry, the scene rig, the lazy scenes): ShaderWatch.arm adds them to its
+## warmed set — the rig itself is freed before the rise.
+var warmed_keys: Dictionary = {}
 
 var _steps: Array = []
 var _t0: int = 0
@@ -222,6 +228,20 @@ func build_scene_rig(parent: Node, camera: Camera3D, root: Node) -> Node3D:
 			m = m.next_pass
 			guard += 1
 	_collect(root, reg, plain, inst)
+	for path in LAZY_SCENES:
+		if ResourceLoader.exists(path):
+			var ps: Variant = load(path)
+			if ps is PackedScene:
+				var lazy := (ps as PackedScene).instantiate()
+				if lazy != null:
+					_collect(lazy, reg, plain, inst)
+					lazy.free()   # its materials live on in the rig's quads
+	for k0 in reg:
+		warmed_keys[k0] = true
+	for k1 in plain:
+		warmed_keys[k1] = true
+	for k3 in inst:
+		warmed_keys[k3] = true
 	var rig := Node3D.new()
 	rig.name = "NightWarmRig"
 	parent.add_child(rig)

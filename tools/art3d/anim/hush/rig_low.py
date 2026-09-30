@@ -14,12 +14,12 @@ from mathutils import Vector
 from lib.clip import Clip
 from lib.pose import merge, sym
 from lib.hush_presets import ARMS_DOWN, STAND, gloves, glove, lean, head, breath
-from rig_mid import stage
+from rig_mid import stage, add_reach_offset
 
 L = 144
 Y = 0.28                          # the low target (under a seat / a low cupboard)
 TARGET_W = (0.30, Y, -1.72)       # relative to reach_pos (x 0, z -1.5)
-FLOOR_W = (0.30, 0.04, -1.60)     # where the bracing glove plants (under her up-stage shoulder)
+BRACE_C = (0.29, -0.17, 0.09)     # the bracing glove, armature space: flat on the floor under her up-stage shoulder
 DOWN, CRAWL, OUT, UP = 10, 22, 118, 132
 WORK = (28, 112)                  # the winding: 4 big turns
 KNEE_MIN = 0.06                   # the knees' clearance over the floor (the ground rule measures soles only)
@@ -29,14 +29,14 @@ REST = merge(ARMS_DOWN, STAND, gloves(18, 12), head(x=-4))
 KNEES = {"thigh_l": [("x", 0), ("y", -4)], "calf_l": [("x", 92)], "foot_l": [("x", 62)],
          "thigh_r": [("x", 4), ("y", 4)], "calf_r": [("x", 96)], "foot_r": [("x", 62)]}
 # all fours, the hips high: the pelvis tips forward 50° and turns 40° into the thing; thighs back to vertical
-def crawl(tip=50.0, turn=40.0):
+def crawl(tip=56.0, turn=40.0):
     """All fours, the hips high: the pelvis tips forward and turns into the thing; the thighs back to vertical, both
     knees on the floor, the right toes on the floor, the left foot cocked up in the air (it waggles: kick())."""
     return {"pelvis": [("x", tip), ("z", turn)],
             "thigh_l": [("x", -tip + 10), ("y", -6)], "calf_l": [("x", 128)], "foot_l": [("x", 20)],
             "thigh_r": [("x", -tip + 10), ("y", 6)], "calf_r": [("x", 94)], "foot_r": [("x", 62)],
-            "spine_01": [("x", 10)], "spine_02": [("x", 10)], "spine_03": [("x", 6), ("z", 6)],
-            "neck_01": [("x", -30)], "Head": [("x", -24)]}
+            "spine_01": [("x", 12)], "spine_02": [("x", 12)], "spine_03": [("x", 8), ("z", 6)],
+            "neck_01": [("x", -34)], "Head": [("x", -26)]}
 
 
 ARMS_CRAWL = {"upperarm_r": [("y", -40), ("z", 70)], "lowerarm_r": [("z", 30)], "hand_r": [("x", -30)],
@@ -62,7 +62,7 @@ def crank(f, T):
 def build(ctx):
     st = stage()
     T = st.to_char(TARGET_W)
-    fl = st.to_char(FLOOR_W)
+    fl = Vector(BRACE_C)
     c = Clip(ctx, "hush/rig_low", length=L, lock="rig_pm", cheat_deg=10.0, stage=st, audio="own",
              notes="band fallback, low: glove target %.2f m, baked facing +1" % Y)
     c.key(0, REST)
@@ -90,7 +90,7 @@ def build(ctx):
     c.custom(knees_clear, 0, L)
     c.ik("r", lambda f: crank(f, T), 16, OUT + 2, pole=(-0.5, 0.2, 0.8), hand=[("z", 60), ("x", -40)], effector="palm",
          blend=6, world=False)
-    c.ik("l", lambda f: fl, 14, OUT + 4, pole=(0.9, 0.2, 0.2), hand=[("x", -80), ("z", -20)], effector="palm", blend=5,
+    c.ik("l", lambda f: fl, 12, OUT + 4, pole=(0.9, 0.2, 0.2), hand=[("x", -80), ("z", -20)], effector="palm", blend=10,
          world=False)
     # standing feet held (auto_plant cannot hold a pointed foot: its toe points straight down)
     for sd in ("l", "r"):
@@ -112,4 +112,5 @@ def build(ctx):
     c.face(88, "frantic")
     c.face(106, "determined")
     c.face(124, "grin")
+    add_reach_offset(c, TARGET_W)
     return c

@@ -1,0 +1,93 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/beat_slow_burn",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/beat_slow_burn.res",
+  "length": 70,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "stare": [
+      0,
+      70
+    ],
+    "blink": [
+      40,
+      44
+    ],
+    "twitch": [
+      56,
+      60
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "bassoon_burn"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "slow_burn"
+    },
+    {
+      "f": 30,
+      "preset": "slow_burn",
+      "slots": {
+        "brows": "one_up"
+      }
+    },
+    {
+      "f": 40,
+      "slots": {
+        "eyes": "closed"
+      },
+      "blink": false
+    },
+    {
+      "f": 44,
+      "preset": "slow_burn",
+      "slots": {
+        "brows": "one_up"
+      }
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/beat_slow_burn.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 14,
+      "f1": 70,
+      "at": "camera",
+      "weight": 0.9,
+      "blend": 10
+    }
+  ]
+}

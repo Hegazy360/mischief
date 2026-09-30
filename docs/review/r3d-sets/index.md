@@ -21,3 +21,21 @@ characters and the one thing that glows? Can you tell what each lit prop is at 6
 | `tea_staging.png` | Bellows on his stool at st_tea (x 15.0) with the kettle and the honey jar; the ID pass with the measured visibility | kettle ≥ 60 % visible past his barrel, the jar clear of his bouffant |
 | `reach_check.png` | `--reach=hush`: Hush on Bellows' stool under the jar (ACHOO-RIA!), Hush at the gramophone lever (ALLEGRO-GO-GO!) | every line green, no red box; Hush in front of the wing flat |
 | `landings.png` | tonight's landing boxes + points: the sink basin (N1 kitchen), the log basket (N1 parlour), the coat stand (N2 hall) | each box sits on its host piece |
+
+## Numbers (measured on these renders)
+
+- **Values (lab.py `rules --rules=set`)** — lit walls: kitchen L* 67.8 / C* 22.1, parlour 66.1 / 14.8, hall 65.8 / 12.6,
+  porch 70.3 / 18.9 (rule 62–76, ≤ 28); wainscot ΔL* 8.8 / 9.5 / 9.7 / 8.5 (8–10); floors L* 49.3–49.5 (40–50);
+  dimmed neighbours 52.7–53.7 / C* 7.0–10.8 (45–58, ≤ 15); dressing C* ≤ 12.7, |ΔL*| ≤ 12.3 (≤ 30, ≤ 15; the pendant
+  lamp exempt as the light source); characters PASS (Hush ≥ 85: 0.22, ≤ 40: 0.62; Bellows 0.32 / 0.36). The only FAILs
+  are the wainscot rule applied to dimmed / backstage rooms (a lint request: §3.7 states it for lit walls) and the
+  backstage hall at stage light 0.3 (by design).
+- **Hit boxes** — every live box ≥ 163 logical px on its short side, ≥ 24 px from its neighbours in every framed room.
+- **Silhouettes** — no pair of live props at IoU ≥ 0.80 (highest: pickle jar × piano back 0.80⁻, different rooms; pantry ×
+  coat cupboard 0.77).
+- **Tea** — Bellows seated at x 15.0: kettle 100 % visible, honey jar 100 % visible (ID-pass pixel counts with / without him).
+- **Reach** — every rig point ≤ 0.50 m from Hush's nearer shoulder (P00/g0: honey 0.446 on the stool, gramophone lever
+  0.384); no Hush or Bellows capsule hits a solid on any slice Night.
+- **Budgets** — static draws ≤ 3 per room (the arch + static pieces merged into one mesh), lit-room triangles ≤ 20.5k
+  (N1 kitchen, ink + halo passes counted), framed-room draw calls 20–39 without characters (≤ 45), set textures 6
+  palettes of 256² (≈ 1.5 MB), `House3D.build` 21–76 ms.

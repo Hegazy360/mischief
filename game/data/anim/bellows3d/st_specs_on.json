@@ -1,0 +1,93 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_specs_on",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_specs_on.res",
+  "length": 12,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 4,
+  "blend_out": 4,
+  "lock": "sim",
+  "beats": {
+    "grab": [
+      0,
+      4
+    ],
+    "on": [
+      4,
+      7
+    ],
+    "push_up": [
+      7,
+      9
+    ]
+  },
+  "events": [
+    {
+      "f": 4,
+      "type": "prop",
+      "op": "show",
+      "prop": "specs"
+    },
+    {
+      "f": 5,
+      "type": "fx",
+      "id": "sparkles"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    },
+    {
+      "f": 4,
+      "preset": "magnified"
+    },
+    {
+      "f": 9,
+      "preset": "suspicious"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_specs_on.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      3,
+      4
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 3,
+      "f1": 12,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 3
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "specs"
+  ]
+}

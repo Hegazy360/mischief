@@ -64,8 +64,10 @@ static func check_report(report: Dictionary, name: String) -> Dictionary:
 	return {"issues": issues, "stats": stats}
 
 
-## The logical viewport of a report: its `viewport` [w, h] when present, else inferred from the action button's
-## §2.1 centre (W − S − 168k, H − B − 168k) with S from the pause button (S + 24k) and B = 0; default 2400 × 1080.
+## The logical viewport of a report: its `viewport` [w, h] when present, else inferred — W from the action button's
+## §2.1 centre (W − S − 168k) with S from the pause button (S + 24k); H = 1080 (the base height: every phone canvas is
+## 1080 tall under stretch `expand`) unless the HUD is tablet-scaled (k < 1: H from Clarence's H − B − 200k, B = 0).
+## Never from the action button's y, so a moved button cannot move the band with it. Default 2400 × 1080.
 static func viewport_of(report: Dictionary, samples: Array) -> Vector2:
 	var v: Variant = report.get("viewport", null)
 	if typeof(v) == TYPE_ARRAY and (v as Array).size() >= 2:
@@ -78,7 +80,10 @@ static func viewport_of(report: Dictionary, samples: Array) -> Vector2:
 			var k := pr.size.x / 144.0
 			var side := pr.position.x - 24.0 * k
 			var c := ar.get_center()
-			return Vector2(c.x + side + 168.0 * k, c.y + 168.0 * k)
+			var h := 1080.0
+			if k < 0.95 and by.has("clarence"):
+				h = maxf(1080.0, (by["clarence"] as Rect2).position.y + 200.0 * k)
+			return Vector2(c.x + side + 168.0 * k, h)
 	return Vector2(2400.0, 1080.0)
 
 
@@ -207,7 +212,10 @@ static func _band(samples: Array, vp: Vector2, name: String, ep: String, stats: 
 	for c in closed:
 		var n: String = c[0]
 		var ru: Array = c[1]
+		# sim ticks (60 / s) when the samples carry them: a real-time run on a slow box draws fewer frames per second
 		var span_s := float(int(ru[1]) - int(ru[0])) / 60.0
+		if int(ru[4]) >= 0 and int(ru[5]) >= 0:
+			span_s = float(int(ru[5]) - int(ru[4])) / 60.0
 		var persistent := span_s > PERSIST_S
 		var row := {"piece": n, "from_frame": ru[0], "to_frame": ru[1], "from_tick": ru[4], "to_tick": ru[5],
 			"samples": ru[2], "span_s": snappedf(span_s, 0.01), "rect": ru[3]}

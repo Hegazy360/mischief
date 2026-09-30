@@ -7,8 +7,11 @@
 ## position the room can use**: Hush is swept across her room in 0.25 m steps walking both ways, the director snaps
 ## (C1 room framing, C2 edge clamp, C6 keep-visible with the room's live boxes inside the aspect's safe rect) and each
 ## distinct camera x is one framing. Aspects (logical px): 20:9 2400 × 1080 with a punch-hole phone's side insets
-## S = 96; 16:9 1920 × 1080 and 4:3 1440 × 1080 with none (the brief's numbers; a real 4:3 tablet canvas is 1920 × 1440
-## with the HUD at ×0.8, where every world rect is 1.33× larger — 1440 × 1080 is the stricter proxy).
+## S = 96; 16:9 1920 × 1080 and 4:3 1440 × 1080 with none (the brief's numbers). **4:3 HUD:** a real 4:3 device's
+## canvas is 1920 × 1440 (base 1920 × 1080, stretch aspect `expand`) where REDESIGN §2.6 scales the HUD ×0.8
+## (`UiScale`); the HUD rects are computed there (`Hud.always_on_rects()` at that aspect) and mapped into the 1440 × 1080
+## frame (× 0.75), while the world rects are measured in the 1440 × 1080 frame — 1.33× smaller than on the device, so
+## the size rule stays the stricter proxy.
 ##
 ## Rules for each live rect of the framed room, at every framing: **min_size** ≥ 144 × 144 px; **gap** ≥ 24 px from
 ## every other live rect on screen (`Lint3D.rect_gap`: side by side or stacked); **safe_rect** inside the safe rect;
@@ -24,9 +27,10 @@ const MIN_PX := 144.0
 const MIN_GAP := 24.0
 const MIN_PX_PER_M := 201.0
 const SWEEP_M := 0.25
-## aspect → [logical size, symmetric side inset S].
-const ASPECTS := {"20x9": [Vector2(2400.0, 1080.0), 96.0], "16x9": [Vector2(1920.0, 1080.0), 0.0],
-	"4x3": [Vector2(1440.0, 1080.0), 0.0]}
+## aspect → [logical size of the lint frame, symmetric side inset S, the device canvas the HUD lays out in].
+const ASPECTS := {"20x9": [Vector2(2400.0, 1080.0), 96.0, Vector2(2400.0, 1080.0)],
+	"16x9": [Vector2(1920.0, 1080.0), 0.0, Vector2(1920.0, 1080.0)],
+	"4x3": [Vector2(1440.0, 1080.0), 0.0, Vector2(1920.0, 1440.0)]}
 const ALWAYS_ON: PackedStringArray = ["pause", "script", "clarence", "action"]
 const HUD_SCRIPT := "res://ui/hud.gd"
 
@@ -36,8 +40,10 @@ const HUD_SCRIPT := "res://ui/hud.gd"
 ## present, else `HudLayout.compute` (the same numbers — the Hud lays its widgets out from it).
 static func hud_rects(episode: EpisodeDef, aspect: String) -> Dictionary:
 	var a: Array = ASPECTS.get(aspect, ASPECTS["20x9"])
-	var vp: Vector2 = a[0]
-	var s := float(a[1])
+	var frame: Vector2 = a[0]
+	var vp: Vector2 = a[2]
+	var f := frame.y / vp.y
+	var s := float(a[1]) / f
 	var ins := Vector4(s, 0.0, s, 0.0)
 	var lines: Array = []
 	if episode != null:
@@ -52,7 +58,8 @@ static func hud_rects(episode: EpisodeDef, aspect: String) -> Dictionary:
 		elif p == HudModel.Pip.OPT_OPEN or p == HudModel.Pip.OPT_DONE:
 			c.y += 1
 	sw = HudLayout.script_pill_width(c.x, c.y)
-	var out := {"always_on": {}, "source": "HudLayout", "viewport": vp, "side": s}
+	var out := {"always_on": {}, "source": "HudLayout", "viewport": frame, "device": vp, "hud_scale": UiScale.factor_for(vp),
+		"side": float(a[1])}
 	var lay := HudLayout.compute(vp, ins, false, UiScale.factor_for(vp), sw)
 	if ResourceLoader.exists(HUD_SCRIPT):
 		var hs := load(HUD_SCRIPT) as Script
@@ -77,9 +84,15 @@ static func hud_rects(episode: EpisodeDef, aspect: String) -> Dictionary:
 	if (out["always_on"] as Dictionary).is_empty():
 		for n in ALWAYS_ON:
 			out["always_on"][n] = lay[StringName(n)]
-	out["pip"] = lay[&"pip"]
-	out["safe"] = lay[&"safe"]
+	for n in ALWAYS_ON:
+		out["always_on"][n] = _scaled(out["always_on"][n], f)
+	out["pip"] = _scaled(lay[&"pip"], f)
+	out["safe"] = _scaled(lay[&"safe"], f)
 	return out
+
+
+static func _scaled(r: Rect2, f: float) -> Rect2:
+	return Rect2(r.position * f, r.size * f)
 
 
 ## A CameraDirector3D at an aspect for tonight's set (off-tree; projection is headless-safe).

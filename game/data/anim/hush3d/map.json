@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "Hush's 3D clip map (owner r3d-anim; index \u00a77.10): the s2-view \u00a74.1.1 schema over view/world/default_maps/hush.json (every key left out falls back to it; this file wins key by key). Clip ids = the 2D ids; sidecars data/anim/hush3d/<clip>.json. walk / run carry the 3D gait (stride_m, speed_m_s = the clip's sidecar values; RigPlayer3D scales playback to the actor's speed) and the 2D stride_px / speed_px_s the ClipMap uses (1 m = 200 px). rig:<prank> rows are derived by ClipMap / SliceClips.build3d from rig_actions.json (bands.<band>.clip = hush/rig_high|rig_mid|rig_low) \u2014 rigging@q/s/b resolve through them (act_tinker_* are not made in 3D). Rows of r3d-anim-hush-b are added from its DONE lines. curtain:bow is a clip_rules.json row with the same id.",
+  "idle": "hush/loco_idle",
+  "idle_fidgets": [
+    "hush/idle_fidget_look",
+    "hush/idle_fidget_proud",
+    "hush/idle_fidget_clarence"
+  ],
+  "walk": {
+    "clip": "hush/loco_walk",
+    "stride_m": 1.8,
+    "speed_m_s": 2.0,
+    "stride_px": 360,
+    "speed_px_s": 400
+  },
+  "run": {
+    "clip": "hush/loco_run",
+    "stride_m": 1.44,
+    "speed_m_s": 3.6,
+    "stride_px": 288,
+    "speed_px_s": 720
+  },
+  "turn": "hush/loco_turn",
+  "flavour:arrive": "hush/loco_arrive",
+  "flavour:skid": "hush/loco_skid",
+  "flavour:step_down": "hush/rig_step_down",
+  "flavour:snicker": "hush/act_snicker",
+  "flavour:glance": "hush/act_glance",
+  "flavour:shrug": "hush/st_shrug",
+  "oneshot:enter": "hush/act_climb_in",
+  "oneshot:yanked": "hush/st_yanked",
+  "oneshot:wheeze": {
+    "clip": "hush/act_wheeze",
+    "loop": true
+  },
+  "state:diving": "hush/act_dive",
+  "state:popping": "hush/act_pop",
+  "state:squeaking": "hush/act_squeak",
+  "state:rummage": {
+    "clip": "hush/act_rummage",
+    "loop": true
+  },
+  "state:pick_window": {
+    "clip": "hush/act_rummage",
+    "loop": true
+  },
+  "state:bowing": {
+    "clip": "hush/act_bow",
+    "loop": true
+  },
+  "state:hidden": "",
+  "freeze": {
+    "clip": [
+      "hush/freeze_1",
+      "hush/freeze_2",
+      "hush/freeze_3",
+      "hush/freeze_4",
+      "hush/freeze_5",
+      "hush/freeze_6",
+      "hush/freeze_7",
+      "hush/freeze_8"
+    ],
+    "loop": false
+  },
+  "freeze_midjob": {
+    "clip": "hush/freeze_midjob",
+    "loop": true
+  },
+  "reaction_fallback": "",
+  "stand_in": "_mannequin"
+}

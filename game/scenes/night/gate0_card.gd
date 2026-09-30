@@ -49,13 +49,13 @@ func _ready() -> void:
 	if icons3d:
 		var hj: Variant = ViewKit.json("res://data/house/house3d.json")
 		var hs: Dictionary = (hj as Dictionary).get("hotspots", {}) if hj is Dictionary else {}
-		var honey := _thumb("kitchen_honey", hs, "rig", Vector3(0.0, 0.22, 0.0), 1.05)
+		var honey := _thumb("kitchen_honey", hs, "rig", Vector3(-0.05, 0.17, 0.0), 1.45)
 		var pantry := _thumb("kitchen_pantry_curtain", hs, "hide", Vector3(0.0, 1.0, 0.0), 3.6)
 		if honey != null:
 			_icons[0] = honey
 		if pantry != null:
 			_icons[2] = pantry
-		_icons[1] = UiIcons.get_icon(&"rig")
+		_icons[1] = UiIcons.get_icon(&"hand_rig")   # the ActionButton's rig glove
 	_arrow = UiIcons.get_icon(&"arrow")
 	if ResourceLoader.exists(NightCurtain.ART):
 		_curtain = load(NightCurtain.ART) as Texture2D

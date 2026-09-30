@@ -17,7 +17,7 @@
   },
   "rooms": {
     "kitchen": {"wall": "#C5B187", "wainscot": "#A5926C", "wainscot_h_m": 0.9, "rail": "#9D8C6F", "rail_h_m": 2.2,
-                "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/kitchen_arch.glb",
+                "floor": ["#926647", "#8A6043"], "arch": "res://art3d/set/kitchen_arch.glb",
                 "palette": "res://art3d/set/palette_kitchen.png",
                 "built_ins": {
                   "kitchen_dresser_base": {"box": [14.12, 0.0, -2.05, 14.6, 0.75, -1.65], "color": "#A99570"},
@@ -28,7 +28,7 @@
                                         "basin": [18.45, 0.4, -2.3, 19.05, 0.75, -1.92]}
                 }},
     "parlour": {"wall": "#C9A6A2", "wainscot": "#A48783", "wainscot_h_m": 0.9, "rail": "#9D8380", "rail_h_m": 2.2,
-                "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/parlour_arch.glb",
+                "floor": ["#926647", "#8A6043"], "arch": "res://art3d/set/parlour_arch.glb",
                 "palette": "res://art3d/set/palette_parlour.png",
                 "built_ins": {
                   "parlour_fireplace": {"box": [10.95, 0.0, -2.4, 12.35, 1.4, -2.05], "color": "#B9A5A0",
@@ -36,7 +36,7 @@
                   "parlour_mantel": {"box": [10.9, 1.4, -2.4, 12.4, 1.46, -2.0], "color": "#9D8380"}
                 }},
     "hall": {"wall": "#A5B298", "wainscot": "#86917A", "wainscot_h_m": 0.9, "rail": "#838C78", "rail_h_m": 2.2,
-             "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/hall_arch.glb",
+             "floor": ["#926647", "#8A6043"], "arch": "res://art3d/set/hall_arch.glb",
              "palette": "res://art3d/set/palette_hall.png",
              "built_ins": {
                "hall_stairs": {"box": [6.95, 0.0, -2.4, 7.36, 0.54, -1.86], "color": "#838C78", "steps": 3},
@@ -80,12 +80,12 @@
     "kitchen_pickle_jar": {
       "model": "res://art3d/props/pickle_jar.glb", "primitive": "tall_jar", "z": -1.75, "yaw": 0, "scale": 1.5,
       "visual_offset": [0.25, -0.35], "hit_box": null,
-      "bounds": [-0.08, 0.0, -0.08, 0.1, 0.23, 0.08],
+      "bounds": [-0.096, 0.0, -0.096, 0.1, 0.23, 0.096],
       "reach": "high", "reach_target": [0.0, 0.21, 0.05],
       "reach_pos": {"dx": 0.25, "z": -1.45, "step": null, "step_h": 0.0},
       "silhouette": "tall_jar", "view_kind": "rig", "color": "#5FAE5B",
       "states": ["idle", "armed", "spent"], "anims": {"rig": "rig", "armed": "spanner_swing", "trigger": "lid_pop"},
-      "parts": [], "tag_socket": [0.07, 0.12, 0.07], "preview_anchor": [0.0, 0.63, 0.0],
+      "parts": [], "tag_socket": [0.085, 0.1, 0.06], "preview_anchor": [0.0, 0.63, 0.0],
       "ring_anchor": [0.0, 0.11, 0.0], "item_anchor": null, "eyes_anchor": null, "halo": "fresnel", "stack": null,
       "why_offset": "lowered to a 1.35 m shelf above Bellows' barrel so the lid is reachable without a step; +0.25 m x clears the honey's hit box by >= 24 px"
     },
@@ -187,7 +187,7 @@
       "silhouette": "chandelier", "view_kind": "rig", "color": "#D9B45A", "staged_by": ["lift_off"],
       "states": ["idle"], "anims": {"swing": "swing"},
       "parts": [], "tag_socket": null, "preview_anchor": null,
-      "ring_anchor": [0.0, 0.35, 0.0], "item_anchor": null, "eyes_anchor": null, "halo": "fresnel", "stack": null, "why_offset": "the rect's 0.10 m floor-line correction only; struck in the slice (lift_off is not scripted)"},
+      "ring_anchor": [0.0, 0.35, 0.0], "item_anchor": null, "eyes_anchor": null, "halo": "fresnel", "stack": null, "why_offset": "the rect 0.10 m floor-line correction only; built as furniture on Night 1 (the LIFT-OFF landing, REDESIGN 3.4), dormant elsewhere"},
     "parlour_bellows": {"part_of": "arch:parlour_fireplace", "view_kind": "rig", "silhouette": "bellows"},
     "hall_front_door": {
       "model": "arch:hall_front_door_flat", "z": -1.0, "yaw": 0, "scale": 1.0,

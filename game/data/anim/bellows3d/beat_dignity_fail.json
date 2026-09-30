@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/beat_dignity_fail",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/beat_dignity_fail.res",
+  "length": 70,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "straighten": [
+      0,
+      30
+    ],
+    "tug": [
+      2,
+      26
+    ],
+    "look_around": [
+      30,
+      60
+    ],
+    "ahem": [
+      34,
+      46
+    ],
+    "cravat_pings": [
+      60,
+      70
+    ],
+    "ping": [
+      60,
+      64
+    ]
+  },
+  "events": [
+    {
+      "f": 2,
+      "type": "sfx",
+      "id": "cravat_tug"
+    },
+    {
+      "f": 34,
+      "type": "voice",
+      "id": "vo_bellows_ahem",
+      "vol_db": -3.0
+    },
+    {
+      "f": 60,
+      "type": "jiggle",
+      "bones": [
+        "cravat",
+        "bouffant",
+        "belly"
+      ],
+      "kick": 1.0
+    },
+    {
+      "f": 60,
+      "type": "sfx",
+      "id": "cravat_ping"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 26,
+      "preset": "smug"
+    },
+    {
+      "f": 34,
+      "preset": "disdain"
+    },
+    {
+      "f": 46,
+      "preset": "pompous"
+    },
+    {
+      "f": 59,
+      "preset": "smug"
+    },
+    {
+      "f": 60,
+      "preset": "shock"
+    },
+    {
+      "f": 64,
+      "preset": "mortified"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/beat_dignity_fail.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      60
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 30,
+      "f1": 44,
+      "at": "camera",
+      "weight": 0.9,
+      "blend": 6
+    },
+    {
+      "f0": 56,
+      "f1": 70,
+      "at": "camera",
+      "weight": 0.7,
+      "blend": 4
+    }
+  ],
+  "tags": [
+    "last_beat",
+    "t3"
+  ]
+}

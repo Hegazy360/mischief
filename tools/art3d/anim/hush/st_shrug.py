@@ -40,4 +40,6 @@ def build(ctx):
     c.face(0, "neutral")
     c.face(3, "worried")
     c.face(15, "neutral")
+    # lead note D8: the take gives its face to the camera (runtime gaze, facing-proof; eased in 6 f)
+    c.look_camera(0, 18, weight=1.0, blend=6)
     return c

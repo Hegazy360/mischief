@@ -92,6 +92,19 @@ def add_work(c, T, f0, f1, blend=8, fixed=None):
          effector="palm", blend=blend, world=False)
 
 
+def add_reach_offset(c, target_w, z0=-1.5):
+    """Optional sidecar field `reach_offset` [dx, y, dz] (m): where the clip's gloves work relative to her root, in world
+    axes for facing +1 — the view (or house3d.json's reach_pos) can stand her at reach_target.x - dx so her gloves meet
+    the thing without her body hiding it (request in the report)."""
+    orig = c.sidecar
+
+    def sidecar(anim_res):
+        d = orig(anim_res)
+        d["reach_offset"] = [round(target_w[0], 3), round(target_w[1], 3), round(target_w[2] - z0, 3)]
+        return d
+    c.sidecar = sidecar
+
+
 def build(ctx):
     st = stage()
     T = st.to_char(TARGET_W)
@@ -137,4 +150,5 @@ def build(ctx):
     c.face(TUGS[1] + 6, "determined")
     c.face(TUGS[2], "frantic")
     c.face(88, "grin")
+    add_reach_offset(c, TARGET_W)
     return c

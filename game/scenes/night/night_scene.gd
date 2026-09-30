@@ -741,7 +741,7 @@ func start_rise(rise_s: float = NightCurtain.RISE_S) -> void:
 			a.call("music_state", "curtain")
 	curtain.rise(rise_s)
 	if view_mode == VIEW_3D and not shader_watch.armed:
-		shader_watch.arm(self)
+		shader_watch.arm(self, warmer.warmed_keys if warmer != null else {})
 	DeviceLog.mark("sim_start")
 	if DeviceLog.active() and not _retrying:
 		DeviceLog.note("tex_mb_by_kind", TexStats.memory_report(null).get("tracked", {}))
@@ -792,7 +792,7 @@ func _start_cli_now() -> void:
 	curtain.set_up()
 	rise_frame = frame_n
 	if view_mode == VIEW_3D and not shader_watch.armed:
-		shader_watch.arm(self)
+		shader_watch.arm(self, warmer.warmed_keys if warmer != null else {})
 	var seek := int(cli_args.get("seek_tick", -1))
 	if seek > 0:
 		seek_to(seek)

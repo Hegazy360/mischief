@@ -39,4 +39,6 @@ def build(ctx):
     c.face(10, "smug")
     c.face(52, "proud")
     c.face(72, "neutral")
+    # lead note D8: showing off to the Stalls — the face turns to the camera (runtime gaze, facing-proof, 8 f ease)
+    c.look_camera(6, 78, weight=1.0, blend=8)
     return c

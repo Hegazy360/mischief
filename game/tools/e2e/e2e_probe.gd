@@ -7,6 +7,8 @@ class_name E2eProbe
 extends Node
 
 const DOUBLE_S := 0.1
+## Float slack: at a fixed 60 fps six frames sum to 0.09999… s, which read as "within 100 ms" (N01 bellows_step).
+const DOUBLE_EPS := 0.001
 const LAUNCH_OFFSET_S := 2.3
 ## HUD / overlay samples every this many PLAY frames.
 const HUD_EVERY := 30
@@ -25,6 +27,7 @@ var hash_at_tick: int = 0
 
 var _t: float = 0.0
 var _proc_frame: int = -1
+var _last_crowd_t: float = -1.0
 var _frame: int = 0
 var _rise_t: float = -1.0
 var _rise_frame: int = -1
@@ -80,6 +83,11 @@ func attach(n: Node) -> void:
 	var ad: Variant = n.get("audio_dir")
 	if ad is Object:
 		(ad as Object).set("record", true)
+		# the crowd's own moment (both crowd calls emit one of these first), stamped on the cue's clock
+		if (ad as Object).has_signal("laugh"):
+			(ad as Object).connect("laugh", func(_tier: int) -> void: _on_crowd())
+		if (ad as Object).has_signal("crowd_special"):
+			(ad as Object).connect("crowd_special", func(_kind: String) -> void: _on_crowd())
 	var wv: Variant = n.get("world_view")
 	if wv is Object and (wv as Object).has_signal("cue_staged"):
 		(wv as Object).connect("cue_staged", _on_cue_staged)
@@ -211,7 +219,10 @@ func _on_ticked(events: Array) -> void:
 			if _staged_early.has(cid) and absf(float(_staged_early[cid]) - _now_t()) < 0.0005:
 				st = float(_staged_early[cid])
 			_staged_early.erase(cid)
-			_cues.append({"id": cid, "tick": tk, "t": _now_t(), "staged_t": st, "crowd_t": -1.0})
+			var now := _now_t()
+			# a crowd the director fired for this tick before the probe's `ticked` handler ran (it connects first)
+			var ct := _last_crowd_t if _last_crowd_t >= 0.0 and absf(_last_crowd_t - now) < 0.0005 else -1.0
+			_cues.append({"id": cid, "tick": tk, "t": now, "staged_t": st, "crowd_t": ct})
 
 
 func _on_cue_staged(id: String, _kind: String) -> void:
@@ -221,6 +232,17 @@ func _on_cue_staged(id: String, _kind: String) -> void:
 			return
 	# Staged in this tick before the probe recorded the cue (see _staged_early).
 	_staged_early[id] = _now_t()
+
+
+## A crowd sound starts now (AudioDirector `laugh` / `crowd_special`): the answer to every laugh cue still waiting.
+## Both ends are stamped with `_now_t()` (the director's own clock lags a frame for calls made inside the sim's
+## `ticked`, and a crowd queued there then fired in its `advance` read one frame long).
+func _on_crowd() -> void:
+	var now := _now_t()
+	_last_crowd_t = now
+	for c in _cues:
+		if float(c["crowd_t"]) < 0.0 and now >= float(c["t"]) - 0.0005:
+			c["crowd_t"] = now
 
 
 ## The probe clock at this moment of the frame: the sim's `ticked` (SimDriver, priority −100) and the stager fire
@@ -251,11 +273,6 @@ func _read_sounds() -> void:
 			if times is PackedFloat32Array and i < (times as PackedFloat32Array).size() and now is float:
 				at = _t - (float(now) - (times as PackedFloat32Array)[i])
 			_sounds.append([at, m, id])
-			if m == "crowd":
-				# the director's own call time (as the sounds above), not the frame the probe read it in
-				for c in _cues:
-					if float(c["crowd_t"]) < 0.0 and at >= float(c["t"]) - 0.02:
-						c["crowd_t"] = at
 
 
 ## TexStats.pages_built() when the rig task's class exists (−1 otherwise).
@@ -280,7 +297,7 @@ static func doubles(sounds: Array) -> Array:
 	var last := {}
 	for s in sounds:
 		var key := "%s:%s" % [s[1], s[2]]
-		if last.has(key) and float(s[0]) - float(last[key]) < DOUBLE_S:
+		if last.has(key) and float(s[0]) - float(last[key]) < DOUBLE_S - DOUBLE_EPS:
 			out.append({"id": String(s[2]), "method": String(s[1]), "t": snappedf(float(s[0]), 0.001),
 				"dt": snappedf(float(s[0]) - float(last[key]), 0.001)})
 		last[key] = float(s[0])

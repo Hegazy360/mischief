@@ -1,0 +1,133 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/cue_picture_bonk",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/cue_picture_bonk.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 4,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      6,
+      11
+    ],
+    "accent": [
+      11,
+      15
+    ],
+    "hold": [
+      15,
+      40
+    ],
+    "settle": [
+      40,
+      48
+    ]
+  },
+  "events": [
+    {
+      "f": 12,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "bonk"
+    },
+    {
+      "f": 12,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r",
+        "belly",
+        "cravat"
+      ],
+      "kick": 0.9
+    },
+    {
+      "f": 12,
+      "type": "shake",
+      "trauma": 0.25
+    },
+    {
+      "f": 40,
+      "type": "voice",
+      "id": "vo_bellows_hmph"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "disdain"
+    },
+    {
+      "f": 6,
+      "preset": "pompous"
+    },
+    {
+      "f": 12,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 24,
+      "preset": "huh"
+    },
+    {
+      "f": 30,
+      "preset": "slow_burn"
+    },
+    {
+      "f": 40,
+      "preset": "irked"
+    },
+    {
+      "f": 44,
+      "preset": "furious"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/cue_picture_bonk.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      12
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 30,
+      "f1": 40,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "tags": [
+    "cue",
+    "overlay"
+  ]
+}

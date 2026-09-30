@@ -1,0 +1,139 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/beat_bow_topple",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/beat_bow_topple.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 12,
+  "lock": null,
+  "beats": {
+    "bow": [
+      0,
+      30
+    ],
+    "creak": [
+      4,
+      30
+    ],
+    "topple": [
+      30,
+      34
+    ],
+    "floor": [
+      34,
+      60
+    ],
+    "anticipation": [
+      28,
+      33
+    ],
+    "accent": [
+      33,
+      37
+    ]
+  },
+  "events": [
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "bow_creak"
+    },
+    {
+      "f": 30,
+      "type": "sfx",
+      "id": "slide_down_short"
+    },
+    {
+      "f": 34,
+      "type": "shake",
+      "trauma": 0.3
+    },
+    {
+      "f": 34,
+      "type": "jiggle",
+      "bones": [
+        "belly",
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r",
+        "tail_l",
+        "tail_r"
+      ],
+      "kick": 1.0
+    },
+    {
+      "f": 34,
+      "type": "sfx",
+      "id": "slip_thud"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 14,
+      "preset": "smug"
+    },
+    {
+      "f": 26,
+      "preset": "strain"
+    },
+    {
+      "f": 30,
+      "preset": "shock"
+    },
+    {
+      "f": 34,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 44,
+      "preset": "mortified"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/beat_bow_topple.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      30,
+      34
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 26,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 6
+    }
+  ],
+  "tags": [
+    "last_beat",
+    "t3"
+  ]
+}

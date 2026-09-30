@@ -1,0 +1,39 @@
+{
+  "regions": [
+    {
+      "color": "#FF0000",
+      "name": "fx_wall",
+      "class": "wall",
+      "room": "fx"
+    },
+    {
+      "color": "#00FF00",
+      "name": "fx_wainscot",
+      "class": "wainscot",
+      "room": "fx"
+    },
+    {
+      "color": "#0000FF",
+      "name": "fx_floor",
+      "class": "floor",
+      "room": "fx"
+    },
+    {
+      "color": "#FFFF00",
+      "name": "fx_window",
+      "class": "dressing",
+      "wall": "fx_wall"
+    },
+    {
+      "color": "#FF00FF",
+      "name": "fx_rug_c40",
+      "class": "dressing",
+      "wall": "fx_wall"
+    },
+    {
+      "color": "#00FFFF",
+      "name": "fx_honey",
+      "class": "live_prop"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_peer_under_piano",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_peer_under_piano.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {
+    "peer": [
+      0,
+      38
+    ],
+    "hmm": [
+      38,
+      48
+    ],
+    "heave": [
+      48,
+      60
+    ]
+  },
+  "events": [
+    {
+      "f": 38,
+      "type": "voice",
+      "id": "vo_bellows_hmm"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "suspicious"
+    },
+    {
+      "f": 12,
+      "preset": "magnified"
+    },
+    {
+      "f": 38,
+      "preset": "suspicious"
+    },
+    {
+      "f": 48,
+      "preset": "irked"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_peer_under_piano.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "tags": [
+    "micro_gag",
+    "hunt",
+    "overlay"
+  ]
+}

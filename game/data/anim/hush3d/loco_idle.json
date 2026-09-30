@@ -64,5 +64,21 @@
     "pop_frames": [],
     "freeze_holds": [],
     "draft": false
-  }
+  },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 50,
+      "at": "camera",
+      "weight": 0.7,
+      "blend": 8
+    },
+    {
+      "f0": 112,
+      "f1": 240,
+      "at": "camera",
+      "weight": 0.7,
+      "blend": 8
+    }
+  ]
 }

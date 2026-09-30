@@ -1,0 +1,90 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_head_turn",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_head_turn.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "head",
+  "blend_in": 4,
+  "blend_out": 6,
+  "lock": "sim",
+  "beats": {
+    "start": [
+      0,
+      3
+    ],
+    "listen": [
+      8,
+      30
+    ],
+    "squint": [
+      30,
+      42
+    ],
+    "shake_off": [
+      42,
+      52
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    },
+    {
+      "f": 8,
+      "preset": "pardon"
+    },
+    {
+      "f": 30,
+      "preset": "suspicious"
+    },
+    {
+      "f": 44,
+      "preset": "irked"
+    },
+    {
+      "f": 52,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_head_turn.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 6,
+      "f1": 46,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 7
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "head_turn"
+  ]
+}

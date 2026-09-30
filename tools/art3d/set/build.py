@@ -342,10 +342,11 @@ def prop_kettle():
 
 def prop_pickle_jar():
     pb = PB("pickle_jar", "props")
-    # a pot-bellied jar with a narrow neck and a small gold lid (a waisted top at 64 px: not the piano's box)
-    pb.lathe([(0.05, 0.0), (0.068, 0.012), (0.08, 0.07), (0.078, 0.11), (0.062, 0.145), (0.042, 0.165), (0.04, 0.19)],
+    # a fat pot-bellied jar (wider than tall at the belly) with a narrow neck and a small gold lid: at 64 px a
+    # waisted round shape, not the piano's box
+    pb.lathe([(0.058, 0.0), (0.082, 0.014), (0.096, 0.07), (0.093, 0.11), (0.072, 0.145), (0.044, 0.165), (0.04, 0.19)],
              (0, 0, 0), "pickle", seg=22, bands=["pickle_dk", "pickle", "pickle", "pickle", "pickle_dk", "pickle_dk"])
-    for i, (x, y, z) in enumerate(((-0.03, 0.04, 0.052), (0.03, 0.07, 0.056), (-0.012, 0.1, 0.062), (0.028, 0.125, 0.046))):
+    for i, (x, y, z) in enumerate(((-0.034, 0.045, 0.07), (0.034, 0.07, 0.072), (-0.012, 0.1, 0.078), (0.03, 0.125, 0.062))):
         pb.sphere(0.022, (x, y, z), "onion", seg=10, rings=6)
     pb.part("lid", pivot=(0.0, 0.19, 0.0))
     pb.lathe([(0.0, 0.19), (0.05, 0.19), (0.052, 0.2), (0.05, 0.222), (0.0, 0.225)], (0, 0, 0), "gold_lid", seg=22)

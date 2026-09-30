@@ -1,0 +1,47 @@
+{
+ "episode": "p00_curtain_up",
+ "scenario": "fixture",
+ "view": "3d",
+ "pip_on_share": 0.2,
+ "pip_longest_s": 2.0,
+ "pip_windows": [
+  [
+   48,
+   170
+  ]
+ ],
+ "overlays": {
+  "max": 2,
+  "loud_max": 1,
+  "samples": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    31,
+    1,
+    0
+   ]
+  ]
+ },
+ "perf3d": {
+  "draw_calls_p95": 71.0,
+  "draw_calls_max": 80.0,
+  "tris_max": 92897.0,
+  "emitters_max": 4,
+  "tex_mb_max": 103.4,
+  "shader_compiles_play": 1,
+  "script_ms_p95": 2.6,
+  "process_ms_p95": 9.0,
+  "compile_detail": {
+   "first_use": [
+    {
+     "key": "reg:prop|tag",
+     "tick": 211
+    }
+   ]
+  }
+ }
+}

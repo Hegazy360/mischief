@@ -402,6 +402,13 @@ func test_the_warm_up_covers_every_material_of_the_night() -> void:
 	var unknown := PackedStringArray()
 	_collect_unknown(n.world_view, n.shader_watch.known, unknown)
 	assert_eq(unknown.size(), 0, "materials the warm-up missed: %s" % [unknown])
+	# the lazily built freeze plinth (first freeze in PLAY) is warmed too
+	if ResourceLoader.exists(NightWarmer.LAZY_SCENES[0]):
+		var lazy := (load(NightWarmer.LAZY_SCENES[0]) as PackedScene).instantiate()
+		var missed := PackedStringArray()
+		_collect_unknown(lazy, n.shader_watch.known, missed)
+		lazy.free()
+		assert_eq(missed.size(), 0, "the plinth's shaders are in the warmed set: %s" % [missed])
 	await _frames(70)
 	assert_eq(n.shader_watch.compiles_play(), 0, "no shader first used in PLAY: %s" % [n.shader_watch.first_use])
 	await _free(n)
@@ -455,6 +462,29 @@ func test_the_detector_fires_on_an_unwarmed_material() -> void:
 	assert_eq(w.compiles_play(), 2, "a scene shader first visible in PLAY counts")
 	w.scan(12)
 	assert_eq(w.compiles_play(), 2, "each shader counts once")
+	assert_eq(String((w.first_use[1] as Dictionary).get("node", "?")), String(root.get_path_to(mi)), "the record names the node")
+	# BaseMaterial3D: one generated shader per feature set, shared — a new colour is not a compile, a new mode is
+	var sm_a := StandardMaterial3D.new()
+	sm_a.grow = true
+	sm_a.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	var sm_b := StandardMaterial3D.new()
+	sm_b.grow = true
+	sm_b.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	sm_b.albedo_color = Color.RED
+	var sm_c := StandardMaterial3D.new()
+	sm_c.grow = true
+	sm_c.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	sm_c.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	assert_eq(ShaderWatch.shader_key(sm_a, false), ShaderWatch.shader_key(sm_b, false), "same features, same shader")
+	assert_ne(ShaderWatch.shader_key(sm_a, false), ShaderWatch.shader_key(sm_c, false), "a new mode is a new shader")
+	var n0 := w.compiles_play()
+	for mat: StandardMaterial3D in [sm_a, sm_b, sm_c]:
+		var mb := MeshInstance3D.new()
+		mb.mesh = QuadMesh.new()
+		mb.material_override = mat
+		root.add_child(mb)
+	w.scan(13)
+	assert_eq(w.compiles_play(), n0 + 2, "sm_a and sm_c are first uses; sm_b shares sm_a's shader")
 	# hitches: frames far over the running median
 	for i in 20:
 		w.frame(1.0 / 60.0, 20 + i)

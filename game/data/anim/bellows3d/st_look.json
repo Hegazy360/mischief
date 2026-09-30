@@ -1,0 +1,95 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_look",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_look.res",
+  "length": 180,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 8,
+  "lock": "sim",
+  "beats": {
+    "peer_left": [
+      20,
+      58
+    ],
+    "peer_right": [
+      58,
+      100
+    ],
+    "floor": [
+      100,
+      128
+    ],
+    "shrug": [
+      128,
+      160
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "magnified"
+    },
+    {
+      "f": 58,
+      "preset": "suspicious"
+    },
+    {
+      "f": 100,
+      "preset": "magnified"
+    },
+    {
+      "f": 128,
+      "preset": "pardon"
+    },
+    {
+      "f": 156,
+      "preset": "irked"
+    },
+    {
+      "f": 166,
+      "preset": "magnified"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_look.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 128,
+      "f1": 164,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "curious",
+    "look"
+  ]
+}

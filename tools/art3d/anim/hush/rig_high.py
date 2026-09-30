@@ -14,7 +14,7 @@ from mathutils import Vector
 from lib.clip import Clip
 from lib.pose import merge, sym
 from lib.hush_presets import ARMS_DOWN, STAND, TIPTOE, gloves, glove, lean, head, breath
-from rig_mid import stage, LEGS
+from rig_mid import stage, add_reach_offset, LEGS
 
 L = 120
 Y = 1.86                        # glove height of the band's typical high target
@@ -133,4 +133,5 @@ def build(ctx):
     c.face(70, "determined")
     c.face(96, "frantic")
     c.face(DN1, "grin")
+    add_reach_offset(c, TARGET_W)
     return c

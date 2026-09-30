@@ -46,11 +46,13 @@ var _ring_n: int = 0
 var _sort := PackedFloat32Array()
 
 
-## Record the warmed set (call on the curtain-rise frame, after the warm-up).
-func arm(p_root: Node) -> void:
+## Record the warmed set (call on the curtain-rise frame, after the warm-up). `warmed` = NightWarmer.warmed_keys (what
+## its rig drew, freed since: e.g. the lazily built plinth's material).
+func arm(p_root: Node, warmed: Dictionary = {}) -> void:
 	root = p_root
 	armed = true
 	known.clear()
+	known.merge(warmed)
 	for e in MaterialWarm3D.entries():
 		var d: Dictionary = e
 		known["reg:" + MaterialWarm3D.key_of(d["material"], d["kind"])] = true
@@ -163,7 +165,8 @@ func _first(key: String, kind: String, tick: int, source: String) -> void:
 	DeviceLog.shader_first_use(key, kind, tick)
 
 
-## The compile unit of a material: its shader (ShaderMaterial) or the material itself (BaseMaterial3D), + "inst:"
+## The compile unit of a material: its shader (ShaderMaterial), or for a BaseMaterial3D its feature signature
+## (`base_key`: Godot builds one shader per feature set and shares it between every material with that set), + "inst:"
 ## for the instanced variant (particles / MultiMesh).
 static func shader_key(m: Material, instanced: bool) -> String:
 	var base := ""
@@ -172,9 +175,35 @@ static func shader_key(m: Material, instanced: bool) -> String:
 		if sh == null:
 			return ""
 		base = sh.resource_path if sh.resource_path != "" else "shader:%d" % sh.get_rid().get_id()
+	elif m is BaseMaterial3D:
+		base = ShaderWatch.base_key(m as BaseMaterial3D)
 	else:
 		base = "%s:%d" % [m.get_class(), m.get_rid().get_id()]
 	return ("inst:" if instanced else "sh:") + base
+
+
+## The properties a BaseMaterial3D's generated shader depends on (the engine's material key: modes, flags, which
+## feature textures are set). Parameters (colours, amounts) are uniforms and do not make a new shader.
+const BASE_KEY_PROPS: PackedStringArray = ["transparency", "shading_mode", "blend_mode", "cull_mode", "depth_draw_mode",
+	"no_depth_test", "diffuse_mode", "specular_mode", "billboard_mode", "billboard_keep_scale", "texture_filter",
+	"texture_repeat", "vertex_color_use_as_albedo", "vertex_color_is_srgb", "normal_enabled", "emission_enabled",
+	"rim_enabled", "clearcoat_enabled", "anisotropy_enabled", "ao_enabled", "heightmap_enabled",
+	"subsurf_scatter_enabled", "backlight_enabled", "refraction_enabled", "detail_enabled", "use_point_size",
+	"fixed_size", "grow", "alpha_antialiasing_mode", "distance_fade_mode", "proximity_fade_enabled",
+	"disable_receive_shadows", "shadow_to_opacity", "disable_ambient_light", "disable_fog", "uv1_triplanar",
+	"uv2_triplanar", "use_particle_trails", "albedo_texture_force_srgb"]
+const BASE_KEY_TEXTURES: PackedStringArray = ["albedo_texture", "metallic_texture", "roughness_texture",
+	"emission_texture", "normal_texture", "orm_texture"]
+
+
+static func base_key(m: BaseMaterial3D) -> String:
+	var parts := PackedStringArray([m.get_class()])
+	for p in BASE_KEY_PROPS:
+		var v: Variant = m.get(p)
+		parts.append("" if v == null else str(v))
+	for t in BASE_KEY_TEXTURES:
+		parts.append("1" if m.get(t) != null else "0")
+	return "|".join(parts)
 
 
 func _note_material(m: Material, instanced: bool) -> void:
@@ -187,7 +216,7 @@ func _note_material(m: Material, instanced: bool) -> void:
 		guard += 1
 
 
-func _check_material(m: Material, instanced: bool, report: bool) -> void:
+func _check_material(m: Material, instanced: bool, report: bool, where: Node = null) -> void:
 	var guard := 0
 	while m != null and guard < 6:
 		var k := shader_key(m, instanced)
@@ -195,6 +224,10 @@ func _check_material(m: Material, instanced: bool, report: bool) -> void:
 			known[k] = true
 			if report:
 				_first(k, "scene", _scan_tick, "scene")
+				# where it was seen (the node, the material's file or name) — who to ask to warm it
+				var rec: Dictionary = first_use[first_use.size() - 1]
+				rec["node"] = String(root.get_path_to(where)) if where != null and root != null and root.is_ancestor_of(where) else ""
+				rec["material"] = m.resource_path if m.resource_path != "" else m.resource_name
 		m = m.next_pass
 		guard += 1
 
@@ -209,18 +242,18 @@ func _walk(n: Node, only_visible: bool, report: bool) -> void:
 			pass
 		else:
 			if g.material_override != null:
-				_check_material(g.material_override, inst, report)
+				_check_material(g.material_override, inst, report, g)
 			if g is MeshInstance3D and (g as MeshInstance3D).mesh != null:
 				var mi := g as MeshInstance3D
 				for i in mi.mesh.get_surface_count():
 					var m := mi.get_active_material(i)
 					if m != null:
-						_check_material(m, false, report)
+						_check_material(m, false, report, g)
 			elif g is CPUParticles3D and (g as CPUParticles3D).mesh != null:
 				var pm := (g as CPUParticles3D).mesh
 				for i2 in pm.get_surface_count():
 					var m2 := pm.surface_get_material(i2)
 					if m2 != null:
-						_check_material(m2, true, report)
+						_check_material(m2, true, report, g)
 	for c in n.get_children():
 		_walk(c, only_visible, report)

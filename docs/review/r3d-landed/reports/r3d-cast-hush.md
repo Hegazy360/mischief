@@ -7,8 +7,8 @@ cheeks, the little navy teardrop, white 4-digit gloves and the cherry beret with
 B's head (head_scale 1.0), which is the owner's pick. The R6 alternate `head_b` (×1.2) is built next to it and does not
 replace it.
 
-Hours: about 3.3 h active (16:32 to about 19:50 UTC). P0 landed at 17:00, the reach proof and SKELETON FROZEN at 17:16,
-the O1 boards at 17:48, the R6 head check at 17:53 and P2 at 19:40.
+Hours: about 3.1 h active (16:32 to 19:37 UTC). P0 landed at 17:00, the reach proof and SKELETON FROZEN at 17:16,
+the O1 boards at 17:48, the R6 head check at 17:53 and P2 at 19:30 (verified 19:35).
 
 ## Files built (all owned paths)
 - **Sources** in `tools/art3d/hush/`:
@@ -74,7 +74,7 @@ the O1 boards at 17:48, the R6 head check at 17:53 and P2 at 19:40.
   The cream stripes were widened at P2 to meet it.
 - **Silhouettes at 64 px**: no pair reaches IoU 0.80. The closest are idle / reach-mid 0.68, idle / snicker 0.66 and
   reach-mid / squeak 0.63.
-- **Tests**: cast3d 29/29 (hush 16, 0 skip). Full suite: SUITE. Lint: LINT.
+- **Tests**: cast3d 29/29 (hush 16, 0 skip). Full suite (`tools/scripts/test_game.sh r3d-cast-hush`): 1423 passed, 0 failed, 1 skipped. Lint (`SANDBOX=r3d-cast-hush tools/scripts/lint.sh`) exits 1 on one error, and it is not mine: `L10_pop_jump` in r3d-anim-bellows' `bellows3d/bit_warmup.json` f27. Nothing in Hush's files is flagged.
 
 ## R6 head verdict and the owner question
 - **Step 1**: the maximal face card inside B's head fails. The head is 54.5 px (< 60) in every view. The face card is

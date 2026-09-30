@@ -1,0 +1,121 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/act_hunt",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/act_hunt.res",
+  "length": 180,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "peer_low": [
+      0,
+      36
+    ],
+    "glare": [
+      38,
+      60
+    ],
+    "peer_high": [
+      60,
+      90
+    ],
+    "peer_low_b": [
+      90,
+      126
+    ],
+    "glare_b": [
+      128,
+      150
+    ],
+    "peer_high_b": [
+      150,
+      180
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "creak"
+    },
+    {
+      "f": 90,
+      "type": "sfx",
+      "id": "creak"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "magnified"
+    },
+    {
+      "f": 38,
+      "preset": "furious"
+    },
+    {
+      "f": 60,
+      "preset": "magnified"
+    },
+    {
+      "f": 90,
+      "preset": "magnified"
+    },
+    {
+      "f": 128,
+      "preset": "furious"
+    },
+    {
+      "f": 150,
+      "preset": "magnified"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/act_hunt.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 38,
+      "f1": 60,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 8
+    },
+    {
+      "f0": 128,
+      "f1": 150,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 8
+    }
+  ],
+  "tags": [
+    "activity",
+    "hunt",
+    "specs"
+  ]
+}

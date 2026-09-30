@@ -1,0 +1,189 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/bit_livid",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/bit_livid.res",
+  "length": 120,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      6,
+      29
+    ],
+    "accent": [
+      29,
+      33
+    ],
+    "hold": [
+      33,
+      78
+    ],
+    "settle": [
+      78,
+      120
+    ],
+    "rigid": [
+      0,
+      6
+    ],
+    "inhale": [
+      6,
+      29
+    ],
+    "bellow": [
+      30,
+      57
+    ],
+    "pound": [
+      57,
+      62
+    ],
+    "glare": [
+      78,
+      104
+    ],
+    "harrumph": [
+      104,
+      120
+    ]
+  },
+  "events": [
+    {
+      "f": 30,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 30,
+      "type": "voice",
+      "id": "vo_bellows_who_squeaked"
+    },
+    {
+      "f": 30,
+      "type": "sfx",
+      "id": "stomp"
+    },
+    {
+      "f": 30,
+      "type": "shake",
+      "trauma": 0.3
+    },
+    {
+      "f": 30,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r",
+        "sideburn_l",
+        "sideburn_r",
+        "belly"
+      ],
+      "kick": 0.9
+    },
+    {
+      "f": 57,
+      "type": "sfx",
+      "id": "meltdown_stomp"
+    },
+    {
+      "f": 57,
+      "type": "jiggle",
+      "bones": [
+        "belly",
+        "cravat"
+      ],
+      "kick": 0.5
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "furious"
+    },
+    {
+      "f": 4,
+      "preset": "irked"
+    },
+    {
+      "f": 8,
+      "preset": "inhale"
+    },
+    {
+      "f": 30,
+      "preset": "livid"
+    },
+    {
+      "f": 57,
+      "preset": "furious"
+    },
+    {
+      "f": 62,
+      "preset": "livid"
+    },
+    {
+      "f": 78,
+      "preset": "suspicious"
+    },
+    {
+      "f": 86,
+      "preset": "furious"
+    },
+    {
+      "f": 98,
+      "preset": "suspicious"
+    },
+    {
+      "f": 104,
+      "preset": "furious"
+    },
+    {
+      "f": 110,
+      "preset": "irked"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/bit_livid.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      30
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 80,
+      "f1": 108,
+      "at": "camera",
+      "weight": 0.5,
+      "blend": 6
+    }
+  ],
+  "tags": [
+    "bit",
+    "squeak",
+    "livid"
+  ]
+}

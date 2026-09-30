@@ -126,7 +126,7 @@ def build(ctx):
     c.key(165, sink(kick=0.0, loll=-0.2, sit=0.8, star=1.0), "out_back")
 
     # ---- motion layers ---------------------------------------------------------------------------------------------
-    c.motion(lambda f: dangle(f, 44.0, 6.0), 0, 93)
+    c.motion(lambda f: dangle(f, 44.0, 6.0, feet=False), 0, 93)     # = act_tea's dangle at its f 420 (THE SIP)
     c.motion(lambda f: tremble(f, 0.5 + 1.2 * ramp(f, 44, 70), ("spine_03", "Head", "neck_01")), 44, 78,
              weight=lambda f: window(f, 44, 52, 74, 78))
     c.motion(lambda f: breath(f, 70.0, 0.6), 0, 44)
@@ -190,7 +190,6 @@ def build(ctx):
     c.event(94, "jiggle", bones=["bouffant", "tail_l", "tail_r", "belly"], kick=0.9)
     c.event(95, "decor", id="kitchen_stool", visible=False)
     c.event(95, "prop", op="show", prop="stool")
-    c.event(100, "laugh", tier="auto")
     c.mark(112, "knock_on")
     c.event(112, "shake", trauma=0.6)
     c.event(112, "fx", id="drops")

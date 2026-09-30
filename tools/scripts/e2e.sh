@@ -23,22 +23,24 @@
 # with the device default).
 # Every game process runs through tools/scripts/slot.sh (R3D ruling R11); E2E_TIMEOUT starts once a slot is free.
 #
-# E2E_TIMEOUT table (R3D, r3d-night; measured on the 4-core CPU box under llvmpipe, 1200x540, MSAA off, one render
-# thread per slot; r3d-view3d P0b: 85 ms/frame p50, 125 ms p95 real time; Godot clamps a frame at 66.7 ms of game
-# time, so real-time runs take ~1.5x their game length; fixed-fps replays take frames x ~90 ms):
-#   scenario            mode        game length        expected wall     timeout (E2E_TIMEOUT default)
-#   g0_sneeze           fixed 60    1414 ticks ~24 s    ~150 s            600 s
-#   prologue_ideal      real time   ~60 s               ~95 s             600 s
-#   prologue_required   real time   ~70 s               ~110 s            600 s
-#   prologue_slow       real time   ~90 s               ~140 s            700 s
-#   n01_* / n02_*       fixed 60    ~140 s (8400 ticks)  ~13 min           1800 s
-#   n01_caught/chase/meltdown fixed ~40–80 s            ~4–8 min          1200 s
-#   retry / pause_back  real time   ~10 s               ~40 s             400 s
-#   curtain_call        real time   P00+N01x2+N02+g0    ~4 min            900 s
-#   touch_smoke         real time   ~5 s                ~40 s             400 s
-#   tap_accuracy        real time   4 Nights x rooms    ~6 min            1200 s
-#   slice_all           headless    every route          ~20 min total     per row as above
-# (the wall times include the slot wait-free Godot start, ~10 s, and the sandbox import when assets changed)
+# E2E_TIMEOUT table (R3D, r3d-night; MEASURED 2026-09-30 on the 4-core CPU box under llvmpipe, 1200x540, MSAA off, one
+# render thread per slot, 3D view: frame 99-106 ms p50 / 142-177 ms p95 real time; Godot clamps a frame at 66.7 ms of
+# game time, so real-time runs take ~1.5-2x their game length; fixed-fps replays take frames x ~100 ms; `rows` marked
+# "est." were not measured in this task (slice_all measures them headless):
+#   scenario            mode        game length        measured wall                    timeout (E2E_TIMEOUT default)
+#   g0_sneeze           fixed 60    1414 ticks ~24 s    210 s (373 s with --shot-seq/4)  600 s
+#   prologue_ideal      real time   ~60 s               134-163 s                        600 s
+#   prologue_required   real time   ~70 s               152 s                            600 s
+#   prologue_slow       real time   ~90 s               147 s                            700 s
+#   n01_* / n02_*       fixed 60    ~140 s (8400 ticks)  est. ~14 min rendered            1800 s
+#   n01_caught/chase/meltdown fixed ~40-80 s            est. ~4-8 min rendered           1200 s
+#   retry               real time   ~10 s               26 s                             400 s
+#   pause_back          real time   ~10 s               30 s                             400 s
+#   touch_smoke         real time   ~5 s                20 s                             400 s
+#   curtain_call        real time   P00+N01x2+N02+g0    115 s                            900 s
+#   tap_accuracy        real time   4 Nights x rooms    73 s                             1200 s
+#   slice_all           headless    every route          see the r3d-night report         per row as above
+# (wall = slot wait excluded, Godot start ~10 s and a sandbox re-import when assets changed included)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCEN="${1:?scenario}"; shift

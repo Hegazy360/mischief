@@ -1,5 +1,5 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 INFO L24_sound_table res://data/anim/hush3d/loco_skid.json no audio-table row: new sound frames ["2 slide_down_short"] for r3d-integrate
-lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 226 ms
-[Content] loaded res://data in 16 ms: 0 errors, 27 warnings
+lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 180 ms
+[Content] loaded res://data in 15 ms: 0 errors, 27 warnings

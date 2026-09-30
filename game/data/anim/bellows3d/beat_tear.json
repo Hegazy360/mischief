@@ -1,0 +1,106 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/beat_tear",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/beat_tear.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "lip": [
+      0,
+      24
+    ],
+    "tear": [
+      24,
+      40
+    ],
+    "sniff": [
+      40,
+      60
+    ],
+    "sniffle": [
+      42,
+      50
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "sad_violin"
+    },
+    {
+      "f": 24,
+      "type": "sfx",
+      "id": "tear_plink"
+    },
+    {
+      "f": 42,
+      "type": "sfx",
+      "id": "sniffle"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sulk"
+    },
+    {
+      "f": 12,
+      "preset": "mortified"
+    },
+    {
+      "f": 24,
+      "preset": "teary"
+    },
+    {
+      "f": 42,
+      "preset": "sniff"
+    },
+    {
+      "f": 48,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/beat_tear.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 60,
+      "at": "camera",
+      "weight": 0.9,
+      "blend": 4
+    }
+  ],
+  "tags": [
+    "last_beat",
+    "t3"
+  ]
+}

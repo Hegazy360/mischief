@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "rig": "bellows",
+  "doc": "Bellows' 3D clip map (owner r3d-anim-bellows-a; index §7.10): the s2-view §4.1.1 schema over view/world/default_maps/bellows.json (every key left out falls back to it; this file wins key by key). Clip ids = the 2D ids; sidecars data/anim/bellows3d/<clip>.json. walk entries carry the 3D gait (stride_m, speed_m_s: the clip's sidecar values; RigPlayer3D scales playback to the actor's speed) and the 2D stride_px / speed_px_s the ClipMap uses to detect a walk and its nominal speed (1 m = 200 px). Rows of r3d-anim-bellows-b / -c are added when their DONE lines appear. The curtain-call clips (curtain:wander_on / slow_burn / bonk / double_take) are clip_rules.json rows with the same ids.",
+  "idle": "bellows/loco_idle",
+  "walk": {
+    "clip": "bellows/loco_strut",
+    "stride_m": 0.64,
+    "speed_m_s": 1.2,
+    "stride_px": 128,
+    "speed_px_s": 240
+  },
+  "walk@tier2": {
+    "clip": "bellows/loco_irked",
+    "stride_m": 0.616,
+    "speed_m_s": 1.32,
+    "stride_px": 123,
+    "speed_px_s": 264
+  },
+  "walk@blind": {
+    "clip": "bellows/loco_blind_shuffle",
+    "stride_m": 0.48,
+    "speed_m_s": 1.2,
+    "stride_px": 96,
+    "speed_px_s": 240
+  },
+  "turn": "bellows/loco_turn",
+  "activity:tea": "bellows/act_tea",
+  "activity:warmup": "bellows/act_warmup",
+  "activity:fixup_mirror": "bellows/act_fixup_mirror",
+  "oneshot:stun": "bellows/st_bonk",
+  "reaction": "<from sim>",
+  "reaction_fallback": "bellows/st_double_take"
+}

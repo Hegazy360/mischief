@@ -1,0 +1,58 @@
+{
+  "names": [
+    "fx_jar",
+    "fx_jar_twin",
+    "fx_horn"
+  ],
+  "files": [
+    "shots/P00/fx_masks/fx_jar.png",
+    "shots/P00/fx_masks/fx_jar_twin.png",
+    "shots/P00/fx_masks/fx_horn.png"
+  ],
+  "iou": [
+    [
+      1.0,
+      0.8852,
+      0.4487
+    ],
+    [
+      0.8852,
+      1.0,
+      0.4751
+    ],
+    [
+      0.4487,
+      0.4751,
+      1.0
+    ]
+  ],
+  "pairs_over": [
+    {
+      "a": "fx_jar",
+      "b": "fx_jar_twin",
+      "iou": 0.8852
+    }
+  ],
+  "threshold": 0.8,
+  "height": 64,
+  "canvas": [
+    96,
+    96
+  ],
+  "fit": "height",
+  "sizes": [
+    [
+      43,
+      64
+    ],
+    [
+      39,
+      64
+    ],
+    [
+      64,
+      64
+    ]
+  ],
+  "empty": []
+}

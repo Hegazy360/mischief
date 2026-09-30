@@ -171,12 +171,13 @@ class Gait:
     L/2), touching down `front` m ahead of the ankle's rest y (armature -y = his front), swinging `lift` m high."""
 
     def __init__(self, L, speed, stance, front=None, lift=0.07, toe_out=10.0, width=1.0, pitch_st=0.0,
-                 pitch_sw=-18.0, heel=True):
+                 pitch_sw=-18.0, heel=True, rise=0.8):
         self.L, self.speed, self.stance = int(L), float(speed), int(stance)
         self.D = self.speed * self.stance / 60.0
         self.front = -self.D * 0.5 if front is None else float(front)
         self.lift, self.toe_out, self.width = float(lift), float(toe_out), float(width)
         self.pitch_st, self.pitch_sw, self.heel = float(pitch_st), float(pitch_sw), heel
+        self.rise = float(rise)          # swing height profile exponent (< 0.8: a low shuffle clears the floor fast)
 
     def phase(self, f, side):
         return ((f / float(self.L)) + (0.0 if side == "l" else 0.5)) % 1.0
@@ -193,16 +194,21 @@ class Gait:
         v = (ph - s) / (1.0 - s)
         e = 0.5 - 0.5 * math.cos(math.pi * v)
         y = self.front + self.D - self.D * e
-        z = self.lift * math.sin(math.pi * v) ** 0.8
+        z = self.lift * math.sin(math.pi * v) ** self.rise
         return y, z, self.pitch_sw * math.sin(math.pi * v), False
 
-    def apply(self, c, pelvis_h=None, knee_dir=(0, -1.0, 0.1)):
+    def apply(self, c, pelvis_h=None, knee_dir=(0, -1.0, 0.1), f0=0, f1=None, w=None):
         """Adds the leg constraint to clip c: pelvis height (callable f -> offset from rest, m) then both legs on IK
         with the planted sole on the floor (z 0) and its heel/ball point where foot() says."""
         sk = c.skel
         gait = self
 
         def legs(pose, f):
+            k = 1.0 if w is None else float(w(f))
+            if k <= 0.0:
+                return
+            if k < 1.0:
+                keep = pose.copy()
             if pelvis_h is not None:
                 pz = pose.pelvis_offset().z
                 pose.add_pelvis_offset(Vector((0, 0, float(pelvis_h(f)) - pz)))
@@ -222,7 +228,13 @@ class Gait:
                 tgt = target + P.rot_q([("z", s * gait.toe_out)]) @ (piv - heel_pt)   # the flat (yawed) foot's pivot
                 ankle = tgt - (Rf @ Mf.inverted()) @ (piv - ankle_rest)
                 P.solve_leg(pose, side, ankle, foot_world=Rf, knee_dir=Vector(knee_dir))
-        c.custom(legs, 0, self.L)
+            if k < 1.0:     # blend the stepping legs with the keyed ones (a walk that starts / stops)
+                for b in ("pelvis", "thigh_l", "calf_l", "foot_l", "thigh_r", "calf_r", "foot_r"):
+                    l0, r0, s0 = keep.get(b)
+                    l1, r1, _ = pose.get(b)
+                    pose.basis[b] = (l0.lerp(l1, k), P.qslerp(r0, r1, k), s0)
+                pose.solve()
+        c.custom(legs, f0, self.L if f1 is None else f1)
         return c
 
 
@@ -425,7 +437,7 @@ SIP_BODY = merge(SIT, lean(fwd=-4, turn=4), head(x=-12, z=10), pinkie_up("r"), g
                  {"pelvis": [("x", -2)]})
 CHEST = "spine_03"
 # chest-carried rest points (they ride spine_03): where the cup / saucer sit when not at the lips
-CUP_BELLY = Vector((-0.10, -0.47, 0.99))      # the cup held low in front of the belly, over the saucer
+CUP_BELLY = Vector((-0.10, -0.47, 0.90))      # the cup held low in front of the belly top, over the saucer
 SAUCER_BELLY = CUP_BELLY - Vector((0.0, 0.0, 0.109))   # the saucer right under it (the cup sits on it)
 SAUCER_CHIN = Vector((0.04, -0.47, 0.99))     # the saucer under the chin while he sips
 
@@ -465,6 +477,53 @@ def sip_arms(ts, pose, lift=1.0, cup_low=None, saucer_at=None, cup_R=None, sauce
 KETTLE_ARCH = 0.36
 JAR_H = 0.26
 JAR_MOUTH = 0.225
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# D8: faces face the camera on every face beat (baked on staged clips; the sidecar gaze covers either facing)
+# ------------------------------------------------------------------------------------------------------------------
+FACE_SHARE = (0.2, 0.3, 0.5)          # chest, neck, head
+
+
+def face_to(pose, point, weight=1.0, bones=("spine_03", "neck_01", "Head"), share=FACE_SHARE, max_deg=85.0):
+    """Turn the face toward `point` (armature space) about the VERTICAL only: the keyed head pitch and roll stay (the
+    head tipped back on "AHHH", the loll in the sink), the yaw goes to the point, `share` of it per bone."""
+    if weight <= 0.0:
+        return
+    if pose.world is None:
+        pose.solve()
+    head_b = bones[-1]
+    for i, (b, k) in enumerate(zip(bones, share)):
+        if not pose.skel.has(b):
+            continue
+        eye = pose.pos(head_b) + Vector((0, 0, 0.1))
+        fd = P.face_dir(pose, head_b)
+        want = Vector(point) - eye
+        if Vector((fd.x, fd.y)).length < 1e-4:
+            return
+        d = math.atan2(want.x, -want.y) - math.atan2(fd.x, -fd.y)
+        d = (d + math.pi) % (2 * math.pi) - math.pi
+        lim = math.radians(max_deg)
+        d = max(-lim, min(lim, d))
+        rel = min(1.0, k / max(1e-6, sum(share[i:]))) * weight
+        pose.set_world_rot(b, Quaternion((0.0, 0.0, 1.0), d * rel) @ pose.world_rot(b))
+
+
+def face_cam(c, f0, f1, weight=1.0, ease=(8, 8), target=None, share=FACE_SHARE):
+    """D8 on a staged clip: the face to the audience camera over [f0, f1] (`ease` in / out frames, 0 = already full at
+    the edge — loop seams), weight a float or callable(f). target: None = the stage's camera, a point or callable(f).
+    Add it BEFORE the IK that must follow the head (the cup at the lips). Pair it with c.look_camera for the view."""
+    e0, e1 = ease
+
+    def fn(pose, f):
+        w = weight(f) if callable(weight) else weight
+        w *= window(f, f0, f0 + e0, f1 - e1, f1)
+        if w <= 1e-4:
+            return
+        t = c.stage.camera() if target is None else (target(f) if callable(target) else Vector(target))
+        face_to(pose, t, w, share=share)
+    c.custom(fn, f0, f1)
+    return c
 
 
 # ------------------------------------------------------------------------------------------------------------------

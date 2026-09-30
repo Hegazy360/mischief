@@ -100,5 +100,21 @@
     ],
     "freeze_holds": [],
     "draft": false
-  }
+  },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 25,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 27,
+      "f1": 36,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 6
+    }
+  ]
 }

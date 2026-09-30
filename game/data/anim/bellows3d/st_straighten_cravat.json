@@ -1,0 +1,113 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/st_straighten_cravat",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/st_straighten_cravat.res",
+  "length": 60,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 8,
+  "lock": "sim",
+  "beats": {
+    "reach": [
+      0,
+      10
+    ],
+    "tug": [
+      10,
+      14
+    ],
+    "tugged": [
+      14,
+      18
+    ],
+    "lapels": [
+      18,
+      32
+    ],
+    "sniff": [
+      32,
+      48
+    ]
+  },
+  "events": [
+    {
+      "f": 14,
+      "type": "sfx",
+      "id": "cravat_tug",
+      "vol_db": -3.0
+    },
+    {
+      "f": 14,
+      "type": "jiggle",
+      "bones": [
+        "cravat"
+      ],
+      "kick": 0.6
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 12,
+      "preset": "strained_grin"
+    },
+    {
+      "f": 18,
+      "preset": "smug"
+    },
+    {
+      "f": 34,
+      "preset": "sniff"
+    },
+    {
+      "f": 44,
+      "preset": "disdain"
+    },
+    {
+      "f": 52,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/st_straighten_cravat.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 10,
+      "f1": 50,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    }
+  ],
+  "tags": [
+    "oneshot",
+    "doorway_pause"
+  ]
+}

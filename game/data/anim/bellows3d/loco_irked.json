@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/loco_irked",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/loco_irked.res",
+  "length": 28,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "bellows_step"
+    },
+    {
+      "f": 14,
+      "type": "sfx",
+      "id": "bellows_step"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "irked"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 0.616,
+  "speed_m_s": 1.32,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/loco_irked.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

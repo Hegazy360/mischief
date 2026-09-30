@@ -57,4 +57,7 @@ def build(ctx):
     c.face(0, "sneak")
     c.face(4, "shock")
     c.face(27, "dazed")
+    # lead note D8: the shock and the daze face the camera (runtime gaze, facing-proof)
+    c.look_camera(0, 25, weight=1.0, blend=6)
+    c.look_camera(27, L, weight=0.8, blend=6)
     return c

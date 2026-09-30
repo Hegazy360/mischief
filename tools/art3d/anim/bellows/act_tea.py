@@ -23,8 +23,8 @@ L = 480
 UP = Vector((0, 0, 1))
 KETTLE_HOME = (14.40, 0.75, -1.82)          # house3d.json kitchen_kettle: rect centre-x + visual_offset, base y, z
 CUP_REL = qz(15) @ CUP_LOW_R                # the cup on its saucer (in the left glove it sits exactly as held low)
-BELLY_SHELF = Vector((0.0, -0.335, 0.985))  # the saucer resting on the top of his belly (chest-carried)
-BELLY_TILT = qx(-22)                        # ... tilted with the barrel's curve
+BELLY_SHELF = Vector((0.0, -0.335, 0.93))   # the saucer resting on the top of his belly (chest-carried)
+BELLY_TILT = qx(-30)                        # ... tilted with the barrel's curve
 
 
 def build(ctx):
@@ -103,9 +103,9 @@ def build(ctx):
             # the glove leaves the saucer on the shelf, turns palm up for the jar (100-156), then comes back onto the
             # saucer where it sits (156-166)
             arm_ik(pose, "l", shelf, POLE_L, hand_R=SHELF_R, effector=ts.saucer_c)
-            wait = chest_point(pose, track(f, [(100, (0.22, -0.44, 0.96)), (110, (0.20, -0.46, 1.00)),
-                                               (126, (0.17, -0.46, 1.02)), (140, (0.19, -0.46, 1.00)),
-                                               (156, (0.22, -0.44, 0.97))]))
+            wait = chest_point(pose, track(f, [(100, (0.26, -0.46, 0.80)), (110, (0.24, -0.50, 0.83)),
+                                               (126, (0.22, -0.50, 0.85)), (140, (0.23, -0.50, 0.83)),
+                                               (156, (0.26, -0.46, 0.80))]))
             arm_ik(pose, "l", wait, POLE_L, hand_R=JAR_L, effector=PALM_L, w=window(f, 100, 108, 152, 160))
         if 98 <= f < 164:
             place_prop(pose, sk, "prop_l", Quaternion(), ts.palm(pose, "l") + UP * 0.012,   # the lent jar on the palm
@@ -122,7 +122,7 @@ def build(ctx):
         if 4 <= f < 92:                             # the kettle
             tilt = track(f, [(14, 0.0), (32, 0.0), (40, 46.0), (64, 50.0), (72, 0.0)])
             Rk = qy(tilt) @ qz(180)
-            arch_pour = cup_top + Vector((-0.318, 0.0, 0.122)) + Rk @ (UP * KETTLE_ARCH)
+            arch_pour = cup_top + Vector((-0.36, -0.02, 0.10)) + Rk @ (UP * KETTLE_ARCH)
             arch = kettle_arch_home.lerp(arch_pour, ramp(f, 16, 32)).lerp(kettle_arch_home, ramp(f, 72, 84))
             arm_ik(pose, "r", arch, POLE_R, hand_R=Rk @ KETTLE_R, effector=PALM_R, w=window(f, 4, 13, 80, 92))
             if 14 <= f < 88:

@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/act_fixup_mirror",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/act_fixup_mirror.res",
+  "length": 240,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "strokes": [
+      40,
+      100
+    ],
+    "admire": [
+      100,
+      152
+    ],
+    "strokes2": [
+      152,
+      212
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "comb"
+    },
+    {
+      "f": 40,
+      "type": "voice",
+      "id": "vo_bellows_hum",
+      "vol_db": -3.0
+    },
+    {
+      "f": 152,
+      "type": "voice",
+      "id": "vo_bellows_hum",
+      "vol_db": -3.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "admiring"
+    },
+    {
+      "f": 24,
+      "preset": "smug"
+    },
+    {
+      "f": 40,
+      "preset": "pompous"
+    },
+    {
+      "f": 100,
+      "preset": "admiring"
+    },
+    {
+      "f": 118,
+      "preset": "kiss"
+    },
+    {
+      "f": 136,
+      "preset": "smug"
+    },
+    {
+      "f": 152,
+      "preset": "pompous"
+    },
+    {
+      "f": 212,
+      "preset": "admiring"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/act_fixup_mirror.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 4.76,
+    "z": -1.4,
+    "facing": 1,
+    "cheat_deg": 35.0
+  }
+}

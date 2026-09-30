@@ -1,0 +1,200 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/bit_tea",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/bit_tea.res",
+  "length": 100,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      12,
+      16
+    ],
+    "accent": [
+      16,
+      19
+    ],
+    "hold": [
+      19,
+      58
+    ],
+    "settle": [
+      74,
+      100
+    ],
+    "huh": [
+      0,
+      4
+    ],
+    "sip": [
+      4,
+      12
+    ],
+    "splutter": [
+      28,
+      58
+    ],
+    "sniff": [
+      58,
+      64
+    ],
+    "glare": [
+      64,
+      74
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "teacup"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "saucer"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "hide",
+      "prop": "spoon"
+    },
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "tea_slurp"
+    },
+    {
+      "f": 17,
+      "type": "voice",
+      "id": "vo_bellows_pff"
+    },
+    {
+      "f": 17,
+      "type": "fx",
+      "id": "drops"
+    },
+    {
+      "f": 17,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "belly",
+        "cravat"
+      ],
+      "kick": 0.5
+    },
+    {
+      "f": 28,
+      "type": "voice",
+      "id": "vo_bellows_ugh"
+    },
+    {
+      "f": 28,
+      "type": "fx",
+      "id": "drops"
+    },
+    {
+      "f": 58,
+      "type": "sfx",
+      "id": "sniffle"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    },
+    {
+      "f": 4,
+      "preset": "sip"
+    },
+    {
+      "f": 12,
+      "preset": "sneeze_gasp"
+    },
+    {
+      "f": 17,
+      "preset": "wild_take"
+    },
+    {
+      "f": 22,
+      "preset": "teary"
+    },
+    {
+      "f": 58,
+      "preset": "sniff"
+    },
+    {
+      "f": 64,
+      "preset": "suspicious"
+    },
+    {
+      "f": 80,
+      "preset": "disdain"
+    },
+    {
+      "f": 88,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/bit_tea.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      17
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 12,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 4
+    },
+    {
+      "f0": 18,
+      "f1": 80,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    }
+  ],
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "bit",
+    "squeak_bit"
+  ]
+}

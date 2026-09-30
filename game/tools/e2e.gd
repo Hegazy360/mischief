@@ -158,6 +158,12 @@ func _process(delta: float) -> void:
 
 
 func _on_night(n: Node) -> void:
+	# A headless run has no 20:9 window (its viewport is square): project as the phone does, so the on-screen tests,
+	# the Bellows window share and the visibility rows read as on a rendered run.
+	if DisplayServer.get_name() == "headless":
+		var c: Variant = n.get("cam")
+		if c is Object and (c as Object).get("logical_size_override") != null:
+			(c as Object).set("logical_size_override", Vector2(2400, 1080))
 	if probe != null:
 		if probe.night == null:
 			n.call("set_replay", _cmds)

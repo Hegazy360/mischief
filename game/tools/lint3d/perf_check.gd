@@ -2,8 +2,10 @@
 ## (`tools/scripts/perf3d.sh <e2e report.json>…`; the block is `r3d-night`'s Perf3D.summary, index §7.10).
 ##
 ## Budgets (desktop proxy): draw calls p95 ≤ 150 and max ≤ 250 · triangles max ≤ 150k · CPUParticles3D emitters max
-## ≤ 8 · texture memory ≤ 250 MB · `shader_compiles_play` == 0 · view + HUD script time p95 ≤ 4 ms. One table row per
-## report; any breach is an error (exit 1). A report without a `perf3d` block (a headless or 2D run) is a SKIP.
+## ≤ 8 · texture memory ≤ 250 MB · `shader_compiles_play` == 0 · view + HUD script time p95 ≤ 4 ms (the block's
+## `view_ms_p95` when it has one — index §6 row 16 budgets the view + HUD scripts; `script_ms_p95` = view + HUD + sim
+## otherwise, with `sim_ms_p95` reported as info). One table row per report; any breach is an error (exit 1). A report
+## without a `perf3d` block (a headless or 2D run) is a SKIP.
 class_name PerfCheck3D
 extends RefCounted
 
@@ -36,11 +38,14 @@ static func check(report: Dictionary, name: String) -> Dictionary:
 	var ok := true
 	for key in COLUMNS:
 		var b: Array = BUDGETS[key]
-		if not pd.has(key):
+		var src := key
+		if key == "script_ms_p95" and pd.has("view_ms_p95"):
+			src = "view_ms_p95"
+		if not pd.has(src):
 			issues.append(Lint3D.skip("perf", key, "%s perf3d has no %s" % [name, key], "r3d-night", row["episode"]))
 			row[key] = null
 			continue
-		var v := float(pd[key])
+		var v := float(pd[src])
 		row[key] = v
 		var limit := float(b[0])
 		var breach := v != limit if String(b[1]) == "==" else v > limit
@@ -49,10 +54,17 @@ static func check(report: Dictionary, name: String) -> Dictionary:
 			var det := ""
 			if key == "shader_compiles_play" and pd.has("compile_detail"):
 				det = JSON.stringify(Lint3D.to_json((pd["compile_detail"] as Dictionary).get("first_use", [])))
-			elif key == "script_ms_p95" and pd.has("script_ms_p50") and is_equal_approx(v, float(pd.get("process_ms_p95", -1.0))):
+			elif key == "script_ms_p95" and is_equal_approx(v, float(pd.get("process_ms_p95", -1.0))):
 				det = "equals process_ms_p95: the report's script timer fell back to the process time (render + GPU wait on the proxy)"
+			if src != key:
+				det = "view + HUD scripts (%s)" % src
 			issues.append(Lint3D.issue("perf", key, Lint3D.ERROR, row["episode"], "", name, v, "%s %s" % [b[1], b[0]],
 				String(b[2]), det))
+	if pd.has("view_ms_p95"):
+		row["script_source"] = "view_ms_p95"
+		issues.append(Lint3D.issue("perf", "script_split", Lint3D.INFO, row["episode"], "", name,
+			"view + HUD %s ms, sim %s ms, all scripts %s ms (p95)" % [pd.get("view_ms_p95"), pd.get("sim_ms_p95", "?"),
+			pd.get("script_ms_p95", "?")], "view + HUD ≤ 4 ms", "r3d-view3d / r3d-hud", "the budget judges view + HUD"))
 	row["status"] = "PASS" if ok else "FAIL"
 	return {"issues": issues, "row": row}
 

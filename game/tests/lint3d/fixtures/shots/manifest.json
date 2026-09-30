@@ -1,0 +1,44 @@
+{
+  "jobs": [
+    {
+      "night": "p00_curtain_up",
+      "room": "fx",
+      "pass": "beauty",
+      "aspect": "20x9",
+      "png": "P00/fx_beauty.png",
+      "cam_x": 0.0
+    },
+    {
+      "night": "p00_curtain_up",
+      "room": "fx",
+      "pass": "id",
+      "aspect": "20x9",
+      "png": "P00/fx_id.png",
+      "legend": "P00/fx_id.json"
+    },
+    {
+      "night": "p00_curtain_up",
+      "room": "fx",
+      "pass": "mask",
+      "aspect": "20x9",
+      "hotspot": "fx_jar",
+      "png": "P00/fx_masks/fx_jar.png"
+    },
+    {
+      "night": "p00_curtain_up",
+      "room": "fx",
+      "pass": "mask",
+      "aspect": "20x9",
+      "hotspot": "fx_jar_twin",
+      "png": "P00/fx_masks/fx_jar_twin.png"
+    },
+    {
+      "night": "p00_curtain_up",
+      "room": "fx",
+      "pass": "mask",
+      "aspect": "20x9",
+      "hotspot": "fx_horn",
+      "png": "P00/fx_masks/fx_horn.png"
+    }
+  ]
+}

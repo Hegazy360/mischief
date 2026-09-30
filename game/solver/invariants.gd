@@ -186,7 +186,8 @@ static func rule2_entry_warning(log: SolverLog) -> Array[String]:
 	return _cap(out, 2, extra)
 
 
-## Rule 3: an unwatched hiding spot that is not in use is 100 % safe.
+## Rule 3: an unwatched hiding spot that is not in use is 100 % safe. A catch on the tick she popped out of the
+## spot (`pop_out` at the catch tick: she stepped into his arms) is not a catch in the spot.
 static func rule3_safe_hiding(log: SolverLog) -> Array[String]:
 	var out: Array[String] = []
 	for ev in log.events_named("caught"):
@@ -196,6 +197,8 @@ static func rule3_safe_hiding(log: SolverLog) -> Array[String]:
 			continue
 		var spot := log.name_of(log.hush_hidden[i])
 		if spot == "" or log.hush_watched[i] == 1:
+			continue
+		if not log.events_named("pop_out", {"t": tc, "spot": spot}).is_empty():
 			continue
 		var in_use_act := SolverData.sv(log.in_use.get(spot, ""))
 		if in_use_act != "" and log.name_of(log.b_activity[i]) == in_use_act:

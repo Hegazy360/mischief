@@ -72,7 +72,7 @@ func test_gate0_keys_persist() -> void:
 	assert_eq(s2.call("get_value", "voice_style"), "tuba")
 	assert_eq(s2.call("get_value", "hush_skin"), "pip")
 	assert_eq(s2.call("get_value", "crowd_style"), "formant", "untouched key keeps its default")
-	assert_eq(int(s2.get("loaded_version")), 2, "the file is stamped")
+	assert_eq(int(s2.get("loaded_version")), 3, "the file is stamped (3 = the R3D keys)")
 	s2.free()
 
 
@@ -93,7 +93,7 @@ func test_stage1_file_migrates() -> void:
 	s.call("save")
 	var back := ConfigFile.new()
 	assert_eq(back.load(path), OK)
-	assert_eq(int(back.get_value("meta", "version", 0)), 2, "rewritten at the current version")
+	assert_eq(int(back.get_value("meta", "version", 0)), 3, "rewritten at the current version")
 	assert_eq(back.get_value("settings", "voice_style", ""), "formant")
 	s.free()
 

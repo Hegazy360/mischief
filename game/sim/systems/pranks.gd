@@ -335,7 +335,7 @@ func hotspot_state(w: SimWorld, id: String) -> Dictionary:
 	var h := w.db.house.hotspot(id)
 	if h == null:
 		return {}
-	var enabled := w.ctx.hush_allowed(h.room_idx)
+	var enabled := w.ctx.hush_allowed(h.room_idx) and w.ctx.is_live(h.idx)
 	var d := {"kind": h.kind_name, "enabled": enabled, "stock": [], "occupant": w.hush.hidden_spot == h.idx,
 		"in_use_next": false, "spent": false, "rigged": false, "needs_item": "", "seen": w.hush_can_see(id)}
 	match h.kind:

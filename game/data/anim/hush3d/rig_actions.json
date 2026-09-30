@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "tiers": {"q": 48, "s": 90, "b": 150},
+  "bands": {
+    "low": {"glove_y_m": [0.00, 0.55], "clip": "hush/rig_low"},
+    "mid": {"glove_y_m": [0.55, 1.40], "clip": "hush/rig_mid"},
+    "high": {"glove_y_m": [1.40, 2.15], "step_above_m": 1.70, "clip": "hush/rig_high"}
+  },
+  "pranks": {
+    "achoo_ria": {"hotspot": "kitchen_honey", "tier": "q", "band": "high", "clip": "hush/rig_achoo_ria", "prop_anim": "rig", "held": "pepper_pot", "step": "stool:kitchen_stool", "glances": [], "noise_rings": false},
+    "allegro_go_go": {"hotspot": "parlour_gramophone", "tier": "q", "band": "mid", "clip": "hush/rig_allegro_go_go", "prop_anim": "rig", "held": null, "step": null, "glances": [], "noise_rings": false},
+    "kettle_drum": {"hotspot": "kitchen_kettle", "tier": "q", "band": "mid", "clip": null, "prop_anim": "rig", "held": "squeaker", "step": null, "glances": [], "noise_rings": false},
+    "tap_dance": {"hotspot": "kitchen_sink_tap", "tier": "q", "band": "mid", "clip": null, "prop_anim": "rig", "held": null, "step": null, "glances": [], "noise_rings": false},
+    "in_a_pickle": {"hotspot": "kitchen_pickle_jar", "tier": "s", "band": "high", "clip": null, "prop_anim": "rig", "held": null, "step": null, "glances": [500], "noise_rings": false},
+    "lift_off": {"hotspot": "parlour_recliner", "tier": "b", "band": "low", "clip": null, "prop_anim": "rig", "held": null, "step": null, "glances": [300, 600, 900], "noise_rings": true},
+    "cold_open": {"hotspot": "kitchen_fridge_shelf", "tier": "s", "band": "mid", "clip": null, "prop_anim": "rig", "held": null, "step": null, "glances": [300, 700], "noise_rings": false},
+    "eye_popping_news": {"hotspot": "parlour_newspaper", "tier": "q", "band": "mid", "clip": null, "prop_anim": "rig", "held": "magnifier", "step": null, "glances": [], "noise_rings": false},
+    "something_fishy": {"hotspot": "hall_phone", "tier": "q", "band": "mid", "clip": null, "prop_anim": "rig", "held": "kipper", "step": null, "glances": [], "noise_rings": false},
+    "times_up": {"hotspot": "hall_clock", "tier": "s", "band": "high", "clip": null, "prop_anim": "rig", "held": null, "step": "mime", "glances": [300, 700], "noise_rings": false},
+    "mirror_mirror": {"hotspot": "hall_mirror", "tier": "b", "band": "high", "clip": null, "prop_anim": "rig", "held": null, "step": "mime", "glances": [300, 700], "noise_rings": true}
+  }
+}

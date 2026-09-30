@@ -1,129 +1,125 @@
-## HudLayout — the pure HUD layout (GDD §3.8): every widget's hit rect from the logical viewport
-## size, the safe-area insets and the handedness. Positions are the top-left of each HIT box.
+## HudLayout — the pure R3D HUD layout (REDESIGN_3D §2.1–§2.2, r3d-hud brief §4.1–§4.2): every
+## piece's HIT rect (top-left + size) from the logical viewport, the safe-area insets, the handedness,
+## the tablet scale and the Script chip's width.
 ##
 ##   S = symmetric side inset, T = top, B = bottom, W × H = logical viewport, k = UiScale (0.8 on
-##   tablets). Right-handed (default):
-##   pause (S+24, T+24) 144 · figgis (S+192, T+24) 144 · meter centred, y T+16, 600 × 144 ·
-##   banner centred, y T+164 (not a target) · pip (W−S−472, T+24) 448 × 252 (escalated 704 × 396,
-##   same top-right corner, scaled down only when the meter or the action column would be
-##   covered — on a 16:9 phone it fits 612 × 344 beside the meter) · overview (W−S−168, T+300)
-##   144 (moves below an escalated PiP, or beside it when that doesn't fit) ·
-##   tray (S+32, H−B−200) 744 × 168 · clarence (S+32, H−B−392) 168 · action centre
-##   (W−S−168, H−B−168) 240 · Stalls band x ∈ [S+800, W−S−312] along the bottom: no targets.
-##   Left-handed mirrors every rect horizontally (x' = W − x − w): the thumb clusters swap and the
-##   top corners swap pause/Figgis with PiP/overview.
+##   tablets). Right-handed (default); the four ALWAYS-ON pieces:
+##   pause (S+24, T+24) 144 · script (S+192, T+24) max(312, pill) × 144 (the pill 96 tall at T+48) ·
+##   clarence (S+32, H−B−200) 168 · action centre (W−S−168, H−B−168) 240 circle.
+##   CONTEXTUAL pieces: meter centred (W/2−230, T+24) 460 × 104 · banner (the Running-Gag fuse) under
+##   it, bar at T+144 · pip (the Bellows window) (W−S−424, T+24) 400 × 225, escalated 704 × 396 in the
+##   same top-right corner (scaled down only to clear the Script chip and the meter) · edge badge zones x S+24…S+160 /
+##   W−S−160…W−S−24, y 430–650 (centred on the safe height) · chips (S+224 + i·168, H−B−188) 144 ·
+##   figgis (S+24, T+192) 144 + its 320 × 200 card to the right · bow (W−S−344, T+24) 320 × 112, slid
+##   under the open Bellows window to T+273 (bow_low) · overview (W−S−168, T+300) 144 · Stalls band
+##   x ∈ [S+560, W−S−440] along the bottom (never a target).
+##   Left-handed mirrors every rect horizontally (x' = W − x − w) except the centred meter / banner.
+## Keys kept for older callers: `tray` (= chips), `figgis`, `meter`, `banner`, `pip`, `pip_escalated`,
+## `overview`, `overview_escalated`, `band`, `safe`, `edge_zone`, `arrow_zone`.
 class_name HudLayout
 extends RefCounted
 
-## Stalls band height reserved at the bottom centre (the heads rise up to 120 px).
+## Stalls band height reserved at the bottom centre (the heads rise up to 150 px on laughs).
 const BAND_H := 120.0
-## Rects that are touch targets (the layout test checks sizes, gaps and the free band).
-const TARGETS: PackedStringArray = ["pause", "figgis", "meter", "pip", "overview", "tray", "clarence", "action"]
+## The four always-on pieces (REDESIGN §2.1 — MUST be ≤ 4).
+const ALWAYS_ON: PackedStringArray = ["pause", "script", "clarence", "action"]
+## Every rect that can be a touch target (layout tests: sizes, gaps).
+const TARGETS: PackedStringArray = ["pause", "script", "clarence", "action", "pip", "overview", "tray", "bow",
+	"figgis"]
+## The Script pill (REDESIGN §2.1): 112 + 46 per required line + 22 per optional line + 50, ≤ 440.
+const PILL_BASE := 112.0
+const PILL_REQ := 46.0
+const PILL_OPT := 22.0
+const PILL_BIG := 50.0
+const PILL_MAX := 440.0
+const PILL_MIN_HIT := 312.0
+## The carried-item chips.
+const CHIPS := 4
+const CHIP_HIT := 144.0
+const CHIP_PITCH := 168.0
+## The middle band (at the 1080 base) that holds no always-on / persistent HUD (§2.5).
+const MIDDLE_Y0 := 250.0
+const MIDDLE_Y1 := 880.0
 
 
-## Every rect (Dictionary StringName → Rect2): pause, figgis, meter, banner, pip, pip_escalated,
-## overview, overview_escalated, tray, clarence, action, band, safe, edge_zone, arrow_zone.
-static func compute(vp: Vector2, insets: Vector4, left_handed: bool = false, k: float = 1.0) -> Dictionary:
+## The Script pill's width for `req` required and `opt` optional lines (pure).
+static func script_pill_width(req: int, opt: int) -> float:
+	return minf(PILL_MAX, PILL_BASE + PILL_REQ * float(req) + PILL_OPT * float(opt) + PILL_BIG)
+
+
+## Every rect (Dictionary StringName → Rect2); see the class doc. `script_w` = the Script pill width
+## (script_pill_width), unscaled.
+static func compute(vp: Vector2, insets: Vector4, left_handed: bool = false, k: float = 1.0,
+		script_w: float = PILL_MIN_HIT) -> Dictionary:
 	var s := maxf(insets.x, insets.z)
 	var t := insets.y
 	var b := insets.w
 	var w := vp.x
 	var h := vp.y
 	var r := {}
+	# --- always on
 	r[&"pause"] = Rect2(s + 24.0 * k, t + 24.0 * k, 144.0 * k, 144.0 * k)
-	r[&"figgis"] = Rect2(s + 192.0 * k, t + 24.0 * k, 144.0 * k, 144.0 * k)
-	r[&"meter"] = Rect2((w - 600.0 * k) * 0.5, t + 16.0 * k, 600.0 * k, 144.0 * k)
-	r[&"banner"] = Rect2((w - 640.0 * k) * 0.5, t + 164.0 * k, 640.0 * k, 96.0 * k)
-	r[&"pip"] = Rect2(w - s - 472.0 * k, t + 24.0 * k, 448.0 * k, 252.0 * k)
-	r[&"overview"] = Rect2(w - s - 168.0 * k, t + 300.0 * k, 144.0 * k, 144.0 * k)
-	r[&"tray"] = Rect2(s + 32.0 * k, h - b - 200.0 * k, 744.0 * k, 168.0 * k)
-	r[&"clarence"] = Rect2(s + 32.0 * k, h - b - 392.0 * k, 168.0 * k, 168.0 * k)
+	r[&"script"] = Rect2(s + 192.0 * k, t + 24.0 * k, maxf(PILL_MIN_HIT, script_w) * k, 144.0 * k)
+	r[&"clarence"] = Rect2(s + 32.0 * k, h - b - 200.0 * k, 168.0 * k, 168.0 * k)
 	var ac := Vector2(w - s - 168.0 * k, h - b - 168.0 * k)
 	r[&"action"] = Rect2(ac - Vector2(120.0, 120.0) * k, Vector2(240.0, 240.0) * k)
-	# the escalated Gag-Cam window: top-right, 24 px clear of the meter and — with the overview
-	# button under it — of the action button's column; scaled (aspect kept) only to fit
-	var meter_end := (r[&"meter"] as Rect2).end.x
+	# --- contextual
+	r[&"meter"] = Rect2(w * 0.5 - 230.0 * k, t + 24.0 * k, 460.0 * k, 104.0 * k)
+	r[&"banner"] = Rect2(w * 0.5 - 230.0 * k, t + 136.0 * k, 460.0 * k, 88.0 * k)
+	r[&"pip"] = Rect2(w - s - 424.0 * k, t + 24.0 * k, 400.0 * k, 225.0 * k)
+	# the escalated window keeps the top-right corner; it shrinks (aspect kept) only to stay 24 px
+	# clear of the Script chip and of the transient meter (an off-screen payoff scores: the meter shows)
 	var right := w - s - 24.0 * k
-	var avail_w := right - (meter_end + 24.0 * k)
-	var top := t + 24.0 * k
-	var act_top := (r[&"action"] as Rect2).position.y
-	var avail_h := act_top - 24.0 * k - top
-	var fit_w := avail_w / (704.0 * k)
-	# first choice: the overview button fits under the window (168 = 144 + 24)
-	var ek := minf(1.0, minf(fit_w, (avail_h - 168.0 * k) / (396.0 * k)))
-	var under := ek >= 0.75
-	if not under:
-		ek = minf(1.0, minf(fit_w, avail_h / (396.0 * k)))
-	var esz := Vector2(704.0, 396.0) * k * ek
-	r[&"pip_escalated"] = Rect2(right - esz.x, top, esz.x, esz.y)
-	if under:
-		r[&"overview_escalated"] = Rect2(w - s - 168.0 * k, top + esz.y + 24.0 * k, 144.0 * k, 144.0 * k)
-	else:
-		r[&"overview_escalated"] = Rect2(right - esz.x - 168.0 * k, t + 300.0 * k, 144.0 * k, 144.0 * k)
-	var bx0 := s + 800.0 * k
-	var bx1 := w - s - 312.0 * k
+	var left_limit := maxf((r[&"script"] as Rect2).end.x, (r[&"meter"] as Rect2).end.x) + 24.0 * k
+	var ek := minf(1.0, (right - left_limit) / (704.0 * k))
+	var esz := Vector2(704.0, 396.0) * k * maxf(0.4, ek)
+	r[&"pip_escalated"] = Rect2(right - esz.x, t + 24.0 * k, esz.x, esz.y)
+	r[&"overview"] = Rect2(w - s - 168.0 * k, t + 300.0 * k, 144.0 * k, 144.0 * k)
+	r[&"overview_escalated"] = Rect2(w - s - 168.0 * k, t + 24.0 * k + esz.y + 24.0 * k, 144.0 * k, 144.0 * k)
+	r[&"tray"] = Rect2(s + 224.0 * k, h - b - 188.0 * k, (CHIP_PITCH * float(CHIPS - 1) + CHIP_HIT) * k, CHIP_HIT * k)
+	r[&"figgis"] = Rect2(s + 24.0 * k, t + 192.0 * k, 144.0 * k, 144.0 * k)
+	r[&"figgis_card"] = Rect2(s + 180.0 * k, t + 192.0 * k, 320.0 * k, 200.0 * k)
+	r[&"bow"] = Rect2(w - s - 344.0 * k, t + 24.0 * k, 320.0 * k, 112.0 * k)
+	r[&"bow_low"] = Rect2(w - s - 344.0 * k, t + 273.0 * k, 320.0 * k, 112.0 * k)
+	var mid := (t + h - b) * 0.5
+	r[&"edge_left"] = Rect2(s + 24.0 * k, mid - 110.0 * k, 136.0 * k, 220.0 * k)
+	r[&"edge_right"] = Rect2(w - s - 160.0 * k, mid - 110.0 * k, 136.0 * k, 220.0 * k)
+	var bx0 := s + 560.0 * k
+	var bx1 := w - s - 440.0 * k
 	r[&"band"] = Rect2(bx0, h - b - BAND_H * k, maxf(0.0, bx1 - bx0), BAND_H * k)
 	r[&"safe"] = Rect2(s, t, w - 2.0 * s, h - t - b)
-	# where edge bubbles and pick strips may go: below the top row, above the bottom clusters
+	# where pick strips and "it's over there" arrows may go: below the top row, above the thumbs
 	r[&"edge_zone"] = Rect2(s + 32.0 * k, t + 300.0 * k, w - 2.0 * s - 64.0 * k, h - t - b - 300.0 * k - 420.0 * k)
-	# where "it's over there" arrows may sit (EdgeArrows): 48 px below the overview button's row (a tilted
-	# arrow's tail rises) and 52 px above the thumb clusters, the full safe width
-	var az_top := t + 492.0 * k
-	r[&"arrow_zone"] = Rect2(s + 32.0 * k, az_top, w - 2.0 * s - 64.0 * k, maxf(0.0, h - b - 444.0 * k - az_top))
+	var az_top := t + 300.0 * k
+	r[&"arrow_zone"] = Rect2(s + 200.0 * k, az_top, w - 2.0 * s - 400.0 * k, maxf(0.0, h - b - 320.0 * k - az_top))
 	if left_handed:
 		for key in r.keys():
 			if key == &"safe" or key == &"meter" or key == &"banner" or key == &"edge_zone" or key == &"arrow_zone":
 				continue
 			var rc: Rect2 = r[key]
 			r[key] = Rect2(w - rc.position.x - rc.size.x, rc.position.y, rc.size.x, rc.size.y)
+		var el: Rect2 = r[&"edge_left"]
+		r[&"edge_left"] = r[&"edge_right"]
+		r[&"edge_right"] = el
 	return r
 
 
-## Where the edge bubble sits (hit box top-left) for a direction toward Bellows (screen space,
-## y down). Mostly vertical → top centre under the banner (up) or bottom centre just above the
-## Stalls band, between the thumb clusters (down); mostly horizontal → the left / right edge at
-## mid-height, between the top-corner column and the bottom cluster. Never overlaps a target.
-static func edge_bubble_pos(layout: Dictionary, dir: Vector2, bubble: float = 144.0) -> Vector2:
-	var safe: Rect2 = layout[&"safe"]
-	var banner: Rect2 = layout[&"banner"]
-	var band: Rect2 = layout[&"band"]
-	var d := dir.normalized() if dir.length_squared() > 0.0 else Vector2.RIGHT
-	if absf(d.y) > absf(d.x):
-		var y := banner.end.y + 24.0 if d.y < 0.0 else band.position.y - 24.0 - bubble
-		var x0 := safe.position.x + 24.0
-		var x1 := safe.end.x - 24.0 - bubble
-		var mid_x := safe.get_center().x
-		for key in TARGETS:
-			var rc: Rect2 = layout[StringName(key)]
-			if rc.end.y + 24.0 <= y or rc.position.y - 24.0 >= y + bubble:
-				continue
-			if rc.get_center().x < mid_x:
-				x0 = maxf(x0, rc.end.x + 24.0)
-			else:
-				x1 = minf(x1, rc.position.x - 24.0 - bubble)
-		var cx := mid_x + d.x * safe.size.x * 0.25 - bubble * 0.5
-		return Vector2(clampf(cx, x0, maxf(x0, x1)), y)
-	# left / right edge: between the targets in that half's corner column (top) and its thumb
-	# cluster (bottom), label (60 px) below when it fits
-	var left := d.x < 0.0
-	var mid := safe.get_center()
-	var y0 := safe.position.y + 24.0
-	var y1 := safe.end.y - 24.0 - bubble
-	for key in TARGETS:
-		var rc: Rect2 = layout[StringName(key)]
-		if (rc.get_center().x < mid.x) != left or key == "meter":
-			continue
-		if rc.get_center().y < mid.y:
-			y0 = maxf(y0, rc.end.y + 24.0)
-		else:
-			y1 = minf(y1, rc.position.y - 24.0 - bubble)
-	var want := mid.y - bubble * 0.5
-	if y1 - y0 >= 60.0:
-		want = minf(want, y1 - 60.0)
-	var y := clampf(want, y0, maxf(y0, y1))
-	if left:
-		return Vector2(safe.position.x + 32.0, y)
-	return Vector2(safe.end.x - 32.0 - bubble, y)
+## The middle band (REDESIGN §2.5: y 250–880 at the 1080 base, scaled to `vp.y`) as a full-width rect.
+static func middle_band(vp: Vector2) -> Rect2:
+	var f := vp.y / 1080.0
+	return Rect2(0.0, MIDDLE_Y0 * f, vp.x, (MIDDLE_Y1 - MIDDLE_Y0) * f)
+
+
+## Where the edge badge sits (hit box top-left) in `layout` for a side (−1 left, +1 right; any other
+## value picks from `dir.x`) — the 136 × 220 edge zone of that side.
+static func edge_badge_rect(layout: Dictionary, side: int, dir: Vector2 = Vector2.RIGHT) -> Rect2:
+	var sd := side if side != 0 else (1 if dir.x >= 0.0 else -1)
+	return layout[&"edge_right"] if sd > 0 else layout[&"edge_left"]
+
+
+## Stage-2 API: the edge bubble's top-left for a direction (now: the edge badge zone of that side).
+static func edge_bubble_pos(layout: Dictionary, dir: Vector2, _bubble: float = 144.0) -> Vector2:
+	return edge_badge_rect(layout, 0, dir).position
 
 
 ## Where a pick strip of `size` goes when asked to pop above `anchor` (screen px): centred on
@@ -135,13 +131,8 @@ static func pick_strip_pos(layout: Dictionary, anchor: Vector2, size: Vector2) -
 	var min_y := safe.position.y + 300.0
 	var clusters_top := minf((layout[&"clarence"] as Rect2).position.y, (layout[&"action"] as Rect2).position.y)
 	var max_y := clusters_top - 24.0 - size.y
-	var over: Rect2 = layout[&"overview"]
 	var min_x := safe.position.x + 32.0
 	var max_x := safe.end.x - 32.0 - size.x
-	if over.get_center().x > safe.get_center().x:
-		max_x = minf(max_x, over.position.x - 24.0 - size.x)
-	else:
-		min_x = maxf(min_x, over.end.x + 24.0)
 	p.x = clampf(p.x, min_x, maxf(min_x, max_x))
 	p.y = clampf(p.y, min_y, maxf(min_y, max_y))
 	return p

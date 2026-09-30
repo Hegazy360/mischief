@@ -18,6 +18,15 @@
 ##     by itself when the ring completes.
 ## Signals: action_down(verb), action_up(verb, cancelled), action_double_tap(verb) (a second
 ## tap of a TAP verb within DOUBLE_TAP_MS: pop out and run), ring_half(), ring_complete().
+##
+## R3D (REDESIGN_3D §2.4) — two visual states, switched with the same hysteresis and cross-fade:
+##   QUIET  FREEZE while nothing threatens Hush: a navy 62 % disc, a white 84 px statue, no ring —
+##          still pressable (FREEZE is persistent) but it does not shout;
+##   LIVE   any verb that is the right move now: full colour, a 1.08× pop, 96 px icon, 14 px ring —
+##          RIG (gold), RIG_DIM, POP OUT / GO ▶ (danger rim), and FREEZE when it matters: a stone-white
+##          face with an amber rim (`set_freeze_danger(1)`: he is in her room, she is exposed), the rim
+##          pulsing red-amber at 3 Hz while a "?" fills on her (`set_freeze_danger(2)`).
+## `set_live(on)` (Hud: `Hud.is_live(model)`); RIG / RIG_DIM / POP_OUT / GO are always shown LIVE.
 class_name ActionButton
 extends TouchWidget
 
@@ -44,6 +53,10 @@ const PULSE_HZ := 3.0
 const PULSE_FROM := 0.8
 const DOUBLE_TAP_MS := 280
 const TAG_MS := 1600
+const QUIET_ICON := 84.0
+const QUIET_FILL := Color(0.106, 0.137, 0.251, 0.62)
+const STONE := Color("#E4DFEC")
+const STONE_SHADE := Color("#B3AAC4")
 
 const V := HudModel.Verb
 const RIM_COLORS: Array[Color] = [UiKit.GREEN, UiKit.AMBER, UiKit.RED]
@@ -61,6 +74,14 @@ var latched_verb: int = -1
 var ring_frac: float = 0.0
 ## POP_OUT / GO danger rim (HudModel.Rim).
 var rim: int = HudModel.Rim.GREEN
+## The face shown is LIVE (else QUIET — only ever FREEZE).
+var shown_live: bool = false
+## FREEZE danger (HudModel.FreezeDanger): the amber rim / the 3 Hz red-amber pulse.
+var freeze_danger: int = 0
+
+var _target_live: bool = false
+var _prev_live: bool = false
+var _tex_quiet: Texture2D = null
 
 var _target_verb: int = V.FREEZE
 var _shown_since_ms: int = -100000
@@ -96,6 +117,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	_tex_freeze = UiIcons.get_icon(&"verb_freeze")
+	_tex_quiet = UiIcons.get_icon(&"verb_freeze_quiet")
 	_tex_pop = UiIcons.get_icon(&"verb_pop_out")
 	_tex_pin = UiIcons.get_icon(&"pin")
 	_tex_hand = UiIcons.get_icon(&"hand_rig")
@@ -113,6 +135,34 @@ func _ready() -> void:
 func set_verb(v: int) -> void:
 	_target_verb = v
 	_update_verb()
+
+
+## QUIET / LIVE (REDESIGN §2.4); verbs other than FREEZE are always drawn LIVE.
+func set_live(on: bool) -> void:
+	_target_live = on
+	_update_verb()
+
+
+## Verb and QUIET / LIVE in one step (one hysteresis window for both — the Hud's call).
+func set_face(v: int, live: bool) -> void:
+	_target_verb = v
+	_target_live = live
+	_update_verb()
+
+
+## FREEZE danger 0 none / 1 exposed (amber rim) / 2 a "?" filling (red-amber pulse).
+func set_freeze_danger(d: int) -> void:
+	if d == freeze_danger:
+		return
+	freeze_danger = d
+	if d == 2:
+		set_process(true)
+	queue_redraw()
+
+
+## True when verb `v` with the live flag `on` draws the LIVE face.
+static func face_live(v: int, on: bool) -> bool:
+	return v != V.FREEZE or on
 
 
 ## The verb waiting to be shown (== shown_verb when none is pending).
@@ -261,7 +311,8 @@ func _touch_cancel() -> void:
 # --- verb switching -------------------------------------------------------------------------
 
 func _update_verb() -> void:
-	if _target_verb == shown_verb:
+	var tl := face_live(_target_verb, _target_live)
+	if _target_verb == shown_verb and tl == shown_live:
 		return
 	if is_pressed or _toggled:
 		return
@@ -269,15 +320,21 @@ func _update_verb() -> void:
 	if now - _shown_since_ms < HYSTERESIS_MS:
 		set_process(true)
 		return
+	var verb_changed := _target_verb != shown_verb
+	var went_live := tl and not shown_live
 	_prev_verb = shown_verb
+	_prev_live = shown_live
 	shown_verb = _target_verb
+	shown_live = tl
 	_shown_since_ms = now
 	_fade_from_ms = now
-	_tag_ms = now
-	if shown_verb == V.RIG:
+	if tl and (verb_changed or went_live):
+		_tag_ms = now
+	if went_live or (tl and verb_changed and shown_verb == V.RIG):
 		_pop(ARRIVAL_POP)
 	set_process(true)
-	verb_shown.emit(shown_verb)
+	if verb_changed:
+		verb_shown.emit(shown_verb)
 	queue_redraw()
 
 
@@ -294,6 +351,7 @@ func _process(_delta: float) -> void:
 	busy = busy or now - _fade_from_ms < FADE_MS or now - _pop_ms < POP_MS or now - _tag_ms < TAG_MS
 	busy = busy or (ring_frac >= PULSE_FROM and ring_frac < 1.0 and shown_verb == V.RIG)
 	busy = busy or ((shown_verb == V.POP_OUT or shown_verb == V.GO) and rim == HudModel.Rim.RED)
+	busy = busy or (shown_verb == V.FREEZE and shown_live and freeze_danger == 2)
 	queue_redraw()
 	if not busy:
 		set_process(false)
@@ -311,20 +369,24 @@ func _draw() -> void:
 	# each face = one triangle array (shadow, disc, rim) + its icons (s2-fix G #8)
 	var ft := float(now - _fade_from_ms) / float(FADE_MS)
 	if ft >= 0.0 and ft < 1.0 and _prev_verb >= 0:
-		_draw_face(_prev_verb, 1.0 - ft, true)
-		_draw_face(shown_verb, ft)
+		_draw_face(_prev_verb, 1.0 - ft, true, _prev_live)
+		_draw_face(shown_verb, ft, false, shown_live)
 	else:
-		_draw_face(shown_verb, 1.0, true)
+		_draw_face(shown_verb, 1.0, true, shown_live)
 	draw_set_transform(c, 0.0, Vector2.ONE)
 	if shown_verb == V.RIG:
 		_draw_ring(now)
-	_draw_tag(now)
+	if shown_live:
+		_draw_tag(now)
 	draw_set_transform(Vector2.ZERO)
 
 
-func _draw_face(v: int, a: float, with_shadow: bool = false) -> void:
+func _draw_face(v: int, a: float, with_shadow: bool = false, live: bool = true) -> void:
 	var r := VISUAL * 0.5
 	var down := is_pressed or _toggled
+	if v == V.FREEZE and not live:
+		_draw_quiet(r, a, with_shadow, down)
+		return
 	var fill: Color
 	var shade: Color
 	match v:
@@ -335,8 +397,9 @@ func _draw_face(v: int, a: float, with_shadow: bool = false) -> void:
 			fill = Color("#A7A3B8")
 			shade = Color("#7C7894")
 		V.FREEZE:
-			fill = Color("#9C8FD6") if not down else Color("#8FC8F0")
-			shade = Color("#6F62B0") if not down else Color("#5E97C8")
+			# LIVE FREEZE: the stone-white face (she turns to marble)
+			fill = STONE if not down else Color("#D6E6F5")
+			shade = STONE_SHADE if not down else Color("#A3B8D0")
 		V.POP_OUT:
 			fill = UiKit.CREAM
 			shade = UiKit.CREAM_SHADE
@@ -355,6 +418,8 @@ func _draw_face(v: int, a: float, with_shadow: bool = false) -> void:
 	UiShapes.circle(Vector2(0, -r * 0.08), (r - UiKit.BUTTON_OUTLINE) * 0.9, Color(fill, a))
 	if v == V.POP_OUT or not (v == V.RIG or v == V.RIG_DIM or v == V.FREEZE):
 		_draw_rim(r, a)
+	elif v == V.FREEZE and freeze_danger > 0:
+		_draw_freeze_rim(r, a)
 	UiShapes.flush(self)
 	match v:
 		V.RIG:
@@ -387,6 +452,32 @@ func _draw_face(v: int, a: float, with_shadow: bool = false) -> void:
 			for i in GO_TRI_LINE.size() - 1:
 				UiShapes.line(GO_TRI_LINE[i], GO_TRI_LINE[i + 1], Color(UiKit.NAVY, a), 5.0)
 			UiShapes.flush(self)
+
+
+## QUIET: a navy 62 % disc with the white statue — pressable, but it does not shout.
+func _draw_quiet(r: float, a: float, with_shadow: bool, down: bool) -> void:
+	UiShapes.begin()
+	if with_shadow:
+		UiShapes.circle(Vector2(0, 4), r, Color(0, 0, 0, 0.18 * a))
+	UiShapes.circle(Vector2.ZERO, r, Color(QUIET_FILL, QUIET_FILL.a * a * (1.3 if down else 1.0)))
+	UiShapes.flush(self)
+	var e := QUIET_ICON
+	UiKit.draw_icon(self, _tex_quiet if _tex_quiet != null else _tex_freeze, Rect2(-e * 0.5, -e * 0.5 - 4.0, e, e),
+		Color(1, 1, 1, a))
+
+
+## FREEZE LIVE's rim: amber (exposed), pulsing red ↔ amber at 3 Hz while a "?" fills.
+func _draw_freeze_rim(r: float, a: float) -> void:
+	var col := UiKit.AMBER
+	var w := 14.0
+	if freeze_danger >= 2:
+		if UiKit.reduce_flash():
+			col = UiKit.RED
+		else:
+			var ph := 0.5 + 0.5 * sin(float(UiKit.now_ms()) * 0.001 * TAU * PULSE_HZ)
+			col = UiKit.AMBER.lerp(UiKit.RED, ph)
+			w += 4.0 * ph
+	UiShapes.arc(Vector2.ZERO, r - UiKit.BUTTON_OUTLINE - w * 0.5 + 1.0, 0.0, TAU, w, Color(col, a), 64)
 
 
 func _draw_rim(r: float, a: float) -> void:

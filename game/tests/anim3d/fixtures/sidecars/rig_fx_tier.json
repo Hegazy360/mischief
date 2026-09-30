@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_fx_tier",
+  "rig": "hush",
+  "anim": "res://tests/anim3d/fixtures/anim/rig_fx_tier.res",
+  "length": 64,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "determined"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/lib/fixtures/rig_fx_tier.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 0.0,
+    "z": -1.0,
+    "facing": 1,
+    "cheat_deg": 10.0
+  }
+}

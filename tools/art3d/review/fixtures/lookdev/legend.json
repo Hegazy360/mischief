@@ -1,0 +1,55 @@
+{
+  "source": "docs/review/lookdev/look-toy/ingame_kitchen.png",
+  "regions": [
+    {
+      "color": "#FF0000",
+      "name": "kitchen_wall",
+      "class": "wall",
+      "room": "kitchen"
+    },
+    {
+      "color": "#0000FF",
+      "name": "kitchen_floor",
+      "class": "floor",
+      "room": "kitchen"
+    },
+    {
+      "color": "#FF8000",
+      "name": "parlour_wall",
+      "class": "wall",
+      "room": "parlour"
+    },
+    {
+      "color": "#8000FF",
+      "name": "parlour_floor",
+      "class": "floor",
+      "room": "parlour"
+    },
+    {
+      "color": "#FFFF00",
+      "name": "fireplace",
+      "class": "dressing",
+      "room": "parlour"
+    },
+    {
+      "color": "#00FFFF",
+      "name": "gramophone_horn",
+      "class": "live_prop"
+    },
+    {
+      "color": "#00FF00",
+      "name": "pantry_curtain",
+      "class": "live_prop"
+    },
+    {
+      "color": "#008000",
+      "name": "hush",
+      "class": "character"
+    },
+    {
+      "color": "#800080",
+      "name": "bellows",
+      "class": "character"
+    }
+  ]
+}

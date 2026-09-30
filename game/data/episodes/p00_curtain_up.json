@@ -8,6 +8,7 @@
   "seed": 100,
   "rooms": ["parlour", "kitchen"],
   "backstage": ["hall"],
+  "hides": ["kitchen_pantry_curtain", "parlour_piano_back"],
   "entry": "window",
   "rules": {
     "spot_fill_s": 2.0,

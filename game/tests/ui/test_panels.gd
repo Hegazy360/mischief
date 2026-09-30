@@ -16,9 +16,10 @@ func test_pause_menu_actions_and_bow_only_with_a_star() -> void:
 	var p := PauseMenu.new()
 	p.setup(false)
 	_add(p)
-	assert_eq(p.actions(), PackedStringArray(["resume", "retry", "settings", "playbill"]), "no Take a Bow before ★")
+	assert_eq(p.actions(), PackedStringArray(["resume", "retry", "hint", "map", "settings", "playbill"]),
+		"no Take a Bow before ★; R3D adds Hint and Map")
 	p.setup(true)
-	assert_eq(p.actions(), PackedStringArray(["resume", "retry", "bow", "settings", "playbill"]))
+	assert_eq(p.actions(), PackedStringArray(["resume", "retry", "bow", "hint", "map", "settings", "playbill"]))
 	var b: UiButton = p.buttons["resume"]
 	assert_eq(b.visual_rect().size.y, 96.0, "96 px-tall buttons")
 	var got := []
@@ -40,15 +41,20 @@ func test_pause_menu_back_resumes() -> void:
 	p.queue_free()
 
 
-func test_pause_buttons_are_24px_apart() -> void:
+func test_pause_buttons_are_24px_apart_and_fit() -> void:
 	var p := PauseMenu.new()
-	p.setup(true)
+	p.setup(true, {"applause": 87, "tomatoes_left": 2, "tomatoes_max": 3, "curtain_calls": 1})
 	_add(p)
 	var acts := p.actions()
-	for i in range(1, acts.size()):
-		var a: UiButton = p.buttons[acts[i - 1]]
-		var b: UiButton = p.buttons[acts[i]]
-		assert_eq(b.position.y - (a.position.y + a.size.y), 24.0)
+	var rects: Array[Rect2] = []
+	for a in acts:
+		var b: UiButton = p.buttons[a]
+		rects.append(Rect2(b.position, b.size))
+		assert_ge(b.size.y, 120.0, "%s: 120 px hit" % a)
+	for i in rects.size():
+		for j in range(i + 1, rects.size()):
+			assert_false(rects[i].grow(11.9).intersects(rects[j].grow(11.9)), "%s / %s ≥ 24 px apart" % [acts[i], acts[j]])
+	assert_le(p.card.size.y, 1080.0, "seven buttons + header fit a phone")
 	p.queue_free()
 
 

@@ -63,6 +63,9 @@ var ff_needs_cue: bool = false
 var enter_ticks: int = 0
 ## `rules.combos`: null = every combo allowed, else the allowed combo ids (rule 12).
 var combos_allowed: Variant = null
+## Struck hotspots of the Night (REDESIGN_3D §6.2 C1): tappable hotspots in a room Hush may enter that are not
+## live tonight (`SolverData.live_hotspots`) — id → true (rule 13).
+var struck: Dictionary = {}
 
 
 ## Intern a string to a code.

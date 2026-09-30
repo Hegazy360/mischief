@@ -75,7 +75,7 @@ func test_real_prologue_plays_to_the_curtain() -> void:
 	U.run_until_pred(w, func(x: SimWorld) -> bool: return x.hush.state == SimHush.IDLE, 300, log)
 	assert_true(U.walk_to(w, "parlour_gramophone", 1500, log), "to the gramophone")
 	assert_true(U.rig_hold(w, 400, log), "lever at triple speed")
-	assert_true(U.walk_to(w, "parlour_chaise_back", 1500, log))
+	assert_true(U.walk_to(w, "parlour_piano_back", 1500, log), "behind the piano (the chaise is struck, REDESIGN_3D §6.2 C2)")
 	log.append_array(U.run(w, 5400))
 	assert_true(w.ended, "the curtain falls")
 	assert_eq(w.end_reason, "prologue_done")

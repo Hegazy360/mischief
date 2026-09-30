@@ -150,8 +150,9 @@ static func _cond_names(cond: Variant, pranks: PackedStringArray) -> bool:
 	return false
 
 
-## The nearest glowing hotspot the route never uses (rig points first, then containers, then
-## hiding spots), in the episode's rooms, measured from Hush's start point.
+## The nearest glowing hotspot the route never uses (rig points first, then containers, then hiding spots),
+## measured from Hush's start point. For a real episode "glowing" means live tonight and in Hush's start room
+## (REDESIGN_3D §4.4 N1: only her room glows) — "" when the decluttered room has no such distractor.
 static func wrong_tap_target(steps: Array, data: SolverData, episode_id: String) -> String:
 	var used := PackedStringArray()
 	for s in steps:
@@ -184,6 +185,8 @@ static func wrong_tap_target(steps: Array, data: SolverData, episode_id: String)
 			continue
 		if kind == "hiding" and data.in_use_activity(id) != "":
 			continue
+		if data.episodes.has(episode_id) and (not data.is_live(episode_id, id) or r != sroom):
+			continue   # only live hotspots in Hush's room glow (REDESIGN_3D §4.4 N1, §6.2 C1)
 		var score := data.walk_px(sroom, sx, r, int(h.get("use_x", 0))) + int(kind_rank[kind]) * 200
 		if score < best_score:
 			best_score = score

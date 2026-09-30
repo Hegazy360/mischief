@@ -1,12 +1,14 @@
-## RunningGagBanner — "RUNNING GAG ×1.5" (52 px) over a 420 × 18 fuse bar draining, centred at
-## y = T+164 under the meter (GDD §3.8, §4.5). Shown only while a Running Gag is live
-## (link > 0). Pops 1.2 → 1.0 on every new link; the fuse spark flickers at the burning end.
-## Never a touch target (MOUSE_FILTER_IGNORE).
+## RunningGagBanner — the Running Gag fuse under the transient meter (REDESIGN_3D §2.2): a 420 × 18
+## fuse bar at y T+144 with "RUNNING GAG ×1.5" (44 px) under it, 460 wide, centred. Shown only while a
+## Running Gag is live (link > 0; the meter stays up with it). Pops 1.2 → 1.0 on every new link; the
+## fuse spark flickers at the burning end. Never a touch target (MOUSE_FILTER_IGNORE).
 class_name RunningGagBanner
 extends Control
 
-const W := 640.0
-const H := 96.0
+const W := 460.0
+const H := 88.0
+## Text size (REDESIGN §2.2: 44 px).
+const TEXT_PX := 44
 const FUSE_W := 420.0
 const FUSE_H := 18.0
 const POP_MS := 260
@@ -69,23 +71,22 @@ func _draw() -> void:
 	var pt := float(now - _pop_ms) / float(POP_MS)
 	if pt >= 0.0 and pt < 1.0 and not UiKit.reduce_motion():
 		k *= 1.2 - 0.2 * pt
-	draw_set_transform(Vector2(W * 0.5, 34.0), 0.0, Vector2(k, k))
+	draw_set_transform(Vector2(W * 0.5, 17.0), 0.0, Vector2(k, k))
 	var f := UiKit.display_font()
 	var hot := mult_pct >= 200
-	UiKit.draw_text_centered(self, f, Vector2.ZERO, _text, UiKit.SIZE_BANNER,
-		UiKit.GOLD_LIGHT if hot else UiKit.CREAM, 14)
-	# fuse
-	var fr := Rect2(-FUSE_W * 0.5, 36.0, FUSE_W, FUSE_H)
-	UiKit.draw_chunky_rect(self, fr.grow(5.0), 14.0, UiKit.NAVY, UiKit.NAVY, 0.0, 0.0)
-	UiKit.draw_chunky_rect(self, fr, 9.0, Color("#4A3B2A"), Color("#4A3B2A"), 0.0, 0.0)
+	# fuse (its centre line at T+144 + 9)
+	var fr := Rect2(-FUSE_W * 0.5, -FUSE_H * 0.5, FUSE_W, FUSE_H)
+	UiShapes.begin()
+	UiShapes.rrect(fr.grow(5.0), 14.0, UiKit.NAVY)
+	UiShapes.rrect(fr, 9.0, Color("#4A3B2A"))
 	var lit := fuse_frac * FUSE_W
+	var tip := fr.position + Vector2(lit, FUSE_H * 0.5)
+	var fl := 0.5 if UiKit.reduce_flash() else 0.5 + 0.5 * sin(float(now) * 0.045)
 	if lit > 1.0:
 		var col := UiKit.BRASS.lerp(UiKit.CHERRY, 1.0 - fuse_frac)
-		UiKit.draw_chunky_rect(self, Rect2(fr.position, Vector2(lit, FUSE_H)), 9.0, col, col.darkened(0.2), 0.0, 5.0)
-		var tip := fr.position + Vector2(lit, FUSE_H * 0.5)
-		var fl := 0.5 + 0.5 * sin(float(now) * 0.045)
-		if UiKit.reduce_flash():
-			fl = 0.5
-		draw_circle(tip, 12.0 + 4.0 * fl, Color(UiKit.YELLOW, 0.55))
-		draw_circle(tip, 7.0 + 2.0 * fl, UiKit.WHITE)
+		UiShapes.rrect(Rect2(fr.position, Vector2(lit, FUSE_H)), 9.0, col)
+		UiShapes.circle(tip, 12.0 + 4.0 * fl, Color(UiKit.YELLOW, 0.55))
+		UiShapes.circle(tip, 7.0 + 2.0 * fl, UiKit.WHITE)
+	UiShapes.flush(self)
+	UiKit.draw_text_centered(self, f, Vector2(0, 44.0), _text, TEXT_PX, UiKit.GOLD_LIGHT if hot else UiKit.CREAM, 12)
 	draw_set_transform(Vector2.ZERO)

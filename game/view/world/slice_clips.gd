@@ -17,6 +17,13 @@
 ## them; `skin: "pip"` swaps in the `skin:pip` overrides. Deterministic (sorted by clip id).
 ## Consumers: s2-sim's coverage lint, s2-rig's lint A24/A25/A29, `test_*_clips.gd`,
 ## `tests/slice/`, s2-integrate. A human-readable dump: `docs/review/s2-view/slice_clips.md`.
+##
+## **3D (R3D index §5.3, §7.10):** `build3d(episodes)` builds the same manifest on the rigs' 3D maps
+## (`ClipMap.load_map3d`) for the given episodes only, with `state:rigging` / `rigging@*` (the `act_tinker_*` clips)
+## swapped for one `rig:<prank>` row per prank of those Nights (`rig_actions.json`: the prank's own clip at its tier's
+## length, else its band clip at any length), the `flavour:arrive|skid|step_down` rows (clip_rules.json rows marked
+## `"view": "3d"`), no Figgis rows (Figgis stays a 2D bust, R7). `freeze_5..8` join once `hush3d/map.json` lists them.
+## `docs/review/r3d-view3d/slice_clips3d.md` is its dump.
 class_name SliceClips
 extends RefCounted
 
@@ -36,6 +43,25 @@ const LEGACY_MG_LEN := 48
 ## Every clip the slice can play (real data), for `skin` ("" | "pip").
 static func build(skin: String = "") -> Array[Dictionary]:
 	return SliceClips.build_from(SliceClips.load_db(), skin)
+
+
+## The 3D manifest for `episodes` (see the class doc).
+static func build3d(episodes: PackedStringArray) -> Array[Dictionary]:
+	var db := SliceClips.load_db()
+	var all: Dictionary = db["episodes"]
+	var eps := {}
+	for id in episodes:
+		if all.has(id):
+			eps[id] = all[id]
+		else:
+			var e: Variant = ViewKit.json("res://data/episodes/%s.json" % id)
+			if e is Dictionary:
+				eps[id] = e
+	db["episodes"] = eps
+	db["maps"] = {"bellows": ClipMap.load_map3d("bellows"), "hush": ClipMap.load_map3d("hush")}
+	db["format3d"] = true
+	db["rig_actions"] = ClipMap.rig_actions()
+	return SliceClips.build_from(db, "")
 
 
 ## The real data as a db Dictionary for build_from().
@@ -122,8 +148,9 @@ static func build_from(db: Dictionary, skin: String = "") -> Array[Dictionary]:
 			ids.append(ViewKit.s(id))
 	for ep_id in ids:
 		SliceClips._episode(acc, db, ep_id, eps[ep_id], skin)
-	for f in FIGGIS_CLIPS:
-		SliceClips._add(acc, f, "figgis", "figgis chip", -1, 0, f == "figgis/f_idle", "figgis", 0)
+	if not bool(db.get("format3d", false)):
+		for f in FIGGIS_CLIPS:
+			SliceClips._add(acc, f, "figgis", "figgis chip", -1, 0, f == "figgis/f_idle", "figgis", 0)
 	var keys := acc.keys()
 	keys.sort()
 	var out: Array[Dictionary] = []
@@ -322,9 +349,14 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 		SliceClips._add(acc, cc, "bellows", "%s combo %s" % [bw, cid], SliceClips._ct_frames(ct, cc), RX_TOL, false, "combo", 0)
 	# Hush
 	var hw := "%s: hush" % tag
+	var fmt3 := bool(db.get("format3d", false))
 	for k2 in ["idle", "idle_fidgets", "walk", "run", "turn", "state:rummage", "state:pick_window", "state:rigging",
 			"state:diving", "state:popping", "state:squeaking", "freeze", "freeze_midjob"]:
+		if fmt3 and k2 == "state:rigging":
+			continue
 		SliceClips._key(acc, hm, k2, "hush", hw, skin)
+	if fmt3:
+		SliceClips._rig_rows3d(acc, db, pranks, hm, hw)
 	var tiers := PackedStringArray()
 	for p4 in pranks:
 		for st in (pranks_db.get(p4, {}) as Dictionary).get("steps", []):
@@ -333,8 +365,9 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 				if not tiers.has(t):
 					tiers.append(t)
 	tiers.sort()
-	for t2 in tiers:
-		SliceClips._key(acc, hm, "rigging@" + t2, "hush", hw, skin)
+	if not fmt3:
+		for t2 in tiers:
+			SliceClips._key(acc, hm, "rigging@" + t2, "hush", hw, skin)
 	if can_catch:
 		SliceClips._key(acc, hm, "state:caught", "hush", hw, skin)
 	if not cant_fail and ep_id != "g0_sneeze":
@@ -354,6 +387,10 @@ static func _rule(acc: Dictionary, db: Dictionary, r: Dictionary, ep_id: String,
 	var acts: PackedStringArray = flags.get("acts", PackedStringArray())
 	var eps: Variant = r.get("episodes", "all")
 	if eps is Array and not (eps as Array).has(ep_id):
+		return
+	var view := ViewKit.s(r.get("view", ""))
+	var fmt3 := bool(db.get("format3d", false))
+	if (view == "3d" and not fmt3) or (view == "2d" and fmt3):
 		return
 	var key := ViewKit.s(r.get("key", ""))
 	var rig := ViewKit.s(r.get("rig", ""))
@@ -423,6 +460,25 @@ static func _rule(acc: Dictionary, db: Dictionary, r: Dictionary, ep_id: String,
 		if expect < 0 and src.begins_with("sim:") and then_c == "":
 			lok = true
 		SliceClips._add(acc, c, rig, "%s: %s %s" % [tag, rig, key], expect, tol, lok, key, mx)
+
+
+## 3D: one `rig:<prank>` row per prank of the Night (its own clip at its tier's length; a band clip at any length).
+static func _rig_rows3d(acc: Dictionary, db: Dictionary, pranks: PackedStringArray, hm: Dictionary, why: String) -> void:
+	var ra: Dictionary = db.get("rig_actions", {})
+	var tiers: Dictionary = ra.get("tiers", {}) if ra.get("tiers", null) is Dictionary else {}
+	var pr_tbl: Dictionary = ra.get("pranks", {}) if ra.get("pranks", null) is Dictionary else {}
+	for pk in pranks:
+		if not pr_tbl.has(pk):
+			continue
+		var key := "rig:" + pk
+		var e: Variant = hm.get(key, null)
+		var clip := ClipMap.clip_of(e) if e != null else ClipMap.rig_clip_of(ra, pk)
+		if clip == "":
+			continue
+		var pd: Dictionary = pr_tbl[pk]
+		var own: Variant = pd.get("clip", null)
+		var expect := int(tiers.get(ViewKit.s(pd.get("tier", "q")), -1)) if own is String and ViewKit.s(own) == clip else -1
+		SliceClips._add(acc, clip, "hush", "%s %s (rig_pm)" % [why, key], expect, 0, false, key, 0)
 
 
 static func _mg(acc: Dictionary, bm: Dictionary, mid: String, mlen: int, why: String, skin: String) -> void:

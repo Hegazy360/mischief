@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "pranks": {
+    "achoo_ria": {"pictogram": ["nose", "star_burst"], "needs": null, "combines": [{"with": "tap_dance", "badge": "to_sink"}]},
+    "allegro_go_go": {"pictogram": ["record", "x3", "spiral"], "needs": null, "combines": []},
+    "kettle_drum": {"pictogram": ["kettle", "notes", "crack"], "needs": "squeaker", "combines": []},
+    "tap_dance": {"pictogram": ["tap", "water_jet", "face"], "needs": null, "combines": []},
+    "in_a_pickle": {"pictogram": ["jar", "straining_arm", "onions"], "needs": null, "combines": []},
+    "lift_off": {"pictogram": ["chair", "spring", "up_arrow", "chandelier"], "needs": null, "combines": []},
+    "cold_open": {"pictogram": ["fridge", "avalanche", "jelly_helmet"], "needs": null, "combines": []},
+    "eye_popping_news": {"pictogram": ["newspaper", "magnifier", "ballooned_eyes"], "needs": "magnifier", "combines": []},
+    "something_fishy": {"pictogram": ["phone", "fish"], "needs": "kipper", "combines": []},
+    "times_up": {"pictogram": ["clock", "zigzag", "exclaim"], "needs": null, "combines": []},
+    "mirror_mirror": {"pictogram": ["oval_face", "wink"], "needs": null, "combines": []}
+  }
+}

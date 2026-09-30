@@ -1,0 +1,16 @@
+status  region                     class       rule                                   value  limit        detail
+FAIL    kitchen_wall               wall        lit wall L*                             90.6  62–76        
+PASS    kitchen_wall               wall        lit wall C*                              9.4  28           
+FAIL    kitchen_floor              floor       floor L*                                64.3  40–50        
+FAIL    parlour_wall               wall        lit wall L*                             78.6  62–76        
+PASS    parlour_wall               wall        lit wall C*                             21.3  28           
+FAIL    parlour_floor              floor       floor L*                                62.1  40–50        
+PASS    fireplace                  dressing    dressing C*                              6.8  30           
+FAIL    fireplace                  dressing    dressing |ΔL*|                          17.1  15           vs parlour_wall
+PASS    gramophone_horn            live_prop   live prop C*                            65.7  45           
+FAIL    pantry_curtain             live_prop   live prop C*                            43.5  45           
+FAIL    hush                       character   character share L* ≥ 85                0.127  0.2          
+PASS    hush                       character   character share L* ≤ 40                0.553  0.2          
+PASS    bellows                    character   character share L* ≥ 85                0.333  0.2          
+PASS    bellows                    character   character share L* ≤ 40                0.341  0.2          
+FAIL — 7 pass, 7 fail, 0 skip, 0 exempt, 0 info

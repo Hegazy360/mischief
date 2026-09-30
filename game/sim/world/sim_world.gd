@@ -254,7 +254,8 @@ func tomatoes_max() -> int:
 	return ctx.tomatoes_max
 
 
-## {kind, enabled, stock:[items], occupant, in_use_next, spent, rigged, needs_item, seen}
+## {kind, enabled, stock:[items], occupant, in_use_next, spent, rigged, needs_item, seen}. `enabled` is false for a
+## struck hotspot (not live tonight, `SimCtx.live_hotspots()`) and for one in a room Hush may not enter.
 func hotspot_state(id: String) -> Dictionary:
 	return pranks.hotspot_state(self, id)
 

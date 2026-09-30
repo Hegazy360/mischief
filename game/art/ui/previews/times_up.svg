@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: clock zigzag exclaim</desc>
+<circle cx="50.0" cy="58.0" r="40.0" fill="#FFF4E0" stroke="#1B2340" stroke-width="5"/>
+<circle cx="50.0" cy="58.0" r="32.0" fill="#FFFFFF" stroke="#1B2340" stroke-width="3"/>
+<path d="M76.0 58.0 L80.0 58.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M72.5 71.0 L76.0 73.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M63.0 80.5 L65.0 84.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50.0 84.0 L50.0 88.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M37.0 80.5 L35.0 84.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M27.5 71.0 L24.0 73.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M24.0 58.0 L20.0 58.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M27.5 45.0 L24.0 43.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M37.0 35.5 L35.0 32.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50.0 32.0 L50.0 28.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M63.0 35.5 L65.0 32.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M72.5 45.0 L76.0 43.0" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50 58 L50 34 M50 58 L68 66" fill="none" stroke="#1B2340" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="50.0" cy="58.0" r="4.0" fill="#1B2340"/>
+<path d="M76 90 L96 84 L86 100 L108 94 L98 112 L120 106" fill="none" stroke="#9CA3B4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M104 8 L122 8 L116 52 L108 52 Z" fill="#E8413C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="112.0" cy="64.0" r="7.0" fill="#E8413C" stroke="#1B2340" stroke-width="5"/>
+<path d="M8 30 Q4 58 12 84" fill="none" stroke="#1B2340" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

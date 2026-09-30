@@ -157,9 +157,20 @@ func test_real_fuzz_regressions_p00() -> void:
 	print("  %s" % Fuzz.summary_line(r17))
 	assert_true(bool(r17["ok"]), "random 17: %s" % "\n".join(PackedStringArray(r17["invariants"])))
 	var lg: SolverLog = r17["log"]
-	var q := lg.events_named("cmd_queued", {"why": "entering"})
-	assert_false(q.is_empty(), "the climb-in go was answered with cmd_queued")
-	assert_eq(int((q[0] as Dictionary).get("t", -1)), 1, "on the tick it was tapped")
+	# every go / move tapped during the climb-in is answered the tick it was tapped: queued (a live target) or
+	# refused (R3D: a struck hotspot, `cmd_rejected {why: "struck"}`) — never silent
+	var enter := lg.enter_ticks
+	var answered := 0
+	for pr in lg.cmds:
+		var c: Dictionary = pr[1]
+		var t := int(pr[0])
+		if t > enter or not (String(c.get("c", "")) in ["go", "move"]):
+			continue
+		var q := lg.events_named("cmd_queued", {"why": "entering", "t": t})
+		var rj := lg.events_named("cmd_rejected", {"t": t})
+		assert_true(not q.is_empty() or not rj.is_empty(), "the climb-in %s at t=%d was answered the same tick" % [JSON.stringify(c), t])
+		answered += 1
+	assert_gt(answered, 0, "random 17 taps during the climb-in")
 	var r13 := Fuzz.run_bot(fac, _data, ep, "hider", 13, {"probe": true})
 	print("  %s" % Fuzz.summary_line(r13))
 	var sl: Dictionary = r13["softlock"]

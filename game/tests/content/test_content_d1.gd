@@ -295,8 +295,11 @@ func test_every_route_carries_the_d1_gates() -> void:
 func test_scenario_routes_cover_the_staging_set_pieces() -> void:
 	var want := {
 		"n01_throat_tea": {"caught": ["caught", "doorstep"], "chase": ["chase_start", "door_slam"], "meltdown": ["meltdown_start"]},
-		"n02_something_fishy": {"face_to_face": ["face_to_face", "near_miss"], "face_to_face_lost": ["face_to_face", "caught"]},
 	}
+	# R3D (REDESIGN_3D §6.2 C2): the in-use hiding lesson (hall_clock_case, struck in Night 2) moves to Night 3.
+	for rn in ["face_to_face", "face_to_face_lost"]:
+		assert_false((sols.get("n02_something_fishy", {}).get("routes", {}) as Dictionary).has(rn),
+			"n02_something_fishy/%s is retired" % rn)
 	for e in want:
 		if not assert_true(sols.has(e), "solutions/%s.json" % e):
 			continue

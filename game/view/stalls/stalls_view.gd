@@ -64,6 +64,12 @@ var view_size_override: Vector2 = Vector2.ZERO
 var side_inset: float = 0.0
 var alpha_rest: float = REST_ALPHA
 var alpha_hold: float = 1.0
+## REDESIGN §2.2 (the 3D view): the Stalls are **hidden at rest** — they fade out and sink below the band, and rise
+## only on audience events (laughs 60–150 px by tier, gasp, shush, "BEHIND YOU!", chants, boos). The 2D view keeps
+## its resting row (false).
+var hidden_at_rest: bool = false
+const HIDE_SINK_PX := 90.0
+var _sink := 0.0
 
 var _atlas: Texture2D = null
 ## Per seat: atlas regions for rest / laugh / lean / point, drawn canvas size and pivot.
@@ -510,8 +516,10 @@ func advance(delta: float) -> void:
 	if _mode != "rest" and _t >= _dur:
 		_mode = "rest"
 		_tier = -1
-	var want_alpha := alpha_rest if _mode == "rest" else alpha_hold
+	var rest_a := 0.0 if hidden_at_rest else alpha_rest
+	var want_alpha := rest_a if _mode == "rest" else alpha_hold
 	_alpha = move_toward(_alpha, want_alpha, delta * (4.0 if want_alpha > _alpha else 1.2))
+	_sink = move_toward(_sink, 1.0 if hidden_at_rest and _mode == "rest" else 0.0, delta * (1.5 if _mode == "rest" else 6.0))
 	_balloon_t += delta
 	if _tumble >= 0:
 		_tumble_t += delta

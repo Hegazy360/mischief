@@ -105,24 +105,62 @@ static func compute(log: SolverLog, is_laugh: Callable = Callable()) -> Dictiona
 	r["hold_total_s"] = _s(hold)
 	r["freeze_total_s"] = _s(freeze)
 	r.merge(dead_air(log, laugh_fn), true)
+	r["d1_lean"] = d1_lean(log, laugh_fn, SolverData.sv(log.persona))
 	return r
+
+
+## D1 thresholds per persona (lead decision D1): dead air ⏩ %, worst gap ⏩ s.
+const D1_MAX_PCT := {"ideal": 20.0, "required": 25.0, "slow": 30.0}
+const D1_MAX_GAP_S := 12.0
+
+
+## The lean dead-air check (R3D ruling R15): the D1 metric recomputed as if the Bellows window stayed closed on
+## adjacency-only ticks — a `pip` beat whose `pip_reason` is "adjacent" counts as visible only when it has an
+## emote (the HUD edge badge plays it: an edge beat, inside the ≤ ⅓ edge-share cap, Stage-2 ruling L1), else it is
+## hidden. {dead_air_ff_pct, max_gap_ff_s, edge_share, beats {room, pip, edge, hidden, adjacent_pip}, ok, fail
+## [..]} — `ok` applies the gate thresholds for the persona (ideal ≤ 20 %, required ≤ 25 %, slow ≤ 30 %; worst gap
+## ≤ 12 s; edge share ≤ ⅓), info only (the orchestrator's `bellows_window: "lean"` decision reads it).
+static func d1_lean(log: SolverLog, laugh_fn: Callable = Callable(), persona: String = "") -> Dictionary:
+	var da := dead_air(log, laugh_fn, true)
+	var bt: Dictionary = da.get("beats", {})
+	var adj := 0
+	for ev in log.events:
+		if SolverData.sv(ev.get("e", "")) == "micro_gag" and SolverData.sv(ev.get("vis", "")) == "pip" \
+				and SolverData.sv(ev.get("pip_reason", "")) == "adjacent":
+			adj += 1
+	var out := {"dead_air_ff_pct": da["dead_air_ff_pct"], "max_gap_ff_s": da["max_gap_ff_s"],
+		"edge_share": float(bt.get("edge_share", 0.0)), "beats": {"room": int(bt.get("room", 0)), "pip": int(bt.get("pip", 0)),
+			"edge": int(bt.get("edge", 0)), "hidden": int(bt.get("hidden", 0)), "adjacent_pip": adj}}
+	var fail := PackedStringArray()
+	if D1_MAX_PCT.has(persona) and float(da["dead_air_ff_pct"]) > float(D1_MAX_PCT[persona]):
+		fail.append("dead air ⏩ %.1f %% > %.0f %%" % [float(da["dead_air_ff_pct"]), float(D1_MAX_PCT[persona])])
+	if D1_MAX_PCT.has(persona) and float(da["max_gap_ff_s"]) > D1_MAX_GAP_S:
+		fail.append("worst gap ⏩ %.1f s > %.0f s" % [float(da["max_gap_ff_s"]), D1_MAX_GAP_S])
+	if D1_MAX_PCT.has(persona) and float(bt.get("edge_share", 0.0)) > EDGE_SHARE_MAX + 0.0005:
+		fail.append("edge share %.2f > 1/3" % float(bt.get("edge_share", 0.0)))
+	out["fail"] = fail
+	out["ok"] = fail.is_empty()
+	return out
 
 
 static func _s(ticks: int) -> float:
 	return snappedf(ticks / 60.0, 0.01)
 
 
-## The micro-gag kind of an event: "" (not a beat), "room" | "pip" | "edge" (visible) or "hidden".
-static func beat_kind(ev: Dictionary) -> String:
+## The micro-gag kind of an event: "" (not a beat), "room" | "pip" | "edge" (visible) or "hidden". `lean` (R15):
+## an adjacency-only `pip` beat (`pip_reason` "adjacent") is an "edge" beat when it has an emote, else "hidden".
+static func beat_kind(ev: Dictionary, lean: bool = false) -> String:
 	if SolverData.sv(ev.get("e", "")) != "micro_gag":
 		return ""
 	var v := SolverData.sv(ev.get("vis", ""))
+	if lean and v == "pip" and SolverData.sv(ev.get("pip_reason", "")) == "adjacent":
+		return "edge" if SolverData.sv(ev.get("emote", "")) != "" else "hidden"
 	return v if BEAT_KINDS.has(v) else "hidden"
 
 
 ## Per-tick clocks shared by the mask, the ⏩ latch and the gap: {laugh: {t: true}, beat: {t: kind}, drop: {t:
 ## true}, react: {t: true}, cue_ff: first ghost_ff cue tick (−1)}.
-static func _clocks(log: SolverLog, laugh_fn: Callable) -> Dictionary:
+static func _clocks(log: SolverLog, laugh_fn: Callable, lean: bool = false) -> Dictionary:
 	var laugh := {}
 	var beat := {}
 	var drop := {}
@@ -131,7 +169,7 @@ static func _clocks(log: SolverLog, laugh_fn: Callable) -> Dictionary:
 		var t := int(ev.get("t", 0))
 		if laugh_fn.call(ev):
 			laugh[t] = true
-		var bk := beat_kind(ev)
+		var bk := beat_kind(ev, lean)
 		if bk != "" and bk != "hidden":
 			# the most visible kind wins when two beats share a tick
 			var prev := SolverData.sv(beat.get(t, ""))
@@ -162,10 +200,11 @@ static func _drops(ev: Dictionary, hush_room: String) -> bool:
 	return false
 
 
-## The dead-air block of the report (see the class doc): gate, sim and naive clocks, beats, alive_by.
-static func dead_air(log: SolverLog, laugh_fn: Callable = Callable()) -> Dictionary:
+## The dead-air block of the report (see the class doc): gate, sim and naive clocks, beats, alive_by. `lean`: the
+## R15 recount (`beat_kind(ev, true)`; `d1_lean`).
+static func dead_air(log: SolverLog, laugh_fn: Callable = Callable(), lean: bool = false) -> Dictionary:
 	var lf := laugh_fn if laugh_fn.is_valid() else SolverHooks.is_laugh
-	var ck := _clocks(log, lf)
+	var ck := _clocks(log, lf, lean)
 	var laugh: Dictionary = ck["laugh"]
 	var beat: Dictionary = ck["beat"]
 	var drop: Dictionary = ck["drop"]
@@ -277,7 +316,7 @@ static func dead_air(log: SolverLog, laugh_fn: Callable = Callable()) -> Diction
 	r["alive_by"] = ab
 	var bt := {"total": 0, "room": 0, "pip": 0, "edge": 0, "hidden": 0}
 	for ev in log.events:
-		var k2 := beat_kind(ev)
+		var k2 := beat_kind(ev, lean)
 		if k2 != "":
 			bt["total"] = int(bt["total"]) + 1
 			bt[k2] = int(bt[k2]) + 1
@@ -550,7 +589,23 @@ static func summary_line(r: Dictionary, tag: String = "solve") -> String:
 	var wk: Array = r.get("warn_keys", [])
 	if not wk.is_empty():
 		line += " | warn_ keys: %s" % ", ".join(PackedStringArray(wk))
+	if r.has("d1_lean"):
+		line += " | d1_lean %s" % lean_text(r, true)
 	return line
+
+
+## "⏩ 8.1 % gap 4.2 s edge 0.12 OK" (or FAIL / info for a scenario) — the R15 column.
+static func lean_text(r: Dictionary, color: bool) -> String:
+	var ln: Variant = r.get("d1_lean", null)
+	if not (ln is Dictionary):
+		return "—"
+	var d: Dictionary = ln
+	var persona := SolverData.sv(r.get("persona", ""))
+	var verdict := "info"
+	if D1_MAX_PCT.has(persona):
+		verdict = "OK" if bool(d.get("ok", false)) else ("\u001b[31mFAIL\u001b[0m" if color else "**FAIL**")
+	return "⏩ %.1f %% gap %.1f s edge %.2f %s" % [float(d.get("dead_air_ff_pct", 0.0)), float(d.get("max_gap_ff_s", 0.0)),
+		float(d.get("edge_share", 0.0)), verdict]
 
 
 static func _fmt_s(v: float) -> String:
@@ -561,12 +616,12 @@ static func _fmt_s(v: float) -> String:
 ## first, sim time in brackets.
 static func to_markdown(reports: Array, title: String = "Solver runs") -> String:
 	var md := "# %s\n\n" % title
-	md += "| episode | route | ok | duration | stars | applause | lines | catches | 1st laugh* | 1st prank* | laughs@60* | dead air ⏩ [sim] | max gap ⏩ [sim] | ⏩ naive | beats room/pip/edge (hidden) | edge share | hold | near misses |\n"
-	md += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+	md += "| episode | route | ok | duration | stars | applause | lines | catches | 1st laugh* | 1st prank* | laughs@60* | dead air ⏩ [sim] | max gap ⏩ [sim] | ⏩ naive | beats room/pip/edge (hidden) | edge share | hold | near misses | d1_lean |\n"
+	md += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 	for r in reports:
 		var bt: Dictionary = r.get("beats", {})
 		var es := float(bt.get("edge_share", 0.0))
-		md += "| %s | %s | %s | %.1f s | %s | %.1f | %d | %d | %s | %s | %d | %.1f %% [%.1f %%] | %.1f s [%.1f s] | %.1f %% | %d/%d/%d (%d) | %s | %.1f s | %d |\n" % [
+		md += "| %s | %s | %s | %.1f s | %s | %.1f | %d | %d | %s | %s | %d | %.1f %% [%.1f %%] | %.1f s [%.1f s] | %.1f %% | %d/%d/%d (%d) | %s | %.1f s | %d | %s |\n" % [
 			r.get("episode", "?"), r.get("route", "?"), "OK" if bool(r.get("ok", false)) else "**FAIL**",
 			float(r.get("duration_s", 0.0)), stars_text(r.get("stars", [])), float(r.get("applause", 0.0)),
 			(r.get("lines", []) as Array).size(), (r.get("catches", []) as Array).size(),
@@ -575,7 +630,7 @@ static func to_markdown(reports: Array, title: String = "Solver runs") -> String
 			float(r.get("max_gap_ff_s", 0.0)), float(r.get("max_gap_sim_s", 0.0)), float(r.get("dead_air_ff_naive_pct", 0.0)),
 			int(bt.get("room", 0)), int(bt.get("pip", 0)), int(bt.get("edge", 0)), int(bt.get("hidden", 0)),
 			("**%.2f**" % es) if es > EDGE_SHARE_MAX + 0.0005 else "%.2f" % es,
-			float(r.get("hold_total_s", 0.0)), int(r.get("near_misses", 0))]
+			float(r.get("hold_total_s", 0.0)), int(r.get("near_misses", 0)), lean_text(r, false)]
 	md += "\n\\* launch-relative (sim time + the episode's director `launch_offset_s`). ⏩ = the D1 gate: real time with the persona's ⏩ latch (hidden ticks weigh 1/3 only while ⏩ is held; dropped on prank fire / \"?\" / entry warning; ruling L2) and visible micro-gag beats. naive = every hidden tick 1/3 (Stage 1). Edge share **bold** above 1/3 (ruling L1).\n"
 	var any_fail := false
 	for r in reports:

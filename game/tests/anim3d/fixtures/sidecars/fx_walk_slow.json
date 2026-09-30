@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/fx_walk_slow",
+  "rig": "hush",
+  "anim": "res://tests/anim3d/fixtures/anim/fx_walk_slow.res",
+  "length": 54,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 1.8,
+  "speed_m_s": 2.0,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/lib/fixtures/fx_walk_slow.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

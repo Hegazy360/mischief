@@ -1,0 +1,658 @@
+{
+  "version": 1,
+  "rig": "bellows",
+  "scene": "res://art3d/chars/bellows/bellows.glb",
+  "skeleton": "Armature/Skeleton3D",
+  "mesh": "Armature/Skeleton3D/bellows_body",
+  "height_m": 1.78,
+  "head_scale": 1.0,
+  "tris": 9947,
+  "deform_bones": 49,
+  "bones": {
+    "root": "root",
+    "pelvis": "pelvis",
+    "spine_top": "spine_03",
+    "neck": "neck_01",
+    "head": "Head",
+    "hand_l": "hand_l",
+    "hand_r": "hand_r",
+    "foot_l": "foot_l",
+    "foot_r": "foot_r"
+  },
+  "sockets": {
+    "grip_r": {
+      "bone": "prop_r",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ]
+    },
+    "grip_l": {
+      "bone": "prop_l",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mouth": {
+      "bone": "Head",
+      "pos": [
+        -0.0,
+        0.039,
+        0.2516
+      ]
+    },
+    "head_top": {
+      "bone": "Head",
+      "pos": [
+        0.0,
+        0.7039,
+        -0.0879
+      ]
+    },
+    "nose_tip": {
+      "bone": "nose",
+      "pos": [
+        -0.0,
+        0.127,
+        -0.005
+      ]
+    },
+    "face": {
+      "bone": "Head",
+      "pos": [
+        -0.0,
+        0.1845,
+        0.2461
+      ]
+    },
+    "specs_face": {
+      "bone": "specs_face",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "specs_chest": {
+      "bone": "specs_chest",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "belly_front": {
+      "bone": "spine_02",
+      "pos": [
+        -0.0,
+        -0.0087,
+        0.3799
+      ]
+    },
+    "seat": {
+      "bone": "pelvis",
+      "pos": [
+        -0.0,
+        -0.1189,
+        0.0778
+      ]
+    },
+    "feet": {
+      "bone": "root",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "ride": {
+      "bone": "ride",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "props": {
+    "teacup": {
+      "bone": "prop_teacup",
+      "states": {
+        "held": "grip_r",
+        "sip": "grip_r"
+      },
+      "default": "hidden",
+      "doc": "x1.8: cup + saucer 0.16 m+ wide, white with a gold band, handle toward the palm (pinkie up)"
+    },
+    "saucer": {
+      "bone": "prop_saucer",
+      "states": {
+        "held": "grip_l"
+      },
+      "default": "hidden"
+    },
+    "spoon": {
+      "bone": "prop_spoon",
+      "states": {
+        "held": "grip_r"
+      },
+      "default": "hidden",
+      "doc": "the honey spoon"
+    },
+    "comb": {
+      "bone": "prop_comb",
+      "states": {
+        "held": "grip_r"
+      },
+      "default": "hidden",
+      "doc": "the mirror fix-up"
+    },
+    "baton": {
+      "bone": "prop_baton",
+      "states": {
+        "held": "grip_r"
+      },
+      "default": "hidden",
+      "doc": "the conduct-air micro-gag"
+    },
+    "specs": {
+      "bone": "specs_face",
+      "states": {
+        "on": "specs_face",
+        "magnifier": "specs_face"
+      },
+      "default": "hidden",
+      "hides": [
+        "specs_dangling"
+      ],
+      "doc": "worn on the nose; showing it hides specs_dangling (and back)"
+    },
+    "specs_dangling": {
+      "bone": "specs_chest",
+      "states": {
+        "dangling": "specs_chest"
+      },
+      "default": "dangling",
+      "hides": [
+        "specs"
+      ]
+    }
+  },
+  "attachments": {
+    "bouffant_flipped": {
+      "scene": "res://art3d/chars/bellows/bouffant_flipped.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "bouffant_frazzled": {
+      "scene": "res://art3d/chars/bellows/bouffant_frazzled.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "bouffant_wet": {
+      "scene": "res://art3d/chars/bellows/bouffant_wet.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "bouffant_floured": {
+      "scene": "res://art3d/chars/bellows/bouffant_floured.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "stool": {
+      "scene": "res://art3d/set/stool.glb",
+      "bone": "ride",
+      "default": false,
+      "soft": true,
+      "doc": "the ride-along kitchen stool (r3d-sets' mesh): shown by the sneeze (prop show stool) while the set's stool is hidden by the clip's decor event; missing scene = logged, not fatal"
+    }
+  },
+  "slots": {
+    "bouffant": {
+      "neat": null,
+      "flipped": "bouffant_flipped",
+      "frazzled": "bouffant_frazzled",
+      "wet": "bouffant_wet",
+      "floured": "bouffant_floured"
+    }
+  },
+  "slot_parts": {
+    "bouffant": {
+      "hide_bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r"
+      ]
+    }
+  },
+  "fx": {
+    "choo_puff": {
+      "bone": "fx_choo"
+    },
+    "stars": {
+      "bone": "fx_stars"
+    },
+    "notes": {
+      "bone": "fx_notes"
+    }
+  },
+  "hidden_bones": [
+    "prop_teacup",
+    "prop_saucer",
+    "prop_spoon",
+    "prop_comb",
+    "prop_baton",
+    "specs_face",
+    "fx_choo",
+    "fx_stars",
+    "fx_notes"
+  ],
+  "anim": {
+    "layers": [
+      "arm_out"
+    ],
+    "layer_params": {
+      "arm_out": {
+        "space": "armature_axes",
+        "rots": {
+          "upperarm_l": [
+            [
+              "y",
+              -40.0
+            ]
+          ],
+          "upperarm_r": [
+            [
+              "y",
+              40.0
+            ]
+          ]
+        },
+        "doc": "pre-multiplied onto the keyed local rotation of each bone (look B's layer_rotation): +abduction so the arms clear the 0.85 m barrel. FK channels only: IK-solved arm keys are solved after the layer."
+      }
+    }
+  },
+  "jiggle": [
+    {
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r"
+      ],
+      "stiffness": 2.2,
+      "drag": 0.35,
+      "gravity": 0.15,
+      "radius": 0.12,
+      "clamp_deg": 14
+    },
+    {
+      "bones": [
+        "sideburn_l",
+        "sideburn_r"
+      ],
+      "stiffness": 3.5,
+      "drag": 0.4,
+      "gravity": 0.1,
+      "radius": 0.06,
+      "clamp_deg": 12
+    },
+    {
+      "bones": [
+        "belly"
+      ],
+      "stiffness": 4.0,
+      "drag": 0.5,
+      "gravity": 0.0,
+      "radius": 0.2,
+      "clamp_deg": 8
+    },
+    {
+      "bones": [
+        "cravat"
+      ],
+      "stiffness": 2.5,
+      "drag": 0.4,
+      "gravity": 0.4,
+      "radius": 0.05,
+      "clamp_deg": 25
+    },
+    {
+      "bones": [
+        "tail_l",
+        "tail_r"
+      ],
+      "stiffness": 2.0,
+      "drag": 0.3,
+      "gravity": 0.5,
+      "radius": 0.06,
+      "clamp_deg": 35
+    }
+  ],
+  "face": {
+    "atlas": "res://art3d/chars/bellows/face_bellows.png",
+    "atlas_px": 1024,
+    "grid": [
+      8,
+      8
+    ],
+    "layers": [
+      "brows",
+      "eyes",
+      "pupils",
+      "mouth",
+      "extra_a",
+      "extra_b",
+      "lids"
+    ],
+    "order": [
+      "extra_a",
+      "extra_b",
+      "brows",
+      "eyes",
+      "pupils",
+      "lids",
+      "mouth"
+    ],
+    "layer_rects": {
+      "extra_a": [
+        0.0,
+        0.02,
+        1.0,
+        0.94
+      ],
+      "extra_b": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "brows": [
+        0.11,
+        0.57,
+        0.89,
+        0.83
+      ],
+      "eyes": [
+        0.15,
+        0.42,
+        0.85,
+        0.72
+      ],
+      "pupils": [
+        0.15,
+        0.42,
+        0.85,
+        0.72
+      ],
+      "lids": [
+        0.15,
+        0.42,
+        0.85,
+        0.72
+      ],
+      "mouth": [
+        0.27,
+        0.06,
+        0.73,
+        0.38
+      ]
+    },
+    "cells": {
+      "extra_a": {
+        "blush": 36,
+        "vein": 37,
+        "vein_m": 38,
+        "singe": 39,
+        "pinch": 40
+      },
+      "extra_b": {
+        "sweat": 41,
+        "sweat_m": 42,
+        "steam_l": 43,
+        "steam_r": 44,
+        "steam": 45,
+        "hiccup": 46,
+        "tears": 47
+      },
+      "brows": {
+        "neutral": 16,
+        "up": 17,
+        "angry": 18,
+        "worried": 19,
+        "one_up": 20,
+        "one_up_m": 21,
+        "sly": 22,
+        "sly_m": 23
+      },
+      "eyes": {
+        "open": 0,
+        "half": 1,
+        "angry": 2,
+        "balloon": 3,
+        "closed": 4,
+        "pinpoint": 5,
+        "spiral": 6,
+        "squint": 7,
+        "teary": 8,
+        "wide": 9
+      },
+      "pupils": {
+        "default": 10,
+        "half": 11,
+        "angry": 12,
+        "small": 13
+      },
+      "lids": {
+        "half": 14,
+        "angry": 15
+      },
+      "mouth": {
+        "closed": 24,
+        "smug": 25,
+        "smug_m": 26,
+        "smile": 27,
+        "open": 28,
+        "O_small": 29,
+        "O_mid": 30,
+        "O_big": 31,
+        "grit": 32,
+        "scream": 33,
+        "wavy": 34
+      }
+    },
+    "pupil_range": [
+      0.035,
+      0.025
+    ],
+    "presets": "res://data/rigs3d/bellows/faces.json",
+    "default": "pompous",
+    "mirror_cells": {
+      "brows": {
+        "one_up": "one_up_m",
+        "one_up_m": "one_up",
+        "sly": "sly_m",
+        "sly_m": "sly"
+      },
+      "mouth": {
+        "smug": "smug_m",
+        "smug_m": "smug"
+      },
+      "extra_a": {
+        "vein": "vein_m",
+        "vein_m": "vein"
+      },
+      "extra_b": {
+        "sweat": "sweat_m",
+        "sweat_m": "sweat",
+        "steam_l": "steam_r",
+        "steam_r": "steam_l"
+      }
+    },
+    "no_pupils": [
+      "closed",
+      "pinpoint",
+      "spiral",
+      "balloon",
+      "squint"
+    ],
+    "blink": {
+      "every_s": [
+        2.0,
+        6.0
+      ],
+      "frames": 6,
+      "cell": "closed",
+      "blinkable": [
+        "open",
+        "half",
+        "angry",
+        "wide",
+        "teary"
+      ],
+      "hide_layers": [
+        "pupils",
+        "lids"
+      ]
+    },
+    "card": {
+      "uv": "UV2",
+      "centre_m": [
+        0.0,
+        1.25
+      ],
+      "w_m": 0.56,
+      "h_m": 0.56
+    }
+  },
+  "material": {
+    "palette": "res://art3d/chars/bellows/palette_bellows.png",
+    "outline_px": 3.5,
+    "rim": 0.45
+  },
+  "vertex_color": {
+    "r": "skin_tint",
+    "g": "stone_keep",
+    "b": "rim_damp",
+    "a": "outline_scale"
+  },
+  "looks": {
+    "FRAZZLED": {
+      "swap": {
+        "bouffant": "frazzled"
+      },
+      "face_extra": {
+        "extra_a": "singe"
+      }
+    },
+    "BLINDED": {
+      "swap": {
+        "bouffant": "flipped"
+      }
+    },
+    "SOAKED": {
+      "swap": {
+        "bouffant": "wet"
+      }
+    },
+    "FLOURY": {
+      "swap": {
+        "bouffant": "floured"
+      },
+      "params": {
+        "flash_color": "#FFFFFF",
+        "flash": 0.18
+      }
+    },
+    "SQUEAKY": {
+      "face_extra": {
+        "extra_a": "pinch",
+        "extra_b": "hiccup"
+      }
+    }
+  },
+  "tint": {
+    "tiers": [
+      "#FFFFFF",
+      "#FFE0DC",
+      "#FFC2B8",
+      "#F59A94"
+    ],
+    "livid": "#B8324B",
+    "sideburn_scale": [
+      1.0,
+      1.15,
+      1.15,
+      1.35
+    ],
+    "livid_specs": "on"
+  },
+  "stone": {
+    "color": "#E8E6E1"
+  },
+  "cheat": {
+    "idle": 35,
+    "walk": 20,
+    "perform": 35,
+    "face_to_face": 5
+  },
+  "blob_shadow_r": 0.48,
+  "skins": {},
+  "portraits": {
+    "dir": "res://art3d/chars/bellows/portraits",
+    "names": []
+  },
+  "build": {
+    "script": "tools/art3d/bellows/build.py",
+    "skeleton": "tools/art3d/bellows/skeleton.json",
+    "landmarks": {
+      "HC": [
+        0.0,
+        -0.0212,
+        1.262
+      ],
+      "TC": [
+        0.0,
+        0.0044,
+        0.7
+      ],
+      "FC": [
+        0.0,
+        -0.0212,
+        1.25
+      ],
+      "face_card": {
+        "centre": [
+          0.0,
+          1.25
+        ],
+        "w": 0.56,
+        "h": 0.56
+      },
+      "head_r": [
+        0.255,
+        0.232,
+        0.238,
+        2.1
+      ],
+      "barrel_r": [
+        0.405,
+        0.355,
+        0.43,
+        2.2
+      ]
+    }
+  }
+}

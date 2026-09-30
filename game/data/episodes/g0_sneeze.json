@@ -9,6 +9,7 @@
   "desc": "Dev scene for Gate 0 (stage door only): ACHOO-RIA! end to end in the kitchen, can't fail, ends 3 s after the sneeze.",
   "rooms": ["parlour", "kitchen"],
   "backstage": ["hall"],
+  "hides": ["kitchen_pantry_curtain"],
   "entry": "window",
   "rules": {
     "spot_fill_s": 2.0,

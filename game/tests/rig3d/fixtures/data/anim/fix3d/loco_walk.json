@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "fix/loco_walk",
+  "rig": "fix",
+  "anim": "res://tests/rig3d/fixtures/anim/fix/loco_walk.tres",
+  "length": 80,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "step_l"
+    },
+    {
+      "f": 40,
+      "type": "sfx",
+      "id": "step_r"
+    }
+  ],
+  "face": [],
+  "cheat_deg": 20,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 1.6,
+  "speed_m_s": 1.2,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tests/rig3d/fixtures/make_fixtures.gd"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

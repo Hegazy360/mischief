@@ -13,7 +13,8 @@
 ## station for that kind, GDD §5.4); reactions.json covers every archetype used;
 ## `time_jitter == 0` on `rx_*` clips; prank-line bases normalise to exactly 700 tenths; (D1, BeatLint) every
 ## activity / fix-up a final Night uses has a micro-gag at least every 8 s and never two within 5 s, and every
-## `emote` is in the edge-bubble vocabulary.
+## `emote` is in the edge-bubble vocabulary; (R3D) `hides` lists and solution hides (REDESIGN_3D §6.2 C1) and the
+## view data `previews.json` + `rig_actions.json` (C4, ViewDataLint).
 class_name ContentLint
 extends RefCounted
 
@@ -28,6 +29,8 @@ const MAX_CAPTION := 18
 const HINT_MOMENTS: PackedStringArray = ["chase", "meltdown", "stairs_up", "stairs_down", "search", "curious",
 	"reacting", "exhausted"]
 const MAX_CARD_WORDS := 25
+## The R3D view-data rules (preloaded, so the lint never depends on a fresh global class cache).
+const _ViewData := preload("res://tools/lint/view_data_lint.gd")
 
 
 ## Load `root` (with `base_root` as a fallback for missing files) and lint it.
@@ -61,6 +64,20 @@ static func load_parts(root: String, base_root: String = "") -> Dictionary:
 	var clips := {}
 	_collect_clips(_pick_dir(root, base_root, "anim"), clips, perr)
 	parts["clips"] = clips
+	# R3D view data (REDESIGN_3D §6.2 C4; ViewDataLint) and the solutions (hides ∈ the episode's `hides`, C1)
+	for pair in [["previews", "view/previews.json"], ["rig_actions", "anim/hush3d/rig_actions.json"], ["house3d", "house/house3d.json"]]:
+		var rel: String = pair[1]
+		var pth := "%s/%s" % [root, rel]
+		if not FileAccess.file_exists(pth) and base_root != "":
+			pth = "%s/%s" % [base_root, rel]
+		parts[pair[0]] = SolverData.read_json(pth, perr) if FileAccess.file_exists(pth) else {}
+	var sols := {}
+	var sdir := _pick_dir(root, base_root, "solutions")
+	for n in SolverData._list_json(sdir):
+		var v: Variant = SolverData.read_json("%s/%s" % [sdir, n], perr)
+		if v is Dictionary:
+			sols[SolverData.sv((v as Dictionary).get("episode", n.get_basename()))] = v
+	parts["solutions"] = sols
 	parts["missing"] = missing
 	parts["parse_errors"] = PackedStringArray(perr)
 	return parts
@@ -276,6 +293,61 @@ static func lint(parts: Dictionary) -> PackedStringArray:
 		e.append_array(_lint_episode(eid, eps[eid], data, pranks, das, combos, acts, items, residues, rules_seen))
 	# --- D1: micro-gag cadence + the edge-bubble emote vocabulary (BeatLint; coverage runs in run_lints) -----
 	e.append_array(BeatLint.lint(parts))
+	# --- R3D: hides (C1) and the view data (C4) ---------------------------------------------------------------
+	e.append_array(_lint_hides(parts, data))
+	if parts.has("previews") or parts.has("rig_actions"):
+		e.append_array(_ViewData.lint(parts, data))
+	return e
+
+
+## REDESIGN_3D §6.2 C1: every listed hiding spot is a hiding hotspot in the Night's rooms; one per room in Act I
+## (final Nights); the safety-net pulse and hiding-spot cue targets are listed; every solution step that hides in,
+## goes to or pops out towards a hotspot uses a live one.
+static func _lint_hides(parts: Dictionary, data: SolverData) -> PackedStringArray:
+	var e := PackedStringArray()
+	var eps: Dictionary = parts.get("episodes", {})
+	for eid in data.sorted_ids("episodes"):
+		var ep: Dictionary = eps[eid]
+		var f := "episodes/%s.json" % eid
+		if ep.has("hides") and ep["hides"] != null:
+			var listed := SolverData.as_ids(ep["hides"])
+			var rooms := SolverData.as_ids(ep.get("rooms", []))
+			var per := {}
+			for hid in listed:
+				if not data.has_hotspot(hid) or data.hotspot_kind(hid) != "hiding":
+					e.append("%s: hides '%s' is not a hiding hotspot in house.json" % [f, hid])
+					continue
+				var r := data.hotspot_room(hid)
+				if not rooms.has(r):
+					e.append("%s: hides '%s' is in %s, not one of the Night's rooms" % [f, hid, r])
+				per[r] = int(per.get(r, 0)) + 1
+			if int(ep.get("act", 1)) <= 1 and SolverData.sv(ep.get("status", "draft")) == "final":
+				for r in per:
+					if int(per[r]) > 1:
+						e.append("%s: hides lists %d hiding spots in %s (Act I: one per room)" % [f, per[r], r])
+			var dir: Dictionary = ep.get("director", {}) if ep.get("director", {}) is Dictionary else {}
+			var sn: Variant = dir.get("safety_net", {})
+			var pulse := SolverData.sv((sn as Dictionary).get("pulse", "")) if sn is Dictionary else ""
+			if pulse != "" and data.hotspot_kind(pulse) == "hiding" and not listed.has(pulse):
+				e.append("%s: director.safety_net.pulse '%s' is struck (not in hides)" % [f, pulse])
+			for c in dir.get("cues", []):
+				var tgt := SolverData.sv((c as Dictionary).get("target", "")) if c is Dictionary else ""
+				if tgt != "" and data.has_hotspot(tgt) and data.hotspot_kind(tgt) == "hiding" and not listed.has(tgt):
+					e.append("%s: director cue %s targets the struck spot '%s'" % [f, (c as Dictionary).get("id", ""), tgt])
+	var sols: Dictionary = parts.get("solutions", {})
+	for eid in sols:
+		if not data.episodes.has(String(eid)):
+			continue
+		var routes: Variant = (sols[eid] as Dictionary).get("routes", {})
+		if not (routes is Dictionary):
+			continue
+		for rn in routes:
+			var steps: Variant = (routes[rn] as Dictionary).get("steps", []) if routes[rn] is Dictionary else []
+			if not (steps is Array):
+				continue
+			for i in (steps as Array).size():
+				for m in SolutionDef.validate_live(steps[i], data, String(eid)):
+					e.append("solutions/%s.json: %s step %d: %s" % [eid, rn, i + 1, m])
 	return e
 
 

@@ -127,7 +127,7 @@ func _executor(w: Object, steps: Array, seed_state: Variant = null) -> Executor:
 func predict(world: Object, loops: int = 2, max_ticks: int = 60 * 300) -> Dictionary:
 	var w: Object = world.call("clone")
 	var probe := SolverProbe.new(w, data)
-	var spot := data.nearest_hiding(probe.hush_room(), probe.hush_x(), _in_use_spots(probe))
+	var spot := data.nearest_hiding(probe.hush_room(), probe.hush_x(), _in_use_spots(probe), PackedStringArray(), episode)
 	var steps: Array = []
 	if spot != "":
 		steps.append({"do": "hide", "spot": spot, "max_s": 20})
@@ -327,8 +327,8 @@ func macro(task: Dictionary, probe: SolverProbe, window: String, carry: PackedSt
 
 
 ## Steps that take an exposed Hush out of Bellows' way: with him in her room, run to the
-## neighbouring room on her side (away from him) and hide there (else just get there); with him
-## next door, hide in the nearest spot of her room.
+## neighbouring room on her side (away from him; only a room she may enter tonight) and hide there
+## (else just get there); with him next door (or no such room), hide in the nearest live spot.
 func escape_steps(probe: SolverProbe) -> Array:
 	var hr := probe.hush_room()
 	var hx := probe.hush_x()
@@ -336,15 +336,18 @@ func escape_steps(probe: SolverProbe) -> Array:
 		var r := data.room(hr)
 		var away_left := hx < probe.bellows_x()
 		var best := ""
+		var allowed := data.hush_rooms(episode) if data.episodes.has(episode) else PackedStringArray()
 		for nb in data.neighbours(hr):
 			var nr := data.room(nb)
 			if nr.is_empty() or data.room_floor(nb) != data.room_floor(hr):
 				continue
+			if not allowed.is_empty() and not allowed.has(nb):
+				continue   # backstage / locked tonight: she cannot go there (the Prologue's roped-off hall)
 			var left := int(nr.get("x1", 0)) <= int(r.get("x0", 0))
 			if left == away_left:
 				best = nb
 		if best != "":
-			var spot := data.nearest_hiding(best, hx, _in_use_spots(probe), PackedStringArray([best]))
+			var spot := data.nearest_hiding(best, hx, _in_use_spots(probe), PackedStringArray([best]), episode)
 			if spot != "":
 				return [{"do": "hide", "spot": spot, "run": true, "max_s": 20}]
 			var nr2 := data.room(best)
@@ -402,7 +405,7 @@ func _stage_steps(probe: SolverProbe, pos: Dictionary, to_room: String, window: 
 	if mid.is_empty():
 		return []
 	var stage := mid[mid.size() - 1]
-	var spot := data.nearest_hiding(stage, int(data.room(stage).get("x0", 0)), _in_use_spots(probe), PackedStringArray([stage]))
+	var spot := data.nearest_hiding(stage, int(data.room(stage).get("x0", 0)), _in_use_spots(probe), PackedStringArray([stage]), episode)
 	if spot == "":
 		return []
 	var steps: Array = []
@@ -456,8 +459,8 @@ func _hide_spot(probe: SolverProbe, room: String, x: int) -> String:
 			act_spots.append(id)
 	var ex2 := exclude.duplicate()
 	ex2.append_array(act_spots)
-	var s := data.nearest_hiding(room, x, ex2)
-	return s if s != "" else data.nearest_hiding(room, x, exclude)
+	var s := data.nearest_hiding(room, x, ex2, PackedStringArray(), episode)
+	return s if s != "" else data.nearest_hiding(room, x, exclude, PackedStringArray(), episode)
 
 
 func _panto_activities() -> Array:

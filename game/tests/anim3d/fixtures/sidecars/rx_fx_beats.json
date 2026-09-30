@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rx_fx_beats",
+  "rig": "hush",
+  "anim": "res://tests/anim3d/fixtures/anim/rx_fx_beats.res",
+  "length": 90,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      10,
+      24
+    ],
+    "accent": [
+      24,
+      27
+    ],
+    "hold": [
+      27,
+      70
+    ],
+    "settle": [
+      70,
+      90
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 24,
+      "preset": "shock"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/lib/fixtures/rx_fx_beats.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      27
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

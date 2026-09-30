@@ -21,7 +21,10 @@
 ##     that action ends, unless a newer go/move replaced it first;
 ## 10. at most one reaction at a time; applause never negative; prank bases sum to 700 tenths;
 ## 11. (Stage 3, only when Beryl exists) Beryl's headbutt never produces `caught`;
-## 12. no `combo` the Night's `rules.combos` does not allow (`[]` = none: ruling L4).
+## 12. no `combo` the Night's `rules.combos` does not allow (`[]` = none: ruling L4);
+## 13. no command on a struck hotspot is accepted (REDESIGN_3D §6.2 C1): every `go` / `pin` on one of
+##     `log.struck` is answered the same tick by `cmd_rejected {c, why: "struck", target}`, and no `hush_go`,
+##     `hush_arrive` or `hide` ever names a struck hotspot.
 class_name Invariants
 extends RefCounted
 
@@ -68,6 +71,7 @@ static func check(log: SolverLog) -> Array[String]:
 	out.append_array(rule10_reactions_applause(log))
 	out.append_array(rule11_headbutt(log))
 	out.append_array(rule12_combos(log))
+	out.append_array(rule13_struck(log))
 	return out
 
 
@@ -622,3 +626,40 @@ static func sim_counters(world: Object) -> Array[String]:
 			if int(c[k]) != 0:
 				out.append("sim: invariant counter %s = %d" % [k, int(c[k])])
 	return out
+
+
+## Rule 13: a struck hotspot (not on stage tonight) never accepts a command.
+static func rule13_struck(log: SolverLog) -> Array[String]:
+	var out: Array[String] = []
+	if log.struck.is_empty():
+		return out
+	var extra := 0
+	var rejected := {}
+	for ev in log.events_named("cmd_rejected"):
+		if SolverData.sv(ev.get("why", "")) == "struck":
+			rejected["%d|%s|%s" % [int(ev.get("t", 0)), SolverData.sv(ev.get("c", "")), SolverData.sv(ev.get("target", ""))]] = true
+	for pair in log.cmds:
+		if not (pair is Array) or (pair as Array).size() < 2 or not ((pair as Array)[1] is Dictionary):
+			continue
+		var t := int(pair[0])
+		var cmd: Dictionary = pair[1]
+		var kind := SolverData.sv(cmd.get("c", ""))
+		var hs := SolverData.sv(cmd.get("hotspot", ""))
+		if (kind != "go" and kind != "pin") or not log.struck.has(hs):
+			continue
+		if rejected.has("%d|%s|%s" % [t, kind, hs]):
+			continue
+		if out.size() < MAX_PER_RULE:
+			out.append("rule 13: %s on the struck hotspot '%s' at %s was not refused with cmd_rejected struck" % [
+				kind, hs, _t(t)])
+		else:
+			extra += 1
+	for pair in [["hush_go", "target"], ["hush_arrive", "hotspot"], ["hide", "spot"]]:
+		for ev in log.events_named(String(pair[0])):
+			var id := SolverData.sv(ev.get(String(pair[1]), ""))
+			if log.struck.has(id):
+				if out.size() < MAX_PER_RULE:
+					out.append("rule 13: %s names the struck hotspot '%s' at %s" % [pair[0], id, _t(int(ev.get("t", 0)))])
+				else:
+					extra += 1
+	return _cap(out, 13, extra)

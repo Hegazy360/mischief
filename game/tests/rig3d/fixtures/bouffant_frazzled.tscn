@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b7708"]
+albedo_color = Color(0.7254902, 0.7372549, 0.7764706, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e7klp"]
+material = SubResource("StandardMaterial3D_b7708")
+size = Vector3(0.3, 0.18, 0.24)
+
+[node name="bouffant_frazzled" type="Node3D" unique_id=1098458488]
+
+[node name="mesh" type="MeshInstance3D" parent="." unique_id=650928157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+mesh = SubResource("BoxMesh_e7klp")

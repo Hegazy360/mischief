@@ -158,6 +158,10 @@ func _init_log_facts() -> void:
 	log.ff_needs_cue = persona.ff_needs_cue and not (cue_ix >= 0 and data.episode_index(ep) > cue_ix)
 	log.enter_ticks = data.enter_ticks(ep)
 	log.combos_allowed = data.combos_rule(ep)
+	# rule 13 needs a world that applies the live mask (the real sim; mocks without one are exempt)
+	var ctx: Variant = SolverProbe.field(world, "ctx", null)
+	if ctx is Object and SolverProbe.field(ctx, "live_mask", null) != null:
+		log.struck = data.struck_hotspots(ep)
 	var bases := data.line_bases(ep)
 	if not bases.is_empty():
 		var s := 0
@@ -435,7 +439,8 @@ func _after_catch() -> void:
 			if SolverData.sv(steps[k].get("do", "")) == "wait":
 				back = k
 				break
-		var cover := data.nearest_hiding(probe.hush_room(), probe.hush_x())
+		var cover := data.nearest_hiding(probe.hush_room(), probe.hush_x(), PackedStringArray(), PackedStringArray(),
+			SolverData.sv(opts.get("episode", "")))
 		var extra: Array = []
 		if cover != "":
 			extra.append({"do": "hide", "spot": cover, "max_s": 20, "recovery": true})
@@ -483,7 +488,8 @@ func _tick_evade() -> bool:
 			for id in data.hotspots_in(room_id, "hiding"):
 				if bool(probe.hotspot_state(id).get("in_use_next", false)):
 					exclude.append(id)
-			var spot := data.nearest_hiding(room_id, probe.hush_x(), exclude, PackedStringArray([room_id]))
+			var spot := data.nearest_hiding(room_id, probe.hush_x(), exclude, PackedStringArray([room_id]),
+				SolverData.sv(opts.get("episode", "")))
 			_interrupt["spot"] = spot
 			if spot == "":
 				_send({"c": "freeze", "on": true})

@@ -1,0 +1,52 @@
+{
+  "regions": [
+    {
+      "color": "#FF0000",
+      "name": "kitchen_wall",
+      "class": "wall",
+      "room": "kitchen"
+    },
+    {
+      "color": "#00FF00",
+      "name": "kitchen_wainscot",
+      "class": "wainscot",
+      "room": "kitchen"
+    },
+    {
+      "color": "#0000FF",
+      "name": "kitchen_floor",
+      "class": "floor",
+      "room": "kitchen"
+    },
+    {
+      "color": "#FFFF00",
+      "name": "stool",
+      "class": "dressing",
+      "room": "kitchen"
+    },
+    {
+      "color": "#FF00FF",
+      "name": "loud_rug",
+      "class": "dressing",
+      "room": "kitchen"
+    },
+    {
+      "color": "#00FFFF",
+      "name": "honey_jar",
+      "class": "live_prop",
+      "room": "kitchen"
+    },
+    {
+      "color": "#800000",
+      "name": "sink_tap",
+      "class": "live_prop",
+      "room": "kitchen",
+      "halo": true
+    },
+    {
+      "color": "#008000",
+      "name": "hush",
+      "class": "character"
+    }
+  ]
+}

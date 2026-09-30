@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dt142"]
+albedo_color = Color(0.8509804, 0.8627451, 0.8901961, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o3axp"]
+material = SubResource("StandardMaterial3D_dt142")
+size = Vector3(0.26, 0.1, 0.2)
+
+[node name="bouffant_flipped" type="Node3D" unique_id=2005076888]
+
+[node name="mesh" type="MeshInstance3D" parent="." unique_id=1352586846]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.06)
+mesh = SubResource("BoxMesh_o3axp")

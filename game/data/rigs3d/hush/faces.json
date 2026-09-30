@@ -1,0 +1,319 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "Hush's 3D face presets: the 26 presets of the 2D data/rigs/hush/faces.json by their 2D names, each a cell per layer of face_hush.png (rig3d.json face.cells); pupils null = no pupil layer (the eye cell bakes its own); gaze = the resting pupil offset (the 2D pupils direction) as -1..1 of face.pupil_range (u right as seen from the front, v up). statue / statue_blink keep the eyes coloured through the stone-keep mask (COLOR.g on the face card).",
+  "presets": {
+    "neutral": {
+      "eyes": "open",
+      "brows": "neutral",
+      "pupils": "centre",
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "smile",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "grin": {
+      "eyes": "open",
+      "brows": "up",
+      "pupils": "centre",
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grin",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "snicker": {
+      "eyes": "squint",
+      "brows": "sly",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grin",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "shock": {
+      "eyes": "wide",
+      "brows": "up",
+      "pupils": "centre",
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "O",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "fear": {
+      "eyes": "wide",
+      "brows": "worried",
+      "pupils": "centre",
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grimace",
+      "extra_a": "cheeks",
+      "extra_b": "sweat"
+    },
+    "hold_breath": {
+      "eyes": "wide",
+      "brows": "worried",
+      "pupils": "centre",
+      "gaze": [
+        -1.0,
+        0.0
+      ],
+      "mouth": "puffed",
+      "extra_a": "cheeks",
+      "extra_b": "sweat"
+    },
+    "smug": {
+      "eyes": "half",
+      "brows": "sly",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "smile",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "wince": {
+      "eyes": "closed",
+      "brows": "worried",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grimace",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "determined": {
+      "eyes": "squint",
+      "brows": "determined",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "tongue",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "sad": {
+      "eyes": "worried",
+      "brows": "worried",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "wavy",
+      "extra_a": "cheeks",
+      "extra_b": "tear"
+    },
+    "busted": {
+      "eyes": "wide",
+      "brows": "up",
+      "pupils": "centre",
+      "gaze": [
+        0.8,
+        0.8
+      ],
+      "mouth": "grimace",
+      "extra_a": "cheeks",
+      "extra_b": "sweat"
+    },
+    "wink": {
+      "eyes": "wink",
+      "brows": "sly",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grin",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "statue": {
+      "eyes": "half",
+      "brows": "neutral",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "smile",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "happy": {
+      "eyes": "happy",
+      "brows": "up",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "laugh",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "laugh": {
+      "eyes": "happy",
+      "brows": "worried",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "laugh",
+      "extra_a": "blush",
+      "extra_b": null
+    },
+    "worried": {
+      "eyes": "open",
+      "brows": "worried",
+      "pupils": "centre",
+      "gaze": [
+        -1.0,
+        0.0
+      ],
+      "mouth": "wavy",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "shush": {
+      "eyes": "open",
+      "brows": "up",
+      "pupils": "centre",
+      "gaze": [
+        1.0,
+        0.0
+      ],
+      "mouth": "shh",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "glance": {
+      "eyes": "open",
+      "brows": "sly",
+      "pupils": "centre",
+      "gaze": [
+        -0.8,
+        -0.8
+      ],
+      "mouth": "grin",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "proud": {
+      "eyes": "happy",
+      "brows": "up",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "grin",
+      "extra_a": "blush",
+      "extra_b": null
+    },
+    "dazed": {
+      "eyes": "spiral",
+      "brows": "worried",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "wavy",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "sneak": {
+      "eyes": "open",
+      "brows": "sly",
+      "pupils": "centre",
+      "gaze": [
+        1.0,
+        0.0
+      ],
+      "mouth": "shh",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "curious": {
+      "eyes": "open",
+      "brows": "up",
+      "pupils": "centre",
+      "gaze": [
+        0.8,
+        0.8
+      ],
+      "mouth": "O",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "phew": {
+      "eyes": "closed",
+      "brows": "worried",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "smile",
+      "extra_a": "cheeks",
+      "extra_b": "sweat"
+    },
+    "statue_blink": {
+      "eyes": "closed",
+      "brows": "neutral",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "smile",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "determined_blink": {
+      "eyes": "closed",
+      "brows": "determined",
+      "pupils": null,
+      "gaze": [
+        0.0,
+        0.0
+      ],
+      "mouth": "tongue",
+      "extra_a": "cheeks",
+      "extra_b": null
+    },
+    "frantic": {
+      "eyes": "wide",
+      "brows": "determined",
+      "pupils": "centre",
+      "gaze": [
+        0.0,
+        -1.0
+      ],
+      "mouth": "tongue",
+      "extra_a": "cheeks",
+      "extra_b": "sweat"
+    }
+  }
+}

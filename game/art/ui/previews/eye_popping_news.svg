@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: newspaper magnifier ballooned_eyes</desc>
+<path d="M6 24 L84 16 L90 110 L12 118 Z" fill="#F6F1E6" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M48 20 L84 16 L90 110 L54 114 Z" fill="#DDD3BF"/>
+<path d="M16 36 L44 33" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 48 L44 45" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 60 L44 57" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 72 L44 69" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 84 L44 81" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 96 L44 93" fill="none" stroke="#A7A097" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M110 118 L96 98" fill="none" stroke="#A86B3C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="76.0" cy="66.0" r="36.0" fill="#DCEBF2" stroke="#1B2340" stroke-width="6"/>
+<circle cx="76.0" cy="66.0" r="26.0" fill="#FFFFFF" stroke="#1B2340" stroke-width="3"/>
+<circle cx="80.0" cy="68.0" r="14.0" fill="#3B5BA8" stroke="#1B2340" stroke-width="3"/>
+<circle cx="82.0" cy="70.0" r="7.0" fill="#1B2340"/>
+<circle cx="76.0" cy="62.0" r="4.0" fill="#FFFFFF"/>
+<path d="M46 44 Q76 30 106 44" fill="none" stroke="#1B2340" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

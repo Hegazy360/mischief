@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/fx_accent_6f",
+  "rig": "hush",
+  "anim": "res://tests/anim3d/fixtures/anim/fx_accent_6f.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      12,
+      24
+    ],
+    "accent": [
+      24,
+      30
+    ],
+    "hold": [
+      30,
+      54
+    ],
+    "settle": [
+      54,
+      60
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 24,
+      "preset": "shock"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/lib/fixtures/fx_accent_6f.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      30
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

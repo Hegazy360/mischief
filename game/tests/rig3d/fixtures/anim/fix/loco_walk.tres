@@ -1,0 +1,33 @@
+[gd_resource type="Animation" format=3]
+
+[resource]
+length = 1.3333333333333333
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Armature/Skeleton3D:thigh_l")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.21643962, 0, 0, 0.976296, 0.6666667, 1, -0.21643962, 0, 0, 0.976296, 1.3333334, 1, 0.21643962, 0, 0, 0.976296)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Armature/Skeleton3D:thigh_r")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, -0.21643962, 0, 0, 0.976296, 0.6666667, 1, 0.21643962, 0, 0, 0.976296, 1.3333334, 1, -0.21643962, 0, 0, 0.976296)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Armature/Skeleton3D:upperarm_l")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0, 0, -0.57357645, 0.81915206, 0.6666667, 1, 0, 0, -0.5, 0.8660254, 1.3333334, 1, 0, 0, -0.57357645, 0.81915206)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Armature/Skeleton3D:upperarm_r")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0, 0, 0.57357645, 0.81915206, 0.6666667, 1, 0, 0, 0.5, 0.8660254, 1.3333334, 1, 0, 0, 0.57357645, 0.81915206)

@@ -1,0 +1,98 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "fix/rx_sneeze",
+  "rig": "fix",
+  "anim": "res://tests/rig3d/fixtures/anim/fix/rx_sneeze.tres",
+  "length": 165,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      74,
+      94
+    ],
+    "accent": [
+      94,
+      97
+    ],
+    "hold": [
+      97,
+      145
+    ],
+    "settle": [
+      145,
+      165
+    ]
+  },
+  "events": [
+    {
+      "f": 94,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 94,
+      "type": "look",
+      "set": {
+        "bouffant": "flipped"
+      }
+    },
+    {
+      "f": 95,
+      "type": "decor",
+      "id": "kitchen_stool",
+      "visible": false
+    },
+    {
+      "f": 95,
+      "type": "prop",
+      "op": "show",
+      "prop": "stool"
+    },
+    {
+      "f": 165,
+      "type": "mark",
+      "name": "release"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 94,
+      "preset": "shock"
+    },
+    {
+      "f": 145,
+      "preset": "neutral"
+    }
+  ],
+  "cheat_deg": null,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tests/rig3d/fixtures/make_fixtures.gd"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

@@ -1,0 +1,11 @@
+[gd_resource type="Animation" format=3]
+
+[resource]
+length = 1.1666666666666667
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Armature/Skeleton3D:Head")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5833333, 1, 0, 0.25881904, 0, 0.9659258, 1.1666666, 1, 0, 0, 0, 1)

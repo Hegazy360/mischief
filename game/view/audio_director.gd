@@ -70,10 +70,15 @@ const DEFAULT_EVENTS := {
 }
 
 var driver: SimDriver = null
-var camera: CameraDirector = null
+## The camera: CameraDirector (2D) or CameraDirector3D (both answer world_to_screen / visible_world_rect /
+## view_size in sim px; the 3D one also `project(Vector3)`). Duck-typed so one director serves both views.
+var camera: Variant = null
 var layout: HouseLayout = null
 var info: ContentInfo = null
-var world_view: WorldView = null
+## WorldView (2D) or WorldView3D: `layout`, `info`, `hush_view`, `bellows_view` (duck-typed).
+var world_view: Variant = null
+## True with a 3D view: clip sounds come from the 3D sidecars.
+static var prefer3d: bool = false
 var events: Dictionary = {}
 var pranks: Dictionary = {}
 var archetypes: Dictionary = {}
@@ -132,21 +137,26 @@ func _init() -> void:
 		_delayed.append([-1.0, null, null])
 
 
-## Wire to a driver (ticked), camera (panning), world view (positions, clip events).
-func setup(d: SimDriver, cam: CameraDirector, wv: WorldView) -> void:
+## Wire to a driver (ticked), camera (panning), world view (positions, clip events). `cam` / `wv` are the 2D
+## CameraDirector / WorldView or the 3D CameraDirector3D / WorldView3D.
+func setup(d: SimDriver, cam: Object, wv: Object) -> void:
 	driver = d
 	camera = cam
 	world_view = wv
-	layout = wv.layout if wv != null else HouseLayout.load_default()
-	info = wv.info if wv != null else null
+	layout = wv.get("layout") if wv != null else HouseLayout.load_default()
+	info = wv.get("info") if wv != null else null
+	var want3d := wv != null and wv.has_method("anchor_of")
+	if want3d != AudioDirector.prefer3d:
+		AudioDirector.prefer3d = want3d
+		_sounds_cache.clear()
 	load_cues()
 	_audio = ViewKit.autoload("Audio")
 	if driver != null and not driver.ticked.is_connected(on_ticked):
 		driver.ticked.connect(on_ticked)
 	if wv != null:
-		for cv in [wv.hush_view, wv.bellows_view]:
-			if cv != null and not (cv as CharacterView).clip_event.is_connected(on_clip_event):
-				(cv as CharacterView).clip_event.connect(on_clip_event)
+		for cv in [wv.get("hush_view"), wv.get("bellows_view")]:
+			if cv is Object and (cv as Object).has_signal("clip_event") and not (cv as Object).is_connected("clip_event", on_clip_event):
+				(cv as Object).connect("clip_event", on_clip_event)
 
 
 ## Load cues.json (soft); the built-in defaults when absent.
@@ -439,6 +449,8 @@ func on_clip_event(ev: Dictionary) -> void:
 	var pan := 0.0
 	if camera != null and pos is Vector2 and pos != Vector2.INF:
 		pan = AudioDirector.pan_for(camera.world_to_screen(pos).x, camera.view_size().x)
+	elif camera != null and pos is Vector3 and (camera as Object).has_method("project"):
+		pan = AudioDirector.pan_for(camera.project(pos).x, camera.view_size().x)
 	var vol := 0.0
 	var snap := driver.snapshot() if driver != null else null
 	if snap != null and layout != null:
@@ -548,8 +560,8 @@ func _clip_owns(id: String, ev: Dictionary) -> bool:
 	for cv in actors:
 		if cv == null:
 			continue
-		var c: CharacterView = cv
-		if AudioDirector.clip_sounds(c.current_clip()).has(id) or AudioDirector.clip_sounds(c.overlay_clip()).has(id):
+		var c: Object = cv
+		if AudioDirector.clip_sounds(str(c.call("current_clip"))).has(id) or AudioDirector.clip_sounds(str(c.call("overlay_clip"))).has(id):
 			skipped_dups += 1
 			if not _dup_warned.has(id):
 				_dup_warned[id] = true
@@ -568,6 +580,16 @@ static func clip_sounds(clip_id: String) -> PackedStringArray:
 	if _sounds_cache.has(clip_id):
 		return _sounds_cache[clip_id]
 	var out := PackedStringArray()
+	if AudioDirector.prefer3d:
+		var sd: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id)) if ClipMap.clip_exists3d(clip_id) else null
+		if sd is Dictionary:
+			for e3 in (sd as Dictionary).get("events", []):
+				if e3 is Dictionary:
+					var t3 := ViewKit.s((e3 as Dictionary).get("type", ""))
+					if t3 == "sfx" or t3 == "voice":
+						out.append(ViewKit.s((e3 as Dictionary).get("id", (e3 as Dictionary).get("bank", ""))))
+		_sounds_cache[clip_id] = out
+		return out
 	if ClipMap.clip_exists(clip_id):
 		var c: Variant = ClipLib.get_clip(clip_id)
 		if c != null:

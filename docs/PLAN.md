@@ -1,6 +1,7 @@
-# Mischief Next Door — Build Plan (v1.0)
+# Mischief Next Door — Build Plan (v1.1)
 
-Design: `docs/GDD.md` (binding). Contracts: `docs/TECH.md` (binding). Status: `docs/PROGRESS.md`.
+Design: `docs/GDD.md` v1.2 (binding) + `docs/REDESIGN_3D.md` (the 3D spec). Contracts: `docs/TECH.md` v1.1-3D (binding).
+Status: `docs/PROGRESS.md`. (v1.1: the 3D pivot — the R0–R4 stages and the R3D section §2b.)
 Task briefs (self-contained, one per task): `<scratchpad>/mnd/tasks/<key>.md` (Stage 2: `s2-<name>.md` + `s2-index.md`); task reports:
 `<scratchpad>/mnd/reports/<key>.md`.
 
@@ -10,6 +11,8 @@ Task briefs (self-contained, one per task): `<scratchpad>/mnd/tasks/<key>.md` (S
   the full test + lint + solver suite before the next batch.
 - **Gates** stop the line: Gate 0 (Sneeze & Cast, early Stage 2), the **Fun Gate** (end of Stage 2, owner on his
   phone), one **owner check per Act** in Stage 3, and the release check. Content never outruns a failed gate.
+  (v1.1) After the 2D Gate 0 the view pivots to 3D: **Gate 0 again in 3D** ("Sneeze 3D", the R3D exit) and the Fun Gate
+  becomes **R4**, played on the 3D build (§2b).
 - **Meta comes last.** Nothing from GDD §8 Stage 4 is built before the Fun Gate passes.
 - Every task ends with: tests green in its sandbox, its lints green, review artefacts in `docs/review/<key>/`
   that the agent actually looked at, and a report listing APIs, verification, deviations and requests.
@@ -19,7 +22,11 @@ Task briefs (self-contained, one per task): `<scratchpad>/mnd/tasks/<key>.md` (S
 | 1 Foundation | 10 parallel tasks (below) | every module builds and tests alone; integration pass green |
 | 1i Integration | orchestrator + a short fix task | autoloads registered; real data loads with 0 errors; solver runs P/N1/N2 |
 | 2 Vertical slice | Prologue + Nights 1–2 at final polish | Gate 0 passed early; automated pre-gate green |
-| Fun Gate | owner plays the debug APK | all 8 owner checks (GDD §10.4) |
+| Gate 0 (2D) | the owner played the 2D Gate-0 build | verdict: core right; UI, characters, house and actions not (→ the 3D pivot) |
+| R0 3D pivot | REDESIGN_3D spec, pipeline spike, three look-devs, owner board | owner style pick D6 (done) |
+| **R3D** = R1 + R2 | the 3D slice on branch `r3d` (§2b): sets, camera, HUD, previews/tags/rings, the 3D cast, the Gate-0 + Prologue clips | Gate 0 in 3D + the Prologue playable in 3D on the phone; `pregate3d.sh` green |
+| R3 slice sets and clips | the slice rooms at final 3D polish, all 137 slice clips in 3D | pre-gate green incl. the 3D lints, mute test, device perf |
+| Fun Gate (R4) | owner plays the 3D debug APK | all 8 owner checks (GDD §10.4) |
 | 3 Content | Act I rest → Act II → Act III + Gala, one wave per Act | owner check per Act |
 | 4 Meta + FTUE + polish | Playbill, Encores, Programme, cold opens, polish passes | full playthrough review |
 | 5 Release | signed builds via CI | release checklist |
@@ -247,7 +254,83 @@ of 5); retry ≤ 1.5 s, backgrounding pauses, tap accuracy ≥ 19/20, a time-bou
 strips (≥ 2 Prologue gags); reviews ≥ 4/5 funny on every Prologue gag and Night 1's first prank, ≥ 3/5 on the rest;
 audio and APK budgets (debug and profile APKs built locally).
 
+## 2b. R3D — the 3D slice (REDESIGN §6.4 R1 + R2, branch `r3d`)
+**Why.** The owner played the 2D Gate-0 build on his phone: *"the idea is there, it's great, however the UI is too
+crowded, and the characters don't look good, i think 3d characters would be more appealing, the house is too crowded we
+need to simplify it a bit, and the actions the character is taking are not very obvious, the core idea itself tho is
+correct."* The lead decision (`docs/REDESIGN_3D.md` v1.0, binding): the view goes full 3D — 3D characters in a simplified
+3D dollhouse-cutaway stage seen from the side — and the HUD is decluttered, the house simplified and every action made
+readable before / during / after / at the trigger. The sim, content, solver, audio and UI logic stay behind the
+`ViewSnapshot` seam. R0 (the spec, the pipeline spike, three style look-devs and the owner board
+`docs/review/lookdev/`) is done.
+
+**The owner's style pick (D6, binding): "Prankster dimensions from B, the rest from A."** Hush = look B's body dimensions
+and proportions (1.60 m, B's lanky limbs, torso, head and neck) rendered in look A's Toy Box vinyl style; Bellows, the
+house, lighting, shading, faces and props = look A with the board's fixes (a modeller pass to ≤ 10k triangles and ≤ 50
+deform bones, a bigger face inside the bouffant, B's arm IK + foot grounding + bigger held props, C's CHOO puff and dazed
+stars as vinyl, the 20–35° cheat-out). GDD v1.2 and TECH v1.1-3D describe the result.
+
+**One build.** R1 (the 3D greybox slice) and R2 (the cast in 3D) run as one build on branch `r3d` (`main` keeps the 2D
+Gate-0 build). Plan, rulings R1–R19, the ownership table, the contracts, the launch queue and the exit checklist:
+`<scratchpad>/mnd/tasks/r3d-index.md`; briefs `<scratchpad>/mnd/tasks/r3d-<key>.md`; reports
+`<scratchpad>/mnd/reports/r3d-<key>.md`; per-task landings `<scratchpad>/mnd/work/r3d-<key>/LANDED.md` (mirrored into
+`docs/review/r3d-landed/` with every WIP push).
+
+| Key | Goal | Launch |
+|---|---|---|
+| `r3d-view3d` | The 3D world from the real sim: shaders + the lighting model (look A's vinyl terms), `CameraDirector3D` C1–C8 + punch-ins, `WorldView3D`, `CharacterView3D` (cheat-out, lane depth, blob shadows, marble freeze, landings, hand-offs), floor decals, the Bellows window + C8 (two modes), stagers, FX split, audio pan, Stalls hidden at rest, ClipMap + `SliceClips.build3d`, projected hotspot rects, the overlay-anchor source, `MaterialWarm3D`, ViewSandbox3D, the perf probe | B1 |
+| `r3d-sets` | The simplified per-Night sets in look A: Blender set builders, `house3d.json`, `House3D` / `SetList` (the strike rule) / `Prop3D`, per-room light, SetPreview3D; the reach geometry (reach row, `reach_pos`, Bellows' stool as Hush's step, `visual_offset` / `hit_box`), landings and hand-offs | B1 |
+| `r3d-cast-hush` | Hush in 3D — B's dimensions in A's vinyl style, the face atlas, the head check (R6), Clarence, jiggle, the marble statue, the red beret tag and the plinth, ≤ 10k tris / ≤ 50 deform bones; `reach_proof.png` before SKELETON FROZEN; the O1 boards | B1 |
+| `r3d-cast-bellows` | Bellows in look A with the board's fixes: modeller pass, bigger face, `arm_out` layer, ×1.8 teacup and held props, body slots + looks, temper tint, specs, the vinyl CHOO puff + stars, the ride-along stool, HUD portraits; the O1 boards | B1 |
+| `r3d-rig` | The 3D character runtime: `RigDef3D`, `ClipLib3D`, `RigPlayer3D`, the headless `RigSampler3D`, AnimViewer3D, the 3D sheets, capture on 3D, RigPerf3D | B1 |
+| `r3d-anim` | The clip pipeline (bpy pose language + IK + grounding → per-clip `.res` + sidecar), the 3D animation lint, the UAL retarget; Hush's 17 FINAL hero clips; `hush3d/map.json` | B1 (A0), then A1 |
+| `r3d-hud` | The four-piece HUD, contextual pieces, QUIET / LIVE, the pause / Script panels (Hint, Map, routine strip), the world overlays + `OverlayPlacer`, preview pictograms, TapAssist on projected rects, the new settings, C5 strings, Figgis on its SVG level in look A's palette | B1 |
+| `r3d-content` | C1 `hides` + the sim's live mask + `cmd_rejected struck`; C2 route re-plans; `previews.json` + `rig_actions.json`; the gates re-run; `lint.sh` forwards the 3D anim lint; `SimVisibility.pip_reason` + `d1_lean` | B1 |
+| `r3d-docs` | GDD v1.2, TECH v1.1-3D, this section | B1 |
+| `r3d-tools-a` | The shared review toolset (`tools/art3d/review/`: CIELAB, 64 px silhouettes + IoU, strips, boards, opaque reviewer packets) | B1 (P0 ≤ 2 h) |
+| `r3d-anim-bellows-a` | Bellows' Gate-0-critical clips (the sneeze first, tea with the hand-offs, warm-up, walks, bonk, wander-on, slow burn); `bellows3d/map.json` | queue 1 |
+| `r3d-night` | NightScene / Boot / curtain call / Gag Reel / stage door on the 3D view; input on projected rects; presenters; the warm-up + compile detection; the 3D perf log; e2e in 3D (`pip_on_share`); the APK route | queue 2 |
+| `r3d-anim-hush-b` | Hush's remaining clips: fidgets, glance, rummage, wheeze, mid-job freeze, shrug, yanked, arrive, skid, the band fallbacks, statues 5–8 | queue 3 |
+| `r3d-anim-bellows-c` | Bellows' Prologue-only set (the dizzy spin first, the cue bonks, …) | queue 4 |
+| `r3d-tools-b` | The REDESIGN §6.3 lints: set, screen-rect, HUD (+ the Bellows-window share warning), visibility C8, perf; `lint3d.sh`, `perf3d.sh`, LintShot3D | queue 5 |
+| `r3d-anim-bellows-b` | Bellows' Gate-0 micro-gags, one-shots and squeak bits | queue 6 |
+| `r3d-integrate` | Alone after every B1 and queue task: the real cast, clips and sets in the real game; every Gate-0 / Prologue route with 0 fallbacks; N01 / N02 in 3D; every open request; the 2D reachability scan and deletions | I (alone) |
+| `r3d-qa` | Alone, last: `pregate3d.sh`, the readability review, perf evidence, the APK, the owner pack `docs/review/r3d/index.md`, the TECH as-built fold-in, PROGRESS, CI | Q (alone, last) |
+
+**Batches.** Pre-flight P (orchestrator, done at 9ca1db7: `slot.sh` CPU slots, the Blender / Godot / SDK setup scripts,
+the vendored CC0 UAL files, the look-dev references in git, the `[shader_globals]` block, CLAUDE.md for the 3D view, CI on
+`r3d`, the 2D reference frames, the baseline) → **B1** (10 tasks in parallel, with P0 landings the others wait on) → a
+priority **queue** (≤ 10 running, ≤ 4 Godot / Blender processes through `slot.sh`) → checkpoints K1–K3 (commit, one
+import, the full suite + lints + solver) → **I** `r3d-integrate` → **Q** `r3d-qa` (FAIL → `r3d-integrate` re-runs the
+failing rows → `r3d-qa` again, until PASS). WIP commits and pushes every 60–90 min (restart safety). Owner checkpoints
+are non-blocking: **O1** (≈ 5 h) the cast boards — "is this the Hush and Bellows you picked?"; **O2** (≈ 8 h) the perf-probe
+APK on his phone, which sets the MSAA / render-scale / outline defaults; **O3** the head question, only if the head check
+proposes a bigger head.
+
+**Exit (the owner's R1 + R2 checks in one APK):** **Gate 0 in 3D ("Sneeze 3D") and the Prologue playable end to end in
+3D on the phone** (a debug APK built by CI on `r3d`), with `tools/scripts/pregate3d.sh` green — import metadata; the full
+suite; strict lints (content incl. `hides` and the 3D clip coverage for g0 + p00, hotspot, IP, the 3D animation lint on the
+70 manifest clips + the band fallbacks); art + audio validators; every route's own `expect` and the dead-air gate; planner
+proofs; fuzz 200 (no command on a struck hotspot accepted); the set, screen-rect, HUD and visibility (C8) lints; Gate 0 and
+the Prologue in 3D with 0 fallbacks per clip id; N01 / N02 booting in 3D; the frame budget on the desktop proxy (≤ 150
+draw calls p95, ≤ 150k triangles, ≤ 8 emitters, ≤ 250 MB textures, 0 shader compiles during play) and the per-character
+budget; flows, feedback and tap accuracy on projected rects; **the readability review** (fresh reviewers name Hush's verb
+≥ 7/8, read a lit spot's preview ≥ 6/8, call the screen crowded ≤ 1/8, prefer the 3D frame to the 2D one ≥ 6/8; the sneeze
+and the dizzy spin ≥ 4/5 funny and readable); the APK (≤ 150 MB, the 3D files present, the dev folders absent, `boot_config`
+= stage door, 3D, previews hidden). The exact rows are `r3d-index.md` §6.
+
+**Deferred to R3** (recorded so nothing silently drops, index §8.6): Figgis as a pre-rendered 3D-style sprite; the Pip
+skin (D2 unanswered); the N1 / N2 Bellows clips beyond Gate 0 / Prologue and their polish; the N1 / N2-only props' final
+polish; statues 5–8 if their box runs out; the draft clips' polish; the Bellows-window mode the owner did not pick.
+
+**What comes next.** **R3 — slice sets and clips:** the kitchen, parlour, hall and porch at final 3D polish per REDESIGN
+§3.4, all 11 slice pranks' armed / spent looks and rig actions, **all 137 slice clips in 3D**, the Stalls, curtain call
+and Gag Reel over the 3D view; exit: the pre-gate green (solver, fuzz, dead-air gate, the lints incl. §6.3, the mute test
+on 3D GIFs, perf on device). **R4 — the Fun Gate in 3D:** the GDD §10.4 owner checks on his phone (§3 below); pass →
+Stage 3 content.
+
 ## 3. The FUN GATE (owner, the profile APK — release template with the device log —, his own phone, no coaching)
+(v1.1) Played as **R4** on the 3D build, after R3 (§2b); everything below stands.
 Reviewers prepare: a clean install build, the device log exporter (plus a screen recording of the first minute from the
 app icon), a one-page "what to try" card (never read aloud before he plays). **Pass = all 8 checks of GDD §10.4** (first laugh ≤ 10 s and first prank ≤ 30 s from launch; ≥ 5
 laughs in 10 min; unprompted replay; 9/10 destination calls; no unfair catch with the ≥ 1.0 s "?" in the log; ≤ 1

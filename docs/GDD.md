@@ -1,12 +1,36 @@
-# Mischief Next Door — Game Design Document (v1.1, BINDING)
+# Mischief Next Door — Game Design Document (v1.2, BINDING)
 
 *"A silent comedy for a very loud man."*
 
 Status: final, binding design for v1. Built on the panel's winning proposal ("The Comedy Sandbox"), with the
 judges' grafts from "Snackable" and "Classic" and every must-fix resolved (traceability table in Appendix A).
 Technical contracts: `docs/TECH.md`. Build plan: `docs/PLAN.md`. Status: `docs/PROGRESS.md`.
+**The 3D pivot (v1.2):** the view is 3D (`docs/REDESIGN_3D.md` v1.0, owner decision D6); this version folds in every
+amendment REDESIGN §6.6 lists, the owner's style pick and the R3D lead rulings that change design. The branch `r3d`
+builds it; `main` keeps the 2D Gate-0 build that v1.1 describes.
 
 **Changelog.**
+- **v1.2 (2026-09-30, the 3D pivot: REDESIGN_3D v1.0, owner decision D6, R3D rulings R5–R7 and R15, lead decision D7 on
+  outline widths).** The owner played the 2D Gate-0 build: the core idea is right, but the UI was too crowded, the
+  characters didn't look good (he wants 3D), the house was too crowded and the actions weren't obvious. His style pick:
+  *"Prankster dimensions from B, the rest from A"* — Hush = look B's body dimensions in look A's Toy Box style; Bellows,
+  the house, lighting, shading, faces and props = look A with the look-dev board's fixes. Changed (every changed
+  paragraph is marked "(v1.2)"): Conventions (3D units, terms); §0 (Fairness row: the Bellows window; new Look row);
+  §1.2 (the 3D cast in metres and on-screen px, 64 px silhouettes, face cards, the owner's hybrid Hush, the head check,
+  Pip, Figgis); §1.3 (footlights as light); §2.1 (the feedback column: before / during / after / trigger); §2.3 (cue
+  staging in 3D, no timing change; the Boot warm-up); §2.4 (the Bellows window's name, the `lean` check); §3 intro; §3.1
+  (projected tap targets, pinch and drag within C1–C3); §3.2 (QUIET / LIVE, the ring at the prop, the marble freeze);
+  §3.3 (Clarence bottom-left, the contextual lure ring); §3.4 (one hiding spot per room in Act I, `hides`, the in-use
+  lesson from Night 3); §3.5 (verb glow / halo, previews, needs clouds, item bubbles, red beret tags; W1–W4, N1–N4,
+  V1–V6); §3.6 (carried-item chips); §3.7 (the 3D camera, the Bellows window 400×225 and C8 with its two presentations,
+  the Overview hidden in Act I, the floor-above gag dropped); §3.8 (the HUD: four always-on pieces, contextual pieces,
+  the panels, the placement rules); §3.9 (bubble sizes; floor decals); §3.10 (a pointer to the 3D HUD's text sizes);
+  §3.11 (Previews, Room dimming, Outline +50 %; the debug keys); §4.10 and §6.5 (the Stalls hidden at rest); §6.4 (the
+  spotlight pool; Hint in the pause panel); §7.1 (the 3D stage: units, depth bands, set layers, the strike rule,
+  density, the reach ruling, locked rooms not built); §7.2 (`hides`, the rooms built per Night, Night 2 without the
+  clock case); §9.1–§9.4 (3D art direction and shading, rigs, the animation pipeline and list; §9.3's timing rules
+  unchanged); §9.5 (voice and crowd defaults kept); §10.2–§10.5 (3D budgets, R3D = R1 + R2, the Fun-Gate pre-checks in
+  3D, risks X1–X9); Appendix A (the 3D decisions). Everything else is word for word v1.1.
 - **v1.1 (2026-09-29, Stage 2 Checkpoint G).** Folded in the Stage-1 content resolutions ("GDD ambiguities" 1–8),
   every Stage-2 D1 data change (`docs/review/s2-content/d1_changes.md`), lead decision D1 (the dead-air gate, with
   rulings L1/L2/L4), the sim-clock / Boot contract (L13) and the curtain-call step table. Changed: §0 laugh clock;
@@ -21,6 +45,11 @@ every phone). Times are seconds of game time; animation frames are at 60 fps (1 
 `S` = symmetric side safe inset, `T` = top inset, `B` = bottom inset, `W` = logical width (1920–2520), `H` = 1080.
 "MUST" statements are testable acceptance rules. Anything not in this document is OUT of v1 unless PLAN.md
 adds it after the fun gate.
+**(v1.2) 3D conventions.** 3D sizes are metres; **1 m = 200 sim px** (§7.1). "At the base framing" = the play camera
+of §3.7 on a 1920×1080 logical screen (1 m = 269 px at the acting lane); the review shots are 1200×540 (half of that:
+a figure of 434 px is 217 px in a shot). Terms in sections v1.2 did not amend: **"PiP" / "Bellows-Cam"** means the
+Bellows window of §3.7; **"badge"** means the verb glow / halo, previews and tags of §3.5; **"tray"** means the
+carried-item chips of §3.6; **"Figgis chip"** means his contextual bust of §3.8.
 
 **Originality.** Everything here is original. We never use *Neighbours from Hell* names, characters, art,
 level layouts, gags listed in `docs/research/nfh.md` §9, TV/"viewers"/rating-% framing, or branding.
@@ -37,8 +66,9 @@ A content lint (TECH §10.5) rejects banned terms.
 | **Verbs** | Tap to tiptoe (double-tap to run). **Hold** the action button to rig. **Hold FREEZE** to become a statue. Tap a hiding spot to hide. Tap **Clarence** the rubber chicken to squeak. |
 | **Depth** | Three systems, deep rather than wide: (1) the **specs rule** (one danger read), (2) **Temper → Running Gag → Meltdown** (one chain engine, fed by **residue → fix-up** routing), (3) the **squeak** (one free comic verb that is also a lure). |
 | **Content** | 32 original pranks (6 signature set pieces), 10 squeak bits, 6 Double Acts, 7 residues, 4 combos, 22 reaction archetypes. |
-| **Audience** | **The Stalls**: a strip of silhouetted theatre heads that laughs in 5 tiers, gasps, shushes and shouts "BEHIND YOU!". Score is **Applause** (0–100+); stars are **Curtain Calls**. |
-| **Fairness** | You can always read where he goes next (thought bubble + ring), what he can see (awareness glyph + stare strip on the floor), and when he's coming (1.5 s door jiggle + footsteps + PiP). Every catch starts with a ≥ 0.8 s "?" window and is replayed by the **Busted Cam**. |
+| **Audience** | **The Stalls**: a strip of silhouetted theatre heads that laughs in 5 tiers, gasps, shushes and shouts "BEHIND YOU!" ((v1.2) hidden at rest, rising only on audience events, §4.10). Score is **Applause** (0–100+); stars are **Curtain Calls**. |
+| **Fairness** | You can always read where he goes next (thought bubble + ring), what he can see (awareness glyph + stare strip on the floor), and when he's coming (1.5 s door jiggle + footsteps + **the Bellows window** — (v1.2) a 400 × 225 inset shown only while he is off-screen and in the next room, heading to Hush's room, or she is rigging — never an always-on PiP, §3.7). Every catch starts with a ≥ 0.8 s "?" window and is replayed by the **Busted Cam**. |
+| **Look** (v1.2) | **3D toy-proportioned characters** — Hush in look B's body dimensions rendered in look A's *Toy Box* vinyl style; Bellows, the house and the props in look A — in a **simplified 3D dollhouse-cutaway stage**, dressed per Night with only what tonight uses, seen by a **fixed side-on perspective camera** that follows Hush. A 4-piece HUD; every action readable before, during, after and at the trigger (§3.5). |
 | **Failure** | **The Lecture**: a 4-second sung scolding, then Hush lands on the doorstep and takes a tomato. Every rig and every laugh is kept. Three tomatoes bring **the Hook** (from Night 4; never in Relaxed). Retry in place in ≤ 1.5 s. |
 | **Laugh clock** | ≈ 5 s a vase smashes behind him · **≤ 10 s from app launch the player's first squeak cracks his high note** · ≈ 25–28 s first prank (ACHOO-RIA!, ≤ 30 s) · ≈ 47–50 s his first Running Gag link (ALLEGRO-GO-GO! ×1.5) · six laughs in the first 60 s (launch-relative, §2.3). |
 | **Length** | ≈ 60 min to clear once; 3–4 h for all Curtain Calls; Encores and the Programme (Stage 4) extend it. |
@@ -71,25 +101,53 @@ after the owner's fun gate passes (PLAN Stage 4).
 
 ### 1.2 Cast
 
-| Character | Role and personality | Silhouette (must read as a 50 px black shape) | Size at zoom 1.0 | Colours |
+| Character | Role and personality | Silhouette (v1.2: must read as a **64 px** black shape) | Size (v1.2: metres; px at the base framing, §3.7) | Colours |
 |---|---|---|---|---|
-| **Hush** (player), street mime, ~25, lives at No. 9 | Silent, gleeful, a brave coward who can't resist showing off. Mimes everything; glances at the audience after every rig (makes the player complicit). **Warm, never creepy**: big round pupils, rosy blush, smiling default mouth, small teardrop. | Lanky; tilted beret; Breton stripes; braces; **huge white gloves** (1.6× hand size — the gloves act); flat shoes. | 340 px tall, head 130 px | Face paint `#FFF6EA`, stripes navy `#2B3566`, **cherry-red beret + braces `#E23B4E`**, cheeks `#FF9AA2` |
-| **Clarence** | Hush's rubber chicken, rides in her braces. Pitch follows the squeak. | Floppy chicken, red comb. | 90 px | Yellow `#FFD23F`, comb `#E23B4E` |
-| **Horace Bellows** (neighbour), 61 | Retired bass-baritone ("fourth most famous in the county") planning a comeback nobody wants. Vain, stingy, short-sighted: his specs hang on a chain, unworn, until he's suspicious or furious. Catchphrase **"PIPE DOWN!"** The straight man with far too much dignity. | **A dandelion clock on a barrel**: barrel torso on tiny legs, silver **bouffant**, **mutton-chop sideburns** (springs that bristle with temper), specs on a chain. | 380 px tall, head 140 px | Plum jacket `#7B3F8C`, gold cravat `#E8B33A`, bouffant `#D9DCE6`; face ramps peach `#F4C9A8` → pink → red → beetroot `#B8324B` with temper |
-| **Beryl** (Act II+) | His pygmy goat ("my little prima donna"). Dozes in sunbeams, loves apples, **headbutts anyone who bends over near her**. Never gives Hush away, never harmed. | Box body, stick legs, triangle beard, rectangular pupils, jingling bell. | 210 px | Cream `#F3EAD6`, **pink collar `#FF7FB0`** |
-| **Dame Delphine Trill** (Act III+) | Retired soprano, his old stage partner and unrequited crush. Blind as a bat without her opera glasses; easily scandalised. Her high C cracks mirrors. | A gliding triangle gown under a towering auburn **beehive with a tiara**; opera glasses on a stick. | 420 px | **Emerald `#1FA37A`**, beehive `#B5562E` |
-| **Old Figgis** (hints) | The ancient prompter. Whispers "psst!", holds up picture cue cards. | A tiny head with huge ears in a hooded prompt box — lives in a top-left HUD chip. | 128 px chip | Hood `#3A3050`, face `#F4C9A8` |
-| **The Stalls** (audience) | The visible laugh track: ~24 silhouetted heads (bowlers, beehives, a shiny bald head, a toddler on a shoulder). | Head/hat silhouettes only. | 40 px resting, up to 120 px during laughs | Aubergine `#2A1E3A` at 0.6 alpha |
+| **Hush** (player), street mime, ~25, lives at No. 9 | Silent, gleeful, a brave coward who can't resist showing off. Mimes everything; glances at the audience after every rig (makes the player complicit). **Warm, never creepy**: big round pupils, rosy blush, smiling default mouth, small teardrop. | Lanky; tilted beret; Breton stripes; braces; **huge white gloves** (1.6× hand size — the gloves act); flat shoes. (v1.2) At 64 px: beret + gloves + stripes on a lanky frame. | (v1.2) **1.60 m** to the top of the beret = **434 px, 40 % of the screen height** (217 px in a 1200×540 shot); head ≈ 0.50 m incl. the beret (look B's proportions); gloves ≈ 0.20 m | Face paint `#FFF6EA`, stripes navy `#2B3566`, **cherry-red beret + braces `#E23B4E`**, cheeks `#FF9AA2` |
+| **Clarence** | Hush's rubber chicken, rides in her braces. Pitch follows the squeak. | Floppy chicken, red comb. | (v1.2) a hand-sized squeaky prop on her right brace (a rig prop: in the brace, held, squeezed) | Yellow `#FFD23F`, comb `#E23B4E` |
+| **Horace Bellows** (neighbour), 61 | Retired bass-baritone ("fourth most famous in the county") planning a comeback nobody wants. Vain, stingy, short-sighted: his specs hang on a chain, unworn, until he's suspicious or furious. Catchphrase **"PIPE DOWN!"** The straight man with far too much dignity. | **A dandelion clock on a barrel**: barrel torso on tiny legs, silver **bouffant**, **mutton-chop sideburns** (springs that bristle with temper), specs on a chain. (v1.2) At 64 px: a dandelion puff on a barrel. | (v1.2) **1.78 m** to the top of the bouffant = **471 px, 44 % of the screen height** (236 px in a 1200×540 shot); barrel torso 0.85 m wide on 0.45 m legs; head ≈ 120 px plus the bouffant | Plum jacket `#7B3F8C`, gold cravat `#E8B33A`, bouffant `#D9DCE6`; face ramps peach `#F4C9A8` → pink → red → beetroot `#B8324B` with temper |
+| **Beryl** (Act II+) | His pygmy goat ("my little prima donna"). Dozes in sunbeams, loves apples, **headbutts anyone who bends over near her**. Never gives Hush away, never harmed. | Box body, stick legs, triangle beard, rectangular pupils, jingling bell. | 210 px (2D; her 3D size is set when she is built, Stage 3) | Cream `#F3EAD6`, **pink collar `#FF7FB0`** |
+| **Dame Delphine Trill** (Act III+) | Retired soprano, his old stage partner and unrequited crush. Blind as a bat without her opera glasses; easily scandalised. Her high C cracks mirrors. | A gliding triangle gown under a towering auburn **beehive with a tiara**; opera glasses on a stick. | 420 px (2D; her 3D size is set when she is built, Stage 3) | **Emerald `#1FA37A`**, beehive `#B5562E` |
+| **Old Figgis** (hints) | The ancient prompter. Whispers "psst!", holds up picture cue cards. | A tiny head with huge ears in a hooded prompt box — (v1.2) a contextual HUD bust (§3.8), no longer an always-on chip. | 128 px bust (2D) | Hood `#3A3050`, face `#F4C9A8` ((v1.2) redrawn in look A's palette, below) |
+| **The Stalls** (audience) | The visible laugh track: ~24 silhouetted heads (bowlers, beehives, a shiny bald head, a toddler on a shoulder). | Head/hat silhouettes only (2D). | (v1.2) hidden at rest; they rise 60–150 px by laugh tier on audience events (§4.10) | Aubergine `#2A1E3A` at 0.6 alpha |
+
+**(v1.2) The cast in 3D — the owner's pick: "Prankster dimensions from B, the rest from A."**
+- **Hush** has **look B's body dimensions and proportions** — 1.60 m, B's lanky long limbs, B's torso and head
+  proportions and **B's neck** (the Breton collar may cover it, never shorten it) — **rendered in look A's style**:
+  matte vinyl-toy forms, a painted face from one decal atlas, A's palette, the toy shader with its outline, A's
+  gloves / beret / stripes vocabulary. Her arms are B's (shoulder 1.127 m above the floor, 0.405 m shoulder → wrist),
+  which is why the set brings what she rigs into her reach (§7.1).
+- **Horace Bellows** is **look A** with the look-dev board's fixes: a modeller pass inside the budget of §9.2, a bigger
+  face inside the bouffant, arms that clear his barrel, bigger held props (the teacup must read at game size), the
+  cotton-wool CHOO puff and the felt dazed stars restyled as vinyl, the 20–35° face cheat-out (§7.1).
+- **Faces are 2D painted cards on the 3D heads** — eyes, brows and mouth are cells of one face atlas per character,
+  pupils follow a look-at, blinks swap a lid cell; the same presets and the same expression vocabulary as v1.1 (§9.2).
+- **Value hierarchy:** the characters are the only things on stage with both value extremes (≥ 20 % of the silhouette
+  at L* ≥ 85 and ≥ 20 % at L* ≤ 40), a **4.8 px outline** (look A's weight, lead decision D7) and a **rim light** (§9.1).
+- **The head check (Hush).** The owner's pick is B's head. If B's head makes her painted face unreadable at game size,
+  the face card is first enlarged *inside* the head (no silhouette change); only if a maximal face card still fails the
+  readability bar are head-scale variants rendered (×1.1 / ×1.2 / ×1.3 about the neck) and the smallest that reads is
+  **proposed** — never silently shipped. The build keeps B's head (scale 1.0) until the owner answers; the alternate is
+  the rig variant `head_b`, and the debug stage door offers **"Gate 0 · Hush, B's head"** and **"Gate 0 · Hush, head
+  ×<scale>"** (e.g. "head ×1.2") so he can judge it in play. The head scale never changes the skeleton or the clips;
+  B's neck bone and visible neck length stay.
+- **Figgis** is a flat bust (2D SVG) restyled as matte vinyl in look A's palette; his idle rig animation is dropped in
+  R3D (a stated downgrade), and a pre-rendered sprite in the 3D style is R3 work. **The Stalls** stay 2D silhouettes.
 
 **Pip fallback (kept wired, R4).** If the owner rejects the mime at the cast review, Hush is replaced by *Pip*,
 an 11-year-old "Statues" champion (red beanie, striped jumper, same gloves-as-mittens idea). Same rig topology,
 same pivots, same verbs, same clips; only part SVGs, face paint and the Lecture's grab (Pip is shooed out
 with a broom-sweep instead of lifted) change. Art tasks MUST keep part names and pivots rig-compatible.
+**(v1.2)** In 3D the Pip fallback is a skin on Hush's 3D skeleton (same bones, same clips). The owner never answered
+"mime or Pip" (D2), so R3D builds the mime only: a `pip` skin request falls back to Hush (logged once); Pip is R3 work
+once D2 is answered.
 
 ### 1.3 Framing: "the house is a stage"
 A stage farce, not television: there are no cameras, viewers, ratings, channels, seasons or directors.
 - Episodes are **Nights**; groups of Nights are **Acts**; the cutaway house is the set with its fourth wall
-  missing. A red curtain rises and falls each Night. Footlights glow along the bottom of the set.
+  missing. A red curtain rises and falls each Night. Footlights glow along the bottom of the set — (v1.2) as
+  **light, not sprites**: a warm additive gradient from the gilded stage lip (12 % at the lip, fading to 0 by 1.2 m
+  up), computed in the shaders like the rest of the stage light (§9.1).
 - Score is **Applause** on a brass **Applause-o-Meter**. Stars are **Curtain Calls** (★ ★★ ★★★).
 - Each catch earns Hush a **tomato** from the Stalls; three bring out **the Hook** (a vaudeville cane).
 - **Results = the curtain call** (§6.2). Bellows, still wearing his residue, wanders onstage, sees the audience
@@ -103,15 +161,15 @@ A stage farce, not television: there are no cameras, viewers, ratings, channels,
 
 ### 2.1 The 30-second beat (8–12 per Night)
 
-| t | Player | Screen and audience |
+| t | Player | Screen and audience ((v1.2) the feedback of every action: **BEFORE / DURING / AFTER / TRIGGER**, §3.5) |
 |---|---|---|
-| 0–3 s | **Read** his thought bubble (next activity icon + countdown ring + awareness glyph). | He hums through an activity with a micro-gag every 5–8 s. |
-| 3–8 s | **Move**: tap a glowing hotspot; Hush tiptoes (400 px/s). | Ripple ≤ 16 ms, dotted path, 8 ms haptic tick, pizzicato footsteps. |
-| 8–11 s | **Rig**: hold the action button 0.8 / 1.5 / 2.5 s. | Hush fiddles, then frantically works, then wipes her brow, then snickers at the Stalls (titter). |
+| 0–3 s | **Read** his thought bubble (next activity icon + countdown ring + awareness glyph). | He hums through an activity with a micro-gag every 5–8 s. (v1.2) **BEFORE:** every available rig point in Hush's room shows a passive preview of its *joke* (§3.5). |
+| 3–8 s | **Move**: tap a glowing hotspot; Hush tiptoes (400 px/s). | Ripple ≤ 16 ms, dotted path, 8 ms haptic tick, pizzicato footsteps. (v1.2) The path and a 0.5 m destination ring are floor decals; at the rig point Hush's thought shows the joke and the other previews fade to 30 %. |
+| 8–11 s | **Rig**: hold the action button 0.8 / 1.5 / 2.5 s. | Hush fiddles, then frantically works, then wipes her brow, then snickers at the Stalls (titter). (v1.2) **DURING:** a prop-specific action in one of three reach bands, the prop changing as she works, the **rig ring filling at the prop** with its echo on the button. **AFTER:** the prop's armed look + Hush's **red beret tag** hung on it; she snickers at the audience. |
 | 11–14 s | **Cover**: tap a hiding spot, or hold FREEZE, or squeak Clarence for a laugh or a lure. | 1.5 s before he enters: door jiggle, footsteps crescendo, PiP pops, "BEHIND YOU!" if she's exposed. |
-| 14–22 s | **Watch** him approach the trap. | Suspense tremolo. A first-time prank plays its last 0.4 s at 0.5×. |
-| 22–26 s | **Payoff.** | Punch-in, hit-stop, a 2–4 s reaction, a pun caption, a tiered laugh, the Applause needle jumps. |
-| 26–30 s | **Decide**: he's fuming (Running Gag fuse burning) and his bubble shows where he'll go to clean up. Rig that spot, squeak to keep him simmering, or back off because his specs just went on. | His body is the meter: face colour, sideburns, steam. The fuse bar drains under the Applause-o-Meter. |
+| 14–22 s | **Watch** him approach the trap. | Suspense tremolo. A first-time prank plays its last 0.4 s at 0.5×. (v1.2) **TRIGGER:** the tag wiggles and the camera finds the two-shot. |
+| 22–26 s | **Payoff.** | Punch-in, hit-stop, a 2–4 s reaction, a pun caption, a tiered laugh, the Applause needle jumps. (v1.2) The punch-in is a camera dolly; afterwards the prop shows **spent** (glow off) and its tag flies to the Script chip's pip. |
+| 26–30 s | **Decide**: he's fuming (Running Gag fuse burning) and his bubble shows where he'll go to clean up. Rig that spot, squeak to keep him simmering, or back off because his specs just went on. | His body is the meter: face colour, sideburns, steam. The fuse bar drains under the Applause-o-Meter ((v1.2) the transient meter, shown while the Running Gag is live, §3.8). |
 
 A skilled run lands a laugh every 15–25 s and a prank every 40–60 s. No stretch of more than 12 s of real time
 may pass without player input, a laugh or a *visible* micro-gag, and dead air stays within the gate of §2.4
@@ -133,10 +191,10 @@ There is no clock and no Bedtime in v1: nothing punishes watching and planning. 
 (a landed prank's station greys out), squeak bits diminish to zero, so Applause is naturally bounded.
 
 ### 2.3 The first 60 seconds — Prologue "Curtain Up"
-Rooms: **parlour + kitchen** only (the hall doorway is roped off "backstage"; Bellows goes through it, the PiP
-follows him). No menus before play. Times are **from app launch** on a mid-range Android: launch-relative =
-sim time + 2.3 s (Boot and the sim clock, below). Where the *ideal* and the *slow first-timer* routes differ, t
-gives the range ideal–slow (solver-measured at Checkpoint G, `docs/review/s2-content/prologue_clock.md`).
+Rooms: **parlour + kitchen** only (the hall doorway is roped off "backstage"; Bellows goes through it, the PiP follows
+him — (v1.2) the Bellows window of §3.7). No menus before play. Times are **from app launch** on a mid-range Android:
+launch-relative = sim time + 2.3 s (Boot and the sim clock, below). Where the *ideal* and the *slow first-timer* routes
+differ, t gives the range ideal–slow (solver-measured at Checkpoint G, `docs/review/s2-content/prologue_clock.md`).
 Director cue ids are in `code`; they are binding for the FTUE, the view and the sound.
 
 | t (s) | Beat | Player | Laugh |
@@ -176,6 +234,17 @@ route and "first player laugh ≤ 10 s, first prank ≤ 30 s, ≥ 4 laughs by 75
 `title_card`. Every `laugh_*` cue MUST produce a visible prop or clip change **and** a crowd sound within 0.3 s.
 `title_card` stages nothing during play: the title slams only in the curtain call, after the fall.
 
+**(v1.2) Cue staging in 3D — no timing change** (every second of the table above stands). The set is the parlour and
+the kitchen built and lit; the hall is built dark ("backstage": architecture, the mirror and the stair foot he uses, a
+velvet rope at the doorway), so Bellows' FRAZZLED mirror detour is seen in the **Bellows window** (§3.7), with the dark
+hall lit for him while he is in it. Ghost fingers (`ghost_squeak`, `ghost_honey`, `ghost_hold`, `ghost_hide`) point at
+the **projected** spot on screen, approaching from the side away from Hush; **`sparkle_lever` is the spotlight pool** —
+a soft warm pool on the floor in front of the gramophone, its preview at full size (§3.5 N4); Figgis's psst card is
+his contextual bust (§3.8). The `laugh_*` cues are staged in the 3D set: the vase nudges along the mantel on each
+warm-up note and smashes behind him (`laugh_vase`), the blind bonk at the doorway (`laugh_doorframe`), the relief
+laugh (`laugh_relief`), the picture falling on his head in the doorway (`laugh_picture`). The pantry curtain and the
+piano back are the Prologue's two hiding spots (`hides`, §3.4).
+
 **Boot and the sim clock (binding, every Night).**
 1. Boot draws the red curtain (the 1× SVG, no warm-up wait) on its **first frame**, plays the house-lights hum and
    builds the Night underneath it. No menus before play.
@@ -191,7 +260,10 @@ route and "first player laugh ≤ 10 s, first prank ≤ 30 s, ≥ 4 laughs by 75
    clocks have no launch offset); Gate 0 after its stage-door card.
 6. Every Night warms its own list under its curtain, cold open or card — both rigs' atlases, its rooms and props,
    every look it can show (residues, blinded, costumes, the combos it allows), its FX, the fonts at play sizes, one
-   PiP frame, its sounds. **No texture page is built during play.**
+   PiP frame, its sounds. **No texture page is built during play.** (v1.2) In 3D the list is every character look,
+   tint tier, stone and prop state, every set piece and prop state (glow, halo, tag, hidden eyes), every floor-decal and
+   particle material, one Bellows-window frame and the overlay textures: every material is drawn once under the
+   curtain, so **no shader is compiled during play** (§10.4).
 7. Acceptance: tick 0 = the rise frame ± 1 frame; 0 sim events before it; input live ≤ 0.4 s (+ 1 frame) after
    tick 0; on the slow route the first player laugh ≤ 7.7 s and the first prank ≤ 27.7 s after tick 0. Process
    start → curtain up is reported (target 3.1 s, TECH §9) and measured by the device log on the phone.
@@ -204,7 +276,10 @@ non-scenario route (ideal, required, slow) of every `final` Night and of Gate 0;
 2. **Visible beats only.** A micro-gag (§4.1) counts only when the player can see it: Bellows is in Hush's room
    (hidden: her spot's room); or the PiP shows him (adjacent room, heading to her room, or she is rigging, §3.7);
    or — only for a gag with an emote — the HUD edge bubble plays it. **Edge-bubble beats MAY carry at most ⅓ of
-   the beat credit on any route.**
+   the beat credit on any route.** (v1.2) In 3D "the PiP" is the Bellows window and the edge bubble is the edge
+   badge (§3.7, §3.8); the gate itself is unchanged, because the view MUST show him whenever the sim counts him as
+   visible (the visibility contract C8, §3.7). Under the `lean` window presentation an adjacency-only beat shows only
+   in the edge badge, so it counts only when its gag has an emote; the solver reports that variant as `d1_lean`.
 3. **Real time with ⏩.** The gate counts the time the player really waits: a tick at ⏩ weighs ⅓, and ⏩ counts
    only where the game would really run at ×3 — Hush hidden and ⏩ held, dropped by the game's own rule (a prank
    fires, a "?" starts, an entry warning for her room; §3.3), re-pressed after the persona's delay (ideal 0.5 s,
@@ -229,7 +304,9 @@ non-scenario route (ideal, required, slow) of every `final` Night and of Gate 0;
 
 Scheme: **Tap-to-Sneak + Thumb Action** (touchux.md §0), no joystick. Right thumb: the **action button**.
 Left thumb: the **tray** and **Clarence**. Everything else is a world tap. Left-handed mode mirrors the two
-clusters.
+clusters. (v1.2) Left thumb: **Clarence** in the bottom-left corner and, only while Hush carries something, the
+carried-item chips beside him (§3.6). The world is 3D; every world tap resolves on screen against projected targets
+(§3.1).
 
 ### 3.1 Gesture grammar
 
@@ -238,21 +315,38 @@ clusters.
 | **Tap world** | Touch-up ≤ 300 ms after touch-down, travel ≤ 24 px, no second finger. Fires on **touch-up**. | Target priority: hotspot (tap-assist snaps within 90 px to the nearest hotspot) > door/stairs > floor. Hush **tiptoes** (400 px/s, silent). Feedback ≤ 16 ms: ripple (0.35 s fade), dotted path (0.4 s), 8 ms haptic, destination marker. A new tap re-routes instantly. A repeat tap on the current target does nothing (idempotent). |
 | **Second tap** | ≤ 280 ms and ≤ 64 px from the first | Upgrades the current walk to a **run** (720 px/s, noisy: 500 px noise ring every 0.5 s). The first tap is never delayed. |
 | **Tap a hotspot** | — | "Go and do it": pick-ups, hiding, doors, stairs and Take a Bow auto-execute on arrival. **Rigs never auto-execute**: Hush arrives, faces the rig point, and the action button lights up. |
-| **Long-press world** | ≥ 450 ms, travel ≤ 24 px | **Reveal**: every hotspot in view shows its badge for 2 s; lifting over one selects it. 8 ms haptic. |
-| **Drag world** | travel > 24 px | Camera pans 1:1; release flings (τ 0.25 s), holds 1.5 s, eases back over 0.5 s. **A drag never moves Hush**, even when hidden. No drag may start within 48 px of a side edge (Android back gesture). |
-| **Pinch** | two touches, distance change > 32 px | Zoom 0.5–1.25 anchored at the midpoint. The **Overview** button is the one-finger alternative (toggle 1.0 ↔ 0.5). |
-| **Tap PiP / edge bubble** | — | **Peek**: camera flies to Bellows in 0.35 s, holds 1.8 s (longer while the finger stays down), flies back. |
-| **Tap a tray slot** | — | "Where does this go?": matching rig points pulse; off-screen ones get edge arrows for 3 s. |
+| **Long-press world** | ≥ 450 ms, travel ≤ 24 px | **Reveal**: every hotspot in view shows its badge for 2 s; lifting over one selects it. 8 ms haptic. (v1.2) The reveal shows every live spot's verb halo and preview (§3.5). |
+| **Drag world** | travel > 24 px | Camera pans 1:1; release flings (τ 0.25 s), holds 1.5 s, eases back over 0.5 s. **A drag never moves Hush**, even when hidden. No drag may start within 48 px of a side edge (Android back gesture). (v1.2) The drag pans the 3D camera within its C1–C3 limits (§3.7). |
+| **Pinch** | two touches, distance change > 32 px | Zoom 0.5–1.25 anchored at the midpoint. The **Overview** button is the one-finger alternative (toggle 1.0 ↔ 0.5). (v1.2) The pinch dollies the 3D camera within the C1–C3 limits; a pinch-out still opens the Overview (a dolly back to 15 m, 0.5×). The Overview button is hidden in Act I: **Map** in the pause panel is the one-finger alternative (§3.7, §3.8). |
+| **Tap PiP / edge bubble** | — | **Peek**: camera flies to Bellows in 0.35 s, holds 1.8 s (longer while the finger stays down), flies back. (v1.2) Tap the Bellows window or the edge badge. |
+| **Tap a tray slot** | — | "Where does this go?": matching rig points pulse; off-screen ones get edge arrows for 3 s. (v1.2) Tap a carried-item chip (§3.6). |
 | **Android back / iOS edge swipe** | — | Pause menu. Never quits. |
+
+**(v1.2) Tap targets are projected 3D rects.** Every hotspot's hit box is a 3D box — its `house.json` rect's x and y
+(or the view's own offset / hit box for that prop, §7.1) × the prop's depth ± 0.3 m. Its 8 corners are projected every
+frame, and the screen bounding rect is what tap-assist resolves against (the 90 px assist and the priorities above are
+unchanged). Every projected target is **≥ 144 × 144 px**, ≥ 24 px from its neighbours and inside the safe rect; any
+camera framing used for play keeps the back wall ≤ 10 m from the camera (≥ 201 px per metre), so a 0.72 m (144 px)
+rect still projects to ≥ 144 px (≥ 163 px at the back wall at the base framing).
 
 ### 3.2 The action button (right thumb)
 Bottom-right, visual 190 px, hit 240 px circle. It shows exactly one verb as a 96 px icon.
+
+**(v1.2) Two visual states** (the one-verb rule for the HUD, §3.5 V1–V6), centre (W−S−168, H−B−168):
+- **QUIET** — FREEZE while nothing threatens Hush (he is not in her room, or she is hidden): navy disc at 62 % alpha,
+  a white 84 px statue icon, no ring. It stays pressable (FREEZE is persistent) but doesn't shout.
+- **LIVE** — any verb that is the right move now: full colour, a 1.08× pop, a 96 px icon, a 14 px ring. RIG (item icon
+  → target icon, gold `#F2B632`), RIG_DIM (the missing item's grey silhouette; a tap shows where it is), POP OUT / GO ▶
+  (with the green / amber / red danger rim) and **FREEZE when it matters**: a stone-white face with an amber rim while
+  he is in her room and she is exposed, pulsing 3 Hz red-amber while a "?" fills on her.
+- The ≥ 250 ms hysteresis and the 120 ms cross-fade apply to state changes too. While RIG is held, the ring fills on the
+  button **and at the prop** (the world rig ring, §3.5).
 
 | Verb | When shown | Input | Effect |
 |---|---|---|---|
 | **RIG** (item icon → target icon) | Hush stands at a rig point whose prank is available and she has what it needs (or it's free). Pops 1.08× on arrival. | **Hold** | A 14 px ring fills over the prank's prep tier: **Q 0.8 s, S 1.5 s, B 2.5 s** (never > 3 s). Yellow → green; pulses at 3 Hz over the last 20 %; 8 ms haptic at 50 %; completion pops 1.0 → 1.18 → 1.0 over 180 ms with a ding and a 30 ms haptic. **Release early keeps progress** (the icon shows the partial ring; coming back resumes). Sliding > 80 px off the button cancels (progress kept). |
 | RIG (dimmed, item silhouette) | At a rig point but missing the item | Tap | The container that holds the item pulses (edge arrow if off-screen). |
-| **FREEZE** (statue icon) | Everywhere else, whenever Hush is not hidden. **Persistent**: it never turns into HIDE or anything else. | **Hold** | Hush strikes one of 8 ridiculous statue poses (chosen by the room/prop) and stays frozen while held. Release unfreezes. World taps while frozen drop a destination **pin**; releasing goes there. |
+| **FREEZE** (statue icon) | Everywhere else, whenever Hush is not hidden. **Persistent**: it never turns into HIDE or anything else. | **Hold** | Hush strikes one of 8 ridiculous statue poses (chosen by the room/prop) and stays frozen while held. Release unfreezes. World taps while frozen drop a destination **pin**; releasing goes there. (v1.2) She **turns to marble** — every part desaturated to stone white, the ink outline kept — **except her eyes, beret and braces** (the player never loses her), a stone plinth pops up under her feet (0.1 s), a woodblock clack; release: the colour returns with a shiver (0.15 s). R3D builds statues 1–4 first and 5–8 after them; if the R3D animation time box runs out, statues 5–8 ship in R3 and the build plays "4 of 8" until then (PLAN R3D). |
 | **POP OUT** / **GO ▶** | Hush is hidden | Tap | Leaves the hiding spot (to the pin if one is set, button reads GO ▶). A double-tap pops out and runs. The rim shows danger: **green** = he is not in this room or the next; **amber** = he's next door or heading here; **red** = he's in this room. |
 
 Rules:
@@ -261,16 +355,22 @@ Rules:
 - **Caught mid-job:** if a "?" starts filling on Hush while she holds RIG, the ring pauses and — as long as
   the thumb stays down — Hush freezes in place mid-task (a statue holding a saw). Releasing unfreezes.
 - **Thumb occlusion:** while the button is held the camera offsets 200 px so Hush sits at 40–55 % of screen
-  width, never under the thumb.
+  width, never under the thumb. (v1.2) In 3D this is camera rule C4 (§3.7): the camera shifts within its limits so
+  Hush stays at 40–55 % of the width while the button is held.
 - **Tap-to-rig** (setting): holds become tap-to-start/tap-to-stop; FREEZE becomes a toggle.
 
 ### 3.3 Clarence / ⏩ (left thumb)
 Visual 128 px, hit 168 px, directly above the tray's left end. Centre distance to the action button ≥ 1,300 px.
+(v1.2) Clarence moves to the **bottom-left corner**: hit (S+32, H−B−200) 168×168, a 128 px navy disc at 62 % with
+Clarence in colour (there is no tray below him any more, §3.6). Centre (S+116) to the action centre (W−S−168) =
+W − 2S − 284 ≥ 1,300 px for S ≤ 168: the two-thumb rule holds at every aspect.
 - **Tap: SQUEAK** (0.12 s). No cooldown, ever. Hush's arm moves for 0.3 s (counts as *moving* for sight, §4.3).
   A press that begins within 150 ms of an action-button press is ignored (prevents two-thumb slips).
 - **Hold (≥ 0.5 s): WHEEZE** — a falling squeak up to 1.5 s long. Same rules as a squeak (counts once).
 - **Lure ring:** a thin ring around the button shows lure readiness; it **greys out** after two lures inside
-  60 s (lure fatigue, §5.6). The squeak itself still works and is still funny.
+  60 s (lure fatigue, §5.6). The squeak itself still works and is still funny. (v1.2) The 8 px lure ring is
+  **contextual**: it shows only when lure fatigue is close (≥ 1 lure in the last 60 s) and is grey when fatigued;
+  otherwise Clarence's button carries no ring.
 - **While hidden, the button becomes ⏩** (hold = world ×3). ⏩ drops to ×1 instantly on an entry warning for
   Hush's room, a prank trigger, a "?" or release. **Hush can never squeak from a hiding spot**, so a stray
   press can't break "hidden = safe". The Prologue teaches ⏩ once, at Hush's first hidden wait (`ghost_ff`, §2.3);
@@ -287,6 +387,17 @@ Visual 128 px, hit 168 px, directly above the tray's left end. Centre distance t
   he dresses, the bath before bath time, the clock before he winds it) wears a **red badge**. Hide there anyway
   and he opens it: face to face, both shriek, a 0.8 s "?" window in which POP OUT + run escapes ("BOO!",
   near-miss) — otherwise it's a catch. Hiding there is a gag, never an ambush.
+- **(v1.2) One hiding spot per room in Act I.** Each Night lists its live hiding spots (`hides`, §7.2) — kitchen:
+  the pantry curtain; parlour: behind the piano; hall: the coat cupboard. The Prologue lists the pantry curtain and
+  the piano back, Gate 0 the pantry curtain, Nights 1 and 2 all three. A Night without the list uses every hiding spot
+  of its rooms (the draft Nights). An unlisted spot is **struck** — not built on the stage — and the sim refuses a
+  command to it (`cmd_rejected`, reason `struck`; the view answers a stray tap with a small "no" wobble, no text).
+- **(v1.2) The in-use lesson starts in Night 3** (the wardrobe, the bath): Night 2 no longer has the clock-case
+  hiding spot. The in-use spot's red marker is drawn in the 3D style when Night 3 goes final (Stage 3).
+- **(v1.2) Hidden, in 3D:** the dive is a big cartoon leap in an arc (0.25 s) with a whoosh; the cloth or door swings
+  shut and wobbles (0.4 s); only her eyes blink in the dark gap (a 3D eye card inside the prop) and track him; the
+  cloth breathes; the world desaturates 20 % with a soft vignette = "safe"; Clarence becomes ⏩ and the action button
+  shows POP OUT with the danger rim.
 
 ### 3.5 Hotspots and highlighting
 - **Current room:** every interactable has a 4 px outline pulsing alpha 0.6 ↔ 1.0 at 1.2 Hz and a sparkle every
@@ -298,6 +409,47 @@ Visual 128 px, hit 168 px, directly above the tray's left end. Centre distance t
   two targets, no overlaps. Enforced by the hotspot lint (TECH §10.5) on every house and Night.
 - Setting **Hints**: Always (default) / On long-press / Off.
 
+**(v1.2) In 3D the badges are gone.** The two bullets on outlines and badges above describe the 2D build (`main`);
+on the 3D stage every action is readable in four moments, and the world says what each spot will do:
+- **Verb glow and halo.** Live props (and only they) carry a 3.4 px ink outline (D7) and, while Hush is in their room, an
+  8 px **verb halo** that pulses 0.6 ↔ 1.0 at 1.2 Hz in the verb's colour: **rig gold `#FFC838`**, **hide blue
+  `#5C9EFF`**, **take cream `#FFF4DB`**, **exit cream after ★** (the front door). **The active prank spot** — the prop
+  Hush is at, or an armed prop whose trigger is his next activity — pulses at 2× amplitude.
+- **BEFORE — a preview of the joke, not the instruction.** A **passive preview** (a 112×90 cloud with a 78 px
+  pictogram, at 80 % strength) sits above every available rig point in Hush's room; **Hush's thought** (a 180×144 cloud
+  with a 124 px pictogram at her head, on the side away from the prop) shows the payoff while she stands at a rig
+  point; a **needs cloud** is the preview with the missing item's grey silhouette (once she has seen its container);
+  an **item bubble** (a 116 px cream disc with the item icon) sits above a container that holds tonight's item. When
+  his next activity will trigger an available, unarmed rig point in her room, that preview gets **his ring** (the red
+  countdown ring of his bubble): *he's coming for this next.* When two armed pranks combine (HOT & COLD), the first
+  one's preview carries a small "→ sink" badge.
+- **DURING — what Hush is doing.** A prop-specific pose readable in silhouette at 64 px, the prop changing as she
+  works, and one progress indicator **at the prop**: the **rig ring** (radius 118 px, 14 px stroke, yellow `#F2D23A` →
+  green `#5CCF6A` on an 18 px 35 % black track), echoed on the button; release keeps progress (the ring stays partial
+  at the prop).
+- **AFTER — it's armed.** The prop visibly changes (its armed look) and Hush's calling card, the **red beret tag** (a
+  0.28 m 3D beret on a string, ≈ 65 px on screen), hangs on it; she snickers at the audience (40 f, interruptible).
+- **TRIGGER — he walks into it.** Anticipation (the tag wiggles, the suspense stem, the camera finds the two-shot),
+  the accent (punch-in, hit-stop, caption, laugh), then the prop shows **spent** (glow off) and the tag flies to its
+  pip on the Script chip (0.6 s).
+- **"What am I doing / what can I do next"** (binding): **W1** Hush's verb reads from her body alone at 64 px (sneak
+  crouch, run lean, three reach bands, dive, statue, squeak, peek, bow; no two verbs share a silhouette). **W2** every
+  held verb has exactly one world progress indicator (the rig ring at the prop, the frozen stone look) and its echo on
+  the button. **W3** a queued command shows a ghost ring with a small chevron at its target until it runs. **W4** his
+  current activity reads from his held prop and pose; his bubble shows the next one. **N1** everything live in Hush's
+  room glows in its verb colour; nothing else glows. **N2** every available rig point in her room shows its preview;
+  armed ones show the tag instead; spent ones show nothing. **N3** the action button's face is the verb available
+  right here, right now. **N4** after 6 s without input (the Figgis nudge at 40 s is unchanged) the "next useful" spot
+  (§6.4) gets the **spotlight pool** — a soft warm pool on the floor in front of it — and its preview at full size.
+- **One verb per screen** (binding): **V1** at a rig point: the LIVE button + Hush's thought; other previews fade to
+  30 %. **V2** in danger (entry warning, "?" filling, chase): FREEZE LIVE if she is seen, else the nearest hiding
+  spot's safety-net marker (a white 88 px disc with a blue closed eye); every preview hides. **V3** hidden: POP OUT / GO
+  ▶ with its rim; the world desaturates. **V4** otherwise nothing is loud: the passive previews are the menu. **V5**
+  after an action completes, nothing new is suggested for 1.0 s (the consequence gets the screen). **V6** at most 6
+  world overlays on screen at once, at most 2 of them loud (full strength, ≥ 150 px).
+- **Hit boxes** are the projected 3D rects of §3.1 (≥ 144 × 144 px, ≥ 24 px apart); the screen-rect lint checks them at
+  every aspect. The **Hints** setting becomes **Previews** (§3.11).
+
 ### 3.6 Tray and items
 - Bottom-left, **4 slots**: visual 128 px, hit 168 px, 24 px gaps (744 × 168 px). No bag screen, no scrolling.
 - At a rig point that accepts a carried item, that slot rises 12 px and glows, and the action button shows
@@ -308,57 +460,164 @@ Visual 128 px, hit 168 px, directly above the tray's left end. Centre distance t
 - **Respawn:** a used item restocks at its container 20 s later. A carried item flies home when Hush is caught.
   Nothing can soft-lock a Night.
 - Optional power-user path: drag a tray item onto a hotspot = walk there and rig (still a hold).
+- **(v1.2) The tray becomes carried-item chips, shown only while carrying.** No empty slots: each carried item is a
+  chip (128 px visual / 144 px hit) at (S+224 + i·168, H−B−188), right of Clarence, at most 4 (the fifth pick sends
+  the oldest home with a "plop"). **The item stays visible on Hush's model**, tucked in her braces. "Item get": she
+  pops out of the container holding it over her head at 1.6× (0.4 s, a sparkle; view-only, cut short by the next
+  command), tucks it in her braces, and its chip flies to the HUD; the needs cloud on its rig point turns into a full
+  preview (§3.5). At a rig point that takes a carried item, its chip rises 12 px and glows and the action button
+  shows *item → target*, as above; tapping a chip pulses the rig points it serves; dragging a chip onto a hotspot is
+  the power-user path. The pick strip is unchanged.
 
 ### 3.7 Camera
-- **Framing:** at zoom 1.0 one floor fills the screen height (640 px interior + 60 px slab) with ≈ 190 px of the
-  floors above and below visible. Seeing his legs on the floor above is both a cue and a gag.
-- **Follow:** Hush at 40–45 % of the width with 12 % look-ahead toward her walk; exponential smoothing
-  τ 0.20 s (0.15 s running); floor changes ease over 0.40 s; no walk bob; limits = house bounds.
-- **Gag-Cam** (every prank payoff): cut focus to Bellows, zoom 1.0 → 1.4 (small 1.15, big 1.3, chain finale or
-  signature 1.6) in 0.18 s, hit-stop 3 / 5 / 8 frames (cap 150 ms per second), shake 10–16 px decaying over
-  0.25 s, hold 1.2–2.0 s on his face, ease back in 0.35 s. **Input stays live; taps queue.**
-- **Off-screen payoffs:** if Hush is mid-rig or in danger, the PiP grows to a 704 × 396 **Gag-Cam window**
-  instead of cutting away. **No punchline is ever missed.** A gag-cam queue guarantees one punchline at a time.
-- **Bellows-Cam PiP:** 448 × 252 at top-right, shown when he is off-screen **and** (within one room, heading to
-  Hush's room, or she is rigging); hides 2 s after. Its 6 px frame is coloured by his temper tier. Renders at
-  30 Hz. When hidden, an **edge bubble** (112 px face, 36 px label "↑ upstairs", "2 rooms →") points at him.
-- **Overview** (0.5×): planning only; poses read, faces don't, so every payoff zooms back in.
-- **Audio is the third channel:** his footsteps pan by screen x and fade by rooms between you.
+(v1.2 — the whole section: a 3D perspective camera replaces the 2D zoom camera; REDESIGN_3D §5.2.)
+- **Base framing (binding numbers):** a perspective Camera3D, vertical FOV **30°** (the height is kept, the width
+  follows the aspect), **7.5 m** in front of the acting lane, at **y 1.9 m**, aimed at y 1.35 m on the lane (pitch
+  **−4.2°**), near 0.5 m, far 60 m. It sees 4.02 m of height at the lane: **1 m = 269 px at the lane**, 226 px at the
+  back wall, 322 px at the lip; the visible width at the lane is **8.93 m at 20:9, 7.15 m at 16:9, 5.36 m at 4:3**. The
+  top ≈ 90 px of the frame show the dark proscenium header (the top HUD row sits on it), the bottom ≈ 100 px the stage
+  lip and the dark apron. Hush (1.60 m) is 434 px tall = 40 % of the screen height; Bellows 471 px = 44 %.
+- **C1 Room framing:** the camera frames Hush's room. If the room fits (width + 0.6 m ≤ the visible width) the camera
+  x is clamped to [x1 − V/2 + 0.3, x0 + V/2 − 0.3] (the whole room in view) and biased toward her walk by her 12 %
+  look-ahead; otherwise it follows her at 40–45 % of the width with 12 % look-ahead, clamped to the room. Exponential
+  smoothing τ 0.20 s (0.15 s running); no walk bob; crossing a doorway eases to the new room's framing over 0.45 s
+  (never a cut). At 20:9 at most 1.7 m of each neighbouring room shows (dimmed), at 16:9 at most 0.8 m.
+- **C2 Edge clamp:** at most 0.3 m of unbuilt space shows past the Night's outermost built walls (the Night-1 kitchen
+  frames at camera x 15.33 m at 20:9).
+- **C3 Two-shot:** when Bellows is in Hush's room, or in a linked room within 3 m of the shared doorway, the camera may
+  pull back to ≤ 1.15× its distance (8.63 m) and shift to hold both, Hush ≥ 20 % from either edge (1.15× keeps the back
+  wall ≤ 10.0 m away, so a 0.72 m hotspot still projects to ≥ 144 px).
+- **C4 Hold offset:** while the action button is held, Hush stays at 40–55 % of the width (away from the thumb, §3.2).
+- **C5 Floors — one floor at a time:** a floor change cranes the camera 3.5 m over 0.40 s; **the other floor is never
+  in frame** (the upper floor is never visible in Act I). The v1.1 gag "his legs on the floor above" is **dropped**.
+- **C6 Safe rect:** Hush and the projected rects of every live prop in her room stay inside the safe rect (the
+  punch-hole never covers a target); the camera shifts within C1 / C2 to guarantee it.
+- **C7 Gag-Cam punch-ins** (every prank payoff): a **dolly** along the view axis toward his head and chest to the
+  distance 7.5 m / zoom — **S 1.15 = 6.52 m, L 1.3 = 5.77 m, M 1.4 = 5.36 m, signature and chain finale 1.6 = 4.69 m,
+  never closer than 4.5 m** — in 0.18 s, plus a 3–6° yaw toward his face side for M / L / signature (8° for MIRROR,
+  MIRROR's face-to-face); hit-stop 3 / 5 / 8 frames (cap 150 ms per second), shake 10–16 px decaying over 0.25 s,
+  hold 1.2–2.0 s on his face, ease back in 0.35 s. A clip may add a slow push (the sneeze build pushes to 1.15).
+  **Input stays live; taps queue.** A gag-cam queue guarantees one punchline at a time.
+- **Off-screen payoffs:** if Hush is mid-rig or in danger, the Bellows window escalates to **704 × 396** in the same
+  corner instead of cutting away. **No punchline is ever missed.**
+- **The Bellows window** (the old always-on 448 × 252 Bellows-Cam is gone): **400 × 225** at the top right
+  (W−S−424, T+24) plus a 6 px frame coloured by his temper tier, his next-activity chip (72 px, with the bubble's ring)
+  in its lower-left corner; it renders the same 3D world through its own camera at 30 Hz, only while shown. It shows
+  **only while Bellows is off-screen and the sim says the player should see him** (he is in the next room, heading to
+  Hush's room, or she is rigging); it **never shows while he is on screen**, and hides 1.5 s after the reason ends. Tap
+  = peek. When he is off-screen and there is no window (≥ 2 rooms away, not heading here), the **edge badge** (his
+  112 px face, an arrow and the 64 px next-activity icon, in the outer edge zone at y 430–650) points at him and plays
+  the emotes of his edge micro-gags.
+- **C8 — the visibility contract (keeps the dead-air gate valid, §2.4):** whenever the sim counts Bellows as visible
+  (in Hush's room, or "in the window"), the view MUST show him — on screen or in the Bellows window; whenever he is on
+  screen, the Bellows window is closed.
+- **Two presentations of the window** (a debug setting, §3.11): **`sim`** — C8 exactly as written; **`lean`** — while
+  the only reason the sim shows him is adjacency (he is not heading to her room, she is not rigging, no reaction or
+  payoff is running), the edge badge stands in for the window (face, next-activity icon, micro-gag emotes); heading,
+  rigging and payoffs still open it, and C8 accepts the badge on those adjacency-only ticks. The window must not
+  become the new always-on PiP, so the automated checks measure its share of PLAY time and warn above **35 %**. **The
+  shipped default is set at integration from the measured share:** `sim`, unless the first 3D Prologue run shows the
+  window up more than 35 % of PLAY and the dead-air gate still passes with adjacency-only beats counted through the
+  badge (`d1_lean`, §2.4) on every route — then `lean`. The owner can flip it in Settings (debug).
+- **Overview / Map** (a dolly back to 15 m, 0.5×; from Night 3 also a crane that shows both floors): planning only;
+  poses read, faces don't, so every payoff zooms back in; taps still resolve through tap-assist. **Hidden in Act I**
+  (one floor, ≤ 4 rooms): **Map** in the pause panel opens it (tap a room to peek), and a pinch-out still works; from
+  Night 3 a 144 px Overview button appears only while Bellows is on the other floor.
+- **Peek** (tap the Bellows window or the edge badge): the camera flies to him in 0.35 s, holds 1.8 s (longer while the
+  finger stays down) and flies back.
+- **Reduce motion:** no shake, no yaw, punch-ins ≤ 1.15×, 0.25 s linear moves.
+- **Audio is the third channel:** his footsteps pan by his projected screen x and fade by rooms between you.
 
 ### 3.8 HUD layout (1920 × 1080 base; positions are the top-left of the hit box)
+(v1.2 — the whole section: the v1.1 table and diagram are replaced by REDESIGN_3D §2. The old HUD had nine pieces on
+screen at rest, covering 18 % of the screen, 24 % with the Stalls band; the 3D HUD has four.)
 
-| Element | Position | Visual / hit | Notes |
+**Always on — four pieces (MUST be ≤ 4):**
+
+| # | Piece | Hit rect (top-left, size) | Visual | Behaviour |
+|---|---|---|---|---|
+| 1 | **Pause** | (S+24, T+24) 144×144 | 96 px disc, navy `#1B2340` at 62 % alpha, white bars 44 px | Opens the pause panel. Android back / iOS edge swipe does the same. |
+| 2 | **Script chip** | (S+192, T+24) 312×144 | 312×96 pill (navy 62 %) at y T+48: playbill icon 40×52, **one 34 px pip per required line** (gold filled = done, white ring = open), one 14 px dot per optional line, a 32 px star for the Big Number (grey sealed → gold unsealed) | Tap = Script panel (pauses). When a line lands, the prank's red beret tag flies from the prop to its pip (0.6 s) and the pip fills with a pop. The pill grows with the Script (112 + 46 per required line + 22 per optional line + 50 px, ≤ 440 px). |
+| 3 | **Clarence / ⏩** | (S+32, H−B−200) 168×168 | 128 px disc, navy 62 %, Clarence in colour | Tap = SQUEAK, hold = WHEEZE, ⏩ while hidden (§3.3). The 8 px lure ring only when lure fatigue is close; grey when fatigued. |
+| 4 | **Action button** | centre (W−S−168, H−B−168), 240 circle | 190 px disc | QUIET / LIVE (§3.2); verbs, latch, hysteresis and queue unchanged. |
+
+Clarence's centre (S+116) to the action centre (W−S−168) = W − 2S − 284 ≥ 1,300 px for S ≤ 168 (the two-thumb rule).
+Left-handed mode mirrors every rect horizontally (x' = W − x − w) except the centred meter.
+
+**Contextual and transient — shown only when they mean something:**
+
+| Piece | When it shows | Where / size | Replaces v1.1's |
 |---|---|---|---|
-| Pause | (S+24, T+24) | 112 / 144 | — |
-| **Figgis chip** (hints) | (S+192, T+24) | 128 / 144 | Pulses "psst" after 40 s without progress |
-| **Applause-o-Meter** | centred, y = T+16 | 600 × 132 / 600 × 144 | Brass dial 120 px, Applause number 56 px, Script counter "3/5" 48 px, tomatoes 3 × 44 px. Tap = Script panel (pauses). |
-| Running Gag banner | centred, y = T+164 | "RUNNING GAG ×1.5" 52 px + fuse bar 420 × 18 | Only while active; non-interactive |
-| **Bellows-Cam PiP** | (W−S−472, T+24) | 448 × 252 | Conditional; tap = peek |
-| Overview toggle | (W−S−168, T+300) | 112 / 144 | — |
-| **Tray** | (S+32, H−B−200) | 4 × 128 / 168, 24 px gaps | — |
-| **Clarence / ⏩** | (S+32, H−B−392) | 128 / 168 | Lure ring 8 px |
-| **Action button** | centre (W−S−168, H−B−168) | 190 / 240 circle | Ring 14 px |
-| **The Stalls** | band from x = S+800 to W−S−312, bottom edge | 40 px resting, up to 120 px on laughs | `mouse_filter = IGNORE`; never a touch target |
-| Thought bubble | world space above his head | 150 × 130, icon 88, ring 10 px, glyph 48, ear pips 3 × 20 | Clamped below the HUD band |
-| Pun caption | world space by his head | 88 px bold, 6 px outline | 1.2 s, stamp-in 1.6 → 1.0 over 4 f |
-| Bonus stamps | beside the caption | 64 px | "MELTDOWN! +8", "COMBO! +4", "NEAR MISS! +2", "EMBARRASSED! +5" |
-| Script panel (paused) | centred | 1000 × 680, rows 84 px, text 44 px, icons 72 px | — |
+| **Applause meter** | 2.5 s after any Applause change (count-up 0.6 s, stamp beside it); stays while a Running Gag is live | centred, (W/2−230, T+24) 460×104 pill: dial 72, "APPLAUSE" 36 px, number 60 px, delta "+35" 56 px outside the pill | the permanent 600×144 brass meter |
+| **Running Gag fuse** | while the Running Gag is live | under the meter: "RUNNING GAG ×1.5" 44 px + a 420×18 fuse bar at y T+144 | the separate banner |
+| **Bellows window** | Bellows off-screen **and** the sim shows him (§3.7, C8); never while he is on screen; hides 1.5 s after | top right, (W−S−424, T+24) 400×225 + a 6 px frame coloured by temper tier; his next-activity chip (72 px, with the bubble's ring) in its lower-left corner; escalates to 704×396 in the same corner for an off-screen payoff. Tap = peek. | the 448×252 always-visible Bellows-Cam |
+| **Edge badge** | Bellows off-screen and no Bellows window (≥ 2 rooms away, not heading here; or adjacency-only under the `lean` presentation, §3.7) | the left or right edge zone, x S+24…S+160 / W−S−160…W−S−24, y 430–650: his 112 px face, an arrow, the 64 px next-activity icon; plays the emotes of his edge micro-gags (§2.4 rule 2 unchanged) | the edge bubble (kept, moved) |
+| **Carried items** | only while Hush carries something | chips 128 visual / 144 hit at (S+224 + i·168, H−B−188), max 4, right of Clarence (§3.6) | the always-visible 4-slot tray |
+| **Figgis** | a nudge (40 s without progress), a card cue, or Hint from the pause panel; auto-hides after 4 s | bust 128 px at (S+24, T+192), card 320×200 to its right; obeys the placement rules below | the permanent Figgis chip |
+| **BOW** | after ★ (every required line) | (W−S−344, T+273) 320×112, "Take a Bow ▶"; slides under the Bellows window when that is open; the front door glows cream | the pause-menu-only bow |
+| **Pick strip** | a container with 2–4 useful items (not in the slice) | above the container (§3.6 sizes) | unchanged |
+| **The Stalls** | on audience events only: laughs (rising 60–150 px by tier), gasp, shush, "BEHIND YOU!", chants, boos | the bottom band x ∈ [S+560, W−S−440] on the layer under the HUD (so carried chips 3–4 stay on top), never a target; **hidden at rest** (the laugh track keeps them present by ear) | the 40 px resting row |
+| **Overview** | hidden in Act I (one floor, ≤ 4 rooms); a pinch-out still works; **Map** in the pause panel; from Night 3 a 144 px button only while Bellows is on the other floor | (W−S−168, T+300) when shown | the permanent overview button |
+| **Tomatoes** | on a catch (Night 4+): three 44 px tomatoes in the transient meter for 2.5 s | inside the meter | inside the permanent meter |
+
+**Removed from the play screen:** the empty tray slots, the idle Figgis chip, the permanent meter and banner, the
+Overview button in Act I, the footlight sprites (the footlights are light, §1.3), the resting Stalls row.
+
+**What moves into the panels:**
+- **Pause panel** (pauses): Resume · Retry · Take a Bow (after ★) · **Hint** (Figgis steps 2–3, §6.4) · **Map** (the
+  Overview of tonight's set; tap a room to peek) · Settings · Playbill. Header: the Applause total, tomatoes, Curtain
+  Calls so far.
+- **Script panel** (tap the chip or the meter; pauses; centred 1000 × 680, rows 84 px, text 44 px, icons 72 px): every
+  line with its ribbon / candle, "???" lines, the sealed Big Number, **his routine strip** with rigged stations stamped
+  with the red beret (§4.2), and tonight's loading-card rule as a one-line reminder.
+
+**Over the world (2D, anchored to 3D points):** his thought bubble (§3.9: 200 × 170, icon 112, ring 12 px, glyph 60,
+ear pips 3 × 24); pun captions (88–104 px Lilita One, 6 px navy outline; 1.2 s, stamp-in 1.6 → 1.0 over 4 f); bonus
+stamps beside the caption (64 px: "MELTDOWN! +8", "COMBO! +4", "NEAR MISS! +2", "EMBARRASSED! +5"); the previews,
+Hush's thought, needs clouds, item bubbles, the rig ring and the safety-net marker (§3.5).
+
+**Hints never cover the action (binding placement rules):**
+- **Protected rects**, recomputed every frame on screen: Hush's projected bounding box + 48 px; Bellows' + 48 px; his
+  thought bubble; the prop Hush is at (its projected rect + its preview); the four always-on hit rects + 48 px; the
+  Bellows window.
+- **Placement priority:** his bubble (never moves, except to clamp inside the safe area) > Hush's thought > danger
+  markers (the safety-net hiding marker) > passive previews > container item bubbles > the Figgis card > captions and
+  stamps. A lower item that would overlap a higher one or a protected rect slides sideways (≤ one cloud width), then
+  up (≤ 150 px), then waits. Passive previews may be covered by Hush's thought (they are faded then).
+- **Danger is sacred:** during an entry warning, a "?" fill, a chase or a reaction, all hints and previews hide; the
+  only teaching allowed is the safety-net hiding marker (`ghost_hide` and the Director's safety net). Queued hints fire
+  1.0 s after it is safe.
+- **Hints point at the world, never at text:** a ghost finger on the spot (approaching from the side away from Hush),
+  the spotlight pool on the floor in front of the spot (§3.5 N4), or Figgis's picture card; no arrows over characters.
+- **The middle band y 250–880 holds no always-on or persistent HUD** — only world-anchored bubbles, previews and
+  captions, and three short-lived contextual pieces that obey the protected rects (the edge badge in the outer 160 px,
+  the Figgis card, the pick strip).
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
-│ [II] [Figgis]        ┌ APPLAUSE ◔ 64   3/5   ● ● ○ ┐          ┌ BELLOWS-CAM ─┐ │
-│                      └──── RUNNING GAG ×1.5 ▬▬▬▬░░ ┘          │   448×252    │ │
-│                                                               └──────────────┘ │
-│                     (   bubble: [🛁 ring]  👓  ••   )                 [ovw]     │
-│                                                                                │
-│                (world only — the middle 60 % of the height stays clear)         │
-│                                                                                │
-│ (🐔/⏩)                                                                          │
-│ [itm][itm][itm][itm]      ˙ ˙ ˙ the Stalls (heads, IGNORE) ˙ ˙ ˙     ( ACTION )  │
+│ (II) [▤ ● ● ○ · · ☆]    ┌ APPLAUSE ◔ 64 ┐ +35         ┌─ BELLOWS WINDOW ──┐    │
+│  pause + Script chip    └ RUNNING GAG ×1.5 ▬▬▬░░ ┘    │ 400×225, only when│    │
+│ [Figgis] (nudge / Hint)   (transient: 2.5 s)          └[next]─ he matters ┘    │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ y 250 ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ [BOW ▶] (after ★)  │
+│                     (   his bubble 200×170   )                                 │
+│ [edge   world only: previews, Hush's thought, rig ring, item bubbles, captions │
+│  badge]  (no always-on or persistent HUD between y 250 and y 880)              │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ y 880 ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │
+│ (Clarence/⏩) [itm][itm] (only while carrying)  ˙ Stalls: laughs only ˙ (ACT)  │
+└────────────────────────────────────────────────────────────────────────────────┘    │  400×225, only    │     │
+│ [Figgis] (nudge / Hint)   (transient: 2.5 s)          └[next]─ if needed ─┘     │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ y 250 ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ [BOW ▶] (after ★)│
+│                     (   his bubble 200×170   )                                 │
+│ [edge   world only: previews, Hush's thought, rig ring, item bubbles, captions  │
+│  badge]  (no always-on or persistent HUD between y 250 and y 880)              │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ y 880 ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │
+│ (Clarence/⏩) [itm][itm] (only while carrying)  ˙ Stalls: on laughs only ˙ (ACT) │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
-HUD anchors to the safe-area corners (symmetric side inset `S = max(left, right)`), sits ≥ 32 px inside it, and
-the bottom-centre never holds a touch target. On tablets (logical height > 1250) the HUD scales ×0.8.
+HUD anchors to the safe-area corners (symmetric side inset `S = max(left, right)`), sits ≥ 24 px inside it, and
+the bottom-centre never holds a touch target. On tablets (logical height > 1250, or 4:3) the HUD scales ×0.8. The 3D
+view renders full-bleed, but the camera keeps Hush and every live prop of her room inside the safe rect (§3.7 C6).
+Text during play ≥ 44 px; HUD numbers 48–60 px; captions 88–104 px.
 
 ### 3.9 Readability overlays
 - **Thought bubble:** his **next** activity icon with a countdown ring that starts ≥ 4 s before he leaves; a
@@ -375,11 +634,24 @@ the bottom-centre never holds a touch target. On tablets (logical height > 1250)
   squeaks yellow, runs and rigs white. The lure radius is learnable.
 - **Room-entry warning:** ≥ 1.5 s before he enters Hush's room: door-handle jiggle (or his legs on the stairs),
   footsteps crescendo panned to his side, PiP pops, and the Stalls shout "BEHIND YOU!" if she's exposed.
+- **(v1.2) Sizes and floor decals in 3D.** His thought bubble (2D, anchored above his head) is **200 × 170 with a
+  112 px icon, a 12 px ring, a 60 px awareness glyph and 3 × 24 px ear pips**, and always shows the *next* activity.
+  The stare strip, the footprints and the rings are **floor decals** on the 3D stage floor (flat, unlit, no depth
+  write): the **stare strip** lies on the floor in front of the acting lane (z −1.5 … −0.5, §7.1) from his feet in his
+  facing direction, the darker inner segment his frozen range, grey while he's blind; the **footprints** show his next
+  1.5 s of walking; the **noise rings** expand to their **true radius** — a run's white ring to 2.5 m (500 px) every
+  0.5 s, a B rig's every 0.5 s, and the squeak's yellow ring to its true hearing reach (her room and every open
+  doorway) — so the player sees how far a noise carries. The tap feedback (a 0.5 m white destination ring, dotted path
+  decals, the tapped spot's pop), floor pins, the W3 queued ghost ring and the N4 spotlight pool are decals too; the
+  characters' blob shadows (r 0.34 m Hush, 0.45 m Bellows, 32 % alpha) are the only shadows. On the entry warning the
+  Bellows window opens (when he is off-screen).
 
 ### 3.10 Text, icons and haptics
 - Text: **≥ 36 px anywhere; 44 px for anything read during play; 48–56 px HUD numbers; 80–96 px captions and
   titles**; always a 4–6 px navy outline over the world. Icons and pantomime over words; Script lines are the
-  only sentences during play. Fonts: Lilita One (display), Nunito ExtraBold (UI) — both OFL.
+  only sentences during play. Fonts: Lilita One (display), Nunito ExtraBold (UI) — both OFL. (v1.2) The 3D HUD
+  (§3.8) sizes follow REDESIGN_3D §2.6: text read during play ≥ 44 px, HUD numbers 48–60 px (the meter's number is
+  60 px), captions 88–104 px Lilita One with a 6 px navy outline.
 - Haptics (`Input.vibrate_handheld`, VIBRATE permission only): tap 8 ms/0.3; ring 50 % 8 ms; rig done
   30 ms/0.7; prank accent 40 + 60 ms; near-miss 20 ms; caught 3 × 30 ms; Meltdown stomps 3 × 60 ms.
   Rate-limited (≤ 6 pulses/s).
@@ -389,6 +661,13 @@ Relaxed mode (unlimited tomatoes, "?" windows ×1.5, no badge, no penalty) · Ta
 Hotspot hints (Always / Long-press / Off) · Stare strip (On/Off) · Audience volume · Voice volume · Music ·
 SFX · Haptics · Reduce motion (no shake, punch-ins ≤ 1.15×) · Reduce flashing · Text +20 %.
 Everything is readable with the sound off (the mute test, §10.4).
+**(v1.2) New settings:** **Previews** (Always / After 6 s idle / Off — Off keeps Hush's thought, the rig ring and the
+safety-net marker; it takes the place of the badge-era Hotspot hints) · **Room dimming** (On/Off; Off lights every
+built room fully) · **Outline +50 %** (thicker character and prop outlines). Reduce motion also removes the camera
+yaw and makes camera moves 0.25 s linear (§3.7). **Debug section** (owner builds only; the defaults come from the
+build's boot configuration): Hush's head (B's head / the proposed head, §1.2 — shown only when the variant exists),
+the Bellows window (`sim` "when the sim shows him" / `lean` "only when he's coming", §3.7), MSAA and render scale (the
+device-performance toggles), and "Night 1/2 previews (work in progress)".
 
 ---
 
@@ -623,6 +902,10 @@ surprises.
   with relief at near misses, shout "BEHIND YOU!", chant at Meltdowns, stand for ×3 chains, and at the top tier
   one of them tumbles out of their seat laughing. They never laugh at nothing, or when Hush is caught (they go
   "Awww" and throw the tomato).
+- **(v1.2) The Stalls are hidden at rest.** They rise out of the dark apron below the stage lip only on audience
+  events — laughs (60–150 px by tier), a gasp, a shush, "BEHIND YOU!", chants, boos — and sink back when the moment
+  is over; the laugh track keeps them present by ear. They are never a touch target. Figgis appears only on a nudge,
+  a card cue or Hint (§3.8).
 
 ---
 
@@ -1019,7 +1302,11 @@ paid continues, no time limits. Relaxed mode removes the Hook and widens "?" win
 
 ### 6.4 Hints — Figgis's ladder (free, unlimited)
 1. **Nudge:** after 40 s without progress (no rig progress, item or line), Figgis's chip pulses "psst" and the
-   next useful hotspot sparkles.
+   next useful hotspot sparkles. (v1.2) **Step 1 adds the spotlight pool:** already after 6 s without input, the
+   "next useful" spot gets a soft warm pool of light on the floor in front of it and its preview at full size (§3.5
+   N4) — pointing at the world, never at text, and never during danger (V2); at 40 s without progress Figgis's bust
+   pops up "psst" (§3.8) over the same pool. **Steps 2–3 are the Hint button of the pause panel** (the Figgis chip
+   is no longer on screen at rest).
 2. **Cue card:** tap Figgis → a picture card (*item → target*, room icon) for 4 s, plus an edge arrow.
 3. **Show me:** tap again → the game pauses and a ghost Hush acts out the next step at 2× (≤ 6 s); for timing
    lines a ghost Bellows shows *when*.
@@ -1037,6 +1324,8 @@ possible now, using each line's authored hint data (TECH §4.6).
 | T4 roar | link 3+, a Meltdown, a signature | roar, whistles, stamping, 4–5 s | everyone stands; one head tumbles out of its seat laughing |
 | specials | — | "Ooooh!" *before* painful-looking accents; a gasp on "?"; relieved laugh on near misses; "Awww" on fizzles and catches; "shhh"; "BEHIND YOU!"; the "PIPE-DOWN!" chant; boos on his first entrance | — |
 
+- (v1.2) The Stalls column plays **from hidden**: at rest there are no heads on screen (§4.10); each tier raises
+  them into view (60–150 px by tier, T4 everyone standing) and they sink back afterwards.
 - The laugh starts at the **start of the hold** (6–12 f after the accent), ducks 6 dB under his voice, never
   repeats the same file twice in a row, never uses an air horn, and is earned only (a titter at most on setup).
 - Audience-volume slider. Fallback crowd (applause, whistles, "ooh", a kazoo "ha-ha" choir) if the formant
@@ -1081,7 +1370,83 @@ GROUND (y 0) ┌ PORCH 500 ┬ HALL 1000 ─stairs┬ PARLOUR 1300 ┬ KITCHEN 1
 Doorways between adjacent rooms are always open, except the front door and back door (they swing when used).
 Stairs join the hall foot (1450, 0) and the landing head (1050, −700). Hush enters by the kitchen window
 (Prologue–N4) or the garden fence gate (N5 on); a caught Hush always lands on the porch doorstep.
-Locked rooms in a Night are shown dimmed behind a velvet rope ("backstage").
+Locked rooms in a Night are shown dimmed behind a velvet rope ("backstage"). (v1.2) In 3D **a room the Night keeps
+closed is not built at all**; only a *backstage* room that the Night's routine passes through (the Prologue's and
+Gate 0's hall) is built dark: architecture only, stage light 0.3, a velvet rope at the doorway.
+
+**(v1.2) The 3D stage** (REDESIGN_3D §3, §5; the sim stays 1-D per floor — the view owns depth).
+- **World units.** **1 m = 200 sim px** (a sim x of 3,000 px is 15.0 m; the kitchen's 2,800–3,900 px are 14.0–19.5 m).
+  Floor `f` stands at y = 3.5 f m (the 700 px pitch); a height of y px above the floor line is y / 200 m. **Room height
+  3.2 m, set depth 2.4 m.** Every room x, station, rect and use point of the table above maps directly; nothing in the
+  house data changes for 3D. Speeds: Hush tiptoes 2.0 m/s and runs 3.6 m/s; Bellows walks 1.2 m/s and chases 3.0 m/s.
+- **Depth bands** (z toward the camera, metres): **+0.25 the stage lip** (a thin gilded edge; below it the dark apron
+  where the Stalls rise) · **0 … −0.4 the apron** (nothing stands here) · **−0.4 … −1.6 the acting lane** —
+  characters walk at **z −1.0**, Bellows stands at z −1.4 at his stations, Hush steps back toward a prop to reach it,
+  the floor decals live here (the stare strip z −1.5 … −0.5) · **−1.6 … −2.4 the set band** (furniture, props, hiding
+  spots; its front edge, z −1.65 … −1.80, is the **reach row**) · **−2.4 the back wall**, a flat colour field.
+- **The frame of the stage.** **Wing flats** divide the rooms: at each room boundary a cream partition (`#E9DCC4`, 0.22 m
+  thick, no outline) runs from the back wall to z −1.4, so the front of the lane is open between rooms — the doorway is
+  implicit and a character is never hidden behind a door frame. Doors that really close (front door, back door) are
+  full-depth flats with the leaf in the lane. No side walls except at the ends of the built set, no ceiling: a dark
+  **proscenium header** (`#1D1728`, 0.8 m, a thin gold edge at 3.13 m) closes the top of every frame. Characters
+  **cheat out**: the sim's facing is ±x, and the view yaws the body toward the camera — 35° idle or performing, 20°
+  walking, 0–10° in face-to-face beats and while reaching (the head turns to the camera instead) — so painted faces
+  never go edge-on; props whose front is the readable side are yawed 10–20° toward the camera.
+- **Three set layers.** (1) **Architecture**, every Night: walls, floor, the lip, wing flats, doors, windows, the
+  stairs, built-in units (kitchen counters and sink unit, fireplace and mantel) — low contrast, no outline, no glow.
+  (2) **Furniture / stations**, built only in the Nights that use them. (3) **Props**, small interactives and cue props,
+  built only in the Nights that use them.
+- **The strike rule (binding).** A furniture piece or prop is on stage in a Night **only if** that Night uses it: a
+  station of an activity or detour in its loop (fix-ups after overrides included) and the set pieces that station's
+  activity borrows, a rig point of one of its pranks, a container holding one of its items, a listed hiding spot
+  (`hides`, §3.4), a reaction landing or knock-on target of one of its pranks, a Director cue prop, a quake prop of a
+  room where a Meltdown can happen tonight, the entry / doorstep, or a step a live rig point uses. Everything else is
+  **struck** (not built). The view derives each Night's set list from the content; nobody hand-writes it.
+- **Density (MUST, checked by the set lint):** **≤ 5 live props per room per Night** (rig points with a prank
+  tonight + containers with an item tonight + listed hiding spots; doors, exits and stairs are architecture; target 2–4);
+  **≤ 4 set-dressing pieces per room** (non-interactive: a window, a portrait, a lamp, a rail), each ≥ 0.5 m on its
+  longest side, low contrast (C* ≤ 30, |ΔL*| ≤ 15 against its wall), never outlined, glowing, previewed or tappable,
+  never in the acting lane above 0.45 m and never in the 0.6 m band above a live prop (where its preview sits);
+  quake props (§4.5) count as dressing and hang ≥ 2.2 m or sit on the mantel; **one hiding spot per room in Act I**;
+  no two live props stacked unless their projected rects keep ≥ 24 px (the slice keeps exactly two such pairs: the
+  kettle under the honey in Night 1, the fridge's shelf over its door in Night 2); each room keeps a 1.5 m stretch of
+  lane with nothing behind it at head height (the Night-1 kitchen: x 3,180–3,540, the fridge and table struck).
+- **Walls are fields, not patterns:** one flat colour per room + one wainscot band 9 L* darker + one picture rail; no
+  wallpaper motifs, tiles or panel mouldings; floors plain boards in two tones. **One floor at a time** (§3.7 C5).
+  Every live prop reads as its own black shape at 64 px; no two live props of a room share a silhouette family
+  (honey jar = squat cylinder + red lid + a tall pepper pot · kettle = round body, spout, arched handle · pickle jar =
+  tall glass cylinder, gold lid, white onions · sink tap = tall chrome gooseneck, blue knob · fridge = tall rounded box
+  with a chrome bar handle · pantry = dark arched alcove with a gathered curtain · gramophone = a big horn · recliner =
+  a fat armchair leaning back · newspaper = a folded broadsheet · piano = a black upright block · CONFISCATED box = a
+  crate with a red band · phone = a candlestick telephone · mirror = an oval on a stand · clock = a tall case with a
+  round face · coat cupboard = a tall wardrobe with one door line).
+- **Scale and reach (the owner's hybrid, R5).** Live and held props are **×1.5** their real size (Bellows' teacup and
+  saucer ×1.8, ≥ 0.16 m wide); furniture **×0.8** (counter top 0.75 m, stool seat 0.55 m, armchair seat 0.42 m, table
+  0.62 m); architecture is real (doors 2.1 m, rooms 3.2 m). Hush has **look B's arms** (shoulder at 1.127 m, 0.405 m
+  from shoulder to wrist; the palm centre 0.09 m and the fingertips 0.23 m beyond the wrist; tiptoe +0.07 m), so:
+  - the **reach part** of every live rig prop (what her glove touches) sits in the **reach row** (z −1.65 … −1.80), on a
+    shelf or counter ≤ 0.35 m deep; the rest of the prop may extend back;
+  - while rigging, Hush stands at the spot's **reach position** (a small x offset from its use point, z −1.6 or
+    nearer the camera; view only, eased 0.2 s); a target is **reachable** iff it is ≤ 0.50 m from her nearer shoulder;
+  - the **reach band** comes from the placed target's height: **low 0.00–0.55 m** (kneel / crawl), **mid 0.55–1.40 m**
+    (standing), **high 1.40–2.15 m** (tiptoe, arms up); **above 1.70 m she needs a step** — **ACHOO-RIA! climbs
+    Bellows' own kitchen stool** (seat 0.55 m; the stool wobbles as she steps on and off), and the band fallback for
+    other high spots uses **the mime's invisible step** (she pats the air, then steps up 0.30–0.45 m on nothing); a rig
+    released mid-step ends with a small hop down before she moves;
+  - **Bellows never reaches up:** set pieces come to his hands (the kettle for the pour, the honey jar for the spoon
+    beat slide into his grip and home again, keeping their armed look and tag);
+  - the view may move a prop's visual and its hit box inside its room to stage it well; `house.json` stays unchanged
+    (the sim uses only its use points and rects).
+- **Colour and value hierarchy (measured on every set render):** lit walls L* 62–76, C* ≤ 28 (the wainscot 8–10 L*
+  darker); a dimmed neighbour's walls L* 45–58, C* ≤ 15; floors L* 40–50; dressing as above; **live props C* ≥ 45 or a
+  verb halo** (metal and wood props) with a 3.4 px ink outline and the verb glow (§3.5); **characters** each with
+  ≥ 20 % of the silhouette at L* ≥ 85 and ≥ 20 % at L* ≤ 40, a 4.8 px outline and a rim light. Characters are the only
+  things with both extremes of the value range and a rim; live props are the only saturated things with an outline;
+  everything else is a mid-value, low-chroma field.
+- **Room light:** Hush's room is lit 1.0; Bellows' room when it is not hers 0.9; other built rooms 0.78 with 40 %
+  desaturation; backstage rooms 0.3 — except a backstage room that holds Bellows, lit 0.9 while he is in it (so his
+  mirror gag in the Prologue's dark hall reads in the Bellows window); his own light never drops below 0.9. Changes
+  tween over 0.4 s; Room dimming off (§3.11) lights every built room 1.0.
 
 ### 7.2 The v1 episode list — Prologue, 10 Nights, Gala Night
 Each Night: rooms, the one new rule and its loading card, the cold open, his loop, the Script (R = required,
@@ -1096,6 +1461,11 @@ Rules for every Night (v1.1):
 3. Where a Night departs from the defaults, its **Rules** line says so: fix-up overrides and `rules.combos` (§5.4),
    and the Figgis **card cues**, which fire by id (`card_*`) and are presented by the FTUE. Every Night's Big
    Number re-arms are listed in §6.2.
+4. **(v1.2) `hides` and the set.** A Night may list its live hiding spots (`hides`); in Act I it lists one per room
+   (§3.4), and every unlisted hiding spot is struck. Absent = every hiding spot of the Night's rooms (the draft Nights).
+   Gate 0 (`g0_sneeze`, §6.2) lists the pantry curtain only. Each final Night's **Set** line gives the rooms built and
+   lit, built dark ("backstage") and not built, and its live props per room (REDESIGN_3D §3.1, §3.4); the rest of the
+   set follows the strike rule of §7.1.
 
 **PROLOGUE — "Curtain Up"** (parlour, kitchen; the hall is backstage) — §2.3. New: squeak, move, hold, hide
 (ghost finger each), and ⏩ once. No loading card (its new rule is `basics`) and no Big Number. Loop (scripted,
@@ -1104,6 +1474,12 @@ rigged, then +2 s; no cap) → `tea` → [FRAZZLED → hall mirror, off-stage] �
 +2 s, or 25 s) → `hunt` (specs on, 6 s, walks 2350 → 1650) → the exit detour upstairs (bubble: the exit icon).
 Script: R **ACHOO-RIA!** · R **ALLEGRO-GO-GO!** (lines as "Bellows sneezes up a storm", "Bellows gets in a spin").
 No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–70 s launch-relative).
+**Set (v1.2):** parlour and kitchen built and lit; the hall built dark (architecture, the mirror and the stair foot
+he uses, a velvet rope at the doorway; his mirror detour is seen in the Bellows window); porch, upstairs, conservatory
+and garden not built. `hides`: the pantry curtain and the piano back. Live props: kitchen 2 (the honey jar with the
+pepper pot, the pantry curtain), parlour 2 (the gramophone, the piano back), hall 0 (backstage); the kettle (the tea
+station), the sink (the sneeze landing) and Bellows' stool are furniture; dressing: the kitchen window and pendant
+lamp; the parlour window, the vase, the picture frame and a portrait.
 
 **ACT I — "The Tenor at Home"**
 
@@ -1118,6 +1494,13 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
   HOT & COLD queues one fix-up (≈ 10 s); on unseal ACHOO-RIA! and TAP DANCE re-arm. Figgis card cues: `card_script`
   at 1 s, `card_tray` at the first pick-up, `card_bow` when every required line is done. First prank ≤ 25 s, every
   fix-up detour ≤ 12 s (§2.4).
+- **Set (v1.2):** porch, hall, parlour and kitchen built and lit; upstairs, conservatory and garden not built (the back
+  door is a closed door). `hides`: the pantry curtain, the piano back and the coat cupboard — the kitchen table and
+  the chaise back are struck, and the solution routes hide in the pantry and behind the piano instead (+≈ 0.43 s of
+  tiptoe per hide). Live props: kitchen 5 (honey, the kettle stacked under it with a 27 px gap on screen, pickle jar,
+  sink tap, pantry curtain; the fridge and the table struck), parlour 2 (recliner, piano back; the gramophone is
+  furniture for the warm-up, the newspaper the paper he reads, the chandelier LIFT-OFF's landing), hall 2 (the
+  CONFISCATED box, the coat cupboard; the mirror is furniture for the fix-up). The front door glows cream after ★.
 - Script: R "Bellows sings a duet with his kettle" (**KETTLE DRUM**) · R "Bellows gets a face wash" (**TAP DANCE**)
   · R "Bellows loses a fight with a jar" (**IN A PICKLE**) · O "Bellows reads the paper in orbit" (**LIFT-OFF**) ·
   O "Bellows sneezes up a storm" (ACHOO-RIA!) · BN **HOT & COLD** — "Sneeze him into the sink" (Double Act).
@@ -1134,6 +1517,12 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
 - Rules: no combos (`rules.combos: []`); on unseal TIME'S UP re-arms. Figgis card cues: `card_specs` at 1 s (he
   opens reading with specs on, so *specs on → get out of sight* is true on screen), then `card_freeze` the moment
   his specs first come off. First prank ≤ 25 s (§2.4).
+- **Set (v1.2):** as Night 1 (porch, hall, parlour, kitchen). `hides`: the pantry curtain, the piano back and the coat
+  cupboard. **Night 2 has no clock-case hiding spot**: the clock case is struck, its two face-to-face scenario routes
+  are retired, and the in-use lesson moves to Night 3 (§3.4). Live props: kitchen 3 (the fridge — one prop with two
+  live zones, the upper shelf to rig and the lower door to take the kipper — and the pantry curtain; the sink is
+  furniture for the STICKY fix-up), parlour 2 (the newspaper on the recliner's arm, the piano back), hall 5 (the
+  CONFISCATED box, the coat cupboard, the phone, the clock, the mirror).
 - Script: R "Bellows talks to a fish" (**SOMETHING FISHY**) · R "Bellows rides the grandfather clock"
   (**TIME'S UP**) · R "Bellows wears his dinner" (**COLD OPEN**) · O "Bellows reads the news up close"
   (**EYE-POPPING NEWS**) · BN "Be his reflection" (**MIRROR, MIRROR**). (TIME'S UP frazzles him → the mirror
@@ -1300,48 +1689,101 @@ quotes, Act IV (cellar and attic), Beryl eating paper, the "butler" gag, sharing
 
 ## 9. Art, camera, animation and audio
 
-### 9.1 Art direction (AI-authored SVG cutouts)
-- **One-line style:** Saturday-morning cartoon on a stage set — chunky rounded shapes, thick navy ink, flat
-  saturated fills with one flat shade tone per shape, lit from the top-left. Family-friendly.
-- **SVG rules** (ported from Booby's STYLE.md, `game/art/STYLE.md` is the file copy): presentation attributes
-  only; `path/rect/circle/ellipse/line/polyline/polygon/g`, gradients only for walls/sky/glows; no filters, masks,
-  `<text>`, `<image>`, CSS or `<use>` chains; ≤ 10 colours per sprite; 3 px canvas margin; compact (1-decimal
-  coordinates); authored at display size (1×) and rasterised at 2× by HiResTex.
-- **Line weights by layer:** characters 6 px (detail 3.5 px) · interactable props 5 px (detail 3 px) · set
-  dressing 4 px (2.5 px) · architecture 3 px `#3A3050` at 80 % opacity. Ink `#1B2340`, round joins and caps.
-- **Value hierarchy:** characters strongest saturation; interactables clean and bright with pre-baked outline /
-  glow sprites; rooms pastel and 20–30 % desaturated so faces pop.
-- **Room palettes:** hall sage `#A9B79A` · parlour dusty rose `#D9A7A0` · kitchen buttercream `#F2DFA6` ·
-  conservatory glass `#CDE7E1` · garden lawn `#8ACB6A`, hedge `#4E9A4A`, sky `#9FD6F0` · landing honey wood
-  `#C9A27A` · bathroom mint `#BFE3D5` · bedroom powder blue `#B8C7E6` · dressing room teal `#6FA3A8` · floors oak
-  `#C98B55` / `#A96C3C`.
-- **The stage:** red velvet curtain `#B3122E` with gold trim `#E8B33A`; a gilded proscenium at the house's far
-  ends; a warm footlight glow along the bottom (additive sprite) and a cool top vignette. No Light2D, no
-  CanvasGroup per character.
-- **Rasterisation:** backgrounds/architecture at 1× and VRAM-compressed; characters and props at 2× (1.5× on
-  phones with < 3 GB RAM) packed into **one runtime atlas per character and per room** (TECH §5.3).
+### 9.1 Art direction (v1.2: 3D Toy Box; SVG for what stays 2D)
+(v1.2 — the whole section. v1.1's 2D art direction — AI-authored SVG cutouts, line weights by layer, pre-baked outline
+sprites, runtime atlases — describes the 2D build on `main`; its SVG rules still govern everything that stays 2D.)
+- **One-line style:** a Saturday-morning cartoon on a toy stage — **chunky matte vinyl-toy characters** with big
+  painted faces and a clean ink outline, in a **simplified 3D dollhouse-cutaway set** of calm colour fields, lit from
+  the upper left front. Family-friendly. The owner's pick (D6): **Hush = look B's body dimensions in look A's Toy Box
+  style; Bellows, the house, lighting, shading, faces and props = look A** (Toy Box) with the look-dev board's fixes
+  (`docs/review/lookdev/index.md`).
+- **Materials:** every 3D surface takes its albedo from a shared **palette texture** (one 256² palette per room set,
+  one per character), so each room is one material and each character one material + its outline. No PBR, no
+  specular maps, no normal maps.
+- **Lighting is computed in the shader** (unshaded materials reading shared stage-light parameters), so every renderer
+  looks the same and costs the same: **one key**, a directional stage key from the upper left front (≈ 49° elevation),
+  warm `#FFF4E0`, +28 % on the lit band and +8 % on a top band; a **flat fill of 0.66** — no surface falls below 66 % of
+  its albedo's luminance, so nothing crushes to black at 30–50 % phone brightness; two soft bands (softness 0.08) + the
+  top band; a **rim on characters only** (fresnel power 2.5, strength 0.35–0.55, cool `#BFE0FF`, which separates Hush's
+  navy costume from dark backgrounds and Bellows from warm walls). **No real-time lights and no real-time shadows**:
+  **blob shadows** under the characters (ellipses r 0.34 m Hush, 0.45 m Bellows, 32 % alpha); practicals (fire, lamps,
+  windows) are emissive only; the footlights are an additive warm gradient from the lip (§1.3). Per-room stage light as
+  §7.1.
+- **The owner's shading pick — look A's vinyl shading is kept** on the characters and the vinyl live props: the soft
+  two-tone terminator with A's warm **lilac shadow tint** (`#B9A3E0`), the **ground-bounce** darkening on down-facing
+  surfaces (0.14) and a **0.10 matte vinyl sheen** on the lit band — all inside the readability floor above (no surface
+  below 66 % of its albedo). The **set keeps the neutral fill** (`#A8A4AE`) so the room stays a calm field behind the
+  toys.
+- **Outlines:** inverted hull, **constant screen width** — characters **4.8 px**, live props **3.4 px** (at the 1080
+  base; lead decision D7: look A's own weight — REDESIGN §5.4's 3.5 / 2.5 px read less like a vinyl toy), dressing and
+  architecture **none**; ink `#1B2340`, lerped 50 % toward the room colour in a dimmed room; hard-edged props carry
+  smoothed outline normals. The **verb halo** on live props is a second 8 px shell in the verb colour behind the ink,
+  pulsing 0.6 ↔ 1.0 at 1.2 Hz, that must stay visible against the back wall (§3.5).
+- **Value hierarchy and room colours:** §7.1 (walls L* 62–76 as flat fields, floors L* 40–50, dressing low contrast,
+  live props saturated or haloed, characters with both value extremes). The v1.1 room palette families carry over —
+  hall sage, parlour dusty rose (calmer, so Bellows' plum separates from it), kitchen buttercream, porch sky — with the
+  exact values chosen to pass the §7.1 rules with both characters in frame.
+- **The stage:** red velvet curtain `#B3122E` with gold trim `#E8B33A` (the Boot curtain stays a pre-rasterised 2D
+  curtain); the gilded stage lip (`#C9A24A`) and the dark apron; the dark proscenium header (`#1D1728`, 0.8 m, gold
+  edge at 3.13 m); cream wing flats (`#E9DCC4`) between rooms (§7.1).
+- **What stays 2D:** the HUD and every panel; captions, stamps and the meter; Bellows' bubble, glyph, ear pips and "?"
+  meter; the previews, needs clouds, item bubbles, the rig ring and the safety-net marker; the ghost finger and the
+  spotlight labels; Figgis (a flat bust); the Stalls silhouettes; the red Boot curtain; the Busted Cam frame and
+  "SPOTTED!"; the Gag Reel frame. Every world-anchored 2D item is placed at its projected 3D point every frame and
+  obeys the placement rules (§3.8). **In 3D:** the set, the props, the characters, the red beret tags, the hidden eyes
+  inside hiding spots and the floor decals (§3.9).
+- **SVG rules** (for what stays 2D; ported from Booby's STYLE.md, `game/art/STYLE.md` is the file copy): presentation
+  attributes only; `path/rect/circle/ellipse/line/polyline/polygon/g`, gradients only for walls/sky/glows; no filters,
+  masks, `<text>`, `<image>`, CSS or `<use>` chains; ≤ 10 colours per sprite; 3 px canvas margin; compact (1-decimal
+  coordinates); authored at display size (1×) and rasterised at 2× by HiResTex. Ink `#1B2340`, round joins and caps.
+- **Third-party art:** CC0 / public-domain only (the Quaternius Universal Animation Library skeleton and clips, CC0
+  1.0), each file's source URL and licence recorded in `game/art3d/CREDITS.md`; everything else is original.
 
 ### 9.2 Characters, faces and takes
-- **Rigs:** flat Sprite2D parts on our JSON FK player, rubber-hose Line2D limbs, springs for secondary motion.
-  - **Bellows** (~22 parts): barrel torso, belly spring, head, **bouffant** (7 textures: neat, flipped, frazzled,
-    wet, floured, feathered, poodle), **sideburn springs** (flat / bristle / puffed), brows, **specs** (on nose,
-    dangling, buttered, magnifier), cravat spring, coat tails, hose arms, 6 mitten hands (open, fist, point, grip,
-    wag, conduct), hose legs, slippers. Face: eyes × 10 (open, half, closed, wide, pinpoint, angry, spiral,
-    balloon, squint, teary), brows × 6, mouths × 10 including the **singing O** in 3 sizes. Skin tinted by temper.
-  - **Hush** (~20 parts): beret spring, head, braces, striped torso, hose limbs, flat shoes, **8 glove shapes**
-    (wall palm, point, pinch, fist, open, thumbs-up, shush, wave), Clarence as a socketed prop. Face: eyes × 8
-    (pupils ≥ 14 px), brows × 5, mouths × 8 (smile default), blush, a small teardrop.
-  - **Beryl** (Act II): box body, head, beard, ear/tail/bell springs, 4 hose legs with hooves, eyes × 4.
-  - **Delphine** (Act III): gown triangle with a sway spring, head, **beehive spring** with tiara, arms, opera
-    glasses on a stick, fan; eyes × 6, mouths × 6.
-  - **Figgis:** a bust in a hood (4 expressions + cue-card hands). **The Stalls:** 24 head/hat silhouettes × 3
-    frames (rest, laugh-up, lean) on one atlas.
-- **Readability minimums at zoom 1.0:** heads 120–150 px; eye whites ≥ 24 px; pupils ≥ 10 px (Hush 14); an open
-  mouth ≥ 40 px wide; outlines 6 px. Gag-Cam heads reach 170–210 px.
+(v1.2 — the rigs are 3D; the face vocabulary, the readability minimums' intent, the warmth rule and the residue list
+carry over. The v1.1 cutout-rig text — Sprite2D parts, rubber-hose Line2D limbs, springs — describes the 2D build.)
+- **Rigs (3D):** every character is **one skinned mesh on the CC0 Quaternius UAL 65-bone humanoid skeleton**
+  (bone names, directions and rolls kept, lengths re-proportioned per character), plus extra bones for props, FX and
+  secondary motion. **Budget per character on a mid-range phone:** ≤ 10k triangles, ≤ 50 deform bones + the jiggle
+  bones, 1 skinned mesh + ≤ 4 attachments, 1 material + the outline (≤ 4 draw calls), ≤ 0.25 ms CPU (skinning +
+  jiggle + face). **Secondary motion on jiggle bones**, computed in the view, never in the sim. **Residues and costumes**
+  are attachment meshes and material swaps sharing the bones; mutually exclusive variants of one body part are **body
+  slots** (the bouffant: neat / flipped / frazzled / wet …). **Temper** tints the skin by a material parameter
+  (peach → beetroot, §1.2). **Faces** are 2D cards: cells of one face atlas per character (eyes, brows, mouth, extras),
+  pupils moved by a look-at, blinks every 2–6 s (6 f, suppressed during takes); no blend shapes.
+  - **Bellows** (look A + the board's fixes): the barrel torso (0.85 m) on 0.45 m legs, belly jiggle; the **bouffant**
+    (body-slot variants neat, flipped, frazzled, wet, floured, feathered, poodle; three jiggle bones); **sideburn
+    jiggle bones** (flat / bristle / puffed with temper); cravat and two coat-tail jiggle bones; **specs** (on nose,
+    dangling, buttered, magnifier); an **arm-out pose layer** on every clip so his arms clear the barrel; big held
+    props — the **teacup and saucer ×1.8** (≥ 0.16 m wide), the newspaper, the pickle jar, the sponge, the phone
+    handset, the comb, the gramophone needle; his ride-along stool for the sneeze. Face (atlas cells, the v1.1
+    vocabulary): eyes × 10 (open, half, closed, wide, pinpoint, angry, spiral, balloon, squint, teary), brows × 6,
+    mouths × 10 including the **singing O** in 3 sizes, **a bigger face inside the bouffant** than look A's look-dev.
+    The CHOO puff and the dazed stars are vinyl FX meshes.
+  - **Hush** (look B's dimensions, look A's style): 1.60 m, head ≈ 0.50 m incl. the beret, B's neck, a narrow torso in
+    a loose Breton top, long thin arms (B's: 0.405 m shoulder → wrist) ending in white four-finger gloves ≈ 0.20 m
+    long, long thin legs in straight navy trousers, flat shoes; jiggle on the beret (+ its stalk), the braces, the hair
+    tips and Clarence (comb + body); props: Clarence (in the brace, held, squeezed), the oversized pepper pot (×1.5,
+    for ACHOO-RIA!), carried items tucked in her braces; the **marble** look (§3.2) keeps her eyes, beret and braces in
+    colour. Face (atlas cells, the v1.1 vocabulary): eyes × 8, brows × 5, mouths × 8 (smile default), blush, a small
+    teardrop, plus the dark-gap eye cells for hiding spots; asymmetric marks have mirrored cells, because facing is a
+    yaw, never a mirror image.
+  - **Beryl** (Act II) and **Delphine** (Act III): built in 3D on the same pipeline in Stage 3 (their v1.1 forms:
+    Beryl's box body, beard, ear / tail / bell and legs; Delphine's gown, beehive with tiara, opera glasses and fan;
+    springs become jiggle bones).
+  - **Figgis:** a flat 2D bust in look A's palette (4 expressions + cue-card hands), contextual (§3.8). **The Stalls:**
+    24 head/hat silhouettes × 3 frames (rest, laugh-up, lean) on one atlas, 2D.
+- **Readability minimums at the base framing:** Hush 434 px and Bellows 471 px tall (40 % / 44 % of the height); heads
+  inside 120–150 px (Hush ≈ 0.50 m incl. the beret; Bellows ≈ 120 px plus the bouffant); the painted face card as big as
+  the head allows. At 1200×540 Hush's head is ≥ 60 px, her face card ≥ 40 px wide, eye whites ≥ 9 px, pupils ≥ 4 px, the
+  mouth ≥ 16 px wide, brows ≥ 3 px thick (the head check of §1.2 uses this bar and a fresh-reviewer face test). Every
+  verb reads as a 64 px silhouette (§3.5 W1); punch-ins enlarge his head by their factor (§3.7 C7).
 - **Hush warmth rule:** at a 50 px silhouette and a 96 px face crop she reads as a smiling person, never a clown:
   big pupils, blush, smiling default, thin eye paint, no black lips. Checked on the cast sheet by the owner.
-- **Residue overlays** share part pivots: drips, flour tint, frizz, feathers, jelly helmet, tutu, trophy helmet,
-  long johns, hedge twigs, tomato splats. Combos have their own looks.
+- **Residue looks** share the bones: drips, flour tint, frizz, feathers, jelly helmet, tutu, trophy helmet, long johns,
+  hedge twigs, tomato splats. Combos have their own looks. A reaction's look owns its body slot until the reaction's
+  release frame; from then on the sim's residue owns it (e.g. the sneeze flips the bouffant, then BLINDED keeps it
+  flipped until the mirror); a retry clears it.
 
 ### 9.3 Comedy timing (numbers the animation lint enforces)
 - Every reaction is **anticipation → accent → hold → settle**: anticipation 8–12 f (small) / 15–24 f (big),
@@ -1359,6 +1801,34 @@ quotes, Act IV (cellar and attic), Beryl eating paper, the "butler" gag, sharing
   sneezes and panto rounds. He is humiliated more than harmed.
 
 ### 9.4 Animation list and priorities
+**(v1.2) Animation in 3D.** The §9.3 numbers are unchanged; the animation lint enforces them on the sampled 3D clips.
+- **Pipeline:** poses are authored in Blender in a small pose language (rotations per bone, 2-bone arm IK, foot
+  grounding, steps and reach helpers, eases per key, 60 fps, frame 0 = the clip start) and **baked one clip per file**
+  into an engine animation plus a **JSON sidecar** that keeps the clip model of v1.1 — beats, events (sounds, laughs,
+  FX, camera, hit-stop, props, looks), marks, loop, layer / mask, blend, variation — and adds a **face timeline**. Clip
+  ids are unchanged (`bellows/rx_sneeze_blast_a`, `hush/loco_walk`), so reactions, one-shots, sound frames and the
+  clip manifest carry over. A clip the sim or a cue times keeps its v1.1 length, every beat and mark of its reaction
+  within 2 f and every sound frame; loops and locomotion may retime to the REDESIGN_3D §4.2 gaits (Hush's cartoon sneak
+  2.2 steps/s at 2.0 m/s, a 1.80 m stride; Bellows' strut a 0.64 m stride at 1.2 m/s). The automatic 2D smear is
+  dropped: accents pop on the frame instead.
+- **Locomotion** is retargeted from the CC0 Quaternius library where it fits (walks, runs, idles, climbs), with
+  per-character layers (Hush's mime paws; Bellows' arm-out on every clip).
+- **Rigging is readable, not generic:** each rig is a **prop-specific action** — one of **three reach bands** (high /
+  mid / low; §7.1) × the prep tier (Q 0.8 / S 1.5 / B 2.5 s) plus the prop's own animation as she works — and the two
+  Prologue pranks have their own: **ACHOO-RIA!** climbs Bellows' stool, lifts the oversized pepper pot over the jar and
+  shakes it three times; **ALLEGRO-GO-GO!** grips the big red-knobbed lever with both gloves and yanks it back. Rig
+  clips follow the rig's progress (one band clip serves every tier); the glances left and right at 30 % and 70 % of S
+  and B rigs are overlaid by the view. The v1.1 generic "tinker × 3" is not made in 3D.
+- **The R3D set (Gate 0 + the Prologue, 70 clips):** Hush 28 — idle, the sneak walk, run, turn, arrive, skid, the two
+  Prologue rig actions, the step-down hop, snicker, dive, pop, **statues 1–4** (5–8 follow: "4 of 8" until they land,
+  R3 at the latest), squeak, climb in, bow, the fidgets, glance, rummage, wheeze, the frozen mid-job statue, shrug,
+  yanked; plus the three band fallbacks for Nights 1–2 — and Bellows 42 — the sneeze first, then tea (with the kettle
+  and honey jar coming to his hands), warm-up, the mirror fix-up, five walks, the bonk, the curtain-call wander-on, the
+  slow burn, the Gate-0 bits, one-shots and micro-gags, and the Prologue's dizzy spin, doorframe and picture bonks,
+  livid bit, stomp, hunt, peer under the piano and the T3 last beats. Everything else of the 137-clip Stage-2 slice
+  list below is **R3** (Nights 1–2 play in 3D meanwhile with readable fallbacks — a double take held to the sim's length
+  plus the caption, never a rest pose — and stay hidden in the owner build).
+
 | Priority | Hush | Bellows | Others |
 |---|---|---|---|
 | **P0 — slice** (Stage 2) | idle + 3 fidgets, tiptoe scurry (10 f per step), run (12 f), turn (6 f), door, stairs, rummage, tinker × 3 (Q/S/B), snicker + glance at the Stalls, dive / pop out, hidden eyes, 4 freeze poses, squeak arm, climb in the window, busted, dangled (Lecture), doorstep + tomato, bow | idle + fidgets, strut (28 f per step, belly spring), Irked walk, Steaming stomp, turn, door, stairs; activities: warmup, tea, pickles, snack, rinse, paper, fire, mirror, phone, clock, hunt; suspicious, double take, "?" look, chase, wheeze, grab, Lecture × 3, Meltdown × 1, Exhausted, slow burn, dignity recovery, door-slam bonk, "pardon" bump; reactions: SNEEZE_BLAST, DRENCH A, SING_CRACK, STRAIN_SLIP, AVALANCHE_HELMET A, DIZZY_SPIN, LAUNCH_CEILING, BLIND_BUMBLE A, FISH_SLAP, JACKHAMMER_CLING, the MIRROR, MIRROR signature, HOT & COLD; squeak bits × 6 | Stalls laugh set; Figgis; curtain |
@@ -1367,7 +1837,9 @@ quotes, Act IV (cellar and attic), Beryl eating paper, the "butler" gag, sharing
 
 Build order: the **sneeze (#1) end to end first** — rig, clip, sound, laugh, camera, lint, GIF — then the owner
 judges it (Gate 0) before mass authoring. A separate review agent scores every gag 1–5 on *funny / readable /
-fresh* from its contact sheet and GIF; anything under 3 goes back.
+fresh* from its contact sheet and GIF; anything under 3 goes back. (v1.2) In 3D the order holds again: the sneeze is
+the first Bellows clip, and the owner judges it as **Gate 0 in 3D ("Sneeze 3D")**; clips that run out of their time
+box ship as lint-clean drafts (never fallbacks) marked for R3 polish.
 
 ### 9.5 Audio direction (procedural, extending Booby's `tools/audio`)
 - **The score is a pit orchestra** (piano, pizzicato strings, clarinet, bassoon, tuba, timpani, woodblock, slide
@@ -1384,6 +1856,9 @@ fresh* from its contact sheet and GIF; anything under 3 goes back.
   nonverbals × 3 (hmph, huh?, WHA!, yow, grr, ahem…), sneeze parts, humming × 4, "BERYL!", "…the pipes." Outside
   reactions he sings at most one line per 6 s. **Fallback voice:** a muted "talking tuba" (instrumental speech),
   A/B-tested with the owner in week 1; the owner picks.
+- **(v1.2) The A/B defaults stand.** The owner never answered the Gate-0 voice and crowd A/B (D3 / D4), so the
+  formant baritone and the formant crowd stay the defaults and the A/B pages stay in the debug stage door. The audio
+  is unchanged by the 3D pivot, except that sounds pan by the source's projected screen x.
 - **Hush has no voice; the pit plays her:** slide-whistle takes, a woodblock "clack" when she freezes, a breathy
   "hff-hff" silent laugh. **Delphine:** soprano f0 280–340 Hz with a glass-crack tail on the high C. **Beryl:** an
   FM + formant "mehhh" and a positional bell. **Clarence:** a rubber squeak whose pitch follows the press; the
@@ -1426,12 +1901,31 @@ T2/T3/Suppressed are procedural modifiers on existing clips, never new clips. Be
 prank is timed end to end in the slice (art → clip → sound → lint → GIF) and the cost per prank is recorded in
 PROGRESS.md.
 
+**(v1.2) 3D budgets.** "Full character rigs" are 3D rigs: **per character ≤ 10k triangles, ≤ 50 deform bones + the
+jiggle bones, 1 skinned mesh + ≤ 4 attachments, 1 material + outline (≤ 4 draw calls), ≤ 0.25 ms CPU** (§9.2). The set
+per Night: **≤ 5 live props and ≤ 4 dressing pieces per room**, one palette material per room set, static meshes
+merged per room (§7.1). Clips: the 137-clip Stage-2 slice list is rebuilt in 3D — the 70 clips of Gate 0 and the
+Prologue in R3D, the rest in R3 (§9.4). Third-party files: CC0 only, each recorded in `game/art3d/CREDITS.md`.
+
 ### 10.3 The vertical slice (Stage 2)
 **Prologue + Nights 1 and 2 at final polish:** hall, parlour and kitchen art; the Hush and Bellows rigs; 11
 pranks + HOT & COLD; MIRROR, MIRROR; 6 squeak bits; temper, Running Gag and Meltdown; FREEZE and the specs rule;
 hiding, pins and the command queue; the Lecture and the Busted Cam; Figgis hints 1–3; the Stalls at every tier;
 the Bellows-Cam; the curtain call with the Gag Reel; adaptive music; haptics; settings (Relaxed, tap-to-rig,
 left-handed, volumes). Left out: Beryl, Delphine, upstairs, the garden, the panto bit, meta.
+
+**(v1.2) The slice in 3D.** The 2D slice reached Gate 0 (the Gate-0 build on `main`); the owner's verdict started the
+3D pivot, which rebuilds the slice's view in stages (REDESIGN_3D §6.4): **R0** (done) the spec, the pipeline spike,
+three look-devs and the owner's pick; **R3D = R1 + R2 in one build** (branch `r3d`) — the 3D sets from the content
+(`SetList`, the strike rule), the 3D camera (C1–C8), the decluttered HUD, the previews, tags and rig rings, the final
+3D Hush and Bellows in the owner's hybrid style with face cards, jiggle and residue looks, Hush's verb pose set and
+reach bands, Bellows' walks, tea, warm-up and the sneeze, and the two small content changes (`hides`, the Night-1 /
+Night-2 route re-plans); **its exit: Gate 0 in 3D ("Sneeze 3D") and the Prologue playable end to end in 3D on the
+owner's phone** (a debug APK), with the solver, fuzz, lints, the dead-air gate and the new 3D checks green; Nights 1
+and 2 boot and play in 3D but are hidden in the owner build (their reactions are fallbacks until R3). **R3** — the
+slice sets and all 137 slice clips in 3D, the 11 slice pranks' armed / spent looks and rig actions, the Stalls,
+curtain call and Gag Reel over the 3D view; **R4** — the Fun Gate (§10.4) in 3D. Content (sim, solver, data, audio,
+UI logic) carries over unchanged except `hides` and the re-plans.
 
 ### 10.4 The fun gate (the owner plays the debug APK on his own phone)
 **Automated pre-checks (all must pass before he sees it):** the solver clears the Prologue, N1 and N2 on the
@@ -1442,6 +1936,20 @@ clip passes the animation lint; hotspot, content and IP lints pass; the **mute t
 reaction GIFs read as jokes to a review agent that doesn't know the prank; review scores ≥ 3/5 on every gag;
 60 fps p95 with the Gag-Cam, PiP and particles at ≤ 150 draw calls; launch to first laugh ≤ 10 s on a budget
 Android (measured from app launch).
+**(v1.2) The 3D pre-checks, added:** the **set lint** (per Night and room: ≤ 5 live props, ≤ 4 dressing, one hiding
+spot per room in Act I, no live stack under 24 px on screen, distinct 64 px silhouette families, the dressing and
+value rules of §7.1 on a rendered set shot); the **screen-rect lint** (every live hotspot of every final Night,
+projected at the base framing at 20:9, 16:9 and 4:3: ≥ 144 × 144 px, ≥ 24 px apart, inside the safe rect, not under
+an always-on HUD piece); the **HUD lint** (≤ 4 always-on pieces in every captured play frame, nothing always-on or
+persistent in the middle band y 250–880, ≤ 6 world overlays with ≤ 2 loud; the Bellows window's share of PLAY time
+reported, a warning above 35 %); the **visibility test** (on every tick of every solver route, whenever the sim counts
+Bellows as visible the view shows him on screen or in the Bellows window, and the window is closed while he is on
+screen — C8, §3.7); and **3D performance** — 60 fps p95 with the punch-in, the Bellows window and a particle burst, ≤ 150
+draw calls p95 (≤ 250 max), ≤ 150k triangles on screen, ≤ 8 particle emitters, ≤ 250 MB of textures, **no shader
+compiled during play** (every material drawn once under the curtain), each character inside its §9.2 budget. Before
+the Fun Gate itself, R3D adds a **readability review**: fresh reviewers name Hush's verb from caption-free frames
+(≥ 7/8), say what a lit spot will do from its preview (≥ 6/8), call the screen crowded at most once in 8, and prefer the
+3D frame to the matching 2D one (≥ 6/8) — the owner's four complaints as acceptance tests.
 
 **Owner checks (all must hold):**
 1. First player-caused laugh ≤ 10 s and first prank ≤ 30 s from launch (log timestamps on his phone).
@@ -1475,6 +1983,15 @@ Android (measured from app launch).
 | R7 | **Touch misreads** | Touch-up activation, 144 px hit boxes, 90 px assist, verb latch, queue, idempotent taps; on-device 19/20 test. |
 | R8 | **Performance / startup** | Runtime atlases (≈ 1–3 draw calls per character), PiP at 30 Hz, ≤ 8 particle emitters; HiResTex warm hidden under the curtain; measured on a budget Android in Stage 2. |
 | R9 | **Content cost** | 22 archetypes + procedural tiers; one prank timed end to end before Stage 3; per-Act owner checks; cut order in PLAN.md. |
+| X1 | (v1.2) **3D performance** on a mid-range phone with the Compatibility renderer (skinning, outline passes double the draws, fill rate at 2400×1080) | the per-character and per-frame budgets (§9.2, §10.4); outlines only on characters and live props; one palette material per room; merged static meshes; MSAA 2× with an off switch; a 0.85 render-scale fallback; the pipeline spike and an on-device perf probe measure first |
+| X2 | (v1.2) **Shader compile hitches** (no ubershaders in Compatibility) | every material warmed under the curtain; the device log reports any compile during play as a failure |
+| X3 | (v1.2) **Animation throughput** — 3D comedy animation costs more than 2D keyframes | the data-driven clip format, beats, events and lint kept; CC0 locomotion retargeted; three reach bands × prop animations instead of bespoke rig clips; readability checked on the Gate-0 / Prologue set before the R3 volume |
+| X4 | (v1.2) **Charm lost in 3D** (the faces were the comedy) | 2D face cards keep the 2D expression vocabulary; the owner judges "Sneeze 3D" before mass authoring |
+| X5 | (v1.2) **The 1-D sim in a 3D space** (players expect depth moves) | the lane rule, wing flats, cheat-out and a shallow 2.4 m set make it read as a stage, not a room to explore |
+| X6 | (v1.2) **Tap misreads from perspective** (props at different depths) | projected hit rects + the screen-rect lint; stacks only where ≥ 24 px apart |
+| X7 | (v1.2) **Content churn** (hides, route re-plans) | the two content changes are small and machine-checked; the gates re-run before the owner sees the build |
+| X8 | (v1.2) **Schedule:** the view, rig and art are rebuilt or adapted (≈ 27k lines of view and Night code, all 820 SVG art files); sim, solver, UI logic and autoloads (≈ 25k lines), audio and content carry over | everything behind the view's snapshot seam is reused; fake-world sandbox shots from day one; parallel tasks with time boxes |
+| X9 | (v1.2) **Licensing** | CC0 / public-domain third-party files only; `art3d/CREDITS.md` records each file's source URL and licence |
 
 ---
 
@@ -1509,3 +2026,18 @@ Android (measured from app launch).
 | IP distance | Stage framing only; no TV/rating/golden awards/seasons/takes; IP lint (§1.3, §5.9). |
 | First-minute teaching load | Prologue teaches squeak, move, hold, hide with ghost fingers; FREEZE waits for Night 2; the specs are only *shown* (§2.3). |
 | Human-vs-neighbour fantasy | Kept: a human prankster against a grumpy human neighbour; pets and guests are supporting acts (§1.2). |
+
+**(v1.2) The owner's Gate-0 verdict and the 3D decisions** (REDESIGN_3D v1.0, owner decision D6, the R3D rulings):
+
+| Complaint / decision | Resolution in this GDD |
+|---|---|
+| "The UI is too crowded" | Four always-on HUD pieces (pause, Script chip, Clarence, action button); everything else contextual; nothing always-on or persistent in the middle band; the placement rules (§3.8). |
+| "The characters don't look good — 3D would be more appealing" | 3D toy-proportioned characters at 40–44 % of the screen height, the only things with both value extremes, a 4.8 px outline and a rim; face cards keep the 2D vocabulary (§1.2, §9.1–§9.2). |
+| "The house is too crowded" | The set is dressed per Night: the strike rule, ≤ 5 live props and ≤ 4 dressing per room, one hiding spot per room in Act I, plain walls, one floor at a time, locked rooms not built (§7.1, §7.2). |
+| "The actions aren't obvious" | Before / during / after / trigger for every verb and prank: previews of the joke, prop-specific actions with the ring at the prop, the armed look + red beret tag, staged payoffs; one verb per screen (§2.1, §3.5). |
+| The owner's style pick (D6) | "Prankster dimensions from B, the rest from A": Hush = look B's body in look A's Toy Box style; Bellows, the house, lighting, shading, faces, props = look A with the board's fixes; A's vinyl shading kept on characters and vinyl props inside the 66 % floor (§1.2, §9.1). |
+| Hush can't reach what she rigs with B's arms | Props ×1.5, furniture ×0.8, the reach row, reach positions, bands by the placed target, ACHOO-RIA! on Bellows' own stool, the mime's invisible step, set pieces come to Bellows' hands (§7.1). |
+| B's head may shrink her painted face | The head check: enlarge the face card first; propose a head scale only if that fails; B's head ships until the owner answers; a `head_b` variant and stage-door buttons to judge in play (§1.2). |
+| The Bellows window may become the new always-on PiP | Its PLAY-time share is measured and warned above 35 %; the `lean` presentation (the edge badge while he is merely next door) with its own dead-air check; the default is set from the measurement (§3.7, §2.4). |
+| Unanswered owner questions (D2–D4) | The mime only (Pip later), the formant voice and crowd stay the defaults (§1.2, §9.5); Figgis a flat bust in look A's palette (§1.2). |
+| No time or tone change | The sim, solver, content, audio, the Prologue's minute, the reaction lengths and every §9.3 timing rule are unchanged (§2.3, §9.3–§9.4). |

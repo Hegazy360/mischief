@@ -1,7 +1,7 @@
 {
   "version": 1,
   "episode": "n02_something_fishy",
-  "notes": "Ideal: COLD OPEN (loop 1) -> FISHY -> TIME'S UP -> Meltdown (loop 2, unseals the Big Number and re-arms TIME'S UP); loop 3: TIME'S UP again -> MIRROR fix-up -> MIRROR, MIRROR (released in round 3) -> EYE-POPPING NEWS (est. 127 Applause).",
+  "notes": "Ideal: COLD OPEN (loop 1) -> FISHY -> TIME'S UP -> Meltdown (loop 2, unseals the Big Number and re-arms TIME'S UP); loop 3: TIME'S UP again -> MIRROR fix-up -> MIRROR, MIRROR (released in round 3) -> EYE-POPPING NEWS (est. 127 Applause). R3D (REDESIGN_3D §6.2 C2): the face_to_face / face_to_face_lost scenario routes are retired with the struck hall_clock_case — the in-use hiding lesson moves to Night 3.",
   "routes": {
     "ideal": {
       "persona": "ideal",
@@ -132,56 +132,6 @@
         "max_gap_s_max": 12,
         "first_prank_s_max": 30
       }
-    },
-    "face_to_face": {
-      "persona": "scenario",
-      "steps": [
-        {"do": "rig", "prank": "cold_open"},
-        {"do": "hide", "spot": "kitchen_pantry_curtain"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "cold_open"}, "max_s": 90},
-        {
-          "do": "wait",
-          "until": {
-            "and": [
-              {"bellows_in_room": "kitchen"},
-              {"bellows_state": "detour"},
-              {"bellows_facing_away_from_hush": true}
-            ]
-          },
-          "max_s": 20
-        },
-        {"do": "hide", "spot": "hall_clock_case"},
-        {"do": "wait_event", "event": "face_to_face", "match": {}, "max_s": 90},
-        {"do": "pop_out", "run": true},
-        {"do": "hide", "spot": "hall_coat_cupboard"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 60},
-        {"do": "idle", "s": 1.0}
-      ],
-      "expect": {"events_min": {"face_to_face": 1, "near_miss": 1}, "catches_max": 0}
-    },
-    "face_to_face_lost": {
-      "persona": "scenario",
-      "steps": [
-        {"do": "rig", "prank": "cold_open"},
-        {"do": "hide", "spot": "kitchen_pantry_curtain"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "cold_open"}, "max_s": 90},
-        {
-          "do": "wait",
-          "until": {
-            "and": [
-              {"bellows_in_room": "kitchen"},
-              {"bellows_state": "detour"},
-              {"bellows_facing_away_from_hush": true}
-            ]
-          },
-          "max_s": 20
-        },
-        {"do": "hide", "spot": "hall_clock_case"},
-        {"do": "wait_event", "event": "face_to_face", "match": {}, "max_s": 90},
-        {"do": "wait_event", "event": "doorstep", "match": {}, "max_s": 30},
-        {"do": "idle", "s": 1.0}
-      ],
-      "expect": {"events_min": {"face_to_face": 1, "caught": 1, "doorstep": 1}}
     }
   }
 }

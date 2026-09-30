@@ -1,8 +1,10 @@
-## PipFrame — the Bellows-Cam window (GDD §3.7, TECH §5.6): shows PipView's viewport texture
-## (`set_texture(tex)`) inside a 6 px border coloured by his temper tier (calm cream, irked pink,
-## steaming red, livid beetroot) with the awareness glyph in the bottom-left corner.
-## 448 × 252 at (W−S−472, T+24); `set_escalated(true)` grows it to the 704 × 396 Gag-Cam window
-## (the Hud moves it; anchored top-right). Pops in / out (0.15 s) with `set_shown(on)`.
+## PipFrame — the Bellows window (REDESIGN_3D §2.2, index §7.9): shows the Bellows window view's
+## texture (`set_texture(tex)`, PipView3D) inside a 6 px frame coloured by his temper tier (calm
+## cream, irked pink, steaming red, livid beetroot) with his NEXT-activity chip (72 px, with his
+## bubble's red countdown ring — `set_next(icon, ring_frac)`) in the lower-left corner (the awareness
+## glyph when no next activity is known). 400 × 225 at (W−S−424, T+24); `set_escalated(true)` grows
+## it to the 704 × 396 Gag-Cam window (the Hud moves it; anchored top-right). Pops in / out (0.15 s)
+## with `set_shown(on)` — shown exactly when the view says so (C8 is r3d-view3d's).
 ## Touch-down → `pip_tap()` (peek at once), touch-up → `pip_release()` (the peek may end).
 class_name PipFrame
 extends TouchWidget
@@ -10,11 +12,13 @@ extends TouchWidget
 signal pip_tap()
 signal pip_release()
 
-const SIZE_NORMAL := Vector2(448, 252)
+const SIZE_NORMAL := Vector2(400, 225)
 const SIZE_ESCALATED := Vector2(704, 396)
 const BORDER := 6.0
 const INK := 4.0
 const GLYPH := 56.0
+const CHIP := 72.0
+const RING_RED := Color("#E8413C")
 
 var texture: Texture2D = null
 var tier: int = 0
@@ -22,6 +26,8 @@ var glyph_id: String = "specs_off"
 var escalated: bool = false
 var shown: bool = false
 
+var next_icon: Texture2D = null
+var ring_frac: float = -1.0
 var _glyph_tex: Texture2D = null
 var _show_k: float = 0.0
 var _tier_ms: int = -100000
@@ -66,7 +72,16 @@ func set_glyph(id: String) -> void:
 	queue_redraw()
 
 
-## Normal 448 × 252 or the escalated 704 × 396 Gag-Cam window.
+## His next activity's icon (null = the awareness glyph) and the bubble's ring 0..1 (< 0 none).
+func set_next(icon: Texture2D, p_ring: float) -> void:
+	if icon == next_icon and is_equal_approx(p_ring, ring_frac):
+		return
+	next_icon = icon
+	ring_frac = p_ring
+	queue_redraw()
+
+
+## Normal 400 × 225 or the escalated 704 × 396 Gag-Cam window.
 func set_escalated(on: bool) -> void:
 	if on == escalated:
 		return
@@ -135,11 +150,16 @@ func _draw() -> void:
 	else:
 		draw_rect(inner, Color(UiKit.PLUM, a))
 	draw_rect(inner, Color(UiKit.NAVY, a), false, 3.0)
-	var gc := inner.position + Vector2(GLYPH * 0.5 + 8.0, inner.size.y - GLYPH * 0.5 - 8.0)
+	# his next-activity chip (lower-left), with the bubble's countdown ring
+	var d := CHIP if next_icon != null else GLYPH
+	var gc := inner.position + Vector2(d * 0.5 + 10.0, inner.size.y - d * 0.5 - 10.0)
 	UiShapes.begin()
-	UiShapes.circle(gc, GLYPH * 0.5 + 6.0, Color(UiKit.NAVY, a))
-	UiShapes.circle(gc, GLYPH * 0.5 + 1.0, Color(UiKit.CREAM, a))
+	UiShapes.circle(gc, d * 0.5 + 6.0, Color(UiKit.NAVY, a))
+	UiShapes.circle(gc, d * 0.5 + 1.0, Color(UiKit.CREAM, a))
+	if next_icon != null and ring_frac >= 0.0:
+		var a0 := -PI * 0.5
+		UiShapes.arc(gc, d * 0.5 + 2.0, a0, a0 + TAU * clampf(ring_frac, 0.0, 1.0), 6.0, Color(RING_RED, a), 40)
 	UiShapes.flush(self)
-	UiKit.draw_icon(self, _glyph_tex, Rect2(gc - Vector2(GLYPH, GLYPH) * 0.42, Vector2(GLYPH, GLYPH) * 0.84),
-		Color(1, 1, 1, a))
+	var tex := next_icon if next_icon != null else _glyph_tex
+	UiKit.draw_icon(self, tex, Rect2(gc - Vector2(d, d) * 0.36, Vector2(d, d) * 0.72), Color(1, 1, 1, a))
 	draw_set_transform(Vector2.ZERO)

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: record x3 spiral</desc>
+<circle cx="56.0" cy="70.0" r="44.0" fill="#26202E" stroke="#1B2340" stroke-width="5"/>
+<circle cx="56" cy="70" r="34" fill="none" stroke="#4A4050" stroke-width="3"/>
+<circle cx="56" cy="70" r="24" fill="none" stroke="#4A4050" stroke-width="3"/>
+<circle cx="56.0" cy="70.0" r="14.0" fill="#E23B4E" stroke="#1B2340" stroke-width="4"/>
+<circle cx="56.0" cy="70.0" r="3.5" fill="#FFF4E0"/>
+<path d="M12 40 Q20 24 38 18" fill="none" stroke="#1B2340" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6 62 Q6 44 16 34" fill="none" stroke="#1B2340" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M78 12 L122 8 L124 44 L80 48 Z" fill="#E8413C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M88 20 L102 38 M102 20 L88 38" fill="none" stroke="#FFF4E0" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M108 20 Q118 18 116 26 Q114 30 110 30 Q118 32 116 38 Q112 44 106 40" fill="none" stroke="#FFF4E0" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="100.0" cy="92.0" r="23.0" fill="#FFF4E0" stroke="#1B2340" stroke-width="4"/>
+<path d="M102.0 92.0 L102.2 92.8 L102.0 93.6 L101.5 94.5 L100.7 95.1 L99.5 95.5 L98.3 95.4 L97.0 94.8 L96.0 93.8 L95.3 92.4 L95.2 90.7 L95.6 89.0 L96.7 87.5 L98.3 86.4 L100.3 85.8 L102.5 86.0 L104.5 86.9 L106.2 88.6 L107.3 90.8 L107.6 93.4 L107.0 96.0 L105.4 98.3 L103.1 100.0 L100.3 100.9 L97.2 100.8 L94.3 99.6 L91.8 97.4 L90.2 94.4 L89.6 91.0 L90.3 87.5 L92.1 84.3 L95.0 81.9 L98.7 80.5 L102.6 80.4 L106.5 81.7 L109.8 84.3 L112.1 87.9 L113.1 92.2 L112.6 96.6 L110.5 100.8 L107.2 104.0 L102.8 106.0 L97.9 106.5 L93.1 105.2 L88.9 102.3 L85.8 98.1 L84.2 93.1 L84.5 87.7 L86.6 82.6 L90.3 78.4 L95.3 75.7 L101.1 74.7 L106.9 75.8 L112.1 78.8 L116.1 83.4 L118.3 89.2 L118.5 95.6 L116.5 101.7 L112.5 106.8 L106.9 110.4 L100.4 112.0 L93.6 111.3 L87.4 108.3 L82.4 103.3" fill="none" stroke="#7B3F8C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

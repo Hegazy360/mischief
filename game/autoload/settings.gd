@@ -6,6 +6,13 @@
 ## voice_style ("formant" | "tuba"), crowd_style ("formant" | "fallback") and hush_skin
 ## ("" = Hush the mime | "pip") — applied by Audio (styles) and the view (skin); the owner's
 ## Gate-0 decisions become the DEFAULTS (one line each).
+## R3D (REDESIGN_3D §2, GDD §3.11 amendments; r3d-index §7.10): previews ("always" | "idle_6s" |
+## "off"), room_dimming, outline_boost ("Outline +50 %"), and the debug keys hush_head ("" |
+## "head_b", R6), bellows_window ("sim" | "lean", R15), msaa_3d, render_scale (1.0 | 0.85) and
+## show_previews (the Night 1/2 stage-door previews). The debug keys that `boot_config.json` names
+## (`bellows_window`, `show_previews`, `render.msaa_3d`, `render.render_scale`) take their DEFAULT
+## from it (BOOT_KEYS), and are written to the file only while they differ from that default — so an
+## orchestrator value flip reaches a device whose player never touched the setting.
 ## Migration-safe: a file written by an older build (no `meta/version`, or missing keys) loads
 ## with defaults for every missing key; unknown keys and invalid values are ignored / reset;
 ## the file is rewritten at FILE_VERSION on the next save.
@@ -21,8 +28,9 @@ signal changed(key: String, value: Variant)
 const PATH := "user://settings.cfg"
 const SECTION := "settings"
 const SAVE_DELAY_SEC := 0.5
-## Version stamped into the file's `meta` section (1 = Stage 1, no stamp; 2 = the A/B keys).
-const FILE_VERSION := 2
+## Version stamped into the file's `meta` section (1 = Stage 1, no stamp; 2 = the A/B keys;
+## 3 = the R3D keys).
+const FILE_VERSION := 3
 const META := "meta"
 const DEFAULTS := {
 	"music_vol": 0.7,
@@ -41,37 +49,65 @@ const DEFAULTS := {
 	"voice_style": "formant",
 	"crowd_style": "formant",
 	"hush_skin": "",
+	# R3D
+	"previews": "always",
+	"room_dimming": true,
+	"outline_boost": false,
+	"hush_head": "",
+	"bellows_window": "sim",
+	"msaa_3d": true,
+	"render_scale": 1.0,
+	"show_previews": false,
 }
+## The R3D debug keys (the Settings panel's debug section).
+const DEBUG_KEYS: PackedStringArray = ["hush_head", "bellows_window", "msaa_3d", "render_scale", "show_previews"]
+## Debug keys whose default comes from `boot_config.json` (key → its path in the file).
+const BOOT_KEYS := {
+	"bellows_window": ["bellows_window"],
+	"show_previews": ["show_previews"],
+	"msaa_3d": ["render", "msaa_3d"],
+	"render_scale": ["render", "render_scale"],
+}
+const BOOT_CONFIG_PATH := "res://scenes/boot/boot_config.json"
 ## Allowed values of string keys (anything else falls back to the default).
 const CHOICES := {
 	"hints": ["always", "long_press", "off"],
 	"voice_style": ["formant", "tuba"],
 	"crowd_style": ["formant", "fallback"],
 	"hush_skin": ["", "pip"],
+	"previews": ["always", "idle_6s", "off"],
+	"hush_head": ["", "head_b"],
+	"bellows_window": ["sim", "lean"],
 }
 ## Clamp ranges of numeric keys.
 const RANGES := {
 	"music_vol": [0.0, 1.0], "sfx_vol": [0.0, 1.0], "voice_vol": [0.0, 1.0], "crowd_vol": [0.0, 1.0],
 	"text_scale": [1.0, 1.2],
+	"render_scale": [0.5, 1.0],
 }
 ## Volume key → Audio bus (TECH §5.8).
 const BUSES := {"music_vol": "Music", "sfx_vol": "SFX", "voice_vol": "Voice", "crowd_vol": "Crowd"}
 
 ## Override before _ready / load_settings (tests) to use another file.
 var path: String = PATH
+## Override before load_settings (tests) to read another boot config ("" = none).
+var boot_config_path: String = BOOT_CONFIG_PATH
 ## Number of completed writes (tests).
 var save_count: int = 0
 ## Version of the file last loaded (0 = no file, 1 = a Stage-1 file without a stamp).
 var loaded_version: int = 0
 
 var _values: Dictionary = {}
+## DEFAULTS with the boot_config.json values applied (see BOOT_KEYS).
+var _defaults: Dictionary = {}
 var _cfg := ConfigFile.new()
 var _save_pending := false
 var _save_timer: float = 0.0
 
 
 func _init() -> void:
-	_values = DEFAULTS.duplicate(true)
+	_defaults = DEFAULTS.duplicate(true)
+	_values = _defaults.duplicate(true)
 
 
 func _ready() -> void:
@@ -90,7 +126,8 @@ func _process(delta: float) -> void:
 
 ## (Re)load from disk; unknown keys are ignored, missing / invalid keys take defaults.
 func load_settings() -> void:
-	_values = DEFAULTS.duplicate(true)
+	reload_boot_defaults()
+	_values = _defaults.duplicate(true)
 	_cfg = ConfigFile.new()
 	loaded_version = 0
 	if SafeFile.load_config(_cfg, path) == OK:
@@ -100,10 +137,42 @@ func load_settings() -> void:
 				_values[k] = _coerce(k, _cfg.get_value(SECTION, k))
 
 
-## Write all values now (cancels a pending debounced save).
+## Recompute the effective defaults: DEFAULTS with `boot_config.json`'s BOOT_KEYS applied.
+func reload_boot_defaults() -> void:
+	_defaults = DEFAULTS.duplicate(true)
+	var bc := read_boot_config(boot_config_path)
+	for k in BOOT_KEYS:
+		var v: Variant = bc
+		for part in BOOT_KEYS[k]:
+			v = (v as Dictionary).get(part, null) if v is Dictionary else null
+		if v != null:
+			_defaults[k] = _coerce(k, v)
+
+
+## The effective default of `key` (DEFAULTS, or boot_config.json's value for a BOOT_KEYS key).
+func default_of(key: String) -> Variant:
+	return _defaults.get(key, DEFAULTS.get(key))
+
+
+## `boot_config.json` as a Dictionary ({} when absent or malformed; pure).
+static func read_boot_config(p: String = BOOT_CONFIG_PATH) -> Dictionary:
+	if p == "" or not FileAccess.file_exists(p):
+		return {}
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(p)) != OK or not (j.data is Dictionary):
+		return {}
+	return j.data
+
+
+## Write all values now (cancels a pending debounced save). A BOOT_KEYS key equal to its default is
+## left out of the file (so a later boot_config flip applies).
 func save() -> void:
 	_save_pending = false
 	for k in _values:
+		if BOOT_KEYS.has(k) and _values[k] == _defaults.get(k):
+			if _cfg.has_section_key(SECTION, k):
+				_cfg.erase_section_key(SECTION, k)
+			continue
 		_cfg.set_value(SECTION, k, _values[k])
 	_cfg.set_value(META, "version", FILE_VERSION)
 	var err := SafeFile.save_config(_cfg, path)
@@ -126,7 +195,7 @@ func is_save_pending() -> bool:
 
 ## Value of `key` (`fallback` for unknown keys).
 func get_value(key: String, fallback: Variant = null) -> Variant:
-	return _values.get(key, DEFAULTS.get(key, fallback))
+	return _values.get(key, _defaults.get(key, fallback))
 
 
 ## Set `key` (coerced to the default's type, clamped / validated). Emits `changed` and schedules
@@ -166,21 +235,23 @@ func all() -> Dictionary:
 ## Reset every key to its default (emits `changed` for each key that differs).
 func reset_to_defaults() -> void:
 	for k in DEFAULTS:
-		set_value(k, DEFAULTS[k])
+		set_value(k, _defaults.get(k, DEFAULTS[k]))
 
 
 func _coerce(key: String, value: Variant) -> Variant:
 	var d: Variant = DEFAULTS[key]
+	# an invalid value falls back to the effective default (boot_config.json's for BOOT_KEYS)
+	var fb: Variant = _defaults.get(key, d) if not _defaults.is_empty() else d
 	var v: Variant = value
 	match typeof(d):
 		TYPE_BOOL:
-			v = bool(value) if typeof(value) in [TYPE_BOOL, TYPE_INT, TYPE_FLOAT] else d
+			v = bool(value) if typeof(value) in [TYPE_BOOL, TYPE_INT, TYPE_FLOAT] else fb
 		TYPE_FLOAT:
-			v = float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else d
+			v = float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else fb
 		TYPE_STRING:
-			v = String(value) if typeof(value) in [TYPE_STRING, TYPE_STRING_NAME] else d
+			v = String(value) if typeof(value) in [TYPE_STRING, TYPE_STRING_NAME] else fb
 	if CHOICES.has(key) and not (CHOICES[key] as Array).has(v):
-		v = d
+		v = fb
 	if RANGES.has(key):
 		var r: Array = RANGES[key]
 		v = clampf(float(v), float(r[0]), float(r[1]))

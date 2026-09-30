@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "rig": "fix",
+  "presets": {
+    "neutral": {
+      "eyes": "open",
+      "brows": "neutral",
+      "mouth": "smile"
+    },
+    "shock": {
+      "eyes": "wide",
+      "brows": "up",
+      "mouth": "O"
+    },
+    "sly": {
+      "eyes": "squint",
+      "brows": "sly",
+      "mouth": "grin",
+      "extra_a": "tear"
+    },
+    "happy": {
+      "eyes": "happy",
+      "brows": "up",
+      "mouth": "grin",
+      "blush": "on"
+    },
+    "statue": {
+      "eyes": "open",
+      "brows": "neutral",
+      "mouth": "smile",
+      "pupils": "none"
+    },
+    "gaze_left": {
+      "eyes": "open",
+      "brows": "neutral",
+      "mouth": "smile",
+      "gaze": [
+        -0.5,
+        0.0
+      ]
+    }
+  }
+}

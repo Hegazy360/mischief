@@ -541,7 +541,8 @@ func _emit_beat(w: SimWorld, id: String, act: String, length: int, emote: String
 		return
 	mg_last_t = w.tick
 	w.emit(SimEvents.MICRO_GAG, {"id": id, "activity": act, "room": w.room_id(room), "x": Fx.to_px(x_sub),
-		"len": length, "emote": emote, "vis": SimVisibility.beat_vis(w, emote != "")})
+		"len": length, "emote": emote, "vis": SimVisibility.beat_vis(w, emote != ""),
+		"pip_reason": String(SimVisibility.pip_reason(w))})
 
 
 ## Walk beats: during a non-chase walk whose planned length exceeds `walk_beats.min_leg_s`, one every

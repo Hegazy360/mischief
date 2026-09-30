@@ -168,14 +168,25 @@ func run(a: Dictionary) -> int:
 ## {new: [..], still: [..], fixed: [..], checked: n}: "episode/route" entries, or "episode/route: key" for an
 ## expect key. A route passed in the baseline when its `ok` was true; a key when its `expect_results[key].ok` was
 ## true (baselines written before per-key results existed count every key of a passing route as passed, and
-## none of a failing one). New routes and new keys are checked absolutely (a failure is new).
+## none of a failing one). New routes and new keys are checked absolutely (a failure is new). `absent`: baseline
+## routes of an episode played now that no longer exist (retired routes; reported, never a failure).
 static func compare_baseline(baseline: Variant, reports: Array) -> Dictionary:
 	var old := {}
 	if baseline is Dictionary:
 		for r in (baseline as Dictionary).get("runs", []):
 			if r is Dictionary:
 				old["%s/%s" % [r.get("episode", "?"), r.get("route", "?")]] = r
-	var out := {"new": [], "still": [], "fixed": [], "checked": 0}
+	var out := {"new": [], "still": [], "fixed": [], "checked": 0, "absent": []}
+	var now_ids := {}
+	for r in reports:
+		now_ids["%s/%s" % [r.get("episode", "?"), r.get("route", "?")]] = true
+	var eps_now := {}
+	for r in reports:
+		eps_now[String(r.get("episode", "?"))] = true
+	for id in old:
+		# a route of an episode played now that is gone from its solution file (retired, e.g. R3D's C2): info only
+		if not now_ids.has(id) and eps_now.has(String(id).get_slice("/", 0)):
+			(out["absent"] as Array).append(id)
 	for r in reports:
 		var id := "%s/%s" % [r.get("episode", "?"), r.get("route", "?")]
 		out["checked"] = int(out["checked"]) + 1
@@ -231,6 +242,8 @@ static func print_baseline(cmp: Dictionary, path: String) -> void:
 		print("  - still failing: %s" % x)
 	for x in fx:
 		print("  - fixed: %s" % x)
+	for x in cmp.get("absent", []):
+		print("  - absent now (retired from the solution file; not a failure): %s" % x)
 	print("[solve] baseline %s" % ("OK: no new failures" if nw.is_empty() else "FAIL: new failures against the baseline"))
 
 

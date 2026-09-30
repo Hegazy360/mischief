@@ -57,6 +57,9 @@ static func warnings(db: ContentDB) -> PackedStringArray:
 			w.append("pranks.json: double_acts.%s is a Stage-3 headbutt Double Act (inactive)" % da.id)
 	for eid in ContentUtil.sorted_keys(db.episodes):
 		var ep: EpisodeDef = db.episodes[eid]
+		if ep.status != "final":
+			for m in hides_per_room(db, ep):
+				w.append("episodes/%s.json: %s" % [eid, m])
 		for l in ep.script_lines:
 			if l.kind >= 0 and l.is_stage3():
 				w.append("episodes/%s.json: line %s kind '%s' is a Stage-3 line kind (never done yet)" % [eid, l.id, l.kind_name])
@@ -448,6 +451,68 @@ static func _episode(db: ContentDB, ep: EpisodeDef, e: PackedStringArray) -> voi
 		var sn := ContentUtil.dict(dir, "safety_net")
 		if not sn.is_empty() and ContentUtil.s(sn, "pulse") != "" and db.house.hotspot(ContentUtil.s(sn, "pulse")) == null:
 			e.append("%s: director.safety_net.pulse '%s' not in house.json" % [f, ContentUtil.s(sn, "pulse")])
+	_hides(db, ep, f, e)
+
+
+## `hides` (REDESIGN_3D §6.2 C1): a list of hiding hotspots in the Night's rooms, no repeats; with a list, the
+## safety-net pulse and every Director cue that targets a hiding spot use a listed one. (One hiding spot per
+## room in Act I: `hides_per_room()`, an error for final Nights, a warning for drafts.)
+static func _hides(db: ContentDB, ep: EpisodeDef, f: String, e: PackedStringArray) -> void:
+	if not ep.has_hides:
+		return
+	if typeof(ep.raw.get("hides")) != TYPE_ARRAY:
+		e.append("%s: hides must be a list of hiding-spot ids" % f)
+		return
+	var seen := {}
+	for hid in ep.hides:
+		var hs := db.house.hotspot(hid)
+		if seen.has(hid):
+			e.append("%s: hides lists '%s' twice" % [f, hid])
+		seen[hid] = true
+		if hs == null:
+			e.append("%s: hides '%s' not in house.json" % [f, hid])
+		elif hs.kind != HotspotDef.HIDING:
+			e.append("%s: hides '%s' is a %s, not a hiding spot" % [f, hid, hs.kind_name])
+		elif not ep.rooms.has(hs.room) or ep.backstage.has(hs.room):
+			e.append("%s: hides '%s' is in room %s, not one of the Night's rooms %s" % [f, hid, hs.room, str(ep.rooms)])
+	if ep.status == "final":
+		for m in hides_per_room(db, ep):
+			e.append("%s: %s" % [f, m])
+	var sn := ContentUtil.dict(ep.director, "safety_net")
+	var pulse := ContentUtil.s(sn, "pulse")
+	if pulse != "" and _is_hiding(db, pulse) and not ep.hides.has(pulse):
+		e.append("%s: director.safety_net.pulse '%s' is not in hides %s (a struck spot)" % [f, pulse, str(ep.hides)])
+	for c in ContentUtil.arr(ep.director, "cues"):
+		if typeof(c) != TYPE_DICTIONARY:
+			continue
+		var tgt := ContentUtil.s(c, "target")
+		if tgt != "" and _is_hiding(db, tgt) and not ep.hides.has(tgt):
+			e.append("%s: director.cues.%s.target '%s' is not in hides %s (a struck spot)" % [f, ContentUtil.s(c, "id"), tgt, str(ep.hides)])
+
+
+## One hiding spot per room in Act I (REDESIGN_3D §3.3): messages for every room of an Act 0–1 episode whose
+## `hides` list more than one spot (empty when the episode has no list or is in a later Act).
+static func hides_per_room(db: ContentDB, ep: EpisodeDef) -> PackedStringArray:
+	var out := PackedStringArray()
+	if not ep.has_hides or ep.act > 1:
+		return out
+	var per := {}
+	for hid in ep.hides:
+		var hs := db.house.hotspot(hid)
+		if hs != null and hs.kind == HotspotDef.HIDING:
+			var got: PackedStringArray = per.get(hs.room, PackedStringArray())
+			got.append(hid)
+			per[hs.room] = got
+	for r in ContentUtil.sorted_keys(per):
+		var ids: PackedStringArray = per[r]
+		if ids.size() > 1:
+			out.append("hides lists %d hiding spots in room %s (%s); Act I allows one per room" % [ids.size(), r, ", ".join(ids)])
+	return out
+
+
+static func _is_hiding(db: ContentDB, id: String) -> bool:
+	var hs := db.house.hotspot(id)
+	return hs != null and hs.kind == HotspotDef.HIDING
 
 
 static func _gate(db: ContentDB, until: Variant, where: String, e: PackedStringArray) -> void:

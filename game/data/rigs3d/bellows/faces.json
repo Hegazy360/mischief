@@ -1,0 +1,467 @@
+{
+  "version": 1,
+  "rig": "bellows",
+  "doc": "The 45 2D presets (game/data/rigs/bellows/faces.json) by name, every slot mapped to a 3D face layer cell (null = layer off). pupils: default | half | angry (clipped under that lid) | small. gaze = a suggested pupil_offset (-1..1 of face.pupil_range; +x = his left, +y = up) from the 2D gaze px.",
+  "layers": [
+    "brows",
+    "eyes",
+    "pupils",
+    "mouth",
+    "extra_a",
+    "extra_b",
+    "lids"
+  ],
+  "presets": {
+    "neutral": {
+      "brows": "neutral",
+      "eyes": "open",
+      "pupils": "default",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "smug": {
+      "brows": "sly",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "smug",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "pompous": {
+      "brows": "up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "admiring": {
+      "brows": "up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "smile",
+      "extra_a": "blush",
+      "extra_b": null,
+      "lids": "half"
+    },
+    "disdain": {
+      "brows": "one_up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "smug",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "sing_small": {
+      "brows": "up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "O_small",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "inhale": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_small",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sing_mid": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_mid",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sing_big": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_big",
+      "extra_a": "blush",
+      "extra_b": null,
+      "lids": null
+    },
+    "suspicious": {
+      "brows": "one_up",
+      "eyes": "squint",
+      "pupils": null,
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "huh": {
+      "brows": "one_up",
+      "eyes": "open",
+      "pupils": "default",
+      "mouth": "open",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "look_back": {
+      "brows": "one_up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "shock": {
+      "brows": "up",
+      "eyes": "wide",
+      "pupils": "default",
+      "mouth": "O_mid",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "wild_take": {
+      "brows": "up",
+      "eyes": "wide",
+      "pupils": "default",
+      "mouth": "scream",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "terrified": {
+      "brows": "worried",
+      "eyes": "pinpoint",
+      "pupils": null,
+      "mouth": "scream",
+      "extra_a": null,
+      "extra_b": "sweat",
+      "lids": null
+    },
+    "antic": {
+      "brows": "angry",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "wavy",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "irked": {
+      "brows": "angry",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "furious": {
+      "brows": "angry",
+      "eyes": "angry",
+      "pupils": "angry",
+      "mouth": "grit",
+      "extra_a": "vein",
+      "extra_b": null,
+      "lids": "angry"
+    },
+    "livid": {
+      "brows": "angry",
+      "eyes": "angry",
+      "pupils": "angry",
+      "mouth": "scream",
+      "extra_a": "vein",
+      "extra_b": "steam",
+      "lids": "angry"
+    },
+    "lecture": {
+      "brows": "angry",
+      "eyes": "angry",
+      "pupils": "angry",
+      "mouth": "open",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "angry"
+    },
+    "strain": {
+      "brows": "angry",
+      "eyes": "squint",
+      "pupils": null,
+      "mouth": "grit",
+      "extra_a": "vein",
+      "extra_b": "sweat",
+      "lids": null
+    },
+    "sneeze_build": {
+      "brows": "worried",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "O_small",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "sneeze_build2": {
+      "brows": "worried",
+      "eyes": "squint",
+      "pupils": null,
+      "mouth": "open",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sneeze_choo": {
+      "brows": "angry",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "scream",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sneeze_build3": {
+      "brows": "worried",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_big",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sneeze_gasp": {
+      "brows": "up",
+      "eyes": "wide",
+      "pupils": "default",
+      "mouth": "O_small",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sniff": {
+      "brows": "up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "sip": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_small",
+      "extra_a": "blush",
+      "extra_b": null,
+      "lids": null
+    },
+    "hum": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "smug",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "dazed_open": {
+      "brows": "up",
+      "eyes": "spiral",
+      "pupils": null,
+      "mouth": "open",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "kiss": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_small",
+      "extra_a": "blush",
+      "extra_b": null,
+      "lids": null
+    },
+    "trill": {
+      "brows": "up",
+      "eyes": "squint",
+      "pupils": null,
+      "mouth": "wavy",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "sly_smile": {
+      "brows": "sly",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "smile",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "dazed": {
+      "brows": "worried",
+      "eyes": "spiral",
+      "pupils": null,
+      "mouth": "wavy",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "slow_burn": {
+      "brows": "neutral",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "closed",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "strained_grin": {
+      "brows": "worried",
+      "eyes": "wide",
+      "pupils": "default",
+      "mouth": "grit",
+      "extra_a": null,
+      "extra_b": "sweat",
+      "lids": null
+    },
+    "sulk": {
+      "brows": "angry",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "wavy",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "mortified": {
+      "brows": "worried",
+      "eyes": "wide",
+      "pupils": "default",
+      "mouth": "wavy",
+      "extra_a": "blush",
+      "extra_b": "sweat",
+      "lids": null
+    },
+    "teary": {
+      "brows": "worried",
+      "eyes": "teary",
+      "pupils": "default",
+      "mouth": "wavy",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "wheeze": {
+      "brows": "worried",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "open",
+      "extra_a": null,
+      "extra_b": "sweat",
+      "lids": "half"
+    },
+    "magnified": {
+      "brows": "up",
+      "eyes": "balloon",
+      "pupils": null,
+      "mouth": "O_mid",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "pardon": {
+      "brows": "up",
+      "eyes": "open",
+      "pupils": "default",
+      "mouth": "smile",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "relief": {
+      "brows": "up",
+      "eyes": "half",
+      "pupils": "half",
+      "mouth": "smile",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": "half"
+    },
+    "asleep": {
+      "brows": "neutral",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "O_small",
+      "extra_a": null,
+      "extra_b": null,
+      "lids": null
+    },
+    "blissful": {
+      "brows": "up",
+      "eyes": "closed",
+      "pupils": null,
+      "mouth": "smile",
+      "extra_a": "blush",
+      "extra_b": null,
+      "lids": null
+    }
+  },
+  "gaze": {
+    "pompous": [
+      0.333,
+      0.25
+    ],
+    "disdain": [
+      0.5,
+      -0.5
+    ],
+    "inhale": [
+      0.0,
+      0.5
+    ],
+    "huh": [
+      0.667,
+      0.0
+    ],
+    "look_back": [
+      -1.0,
+      0.0
+    ],
+    "sneeze_build": [
+      0.0,
+      0.75
+    ],
+    "sniff": [
+      0.333,
+      -0.75
+    ],
+    "sly_smile": [
+      0.667,
+      -0.75
+    ],
+    "slow_burn": [
+      -0.833,
+      -0.5
+    ],
+    "sulk": [
+      0.0,
+      -0.75
+    ],
+    "pardon": [
+      -0.5,
+      0.0
+    ]
+  }
+}

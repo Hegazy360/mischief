@@ -66,6 +66,16 @@ var exit_after: String = ""
 var exit_room: int = -1
 var exit_x: int = 0
 var loop_repeat: bool = true
+## The live-hotspot mask (REDESIGN_3D §6.2 C1, `r3d-index.md` §7.5): 1 per hotspot idx when the hotspot is on
+## stage and tappable tonight. Everything else is struck: `SimHush` refuses it (`cmd_rejected {why: "struck"}`),
+## `hotspot_state().enabled` is false, the Figgis hook never pulls her into it. A byte per hotspot, so the
+## check is one indexed read (`is_live`).
+var live_mask: PackedByteArray = PackedByteArray()
+## Per hotspot idx: its `HotspotDef` kind when live, −1 when struck (the source of `live_hotspots()`).
+var live_kind: PackedInt32Array = PackedInt32Array()
+
+## `live_hotspots()` values, indexed by `HotspotDef` kind (CONTAINER, HIDING, RIG_POINT, EXIT, STAIRS, DOOR).
+const LIVE_NAMES: Array[String] = ["take", "hide", "rig", "exit", "stairs", "door"]
 
 
 ## Build for an episode.
@@ -151,6 +161,8 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 			c.prank_in_ep[p.idx] = 1
 		if bn.has(p.id) and not non_bn.has(p.id) and not p.nights.has(ep.id):
 			c.prank_bn_only[p.idx] = 1
+	# the live mask counts the pranks the Night names (Script lines, Double Acts, `nights`), not the knock-on pull-ins
+	var listed := c.prank_in_ep.duplicate()
 	# double acts whose A is in the Night pull in B (the knock-on target must be riggable)
 	for p in p_db.prank_list:
 		if c.prank_in_ep[p.idx] == 1 and p.knock_prank != "" and p_db.pranks.has(p.knock_prank):
@@ -189,7 +201,80 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 	c.exit_room = p_db.house.room_index.get(ep.exit_room, -1) if ep.exit_room != "" else -1
 	c.exit_x = ep.exit_x_sub
 	c.loop_repeat = ep.loop_repeat
+	_build_live(c, listed)
 	return c
+
+
+## The live hotspots of an episode (`r3d-index.md` §7.5; pure, deterministic, ≤ 1 ms): {hotspot_id: "rig" |
+## "take" | "hide" | "door" | "exit" | "stairs"}. A rig point is live iff a prank of tonight (Script lines,
+## Double Acts, `nights` — not a knock-on target the sim only pulls in so a Double Act can land, e.g. TAP DANCE
+## in the Prologue) rigs there; a container iff it holds an item one of those pranks needs; a hiding spot
+## iff it is in the episode's `hides` (absent: every hiding spot of the rooms Hush may enter); doors, exits and
+## stairs as today (tappable, in a room Hush may enter — the kitchen window stays untappable). Hotspots in
+## backstage rooms or rooms Hush may not enter are never live. Keys are in `house.json` order.
+static func live_hotspots(p_db: ContentDB, ep: EpisodeDef) -> Dictionary:
+	var out := {}
+	if p_db == null or ep == null:
+		return out
+	var c := build(p_db, ep, {})
+	for h in p_db.house.hotspots:
+		var k: int = c.live_kind[h.idx] if h.idx < c.live_kind.size() else -1
+		if k >= 0 and k < LIVE_NAMES.size():
+			out[h.id] = LIVE_NAMES[k]
+	return out
+
+
+## True when hotspot idx `hi` is live tonight (not struck).
+func is_live(hi: int) -> bool:
+	return hi >= 0 and hi < live_mask.size() and live_mask[hi] == 1
+
+
+static func _build_live(c: SimCtx, listed: PackedByteArray) -> void:
+	var db := c.db
+	var house := db.house
+	var n := house.hotspots.size()
+	c.live_mask.resize(n)
+	c.live_kind.resize(n)
+	var rig_live := PackedByteArray()
+	rig_live.resize(n)
+	var cont_live := PackedByteArray()
+	cont_live.resize(n)
+	for i in n:
+		rig_live[i] = 0
+		cont_live[i] = 0
+	for p in db.prank_list:
+		if listed[p.idx] == 0:
+			continue
+		if p.rig_idx >= 0 and p.rig_idx < n:
+			rig_live[p.rig_idx] = 1
+		for st in p.steps:
+			if st.at_idx >= 0 and st.at_idx < n:
+				rig_live[st.at_idx] = 1
+			if st.needs != "" and db.items.has(st.needs):
+				var src: int = (db.items[st.needs] as ItemDef).source_idx
+				if src >= 0 and src < n:
+					cont_live[src] = 1
+	var hides := {}
+	for hid in c.episode.hides:
+		hides[hid] = true
+	for h in house.hotspots:
+		var k := -1
+		var room_ok := c.hush_allowed(h.room_idx) and not c.is_backstage(h.room_idx)
+		if room_ok and h.tappable:
+			match h.kind:
+				HotspotDef.RIG_POINT:
+					if rig_live[h.idx] == 1:
+						k = h.kind
+				HotspotDef.CONTAINER:
+					if cont_live[h.idx] == 1:
+						k = h.kind
+				HotspotDef.HIDING:
+					if not c.episode.has_hides or hides.has(h.id):
+						k = h.kind
+				HotspotDef.EXIT, HotspotDef.STAIRS, HotspotDef.DOOR:
+					k = h.kind
+		c.live_kind[h.idx] = k
+		c.live_mask[h.idx] = 1 if k >= 0 else 0
 
 
 ## True when Hush may be in room `r`.

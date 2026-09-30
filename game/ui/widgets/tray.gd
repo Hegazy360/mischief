@@ -1,8 +1,8 @@
-## Tray — the 4-slot item tray, bottom-left (GDD §3.6): 128 px visual / 168 px hit slots with
-## 24 px gaps (744 × 168). No bag screen, no scrolling. The slot the current rig point accepts
-## rises 12 px and glows. Tap a filled slot → `tray_tap(i)` ("where does this go?"); drag one
-## > 24 px and release → `tray_drag(i, screen_pos)` (the optional power-user path).
-## Items are item ids (icons from art-house, neutral fallback).
+## ItemTray — the CARRIED-ITEM CHIPS (REDESIGN_3D §2.2; replaces the 4-slot tray): only while Hush
+## carries something, one 128 px chip (144 hit, 168 pitch) per item at (S+224 + i·168, H−B−188),
+## right of Clarence, max 4 — no empty slots are ever drawn. The chip the current rig point accepts
+## rises 12 px and glows. Tap a chip → `tray_tap(i)` ("where does this go?"); drag one > 24 px and
+## release → `tray_drag(i, screen_pos)` (the optional power-user path). Items are item ids.
 class_name ItemTray
 extends TouchWidget
 
@@ -10,7 +10,7 @@ signal tray_tap(i: int)
 signal tray_drag(i: int, screen_pos: Vector2)
 
 const SLOTS := 4
-const HIT := 168.0
+const HIT := 144.0
 const VISUAL := 128.0
 const GAP := 24.0
 const RISE := 12.0
@@ -70,7 +70,8 @@ func set_highlight(i: int) -> void:
 
 
 func _has_point(point: Vector2) -> bool:
-	return _slot_at(point) >= 0
+	var i := _slot_at(point)
+	return i >= 0 and _has_item(i)
 
 
 func _slot_at(p: Vector2) -> int:
@@ -161,24 +162,21 @@ func _draw() -> void:
 	for i in SLOTS:
 		var pressed := is_pressed and i == _press_slot and not _dragging
 		UiShapes.set_xform(_slot_xform(i, now))
-		if i == highlight:
+		if i == highlight and _has_item(i):
 			var g := 0.5 + 0.5 * sin(float(now) * 0.001 * TAU * 1.5)
-			var glow := vr.grow(12.0 + 5.0 * g)
-			UiKit.draw_chunky_rect(self, glow.grow(4.0), 40.0, Color(UiKit.GOLD, 0.45 + 0.3 * g), Color(UiKit.GOLD, 0.45 + 0.3 * g), 0.0, 0.0)
-			UiKit.draw_chunky_rect(self, glow, 36.0, Color(UiKit.GOLD_LIGHT, 0.85), Color(UiKit.GOLD_LIGHT, 0.85), 0.0, 0.0)
+			UiShapes.circle(Vector2.ZERO, half + 16.0 + 5.0 * g, Color(UiKit.GOLD, 0.45 + 0.3 * g))
+			UiShapes.circle(Vector2.ZERO, half + 11.0, Color(UiKit.GOLD_LIGHT, 0.85))
 		if _has_item(i):
 			var fill := UiKit.CREAM if not pressed else UiKit.pressed(UiKit.CREAM)
-			UiKit.draw_chunky_rect(self, vr, 28.0, fill, UiKit.CREAM_SHADE if not pressed else UiKit.pressed(UiKit.CREAM_SHADE))
-		else:
-			UiKit.draw_chunky_rect(self, vr, 28.0, Color(UiKit.NAVY, 0.42), Color(UiKit.NAVY, 0.42), 0.0, 0.0)
-			UiShapes.arc(Vector2.ZERO, 22.0, 0.0, TAU, 5.0, Color(UiKit.CREAM, 0.28), 24)
+			UiShapes.circle(Vector2(0, 4), half, Color(0, 0, 0, 0.18))
+			UiKit.draw_disc(self, Vector2.ZERO, half, fill, UiKit.CREAM_SHADE if not pressed else UiKit.pressed(UiKit.CREAM_SHADE), 5.0)
 	UiShapes.flush(self)
 	for i in SLOTS:
 		if not _has_item(i):
 			continue
 		draw_set_transform_matrix(_slot_xform(i, now))
 		if not (_dragging and i == _press_slot):
-			UiKit.draw_icon(self, _tex[i], Rect2(vr.position + Vector2(14, 10), vr.size - Vector2(28, 28)))
+			UiKit.draw_icon(self, _tex[i], Rect2(vr.position + Vector2(20, 16), vr.size - Vector2(40, 40)))
 		else:
 			UiKit.draw_icon(self, _tex[i], vr.grow(-16.0), Color(1, 1, 1, 0.3))
 	draw_set_transform(Vector2.ZERO)

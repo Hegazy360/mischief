@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: jar straining_arm onions</desc>
+<rect x="20.0" y="50.0" width="58.0" height="70.0" rx="12.0" fill="#CFE8D8" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M62 54 L74 54 Q78 54 78 60 L78 110 Q78 118 70 118 L60 118 Q68 110 68 84 Z" fill="#A9CFB6"/>
+<ellipse cx="36.0" cy="80.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 36.0 80.0)"/>
+<ellipse cx="52.0" cy="96.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 52.0 96.0)"/>
+<ellipse cx="40.0" cy="104.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 40.0 104.0)"/>
+<ellipse cx="58.0" cy="72.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 58.0 72.0)"/>
+<rect x="16.0" y="38.0" width="66.0" height="16.0" rx="5.0" fill="#E8413C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M126 22 L96 30 L92 46 L126 40 Z" fill="#7B3F8C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M94 30 Q74 26 70 38 Q70 50 86 50 Q96 48 96 40 Z" fill="#F4C9A8" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M76 36 L84 40 M74 42 L82 46" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M104 12 L100 20 M114 10 L112 18" fill="none" stroke="#E8413C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="100.0" cy="76.0" r="9.0" fill="#F3E6C8" stroke="#1B2340" stroke-width="4"/>
+<path d="M100 67 L100 62" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="114.0" cy="100.0" r="8.0" fill="#F3E6C8" stroke="#1B2340" stroke-width="4"/>
+<path d="M114 92 L116 87" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M84 70 L92 74 M96 108 L104 104" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

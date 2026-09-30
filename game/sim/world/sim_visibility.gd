@@ -1,5 +1,6 @@
 ## SimVisibility — can the player see Bellows right now? The one rule for micro-gag credit (D1, ruling L1)
-## and the PiP (GDD §3.7). Pure: reads the world, changes nothing, allocates nothing.
+## and the PiP (GDD §3.7) / the 3D Bellows window, plus why (`pip_reason`, R3D ruling R15). Pure: reads the
+## world, changes nothing, allocates nothing.
 ##
 ##   "room" — Bellows is in Hush's room (a hidden Hush is in her hiding spot's room);
 ##   "pip"  — not "room", and the GDD §3.7 PiP rule shows him: his room is link-adjacent to hers (doorway,
@@ -43,3 +44,23 @@ static func pip_shows(w: SimWorld) -> bool:
 	if b.path != null and not b.path.is_done() and b.path.final_room() == hr:
 		return true
 	return w.hush.state == SimHush.RIGGING
+
+
+## Why the Bellows window may show him (R3D ruling R15; `pip_shows` unchanged): `&""` when `pip_shows` is false,
+## `&"room"` (same room), `&"heading"` (his current path ends in her room), `&"rigging"` (she is rigging), else
+## `&"adjacent"` (only the nav link) — heading and rigging win over adjacent. The Bellows window's `"lean"` mode
+## replaces the window with the HUD edge badge on `&"adjacent"`. Pure and allocation-free (StringName literals).
+static func pip_reason(w: SimWorld) -> StringName:
+	var b := w.bellows
+	var hr := w.hush.room
+	if hr < 0 or b.room < 0:
+		return &""
+	if b.room == hr:
+		return &"room"
+	if b.path != null and not b.path.is_done() and b.path.final_room() == hr:
+		return &"heading"
+	if w.hush.state == SimHush.RIGGING:
+		return &"rigging"
+	if w.db.nav.linked(b.room, hr):
+		return &"adjacent"
+	return &""

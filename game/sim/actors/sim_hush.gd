@@ -164,6 +164,12 @@ func _reject(w: SimWorld, c: String, why: String) -> void:
 	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": why})
 
 
+## A command on a struck hotspot (not on stage tonight, REDESIGN_3D §6.2 C1): refused, never silent —
+## `cmd_rejected {c, why: "struck", target}` (fairness rule 9 counts it as feedback).
+func _reject_struck(w: SimWorld, c: String, target: String) -> void:
+	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": "struck", "target": target})
+
+
 ## A go/move while busy (or a POP OUT tapped mid-dive) becomes the single queued command (a newer one replaces it, TECH §3.5) and
 ## says so at once — `cmd_queued {c, why, target}`, why = "entering" during the climb-in, else
 ## "busy" — so a held tap is never silent (the view shows it as queued).
@@ -193,6 +199,9 @@ func _cmd_go(w: SimWorld, c: Dictionary) -> void:
 		return
 	if not w.ctx.hush_allowed(h.room_idx):
 		_reject(w, SimCmd.GO, "locked")
+		return
+	if not w.ctx.is_live(hi):
+		_reject_struck(w, SimCmd.GO, hid)
 		return
 	var want_run := bool(c.get("run", false))
 	if state == HIDDEN or state == FROZEN or state == DIVING:
@@ -483,6 +492,9 @@ func _cmd_pin(w: SimWorld, c: Dictionary) -> void:
 			return
 		if hi < 0 or not w.ctx.hush_allowed(w.db.house.hotspots[hi].room_idx):
 			_reject(w, SimCmd.PIN, "unknown_hotspot")
+			return
+		if not w.ctx.is_live(hi):
+			_reject_struck(w, SimCmd.PIN, str(c["hotspot"]))
 			return
 		_set_pin_hotspot(w, hi)
 		return

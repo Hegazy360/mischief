@@ -4,8 +4,13 @@ extends TestBase
 const U = preload("res://tests/sim/sim_test_util.gd")
 
 
+## fx_act1 needs flour only through LIFT-OFF's knock-on (BELLOWS BLOWS): name it tonight so the pantry shelf is live.
+func _flour_tonight(files: Dictionary) -> void:
+	(files["pranks"]["pranks"]["bellows_blows"]["nights"] as Array).append("fx_act1")
+
+
 func test_go_container_rummages_then_picks_single_item() -> void:
-	var w := U.quiet_world()
+	var w := U.quiet_world("fx_act1", {}, _flour_tonight)
 	var log: Array = []
 	assert_true(U.walk_to(w, "kitchen_pantry_shelf", 600, log))
 	assert_eq(w.hush.state, SimHush.RUMMAGE)

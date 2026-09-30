@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "archetypes": {
+    "take_fix": {
+      "clip": "fix/rx_take",
+      "frames": 90,
+      "marks": {
+        "accent": 30,
+        "hold": [
+          33,
+          69
+        ],
+        "release": 90
+      },
+      "t3_prop_f": 50
+    },
+    "sneeze_fix": {
+      "clip": "fix/rx_sneeze",
+      "frames": 165,
+      "marks": {
+        "accent": 94,
+        "hold": [
+          97,
+          145
+        ],
+        "release": 165
+      },
+      "t3_prop_f": 114
+    },
+    "suppressed": {
+      "clip": "fix/beat_suppressed",
+      "frames": 60
+    }
+  },
+  "t3_last_beats": [
+    "fix/beat_slow_burn"
+  ]
+}

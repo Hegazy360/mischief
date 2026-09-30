@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "fix/beat_slow_burn",
+  "rig": "fix",
+  "anim": "res://tests/rig3d/fixtures/anim/fix/beat_slow_burn.tres",
+  "length": 70,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {},
+  "events": [],
+  "face": [],
+  "cheat_deg": null,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tests/rig3d/fixtures/make_fixtures.gd"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

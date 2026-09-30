@@ -29,6 +29,10 @@ var seed: int = 1
 var rooms: PackedStringArray = PackedStringArray()
 ## Rooms Bellows walks through that Hush never enters (the Prologue's roped-off hall).
 var backstage: PackedStringArray = PackedStringArray()
+## `hides` (REDESIGN_3D §6.2 C1): the Night's hiding spots; every other hiding spot is struck (the sim refuses
+## it). Only meaningful when `has_hides` — an absent key means every hiding spot of the Night's rooms.
+var hides: PackedStringArray = PackedStringArray()
+var has_hides: bool = false
 var entry: String = ""
 var rules: Dictionary = {}
 var spot_fill_s: float = 1.0
@@ -90,6 +94,8 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 	e.seed = ContentUtil.i(d, "seed", 1)
 	e.rooms = ContentUtil.strs(d, "rooms")
 	e.backstage = ContentUtil.strs(d, "backstage")
+	e.has_hides = d.has("hides") and d["hides"] != null
+	e.hides = ContentUtil.strs(d, "hides")
 	e.entry = ContentUtil.s(d, "entry")
 	e.rules = ContentUtil.dict(d, "rules")
 	var act_i := clampi(e.act, 0, SimConst.SPOT_FILL_S.size() - 1)

@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "rig": "fix",
+  "scene": "res://tests/rig3d/fixtures/fix_rig.tscn",
+  "skeleton": "Armature/Skeleton3D",
+  "mesh": "Armature/Skeleton3D/fix_body",
+  "height_m": 1.6,
+  "head_scale": 1.2,
+  "tris": 288,
+  "deform_bones": 27,
+  "bones": {
+    "root": "root",
+    "pelvis": "pelvis",
+    "spine_top": "spine_03",
+    "neck": "neck_01",
+    "head": "Head",
+    "hand_l": "hand_l",
+    "hand_r": "hand_r",
+    "foot_l": "foot_l",
+    "foot_r": "foot_r"
+  },
+  "sockets": {
+    "grip_r": {
+      "bone": "hand_r",
+      "pos": [
+        -0.09,
+        0.0,
+        0.02
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ]
+    },
+    "grip_l": {
+      "bone": "hand_l",
+      "pos": [
+        0.09,
+        0.0,
+        0.02
+      ]
+    },
+    "head_top": {
+      "bone": "Head",
+      "pos": [
+        0.0,
+        0.28,
+        0.0
+      ]
+    },
+    "brace_r": {
+      "bone": "spine_02",
+      "pos": [
+        -0.09,
+        0.05,
+        0.11
+      ]
+    },
+    "feet": {
+      "bone": "root",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "seat": {
+      "bone": "pelvis",
+      "pos": [
+        0.0,
+        -0.1,
+        0.0
+      ]
+    }
+  },
+  "props": {
+    "cup": {
+      "bone": "prop_r",
+      "states": {
+        "held": "grip_r",
+        "brace": "brace_r"
+      },
+      "default": "held"
+    },
+    "pepper_pot": {
+      "bone": "prop_l",
+      "default": "hidden"
+    }
+  },
+  "attachments": {
+    "bouffant_flipped": {
+      "scene": "res://tests/rig3d/fixtures/bouffant_flipped.tscn",
+      "bone": "bouffant",
+      "default": false
+    },
+    "bouffant_frazzled": {
+      "scene": "res://tests/rig3d/fixtures/bouffant_frazzled.tscn",
+      "bone": "bouffant",
+      "default": false
+    },
+    "stool": {
+      "scene": "res://tests/rig3d/fixtures/stool.tscn",
+      "bone": "pelvis",
+      "pos": [
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "default": false
+    }
+  },
+  "slots": {
+    "bouffant": {
+      "neat": null,
+      "flipped": "bouffant_flipped",
+      "frazzled": {
+        "show": [
+          "bouffant_frazzled"
+        ],
+        "hide_bones": [
+          "sideburn_l"
+        ]
+      }
+    }
+  },
+  "anim": {
+    "layers": []
+  },
+  "jiggle": [
+    {
+      "bones": [
+        "beret"
+      ],
+      "stiffness": 3.0,
+      "drag": 0.4,
+      "gravity": 0.3,
+      "radius": 0.05,
+      "clamp_deg": 30
+    },
+    {
+      "bones": [
+        "sideburn_l",
+        "sideburn_r"
+      ],
+      "stiffness": 4.0,
+      "drag": 0.5,
+      "gravity": 0.2,
+      "radius": 0.03,
+      "clamp_deg": 20
+    }
+  ],
+  "face": {
+    "atlas": "",
+    "atlas_px": 256,
+    "grid": [
+      8,
+      8
+    ],
+    "layers": [
+      "brows",
+      "eyes",
+      "pupils",
+      "mouth",
+      "extra_a",
+      "extra_b"
+    ],
+    "layer_rects": {
+      "brows": [
+        0.1,
+        0.62,
+        0.9,
+        0.78
+      ],
+      "eyes": [
+        0.12,
+        0.4,
+        0.88,
+        0.64
+      ],
+      "pupils": [
+        0.12,
+        0.4,
+        0.88,
+        0.64
+      ],
+      "mouth": [
+        0.25,
+        0.12,
+        0.75,
+        0.34
+      ],
+      "extra_a": [
+        0.05,
+        0.25,
+        0.95,
+        0.5
+      ],
+      "extra_b": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    },
+    "cells": {
+      "brows": {
+        "neutral": 0,
+        "up": 1,
+        "sly": 2,
+        "sly_m": 3
+      },
+      "eyes": {
+        "open": 8,
+        "wide": 9,
+        "closed": 10,
+        "half": 11,
+        "squint": 12,
+        "happy": 13
+      },
+      "pupils": {
+        "centre": 24
+      },
+      "mouth": {
+        "smile": 32,
+        "O": 33,
+        "grin": 34
+      },
+      "extra_a": {
+        "blush": 40,
+        "tear": 41,
+        "tear_m": 42
+      }
+    },
+    "pupil_range": [
+      0.05,
+      0.03
+    ],
+    "presets": "res://tests/rig3d/fixtures/data/rigs3d/fix/faces.json",
+    "blink": {
+      "every_s": [
+        2.0,
+        6.0
+      ],
+      "frames": 6,
+      "cell": "closed",
+      "blinkable": [
+        "open",
+        "wide"
+      ]
+    },
+    "mirror_cells": {
+      "brows/sly": "sly_m",
+      "brows/sly_m": "sly",
+      "tear": "tear_m",
+      "tear_m": "tear"
+    }
+  },
+  "material": {
+    "palette": "",
+    "outline_px": 3.5,
+    "rim": 0.45
+  },
+  "vertex_color": {
+    "r": "skin_tint",
+    "g": "stone_keep",
+    "b": "rim_damp",
+    "a": "outline_scale"
+  },
+  "looks": {
+    "BLINDED": {
+      "swap": {
+        "bouffant": "flipped"
+      }
+    },
+    "FRAZZLED": {
+      "swap": {
+        "bouffant": "frazzled"
+      }
+    },
+    "RIDE": {
+      "show": [
+        "stool"
+      ]
+    },
+    "BALD": {
+      "hide_bones": [
+        "beret"
+      ]
+    },
+    "GREEN": {
+      "params": {
+        "albedo_color": "#80FF80"
+      }
+    }
+  },
+  "tint": {
+    "tiers": [
+      "#FFFFFF",
+      "#FFE0DC",
+      "#FFC2B8",
+      "#F59A94"
+    ],
+    "livid": "#B8324B",
+    "skin": "#E9B79A",
+    "sideburn_scale": [
+      1.0,
+      1.15,
+      1.15,
+      1.35,
+      1.35
+    ]
+  },
+  "stone": {
+    "color": "#E8E6E1"
+  },
+  "cheat": {
+    "idle": 35,
+    "walk": 20,
+    "perform": 35,
+    "face_to_face": 5
+  },
+  "blob_shadow_r": 0.34,
+  "skins": {},
+  "variant": "head_b"
+}

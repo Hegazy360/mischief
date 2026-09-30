@@ -199,14 +199,15 @@ func _spotted(w: SimWorld) -> void:
 	b.on_spotted(w)
 
 
-## The show must go on: Figgis yanks Hush into the nearest hiding spot (Prologue can't-fail).
+## The show must go on: Figgis yanks Hush into the nearest live hiding spot (Prologue can't-fail; a struck
+## spot is never used, REDESIGN_3D §6.2 C1).
 func figgis_hook(w: SimWorld) -> void:
 	var hu := w.hush
 	var house := w.db.house
 	var best := -1
 	var best_d := 1 << 40
 	for h in house.hotspots:
-		if h.kind != HotspotDef.HIDING or not w.ctx.hush_allowed(h.room_idx):
+		if h.kind != HotspotDef.HIDING or not w.ctx.hush_allowed(h.room_idx) or not w.ctx.is_live(h.idx):
 			continue
 		if h.idx == f2f_spot and f2f_active():
 			continue

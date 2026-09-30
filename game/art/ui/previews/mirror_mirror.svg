@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: oval_face wink</desc>
+<ellipse cx="64.0" cy="66.0" rx="46.0" ry="58.0" fill="#E8B33A" stroke="#1B2340" stroke-width="5"/>
+<ellipse cx="64.0" cy="66.0" rx="38.0" ry="50.0" fill="#BFE0FF" stroke="#1B2340" stroke-width="4"/>
+<path d="M40 30 Q48 22 58 22 L42 44 Z" fill="#FFFFFF" fill-opacity="0.60"/>
+<path d="M34 70 Q34 36 64 36 Q94 36 94 70 L94 92 L82 92 L82 70 L46 70 L46 92 L34 92 Z" fill="#4A2C3C" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="64.0" cy="72.0" r="22.0" fill="#FFF6EA" stroke="#1B2340" stroke-width="4"/>
+<path d="M36 44 Q46 22 70 24 Q94 26 96 42 Q80 34 58 36 Q44 38 36 44 Z" fill="#E23B4E" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="78.0" cy="24.0" r="4.0" fill="#E23B4E" stroke="#1B2340" stroke-width="3"/>
+<path d="M50 72 Q55 67 60 72" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="74.0" cy="70.0" r="3.5" fill="#1B2340"/>
+<path d="M56 84 Q64 90 72 84" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="50.0" cy="80.0" rx="4.0" ry="2.5" fill="#FF9AA2"/>
+<ellipse cx="78.0" cy="80.0" rx="4.0" ry="2.5" fill="#FF9AA2"/>
+<path d="M104.0 10.0 L107.5 18.5 L116.0 22.0 L107.5 25.5 L104.0 34.0 L100.5 25.5 L92.0 22.0 L100.5 18.5 Z" fill="#FFD23F" stroke="#1B2340" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

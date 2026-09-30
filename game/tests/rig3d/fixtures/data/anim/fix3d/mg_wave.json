@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "fix/mg_wave",
+  "rig": "fix",
+  "anim": "res://tests/rig3d/fixtures/anim/fix/mg_wave.tres",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "whistle"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "happy"
+    }
+  ],
+  "cheat_deg": null,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tests/rig3d/fixtures/make_fixtures.gd"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

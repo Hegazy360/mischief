@@ -6,7 +6,9 @@
 ##   FF      ⏩ while Hush is hidden: hold = world ×3 (clarence_down … clarence_up).
 ## A press that begins within SUPPRESS_MS of an action-button press is ignored entirely
 ## (two-thumb slips): the Hud writes `last_action_down_ms`.
-## An 8 px lure ring around the button shows lure readiness and greys out with lure fatigue.
+## R3D (REDESIGN_3D §2.1): a 128 px navy disc at 62 % with Clarence in colour; the 8 px lure ring shows
+## ONLY when lure fatigue is close (`set_lure_ring(HudModel.LureRing.ON)` — ≥ 1 lure in the last 60 s)
+## and greys when fatigued (GREY); hidden otherwise.
 ## Signals: clarence_down(), clarence_hold(), clarence_up(held_ms).
 class_name ClarenceButton
 extends TouchWidget
@@ -30,6 +32,8 @@ const ART_STRETCHED := "res://art/chars/hush/clarence_stretched.svg"
 
 var mode: int = M.SQUEAK
 var lure_grey: bool = false
+## HudModel.LureRing: HIDDEN / ON / GREY.
+var lure_ring: int = HudModel.LureRing.HIDDEN
 ## Real-time ms of the latest action-button touch-down (written by the Hud).
 var last_action_down_ms: int = -100000
 ## Presses dropped by the two-thumb rule (tests).
@@ -79,6 +83,15 @@ func set_lure_grey(on: bool) -> void:
 	queue_redraw()
 
 
+## The contextual lure ring (HudModel.LureRing).
+func set_lure_ring(state: int) -> void:
+	if state == lure_ring:
+		return
+	lure_ring = state
+	lure_grey = state == HudModel.LureRing.GREY
+	queue_redraw()
+
+
 ## Check the hold threshold (called every frame while pressed; public for tests).
 func tick() -> void:
 	if is_pressed and not _held_fired and UiKit.now_ms() - down_ms >= HOLD_MS:
@@ -124,16 +137,17 @@ func _draw() -> void:
 	var lr := r + 12.0
 	# lure ring, shadow and disc: ONE triangle array (s2-fix G #8)
 	UiShapes.begin()
-	UiShapes.arc(c, lr, 0.0, TAU, LURE_W + 6.0, UiKit.NAVY, 64)
-	UiShapes.arc(c, lr, 0.0, TAU, LURE_W, UiKit.GREY if lure_grey else UiKit.YELLOW, 64)
+	if lure_ring != HudModel.LureRing.HIDDEN:
+		UiShapes.arc(c, lr, 0.0, TAU, LURE_W + 6.0, UiKit.NAVY, 64)
+		UiShapes.arc(c, lr, 0.0, TAU, LURE_W, UiKit.GREY if lure_grey else UiKit.YELLOW, 64)
 	var k := UiKit.PRESS_SCALE if is_pressed else 1.0
 	UiShapes.set_xform(Transform2D(0.0, Vector2(k, k), 0.0, c))
-	UiShapes.circle(Vector2(0, 6), r, Color(UiKit.NAVY, 0.35))
+	UiShapes.circle(Vector2(0, 4), r, Color(0, 0, 0, 0.18))
 	var ff_fill := UiKit.PLUM if not is_pressed else Color("#46325F")
 	if mode == M.FF:
 		UiKit.draw_disc(self, Vector2.ZERO, r, ff_fill, Color("#1A1226"))
 	else:
-		UiKit.draw_disc(self, Vector2.ZERO, r, UiKit.CREAM if not is_pressed else UiKit.pressed(UiKit.CREAM), UiKit.CREAM_SHADE)
+		UiShapes.circle(Vector2.ZERO, r, Color(0.106, 0.137, 0.251, 0.62 if not is_pressed else 0.78))
 	UiShapes.flush(self)
 	draw_set_transform(c, 0.0, Vector2(k, k))
 	if mode == M.FF:

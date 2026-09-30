@@ -7,6 +7,7 @@
   "status": "final",
   "seed": 101,
   "rooms": ["porch", "hall", "parlour", "kitchen"],
+  "hides": ["kitchen_pantry_curtain", "parlour_piano_back", "hall_coat_cupboard"],
   "entry": "window",
   "rules": {"spot_fill_s": 1.0, "tomatoes": -1, "cant_fail": false, "nerves": false, "combos": []},
   "new_rule": "items",

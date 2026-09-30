@@ -24,11 +24,19 @@
 ## Whenever a rule matches but its clip is not authored the pick records it (`wanted`,
 ## `ov_wanted`; CharacterView counts it for `WorldView.fallback_counts()`) and resolution falls
 ## through to the next rule — never a puppet, never nothing.
+##
+## **3D format (R3D index §7.2, §7.10; `Ctx.format3d`):** `load_map3d(rig)` = the same default map overlaid with
+## `data/anim/<rig>3d/map.json`, plus a derived **`rig:<prank>`** row for every prank of `data/anim/hush3d/rig_actions.json`
+## (`{clip: the prank's own clip, else bands.<band>.clip, lock: "rig_pm"}`; a map.json row overrides it). A clip exists
+## when its sidecar `data/anim/<rig>3d/<name>.json` does (`clip_exists3d`; length from the sidecar). While Hush rigs:
+## `rig:<prank>` frame-locked to rig progress (‰ / 1000 × length, one normalised clip for Q/S/B) → the last resort
+## `bands.mid.clip` (recorded as a fallback of the prank's clip) — `rigging@*` and `act_tinker_*` are not in 3D.
 class_name ClipMap
 extends RefCounted
 
 const DEFAULT_DIR := "res://view/world/default_maps"
 const ANIM_DIR := "res://data/anim"
+const RIG_ACTIONS := "res://data/anim/hush3d/rig_actions.json"
 ## Reaction marker: the clip comes from the snapshot (`react_clip`).
 const FROM_SIM := "<from sim>"
 ## Every key family of the schema (`*` = per id). Used by tests and SliceClips.
@@ -136,11 +144,20 @@ class Ctx:
 	## Staged director cue overlay id and frame.
 	var cue: String = ""
 	var cue_f: float = 0.0
+	## The 3D format (R3D): `rig:<prank>` rows, sidecar existence, no `rigging@*`.
+	var format3d: bool = false
+	## rig_actions.json (3D; `bands.mid.clip` is the rigging last resort).
+	var rig_actions: Dictionary = {}
 
 
 ## Test hooks: rig → map used instead of the files; fixture clip ids that exist (id → frames).
 static var map_override: Dictionary = {}
 static var fixture_clips: Dictionary = {}
+## 3D test hooks: rig → 3D map; fixture clip ids that exist in 3D (id → frames).
+static var map_override3d: Dictionary = {}
+static var fixture_clips3d: Dictionary = {}
+static var _exists3d: Dictionary = {}
+static var _len3d: Dictionary = {}
 
 static var _exists: Dictionary = {}
 static var _len: Dictionary = {}
@@ -212,6 +229,99 @@ static func clear_cache() -> void:
 	_exists.clear()
 	_len.clear()
 	_wild.clear()
+	_exists3d.clear()
+	_len3d.clear()
+
+
+# --- the 3D format ----------------------------------------------------------------------------
+
+## The sidecar path of a 3D clip id (`hush/loco_walk` → res://data/anim/hush3d/loco_walk.json).
+static func sidecar_path(clip_id: String) -> String:
+	var i := clip_id.find("/")
+	if i <= 0:
+		return ""
+	return "%s/%s3d/%s.json" % [ANIM_DIR, clip_id.substr(0, i), clip_id.substr(i + 1)]
+
+
+## True when a 3D clip's sidecar exists (or it is a 3D fixture clip). Cached.
+static func clip_exists3d(clip_id: String) -> bool:
+	if clip_id == "":
+		return false
+	if fixture_clips3d.has(clip_id):
+		return true
+	if _exists3d.has(clip_id):
+		return _exists3d[clip_id]
+	var ok := FileAccess.file_exists(ClipMap.sidecar_path(clip_id))
+	_exists3d[clip_id] = ok
+	return ok
+
+
+## A 3D clip's length in frames (its sidecar's `length`; 0 when unknown). Cached.
+static func clip_length3d(clip_id: String) -> int:
+	if fixture_clips3d.has(clip_id):
+		return int(fixture_clips3d[clip_id])
+	if _len3d.has(clip_id):
+		return _len3d[clip_id]
+	var n := 0
+	if ClipMap.clip_exists3d(clip_id):
+		var d: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id))
+		if d is Dictionary:
+			n = int((d as Dictionary).get("length", 0))
+	_len3d[clip_id] = n
+	return n
+
+
+## rig_actions.json (empty when absent).
+static func rig_actions() -> Dictionary:
+	var v: Variant = ViewKit.json(RIG_ACTIONS)
+	return v if v is Dictionary else {}
+
+
+## The clip a prank's rig action plays in 3D: its own `clip`, else its band's clip ("" when unknown).
+static func rig_clip_of(actions: Dictionary, prank: String) -> String:
+	var pr: Variant = (actions.get("pranks", {}) as Dictionary).get(prank, null) if actions.get("pranks", null) is Dictionary else null
+	if not (pr is Dictionary):
+		return ""
+	var own: Variant = (pr as Dictionary).get("clip", null)
+	if own is String and own != "":
+		return own
+	var band := ViewKit.s((pr as Dictionary).get("band", "mid"))
+	var bands: Dictionary = actions.get("bands", {}) if actions.get("bands", null) is Dictionary else {}
+	var b: Variant = bands.get(band, null)
+	return ViewKit.s((b as Dictionary).get("clip", "")) if b is Dictionary else ""
+
+
+## The merged 3D map: the default map ⊕ `data/anim/<rig>3d/map.json` ⊕ derived `rig:<prank>` rows (Hush).
+static func load_map3d(rig: String) -> Dictionary:
+	if map_override3d.has(rig):
+		return map_override3d[rig]
+	var base: Variant = ViewKit.json("%s/%s.json" % [DEFAULT_DIR, rig])
+	var data: Variant = ViewKit.json("%s/%s3d/map.json" % [ANIM_DIR, rig])
+	var out := ClipMap.merge(base if base is Dictionary else {}, data if data is Dictionary else {})
+	if rig == "hush":
+		ClipMap.add_rig_rows(out, ClipMap.rig_actions())
+	return out
+
+
+## Adds a `rig:<prank>` row for every prank of `actions` that the map does not already name.
+static func add_rig_rows(map: Dictionary, actions: Dictionary) -> void:
+	var pranks: Variant = actions.get("pranks", {})
+	if not (pranks is Dictionary):
+		return
+	for pk in pranks:
+		var key := "rig:" + String(pk)
+		if map.has(key):
+			continue
+		var clip := ClipMap.rig_clip_of(actions, String(pk))
+		if clip != "":
+			map[key] = {"clip": clip, "lock": "rig_pm"}
+
+
+## The rigging last resort in 3D: `bands.mid.clip`.
+static func band_mid_clip(actions: Dictionary) -> String:
+	var bands: Dictionary = actions.get("bands", {}) if actions.get("bands", null) is Dictionary else {}
+	var m: Variant = bands.get("mid", null)
+	return ViewKit.s((m as Dictionary).get("clip", "")) if m is Dictionary else ""
 
 
 ## The entry for `key` (skin override → exact key → `*` family with `{id}`), or null.
@@ -381,8 +491,12 @@ static func _base_oneshot(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, 
 
 
 static func _base(map: Dictionary, a: ViewSnapshot.Actor, out: Pick, c: Ctx) -> void:
+	# 3D rigging: rig:<prank> frame-locked to rig progress, else bands.mid.clip (counted as a fallback)
+	if c.format3d and a.state == "RIGGING":
+		if ClipMap._rig3d(map, a, out, c):
+			return
 	# state:<state> (Hush rigging: the step's tier first)
-	if a.state != "":
+	if a.state != "" and not (c.format3d and a.state == "RIGGING"):
 		if a.state == "RIGGING" and c.rig_tier != "":
 			if ClipMap._try(map, ClipMap._k("rigging@", c.rig_tier), a, out, c, -1.0, 0):
 				return
@@ -449,6 +563,33 @@ static func _base(map: Dictionary, a: ViewSnapshot.Actor, out: Pick, c: Ctx) -> 
 		out.loop = false
 		return
 	ClipMap._try(map, "idle", a, out, c, -1.0, 0)
+
+
+## 3D rigging (see the class doc). True when a rig clip plays.
+static func _rig3d(map: Dictionary, a: ViewSnapshot.Actor, out: Pick, c: Ctx) -> bool:
+	var u := clampf(float(a.rig_pm) / 1000.0, 0.0, 1.0)
+	if a.rig_prank != "":
+		var key := ClipMap._k("rig:", a.rig_prank)
+		var e: Variant = ClipMap.entry(map, key, c.skin)
+		var clip := ClipMap.clip_of(e) if e != null else ClipMap.rig_clip_of(c.rig_actions, a.rig_prank)
+		if clip != "":
+			if ClipMap._ok(clip, c):
+				ClipMap._apply(out, e, clip, key, a)
+				out.loop = false
+				out.external = true
+				out.frame = u * float(maxi(1, ClipMap._length(clip, c) - 1))
+				return true
+			ClipMap._want(out, clip, key)
+	var mid := ClipMap.band_mid_clip(c.rig_actions)
+	if mid != "" and ClipMap._ok(mid, c):
+		if out.wanted == "":
+			ClipMap._want(out, ClipMap._k("rig:", a.rig_prank) if a.rig_prank != "" else "rig:?", "rigging@mid")
+		ClipMap._apply(out, null, mid, "rigging@mid", a)
+		out.loop = false
+		out.external = true
+		out.frame = u * float(maxi(1, ClipMap._length(mid, c) - 1))
+		return true
+	return false
 
 
 static func _overlay(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, out: Pick, c: Ctx, os_key: String) -> void:

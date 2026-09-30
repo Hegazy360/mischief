@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: to_sink</desc>
+<rect x="10.0" y="30.0" width="60.0" height="24.0" rx="8.0" fill="#C9CED9" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M60 38 L90 38 Q104 38 104 52 L104 72 L84 72 L84 58 L60 58 Z" fill="#C9CED9" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="34.0" cy="22.0" r="10.0" fill="#E8413C" stroke="#1B2340" stroke-width="4"/>
+<ellipse cx="94.0" cy="92.0" rx="7.0" ry="11.0" fill="#6FC3F2" stroke="#1B2340" stroke-width="4"/>
+</svg>

@@ -7,7 +7,8 @@
 ## curious orange, search pink) · HUSH room (hidden = dark stripes, frozen = white stripes) ·
 ## "?" meter (red bars, the fill line dashed) · INPUT (commands and holds) · LAUGHS (yellow;
 ## prank accents full height, director cues grey) · BEATS (Bellows' micro-gags, D1: a thin tick per beat — room
-## green, PiP blue, edge-bubble orange, full height; invisible ones short and grey) · DEAD AIR (grey: the D1 mask,
+## green, PiP blue (light blue: adjacency-only PiP, `pip_reason` "adjacent", R15), edge-bubble orange, full height;
+## invisible ones short and grey) · DEAD AIR (grey: the D1 mask,
 ## visible beats count) · FF (where the persona's ⏩ is latched: those ticks weigh 1/3 in the gate) · EVENTS (rig
 ## steps green, catches red, near misses orange, bow blue). Legends of the room and beat colours sit at the bottom.
 class_name SolverTimeline
@@ -25,6 +26,9 @@ const ROW_DEAD := 7
 const ROW_FF := 8
 const ROW_EVENTS := 9
 const BEAT_COLORS := {"room": "#2E9E4F", "pip": "#2F6FD0", "edge": "#F08A24", "hidden": "#C9C2B6"}
+## A PiP beat whose only reason is adjacency (`pip_reason` "adjacent", R3D ruling R15: the "lean" Bellows window
+## shows the edge badge instead) — light blue; heading / rigging / room PiP beats stay dark blue.
+const BEAT_PIP_ADJACENT := "#93B5EC"
 const BG := Color("#FBF7F0")
 const INK := Color("#1B2340")
 const GRID := Color("#DDD5C8")
@@ -145,7 +149,10 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		var bk := Metrics.beat_kind(ev)
 		if bk != "":
 			var bh := ROW_H - 4 if bk != "hidden" else ROW_H / 3
-			img.fill_rect(Rect2i(x, TOP + (ROW_BEATS + 1) * ROW_H - 2 - bh, 2, bh), Color(BEAT_COLORS[bk]))
+			var bc := Color(BEAT_COLORS[bk])
+			if bk == "pip" and SolverData.sv(ev.get("pip_reason", "")) == "adjacent":
+				bc = Color(BEAT_PIP_ADJACENT)
+			img.fill_rect(Rect2i(x, TOP + (ROW_BEATS + 1) * ROW_H - 2 - bh, 2, bh), bc)
 		match e:
 			"rig_step_done":
 				img.fill_rect(Rect2i(x, TOP + ROW_EVENTS * ROW_H + 3, 2, 7), Color("#2E9E4F"))
@@ -171,6 +178,9 @@ static func render(log: SolverLog, report: Dictionary = {}) -> Image:
 		var lab: String = "BEAT " + String(k).to_upper()
 		_text(img, lx + 13, ly + 2, lab, INK, 1)
 		lx += 13 + lab.length() * 4 + 12
+	img.fill_rect(Rect2i(lx, ly, 10, 10), Color(BEAT_PIP_ADJACENT))
+	_text(img, lx + 13, ly + 2, "PIP ADJACENT ONLY", INK, 1)
+	lx += 13 + 17 * 4 + 12
 	img.fill_rect(Rect2i(lx, ly, 10, 10), Color("#6B8FB8"))
 	_text(img, lx + 13, ly + 2, "FF LATCHED (1/3)", INK, 1)
 	return img

@@ -25,7 +25,7 @@ func _base(patch: Callable = Callable()) -> SimWorld:
 
 
 func _cmds() -> Dictionary:
-	return {"go_far": SimCmd.go("parlour_gramophone"), "go_box": SimCmd.go("hall_confiscated_box"),
+	return {"go_far": SimCmd.go("parlour_recliner"), "go_struck": SimCmd.go("parlour_gramophone"), "go_box": SimCmd.go("hall_confiscated_box"),
 		"move": SimCmd.move("parlour", 2000), "move_run": SimCmd.move("parlour", 2000, true), "pick": SimCmd.pick("squeaker"),
 		"rig_on": SimCmd.rig(true), "freeze_on": SimCmd.freeze(true), "squeak": SimCmd.squeak(), "wheeze_on": SimCmd.wheeze(true),
 		"pin_room": SimCmd.pin("parlour", 2000), "pin_hotspot": SimCmd.pin_hotspot("parlour_piano_back"),
@@ -45,11 +45,11 @@ func _state_worlds() -> Dictionary:
 	U.run(idle, 2)
 	out["IDLE"] = idle
 	var walk := _base()
-	if _drive(walk, [SimCmd.go("parlour_gramophone")], SimHush.WALK):
+	if _drive(walk, [SimCmd.go("parlour_recliner")], SimHush.WALK):
 		U.run(walk, 3)
 		out["WALK"] = walk
 	var run := _base()
-	if _drive(run, [SimCmd.go("parlour_gramophone", true)], SimHush.RUN):
+	if _drive(run, [SimCmd.go("parlour_recliner", true)], SimHush.RUN):
 		out["RUN"] = run
 	var stairs := _base()
 	if _drive(stairs, [SimCmd.go("stairs_foot")], SimHush.STAIRS):
@@ -136,11 +136,11 @@ func test_releases_answer_when_they_release_something() -> void:
 func test_cmd_queued_targets_are_anchors() -> void:
 	var w := _base()
 	_drive(w, [SimCmd.go("hall_confiscated_box")], SimHush.RUMMAGE)
-	var evs := U.step(w, [SimCmd.go("parlour_gramophone")])
+	var evs := U.step(w, [SimCmd.go("parlour_recliner")])
 	var q := U.first(evs, SimEvents.CMD_QUEUED)
 	assert_eq(str(q.get("c", "")), "go")
 	assert_eq(str(q.get("why", "")), "busy")
-	assert_eq(str(q.get("target", "")), "parlour_gramophone", "a go anchors on its hotspot")
+	assert_eq(str(q.get("target", "")), "parlour_recliner", "a go anchors on its hotspot")
 	evs = U.step(w, [SimCmd.move("parlour", 2000)])
 	q = U.first(evs, SimEvents.CMD_QUEUED)
 	assert_eq(str(q.get("target", "")), "parlour:2000", "a move anchors on <room>:<x>")
@@ -155,10 +155,10 @@ func test_cmd_queued_targets_are_anchors() -> void:
 
 func test_climb_in_queues_movement_and_rejects_the_rest() -> void:
 	var w := _base(func(ep: Dictionary) -> void: ep["hush"]["enter"] = {"at_s": 0.0, "busy_s": 2.0})
-	var evs := U.step(w, [SimCmd.go("parlour_gramophone")])
+	var evs := U.step(w, [SimCmd.go("parlour_recliner")])
 	var q := U.first(evs, SimEvents.CMD_QUEUED)
 	assert_eq(str(q.get("why", "")), "entering")
-	assert_eq(str(q.get("target", "")), "parlour_gramophone")
+	assert_eq(str(q.get("target", "")), "parlour_recliner")
 	evs = U.step(w, [SimCmd.squeak()])
 	assert_eq(str(U.first(evs, SimEvents.CMD_REJECTED).get("why", "")), "entering")
 	var log: Array = []
@@ -182,7 +182,7 @@ func test_pop_out_mid_dive_pops_out_when_the_dive_ends() -> void:
 func test_frozen_or_hidden_go_sets_a_pin() -> void:
 	var w := _base()
 	_drive(w, [SimCmd.freeze(true)], SimHush.FROZEN, 2)
-	var evs := U.step(w, [SimCmd.go("parlour_gramophone")])
+	var evs := U.step(w, [SimCmd.go("parlour_recliner")])
 	assert_false(U.first(evs, SimEvents.PIN).is_empty(), "frozen: a go pins the destination")
 	var h := _base()
 	_drive(h, [SimCmd.go("hall_coat_cupboard")], SimHush.HIDDEN)

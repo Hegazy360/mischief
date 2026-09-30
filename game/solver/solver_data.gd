@@ -323,9 +323,10 @@ func walk_px(room_a: String, x_a: int, room_b: String, x_b: int) -> int:
 
 
 ## Nearest hiding spot to (room, x) among `rooms` (default: that room and its neighbours),
-## skipping `exclude`. Returns "" if none.
+## skipping `exclude` and — with `ep_id` — every spot struck tonight (not in the episode's `hides`).
+## Returns "" if none.
 func nearest_hiding(room_id: String, x: int, exclude: PackedStringArray = PackedStringArray(),
-		rooms: PackedStringArray = PackedStringArray()) -> String:
+		rooms: PackedStringArray = PackedStringArray(), ep_id: String = "") -> String:
 	var cands := rooms
 	if cands.is_empty():
 		cands = PackedStringArray([room_id])
@@ -334,7 +335,7 @@ func nearest_hiding(room_id: String, x: int, exclude: PackedStringArray = Packed
 	var best_d := 1 << 30
 	for r in cands:
 		for id in hotspots_in(r, "hiding"):
-			if exclude.has(id):
+			if exclude.has(id) or (ep_id != "" and not is_live(ep_id, id)):
 				continue
 			var d := walk_px(room_id, x, r, hotspot_x(id)) + (0 if r == room_id else 400)
 			if d < best_d:
@@ -518,6 +519,125 @@ func episode_pranks(ep_id: String) -> PackedStringArray:
 				if da.get(k, null) is String and not out.has(sv(da[k])):
 					out.append(sv(da[k]))
 	out.sort()
+	return out
+
+
+## The pranks an episode names (Script lines incl. the Big Number, Double Acts, pranks.json `nights`), sorted —
+## the pranks whose rig points are live tonight (knock-on targets the sim pulls in are not named).
+func named_pranks(ep_id: String) -> PackedStringArray:
+	var out := episode_pranks(ep_id)
+	for pid in sorted_ids("pranks"):
+		var nights: Variant = prank(pid).get("nights", [])
+		if nights is Array and (nights as Array).has(ep_id) and not out.has(pid):
+			out.append(pid)
+	out.sort()
+	return out
+
+
+## Rooms Hush may enter in an episode: its `rooms` + the doorstep's room, minus `backstage`.
+func hush_rooms(ep_id: String) -> PackedStringArray:
+	var ep := episode(ep_id)
+	var back := as_ids(ep.get("backstage", []))
+	var out := PackedStringArray()
+	for r in as_ids(ep.get("rooms", [])):
+		if not back.has(r) and not out.has(r):
+			out.append(r)
+	var ds: Variant = (house.get("entries", {}) as Dictionary).get("doorstep", null) if house.get("entries", {}) is Dictionary else null
+	var dr := sv((ds as Dictionary).get("room", "")) if ds is Dictionary else ""
+	if dr != "" and not back.has(dr) and not out.has(dr):
+		out.append(dr)
+	return out
+
+
+## The episode's hiding spots (REDESIGN_3D §6.2 C1): its `hides` list, or — absent — every hiding spot of the
+## rooms Hush may enter. Sorted by house order.
+func live_hides(ep_id: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for id in hotspot_ids():
+		if hotspot_kind(id) == "hiding" and live_kind(ep_id, id) == "hide":
+			out.append(id)
+	return out
+
+
+## The JSON-level twin of `SimCtx.live_hotspots()` ({hotspot id: "rig" | "take" | "hide" | "door" | "exit" |
+## "stairs"}): the solver, the planner, the fuzz bots and the lints read the same mask the sim applies
+## (`tests/solver` proves the two agree on every episode).
+func live_hotspots(ep_id: String) -> Dictionary:
+	var out := {}
+	for id in hotspot_ids():
+		var k := live_kind(ep_id, id)
+		if k != "":
+			out[id] = k
+	return out
+
+
+## The live kind of one hotspot tonight ("" = struck).
+func live_kind(ep_id: String, id: String) -> String:
+	var ck := "live|" + ep_id
+	if not _sorted_cache.has(ck):
+		_sorted_cache[ck] = _live_table(ep_id)
+	return sv((_sorted_cache[ck] as Dictionary).get(id, ""))
+
+
+## True when a hotspot is live tonight.
+func is_live(ep_id: String, id: String) -> bool:
+	return live_kind(ep_id, id) != ""
+
+
+## The Night's struck hotspots: tappable, in a room Hush may enter, not live tonight — every go or pin on one
+## must be refused with `cmd_rejected {why: "struck"}` (invariant rule 13). id → true.
+func struck_hotspots(ep_id: String) -> Dictionary:
+	var out := {}
+	if not episodes.has(ep_id):
+		return out
+	var rooms := hush_rooms(ep_id)
+	for id in hotspot_ids():
+		var h := hotspot(id)
+		if rooms.has(sv(h.get("room", ""))) and bool(h.get("tappable", true)) and not is_live(ep_id, id):
+			out[id] = true
+	return out
+
+
+func _live_table(ep_id: String) -> Dictionary:
+	var ep := episode(ep_id)
+	var rooms := hush_rooms(ep_id)
+	var rig := {}
+	var cont := {}
+	for pid in named_pranks(ep_id):
+		var n := prank_steps(pid).size()
+		for i in n:
+			var rp := rig_point(pid, i)
+			if rp != "":
+				rig[rp] = true
+			var need := step_needs(pid, i)
+			if need != "" and item_source(need) != "":
+				cont[item_source(need)] = true
+		var rp0 := sv(prank(pid).get("rig_point", ""))
+		if rp0 != "":
+			rig[rp0] = true
+	var has_hides: bool = ep.has("hides") and ep["hides"] != null
+	var listed := as_ids(ep.get("hides", []))
+	var out := {}
+	for id in hotspot_ids():
+		var h := hotspot(id)
+		if not rooms.has(sv(h.get("room", ""))) or not bool(h.get("tappable", true)):
+			continue
+		match sv(h.get("kind", "")):
+			"rig_point":
+				if rig.has(id):
+					out[id] = "rig"
+			"container":
+				if cont.has(id):
+					out[id] = "take"
+			"hiding":
+				if not has_hides or listed.has(id):
+					out[id] = "hide"
+			"exit":
+				out[id] = "exit"
+			"stairs":
+				out[id] = "stairs"
+			"door":
+				out[id] = "door"
 	return out
 
 

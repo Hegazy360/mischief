@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<desc>ids: tap water_jet face</desc>
+<rect x="8.0" y="16.0" width="40.0" height="16.0" rx="6.0" fill="#C9CED9" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M40 22 L58 22 Q66 22 66 30 L66 42 L54 42 L54 34 L40 34 Z" fill="#C9CED9" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="24.0" cy="12.0" r="7.0" fill="#E8413C" stroke="#1B2340" stroke-width="4"/>
+<ellipse cx="60.0" cy="46.0" rx="11.0" ry="5.0" fill="#9CA3B4" stroke="#1B2340" stroke-width="4"/>
+<path d="M52 50 Q70 90 96 84 L100 96 Q62 104 46 54 Z" fill="#6FC3F2" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M66 52 Q84 80 104 72 L106 82 Q78 92 60 54 Z" fill="#6FC3F2" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="104.0" cy="96.0" r="20.0" fill="#F4C9A8" stroke="#1B2340" stroke-width="5"/>
+<path d="M84 88 Q88 76 104 76 Q122 76 124 90 Q112 80 96 84 Z" fill="#D9DCE6" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M96 92 L102 96 L96 100 M114 92 L108 96 L114 100" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="105.0" cy="108.0" rx="5.0" ry="4.0" fill="#7A2336" stroke="#1B2340" stroke-width="3"/>
+<ellipse cx="80.0" cy="110.0" rx="4.0" ry="6.0" fill="#6FC3F2" stroke="#1B2340" stroke-width="3"/>
+<ellipse cx="122.0" cy="112.0" rx="4.0" ry="6.0" fill="#6FC3F2" stroke="#1B2340" stroke-width="3"/>
+<ellipse cx="86.0" cy="70.0" rx="4.0" ry="6.0" fill="#6FC3F2" stroke="#1B2340" stroke-width="3"/>
+</svg>

@@ -40,9 +40,10 @@ const SQUEAK_BIT := "squeak_bit"            ## {bit, score}
 const HEAD_TURN := "head_turn"
 const LURE := "lure"                        ## {room, x}
 const LURE_FATIGUE := "lure_fatigue"
-## A micro-gag beat (GDD §2.1 "a micro-gag every 5–8 s"): {id, activity, room, x, len, emote, vis}.
+## A micro-gag beat (GDD §2.1 "a micro-gag every 5–8 s"): {id, activity, room, x, len, emote, vis, pip_reason}.
 ## `activity` = the activity or detour id ("walk" for a walk beat), `len` = clip frames, `emote` ∈
-## `EMOTES` or "" (none), `vis` = `SimVisibility.beat_vis()` at emission: "room" | "pip" | "edge" | "".
+## `EMOTES` or "" (none), `vis` = `SimVisibility.beat_vis()` at emission: "room" | "pip" | "edge" | "";
+## `pip_reason` = `SimVisibility.pip_reason()` at emission ("" | "room" | "heading" | "rigging" | "adjacent").
 ## Not a laugh; never changes applause, temper or senses.
 const MICRO_GAG := "micro_gag"
 # --- Danger ---
@@ -96,7 +97,8 @@ const DIRECTOR_CUE := "director_cue"        ## {id}
 const SAFETY_NET := "safety_net"            ## {on}
 const FIGGIS_HOOK := "figgis_hook"
 const NIGHT_END := "night_end"              ## {reason}
-const CMD_REJECTED := "cmd_rejected"        ## {c, why}
+## {c, why}; why "struck" (a hotspot not on stage tonight, REDESIGN_3D §6.2 C1) also carries `target` (the hotspot id).
+const CMD_REJECTED := "cmd_rejected"
 ## {c, why, target}: a command held behind a busy action — a go/move while busy, a FREEZE on the stairs / in a door /
 ## mid-rummage, a POP OUT mid-dive; why: "entering" (the climb-in) | "busy"; target: a hotspot id or "<room>:<x px>".
 const CMD_QUEUED := "cmd_queued"

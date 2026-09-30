@@ -143,10 +143,12 @@ class Brain extends RefCounted:
 			rooms.append(SolverData.sv(r))
 		if rooms.is_empty():
 			rooms = data.room_ids()
+		# `spots` keeps the struck hotspots too: random taps on them must be refused (invariant rule 13);
+		# the hider only uses tonight's hiding spots.
 		for id in data.hotspot_ids():
 			if rooms.has(data.hotspot_room(id)):
 				spots.append(id)
-				if data.hotspot_kind(id) == "hiding":
+				if data.hotspot_kind(id) == "hiding" and data.is_live(episode, id):
 					hiding.append(id)
 		pranks = data.episode_pranks(episode)
 		# Shuffle the prank order for reckless.

@@ -157,6 +157,8 @@ func validate(data: SolverData = null) -> PackedStringArray:
 		for i in steps.size():
 			for e in validate_step(steps[i], data):
 				out.append("%s: %s step %d: %s" % [_src(), name, i + 1, e])
+			for e in validate_live(steps[i], data, episode):
+				out.append("%s: %s step %d: %s" % [_src(), name, i + 1, e])
 		var ex: Dictionary = r.get("expect", {})
 		for k in ex:
 			if not Metrics.known_key(String(k)):
@@ -223,6 +225,24 @@ static func validate_step(step: Variant, data: SolverData = null) -> PackedStrin
 		"pop_out":
 			if s.has("to") and has_house and not data.has_hotspot(SolverData.sv(s["to"])):
 				out.append("pop_out: hotspot '%s' not in house.json" % s["to"])
+	return out
+
+
+## Errors of one step against the Night's live mask (REDESIGN_3D §6.2 C1): a `hide`, `go` or `pop_out … to`
+## on a hotspot struck tonight (a hide must use one of the episode's `hides`). [] without data or episode.
+static func validate_live(step: Variant, data: SolverData, ep_id: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	if data == null or ep_id == "" or not data.episodes.has(ep_id) or data.house.is_empty() or not (step is Dictionary):
+		return out
+	var s: Dictionary = step
+	var kind := SolverData.sv(s.get("do", ""))
+	var key: String = {"hide": "spot", "go": "to", "pop_out": "to"}.get(kind, "")
+	if key == "" or not s.has(key):
+		return out
+	var id := SolverData.sv(s[key])
+	if data.has_hotspot(id) and data.struck_hotspots(ep_id).has(id):
+		out.append("%s: '%s' is struck in %s (not live tonight%s)" % [kind, id, ep_id,
+			"; hides = %s" % str(data.live_hides(ep_id)) if kind == "hide" else ""])
 	return out
 
 

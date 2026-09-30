@@ -5,7 +5,8 @@
 ## values costs nothing (no allocations, no string formatting, no redraws).
 ##
 ## TECH §5.9 fields, plus a few optional ones the widgets need (marked "added"; defaults keep
-## the documented behaviour): figgis_ghost, pip_glyph, pip_escalated, script_loop,
+## the documented behaviour), plus the R3D block at the end (the four always-on pieces and the
+## contextual rules of REDESIGN_3D §2): figgis_ghost, pip_glyph, pip_escalated, script_loop,
 ## pick_strip_pos, edge_bubble_* (the "(dir, label)" pair as two typed fields). `script` is
 ## spelled `script_lines` (Object already owns `script`). Stage 2 adds edge_bubble_emote,
 ## tray_arrows and tray_arrows_item (s2-ui §4.2.1, §4.2.8).
@@ -112,13 +113,70 @@ var pick_strip_pos: Vector2 = Vector2.ZERO
 ## The game is paused (HUD dims and ignores touches).
 var paused: bool = false
 
+# --- R3D: the decluttered HUD (REDESIGN_3D §2; r3d-hud brief §4.1–§4.3) ------------------------
+# Four pieces are always on (pause, the Script chip, Clarence, the action button); everything below
+# decides when a CONTEXTUAL piece shows. Every field has a default that keeps a presenter which does
+# not know it yet working (the Hud derives what it can from the older fields).
+
+## Script-chip pip codes (`script_pips`): one per Script line, in Script order.
+enum Pip { REQ_OPEN, REQ_DONE, OPT_OPEN, OPT_DONE, BIG_SEALED, BIG_OPEN, BIG_DONE }
+## Danger on the FREEZE face (`freeze_danger`).
+enum FreezeDanger { NONE, EXPOSED, FILLING }
+## Clarence's lure ring (`lure_ring`).
+enum LureRing { HIDDEN, ON, GREY }
+
+## The action button's face is LIVE (full colour, 1.08× pop, 96 px icon, 14 px ring) or QUIET
+## (navy 62 %, white 84 px statue icon, no ring). RIG, RIG_DIM, POP_OUT and GO are always LIVE;
+## FREEZE is LIVE when `freeze_danger` > 0 or this flag is set (e.g. MIRROR, MIRROR's FREEZE with
+## him at the frame), else QUIET. See `Hud.is_live(model)`.
+var verb_live: bool = false
+## FREEZE danger (FreezeDanger): 1 = he is in her room and she is exposed (amber rim), 2 = a "?"
+## is filling on her (the face pulses red-amber at 3 Hz).
+var freeze_danger: int = FreezeDanger.NONE
+## (optional) UiKit.now_ms()-clock SECONDS until which the transient Applause meter stays up;
+## < 0 = the Hud decides by itself: 2.5 s after any Applause change, and while a Running Gag is live.
+var meter_until_s: float = -1.0
+## Hush carries something: the carried-item chips show (they also show whenever `tray` is not
+## empty — this flag only forces them on, e.g. during the "item get" flight).
+var carrying: bool = false
+## "Take a Bow ▶" chip after ★ (every required line).
+var bow_visible: bool = false
+## Force Figgis's bust on (a card cue, a teaching beat). The Hud also shows him for 4 s when
+## `figgis_pulse` rises (the 40 s nudge) and while a cue card is up.
+var figgis_visible: bool = false
+## The Overview button (hidden in Act I; from Night 3 only while Bellows is on the other floor).
+var overview_visible: bool = false
+## Clarence's lure ring (LureRing): only when lure fatigue is close (≥ 1 lure in the last 60 s),
+## grey when fatigued. −1 = derive from `lure_grey` (grey when true, else hidden).
+var lure_ring: int = -1
+## Script chip pips (Pip codes), one per line. Empty = derived from `script_lines` (req / done /
+## big_number / sealed), else from `lines_done` / `lines_total`.
+var script_pips: PackedInt32Array = PackedInt32Array()
+## Edge badge (Bellows off-screen and no Bellows window): which screen edge (−1 left, +1 right,
+## 0 = hidden; derived from `edge_bubble_dir` when 0 and that is set), the arrow direction toward
+## him (screen space, y down; ZERO = derived from `edge_bubble_dir`), his next-activity icon (id or
+## res:// path; "" = none) and whether it stands in for a Bellows window the `lean` mode closed
+## (index R15: shown even though `pip_visible` is false by design).
+var edge_badge_side: int = 0
+var edge_badge_arrow: Vector2 = Vector2.ZERO
+var edge_badge_icon: String = ""
+var edge_badge_lean: bool = false
+## Bellows window chip: his next-activity icon (id or path; "" = none) and the bubble's countdown
+## ring 0..1 (< 0 = no ring) in the window's lower-left corner.
+var pip_next_icon: String = ""
+var pip_ring_frac: float = -1.0
+## Tag flights to start this frame (consumed once by the Hud): Array of {line_index: int,
+## from: Vector2 (screen px, the prop's projected tag socket; INF = the screen centre)}. The world
+## overlays start the same flight from OverlayModel.tag_flights (they know the prop's anchor).
+var tag_flights: Array = []
+
 
 ## Copy every field from `other` (tests, demos).
 func copy_from(other: HudModel) -> void:
 	for p in get_property_list():
 		if int(p["usage"]) & PROPERTY_USAGE_SCRIPT_VARIABLE:
 			var v: Variant = other.get(p["name"])
-			if v is Array or v is PackedStringArray or v is PackedVector2Array or v is Dictionary:
+			if v is Array or v is PackedStringArray or v is PackedVector2Array or v is PackedInt32Array or v is Dictionary:
 				v = v.duplicate()
 			set(p["name"], v)
 

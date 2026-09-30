@@ -1,13 +1,10 @@
-## Stage-2 panels and the Figgis chip (s2-ui §4.2.3, §4.2.6, §4.2.7): the chip's fallback chain
-## (clips → the rig's poses → the single-image bust) with the card prop only in point / proud, the
+## Stage-2 panels and the Figgis chip (s2-ui §4.2.3, §4.2.6, §4.2.7; R3D index R7): the chip on its
+## SVG level only (no 2D rig class named, one SVG per mood, the 320 × 200 card), the
 ## SettingsPanel's debug-only Gate-0 tab, the LoadingCard taking a live Texture2D (s2-ftue's rule
 ## vignette) and the PauseMenu's Take a Bow only with a ★.
 extends TestBase
 
-const FIXTURE_CLIP := "figgis/f_idle"
-
 var _made: Array = []
-var _registered: bool = false
 
 
 func after_each() -> void:
@@ -15,9 +12,6 @@ func after_each() -> void:
 		if is_instance_valid(p):
 			(p as Node).free()
 	_made.clear()
-	if _registered:
-		ClipLib.invalidate(FIXTURE_CLIP)
-		_registered = false
 	UiKit.now_override = -1
 
 
@@ -29,103 +23,76 @@ func _add(p: Node) -> Node:
 	return p
 
 
-func _chip(rig_id: String = FiggisChip.RIG_ID) -> FiggisChip:
+# --- the Figgis chip (R3D: its SVG level only, index R7) -------------------------------------------
+
+## The 2D rig runtime classes the chip must never name (r3d-integrate deletes them, index §5.4).
+const RIG_CLASSES: PackedStringArray = ["RigPlayer", "ClipLib", "AtlasBuilder", "AtlasSet", "RigDef", "PropSim"]
+
+
+func _chip() -> FiggisChip:
 	var c := FiggisChip.new()
-	c.rig_id = rig_id
 	tree.root.add_child(c)
 	_made.append(c)
 	return c
 
 
-# --- the Figgis chip ----------------------------------------------------------------------------
-
-func test_fallback_chain_is_pure() -> void:
-	assert_eq(FiggisChip.level_for(false, false), FiggisChip.Level.SVG)
-	assert_eq(FiggisChip.level_for(false, true), FiggisChip.Level.SVG, "clips without a rig are useless")
-	assert_eq(FiggisChip.level_for(true, false), FiggisChip.Level.POSES)
-	assert_eq(FiggisChip.level_for(true, true), FiggisChip.Level.CLIPS)
+func test_chip_source_names_no_2d_rig_class() -> void:
+	var src := FileAccess.get_file_as_string("res://ui/widgets/figgis_chip.gd")
+	assert_gt(src.length(), 100)
+	for cls in RIG_CLASSES:
+		assert_eq(src.find(cls), -1, "figgis_chip.gd must not reference %s" % cls)
 
 
-func test_no_rig_is_the_single_image_bust() -> void:
-	var c := _chip("")
-	assert_eq(c.level, FiggisChip.Level.SVG)
-	assert_eq(c.rig, null)
-	assert_eq(c.mood_source, "svg")
-	c.show_card(PackedStringArray(["tray", "arrow", "rig"]))
-	assert_eq(c.state, FiggisChip.State.CARD, "the card still works without the rig")
-	assert_false(c.card_prop_up(), "no rig, no prop")
-
-
-func test_the_figgis_rig_is_used_when_it_exists() -> void:
-	if RigDef.for_id("figgis") == null:
-		skip("no figgis rig in data/rigs (s2-anim-hush)")
-		return
+func test_chip_is_always_the_svg_level() -> void:
+	assert_eq(FiggisChip.level_for(true, true), FiggisChip.Level.SVG, "no rig level any more")
 	var c := _chip()
-	assert_true(c.rig != null, "a RigPlayer inside the chip")
-	var has_clip := ClipLib.get_clip(FIXTURE_CLIP) != null
-	assert_eq(c.level, FiggisChip.Level.CLIPS if has_clip else FiggisChip.Level.POSES)
-	if not has_clip:
-		assert_eq(c.mood_source, "pose:f_rest", "idle = the rest pose")
-		c.set_pulse(true)
-		assert_eq(c.mood, "psst")
-		assert_eq(c.mood_source, "pose:f_psst")
-		c.react("shh", 1.0)
-		assert_eq(c.mood_source, "pose:f_shh")
+	assert_eq(c.level, FiggisChip.Level.SVG)
+	assert_eq(c.mood_source, "svg:idle")
+	assert_eq(c.get_child_count(), 0, "no RigPlayer child: the chip instantiates with only its SVGs")
 
 
-func test_card_prop_only_while_pointing_or_proud() -> void:
-	if RigDef.for_id("figgis") == null:
-		skip("no figgis rig")
-		return
+func test_every_mood_has_its_svg() -> void:
+	for m in FiggisChip.MOODS:
+		var p := FiggisChip.art_path(m)
+		assert_true(FileAccess.file_exists(p), "missing %s" % p)
+		var src := FileAccess.get_file_as_string(p)
+		assert_true(src.contains("#1B2340"), "%s: navy ink outline" % p)
+		assert_not_null_tex(UiIcons.texture(p), p)
+
+
+func assert_not_null_tex(t: Texture2D, what: String) -> void:
+	assert_true(t != null and t.get_width() > 0, "%s rasterises" % what)
+
+
+func test_moods_swap_svgs_with_a_short_bob() -> void:
 	UiKit.now_override = 50000
 	var c := _chip()
-	var pi := c.rig.props.index_of(FiggisChip.CARD_PROP)
-	assert_ge(pi, 0, "the rig has the card prop")
-	assert_eq(c.rig.props.mode[pi], PropSim.HIDDEN, "idle: the card is down")
+	c.set_pulse(true)
+	assert_eq(c.mood, "psst")
+	assert_eq(c.mood_source, "svg:psst")
+	assert_true(c.is_processing(), "the 0.15 s swap bob runs")
+	c.react("shh", 1.0)
+	assert_eq(c.mood_source, "svg:shh")
+	UiKit.now_override = 50000 + 1200
+	c._refresh_state()
+	assert_eq(c.mood, "psst", "back to the state's mood after the one-shot")
+
+
+func test_card_opens_to_the_right_with_item_to_target() -> void:
+	UiKit.now_override = 50000
+	var c := _chip()
 	c.show_card(PackedStringArray(["rig", "arrow", "tea"]), 4.0)
+	assert_eq(c.state, FiggisChip.State.CARD)
 	assert_eq(c.mood, "point")
-	assert_true(c.card_prop_up())
-	assert_ne(c.rig.props.mode[pi], PropSim.HIDDEN, "pointing: the card is up")
 	assert_eq(c.card_icon_count(), 2, "cue icons: item → target (the arrow is drawn, not an icon)")
+	var r := c.card_rect()
+	assert_eq(r.size, Vector2(320, 200), "REDESIGN §2.2: card 320 × 200")
+	assert_ge(r.position.x, FiggisChip.HIT, "to the bust's right")
+	c.flip = true
+	assert_le(c.card_rect().end.x, 0.0, "left-handed: to its left")
 	UiKit.now_override = 50000 + 4100
 	c._refresh_state()
-	assert_eq(c.mood, "idle")
-	assert_eq(c.rig.props.mode[pi], PropSim.HIDDEN, "card down again")
-	c.react("proud", 1.0)
-	assert_eq(c.mood, "proud")
-	assert_ne(c.rig.props.mode[pi], PropSim.HIDDEN, "proud: the card held high")
-
-
-func test_fixture_clip_lifts_the_chip_to_clips() -> void:
-	if RigDef.for_id("figgis") == null:
-		skip("no figgis rig")
-		return
-	if ClipLib.get_clip(FIXTURE_CLIP) == null:
-		var d := {"version": 1, "clip": FIXTURE_CLIP, "rig": "figgis", "loop": true, "length": 60,
-			"keys": [{"f": 0, "pose": "f_rest"}, {"f": 59, "pose": "f_rest"}]}
-		ClipLib.register(ClipLib.from_dict(d, FIXTURE_CLIP))
-		_registered = true
-	var c := _chip()
-	assert_eq(c.level, FiggisChip.Level.CLIPS)
-	assert_eq(c.mood_source, "clip:" + FIXTURE_CLIP)
-	c.set_pulse(true)
-	# f_psst has no clip here → its pose
-	if ClipLib.get_clip("figgis/f_psst") == null:
-		assert_eq(c.mood_source, "pose:f_psst", "a mood without its clip uses its pose")
-
-
-func test_chip_rig_is_cheap() -> void:
-	if RigDef.for_id("figgis") == null:
-		skip("no figgis rig")
-		return
-	var c := _chip()
-	c.rig.advance(0.016)
-	var t0 := Time.get_ticks_usec()
-	for i in 200:
-		c.rig.advance(0.016)
-	var per := float(Time.get_ticks_usec() - t0) / 200.0
-	print("[perf] Figgis chip RigPlayer.advance: %.1f µs" % per)
-	assert_lt(per, 1000.0, "well under a millisecond (budget 0.1 ms on device; measured %.1f µs here)" % per)
+	assert_eq(c.state, FiggisChip.State.IDLE, "the card goes after 4 s")
 
 
 # --- SettingsPanel: the debug-only Gate-0 tab ---------------------------------------------------

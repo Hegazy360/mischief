@@ -2,6 +2,8 @@
 // R3D index §7.6): look A's matte vinyl on `albedo_color` × `tex` × the particle/vertex COLOR, floored at 66 %, with
 // alpha. `billboard` turns quads to the camera (CPUParticles3D quads); meshes keep their own orientation.
 // `emissive` 1 = unlit (sparkles, the spotlight's motes). Visual layer 5 MAIN_ONLY unless the window must show it.
+// `round_disc` (untextured billboards): a disc with a soft 1 px edge, shaded as a little vinyl ball (a view-space sphere
+// normal from UV), so puffs, drops and dust never read as squares.
 shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_opaque, cull_back, fog_disabled, shadows_disabled;
 
@@ -14,6 +16,7 @@ uniform float emissive : hint_range(0.0, 1.0) = 0.0;
 uniform float stage_light : hint_range(0.0, 1.0) = 1.0;
 uniform float key_front : hint_range(0.0, 1.0) = 0.35;
 uniform float alpha_scissor = 0.02;
+uniform bool round_disc = false;
 
 void vertex() {
 	if (billboard) {
@@ -27,13 +30,21 @@ void vertex() {
 
 void fragment() {
 	vec4 t = texture(tex, UV) * albedo_color * COLOR;
+	vec3 n_view = normalize(NORMAL);
+	if (round_disc) {
+		vec2 q = UV * 2.0 - 1.0;
+		float r = length(q);
+		float edge = fwidth(r) * 1.5;
+		t.a *= 1.0 - smoothstep(1.0 - edge, 1.0, r);
+		n_view = normalize(vec3(q.x, -q.y, sqrt(max(0.0, 1.0 - min(1.0, r * r)))));
+	}
 	if (t.a < alpha_scissor) {
 		discard;
 	}
 	vec3 col = t.rgb;
 	if (emissive < 1.0) {
 		vec3 wpos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-		vec3 n_world = normalize((INV_VIEW_MATRIX * vec4(normalize(NORMAL), 0.0)).xyz);
+		vec3 n_world = normalize((INV_VIEW_MATRIX * vec4(n_view, 0.0)).xyz);
 		float lit;
 		vec3 shaded = mnd_vinyl(t.rgb, n_world, mnd_band_soft, wpos, mnd_key_front(INV_VIEW_MATRIX[2].xyz, key_front), lit);
 		col = mix(shaded, t.rgb, emissive);

@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/freeze_6",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/freeze_6.res",
+  "length": 150,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 2,
+  "blend_out": 4,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      0,
+      2
+    ],
+    "accent": [
+      2,
+      5
+    ],
+    "hold": [
+      9,
+      150
+    ]
+  },
+  "events": [
+    {
+      "f": 5,
+      "type": "sfx",
+      "id": "freeze_clack"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 2,
+      "preset": "shock"
+    },
+    {
+      "f": 5,
+      "preset": "proud"
+    },
+    {
+      "f": 78,
+      "preset": "statue_blink"
+    },
+    {
+      "f": 84,
+      "preset": "proud"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/freeze_6.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      5
+    ],
+    "freeze_holds": [
+      [
+        9,
+        150
+      ]
+    ],
+    "draft": false
+  }
+}

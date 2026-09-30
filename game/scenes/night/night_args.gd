@@ -19,6 +19,7 @@
 ## * `--no-captions`    hide the pun captions and stamps (caption-free reviewer packets, `r3d-qa`).
 ## * `--hud=off`        the world only: no HUD, world overlays, bubble or Stalls (set / value shots).
 ## * `--window=sim|lean` the Bellows-window mode for this run (ruling R15; default Settings `bellows_window`).
+## * `--card=g0`        show the Gate-0 3-icon card first (shots of the card).
 ## Pure: `parse(args)` returns a Dictionary; `read_cmds(path)` loads a command log.
 class_name NightArgs
 extends RefCounted
@@ -31,7 +32,7 @@ const DEFAULT_EPISODE := "p00_curtain_up"
 static func parse(args: PackedStringArray) -> Dictionary:
 	var out := {"episode": "", "cmds_path": "", "seek_tick": -1, "paused": false, "relaxed": false,
 		"no_curtain": false, "curtain_call": "", "open": "", "given": false, "view": "", "msaa": "", "no_captions": false,
-		"hud": true, "window": ""}
+		"hud": true, "window": "", "card": ""}
 	for a in args:
 		if a.begins_with("--episode="):
 			out["episode"] = a.substr(10)
@@ -64,6 +65,8 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			out["no_captions"] = true
 		elif a == "--hud=off":
 			out["hud"] = false
+		elif a.begins_with("--card="):
+			out["card"] = a.substr(7)
 		elif a.begins_with("--window="):
 			var w := a.substr(9)
 			out["window"] = w if w == "sim" or w == "lean" else ""

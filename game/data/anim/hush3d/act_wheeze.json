@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_wheeze",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_wheeze.res",
+  "length": 60,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "grip_r"
+    },
+    {
+      "f": 0,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "wheeze_chicken"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "hold_breath"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_wheeze.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

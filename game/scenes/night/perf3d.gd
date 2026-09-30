@@ -18,18 +18,29 @@ var tex_mb_max: float = 0.0
 var vmem_mb_max: float = 0.0
 var process_ms_max: float = 0.0
 var _proc := PackedFloat32Array()
+## The scripts' time per PLAY frame (NightScene's _FrameStart → _FrameEnd: every node's _process, sim included), ms.
+var _script := PackedFloat32Array()
+var _sn: int = 0
 
 
 func _init() -> void:
 	_ms.resize(CAP)
 	_dc.resize(CAP)
 	_proc.resize(CAP)
+	_script.resize(CAP)
+
+
+## One PLAY frame's script time (ms).
+func add_script_ms(ms: float) -> void:
+	_script[_sn % CAP] = ms
+	_sn += 1
 
 
 ## Forget the samples (a new Night).
 func reset() -> void:
 	frames = 0
 	_n = 0
+	_sn = 0
 	_last_us = 0
 	tris_max = 0.0
 	objects_max = 0.0
@@ -94,7 +105,8 @@ func summary(watch: ShaderWatch = null) -> Dictionary:
 		"frame_ms_max": snappedf(frame_ms(1.0), 0.1), "draw_calls_p95": draw_calls(0.95), "draw_calls_max": draw_calls(1.0),
 		"tris_max": tris_max, "objects_max": objects_max, "emitters_max": emitters_max,
 		"tex_mb_max": snappedf(tex_mb_max, 0.1), "vmem_mb_max": snappedf(vmem_mb_max, 0.1),
-		"process_ms_p95": snappedf(Perf3D.pct(_proc, n, 0.95), 0.01), "script_ms_p95": snappedf(Perf3D.pct(_proc, n, 0.95), 0.01)}
+		"process_ms_p95": snappedf(Perf3D.pct(_proc, n, 0.95), 0.01), "script_ms_p95": snappedf(Perf3D.pct(_script, mini(_sn, CAP), 0.95), 0.01) if _sn > 0 else snappedf(Perf3D.pct(_proc, n, 0.95), 0.01),
+		"script_ms_p50": snappedf(Perf3D.pct(_script, mini(_sn, CAP), 0.5), 0.01)}
 	if watch != null:
 		out["shader_compiles_play"] = watch.compiles_play()
 		out["hitches"] = watch.hitches.size()

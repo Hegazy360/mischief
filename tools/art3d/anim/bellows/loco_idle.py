@@ -55,6 +55,7 @@ def build(ctx):
     c.ik("r", HIP_R, 0, 60, pole=POLE_R, hand=PALM_IN_R, effector="palm", blend=(0, 8), world=False)
     c.ik("r", HIP_R, 206, L, pole=POLE_R, hand=PALM_IN_R, effector="palm", blend=(10, 0), world=False)
     c.motion(lambda f: breath(f, 120.0, 1.2))
+    c.motion(lambda f: finger_drum(f, "l", 24, 24.0))          # drumming on his belly
     c.motion(lambda f: {"Head": [("z", 1.5 * math.sin(2 * math.pi * f / 80.0))]})
     c.ground()
     c.auto_plant(speed_m_s=0.0)

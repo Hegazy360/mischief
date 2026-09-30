@@ -374,7 +374,12 @@ func _merge_static() -> void:
 		merged.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		shell.add_child(merged)
 		for mi in used:
-			mi.visible = false
+			# a merged mesh stops drawing; one that parents other meshes (the arch parents the door leaf) keeps its
+			# node visible and drops only its own mesh
+			if mi.find_children("*", "MeshInstance3D", true, false).is_empty():
+				mi.visible = false
+			else:
+				mi.mesh = null
 		for pc in pieces:
 			var pp := pc as Prop3D
 			var all_in := true
@@ -410,7 +415,7 @@ func static_draws(room: String) -> int:
 	if shell == null:
 		return 0
 	for m in shell.find_children("*", "MeshInstance3D", true, false):
-		if _visible_chain(m as Node3D):
+		if (m as MeshInstance3D).mesh != null and _visible_chain(m as Node3D):
 			n += 1
 	for pid in _pieces.keys():
 		var pc: Prop3D = _pieces[pid]

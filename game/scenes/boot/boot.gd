@@ -13,6 +13,10 @@
 ## * `stage_door` (debug builds) / `playbill` → `Router.replace(route)` (no curtain call to wait for).
 ## `--start=<auto|stage_door|episode>` (debug) and `BootRouting.override_start` (the e2e driver sets it
 ## before frame 3) override boot_config.json.
+## R3D: boot_config.json's other keys (BootConfig: `view`, `show_previews`, `bellows_window`, `render`) are read by
+## the NightScene (the view and its render settings), Settings (the debug defaults) and the stage door; on the 3D
+## view the Night's build and material warm-up (NightWarmer, every material drawn once) run under this same first
+## 2D curtain, and the e2e report / device log give process start → curtain up, `night_build_ms` and `warm_ms`.
 ## No menus before play.
 extends Control
 

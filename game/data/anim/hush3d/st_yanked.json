@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/st_yanked",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/st_yanked.res",
+  "length": 36,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 2,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      0,
+      4
+    ],
+    "accent": [
+      4,
+      7
+    ],
+    "hold": [
+      7,
+      27
+    ],
+    "settle": [
+      27,
+      36
+    ]
+  },
+  "events": [
+    {
+      "f": 4,
+      "type": "fx",
+      "id": "cane"
+    },
+    {
+      "f": 4,
+      "type": "sfx",
+      "id": "whoosh"
+    },
+    {
+      "f": 6,
+      "type": "jiggle",
+      "bones": [
+        "beret",
+        "beret_stalk"
+      ],
+      "kick": 1.0
+    },
+    {
+      "f": 27,
+      "type": "sfx",
+      "id": "land_soft"
+    },
+    {
+      "f": 27,
+      "type": "mark",
+      "name": "contact"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    },
+    {
+      "f": 4,
+      "preset": "shock"
+    },
+    {
+      "f": 27,
+      "preset": "dazed"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/st_yanked.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      5,
+      6,
+      7,
+      27
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

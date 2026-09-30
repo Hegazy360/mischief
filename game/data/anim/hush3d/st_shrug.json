@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/st_shrug",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/st_shrug.res",
+  "length": 20,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 4,
+  "blend_out": 4,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      0,
+      3
+    ],
+    "accent": [
+      3,
+      6
+    ],
+    "hold": [
+      6,
+      14
+    ],
+    "settle": [
+      14,
+      20
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 3,
+      "preset": "worried"
+    },
+    {
+      "f": 15,
+      "preset": "neutral"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/st_shrug.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      6
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

@@ -152,6 +152,8 @@ var _pending_flights: Array = []
 var _entry_until: int = -1
 var _keep_buf: Array = []
 var _safe_set: Rect2 = Rect2()
+## Frame start (µs) stamped by _FrameStart (the scripts' time, _FrameEnd).
+var _frame_t0_us: int = 0
 var _retry_t0: int = -1
 var _retrying: bool = false
 var _flash_left: float = 0.0
@@ -185,7 +187,7 @@ func _ready() -> void:
 		cli_args = NightArgs.parse(OS.get_cmdline_user_args())
 		cli = true
 		params = {"episode": String(cli_args["episode"]), "relaxed": bool(cli_args["relaxed"]), "from": "cli",
-			"skip_intro": true}
+			"skip_intro": true, "card": String(cli_args.get("card", ""))}
 	episode_id = String(params.get("episode", ""))
 	if episode_id == "":
 		episode_id = NightArgs.DEFAULT_EPISODE
@@ -244,6 +246,9 @@ func _build() -> void:
 	var probe := _FrameStart.new()
 	probe.night = self
 	add_child(probe)
+	var probe_end := _FrameEnd.new()
+	probe_end.night = self
+	add_child(probe_end)
 	driver = SimDriver.new()
 	add_child(driver)
 	# Our tick handler runs first: it swallows `title_card` before the views see it.
@@ -1641,7 +1646,7 @@ func _save_mark_seen(key: String) -> bool:
 	return sv != null and sv.has_method("mark_seen") and bool(sv.call("mark_seen", key))
 
 
-## Runs before the SimDriver each frame: stamps the frame start for `sim_ms_per_tick`.
+## Runs before the SimDriver each frame: stamps the frame start for `sim_ms_per_tick` and the scripts' time.
 class _FrameStart:
 	extends Node
 	var night: Node = null
@@ -1652,4 +1657,24 @@ class _FrameStart:
 
 	func _process(_d: float) -> void:
 		if night != null:
-			night.set("_tick_t0", Time.get_ticks_usec())
+			var now := Time.get_ticks_usec()
+			night.set("_tick_t0", now)
+			night.set("_frame_t0_us", now)
+
+
+## Runs after every other node's `_process` (the sim, the view, the HUD, the overlays): the frame's script time
+## (µs) for `perf3d.script_ms_p95` — REDESIGN §6.3's "view + HUD scripts ≤ 4 ms/frame p95" (the sim is included).
+class _FrameEnd:
+	extends Node
+	var night: Node = null
+
+	func _init() -> void:
+		name = "FrameEnd"
+		process_priority = 900
+
+	func _process(_d: float) -> void:
+		if night == null:
+			return
+		var t0 := int(night.get("_frame_t0_us"))
+		if t0 > 0 and int(night.get("phase")) == 5:
+			(night.get("perf3d") as Perf3D).add_script_ms(float(Time.get_ticks_usec() - t0) / 1000.0)

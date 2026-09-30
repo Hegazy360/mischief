@@ -10,7 +10,7 @@ Staging comes from house3d.json (reach_geometry: the jar's reach_target and reac
 import math
 from mathutils import Vector, Quaternion
 from lib.clip import Clip
-from lib.stage import Stage, reach_geometry, house3d
+from lib.stage import Stage, reach_geometry, house3d, prop_point
 from lib import pose as P
 from lib.pose import merge, sym
 from lib.hush_presets import ARMS_DOWN, STAND, gloves, lean, head
@@ -21,7 +21,7 @@ GRAB, PUT = 7, 42                     # the pot leaves the shelf / is back on it
 FALLBACK = {"target": (14.55, 2.0225, -1.72), "pos": {"x": 14.85, "z": -1.42, "step": "stool:kitchen_stool", "step_h": 0.55},
             "facing": -1, "band": "high"}
 POT_PIVOT = (-0.2, 0.0, 0.0)          # the set pot's part pivot in the honey_jar prop (tools/art3d/set/build.py), unscaled
-POT_GRIP_Y = 0.432 - 0.215            # its holes at 0.288 x 1.5 above the shelf; her grip sits 0.215 m below her pot's holes
+POT_HOLES_Y = 0.288                   # the set pot's holes above the shelf (prop-local, unscaled)
 
 CROUCH = {"thigh_l": [("x", -44), ("z", 6)], "calf_l": [("x", 74)], "foot_l": [("x", -28)],
           "thigh_r": [("x", -40), ("z", -6)], "calf_r": [("x", 70)], "foot_r": [("x", -28)]}
@@ -31,7 +31,7 @@ ARMS_BACK = sym({"upperarm_l": [("y", 55), ("z", 35)], "lowerarm_l": [("z", -10)
 ARMS_UP = sym({"upperarm_l": [("y", 22), ("z", -14)], "lowerarm_l": [("z", -24)], "hand_l": [("x", -10)]})
 BALANCE_L = {"clavicle_l": [("y", -6)], "upperarm_l": [("y", 8), ("z", 6)], "lowerarm_l": [("z", -14), ("y", 10)],
              "hand_l": [("x", -10), ("y", -20)]}
-READY_R = {"clavicle_r": [("y", 8)], "upperarm_r": [("y", 6), ("z", -6)], "lowerarm_r": [("z", 88)],     # a claw by
+READY_R = {"clavicle_r": [("y", 12)], "upperarm_r": [("y", 28), ("z", -4)], "lowerarm_r": [("z", 70)],   # a claw by
            "hand_r": [("x", -20)]}                                                                  # her shoulder
 REACH_R = {"clavicle_r": [("y", 14)], "upperarm_r": [("y", 30), ("z", 55)], "lowerarm_r": [("z", 15)]}   # out front, for the pot
 SHRUG_R = {"clavicle_r": [("y", 26), ("z", 8)]}                      # the reaching shoulder rides up
@@ -46,14 +46,12 @@ LEAN_OUT = merge({"thigh_r": [("x", -6), ("z", -4)], "calf_r": [("x", 8)], "foot
 
 
 def pot_spot(g):
-    """World point of her grip on the set's pepper pot (standing beside the jar on the shelf)."""
-    h3 = house3d().get("hotspots", {}).get("kitchen_honey") or {}
-    sc = float(h3.get("scale", 1.5))
-    yaw = math.radians(float(h3.get("yaw", 0.0)))
-    px = POT_PIVOT[0] * sc
-    tx, ty, tz = g["target"]
-    base_y = ty - float((h3.get("reach_target") or [0, 0.155, 0])[1]) * sc
-    return (tx + px * math.cos(yaw), base_y + POT_GRIP_Y * sc / 1.5, tz - px * math.sin(yaw))
+    """World point of her grip on the set's pepper pot (standing beside the jar on the shelf): the `pepper_pot` part
+    pivot, her grip 0.215 m under its holes."""
+    if g.get("source") == "fallback":
+        return (g["target"][0] - 0.29, g["target"][1] - 0.0075, g["target"][2] - 0.06)
+    sc = float((house3d().get("hotspots", {}).get("kitchen_honey") or {}).get("scale", 1.5))
+    return prop_point("kitchen_honey", (POT_PIVOT[0], POT_HOLES_Y - 0.215 / sc, POT_PIVOT[2]))
 
 
 def build(ctx):
@@ -71,7 +69,7 @@ def build(ctx):
              notes="staged at %s from %s" % (st.as_json(), g.get("source")))
     stand = merge(ARMS_DOWN, STAND, gloves(20, 12), head(x=-4, z=10))
     c.key(0, stand)
-    c.key(3, merge(stand, CROUCH, ARMS_BACK, READY_R, lean(fwd=18), head(x=-24)), "in_out_quad")    # anticipation
+    c.key(3, merge(stand, CROUCH, ARMS_BACK, READY_R, lean(fwd=18), head(x=-24)), "linear")         # anticipation
     c.key(5, merge(stand, TUCK, ARMS_UP, REACH_R, lean(fwd=6), head(x=-14)), "out_quad")             # airborne
     c.key(6, merge(stand, CROUCH, BALANCE_L, REACH_R, lean(fwd=14, side=4), head(x=-10, z=16)), "in_quad")   # lands
     c.key(GRAB, merge(stand, LEAN_OUT, REACH_R), "out_quad")                                           # snatch!

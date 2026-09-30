@@ -132,6 +132,7 @@ func _warm_materials_3d() -> bool:
 	if world_view == null or cam == null:
 		return true
 	if _rig_frames < 0:
+		_props_on()
 		var reg: Variant = world_view.call("warm_materials", cam) if world_view.has_method("warm_materials") else null
 		materials_drawn = MaterialWarm3D.count()
 		_rig3d = build_scene_rig(get_parent() if get_parent() != null else world_view, cam, world_view)
@@ -153,7 +154,37 @@ func _free_warm_3d() -> bool:
 	return true
 
 
+## Every live rig prop hangs its red beret tag for the warm frames (the tag is built on its first show: its material
+## must be drawn under the curtain, not at the first rig — measured: a StandardMaterial3D first registered at tick 211).
+var _tagged: Array = []
+
+
+func _props_on() -> void:
+	_tagged.clear()
+	var lv: Variant = world_view.get("live")
+	if not (lv is Dictionary) or not world_view.has_method("prop"):
+		return
+	for id in lv:
+		if String(lv[id]) != "rig":
+			continue
+		var p: Variant = world_view.call("prop", String(id))
+		if not (p is Object) or not (p as Object).has_method("show_tag"):
+			continue
+		if (p as Object).has_method("tag_shown") and bool((p as Object).call("tag_shown")):
+			continue
+		(p as Object).call("show_tag", true, false)
+		_tagged.append(p)
+
+
+func _props_off() -> void:
+	for p in _tagged:
+		if p is Object and is_instance_valid(p):
+			(p as Object).call("show_tag", false, false)
+	_tagged.clear()
+
+
 func _free_rigs() -> void:
+	_props_off()
 	MaterialWarm3D.free_warm_rig()
 	if _rig3d != null and is_instance_valid(_rig3d):
 		_rig3d.queue_free()

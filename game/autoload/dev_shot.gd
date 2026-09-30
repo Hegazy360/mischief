@@ -144,6 +144,11 @@ func _process(d: float) -> void:
 		_save("%s/frame_%03d.png" % [_seq_dir, _taken])
 		_taken += 1
 		if _taken >= _count and _out == "":
+			# under the e2e driver the scenario decides when the game quits (its report comes after the frames)
+			if OS.get_cmdline_user_args().has("--e2e"):
+				_shooting = _perf
+				set_process(_devlog or _perf)
+				return
 			_quit()
 			return
 	if _out != "" and _n >= _frames:

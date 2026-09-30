@@ -140,3 +140,28 @@ func test_cmd_log_round_trip_replays_to_the_same_hash() -> void:
 	assert_eq(w.state_hash(), w2.state_hash(), "the logged session replays to the same state")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(CmdLog.path))
 	CmdLog.path = CmdLog.PATH
+
+
+## R3D (r3d-night §4.2 / §4.4): the compile watch's lines and the per-Night 3D perf summary land in the session.
+func test_first_use_hitch_and_perf3d_lines() -> void:
+	DeviceLog.begin_session()
+	DeviceLog.shader_first_use("sh:res://x.gdshader", "fx", 120)
+	DeviceLog.hitch(212.0, 16.7, 130)
+	DeviceLog.hitch(90.0, 16.7, 140)
+	var s := DeviceLog.session()
+	assert_eq((s["shader_first_use"] as Array).size(), 1)
+	assert_eq(String(((s["shader_first_use"] as Array)[0] as Dictionary)["kind"]), "fx")
+	assert_eq(int(s["hitch_count"]), 2)
+	assert_almost_eq(float(((s["hitches"] as Array)[0] as Dictionary)["frame_ms"]), 212.0, 0.01)
+	for i in 80:
+		DeviceLog.hitch(100.0, 16.7, 200 + i)
+	assert_eq((s["hitches"] as Array).size(), 50, "the line list is capped")
+	assert_eq(int(s["hitch_count"]), 82, "the count is not")
+	var p := Perf3D.new()
+	for i in 10:
+		p.frame(1.0 / 60.0, null)
+	DeviceLog.note("perf3d:g0_sneeze", p.summary(ShaderWatch.new()))
+	var v: Dictionary = (s["values"] as Dictionary)["perf3d:g0_sneeze"]
+	for k in ["frame_ms_p95", "draw_calls_p95", "draw_calls_max", "tris_max", "emitters_max", "tex_mb_max", "shader_compiles_play"]:
+		assert_true(v.has(k), "perf3d.%s" % k)
+	assert_eq(DeviceLog.flush(), OK)

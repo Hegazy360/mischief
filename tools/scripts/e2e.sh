@@ -118,7 +118,7 @@ run_one() {
 dump_cmds() {  # $1 episode $2 route -> prints the cmds file path ("" when the dump failed)
   local out="$TMP/cmds"
   mkdir -p "$out"
-  SANDBOX="${SB_NAME}-solve" "$ROOT/tools/scripts/solve.sh" "$1" "--route=$2" "--dump-cmds=$out" >"$TMP/solve_$1_$2.log" 2>&1 || true
+  SANDBOX="${SB_NAME}-shot" "$ROOT/tools/scripts/solve.sh" "$1" "--route=$2" "--dump-cmds=$out" >"$TMP/solve_$1_$2.log" 2>&1 || true
   local f="$out/${1}_${2}.cmds.json"
   [ -f "$f" ] && echo "$f" || echo ""
 }
@@ -129,7 +129,7 @@ if [ "$SCEN" = "slice_all" ]; then
   DIR="$(dirname "$SUM")/slice_all"
   mkdir -p "$DIR"
   mkdir -p "$TMP/cmds"
-  SANDBOX="${SB_NAME}-solve" "$ROOT/tools/scripts/solve.sh" all --route=all "--dump-cmds=$TMP/cmds" >"$TMP/solve_all.log" 2>&1 || true
+  SANDBOX="${SB_NAME}-shot" "$ROOT/tools/scripts/solve.sh" all --route=all "--dump-cmds=$TMP/cmds" >"$TMP/solve_all.log" 2>&1 || true
   # g0_sneeze is a draft episode: `all` covers final ones only
   [ -f "$TMP/cmds/g0_sneeze_ideal.cmds.json" ] || dump_cmds g0_sneeze ideal >/dev/null
   fail=0; rows=()

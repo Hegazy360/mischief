@@ -69,6 +69,10 @@ def build(ctx):
     c.motion(peek)
     c.ground()
     c.auto_plant(speed_m_s=0.0)
+    # the face to the audience (R6: ~25 deg of head turn on top of the 35 deg cheat) — a runtime look ("gaze"), so it
+    # works facing either way; off while she glances down at Clarence
+    c.look_camera(0, 50, weight=0.7, blend=8)
+    c.look_camera(112, L, weight=0.7, blend=8)
     c.face(0, "neutral")
     c.face(62, "curious")
     c.face(100, "happy")

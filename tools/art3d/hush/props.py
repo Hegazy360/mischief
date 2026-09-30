@@ -51,11 +51,13 @@ def to_object(bm, name, keep_g=0.0, outline=1.0):
     # (r3d-rig: corner-only TEXCOORD_0 sampling the palette's unused magenta half): drop them first
     while len(me.uv_layers):
         me.uv_layers.remove(me.uv_layers[0])
-    uv0 = me.uv_layers.new(name="UVMap")
-    fuv = me.uv_layers.new(name="FaceUV")          # TEXCOORD_1 at -2: char_toon's "no face card here"
-    me.uv_layers.active = uv0
+    me.uv_layers.new(name="UVMap")
+    me.uv_layers.new(name="FaceUV")                # TEXCOORD_1 at -2: char_toon's "no face card here"
+    me.color_attributes.new(name="Col", type="FLOAT_COLOR", domain="CORNER")
+    # fetch only after every layer exists: adding any attribute reallocates the storage and stales earlier references
+    uv0, fuv, vc = me.uv_layers["UVMap"], me.uv_layers["FaceUV"], me.color_attributes["Col"]
+    me.uv_layers.active_index = 0
     uv0.active_render = True
-    vc = me.color_attributes.new(name="Col", type="FLOAT_COLOR", domain="CORNER")
     names = [c[0] for c in TP.COLORS]
     for i, p in enumerate(me.polygons):
         u = TP.cell_uv(cols[i])

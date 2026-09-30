@@ -120,6 +120,19 @@ def use_x_m(hid):
     return ux / PX_PER_M
 
 
+def prop_point(hid, local):
+    """World point of a prop-local anchor (metres before scale) of a house3d.json hotspot — SetGeo.to_world: the prop
+    origin (rect centre + visual_offset x, rect bottom + visual_offset y, z) + yaw about +y x (local x scale)."""
+    h3 = house3d().get("hotspots", {}).get(hid) or {}
+    rect = hotspot_rect_m(hid)
+    ox, oy = (h3.get("visual_offset") or [0.0, 0.0])[:2]
+    o = ((rect[0] + rect[2]) * 0.5 + ox, rect[1] + oy, float(h3.get("z", -1.8)))
+    sc = float(h3.get("scale", 1.0))
+    a = math.radians(float(h3.get("yaw", 0.0)))
+    lx, ly, lz = (float(v) * sc for v in local)
+    return (o[0] + lx * math.cos(a) + lz * math.sin(a), o[1] + ly, o[2] - lx * math.sin(a) + lz * math.cos(a))
+
+
 def reach_geometry(hid, fallback=None):
     """{target: (x, y, z) world, pos: {x, z, step, step_h}, facing, band, source} for a rig hotspot from
     house3d.json (+ house.json for x/y); `fallback` (same shape) until r3d-sets lands the entry."""
@@ -131,12 +144,9 @@ def reach_geometry(hid, fallback=None):
         out["source"] = "fallback"
         return out
     rect = hotspot_rect_m(hid)
-    ox, oy = (h3.get("visual_offset") or [0.0, 0.0])[:2]
+    ox = (h3.get("visual_offset") or [0.0, 0.0])[0]
     cx = (rect[0] + rect[2]) * 0.5 + ox
-    by = rect[1] + oy
-    sc = float(h3.get("scale", 1.0))
-    rt = h3.get("reach_target") or [0.0, 0.0, 0.0]
-    target = (cx + rt[0] * sc, by + rt[1] * sc, float(h3.get("z", -1.75)) + rt[2] * sc)
+    target = prop_point(hid, h3.get("reach_target") or [0.0, 0.0, 0.0])
     rp = h3.get("reach_pos") or {}
     ux = use_x_m(hid)
     px = (ux if ux is not None else cx) + float(rp.get("dx", 0.0))

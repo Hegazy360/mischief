@@ -560,6 +560,22 @@ class Clip:
             self.event(f0, "decor", id=did, anim="wobble")
         return self
 
+    def start_on(self, kind, h, decor_id=None):
+        """The clip STARTS standing on a support of height h (a released stepped rig: `rig_step_down`) — the sidecar
+        step records it; follow with step_down()."""
+        self.support.append((0, float(h)))
+        self.support.sort()
+        self.step = self.step or {"kind": kind, "h": float(h)}
+        if decor_id:
+            self.step["id"] = decor_id
+        return self
+
+    def jump(self, f0, f1, arc=0.3):
+        """A flight between f0 (take-off) and f1 (landing) on the same support: the pelvis follows an arc (+arc m),
+        grounding is suspended in the air (a dive, a leap)."""
+        self.constraints.append(("air", int(f0), int(f1), float(arc)))
+        return self
+
     def support_at(self, f):
         h = 0.0
         for f0, v in self.support:

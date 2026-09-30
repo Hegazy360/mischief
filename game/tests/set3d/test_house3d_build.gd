@@ -284,6 +284,19 @@ func test_static_merge_keeps_piece_api() -> void:
 	assert_true(h.landing_box("parlour.log_basket").size.x > 0.2, "the merged log basket keeps its landing box")
 	# the merged mesh uses the room material, so the room light still drives it
 	assert_eq(h.room_material_count("kitchen"), 1)
+	# the hall's front-door leaf (a child of the arch mesh) is not merged and still draws
+	var leaf_ok := false
+	for m in h.room_shell("hall").find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		if String(mi.name).contains("leaf") and mi.mesh != null:
+			var vis := true
+			var cur: Node = mi
+			while cur != null and cur != h:
+				if cur is Node3D and not (cur as Node3D).visible:
+					vis = false
+				cur = cur.get_parent()
+			leaf_ok = leaf_ok or vis
+	assert_true(leaf_ok, "the front-door leaf still draws after the merge")
 	h.free()
 	var h2 := House3D.new()
 	h2.merge_static = false

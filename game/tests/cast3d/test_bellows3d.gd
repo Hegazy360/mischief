@@ -136,6 +136,34 @@ func test_triangle_budget() -> void:
 	var idx: PackedInt32Array = mi.mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX]
 	assert_le(idx.size() / 3, 10000, "skinned mesh <= 10,000 triangles")
 	assert_eq(idx.size() / 3, int(_rig["tris"]), "descriptor tris matches the glb")
+	# the budget holds with any one bouffant variant attached (the slot variants are mutually exclusive)
+	var worst := 0
+	for aid in _rig["attachments"].keys():
+		var a: Dictionary = _rig["attachments"][aid]
+		if a.get("soft", false):
+			continue
+		var n := _scene_tris(String(a["scene"]))
+		assert_gt(n, 0, "attachment %s has triangles" % aid)
+		worst = maxi(worst, n)
+	assert_le(idx.size() / 3 + worst, 10000, "body + the largest slot variant <= 10,000 (got %d + %d)" % [idx.size() / 3, worst])
+
+
+## Triangles of every MeshInstance3D in a scene file (an attachment glb).
+func _scene_tris(path: String) -> int:
+	var ps: PackedScene = load(path)
+	var n := 0
+	var inst := ps.instantiate()
+	var stack: Array[Node] = [inst]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		stack.append_array(nd.get_children())
+		var mi := nd as MeshInstance3D
+		if mi != null and mi.mesh != null:
+			for s in mi.mesh.get_surface_count():
+				var ix: PackedInt32Array = mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX]
+				n += ix.size() / 3
+	inst.free()
+	return n
 
 
 func test_height_to_the_top_of_the_bouffant() -> void:

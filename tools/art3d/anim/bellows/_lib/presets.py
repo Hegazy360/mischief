@@ -138,12 +138,88 @@ def breath(f, period=110.0, amp=1.0):
             "clavicle_r": [("y", 1.6 * s)], "belly": {"r": [], "s": 1.0 + 0.025 * s}}
 
 
+def finger_drum(f, side="l", period=24, amp=26.0):
+    """Fingers tapping in turn on the belly (motion layer; a period dividing the loop keeps the seam clean)."""
+    out = {}
+    s = 1 if side == "l" else -1
+    for i, fg in enumerate(("pinky", "ring", "middle", "index")):
+        ph = (f - i * 3) % period
+        k = math.sin(math.pi * ph / 8.0) if ph < 8 else 0.0
+        out["%s_01_%s" % (fg, side)] = [("y", s * amp * k)]
+        out["%s_02_%s" % (fg, side)] = [("y", s * amp * 0.6 * k)]
+    return out
+
+
 def tremble(f, amp=1.0, bones=("spine_03", "Head"), rate=2.3):
     """A fast shiver (the sneeze build, the strain): two incommensurate sines per bone, a few degrees."""
     out = {}
     for i, b in enumerate(bones):
         out[b] = [("x", amp * 1.6 * math.sin(rate * f + i)), ("y", amp * 1.2 * math.sin(1.7 * rate * f + 2 * i))]
     return out
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# in-place walk cycles (procedural feet on leg IK: the planted foot slides back at exactly `speed` in clip space, so
+# it stays put in lane space — the lint's L12 rule; after r3d-anim's hush/loco_walk)
+# ------------------------------------------------------------------------------------------------------------------
+class Gait:
+    """A two-step cycle of L frames at `speed` m/s: each foot planted `stance` frames (left contact at f 0, right at
+    L/2), touching down `front` m ahead of the ankle's rest y (armature -y = his front), swinging `lift` m high."""
+
+    def __init__(self, L, speed, stance, front=None, lift=0.07, toe_out=10.0, width=1.0, pitch_st=0.0,
+                 pitch_sw=-18.0, heel=True):
+        self.L, self.speed, self.stance = int(L), float(speed), int(stance)
+        self.D = self.speed * self.stance / 60.0
+        self.front = -self.D * 0.5 if front is None else float(front)
+        self.lift, self.toe_out, self.width = float(lift), float(toe_out), float(width)
+        self.pitch_st, self.pitch_sw, self.heel = float(pitch_st), float(pitch_sw), heel
+
+    def phase(self, f, side):
+        return ((f / float(self.L)) + (0.0 if side == "l" else 0.5)) % 1.0
+
+    def foot(self, f, side):
+        """(sole y offset, sole z, foot pitch deg, planted) — y relative to the ankle's rest y."""
+        s = self.stance / float(self.L)
+        ph = self.phase(f, side)
+        if ph < s:
+            u = ph / s
+            # heel strike -> flat -> toe-off (a small roll of the pitch)
+            pitch = self.pitch_st + (-8.0 * (1 - u) ** 6 + 14.0 * u ** 4 if self.heel else 0.0)
+            return self.front + self.D * u, 0.0, pitch, True
+        v = (ph - s) / (1.0 - s)
+        e = 0.5 - 0.5 * math.cos(math.pi * v)
+        y = self.front + self.D - self.D * e
+        z = self.lift * math.sin(math.pi * v) ** 0.8
+        return y, z, self.pitch_sw * math.sin(math.pi * v), False
+
+    def apply(self, c, pelvis_h=None, knee_dir=(0, -1.0, 0.1)):
+        """Adds the leg constraint to clip c: pelvis height (callable f -> offset from rest, m) then both legs on IK
+        with the planted sole on the floor (z 0) and its heel/ball point where foot() says."""
+        sk = c.skel
+        gait = self
+
+        def legs(pose, f):
+            if pelvis_h is not None:
+                pz = pose.pelvis_offset().z
+                pose.add_pelvis_offset(Vector((0, 0, float(pelvis_h(f)) - pz)))
+            for side in ("l", "r"):
+                ft = "foot_" + side
+                y, z, pitch, planted = gait.foot(f, side)
+                s = 1.0 if side == "l" else -1.0
+                x = sk.head(ft).x * gait.width
+                Mf = sk.rest_q[ft]
+                Rf = P.rot_q([("z", s * gait.toe_out), ("x", pitch)]) @ Mf
+                soles = sk.soles()[side]
+                heel_pt, ball_pt = soles[0][1], soles[1][1]
+                ankle_rest = sk.head(ft)
+                target = Vector((x, ankle_rest.y + y, z))      # where the heel is when the foot is flat
+                # the roll pivots on the heel while the toes are up, on the ball once they point down (toe-off)
+                piv = heel_pt if pitch <= 0.0 else ball_pt
+                tgt = target + P.rot_q([("z", s * gait.toe_out)]) @ (piv - heel_pt)   # the flat (yawed) foot's pivot
+                ankle = tgt - (Rf @ Mf.inverted()) @ (piv - ankle_rest)
+                P.solve_leg(pose, side, ankle, foot_world=Rf, knee_dir=Vector(knee_dir))
+        c.custom(legs, 0, self.L)
+        return c
 
 
 # ------------------------------------------------------------------------------------------------------------------

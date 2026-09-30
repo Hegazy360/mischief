@@ -67,6 +67,12 @@ func _ready() -> void:
 	resized.connect(_layout)
 	_layout()
 	set_beat(0)
+	# shots: `--beat=0..3` and `--turn=<deg>`
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--beat="):
+			set_beat(clampi(int(a.substr(7)), 0, BEATS.size() - 1))
+		elif a.begins_with("--turn=") and view3d:
+			turn(float(a.substr(7)))
 
 
 func _build() -> void:

@@ -243,9 +243,10 @@ func _read_sounds() -> void:
 				at = _t - (float(now) - (times as PackedFloat32Array)[i])
 			_sounds.append([at, m, id])
 			if m == "crowd":
+				# the director's own call time (as the sounds above), not the frame the probe read it in
 				for c in _cues:
-					if float(c["crowd_t"]) < 0.0 and _t >= float(c["t"]) - 0.02:
-						c["crowd_t"] = _t
+					if float(c["crowd_t"]) < 0.0 and at >= float(c["t"]) - 0.02:
+						c["crowd_t"] = at
 
 
 ## TexStats.pages_built() when the rig task's class exists (−1 otherwise).

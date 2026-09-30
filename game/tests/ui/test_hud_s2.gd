@@ -51,7 +51,9 @@ func test_emote_reaches_the_bubble_and_clears() -> void:
 	assert_eq(hud.last_changes, 1, "the emote is one field")
 	assert_eq(hud.edge_bubble.emote, "sing")
 	assert_ne(hud.edge_bubble.face_texture(), plain, "the face swaps to the emote face")
-	assert_eq(hud.edge_bubble.face_texture(), UiIcons.get_icon(&"emote_sing"))
+	# the landed 3D portrait (art3d/chars/bellows/portraits/bellows_sing.png) when present, else the 2D face
+	assert_eq(hud.edge_bubble.face_texture(), hud.edge_bubble.face_for("sing"))
+	assert_true(hud.edge_bubble.face_texture() != null)
 	assert_true(hud.edge_bubble.puff_visible(), "the pictogram puff shows while it plays")
 	hud.apply(m)
 	assert_eq(hud.last_changes, 0, "a repeat apply is a no-op")

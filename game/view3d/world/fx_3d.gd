@@ -49,6 +49,7 @@ func _init() -> void:
 		m.shader = load(View3DConst.SH_FX)
 		m.set_shader_parameter("albedo_color", k[0])
 		m.set_shader_parameter("billboard", true)
+		m.set_shader_parameter("round_disc", true)
 		m.set_shader_parameter("emissive", k[7])
 		_mats[id] = m
 		MaterialWarm3D.register(m, &"fx")

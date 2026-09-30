@@ -197,14 +197,14 @@ func _show(delta: float) -> void:
 		(lighting as Object).call("advance", maxf(delta, 0.4))
 	frames_shown += 1
 	var b: Object = f.get("bellows")
-	var target: Vector3 = b.get("pos") + Vector3(0.0, 1.05, 0.0)
+	var target: Vector3 = b.get("pos") + Vector3(0.0, 1.2, 0.0)
 	var after := _accent >= 0 and int(_t_ticks) >= _accent
 	var z := _zoom if after else PRE_ZOOM
 	caption.visible = after and caption.text != ""
 	var k := 1.0 if _snap else clampf(delta * 6.0, 0.0, 1.0)
 	_snap = false
 	_focus = _focus.lerp(target, k)
-	var d := maxf(4.5, BASE_DIST / maxf(0.5, z)) * 0.72
+	var d := maxf(4.5, BASE_DIST / maxf(0.5, z)) * 0.82
 	var eye := _focus + Vector3(0.0, 0.35, d)
 	reel_cam.global_transform = Transform3D(Basis.looking_at(_focus - eye, Vector3.UP), eye) if reel_cam.is_inside_tree() \
 		else Transform3D(Basis.looking_at(_focus - eye, Vector3.UP), eye)

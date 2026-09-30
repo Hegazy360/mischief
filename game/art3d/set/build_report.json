@@ -148,7 +148,15 @@
   },
   "set/kitchen_arch.glb": {
     "parts": [],
-    "tris": 2120
+    "tris": 1568
+  },
+  "set/kitchen_dresser_rack.glb": {
+    "parts": [],
+    "tris": 228
+  },
+  "set/kitchen_honey_shelf.glb": {
+    "parts": [],
+    "tris": 324
   },
   "set/kitchen_lamp.glb": {
     "parts": [],

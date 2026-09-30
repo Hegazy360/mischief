@@ -349,6 +349,43 @@ func test_the_hint_ladder_picks_the_next_useful_spot() -> void:
 	await _free(n)
 
 
+func test_the_map_is_the_overview_with_room_peeks() -> void:
+	allow_errors()
+	var n := _make({"episode": "p00_curtain_up", "from": "test", "skip_intro": true, "view": "3d"})
+	await _wait_phase(n, NightScene.Phase.PLAY)
+	await _phone(n)
+	var t0 := int(n.world.get("tick"))
+	n.open_map()
+	assert_true(n.map_open)
+	assert_true(n.cam.is_overview(), "the 15 m overview")
+	assert_true(n.driver.is_paused(), "the sim stays paused")
+	assert_true(n.input_router.enabled, "the map takes taps")
+	assert_false(n.night_input.enabled, "gameplay taps do not")
+	await _frames(20)
+	assert_eq(int(n.world.get("tick")), t0, "no tick while the map is open")
+	# a tap on the parlour peeks at it
+	var vs: Vector2 = n.cam.view_size()
+	var room := ""
+	var tap := Vector2.ZERO
+	for i in 24:
+		var p := Vector2(vs.x * (float(i) + 0.5) / 24.0, vs.y * 0.6)
+		if n.map_room_at(p) == "parlour":
+			room = "parlour"
+			tap = p
+			break
+	if assert_eq(room, "parlour", "the parlour is on the map"):
+		n._intent(&"tapped", [tap, false])
+		await _frames(2)
+		assert_true(n.cam.is_peeking(), "a tap on a room peeks at it")
+		assert_true(n.map_open, "the map stays open while peeking")
+	assert_true(n.handle_back(), "Back closes the map")
+	assert_false(n.map_open)
+	assert_false(n.cam.is_overview(), "back to the play framing")
+	await _frames(5)
+	assert_gt(int(n.world.get("tick")), t0, "play resumes")
+	await _free(n)
+
+
 # --- warm-up and the compile detector --------------------------------------------------------------------------
 
 func test_the_warm_up_covers_every_material_of_the_night() -> void:

@@ -121,6 +121,14 @@ static func font(path: String) -> Font:
 	return f
 
 
+## Load (and configure) the three shared fonts now. Changing a FontFile's MSDF settings drops its glyph
+## textures, so this must run before any text is drawn — the Settings autoload calls it at boot.
+static func warm_fonts() -> void:
+	display_font()
+	ui_font()
+	black_font()
+
+
 ## Lilita One — numbers, captions, titles.
 static func display_font() -> Font:
 	return font(FONT_DISPLAY_PATH)

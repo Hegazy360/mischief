@@ -112,6 +112,9 @@ func _init() -> void:
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# UiKit sets the shared fonts' MSDF range / size at first use; do it here, before anything draws
+	# text, or captions already drawn by the view keep stale glyph textures (white bars)
+	UiKit.warm_fonts()
 	load_settings()
 	_apply_audio_all.call_deferred()
 

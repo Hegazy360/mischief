@@ -103,15 +103,15 @@ def build(ctx):
         """In the sink: sq = the landing squash, kick = slipper kick phase (-1..1), loll = head roll, sit = 0..1 up,
         star = the dazed star ring's scale."""
         # stuck in the basin like a cork: bottom down, the torso back, the little legs straight up over the front rim
-        legs = {"thigh_l": [("x", -114 + 14 * sit - 10 * kick), ("y", -16)], "calf_l": [("x", 8 + 40 * sit + 14 * kick)],
-                "foot_l": [("x", -40 + 34 * sit)],
-                "thigh_r": [("x", -108 + 14 * sit + 10 * kick), ("y", 16)], "calf_r": [("x", 12 + 40 * sit - 14 * kick)],
-                "foot_r": [("x", -38 + 34 * sit)]}
+        legs = {"thigh_l": [("x", -118 + 18 * sit - 10 * kick), ("y", -40 + 20 * sit)], "calf_l": [("x", 6 + 40 * sit + 14 * kick)],
+                "foot_l": [("x", 18 - 10 * sit)],
+                "thigh_r": [("x", -112 + 18 * sit + 10 * kick), ("y", 38 - 20 * sit)], "calf_r": [("x", 10 + 40 * sit - 14 * kick)],
+                "foot_r": [("x", 16 - 10 * sit)]}
         arms = merge(SINK_ARMS, {"upperarm_l": [("y", 36 + 30 * sit), ("z", 24 - 6 * sit)],
                                  "upperarm_r": [("y", -36 - 30 * sit), ("z", -24 + 6 * sit)]})
         return body(arms, legs, glove("l", 30, 16), glove("r", 30, 16),
                     lean(fwd=14 + 10 * sq - 4 * sit, side=4 * loll), head(x=14 + 6 * sq - 8 * sit, y=10 * loll, z=10),
-                    {"pelvis": [("x", -50 + 26 * sit)], "fx_stars": {"r": [], "s": star}}, belly=1.0 - 0.06 * sq)
+                    {"pelvis": [("x", -56 + 30 * sit)], "fx_stars": {"r": [], "s": star}}, belly=1.0 - 0.06 * sq)
     c.key(112, sink(sq=1.0), "pop")
     c.key(115, sink(sq=-0.3, kick=0.6), "out_quad")
     c.key(119, sink(sq=0.1, kick=-0.8, loll=0.4), "in_out_sine")

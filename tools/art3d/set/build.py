@@ -300,6 +300,11 @@ def pieces():
 # live props (the props palette; one skinned mesh each; local prop frame = house3d.json bounds, before scale)
 # =================================================================================================
 
+# the pepper pot's centre (local x, before the x1.5 scale): 0.24 m from the jar's axis, so Hush reaches it from Bellows'
+# stool without a lean-out (r3d-anim's rig_achoo_ria snatch frame); the pot's belly clears the jar's by 3 mm
+PEPPER_X = -0.16
+
+
 def prop_honey_jar():
     pb = PB("honey_jar", "props")
     # a big squat pot of honey with a cream label, the red lid (a part), the tall pepper pot beside it (a part)
@@ -309,12 +314,12 @@ def prop_honey_jar():
     pb.part("lid", pivot=(0.09, 0.15, 0.0))
     pb.lathe([(0.0, 0.15), (0.093, 0.15), (0.096, 0.162), (0.08, 0.171), (0.0, 0.173)], (0, 0, 0), "honey_lid", seg=26)
     pb.sphere(0.021, (0.0, 0.18, 0.0), "honey_lid", seg=10, rings=6)
-    pb.part("pepper_pot", pivot=(-0.2, 0.0, 0.0))
-    pb.lathe([(0.036, 0.0), (0.05, 0.024), (0.054, 0.16), (0.043, 0.215), (0.036, 0.235)], (-0.2, 0, 0), "pepper", seg=18)
-    pb.lathe([(0.038, 0.235), (0.043, 0.253), (0.027, 0.29), (0.0, 0.296)], (-0.2, 0, 0), "pepper_cap", seg=18)
+    pb.part("pepper_pot", pivot=(PEPPER_X, 0.0, 0.0))
+    pb.lathe([(0.036, 0.0), (0.05, 0.024), (0.054, 0.16), (0.043, 0.215), (0.036, 0.235)], (PEPPER_X, 0, 0), "pepper", seg=18)
+    pb.lathe([(0.038, 0.235), (0.043, 0.253), (0.027, 0.29), (0.0, 0.296)], (PEPPER_X, 0, 0), "pepper_cap", seg=18)
     for i in range(5):
         a = 2 * math.pi * i / 5
-        pb.sphere(0.006, (-0.2 + 0.015 * math.cos(a), 0.288, 0.015 * math.sin(a)), "pepper", seg=6, rings=4)
+        pb.sphere(0.006, (PEPPER_X + 0.015 * math.cos(a), 0.288, 0.015 * math.sin(a)), "pepper", seg=6, rings=4)
     pb.part("armed", pivot=(0.0, 0.15, 0.0))
     for i in range(10):
         a = 2 * math.pi * i / 10 + 0.3
@@ -377,21 +382,23 @@ def prop_sink_tap():
 def prop_fridge():
     pb = PB("fridge", "props")
     # a SQUAT retro fridge (1.52 m: its 64 px silhouette must not read as the pantry alcove or the wardrobe):
-    # a domed top, four stubby legs, two doors split at 0.81 m, a chrome bar handle per door
+    # a domed top, four stubby legs, two doors either side of a 0.19 m chrome divider band (0.71-0.90 m: the two
+    # zones' hit boxes stay >= 24 logical px apart at every framing, lint3d stack), a chrome bar handle per door
     for (x, z) in ((-0.3, -0.2), (0.3, -0.2), (-0.3, 0.17), (0.3, 0.17)):
         pb.box((x - 0.035, 0.0, z - 0.035), (x + 0.035, 0.13, z + 0.035), "fridge_dk", bevel=0.01)
     pb.box((-0.38, 0.12, -0.27), (0.38, 1.3, 0.25), "fridge", bevel=0.07)
     pb.sphere(0.38, (0.0, 1.26, -0.01), "fridge", scale=(1.0, 0.68, 0.69), seg=24, rings=12)
-    pb.box((-0.37, 0.79, 0.24), (0.37, 0.83, 0.262), "fridge_dk", bevel=0.01)
-    pb.part("door_upper", pivot=(-0.37, 1.08, 0.26))
-    pb.box((-0.35, 0.85, 0.25), (0.35, 1.3, 0.27), "fridge", bevel=0.03)
-    pb.box((0.23, 0.9, 0.27), (0.27, 1.16, 0.3), "fridge_bar", bevel=0.012)
-    pb.part("door_lower", pivot=(-0.37, 0.45, 0.26))
-    pb.box((-0.35, 0.16, 0.25), (0.35, 0.77, 0.27), "fridge", bevel=0.03)
-    pb.box((0.23, 0.5, 0.27), (0.27, 0.72, 0.3), "fridge_bar", bevel=0.012)
-    pb.part("armed", pivot=(0.3, 0.82, 0.27))
-    pb.cyl(0.035, 0.035, 0.1, (0.2, 0.815, 0.24), "sausage", seg=10, rot=(90, 0, 0))
-    pb.sphere(0.036, (0.2, 0.815, 0.335), "sausage", seg=10, rings=6)
+    pb.box((-0.37, 0.72, 0.24), (0.37, 0.89, 0.262), "fridge_dk", bevel=0.015)
+    pb.box((-0.36, 0.77, 0.262), (0.36, 0.84, 0.272), "fridge_bar", bevel=0.01)
+    pb.part("door_upper", pivot=(-0.37, 1.11, 0.26))
+    pb.box((-0.35, 0.92, 0.25), (0.35, 1.3, 0.27), "fridge", bevel=0.03)
+    pb.box((0.23, 0.97, 0.27), (0.27, 1.2, 0.3), "fridge_bar", bevel=0.012)
+    pb.part("door_lower", pivot=(-0.37, 0.43, 0.26))
+    pb.box((-0.35, 0.16, 0.25), (0.35, 0.69, 0.27), "fridge", bevel=0.03)
+    pb.box((0.23, 0.42, 0.27), (0.27, 0.64, 0.3), "fridge_bar", bevel=0.012)
+    pb.part("armed", pivot=(0.3, 0.95, 0.27))
+    pb.cyl(0.035, 0.035, 0.1, (0.2, 0.945, 0.24), "sausage", seg=10, rot=(90, 0, 0))
+    pb.sphere(0.036, (0.2, 0.945, 0.335), "sausage", seg=10, rings=6)
     return pb
 
 

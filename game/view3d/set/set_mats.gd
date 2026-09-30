@@ -108,7 +108,7 @@ func tex_mat(tex: Texture2D, kind: StringName) -> Material:
 	return m
 
 
-## The 2.5 px ink shell of a live prop (own instance, layer PROP_INK). `color_normal` = the mesh carries smoothed
+## The ink shell of a live prop (View3DConst.OUTLINE_PROP_PX: 3.4 px @1080, lead ruling D7; own instance, layer PROP_INK). `color_normal` = the mesh carries smoothed
 ## outline normals in COLOR.rgb.
 func ink_mat(color_normal: bool = false) -> Material:
 	var key := "ink|%s" % color_normal
@@ -120,7 +120,7 @@ func ink_mat(color_normal: bool = false) -> Material:
 	var sm := ShaderMaterial.new()
 	sm.shader = sh
 	sm.set_shader_parameter("ink", INK)
-	sm.set_shader_parameter("outline_px", 2.5)
+	sm.set_shader_parameter("outline_px", View3DConst.OUTLINE_PROP_PX)
 	sm.set_shader_parameter("use_color_normal", color_normal)
 	sm.set_shader_parameter("room_color", room_color)
 	sm.set_shader_parameter("stage_light", stage_light)

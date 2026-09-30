@@ -26,8 +26,8 @@ def build(ctx):
     proud = merge(stand, lean(fwd=-4), head(x=-10, z=4), glove("l", 6, 4, spread=12))
     c.key(0, proud)
     c.key(12, merge(stand, SWEEP, BOW_LEGS, lean(fwd=12), head(x=-4)), "in_out_sine")              # the flourish
-    c.key(28, merge(stand, SWEEP, BOW_LEGS, lean(fwd=62), head(x=30), {"pelvis": [("x", 14)]}), "in_out_cubic")  # BOW
-    c.key(52, merge(stand, SWEEP, BOW_LEGS, lean(fwd=64), head(x=32), {"pelvis": [("x", 15)]}))
+    c.key(28, merge(stand, SWEEP, BOW_LEGS, lean(fwd=66), head(x=30), {"pelvis": [("x", 30)]}), "in_out_cubic")  # BOW
+    c.key(52, merge(stand, SWEEP, BOW_LEGS, lean(fwd=68), head(x=32), {"pelvis": [("x", 31)]}))
     c.key(66, merge(stand, HIGH_L, gloves(4, 2, spread=20), lean(fwd=-10), head(x=-18, z=-6)), "out_back")    # up!
     c.key(84, merge(stand, HIGH_L, gloves(4, 2, spread=20), lean(fwd=-8, side=-4), head(x=-16, z=-10)))
     c.key(94, merge(stand, KISS_L, glove("l", 40, 30), lean(fwd=2), head(x=-2, z=-4)), "in_out_sine")         # a kiss

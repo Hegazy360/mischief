@@ -1,4 +1,4 @@
-// outline_prop — the 2.5 px ink of a LIVE prop: outline.gdshader + a stencil write (ref 1) so the verb halo
+// outline_prop — the 3.4 px ink (lead ruling D7) of a LIVE prop: outline.gdshader + a stencil write (ref 1) so the verb halo
 // (halo.gdshader, stencil ≠ 1) never covers the ink. Its own instance on visual layer 3 PROP_INK. See outline.gdshader.
 shader_type spatial;
 render_mode unshaded, cull_front, depth_draw_opaque, fog_disabled, shadows_disabled;
@@ -7,7 +7,7 @@ stencil_mode write, compare_always, 1;
 #include "res://art3d/shaders/stage_light.gdshaderinc"
 
 uniform vec4 ink : source_color = vec4(0.106, 0.137, 0.251, 1.0);
-uniform float outline_px = 2.5;
+uniform float outline_px = 3.4;
 uniform bool use_color_normal = false;
 uniform vec4 room_color : source_color = vec4(0.78, 0.71, 0.52, 1.0);
 uniform float room_lerp : hint_range(0.0, 1.0) = 0.0;

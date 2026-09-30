@@ -442,6 +442,9 @@ SAUCER_BELLY = CUP_BELLY - Vector((0.0, 0.0, 0.109))   # the saucer right under 
 SAUCER_CHIN = Vector((0.04, -0.47, 0.99))     # the saucer under the chin while he sips
 
 
+POLE_SIP_R = Vector((-0.45, -0.35, -0.8))       # the sipping elbow: down, a little out and forward
+
+
 def cup_lips(ts, pose):
     """The cup centre at the lips: 0.10 m in front of the mouth, 0.05 m below it (cast reach proof (a))."""
     return ts.mouth_at(pose) + Vector((0.0, -0.10, -0.05))
@@ -460,7 +463,9 @@ def sip_arms(ts, pose, lift=1.0, cup_low=None, saucer_at=None, cup_R=None, sauce
     k = smooth(lift) if 0.0 < lift < 1.0 else lift
     tgt = low.lerp(top, k)
     R = cup_R if cup_R is not None else SIP_R.slerp(CUP_LOW_R, 1.0 - k)
-    e1 = arm_ik(pose, "r", tgt, POLE_R, hand_R=R, effector=ts.cup_c, w=w_r)
+    # the elbow drops forward-and-out as the cup comes up (POLE_R is nearly opposite the reach at the lips: unstable)
+    pole = Vector(POLE_R).lerp(POLE_SIP_R, k)
+    e1 = arm_ik(pose, "r", tgt, pole, hand_R=R, effector=ts.cup_c, w=w_r)
     if saucer_at is None:
         s_low = chest_point(pose, SAUCER_BELLY)
         s_top = chest_point(pose, SAUCER_CHIN)
@@ -482,10 +487,12 @@ JAR_MOUTH = 0.225
 # ------------------------------------------------------------------------------------------------------------------
 # D8: faces face the camera on every face beat (baked on staged clips; the sidecar gaze covers either facing)
 # ------------------------------------------------------------------------------------------------------------------
-FACE_SHARE = (0.2, 0.3, 0.5)          # chest, neck, head
+FACE_BONES = ("spine_02", "spine_03", "neck_01", "Head")
+FACE_SHARE = (0.15, 0.15, 0.25, 0.45)  # the upper body turns with the head (a cheat of the chest: the shoulders come
+                                       # round with it, so a glove at the mouth never has to cross the barrel)
 
 
-def face_to(pose, point, weight=1.0, bones=("spine_03", "neck_01", "Head"), share=FACE_SHARE, max_deg=85.0):
+def face_to(pose, point, weight=1.0, bones=FACE_BONES, share=FACE_SHARE, max_deg=85.0):
     """Turn the face toward `point` (armature space) about the VERTICAL only: the keyed head pitch and roll stay (the
     head tipped back on "AHHH", the loll in the sink), the yaw goes to the point, `share` of it per bone."""
     if weight <= 0.0:
@@ -509,7 +516,7 @@ def face_to(pose, point, weight=1.0, bones=("spine_03", "neck_01", "Head"), shar
         pose.set_world_rot(b, Quaternion((0.0, 0.0, 1.0), d * rel) @ pose.world_rot(b))
 
 
-def face_cam(c, f0, f1, weight=1.0, ease=(8, 8), target=None, share=FACE_SHARE):
+def face_cam(c, f0, f1, weight=1.0, ease=(8, 8), target=None, bones=FACE_BONES, share=FACE_SHARE):
     """D8 on a staged clip: the face to the audience camera over [f0, f1] (`ease` in / out frames, 0 = already full at
     the edge — loop seams), weight a float or callable(f). target: None = the stage's camera, a point or callable(f).
     Add it BEFORE the IK that must follow the head (the cup at the lips). Pair it with c.look_camera for the view."""
@@ -521,7 +528,7 @@ def face_cam(c, f0, f1, weight=1.0, ease=(8, 8), target=None, share=FACE_SHARE):
         if w <= 1e-4:
             return
         t = c.stage.camera() if target is None else (target(f) if callable(target) else Vector(target))
-        face_to(pose, t, w, share=share)
+        face_to(pose, t, w, bones=bones, share=share)
     c.custom(fn, f0, f1)
     return c
 

@@ -1,0 +1,103 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_hum",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_hum.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "sway_a": [
+      0,
+      10
+    ],
+    "sway_b": [
+      10,
+      22
+    ],
+    "sway_c": [
+      22,
+      34
+    ],
+    "sway_d": [
+      34,
+      44
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "voice",
+      "id": "vo_bellows_hum"
+    },
+    {
+      "f": 2,
+      "type": "fx",
+      "id": "notes"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sing_small"
+    },
+    {
+      "f": 6,
+      "preset": "hum"
+    },
+    {
+      "f": 40,
+      "preset": "blissful"
+    },
+    {
+      "f": 46,
+      "preset": "sing_small"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_hum.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 4,
+      "f1": 44,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "warmup"
+  ]
+}

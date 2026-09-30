@@ -185,6 +185,7 @@ func _all_rooms() -> PackedStringArray:
 
 func _globals_available() -> bool:
 	if _globals_ok == -1:
-		var names := RenderingServer.global_shader_parameter_get_list()
-		_globals_ok = 1 if names.has(&"mnd_fill") else 0
+		# the [shader_globals] of project.godot (global_shader_parameter_get_list() is editor-only: it logs an engine
+		# ERROR in a running game — r3d-night's request)
+		_globals_ok = 1 if ProjectSettings.has_setting("shader_globals/mnd_fill") else 0
 	return _globals_ok == 1

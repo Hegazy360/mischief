@@ -83,11 +83,11 @@
   },
   "gaze": [
     {
-      "f0": 14,
+      "f0": 10,
       "f1": 70,
       "at": "camera",
-      "weight": 0.9,
-      "blend": 10
+      "weight": 1.0,
+      "blend": 8
     }
   ]
 }

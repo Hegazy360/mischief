@@ -27,7 +27,7 @@ def build(ctx):
                         "sideburn_r": [("x", -10 * math.exp(-((f - 57) / 2.5) ** 2))]})
     c.ground()
     c.auto_plant(speed_m_s=0.0)
-    c.look_camera(14, L, weight=0.9, blend=10)
+    c.look_camera(10, L, weight=1.0, blend=8)
     c.beats(stare=(0, 70), blink=(40, 44), twitch=(56, 60))
     c.face(0, "slow_burn")
     c.face(30, "slow_burn", slots={"brows": "one_up"})

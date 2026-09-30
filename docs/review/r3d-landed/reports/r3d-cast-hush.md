@@ -210,3 +210,75 @@ the O1 boards at 17:48, the R6 head check at 17:53 and P2 at 19:30 (verified 19:
 - The toon-shaded light share in the lit kitchen sits at the bar (19.5 %); the flat-lit rule passes.
 - HideSpot3D does not sample the card cells yet, so the peek board is a flat composite of the cells.
 - `hybrid_vs_ab.png` was not re-rendered at P2.
+
+## Addendum: lint fix pass (index §3.3.1, 2026-09-30 20:17–21:06 UTC)
+
+The pass fixed all 3 of my rows in `docs/review/r3d-tools-b/status.md` (20:10Z). Each was set/colour "character share L* ≥ 85" for Hush, bar 0.20. Every lit slice room now clears the 0.23 target with both head variants. The key light and `stage_light` were not changed, so there is no REQUESTS line.
+
+### Cause
+The face albedo was already near white: paint `#FFF6EA` is L* 97. The lint stands Hush facing +x, which is away from the upper-left key, at cheat 35°. So char_toon's vinyl terminator ran across her face:
+- Only 40 % of the face-card vertices were fully lit at cheat 35, and 24 % at the walk cheat of 20°.
+- The rest sat in the lilac shadow band. The 66 % floor holds that band at about L* 83, just under 85. That is the "L* 60–80" face tools-b measured.
+
+Brighter albedo could not fix this. Even pure white floors to exactly L* 85.0.
+
+### Fix (my files only)
+I bent the shading normals of the face paint, which covers the head blob, the neck by its Head weight, and the button nose:
+- Each normal loses half of its sideways (X) part.
+- Each normal gets +1.2 × the head's up axis, then is renormalised.
+
+The constants are `FACE_LIFT_UP` 1.2, `FACE_LIFT_FLAT_X` 0.5 and `FACE_LIFT_FWD` 0 in `tools/art3d/hush/hush_dims.py`. The code is `build.py face_lift()`, which writes Blender custom split normals that export as the glb's NORMAL.
+
+The stage key comes mostly from above (y 0.62 of the vinyl key), so her face now stays in the lit band from either facing. The face card is fully lit, facing away from the key:
+
+| Cheat | Before | After |
+|---|---|---|
+| Idle, 35° | 40 % | 99.6 % |
+| Walk, 20° | 24 % | 95 % |
+| Face to face, 5° | 15 % | 87 % |
+
+Facing into the key it is 100 % at every cheat.
+
+What did not change:
+- Positions, UVs, weights, bones, tris and the build meta are identical. `rig3d.json`, `rig3d_head_b.json`, `faces.json`, the atlas and the palette are byte-identical.
+- The skeleton contract is untouched.
+- The body's terminator, the stripes, the gloves, the rim and the outline are untouched.
+- The head A/B switch is untouched. Both glbs were rebuilt through `build.sh --no-props`.
+
+I tried a softer lift first (+0.9 up, no flattening). It passed the lint too, with 0.244–0.265, but covered only 71 % of the face at walk cheat facing away. So I shipped the stronger version.
+
+### Numbers: Hush share L* ≥ 85 per room
+Source: `lint3d.sh --set --all-nights`, LintShot3D staging.
+
+| Room | B's head before | B's head after | ×1.2 before | ×1.2 after |
+|---|---|---|---|---|
+| g0 kitchen | 0.230 | 0.261 | 0.222 | 0.263 |
+| P00 kitchen | 0.229 | 0.262 | 0.225 | 0.263 |
+| P00 parlour | 0.224 | 0.257 | 0.221 | 0.265 |
+| N01 hall | 0.225 | 0.259 | 0.222 | 0.266 |
+| **N01 kitchen** | **0.197** | 0.270 | 0.191 | 0.275 |
+| N01 parlour | 0.227 | 0.265 | 0.228 | 0.273 |
+| N02 hall | 0.226 | 0.260 | 0.223 | 0.265 |
+| **N02 kitchen** | 0.217 (status.md: **0.195**) | 0.247 | 0.220 | 0.249 |
+| **N02 parlour** | **0.194** | 0.246 | 0.186 | 0.263 |
+
+- **B's head, before**: my 20:20Z run of the same lint. N02 kitchen varied run to run with the idle frame, because the terminator moved across her face.
+- **B's head, after**: the named re-run on the shipped tree, `SANDBOX=r3d-cast-hush-fix tools/scripts/lint3d.sh --set --all-nights --json=<SP>/work/r3d-cast-hush/fix_set.json`. It has no Hush rows. The only error left is r3d-sets' N02 hall negative space (0.68 m).
+- **×1.2 columns**: the same lint on a scratch mirror of the tree with `rig3d.json` pointed at `head_b`, since the lint only loads the default rig. The "after" glb is byte-identical to the shipped `hush_head_b.glb`.
+
+The dark share (L* ≤ 40) stays 0.54–0.63 for B's head and 0.49–0.60 for ×1.2, against a bar of 0.20.
+
+### Checks
+- **Tests**: cast3d passes 30/30 (hush 17, 0 skipped). The new test is `test_face_paint_stays_in_the_lit_band_both_facings`. For both glbs it checks two things:
+  - the face-card normals lean up (mean y above 0.6);
+  - under StageLighting3D's key plus key_front 0.35, at least 95 % of the face card is fully lit at the idle cheat and at least 90 % at the walk cheat, in both facings. The P2 glb fails this with 40 % and 24 %.
+- **Lint**: `SANDBOX=r3d-cast-hush-fix tools/scripts/lint.sh` exits 0.
+- **Boards, looked at**:
+  - `ingame_kitchen.png` is a re-shoot. Facing away from the key, her face now reads as white mime paint. The snicker face card, blush and ink lines are intact. She still has B's dimensions and A's vinyl.
+  - `faces_fix.png` is the head-check crop: neutral, shock and snicker at 1×, for B's head and ×1.2. It shows cheat 35 away from the key, cheat 35 into the key, and head to camera. All six conditions read.
+  - `face_lift.png` has the per-room table above, the N02 parlour value map before and after, and 5× head crops for both variants.
+  - The index marks `faces_game.png`, `turnaround.png` and `value_check.png` as P2, from before the lift.
+
+### Handed on
+- **r3d-integrate**: nothing new. The glbs keep their `.import` files.
+- **r3d-tools-b**: regenerate `status.md`. The three Hush rows should be gone.

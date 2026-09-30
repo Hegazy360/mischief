@@ -1,0 +1,123 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_pinkie_up",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_pinkie_up.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "lift": [
+      0,
+      10
+    ],
+    "cock": [
+      10,
+      14
+    ],
+    "sip": [
+      14,
+      30
+    ],
+    "ahh": [
+      30,
+      40
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "teacup"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "saucer"
+    },
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "teacup_clink"
+    },
+    {
+      "f": 14,
+      "type": "sfx",
+      "id": "pinkie_wobble"
+    },
+    {
+      "f": 30,
+      "type": "voice",
+      "id": "vo_bellows_bliss"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sip"
+    },
+    {
+      "f": 14,
+      "preset": "blissful"
+    },
+    {
+      "f": 30,
+      "preset": "blissful",
+      "slots": {
+        "mouth": "O_mid"
+      }
+    },
+    {
+      "f": 44,
+      "preset": "blissful"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_pinkie_up.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 28,
+      "f1": 46,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "tea"
+  ]
+}

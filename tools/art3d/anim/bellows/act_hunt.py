@@ -54,6 +54,15 @@ GLARE = merge(STAND, lean(fwd=-4), head(x=10, z=0), fist("l"), fist("r"),
                "_pelvis": (0.0, 0.0, -0.01)})
 
 
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
+
 def build(ctx):
     c = Clip(ctx, "bellows/act_hunt", length=L, loop=True, cheat_deg=35, blend_in=8, audio="own",
              tags=["activity", "hunt", "specs"], notes="standing part of the hunt; the view plays walk@tier3 while he moves")
@@ -88,4 +97,5 @@ def build(ctx):
     for f, p in ((0, "magnified"), (38, "furious"), (60, "magnified"), (90, "magnified"), (128, "furious"),
                  (150, "magnified")):
         c.face(f, p)
+    hide_fx(c)
     return c

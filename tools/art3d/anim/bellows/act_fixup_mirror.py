@@ -35,6 +35,11 @@ def build(ctx):
     c.motion(lambda f: breath(f, 120.0, 1.0))
     c.ground()
     c.auto_plant(speed_m_s=0.0)
+    c.look(MIRROR, 0, L, weight=0.5, blend=0)
+    # D8: the face beats to the audience — the smug glance (12-30) and the admire section (104-146: the kiss, smug)
+    for f0, f1 in ((12, 30), (104, 146)):
+        face_cam(c, f0, f1, ease=(6, 6))
+        c.look_camera(f0, f1, weight=1.0, blend=6)
 
     def stroke(u):
         """A comb stroke over the right side of the bouffant, u 0 (forehead) .. 1 (the back of the head)."""
@@ -63,7 +68,6 @@ def build(ctx):
         tgt = pose.skel.carried(pose.world, "Head", Vector((0.30, -0.06, 1.46 + 0.02 * math.sin(f * 0.8))))
         arm_ik(pose, "l", tgt, (0.9, 0.2, -0.6), hand_R=None, effector=TeaSet(ctx).palm_rest("l"), w=min(1.0, w))
     c.custom(pat, 0, L)
-    c.look(MIRROR, 0, L, weight=0.5, blend=0)
     c.event(0, "prop", op="show", prop="comb")
     c.event(40, "voice", id="vo_bellows_hum", vol_db=-3.0)          # he hums while he combs
     c.event(152, "voice", id="vo_bellows_hum", vol_db=-3.0)

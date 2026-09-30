@@ -37,9 +37,9 @@ CLASP = merge({"clavicle_l": [("z", 8)], "upperarm_l": [("y", 70), ("z", -40)], 
 
 def sag(k=1.0, hx=0.0, hy=0.0, hz=0.0):
     """Deflated: shoulders dropped and rounded, the head bowed and tilted (k 0..1), the knees giving."""
-    return merge(STAND, CLASP, lean(fwd=10 * k, side=2 * k), head(x=10 * k + hx, y=6 * k + hy, z=hz),
-                 {"clavicle_l": [("y", 8 * k), ("z", 8)], "clavicle_r": [("y", -8 * k), ("z", -8)],
-                  "_pelvis": (0.0, 0.0, -0.03 * k)})
+    return merge(STAND, CLASP, lean(fwd=16 * k, side=3 * k), head(x=18 * k + hx, y=8 * k + hy, z=hz),
+                 {"clavicle_l": [("y", 14 * k), ("z", 8)], "clavicle_r": [("y", -14 * k), ("z", -8)],
+                  "_pelvis": (0.0, 0.0, -0.045 * k)})
 
 
 # brave: chest out, chin up, the left fist on his hip, the right glove gripping his lapel
@@ -47,6 +47,15 @@ BRAVE = merge(STAND, ARMS_POMPOUS, fist("l"), grip("r", 50, 30), pompous(1.6),
               {"clavicle_l": [("y", -10)], "clavicle_r": [("y", 6)], "_pelvis": (0.0, 0.0, 0.0),
                "upperarm_r": [("y", -70), ("z", 30)], "lowerarm_r": [("z", 92)], "hand_r": [("x", 10)]})
 
+
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
 
 def build(ctx):
     c = Clip(ctx, "bellows/beat_tear", length=L, cheat_deg=35, blend_in=8, blend_out=10, tags=["last_beat", "t3"])
@@ -56,7 +65,9 @@ def build(ctx):
     c.key(24, sag(1.05, hx=4, hy=2, hz=8), "out_quad")                       # the tear
     c.key(34, sag(1.0, hx=0, hy=-2, hz=8), "in_out_sine")
     c.key(40, sag(0.9, hx=-4, hz=6), "in_out_sine")
-    c.key(42, merge(BRAVE, CLASP, head(x=-8), {"clavicle_l": [("y", -16)], "clavicle_r": [("y", 12)]}), "out_back")   # SNIFF
+    c.key(42, merge(BRAVE, CLASP, lean(fwd=-14), head(x=-22), {"clavicle_l": [("y", -20)], "clavicle_r": [("y", 16)],
+                                                             "_pelvis": (0.0, 0.0, -0.035)}),
+          "out_back")                                                           # SNIFF — chest up, head back
     c.key(50, merge(BRAVE, head(x=-14, z=6)), "in_out_sine")
     c.key(L, merge(BRAVE, head(x=-12, z=4)), "in_out_sine")
     # the gloves clasped at his heart (IK on the chest)
@@ -72,4 +83,5 @@ def build(ctx):
     c.beats(lip=(0, 24), tear=(24, 40), sniff=(40, 60), sniffle=(42, 50))
     for f, p in ((0, "sulk"), (12, "mortified"), (24, "teary"), (42, "sniff"), (48, "pompous")):
         c.face(f, p)
+    hide_fx(c)
     return c

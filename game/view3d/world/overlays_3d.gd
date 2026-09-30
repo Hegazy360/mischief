@@ -126,13 +126,20 @@ func _fit_lane() -> void:
 	var ya := (by - a) / 100.0
 	var xf := Transform2D(xa, ya, Vector2.ZERO)
 	xf.origin = a - xf.basis_xform(cp)
-	lane.transform = xf
+	# only a moved camera re-transforms the lane layer (every overlay under it follows)
+	if not xf.is_equal_approx(lane.transform):
+		lane.transform = xf
+		_lane_inv = xf.affine_inverse()
 	_unit = 1.0 / maxf(0.01, xa.length())
+
+
+## The lane layer's inverse transform (screen → lane), refreshed by _fit_lane.
+var _lane_inv := Transform2D.IDENTITY
 
 
 ## Logical screen px → lane space (for anchors off the lane).
 func to_lane(screen: Vector2) -> Vector2:
-	return lane.transform.affine_inverse() * screen
+	return _lane_inv * screen
 
 
 ## The world point `p` (m) in lane space.

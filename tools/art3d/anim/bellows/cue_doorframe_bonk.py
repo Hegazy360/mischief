@@ -45,6 +45,15 @@ RUB = merge(RUB_L, RUB_R, glove("l", 16, 10), open_hand("r", 18), lean(fwd=-4, s
 RUB_B = merge(RUB, lean(fwd=-2, side=-3), head(x=-2, y=-6, z=-4))
 
 
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
+
 def build(ctx):
     c = Clip(ctx, "bellows/cue_doorframe_bonk", length=L, layer="overlay", mask="upper", blend_in=4, blend_out=6,
              cheat_deg=20, tags=["cue", "overlay", "blind"],
@@ -78,4 +87,5 @@ def build(ctx):
     c.event(4, "shake", trauma=0.2)
     for f, p in ((0, "huh"), (4, "shock"), (11, "dazed_open"), (18, "dazed"), (31, "huh")):
         c.face(f, p)
+    hide_fx(c)
     return c

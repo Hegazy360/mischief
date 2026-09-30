@@ -308,3 +308,117 @@ Palette changes this session:
 ## 11. Hours
 
 About 7.5 h in total. P0 took about 3 h and landed within its ≤ 3 h box.
+
+## Fix pass addendum (2026-09-30, 20:15–21:06Z; lint rows of `docs/review/r3d-tools-b/status.md` 20:10Z)
+
+I fixed 6 of my 7 error rows and both warning rows. The seventh row, the N02 hall negative space, cannot be fixed in the set alone; it needs a lead ruling (reasons below). The fix pass took about 0.9 h.
+
+### Lint result, before → after
+
+Re-run with `SANDBOX=r3d-sets-fix tools/scripts/lint3d.sh --set --screen --all-nights --aspects=20x9,16x9,4x3`, with renders.
+
+- **Negative space, P00, g0 and N01 parlour:** 1.02 → **1.57 m** (x 9.88–11.45).
+- **Negative space, N02 parlour:** 1.62 m (it already passed).
+- **Negative space, N01 and N02 porch:** 1.40 → **1.60 m** (x 0.90–2.50). Both warnings are cleared.
+- **Negative space, N01 hall:** 1.499 m, unchanged, and it passes.
+- **Negative space, N02 hall:** still **0.68 m**. This is the one error left.
+- **Stack / gap, N02 kitchen fridge | fridge_shelf:** 5.6 → **36.8 px** at the worst framing. This clears the set stack row and the three screen gap rows (20:9, 16:9 and 4:3).
+- **Set mode overall:** 1 error, the N02 hall. All colour rules pass.
+- **Screen mode overall:** 0 errors. There is 1 warning, `window_overlap` on the N02 hall clock at 16:9; it is r3d-view3d's.
+- I made no change to the `hall_front_door` rows. r3d-view3d posted no REQUESTS line asking me to, and those rows no longer appear.
+
+### What changed (all within my own files)
+
+**`game/data/house/house3d.json`**
+- **Parlour fireplace:** narrowed and moved right.
+  - The fireplace is x 11.50–12.56 and the firebox 11.73–12.33.
+  - The mantel is 11.45–12.61. Its top stays at 1.46 m, so the quake-prop "on the mantel" rule still holds.
+  - The fire and the portrait now sit over it, at x 12.03 and 12.15.
+  - The vase is at 11.68, 0.23 m in from the mantel's left edge, so its five 5 cm warm-up nudges still leave it teetering on the edge. Its smashed pieces moved to 11.48.
+  - The window is 0.8 m wide, at x 13.21.
+  - The recliner (N1) and the log basket sit in the opened stretch, both below head height.
+- **Porch:** No. 9's door is now 0.7 m wide, at x 0.2–0.9.
+- **Fridge zones:** the zone boxes are now lower [0, 0.71] and upper [0.90, 1.52]. The hit boxes are [16.0, 0, 16.8, 0.71] and [16.0, 0.90, 16.8, 1.62], each with `hit_z_half` 0.12. The shelf reach target stays at y 0.95.
+- **Band stands:** every N1/N2 rig point that uses a band clip now has `reach_pos` = placed target − the clip's `reach_offset`, with z ≥ −1.6, adjusted until nothing collides. This is r3d-anim-hush-b's request: Hush now stands beside the prop instead of in front of it (`band_stands.jpg`).
+- **Honey bounds:** the x minimum is −0.215, because the pepper pot moved (next item).
+
+**Rebuilt glbs** (`tools/art3d/set/build.py`, `game/art3d/set/`, `game/art3d/props/`; palettes unchanged, byte for byte)
+- `fridge.glb`: a 0.19 m chrome divider band (0.71–0.90 m) between the two doors. The doors, handles and the armed sausage moved to match.
+- `honey_jar.glb`: the pepper pot's centre is now at `PEPPER_X` = −0.16 local, 0.24 m from the jar's axis (it was 0.30 m). This is r3d-anim's request, so the stool-top snatch needs no lean-out. The tea staging is unchanged: the jar and pot stay clear of Bellows' bouffant.
+- Also rebuilt: `parlour_arch.glb`, `porch_arch.glb`, `parlour_window.glb`. `build_report.json` is updated.
+
+**`game/view3d/set/set_mats.gd`**
+- `ink_mat` now uses `View3DConst.OUTLINE_PROP_PX` (3.4 px, lead ruling D7) instead of 2.5. This was r3d-view3d's request.
+
+**`game/view3d/set/prop_3d.gd`**
+- The beret tag is now built, hidden, when a live rig prop is set up, so `show_tag` never creates a node or material during play. This was r3d-night's request.
+
+### New numbers
+
+- **Reach (SetCheck, nearer shoulder, limit 0.50 m):**
+
+  | Night | Rig point | Distance (m) |
+  |---|---|---|
+  | P00 / g0 | honey | 0.446 |
+  | P00 | gramophone | 0.384 |
+  | N1 | kettle | 0.255 |
+  | N1 | pickle jar | 0.490 |
+  | N1 | sink tap | 0.388 |
+  | N1 | recliner | 0.482 |
+  | N2 | clock | 0.485 |
+  | N2 | mirror | 0.397 |
+  | N2 | phone | 0.380 |
+  | N2 | fridge shelf | 0.354 |
+  | N2 | newspaper | 0.483 |
+
+  All four Nights have 0 errors, 0 warnings and 0 collisions.
+- **Fridge hit boxes:** 194×171 (shelf) and 193×172 (door) logical px, 36.8 px apart at the worst framing.
+- **Colours:** the parlour measures as before: wall L* 66.1 / C* 14.8, wainscot ΔL* 9.5. The dressing measures C* ≤ 11.7 and |ΔL*| ≤ 12.0.
+
+### Why the N02 hall cannot reach 1.5 m in the set alone
+
+The lint counts everything between y 1.1 and 1.8 m whose x span overlaps the lane. The N02 hall packs, into 5 m:
+
+- **Five live props (the §3.3 maximum)**, at house.json use_x spaced 0.84 m apart (frozen, C3): the cupboard at 3.04 m, the crate at 3.88, the phone at 4.72, the mirror at 5.56 and the clock at 6.40.
+- **The coat stand**, which must stay at x ≈ 4.31. It is where MIRROR, MIRROR lands him: pranks.json `end x 862, landing coat_stand`.
+
+Of these, four are taller than 1.1 m: the cupboard, the phone, the mirror and the clock. Together with the coat stand, the largest gap they can leave is:
+
+- **Cupboard to coat stand:** at most 0.87 m (3.44–4.31), even with the window moved.
+- **Between the stand, phone, mirror and clock:** at most 0.29 m.
+- **Clock to the room end:** 0.68 m (6.82–7.50).
+
+The only lever would be taking a tall prop out of the head band:
+- A wall-hung clock would free 6.00–7.50. But TIME'S UP is a tall-case gag: "he clings on as the clock pogoes across the hall; the pendulum door smacks his bum".
+- Shifting props by view offsets would need 0.8 m or more, which desyncs them from where the sim puts them.
+- The window cannot move above any live prop, because that breaks the preview-band rule.
+
+I left the hall unchanged.
+
+**Options for the lead / r3d-integrate:**
+- (a) A ruling that exempts a room at the §3.3 five-live-prop maximum (the N2 hall), or turns its row into a warning.
+- (b) A content change in R3: re-space the hall hotspots in house.json, or move the MIRROR, MIRROR landing.
+- (c) Strike one hall prank from N2.
+
+### Handed on
+
+- **r3d-anim:** re-bake `hush/rig_achoo_ria` with `POT_PIVOT = (-0.16, 0, 0)`. The jar mouth and Hush's stand are unchanged.
+- **r3d-anim-hush-b:** I applied its stand values except two.
+  - The kettle's visual did not move: it is the P00 tea hand-off home and is stacked under the honey. Hush stands at x 14.28 z −1.44 instead, the closest spot that does not collide right of the wing flat; her gloves land 0.14 m past the kettle.
+  - The recliner uses dx +0.15, not −0.15, so her gloves stay on the spring key within 0.50 m.
+- **r3d-integrate:** the N02 hall ruling (above). D7 is done in my files; Bellows' `rig3d.json` and `rig_def_3d.gd` outline defaults are still yours, per r3d-view3d.
+- **Import (R13):** no new files. The rebuilt glbs keep their existing `.import` sidecars.
+
+### Verification
+
+- `test_game.sh r3d-sets-fix -- set3d/`: 37/37 passed.
+- Full suite: 1496 passed, 0 failed, 0 skipped.
+- `SANDBOX=r3d-sets-fix tools/scripts/lint.sh`: rc 0.
+- `SetPreview3D --check`, P00 / g0 / N01 / N02: all rc 0.
+- I looked at the renders, the review boards and `fix_pass.jpg`, and the rooms read calm:
+  - The parlour now has plain wall behind the heads between the piano and the fireplace.
+  - The fridge reads as one retro fridge with two doors.
+  - Hush's gloves are on each band prop.
+
+  The one weak spot is the mirror: Hush still covers the left of its glass while rigging (its reachable edge is its front-right edge).
+- `docs/review/r3d-sets/` is 6.6 MB: `fix_pass.jpg`, `band_stands.jpg`, and every kitchen, parlour and porch room at three aspects plus the Night boards re-rendered, with `tea_staging`, `reach_check`, `landings` and the rects refreshed.

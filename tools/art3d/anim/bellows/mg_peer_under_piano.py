@@ -23,8 +23,8 @@ PEER = merge({"clavicle_l": [("y", 6)], "upperarm_l": [("y", 56), ("z", -64)], "
               "clavicle_r": [("y", -10)], "upperarm_r": [("y", -18), ("z", 70)], "lowerarm_r": [("z", 122)],
               "hand_r": [("x", -30), ("z", 20)]},                              # the right shading his specs
              glove("l", 30, 16), open_hand("r", 6), lean(fwd=58, side=-4, turn=-14),
-             {"spine_02": [("x", 30), ("y", -2), ("z", -6)], "spine_03": [("x", 22), ("z", -6)]},
-             head(x=-26, y=-22, z=-16))
+             {"spine_02": [("x", 44), ("y", -2), ("z", -8)], "spine_03": [("x", 34), ("z", -8)]},
+             head(x=-30, y=-24, z=-16))
 # the hands on the small of his back as he heaves up (hmph)
 HEAVE = merge({"clavicle_l": [("y", -8)], "upperarm_l": [("y", 64), ("z", 50)], "lowerarm_l": [("z", -86)],
                "hand_l": [("x", 20)],
@@ -32,6 +32,15 @@ HEAVE = merge({"clavicle_l": [("y", -8)], "upperarm_l": [("y", 64), ("z", 50)], 
                "hand_r": [("x", 20)]},
               glove("l", 24, 12), glove("r", 22, 12), lean(fwd=-10), head(x=-10, z=4))
 
+
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
 
 def build(ctx):
     c = Clip(ctx, "bellows/mg_peer_under_piano", length=L, layer="overlay", mask="upper", blend_in=6, blend_out=8,
@@ -50,4 +59,5 @@ def build(ctx):
     c.event(38, "voice", id="vo_bellows_hmm")
     for f, p in ((0, "suspicious"), (12, "magnified"), (38, "suspicious"), (48, "irked")):
         c.face(f, p)
+    hide_fx(c)
     return c

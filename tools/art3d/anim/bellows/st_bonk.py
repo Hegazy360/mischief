@@ -40,6 +40,7 @@ def build(ctx):
     c.ground()
     c.auto_plant(speed_m_s=0.0)
     c.beats(accent=(0, 3), dazed=(6, 60), shake=(48, 54))
+    c.look_camera(2, L, weight=1.0, blend=6)      # D8: the dazed face to the audience (runtime gaze: either facing)
     c.event(0, "jiggle", bones=["bouffant", "belly"], kick=0.8)
     c.event(0, "shake", trauma=0.35)
     c.face(0, "wild_take")

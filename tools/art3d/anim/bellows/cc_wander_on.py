@@ -35,6 +35,7 @@ def build(ctx):
     c.ik("r", HIP_R, 0, L, pole=POLE_R, hand=[("y", -80), ("z", 20)], effector="palm", blend=0, world=False)
     for f in range(0, L + 1, 16):
         c.sfx(f, "bellows_step", vol_db=-4.0)
+    c.look_camera(48, 128, weight=0.6, blend=8)   # D8: the blissful face turned 3/4 to the Stalls, still gazing up
     c.face(0, "hum")
     c.face(64, "blissful")
     c.face(112, "hum")

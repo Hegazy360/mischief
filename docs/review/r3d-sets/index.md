@@ -21,6 +21,8 @@ characters and the one thing that glows? Can you tell what each lit prop is at 6
 | `tea_staging.png` | Bellows on his stool at st_tea (x 15.0) with the kettle and the honey jar; the ID pass with the measured visibility | kettle ≥ 60 % visible past his barrel, the jar clear of his bouffant |
 | `reach_check.png` | `--reach=hush`: Hush on Bellows' stool under the jar (ACHOO-RIA!), Hush at the gramophone lever (ALLEGRO-GO-GO!) | every line green, no red box; Hush in front of the wing flat |
 | `landings.png` | tonight's landing boxes + points: the sink basin (N1 kitchen), the log basket (N1 parlour), the coat stand (N2 hall) | each box sits on its host piece |
+| `fix_pass.jpg` | lint fix pass (r3d-tools-b status.md 20:10Z): before / after of the P00 and N1 parlour (negative space), the N2 fridge zones (stack gap), the N1 porch | a plain 1.5 m of wall behind the characters' heads in every room but the N2 hall; the fridge's two zones read as two targets |
+| `band_stands.jpg` | Hush at every N1/N2 band rig point's new `reach_pos` (placed target − the band clip's reach_offset), the band clip at a mid frame | her gloves on the prop and the prop beside her, not hidden behind her |
 
 ## Numbers (measured on these renders)
 
@@ -39,3 +41,16 @@ characters and the one thing that glows? Can you tell what each lit prop is at 6
 - **Budgets** — static draws ≤ 3 per room (the arch + static pieces merged into one mesh), lit-room triangles ≤ 20.5k
   (N1 kitchen, ink + halo passes counted), framed-room draw calls 20–39 without characters (≤ 45), set textures 6
   palettes of 256² (≈ 1.5 MB), `House3D.build` 21–76 ms.
+
+## Fix pass (2026-09-30, lint3d status.md 20:10Z)
+
+- **Negative space** (`lint3d --set`, head band y 1.1–1.8 m): P00 / g0 / N1 parlour 1.02 → **1.57 m** (x 9.88–11.45: the
+  fireplace is 1.06 m wide at x 11.50–12.56 with the mantel 11.45–12.61, fire and portrait over it, the vase 0.23 m in from
+  the mantel's left edge, the window 0.8 m at 13.21); N1 / N2 porch 1.40 → **1.60 m** (No. 9's door 0.7 m at x 0.2–0.9);
+  N1 hall 1.499 (unchanged, passes). **N2 hall stays 0.68 m** — not fixable in the set alone (see the report addendum).
+- **Stack** (N2 fridge shelf | door, projected hit boxes, every framing at 20:9 / 16:9 / 4:3): 5.6 → **36.8 px** (a 0.19 m chrome
+  divider band 0.71–0.90 m between the doors; zone hit boxes [0, 0.71] / [0.90, 1.62] m, 0.12 m deep; shelf target y 0.95 kept).
+- **Band stands**: every N1/N2 band rig point stands Hush beside the prop (placed target − the clip's reach_offset, z ≥ −1.6,
+  collision-free): reach ≤ 0.490 m, no warnings (`band_stands.jpg`).
+- Full `lint3d --set --screen` (renders, all Nights, three aspects): set 1 error (N2 hall negative space), colour rules all
+  PASS; screen 0 errors.

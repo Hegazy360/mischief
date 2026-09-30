@@ -18,8 +18,13 @@
 ##   (8.63 m) and shift to hold both, Hush ≥ 20 % from either edge.
 ## * **C4 hold offset:** while the action button is held, Hush stays at 40–55 % of the width (mirrored left-handed).
 ## * **C5 floors:** a floor change cranes 3.5 m over 0.40 s.
-## * **C6 safe rect:** Hush and every keep-visible box (the live props of her room) inside the safe rect (shift within
-##   C1/C2; Hush wins when all cannot fit).
+## * **C6 safe rect:** Hush and every live hit box of her room (`set_keep_visible` boxes + the room's live boxes from
+##   `set_room_boxes` / the SetList given to `setup`, doors and exits included) inside the safe rect and clear of the
+##   four always-on HUD hit rects (`set_hud_rects`; unset = REDESIGN §2.1's rects from HudLayout for this view size and
+##   safe rect), at every aspect: the exact projected corners give each box an interval of camera x (the HUD rects a
+##   forbidden gap), the camera takes the allowed x nearest its C1/C3/C4 target within C2. When shifting cannot hold
+##   them all (a room wider than the view at 4:3, a box at a stage end) the camera dollies back just enough, up to the
+##   C3 limit 1.15× (the back wall stays ≤ 10 m, a 0.72 m box ≥ 144 px); past that Hush wins and a box is dropped.
 ## * **C7 punch-ins:** a dolly toward his head/chest to D = 7.5 / zoom (S 1.15 = 6.52 m, L 1.3 = 5.77, M 1.4 = 5.36,
 ##   SIG 1.6 = 4.69; never closer than 4.5 m), 0.18 s in (REAL time, so it lands with the hit-stop), hold, 0.35 s out,
 ##   + the caller's yaw (3–6° toward his face side, 8° for MIRROR, MIRROR); an approach "push" (the clip's `cam push`,
@@ -70,6 +75,21 @@ const GAG_FOCUS_MID := 0.18          ## the focus stays within the middle 36 % o
 ## A punch-in never shows more than this much below the floor at the lane (the aim rises instead of framing the pit).
 const GAG_BELOW_FLOOR_M := 0.35
 const APPROACH_HOLD_MAX_F := 600     ## a push waits this long past its frames for punch_gag, then punches anyway
+## C6: boxes stay this many px inside the safe rect / clear of a HUD rect (float slack for the lints' inclusive tests).
+const C6_MARGIN_PX := 1.0
+## C6: Hush's half width and height (m) kept inside the safe rect.
+const C6_HUSH_HALF_W := 0.35
+const C6_HUSH_H := 1.2
+## C6: when the target x falls in a HUD gap, the side the camera is on wins unless the other is this much nearer (m).
+const C6_HYSTERESIS_M := 0.3
+const C6_MAX_BOXES := 24
+const C6_PULL_STEPS := 7
+const KEEP_REFRESH_F := 15
+const HUD_LAYOUT_SCRIPT := "res://ui/hud_layout.gd"
+const UI_SCALE_SCRIPT := "res://autoload/support/ui_scale.gd"
+## The HUD's base canvas width (stretch aspect "expand": a 4:3 device lays the HUD out on 1920 × 1440, REDESIGN §2.6).
+const HUD_BASE_W := 1920.0
+const _EMPTY_ARR: Array = []
 
 enum Pan { NONE, DRAG, FLING, HOLD, RETURN }
 enum Peek { NONE, OUT, HOLD, BACK }
@@ -133,6 +153,32 @@ var _lead_fn: Callable = Callable()
 var _other: Node3D = null
 var _safe := Rect2()
 var _keep_fn: Callable = Callable()
+## C6: room id → Array of AABB (every live hit box of the room).
+var _room_boxes: Dictionary = {}
+## C6: the HUD's four always-on hit rects as handed over (an Array of Rect2; empty = `_hud_auto`).
+var _hud_src: Array = []
+var _hud_auto: Array[Rect2] = []
+var _hud_auto_key := Vector4(-1.0, -1.0, -1.0, 0.0)
+## C6 per-frame buffers (fixed size, reused): the boxes this frame, their count, forbidden HUD gaps (a, b) pairs.
+var _c6_boxes: Array[AABB] = []
+var _c6_n := 0
+var _c6_gaps := PackedFloat32Array()
+var _c6_ng := 0
+## The keep-visible boxes are asked for when the framed room changes and every KEEP_REFRESH_F frames (they are the
+## room's live props: static while Hush stays in it).
+var _keep_buf: Array[AABB] = []
+var _keep_n := 0
+var _keep_room := "\u0001"
+var _keep_age := 0
+## Projection caches (the frame transform + its inverse for the current aim / distance / yaw; the view size per frame).
+var _xf := Transform3D()
+var _xf_inv := Transform3D()
+var _xf_key := Vector4(NAN, NAN, NAN, NAN)
+var _xf_key_z := NAN
+var _vs_cache := Vector2.ZERO
+var _vs_frame := -1
+var _f_cache := 0.0
+var _f_key := Vector2(-1.0, -1.0)
 var _cx := 0.0
 var _lead := 0.0
 var _lead_dir := 1.0
@@ -226,6 +272,9 @@ func setup(house: Variant, set_list: Variant = null) -> void:
 			continue
 		var e: Vector2 = _edges.get(r.floor, Vector2(INF, -INF))
 		_edges[r.floor] = Vector2(minf(e.x, r.x0), maxf(e.y, r.x1))
+	var rb := CameraDirector3D.room_boxes_from(house, set_list)
+	if not rb.is_empty():
+		_room_boxes = rb
 	_snap = true
 
 
@@ -254,6 +303,36 @@ func set_safe_rect(r: Rect2) -> void:
 ## C6: `rects_fn()` returns the world AABBs that must stay inside the safe rect (the live props of Hush's room).
 func set_keep_visible(rects_fn: Callable) -> void:
 	_keep_fn = rects_fn
+	_keep_room = "\u0001"
+
+
+## C6: every live hit box per room ({room id: Array of AABB}, doors and exits included); kept with the
+## keep-visible boxes. `setup` fills it from a SetList.Result + ContentDB; WorldView3D hands its House3D boxes.
+func set_room_boxes(boxes: Dictionary) -> void:
+	_room_boxes = boxes
+
+
+## C6: the live hit boxes of a room (tests / tools).
+func room_boxes(room_id: String) -> Array:
+	return _room_boxes.get(room_id, [])
+
+
+## C6: the four always-on HUD hit rects in logical px (Hud.always_on_rects(); the array is kept by reference, so
+## the HUD may update it in place). Live boxes are kept clear of them. Empty = derived from HudLayout.
+func set_hud_rects(rects: Array) -> void:
+	_hud_src = rects
+
+
+## C6: the HUD rects C6 keeps live boxes clear of (handed over, else REDESIGN §2.1's from HudLayout).
+func hud_rects() -> Array:
+	if not _hud_src.is_empty():
+		return _hud_src
+	var vs := view_size()
+	var key := Vector4(vs.x, vs.y, _safe.position.x + _safe.position.y * 0.001, hand)
+	if key != _hud_auto_key:
+		_hud_auto_key = key
+		_hud_auto = CameraDirector3D.hud_rects_for(vs, _safe if _safe.has_area() else Rect2(Vector2.ZERO, vs), hand < 0.0)
+	return _hud_auto
 
 
 # --- pan, pinch, overview, peek ----------------------------------------------------------
@@ -452,21 +531,30 @@ func view_size() -> Vector2:
 	if logical_size_override != Vector2.ZERO:
 		return logical_size_override
 	if is_inside_tree():
+		var fr := Engine.get_process_frames()
+		if fr == _vs_frame:
+			return _vs_cache
 		var vs := get_viewport().get_visible_rect().size
 		if vs.x > 1.0 and vs.y > 1.0:
+			_vs_frame = fr
+			_vs_cache = vs
 			return vs
 	return Vector2(View3DConst.LOGICAL_W_20X9, View3DConst.LOGICAL_H)
 
 
 ## The focal length in logical px (KEEP_HEIGHT: from the vertical FOV and the logical height).
 func focal_px() -> float:
-	return view_size().y * 0.5 / tan(deg_to_rad(fov) * 0.5)
+	var h := view_size().y
+	if h != _f_key.x or fov != _f_key.y:
+		_f_key = Vector2(h, fov)
+		_f_cache = h * 0.5 / tan(deg_to_rad(fov) * 0.5)
+	return _f_cache
 
 
 ## World → logical screen px (without shake). Points behind the camera return a far-off point.
 func project(p: Vector3) -> Vector2:
-	var xf := _frame_xform()
-	var q := xf.affine_inverse() * p
+	_frame_xform()
+	var q := _xf_inv * p
 	if q.z > -0.001:
 		return Vector2(-100000.0, -100000.0)
 	var f := focal_px()
@@ -530,9 +618,9 @@ func lane_point(x_px: float, floor_i: int, z: float = View3DConst.LANE_Z) -> Vec
 
 ## Logical px per metre (horizontal) on the plane z at the aim point's height, for the current framing.
 func px_per_m_at(z: float) -> float:
-	var xf := _frame_xform()
+	_frame_xform()
 	var p := Vector3(_aim.x, _aim.y, z)
-	var depth := (xf.affine_inverse() * p).z
+	var depth := (_xf_inv * p).z
 	return focal_px() / maxf(0.001, -depth)
 
 
@@ -645,7 +733,11 @@ func advance(view_dt: float, real_dt: float) -> void:
 	var room := _room_at(hx, fl)
 	var ts := _two_shot_dist(hx, other_x, room, fl)
 	_two_shot = ts > _user_dist + 0.001 and not is_overview()
-	var extra := ts - _user_dist if _two_shot else 0.0
+	_c6_gather(room)
+	var need := ts if _two_shot else _user_dist
+	if not is_overview():
+		need = maxf(need, _c6_need_dist(hx, fl))
+	var extra := need - _user_dist
 	if _snap:
 		_ts_extra = extra
 	else:
@@ -801,41 +893,208 @@ func _two_shot_x(hx: float, bx: float, V: float) -> float:
 	return c
 
 
-## C6: shift within the safe rect for Hush and the keep-visible boxes (Hush first; a box that cannot fit is dropped).
+## C6: this frame's boxes — the keep-visible callable's (called once) and the room's live boxes — into the fixed
+## buffer (no allocation per frame).
+func _c6_gather(room: Room3) -> void:
+	if _c6_boxes.size() != C6_MAX_BOXES:
+		_c6_boxes.resize(C6_MAX_BOXES)
+		_c6_gaps.resize(C6_MAX_BOXES * 8)
+	_c6_n = 0
+	if _safe.size.x <= 0.0:
+		return
+	if _keep_fn.is_valid():
+		var rid := room.id if room != null else ""
+		_keep_age += 1
+		if rid != _keep_room or _keep_age >= KEEP_REFRESH_F or _snap:
+			_keep_room = rid
+			_keep_age = 0
+			if _keep_buf.size() != C6_MAX_BOXES:
+				_keep_buf.resize(C6_MAX_BOXES)
+			_keep_n = 0
+			var boxes: Variant = _keep_fn.call()
+			if boxes is Array:
+				for bv in boxes:
+					if bv is AABB and _keep_n < C6_MAX_BOXES:
+						_keep_buf[_keep_n] = bv
+						_keep_n += 1
+		for i in _keep_n:
+			_c6_boxes[_c6_n] = _keep_buf[i]
+			_c6_n += 1
+	if room != null:
+		var rb: Variant = _room_boxes.get(room.id, null)
+		if rb is Array:
+			for bv in rb:
+				if bv is AABB and _c6_n < C6_MAX_BOXES and not _c6_has(bv):
+					_c6_boxes[_c6_n] = bv
+					_c6_n += 1
+
+
+func _c6_has(b: AABB) -> bool:
+	for i in _c6_n:
+		if _c6_boxes[i].is_equal_approx(b):
+			return true
+	return false
+
+
+## C6 at the current distance: the allowed camera x nearest `want` (see `_c6_solve`).
 func _c6_clamp(want: float, hx: float, fl: int) -> float:
 	if _safe.size.x <= 0.0:
 		return want
-	var f := focal_px()
+	return _c6_solve(want, hx, fl, _dist, true).x
+
+
+## C6 pull-back: the smallest distance in [the user's, 1.15 × base] at which Hush and every gathered box fit the
+## safe rect by shifting (4:3 in a room wider than the view, a box at a stage end); the user's when they fit already
+## or never can.
+func _c6_need_dist(hx: float, fl: int) -> float:
+	var d0 := _user_dist
+	if _safe.size.x <= 0.0 or _c6_n == 0:
+		return d0
+	if _c6_solve(hx, hx, fl, d0, false).y > 0.5:
+		return d0
+	var d1 := BASE_DIST * View3DConst.TWO_SHOT_MAX
+	if d1 <= d0 + 0.001 or _c6_solve(hx, hx, fl, d1, false).y < 0.5:
+		return d0
+	var lo := d0
+	var hi := d1
+	for i in C6_PULL_STEPS:
+		var mid := (lo + hi) * 0.5
+		if _c6_solve(hx, hx, fl, mid, false).y > 0.5:
+			hi = mid
+		else:
+			lo = mid
+	return hi
+
+
+## C6 (REDESIGN §5.2) at distance `dist`: the camera x nearest `want`, within C2, that keeps Hush (± 0.35 m) and
+## every gathered box inside the safe rect and (with `hud`) clear of the four always-on HUD hit rects. A box's
+## screen edges are exact (its nearest / farthest corner depths along the pitched view axis; the camera x never
+## changes a depth), so each box gives an interval of x and each HUD rect it overlaps vertically a forbidden gap.
+## Hush wins over a box, a box over the HUD. Returns Vector2(x, 1 when every box fitted else 0).
+func _c6_solve(want: float, hx: float, fl: int, dist: float, hud: bool) -> Vector2:
 	var vs := view_size()
-	var cam_pos := _cam_pos_for(Vector3(want, View3DConst.floor_y(fl) + View3DConst.CAM_AIM_Y, View3DConst.LANE_Z), _dist, 0.0)
-	var cosp := 1.0 / sqrt(1.0 + PITCH_TAN * PITCH_TAN)
-	var s0 := _safe.position.x - vs.x * 0.5
-	var s1 := _safe.end.x - vs.x * 0.5
+	var f := focal_px()
+	var cxs := vs.x * 0.5
+	var cys := vs.y * 0.5
+	var safe := _safe
+	var sn := PITCH_TAN / sqrt(1.0 + PITCH_TAN * PITCH_TAN)
+	var cs := 1.0 / sqrt(1.0 + PITCH_TAN * PITCH_TAN)
+	var fy := View3DConst.floor_y(fl)
+	var cy := fy + View3DConst.CAM_AIM_Y + dist * PITCH_TAN
+	var cz := View3DConst.LANE_Z + dist
+	var V := visible_width_for(dist)
 	var lo := -INF
 	var hi := INF
-	# Hush (±0.35 m)
-	var dh := (cam_pos.z - View3DConst.LANE_Z) * cosp
-	lo = maxf(lo, hx + 0.35 - s1 * dh / f)
-	hi = minf(hi, hx - 0.35 - s0 * dh / f)
-	if lo > hi:
-		return want
-	if _keep_fn.is_valid():
-		var boxes: Variant = _keep_fn.call()
-		if boxes is Array:
-			for bv in boxes:
-				if not (bv is AABB):
-					continue
-				var b: AABB = bv
-				var zc := b.position.z + b.size.z
-				var d := (cam_pos.z - zc) * cosp
-				var blo := b.position.x + b.size.x - s1 * d / f
-				var bhi := b.position.x - s0 * d / f
-				var nlo := maxf(lo, blo)
-				var nhi := minf(hi, bhi)
-				if nlo <= nhi:
-					lo = nlo
-					hi = nhi
-	return clampf(want, lo, hi)
+	if _edges.has(fl):
+		var e: Vector2 = _edges[fl]
+		lo = e.x - View3DConst.EDGE_CLAMP_M + V * 0.5
+		hi = e.y + View3DConst.EDGE_CLAMP_M - V * 0.5
+		if lo > hi:
+			lo = (e.x + e.y) * 0.5
+			hi = lo
+	var sl := safe.position.x + C6_MARGIN_PX
+	var sr := safe.end.x - C6_MARGIN_PX
+	# Hush (± 0.35 m at the lane, 1.2 m tall)
+	var dh := (cy - fy - C6_HUSH_H) * sn + (cz - View3DConst.LANE_Z) * cs
+	var hlo := CameraDirector3D._rinv(hx + C6_HUSH_HALF_W, sr, dh, dh, cxs, f)
+	var hhi := CameraDirector3D._linv(hx - C6_HUSH_HALF_W, sl, dh, dh, cxs, f)
+	if maxf(lo, hlo) > minf(hi, hhi):
+		return Vector2(clampf(want, lo, hi), 0.0)
+	lo = maxf(lo, hlo)
+	hi = minf(hi, hhi)
+	var fits := 1.0
+	_c6_ng = 0
+	var hr: Array = hud_rects() if hud else _EMPTY_ARR
+	for i in _c6_n:
+		var b: AABB = _c6_boxes[i]
+		var y0 := b.position.y
+		var y1 := b.end.y
+		var z0 := b.position.z
+		var z1 := b.end.z
+		var dn := (cy - y1) * sn + (cz - z1) * cs
+		var df := (cy - y0) * sn + (cz - z0) * cs
+		if dn < 0.1:
+			continue
+		var x0 := b.position.x
+		var x1 := b.end.x
+		var blo := CameraDirector3D._rinv(x1, sr, dn, df, cxs, f)
+		var bhi := CameraDirector3D._linv(x0, sl, dn, df, cxs, f)
+		if maxf(lo, blo) > minf(hi, bhi):
+			fits = 0.0
+			continue
+		lo = maxf(lo, blo)
+		hi = minf(hi, bhi)
+		if hr.is_empty():
+			continue
+		# the box's screen y range (independent of the camera x): its 4 (y, z) corner rows
+		var sa := CameraDirector3D._sy(y0, z0, cy, cz, sn, cs, cys, f)
+		var sb := CameraDirector3D._sy(y0, z1, cy, cz, sn, cs, cys, f)
+		var sc := CameraDirector3D._sy(y1, z0, cy, cz, sn, cs, cys, f)
+		var sd := CameraDirector3D._sy(y1, z1, cy, cz, sn, cs, cys, f)
+		var top := minf(minf(sa, sb), minf(sc, sd))
+		var bot := maxf(maxf(sa, sb), maxf(sc, sd))
+		for rv in hr:
+			if not (rv is Rect2):
+				continue
+			var r: Rect2 = rv
+			if bot <= r.position.y - C6_MARGIN_PX or top >= r.end.y + C6_MARGIN_PX:
+				continue
+			if _c6_ng * 2 + 1 >= _c6_gaps.size():
+				break
+			# clear to the right of the rect: x ≤ a; to its left: x ≥ c; forbidden (a, c)
+			_c6_gaps[_c6_ng * 2] = CameraDirector3D._linv(x0, r.end.x + C6_MARGIN_PX, dn, df, cxs, f)
+			_c6_gaps[_c6_ng * 2 + 1] = CameraDirector3D._rinv(x1, r.position.x - C6_MARGIN_PX, dn, df, cxs, f)
+			_c6_ng += 1
+	var x := clampf(want, lo, hi)
+	if _c6_ng > 0:
+		x = _c6_pick(x, lo, hi)
+	return Vector2(x, fits)
+
+
+
+## The allowed x in [lo, hi] outside every forbidden gap nearest `x` (the side the camera is on wins within
+## C6_HYSTERESIS_M); `x` when every point is forbidden (the HUD yields).
+func _c6_pick(x: float, lo: float, hi: float) -> float:
+	if not _c6_forbidden(x):
+		return x
+	var best := x
+	var best_cost := INF
+	for i in _c6_ng * 2:
+		var c := clampf(_c6_gaps[i], lo, hi)
+		if _c6_forbidden(c):
+			continue
+		var cost := absf(c - x)
+		if not _snap and (c - x) * (_cx - x) < 0.0:
+			cost += C6_HYSTERESIS_M
+		if cost < best_cost:
+			best_cost = cost
+			best = c
+	return best
+
+
+func _c6_forbidden(x: float) -> bool:
+	for i in _c6_ng:
+		if x > _c6_gaps[i * 2] + 1e-5 and x < _c6_gaps[i * 2 + 1] - 1e-5:
+			return true
+	return false
+
+
+## The screen y of a point at height `y`, depth plane `z` (camera at `cy`, `cz`; pitch sin / cos `sn`, `cs`).
+static func _sy(y: float, z: float, cy: float, cz: float, sn: float, cs: float, cys: float, f: float) -> float:
+	var d := maxf(0.001, (cy - y) * sn + (cz - z) * cs)
+	return cys - f * ((y - cy) * cs - (z - cz) * sn) / d
+
+
+## The camera x at which a box's LEFT edge (world x `x0`) projects to screen x `a` (the edge's nearest corner when it
+## is left of the screen centre, else its farthest); the edge is ≥ a for every camera x ≤ the result.
+static func _linv(x0: float, a: float, dn: float, df: float, cxs: float, f: float) -> float:
+	return x0 - (a - cxs) * (dn if a <= cxs else df) / f
+
+
+## The camera x at which a box's RIGHT edge (world x `x1`) projects to screen x `b`; the edge is ≤ b for every camera
+## x ≥ the result.
+static func _rinv(x1: float, b: float, dn: float, df: float, cxs: float, f: float) -> float:
+	return x1 - (b - cxs) * (dn if b >= cxs else df) / f
 
 
 func _update_floor(fl: int, dt: float) -> void:
@@ -1080,10 +1339,16 @@ func _cam_pos_for(aim_p: Vector3, dist: float, yaw_d: float) -> Vector3:
 	return aim_p + off
 
 
-## The un-shaken camera transform of the current frame.
+## The un-shaken camera transform of the current frame (cached with its inverse until the aim / distance / yaw move).
 func _frame_xform() -> Transform3D:
-	var pos := _cam_pos_for(_aim, _frame_dist, _yaw)
-	return Transform3D(Basis.looking_at(_aim - pos, Vector3.UP), pos)
+	var key := Vector4(_aim.x, _aim.y, _frame_dist, _yaw)
+	if key != _xf_key or _aim.z != _xf_key_z:
+		_xf_key = key
+		_xf_key_z = _aim.z
+		var pos := _cam_pos_for(_aim, _frame_dist, _yaw)
+		_xf = Transform3D(Basis.looking_at(_aim - pos, Vector3.UP), pos)
+		_xf_inv = _xf.affine_inverse()
+	return _xf
 
 
 func _apply_transform() -> void:
@@ -1094,6 +1359,12 @@ func _apply_transform() -> void:
 
 
 func _update_shake_kick(dt: float) -> void:
+	if _trauma <= 0.0 and _kick == Vector2.ZERO and _kick_v == Vector2.ZERO:
+		# at rest (almost every frame): no spring steps, no noise, no offset writes
+		if h_offset != 0.0 or v_offset != 0.0:
+			h_offset = 0.0
+			v_offset = 0.0
+		return
 	var steps := clampi(int(ceil(dt / (1.0 / 240.0))), 1, 24)
 	var h := dt / float(steps)
 	for i in steps:
@@ -1256,4 +1527,71 @@ static func built_ids(set_list: Variant) -> PackedStringArray:
 		if v is PackedStringArray or v is Array:
 			for id in v:
 				out.append(str(id))
+	return out
+
+
+## C6: every live hit box per room from a SetList.Result (its `live` + `room_of`) and a ContentDB (`house.hotspot`),
+## boxes = SetGeo.hit_box over house3d.json (the lint's and TapAssist's boxes). {} for anything else.
+static func room_boxes_from(house: Variant, set_list: Variant) -> Dictionary:
+	var out := {}
+	if not (set_list is Object) or not (house is Object):
+		return out
+	var sl: Object = set_list
+	if not ("live" in sl) or not sl.has_method("room_of"):
+		return out
+	var hdb: Variant = (house as Object).get("house") if "house" in (house as Object) else house
+	if not (hdb is Object) or not (hdb as Object).has_method("hotspot"):
+		return out
+	var lv: Variant = sl.get("live")
+	if not (lv is Dictionary):
+		return out
+	var h3 := SetGeo.load_house3d()
+	var hs3: Dictionary = h3.get("hotspots", {}) if h3.get("hotspots", null) is Dictionary else {}
+	for id in (lv as Dictionary).keys():
+		var hd: Variant = (hdb as Object).call("hotspot", String(id))
+		if not (hd is Object) or not ("rect" in (hd as Object)):
+			continue
+		var rect: Variant = (hd as Object).get("rect")
+		if not (rect is Array):
+			continue
+		var room := String(sl.call("room_of", String(id)))
+		if room == "":
+			continue
+		var e: Variant = hs3.get(String(id), {})
+		var b := SetGeo.hit_box(rect, e if e is Dictionary else {})
+		if not out.has(room):
+			out[room] = []
+		(out[room] as Array).append(b)
+	return out
+
+
+## C6: REDESIGN §2.1's four always-on HUD hit rects (pause, script at its widest, Clarence, action) for a logical
+## view size and safe rect, from HudLayout (r3d-hud) — laid out on the HUD's canvas (at least the 1920 base width, as
+## stretch "expand" gives a 4:3 device 1920 × 1440, ×0.8 UiScale) and mapped back into the view. [] without HudLayout.
+static func hud_rects_for(vs: Vector2, safe: Rect2, left_handed: bool) -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	if not ResourceLoader.exists(HUD_LAYOUT_SCRIPT) or vs.x < 1.0 or vs.y < 1.0:
+		return out
+	var hl := load(HUD_LAYOUT_SCRIPT) as Script
+	if hl == null:
+		return out
+	var k := maxf(1.0, HUD_BASE_W / vs.x)
+	var cv := vs * k
+	var ins := Vector4(safe.position.x * k, safe.position.y * k, (vs.x - safe.end.x) * k, (vs.y - safe.end.y) * k)
+	var ui_k := 1.0
+	if ResourceLoader.exists(UI_SCALE_SCRIPT):
+		var us := load(UI_SCALE_SCRIPT) as Script
+		if us != null:
+			ui_k = float(us.call("factor_for", cv))
+	var pill := 440.0
+	var pm: Variant = hl.get_script_constant_map().get("PILL_MAX", null)
+	if pm is float or pm is int:
+		pill = float(pm)
+	var lay: Variant = hl.call("compute", cv, ins, left_handed, ui_k, pill)
+	if not (lay is Dictionary):
+		return out
+	for n in [&"pause", &"script", &"clarence", &"action"]:
+		var r: Variant = (lay as Dictionary).get(n, null)
+		if r is Rect2:
+			out.append(Rect2((r as Rect2).position / k, (r as Rect2).size / k))
 	return out

@@ -33,7 +33,7 @@
 ## | L23_overlay | overlay clips declare a mask and blend in / out over ≥ 4 f |
 ## | L24_sound_table | sound frames = the audio table (`data/audio/clip_events.json`, R3) for clips with a row and `source.audio` "table"; "own" clips are listed (info) for the table's regeneration |
 ## | L25_expected_length | lengths = the manifest (`SliceClips.build3d`, else `SliceClips.build`) expect ± tol, or a loop where allowed |
-## | L26_cheat | `cheat_deg` in [0, 40]; ≤ 10 on rig clips (they reach) |
+## | L26_cheat | `cheat_deg` in [0, 40]; ≤ 10 on rig clips (they reach; `rig_step_down` — the hop off a released step — is not one) |
 ## | L27_root_travel | `root.travel` "sim": the root and the pelvis move ≤ 0.15 m in x / z |
 ## | L28_rig_clip | `rig_*` clips: lock "rig_pm"; a prank clip lasts its tier's frames (rig_actions.json tiers); band clips (`rig_high/mid/low`) ≥ 48 f with no baked glance marks; a stepped clip ends on the floor (pelvis back to rest ± 0.01 m, support 0) |
 ## | L29_lock | `lock` in {null, sim, rig_pm}; reaction clips are "sim" |

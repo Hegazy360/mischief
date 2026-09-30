@@ -47,9 +47,21 @@ SMOOTH = {"clavicle_l": [("y", -4)], "upperarm_l": [("y", 76), ("z", -14)], "low
           "clavicle_r": [("y", 4)], "upperarm_r": [("y", -76), ("z", 14)], "lowerarm_r": [("z", 56)],
           "hand_r": [("x", 10), ("y", -30)]}
 # the ping: arms jerk out, frozen, fingers splayed
-PING = {"clavicle_l": [("y", -10)], "upperarm_l": [("y", 60), ("z", -8)], "lowerarm_l": [("z", -24)],
-        "clavicle_r": [("y", 10)], "upperarm_r": [("y", -60), ("z", 8)], "lowerarm_r": [("z", 24)]}
+PING = merge({"clavicle_l": [("y", -20)], "upperarm_l": [("y", 26), ("z", 10)], "lowerarm_l": [("z", -18)],
+              "hand_l": [("x", -30)],
+              "clavicle_r": [("y", 18)], "upperarm_r": [("y", -34), ("z", -6)], "lowerarm_r": [("z", 26)],
+              "hand_r": [("x", -30)]},
+             open_hand("l", 26), open_hand("r", 24))
 
+
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
 
 def build(ctx):
     c = Clip(ctx, "bellows/beat_dignity_fail", length=L, cheat_deg=35, blend_in=8, blend_out=10,
@@ -59,11 +71,12 @@ def build(ctx):
     c.key(16, stand(fwd=2, side=-3, hx=6, hy=-4, arms=AT_CRAVAT, cravat=2), "in_out_sine")      # the shimmy
     c.key(26, stand(fwd=-6, hx=-6, arms=AT_CRAVAT, cravat=0), "in_out_sine")
     c.key(34, stand(fwd=-8, turn=8, hx=-14, hz=18, arms=SMOOTH), "in_out_cubic")                 # ahem — to the Stalls
-    c.key(46, stand(fwd=-8, turn=-8, hx=-14, hz=-20, arms=SMOOTH), "in_out_sine")                # … the wings
+    c.key(46, stand(fwd=-8, turn=-4, hx=-14, hz=-12, arms=SMOOTH), "in_out_sine")                # … the wings
     c.key(57, stand(fwd=-9, hx=-16, hz=4, arms=SMOOTH), "in_out_sine")                           # satisfied
-    c.key(60, stand(fwd=-2, hx=6, hz=4, arms=merge(SMOOTH, PING), cravat=-70), "pop")            # PING
-    c.key(64, stand(fwd=6, hx=22, hz=2, arms=merge(SMOOTH, PING), cravat=-40), "out_quad")       # eyes down at it
-    c.key(L, stand(fwd=8, hx=26, hz=0, arms=merge(SMOOTH, PING), cravat=-30), "in_out_sine")
+    c.key(60, stand(fwd=-14, hx=-10, hz=4, arms=PING, cravat=-80), "pop")                        # PING — a jolt back
+    c.key(64, stand(fwd=10, hx=26, hz=2, arms=PING, cravat=-50), "out_quad")                     # eyes down at it
+    c.key(L, stand(fwd=12, hx=30, hz=0, arms=merge(PING, {"clavicle_l": [("y", 6)], "clavicle_r": [("y", -6)]}),
+                   cravat=-40), "in_out_sine")
     # the gloves ON the cravat while he straightens it (IK, riding the chest)
     c.ik("l", CRAVAT_L, 0, 28, pole=POLE_L, effector="palm", blend=(0, 5), world=False)
     c.ik("r", CRAVAT_R, 0, 28, pole=POLE_R, effector="palm", blend=(0, 5), world=False)
@@ -79,4 +92,5 @@ def build(ctx):
     for f, p in ((0, "pompous"), (26, "smug"), (34, "disdain"), (46, "pompous"), (59, "smug"), (60, "shock"),
                  (64, "mortified")):
         c.face(f, p)
+    hide_fx(c)
     return c

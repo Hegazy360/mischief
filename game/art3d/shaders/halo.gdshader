@@ -1,5 +1,5 @@
 // halo — the verb halo of a live prop (REDESIGN §3.7/§5.4, R3D index §7.6): an 8 px shell in the verb colour
-// OUTSIDE the prop's 2.5 px ink, pulsing 0.6 ↔ 1.0 at 1.2 Hz. It MUST stay visible against the back wall, where a
+// OUTSIDE the prop's 3.4 px ink (D7), pulsing 0.6 ↔ 1.0 at 1.2 Hz. It MUST stay visible against the back wall, where a
 // plain hull behind a wall-mounted prop is clipped by the wall, so:
 //  * STENCIL: the prop (prop_toon) and its ink (outline_prop) write ref 1; the halo draws only where the stencil is
 //    not 1, so it never covers the prop or its ink;
@@ -18,7 +18,7 @@ uniform float glow_amp : hint_range(0.0, 2.0) = 1.0;
 uniform float glow_hz = 1.2;
 uniform float glow_phase = 0.0;
 uniform float halo_px = 8.0;
-uniform float ink_px = 2.5;
+uniform float ink_px = 3.4;
 uniform float pull_m = 0.30;
 uniform bool use_color_normal = false;
 uniform float max_world = 0.12;

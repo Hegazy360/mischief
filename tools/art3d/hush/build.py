@@ -392,6 +392,38 @@ body.add(T.merge(bm, *holes), "prop_r", name="pepper_pot", outline=0.8)
 mat = T.toy_material("hush_toy", PAL, FACE if os.path.exists(FACE) else None)
 bodyob = body.finish(mat)
 bodyob.data.color_attributes.active_color = bodyob.data.color_attributes["Col"]
+
+
+def face_lift(ob, k_up: float, k_fwd: float, flat_x: float) -> int:
+    """Bend the face paint's shading normals toward the head's up (+Z) / forward (-Y) axes and flatten their sideways
+    (X) part by `flat_x` (hush_dims.FACE_LIFT_*), weighted by each vertex's Head weight (the head and nose are rigid on
+    Head; the neck blends out along it). Custom split normals, exported as the glb's NORMAL. Returns the corners bent."""
+    if k_up <= 0.0 and k_fwd <= 0.0 and flat_x <= 0.0:
+        return 0
+    me = ob.data
+    uv0 = me.uv_layers["UVMap"]
+    cells = [TP.cell_uv(TP.IDX[c]) for c in ("paint", "nose_h")]
+    head_g = ob.vertex_groups["Head"].index
+    lift = Vector((0.0, -k_fwd, k_up))
+    normals = [Vector(cn.vector) for cn in me.corner_normals]
+    bent = 0
+    for li, lp in enumerate(me.loops):
+        u = uv0.data[li].uv
+        if not any(abs(u.x - c[0]) < 1e-3 and abs(u.y - c[1]) < 1e-3 for c in cells):
+            continue
+        w = next((g.weight for g in me.vertices[lp.vertex_index].groups if g.group == head_g), 0.0)
+        if w <= 1e-4:
+            continue
+        n = normals[li]
+        normals[li] = (Vector((n.x * (1.0 - flat_x * w), n.y, n.z)) + lift * w).normalized()
+        bent += 1
+    me.normals_split_custom_set([tuple(n) for n in normals])
+    return bent
+
+
+FACE_LIFT = (float(opt.get("face-lift-up", D.FACE_LIFT_UP)), float(opt.get("face-lift-fwd", D.FACE_LIFT_FWD)),
+             float(opt.get("face-lift-flat-x", D.FACE_LIFT_FLAT_X)))
+print("HUSH face_lift", FACE_LIFT, "corners", face_lift(bodyob, *FACE_LIFT))
 tris = sum(len(p.vertices) - 2 for p in bodyob.data.polygons)
 deform_used = sorted({g.name for g in bodyob.vertex_groups if any(
     g.index in [ge.group for ge in v.groups if ge.weight > 1e-4] for v in bodyob.data.vertices)})

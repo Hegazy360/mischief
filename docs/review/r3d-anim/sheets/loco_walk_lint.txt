@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+INFO L24_sound_table res://data/anim/hush3d/loco_walk.json own sound frames ["0 step_pizz_up", "27 step_pizz_up"] (audio table row ["0 step_pizz_up", "10 step_pizz_up", "20 step_pizz_up", "30 step_pizz_up", "40 step_pizz_up", "50 step_pizz_up", "60 step_pizz_up", "70 step_pizz_up"]): r3d-integrate regenerates the row
+lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 295 ms
+[Content] loaded res://data in 31 ms: 0 errors, 27 warnings

@@ -1,0 +1,135 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_admire_reflection_horn",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_admire_reflection_horn.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "lean_in": [
+      0,
+      6
+    ],
+    "admire": [
+      6,
+      14
+    ],
+    "to_house": [
+      14,
+      26
+    ],
+    "pucker": [
+      26,
+      42
+    ],
+    "kiss": [
+      42,
+      50
+    ]
+  },
+  "events": [
+    {
+      "f": 6,
+      "type": "fx",
+      "id": "sparkles"
+    },
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "glint"
+    },
+    {
+      "f": 14,
+      "type": "voice",
+      "id": "vo_bellows_smug"
+    },
+    {
+      "f": 42,
+      "type": "sfx",
+      "id": "kiss_smack"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sing_small"
+    },
+    {
+      "f": 6,
+      "preset": "admiring"
+    },
+    {
+      "f": 14,
+      "preset": "smug"
+    },
+    {
+      "f": 30,
+      "preset": "kiss"
+    },
+    {
+      "f": 43,
+      "preset": "smug"
+    },
+    {
+      "f": 54,
+      "preset": "sing_small"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_admire_reflection_horn.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      41,
+      42
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 14,
+      "f1": 28,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 46,
+      "f1": 58,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "warmup"
+  ]
+}

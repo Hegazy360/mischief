@@ -1,0 +1,130 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_conduct_air",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_conduct_air.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "downbeat": [
+      0,
+      5
+    ],
+    "across": [
+      5,
+      20
+    ],
+    "up": [
+      20,
+      30
+    ],
+    "flourish": [
+      30,
+      42
+    ],
+    "bow": [
+      42,
+      55
+    ]
+  },
+  "events": [
+    {
+      "f": 5,
+      "type": "sfx",
+      "id": "baton_swish"
+    },
+    {
+      "f": 20,
+      "type": "sfx",
+      "id": "baton_swish",
+      "vol_db": -2.0
+    },
+    {
+      "f": 30,
+      "type": "sfx",
+      "id": "baton_swish"
+    },
+    {
+      "f": 42,
+      "type": "sfx",
+      "id": "bow_creak",
+      "vol_db": -4.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sing_small"
+    },
+    {
+      "f": 5,
+      "preset": "smug"
+    },
+    {
+      "f": 30,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 40,
+      "preset": "pompous"
+    },
+    {
+      "f": 50,
+      "preset": "smug"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_conduct_air.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 4,
+      "f1": 40,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 50,
+      "f1": 58,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 4
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "warmup"
+  ]
+}

@@ -256,6 +256,87 @@ func test_c6_safe_rect_keeps_props_inside() -> void:
 	cam.free()
 
 
+## The 4:3 honey jar (house3d.json hit_box, z −1.72 ± 0.3) sits high at the kitchen's left wall: the exact corner
+## depths keep every framing of Hush's walk inside the safe rect (the lint measured −4.6 px with the old estimate).
+func test_c6_exact_edges_keep_the_4x3_honey_inside() -> void:
+	var cam := _cam("4x3", P00_ROOMS)
+	cam.set_safe_rect(Rect2(Vector2.ZERO, Vector2(1440, 1080)))
+	var honey := AABB(Vector3(14.12, 1.72, -2.02), Vector3(0.72, 0.86, 0.6))
+	var pantry := AABB(Vector3(17.45, 0.0, -2.0), Vector3(0.8, 2.1, 0.6))
+	cam.set_keep_visible(func() -> Array: return [honey, pantry])
+	var t := _target(14.3)
+	var worst := INF
+	var x := 14.3
+	while x <= 19.2:
+		for lead in [1.0, -1.0]:
+			t.position.x = x
+			cam.follow(t, func() -> float: return lead)
+			cam.snap_now()
+			cam.advance(1.0 / 60.0, 1.0 / 60.0)
+			var r := cam.project_aabb(honey)
+			worst = minf(worst, r.position.x)
+			assert_le(cam.project_aabb(pantry).end.x, 1440.0, "the pantry inside at Hush x %.2f" % x)
+		x += 0.25
+	assert_ge(worst, 0.0, "the honey never leaves the 4:3 safe rect (worst left edge %.1f px)" % worst)
+	t.free()
+	cam.free()
+
+
+## C6 keeps a live box clear of the always-on HUD hit rects: N1's front door (hit box x 1.95–2.63, down to the floor)
+## sat under Clarence at 16:9 with the hall framed at x 5.0; the camera shifts left until the door clears his rect —
+## with the HUD's rects handed over and with the HudLayout fallback alike.
+func test_c6_keeps_live_boxes_clear_of_the_hud_rects() -> void:
+	var door := AABB(Vector3(1.95, 0.0, -1.3), Vector3(0.68, 2.27, 0.6))
+	for handed in [true, false]:
+		var cam := _cam("16x9", N1_ROOMS)
+		cam.set_safe_rect(Rect2(Vector2.ZERO, Vector2(1920, 1080)))
+		var clarence := Rect2(32, 880, 168, 168)
+		if handed:
+			cam.set_hud_rects([Rect2(24, 24, 144, 144), Rect2(192, 24, 344, 144), clarence, Rect2(1632, 792, 240, 240)])
+		else:
+			var auto := CameraDirector3D.hud_rects_for(Vector2(1920, 1080), Rect2(0, 0, 1920, 1080), false)
+			assert_eq(auto.size(), 4, "HudLayout gives the four always-on rects")
+			if auto.size() == 4:
+				assert_eq(auto[2], clarence, "Clarence at (S+32, H−B−200) 168 (REDESIGN §2.1)")
+		cam.set_keep_visible(func() -> Array: return [door])
+		var t := _target(2.8)
+		for x in [2.8, 4.0, 5.5, 7.0]:
+			t.position.x = x
+			cam.follow(t, func() -> float: return 1.0)
+			cam.snap_now()
+			cam.advance(1.0 / 60.0, 1.0 / 60.0)
+			var r := cam.project_aabb(door)
+			assert_false(r.intersects(clarence), "the door clear of Clarence at Hush x %.1f (%s, rect %s)" % [x, "handed" if handed else "auto", r])
+			assert_ge(r.position.x, 0.0, "the door inside the screen at Hush x %.1f" % x)
+		t.free()
+		cam.free()
+
+
+## A room wider than the 4:3 view (the P00 parlour, 6.5 m against 5.36 m): with Hush at its kitchen end the gramophone
+## (x 7.82) cannot stay in by shifting, so the camera dollies back — never past the C3 limit 1.15× — and comes back
+## to 7.5 m when she walks back.
+func test_c6_pulls_back_when_shifting_cannot_hold_the_room() -> void:
+	var cam := _cam("4x3", P00_ROOMS)
+	cam.set_safe_rect(Rect2(Vector2.ZERO, Vector2(1440, 1080)))
+	var gram := AABB(Vector3(7.82, 0.0, -2.345), Vector3(0.77, 1.9, 0.6))
+	var piano := AABB(Vector3(9.2, 0.0, -2.2), Vector3(0.75, 1.2, 0.6))
+	cam.set_keep_visible(func() -> Array: return [gram, piano])
+	var t := _target(13.7)
+	cam.follow(t, func() -> float: return 1.0)
+	cam.snap_now()
+	cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	assert_gt(cam.distance(), 7.5 + 0.01, "pulled back at the parlour's kitchen end")
+	assert_le(cam.distance(), 7.5 * View3DConst.TWO_SHOT_MAX + 0.001, "never past the C3 limit")
+	var r := cam.project_aabb(gram)
+	assert_ge(r.position.x, 0.0, "the gramophone inside the safe rect (%s)" % r)
+	assert_le(cam.project(t.position + Vector3(0.35, 0.0, 0.0)).x, 1440.0, "Hush inside the safe rect")
+	t.position.x = 9.5
+	_settle(cam, 180)
+	assert_almost_eq(cam.distance(), 7.5, 0.01, "back to the base distance")
+	t.free()
+	cam.free()
+
+
 func test_c5_floor_change_cranes_in_0_4_s() -> void:
 	var cam := _cam("20x9", [])
 	var t := _target(9.0, 0)

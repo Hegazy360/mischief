@@ -4,7 +4,7 @@ a little recoil, and tucks him back into the brace by f 16. Table row: no events
 import math
 from mathutils import Vector
 from lib.clip import Clip
-from lib.pose import merge, sym
+from lib.pose import merge, sym, mix
 from lib.hush_presets import ARMS_DOWN, STAND, gloves, glove, lean, head, clarence
 
 L = 18
@@ -15,16 +15,19 @@ def build(ctx):
     stand = merge(ARMS_DOWN, STAND, gloves(18, 12), head())
     GRAB_R = {"clavicle_r": [("y", 4)], "upperarm_r": [("y", -64), ("z", 36)], "lowerarm_r": [("z", 96)],
               "hand_r": [("x", -20)]}
-    # held up in front of her face like a bicycle horn, the elbow out: squeeze!
-    THRUST_R = {"clavicle_r": [("y", 14), ("z", 8)], "upperarm_r": [("y", 22), ("z", 52)], "lowerarm_r": [("z", 58)],
+    # hoisted up high like a trophy horn, the elbow out: SQUEEZE! (the other glove on her hip, a knee kicked up)
+    THRUST_R = {"clavicle_r": [("y", 22), ("z", 8)], "upperarm_r": [("y", 62), ("z", 30)], "lowerarm_r": [("z", 34)],
                 "hand_r": [("x", -30), ("y", -10)]}
-    RECOIL = merge(THRUST_R, {"upperarm_r": [("y", 30), ("z", 44)], "lowerarm_r": [("z", 70)]})
+    RECOIL = merge(THRUST_R, {"upperarm_r": [("y", 54), ("z", 34)], "lowerarm_r": [("z", 46)]})
+    KICK = {"thigh_l": [("x", -56), ("z", 8)], "calf_l": [("x", 80)], "foot_l": [("x", 26)]}
+    HIP_L = {"upperarm_l": [("y", 64), ("z", 24)], "lowerarm_l": [("z", -96)], "hand_l": [("x", -10), ("y", 50)]}
     c.key(0, stand)
     c.key(3, merge(stand, GRAB_R, glove("r", 50, 30), lean(fwd=6, turn=-10), head(x=14, z=-10)), "out_quad")   # grab
     c.key(6, merge(stand, THRUST_R, glove("r", 40, 30), lean(fwd=-6, turn=12), head(x=-8, z=16)), "out_back")    # out!
-    c.key(8, merge(stand, THRUST_R, glove("r", 92, 60), lean(fwd=-2, turn=12), head(x=-4, z=18),
+    c.key(8, merge(stand, THRUST_R, KICK, HIP_L, glove("r", 92, 60), lean(fwd=-10, turn=12), head(x=-14, z=18),
                    {"clavicle_r": [("y", 16), ("z", 12)]}), "pop")                                              # SQUEEZE
-    c.key(11, merge(stand, RECOIL, glove("r", 50, 30), lean(fwd=-8, turn=10), head(x=-10, z=14)), "out_quad")
+    c.key(11, merge(stand, RECOIL, HIP_L, mix(KICK, {}, 0.5), glove("r", 50, 30), lean(fwd=-8, turn=10), head(x=-10, z=14)),
+          "out_quad")
     c.key(15, merge(stand, GRAB_R, glove("r", 50, 30), lean(fwd=4, turn=-6), head(x=10, z=-4)), "in_out_sine")  # tuck
     c.key(L, stand, "in_out_sine")
     # Clarence's own squash (his body bone) and comb flare on the squeeze

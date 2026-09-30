@@ -89,8 +89,10 @@ checks the two live slice stacks keep their 24 px gaps. No edit was needed or ma
   twin equals `SimCtx.live_hotspots` on all 13 episodes.
 - `solve.sh --baseline`: baseline routes gone from an episode's solution file are listed "absent (retired)", never a failure.
 - Tools: `tools/content/c2_delta.py`, `tools/content/d1_lean_md.py`.
+- `tools/ci/lint_all.sh` runs `python3 -m unittest tools/art3d/review/test_review.py` (r3d-tools-a's request: the R14
+  review toolset; 51 tests OK, ~13 s).
 
-### Two sim fixes the fuzz forced (both mine, both route-neutral)
+### What the fuzz forced (two sim fixes, one invariant fix; all mine, all route-neutral)
 1. **A tap on the hiding spot she is in** (go or pin, HIDDEN or DIVING) clears any pin and answers
    `cmd_rejected {why: "here", target}` — before, it pinned her own spot and POP OUT dived straight back in (fuzz
    soft-lock, P00 seeds 41/97). The executor ignores "here".
@@ -100,6 +102,11 @@ checks the two live slice stacks keep their 24 px gaps. No edit was needed or ma
    Prologue's last warm-up never starts with the gramophone unrigged (in the non-repeating loop the spin was then lost
    for good: fuzz random seeds 9/21/77). All authored routes rig the lever inside the 4 s fix-up → every route hash
    unchanged. Held fix-ups are exempt from rule 9's 60 s progress check (like an uncapped gate).
+3. **Invariant rule 3 false positive** (`Invariants.rule3_safe_hiding`): N1 hider seeds 14/71/75/103/105 flagged
+   "caught while hidden unseen in parlour_piano_back" — the bot popped out mid-chase into his arms (`pop_out` and
+   `caught cause grab` on the same tick; rule 3 reads the tick-before sample, still HIDDEN). A catch that shares its
+   tick with a `pop_out` from that spot is no longer a catch in the spot; a pop_out from another spot or an earlier
+   tick still flags (`tests/solver/test_invariants.gd::test_rule3_safe_hiding`). No sim change.
 
 ## 2. Verification (commands, numbers)
 | gate | result |
@@ -133,7 +140,9 @@ adjacency-only PiP beats are where `lean` would hand him to the edge badge).
 1. Knock-on pull-ins don't make a rig point live (P00/g0 sink tap, N1 fireplace bellows struck): REDESIGN §3.4's
    counts require it; the sim still keeps the knock-on prank "in the Night" (a sneeze can still land in the sink).
 2. Doors/stairs "as today" → live only when they lead somewhere she may go tonight (REDESIGN §3.4 outranks the index;
-   r3d-sets asked). Only the kitchen back door and the N1/N2 stairs change; no route used them.
+   r3d-sets asked). Only the kitchen back door and the N1/N2 stairs change; no route used them. **Kept** —
+   r3d-sets' `SetList.local_live` mirrors it (their §9.4); their fridge-shelf reach target moved to y 0.95, band
+   still mid, so `rig_actions.json` is unchanged (the ViewDataLint re-derivation agrees).
 3. `live_mask` is a byte per hotspot (PackedByteArray), not an int bit mask (60+ hotspots).
 4. Two sim fixes + a new episode field (`director.fixup_holds`, the P00 mirror hold) to make fuzz 200 clean: they
    remove real player-facing traps (a pinned own spot; a Prologue line lost forever), and change no authored route.

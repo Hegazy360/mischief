@@ -74,7 +74,8 @@ parent were at rest (FK: children inherit). Bones not named stay at rest. Armatu
 
 The right side mirrors: `mirror(rots)` flips y and z, `sym(pose)` copies every `*_l` to `*_r` mirrored, `swap(pose)`
 swaps sides (the second half of a cycle), `merge(a, b, …)` (later wins per bone), `add(a, b)` (b's rotations after a's),
-`scaled(pose, k)`, `curl(side, deg, thumb=, spread=)` (fingers). Entries may be `{"r": [...], "s": scale, "t": (x, y,
+`scaled(pose, k)`, `mix(a, b, k)` (a true in-between: quaternion slerp bone by bone — use it for a key half-way
+between two poses; `scaled` only scales angles), `curl(side, deg, thumb=, spread=)` (fingers). Entries may be `{"r": [...], "s": scale, "t": (x, y,
 z) offset}`. Special keys: `"_pelvis": (x, y, z)` / `"_root": (x, y, z)` armature-space offsets (m). Scale survives
 the bake only on extra (non-UAL) bones; squash with poses (knees, spine), not scale.
 
@@ -115,6 +116,16 @@ contact sounds yourself (ids from `game/audio/sfx_map.json`); `bake.sh --audio-r
   arm IK (look B's analytic solver): `target` = a world (Godot) point, `("camera",)`, `(bone, rest point)` riding on a
   bone, or `callable(frame) -> point`; `pole` = the elbow direction (armature space); `hand` = the glove's rotation
   about armature axes (e.g. palm down); the IK weight eases in / out over `blend` frames.
+  `blend` may be a pair `(in, out)`; `soft=0.06` is the soft-IK zone near full extension (no elbow snap as a target
+  comes into reach; the hand falls short by ≤ soft/e at full stretch — use 0.03 when the hand must land exactly).
+  `target`, `pole` and `hand` may also be `fn(frame, pose)` (the pose so far: keys + layers + earlier constraints);
+  `hand` may return a world `Quaternion`. `c.keyed_arm(pose, side, effector)` → (the keyed effector point, the keyed
+  elbow pole, the keyed glove rotation) for such callables.
+- `c.ik_handoff(side, path, f0, f1, pole, hand=, effector=, ramp=6, ramp_out=, hand_ramp=, soft=)` — **the grab**:
+  IK along `path(frame) -> armature point` that TAKES OVER from the keyed hand over `ramp` frames after f0 and GIVES
+  IT BACK by f1 — target, elbow swivel (rotated about the shoulder→hand axis) and glove turn all ease from the keyed
+  arm's own, so a hand that must reach a prop after a hop never flips its elbow mid-move (rig_achoo_ria,
+  rig_allegro_go_go). Key the arm roughly where the IK will take it, then let this do the last 30 cm.
 - `c.reach(side, world_target, f0, f1, …)` — IK to a placed reach target + the head turned to the camera (R5d).
 - `c.look(target, f0, f1, weight, blend)` — a baked head / neck aim (staged clips only: rigs).
 - `c.custom(fn, f0, f1)` — `fn(pose, frame)` for anything else (see `lib/fixtures/` for examples).
@@ -123,11 +134,18 @@ contact sounds yourself (ids from `game/audio/sfx_map.json`); `bake.sh --audio-r
 and landing f1 (the feet ground on it from f1; a `decor {id, anim: wobble}` event at the landing for a stool);
 `c.step_up("mime", 0.40, f0, f1)` — the invisible step (pat the air first in your keys). `c.step_down(f0, f1)` — back
 to the floor (support 0 from f0 + 1). The sidecar gets `step {kind, h, id, support: [[f, h], …]}`; root x/z never move.
+`c.start_on("stool", 0.55, "kitchen_stool")` — a clip that STARTS on a step (rig_step_down, a sill: act_climb_in).
+`c.jump(f0, f1, arc)` — a flight that lands on the same support (a dive, a star jump): grounding is suspended in the
+air, the pelvis follows the arc. Tiptoe / heel-pops: `c.plant(side, f0, f1, part="ball")` holds the ball of the foot
+AND keeps the toes flat on the floor as the heel lifts (auto_plant would roll the contact and slide it).
 
 **Where the clip is performed:** `from lib.stage import Stage, reach_geometry`. `Stage(x, z, facing, cheat)` converts
 world points (`stage.to_char((x, y, z))`) and gives the camera (`stage.camera()`, the audience at (x, 1.9, 6.5)).
 `reach_geometry("kitchen_honey")` reads `house3d.json` (+ house.json x/y): `{target: world (x, y, z), pos: {x, z, step,
 step_h}, facing, band}` — stage a rig clip with `Stage(pos["x"], pos["z"], facing, cheat=10)` and reach `target`.
+`prop_point(hotspot, local)` gives any other prop-local anchor in world space exactly as `SetGeo.to_world` does (the
+prop's yaw and scale applied) — e.g. the lever pivot, the set pepper pot's spot. The placed target moves when
+r3d-sets re-places a prop: derive every staging number from these, never hard-code world metres, and re-bake.
 Rig clips (`rig_*`) record their stage in the sidecar (`stage {x, z, facing, cheat_deg}`): the view must play them
 with that facing.
 
@@ -166,7 +184,8 @@ Rules L01–L30 (header of `game/tools/anim/lint3d_rules.gd`; thresholds in `lin
 frames, loop seams (≤ 0.5°, continuous velocity), accent ≤ 4 f with ≥ 20°/f, anticipation opposes the accent, holds
 ≥ 24 / 36 f (tier 2), no dead hold > 20 f (every body bone < 0.3°/f — a hold must MOVE: breath, tremble, a finger),
 no > 45°/f jump off `pop_frames`, no L/R mirror twinning > 10 f, **feet in lane space** (planted points drift
-≤ 0.01 m; walks: stance velocity = −speed_m_s ± 5 %), soles never > 0.015 m below the support, sounds within ±1 f of
+≤ 0.01 m over a contact of ≥ 3 frames or a landing that ends a one-shot; walks: stance velocity = −speed_m_s ±
+5 %), soles never > 0.015 m below the support, sounds within ±1 f of
 a beat / mark / pop / contact, the take's face swap on the accent, laughs after it, reaction lengths 60–240 (≤ 420),
 bounding box ≥ 15 % change, beats within 2 f of `reactions.json`, time_jitter 0, the audio table, the manifest
 lengths (`SliceClips.build3d`), cheat ∈ [0, 40] (≤ 10 on rig clips), root travel ≤ 0.15 m, rig clips (`rig_pm`,
@@ -182,4 +201,12 @@ The lint samples the baked tracks itself (FK on the rig skeleton; `test_pipeline
 - *"mushy accent"* — the accent beat must contain the fast frames: put a `pop` key (or a 2–4 f move) inside it.
 - *"no motion for ≥ 21 f"* — make the hold move (≥ 0.3°/f on some body bone every ≤ 20 f), or `c.freeze_hold(f0, f1)`.
 - *"clip baked on another skeleton"* — the rig glb changed (skeleton v0 → frozen): re-bake (`--changed` does it).
+- *"jumps 50°/f without a pop"* on a hop or a grab — the keyed arm and the IK arm disagree: key the arm near where
+  the IK takes it and use `ik_handoff`; a body rising out of a squash in one frame (`out_cubic` into the next key) is
+  the other usual cause — `in_out_sine` it over ≥ 3 frames. A deliberate smear (a dive's launch, a whip) goes in
+  `c.pop_frames`.
+- *"no motion for ≥ 21 f"* on a performed hold (a bow) — layer `c.motion(fn)` nods / sways over it.
 - A Blender traceback prints under the `[bake] FAILED <clip>` line; the full log is kept in the temp dir it names.
+- Silhouettes: `tools/scripts/shot.sh res://tools/anim/Verbs3D.tscn /abs/x.png <6×items+10> <sandbox> -- --out=/abs/dir
+  --items="name=hush/clip@frame[:facing=-1][:cheat=10][:prop=pepper_pot.held],…"` renders RGBA cut-outs on the game's
+  RigPlayer3D (then `tools/art3d/review/sil64.py masks … --mode=alpha`).

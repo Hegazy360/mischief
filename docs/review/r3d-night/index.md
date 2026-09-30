@@ -7,7 +7,7 @@ for the timing runs (R11). Cast, clips and sets are whatever `r3d-cast-*`, `r3d-
 
 | Artefact | What it shows | Verdict after looking |
 |---|---|---|
-| [g0_route_strip.jpg](g0_route_strip.jpg) | `e2e.sh g0_sneeze` (fixed 60 fps), every 48th frame: the 2D curtain rise, Hush's climb-in, the squeak lesson, the honey with the gold ring + LIVE RIG button, the dotted path to the pantry, the dive, Bellows at the tea in the Bellows window, then in the kitchen, the CHOO (punch-in, caption, Stalls), the curtain call with **Again ▶** | calm; one loud call to action at a time (the action button or the tray), every tap answered by the ring + path; the Bellows window only while he is off screen |
+| [g0_route_strip.jpg](g0_route_strip.jpg) | `e2e.sh g0_sneeze` (fixed 60 fps), every 48th frame: the 2D curtain rise, Hush's climb-in, the squeak lesson, the honey with the gold ring + LIVE RIG button, the dotted path to the pantry, the dive, Bellows at the tea in the Bellows window, then in the kitchen, the CHOO (punch-in, caption, Stalls), the curtain call with **Again ▶** | calm; in the frames looked at one loud call to action at a time (the action button or the tray) — the probe's `overlays.loud_max` reads 2 at two samples per route (for r3d-hud's one-loud rule); every tap answered by the ring + path on its frame; the Bellows window only while he is off screen |
 | [g0_curtain_call_strip.jpg](g0_curtain_call_strip.jpg) | the g0 call: the fall, the results panel, the **Gag Reel 3D** re-staging the recorded CHOO in its slot (first frame at once), Again ▶ and Stage door live | the reel frames Bellows' chest and follows him onto the stool and into the sink; the caption appears after the accent |
 | [p00_route_strip.jpg](p00_route_strip.jpg) | `e2e.sh prologue_ideal` (real time, launch clock), every 30th frame: kitchen → parlour, the Figgis card cue, the lever sparkle, ALLEGRO-GO-GO!, the running gag, the curtain with Retry / Night 1 | reads end to end at the base framing; the room dimming carries "where the action is" |
 | [p00_curtain_call_strip.jpg](p00_curtain_call_strip.jpg) | the P00 call: the fall, **3D bows** in front of the 2D curtain (Hush walks in and bows under the roses, the title slams over her, then Bellows wanders on, turns red in the slow burn and the valance drops on his head), results + the Gag Reel (ACHOO-RIA! in the kitchen, then ALLEGRO-GO-GO! in the parlour) | reads as the Stage-2 call with 3D actors; Hush is ~55 % of the frame height at the lip, Bellows (upstage band) ~40 %; the title covers Hush's torso for its 1.2 s hold |
@@ -30,8 +30,9 @@ for the timing runs (R11). Cast, clips and sets are whatever `r3d-cast-*`, `r3d-
 
 Draw calls, triangles, emitters, texture memory, compiles, build and warm are inside the budget. The view + HUD script
 time is 4.6–5.1 ms p95 rendered (llvmpipe rasterises on the same 4 cores) and 3.4 ms headless; the device (O2 probe
-APK) is the number that counts. (`prologue_required` is from the first pass, before the view/sim split.) `prologue_required` shows the Bellows window 38 % of
-PLAY (> 35 % warning); the P00-ideal share that decides R15 is 29.6 %, so `bellows_window` stays `"sim"`.
+APK) is the number that counts. `prologue_required` is from the first pass (before the view/sim split); it shows the
+Bellows window 38 % of PLAY (> 35 % warning). The P00-ideal share that decides R15 is 29.5–29.8 % over four runs, so
+`bellows_window` stays `"sim"`.
 
 ## e2e in 3D (this task's runs; strict = `--strict`, R9 scope)
 

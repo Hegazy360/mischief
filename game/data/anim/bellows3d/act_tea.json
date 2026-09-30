@@ -253,6 +253,36 @@
     "freeze_holds": [],
     "draft": false
   },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 12,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    },
+    {
+      "f0": 18,
+      "f1": 40,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 128,
+      "f1": 166,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    },
+    {
+      "f0": 240,
+      "f1": 480,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 10
+    }
+  ],
   "stage": {
     "x": 15.0,
     "z": -1.4,

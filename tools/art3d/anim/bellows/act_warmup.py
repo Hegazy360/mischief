@@ -66,6 +66,7 @@ def build(ctx):
              40, 456, weight=lambda f: window(f, 40, 60, 440, 456))
     c.ground()
     c.auto_plant(speed_m_s=0.0)
+    face_cam(c, 40, 456, ease=(8, 8))          # D8: he sings to the Stalls (yaw only: the chest-up pitch stays)
     # the needle: the baton's tip onto the record (IK: the fingertips), then the left glove on his heart
     tip = ctx.skel.head("prop_baton") + Vector((-0.34, -0.01, 0.02))     # the baton's tip (rides the right glove)
     tip.freeze()
@@ -89,5 +90,5 @@ def build(ctx):
                  (160, "sing_mid"), (210, "sing_small"), (250, "sing_big"), (300, "sing_mid"), (350, "sing_small"),
                  (405, "sing_big"), (430, "sing_mid"), (456, "pompous")):
         c.face(f, p)
-    c.look_camera(40, 456, weight=0.5, blend=10)
+    c.look_camera(40, 456, weight=1.0, blend=8)
     return c

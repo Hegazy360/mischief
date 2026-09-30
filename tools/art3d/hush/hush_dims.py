@@ -34,6 +34,15 @@ HEAD_P = 2.45                     # superellipse power: a flatter vinyl face fro
 # the face card: planar FaceUV square on the head's front faces (u right as seen from the front, v up)
 FACE_C = (0.0, 1.352)             # (x, z) centre of the face square
 FACE_W = 0.300                    # width = height of the face square (m); the painted face fills ~0.26 of it
+# the face lift (lint fix pass, REDESIGN §3.7 "Hush face 96"): the face paint's shading normals (head, neck by its Head
+# weight, button nose) lose FACE_LIFT_FLAT_X of their sideways part and get + FACE_LIFT_UP x the head's up axis
+# (+ FACE_LIFT_FWD x its forward), renormalised. The stage key comes from above (y 0.62 of the vinyl key), so the white
+# face stays in char_toon's lit band from either facing at the idle / walk cheats instead of taking the terminator
+# across it when she faces away from the key. Geometry, silhouette, face card and the body's vinyl terminator are
+# untouched; only the paint's normals move.
+FACE_LIFT_UP = 1.2
+FACE_LIFT_FWD = 0.0
+FACE_LIFT_FLAT_X = 0.5
 
 # beret (cherry red, tilted to her left, a stalk): its highest point is placed at HEIGHT_M exactly
 BERET_R = (0.172, 0.164, 0.040)   # semi-axes (B: 0.168 x 0.158 x 0.036)

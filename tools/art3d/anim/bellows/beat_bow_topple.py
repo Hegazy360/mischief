@@ -62,6 +62,15 @@ def flat(rock=0.0, paddle=0.0):
                  open_hand("l", 20), open_hand("r", 20), lean(fwd=-10), head(x=-40 + 6 * rock))
 
 
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
+
 def build(ctx):
     c = Clip(ctx, "bellows/beat_bow_topple", length=L, cheat_deg=35, blend_in=8, blend_out=12,
              tags=["last_beat", "t3"], notes="the pelvis pitches, the root stays; ends flat on his belly (the next "
@@ -104,4 +113,5 @@ def build(ctx):
     c.event(34, "jiggle", bones=["belly", "bouffant", "bouffant_l", "bouffant_r", "tail_l", "tail_r"], kick=1.0)
     for f, p in ((0, "pompous"), (14, "smug"), (26, "strain"), (30, "shock"), (34, "dazed_open"), (44, "mortified")):
         c.face(f, p)
+    hide_fx(c)
     return c

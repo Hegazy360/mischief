@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_cravat_tug",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_cravat_tug.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "reach": [
+      0,
+      10
+    ],
+    "puff": [
+      10,
+      27
+    ],
+    "ping": [
+      27,
+      36
+    ]
+  },
+  "events": [
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "cravat_tug",
+      "vol_db": -3.0
+    },
+    {
+      "f": 10,
+      "type": "jiggle",
+      "bones": [
+        "cravat",
+        "belly"
+      ],
+      "kick": 0.6
+    },
+    {
+      "f": 27,
+      "type": "sfx",
+      "id": "cravat_ping",
+      "vol_db": -4.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 10,
+      "preset": "strained_grin"
+    },
+    {
+      "f": 18,
+      "preset": "smug"
+    },
+    {
+      "f": 36,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_cravat_tug.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 10,
+      "f1": 40,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "tags": [
+    "micro_gag",
+    "walk"
+  ]
+}

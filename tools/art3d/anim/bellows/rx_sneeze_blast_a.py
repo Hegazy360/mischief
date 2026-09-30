@@ -9,7 +9,7 @@ dazed under a ring of vinyl stars, sitting up groggy (145-165).
 Staged at the stool (x 15.0, z -1.4, facing -1, cheat 35: his left side and face toward the audience). Frame 0 is
 act_tea's sip (both clips build it from _lib.presets SIP_BODY + sip_arms). Sounds: the audio table (R3)."""
 import math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 from lib.clip import Clip
 from lib import pose as P
 from _lib.presets import *
@@ -110,8 +110,8 @@ def build(ctx):
         arms = merge(SINK_ARMS, {"upperarm_l": [("y", 36 + 30 * sit), ("z", 24 - 6 * sit)],
                                  "upperarm_r": [("y", -36 - 30 * sit), ("z", -24 + 6 * sit)]})
         return body(arms, legs, glove("l", 30, 16), glove("r", 30, 16),
-                    lean(fwd=14 + 10 * sq - 4 * sit, side=4 * loll), head(x=14 + 6 * sq - 8 * sit, y=10 * loll, z=10),
-                    {"pelvis": [("x", -56 + 30 * sit)], "fx_stars": {"r": [], "s": star}}, belly=1.0 - 0.06 * sq)
+                    lean(fwd=22 + 10 * sq - 6 * sit, side=4 * loll), head(x=26 + 6 * sq - 10 * sit, y=10 * loll, z=10),
+                    {"pelvis": [("x", -40 + 22 * sit)], "fx_stars": {"r": [], "s": star}}, belly=1.0 - 0.06 * sq)
     c.key(112, sink(sq=1.0), "pop")
     c.key(115, sink(sq=-0.3, kick=0.6), "out_quad")
     c.key(119, sink(sq=0.1, kick=-0.8, loll=0.4), "in_out_sine")
@@ -130,9 +130,8 @@ def build(ctx):
     c.motion(lambda f: tremble(f, 0.5 + 1.2 * ramp(f, 44, 70), ("spine_03", "Head", "neck_01")), 44, 78,
              weight=lambda f: window(f, 44, 52, 74, 78))
     c.motion(lambda f: breath(f, 70.0, 0.6), 0, 44)
-    c.motion(lambda f: {"Head": [("z", 9 * math.sin(2 * math.pi * (f - 145) / 20.0)),
-                                 ("y", 6 * math.cos(2 * math.pi * (f - 145) / 20.0))]}, 145, L,
-             weight=lambda f: ramp(f, 145, 150))
+    c.motion(lambda f: {"Head": [("y", 6 * math.cos(2 * math.pi * (f - 145) / 20.0))]}, 145, L,
+             weight=lambda f: ramp(f, 145, 150))       # the roll half of the dazed circle (the yaw half: after D8)
     c.motion(lambda f: {"fx_stars": [("z", 12.0 * (f - 145))]}, 145, L)
     # the stool rides under him from 95; at 112 it is knocked away backwards, tumbling
     c.motion(lambda f: {"ride": {"r": [("x", -38 * ramp(f, 112, 128) - 220 * ramp(f, 113, 128) ** 1.4)],
@@ -141,9 +140,22 @@ def build(ctx):
 
     # ---- constraints: the seat, the look at the audience, the tea set in his gloves ---------------------------------
     seat(c, 0, L)
-    c.look(("camera",), 0, 93, weight=0.4, blend=(0, 4))
+    # D8: the face on the camera through every face beat — the build (the keyed tip-back stays: yaw only), CHOO at
+    # 0.8 (the puff blasts forward, clear of the face), loosened in the flight; in the sink (lying back in the basin,
+    # the face points at the ceiling) a full look: the chin comes down and the dazed face peers out at the Stalls
+    face_w = [(0, 1.0), (91, 1.0), (93, 0.75), (94, 0.8), (97, 0.7), (103, 0.45), (111, 0.45)]
+    face_cam(c, 0, 111, weight=lambda f: track(f, face_w), ease=(0, 0))
+    c.look(("camera",), 112, L, weight=0.9, blend=(0, 0))
+    c.look_camera(0, 93, weight=1.0, blend=0)          # the same for the view's runtime gaze (either facing)
+    c.look_camera(114, L, weight=1.0, blend=6)
 
-    cup_keys = [(0, 1.0), (8, 0.55), (20, 0.15), (74, 0.0), (82, 0.55), (88, 1.0), (91, 0.95), (93, 0.55)]
+    def dazed_circle(pose, f):
+        """The yaw half of the dazed head circle, on top of the camera look (145-165)."""
+        a = 9.0 * math.sin(2 * math.pi * (f - 145) / 20.0) * ramp(f, 145, 150)
+        pose.set_world_rot("Head", qz(a) @ pose.world_rot("Head"))
+    c.custom(dazed_circle, 145, L)
+
+    cup_keys = [(0, 1.0), (8, 0.55), (20, 0.15), (74, 0.0), (82, 0.55), (88, 1.0), (90, 0.9), (92, 0.5), (93, 0.4)]
     out_keys = [(0, CUP_BELLY), (8, CUP_BELLY), (20, (-0.24, -0.46, 1.00)), (44, (-0.34, -0.40, 1.08)),
                 (74, (-0.40, -0.34, 1.14)), (82, (-0.16, -0.46, 1.02)), (93, (-0.22, -0.44, 1.04))]
     sau_keys = [(0, SAUCER_CHIN), (8, SAUCER_BELLY), (44, (-0.02, -0.46, 0.92)), (74, (0.02, -0.44, 0.95)),
@@ -161,15 +173,25 @@ def build(ctx):
         sip_arms(ts, pose, lift=lift, cup_low=low, saucer_at=sau, saucer_R=qy(-tilt) @ SAUCER_L, w_r=w, w_l=w)
     c.custom(tea_hands, 0, 93)
 
-    # the CHOO puff stays where it burst (in front of his nose at f 94) while he is blown back from it
-    def puff_stays(pose, f):
+    # the CHOO puff: it blasts FORWARD along his front, away from the camera and a little down (clear of the face now
+    # turned to the audience), and stays where it burst while he is blown back from it
+    PUFF_DIR = Vector((-0.36, -0.91, -0.20)).normalized()
+
+    def puff(pose, f):
+        if f == 94:
+            M = pose.world["fx_choo"]
+            at = M.translation.copy()
+            u = pose.skel.carried_dir(pose.world, "fx_choo", P.FRONT)
+            q = P.swing(u, PUFF_DIR)
+            place_bone(pose, "fx_choo", Matrix.Translation(at) @ q.to_matrix().to_4x4() @ Matrix.Translation(-at) @ M)
+            return
         w = 1.0 - ramp(f, 98, 103)            # eases back onto the head while it shrinks away (gone by 103)
         loc0, rot0, sc0 = pose.get("fx_choo")
         place_bone(pose, "fx_choo", c.evaluate(94).world["fx_choo"])
         loc1, rot1, _ = pose.get("fx_choo")
         pose.basis["fx_choo"] = (loc0.lerp(loc1, w), P.qslerp(rot0, rot1, w), sc0)
         pose.update_from("fx_choo")
-    c.custom(puff_stays, 95, 103)
+    c.custom(puff, 94, 103)
     c.pop_frames.append(95)          # the blast's recoil frame (the puff pinned in front of him, the body snapped back)
 
     # ---- events -------------------------------------------------------------------------------------------------

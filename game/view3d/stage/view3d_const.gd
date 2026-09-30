@@ -92,9 +92,11 @@ const LIGHT_BELLOWS_MIN := 0.9       ## his char_toon stage_light never below th
 const LIGHT_EASE_S := 0.4
 const HIDDEN_DESAT := 0.2            ## the "safe" world while Hush hides
 
-# --- outlines, glow, halo (REDESIGN §5.4, §3.7) ---
-const OUTLINE_CHAR_PX := 3.5
-const OUTLINE_PROP_PX := 2.5
+# --- outlines, glow, halo (REDESIGN §5.4, §3.7; widths = lead ruling D7: look A's 2.4 px @540 = 4.8 px @1080 on
+# characters, 3.4 px on live props — the spec's 3.5 / 2.5 ratio; dressing and architecture none; Settings
+# "Outline +50 %" multiplies through the mnd_outline_scale global) ---
+const OUTLINE_CHAR_PX := 4.8
+const OUTLINE_PROP_PX := 3.4
 const HALO_PX := 8.0
 const GLOW_HZ := 1.2
 const GLOW_OFF := 0.0

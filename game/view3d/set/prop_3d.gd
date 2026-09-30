@@ -1,8 +1,8 @@
 ## Prop3D — one hotspot's piece on tonight's set (a live prop, or a hotspot on stage as furniture): its model (the
-## `.glb` of `house3d.json` or a SetPrims greybox of its silhouette family), the 2.5 px ink and 8 px verb-halo shells
-## (live props only, visual layer 3 PROP_INK), the idle / armed / spent looks, the rig progress scrub, the red beret
-## tag, verb glow, short trigger animations and the lend / return_home slide of set-piece hand-offs (R3D index §7.2,
-## §7.10; REDESIGN_3D §4.1–§4.4).
+## `.glb` of `house3d.json` or a SetPrims greybox of its silhouette family), the prop ink (View3DConst.OUTLINE_PROP_PX,
+## lead ruling D7) and 8 px verb-halo shells (live props only, visual layer 3 PROP_INK), the idle / armed / spent looks,
+## the rig progress scrub, the red beret tag, verb glow, short trigger animations and the lend / return_home slide of
+## set-piece hand-offs (R3D index §7.2, §7.10; REDESIGN_3D §4.1–§4.4).
 ##
 ## The node's transform is the prop frame (origin + yaw, `SetGeo.prop_xform`); its `Visual` child carries `scale`.
 ## Anchors (`anchor(kind)`) are the house3d.json anchors in world space. Animations only process while running.
@@ -119,6 +119,11 @@ func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_v
 		_build_primitive()
 	if live:
 		_build_shells()
+		# the beret tag is built (hidden) with the prop, so show_tag never creates a node or material in PLAY
+		if entry.get("tag_socket", null) != null:
+			_tag = _make_tag()
+			_tag.visible = false
+			add_child(_tag)
 	if _skel == null:
 		_build_armed_marks()
 	set_process(false)

@@ -6,6 +6,37 @@
   LINT: NO_IMPORT=1 tools/scripts/sandbox.sh <key> -s res://tools/anim/lint_anim.gd -- --format=3d [--rig=R|--clip=ID|--file=sidecar] [--scope=g0,p00] [--strict] [--json=/abs] — rules L01–L30 in game/tools/anim/lint3d_rules.gd (class AnimLint3D), thresholds lint3d_limits.json; feet per sole point in lane space; expectations from SliceClips.build3d. Tests: game/tests/anim3d/test_lint3d.gd (24, one fixture per rule) + test_pipeline.gd; fixtures game/tests/anim3d/fixtures/ (specs tools/art3d/anim/lib/fixtures/).
   SIDECAR additions (optional fields, index §7.3 rule): "stage" {x, z, facing, cheat_deg} on rig clips (the view must play them with that facing), "step" {kind, h, id, support:[[f,h]…]}, "gaze" [{f0, f1, at:"camera", weight, blend}] (runtime audience look — facing-proof), "source.audio" table|own.
   Verified on the cast v0 rigs: hush.glb (79 bones) + bellows.glb (90 bones, arm_out) bake, convert and lint clean (UAL Walk_Loop/Walk_Formal_Loop/Sprint_Loop); played in AnimViewer3D via --anim-glb.
+20:17Z A1 LANDED — Hush's 17 FINAL clips (brief §4.2 order), baked on the frozen skeleton, bake --strict + lint clean; hush3d/map.json (incl. r3d-anim-hush-b's DONE rows: arrive, skid, glance, fidgets, rummage/pick_window, wheeze, shrug, yanked, freeze_5..8, freeze_midjob); tests game/tests/anim3d/test_hush_clips3d.gd (8 pass: lengths, lint strict, map keys resolve, gaits, statues, rig staging, ACHOO-RIA! pot spout on the placed target at f16/26/36 ≤ 0.03 m, ALLEGRO glove on the knob); sheets docs/review/r3d-anim/sheets/. LIB additions (hush-b / bellows: all optional, README §Clip API): Clip.ik_handoff (IK path that takes over from / gives back to the keyed arm: target, elbow swivel and glove turn all eased), Clip.keyed_arm, pose-aware ik callables fn(f, pose), ik blend=(in, out) + soft=, Clip.start_on (a clip that starts on a step), Clip.jump (flight on the same support), pose.mix (quaternion in-betweens of pose dicts), stage.prop_point (yaw-aware prop anchors = SetGeo.to_world; reach_geometry now applies the prop yaw), plant(part="ball") keeps the toes flat, auto_plant pins a short contact that ends a one-shot, solve_arm's hinge from the pole plane (no 180° flip on a straight arm), run_arms preset swings about armature x (was a no-op twist). LINT: L12 ignores < 3-frame touches (plant_min_f, = the planner), rig_step_down exempt from the reach rules, null lock no longer crashes L28.
+DONE hush/loco_idle 1addd1db4ccaadd057292f2d818e4b23e1a68debc2d6dac15d4f8b75e3f72828
+DONE hush/loco_walk f9d25c8bc7b7f0cf30e1ae748aed13eac5a3d6fc22966a8bd72979b6c383806d
+DONE hush/rig_achoo_ria eec758e023cd74969ebddc5ebd9065d4523912792d7fddefc57e2365fbf2229b
+DONE hush/rig_step_down 4e169a7915a30bc9d65fb7dd4527786df7204114550b7ce70f5a215940075f11
+DONE hush/act_snicker 2c7d170eced757a07ca2b5f1ad434e8f3aa3e59c0635de76a4c269a0a0cab001
+DONE hush/act_dive d58ff5b1676f18a43e4246046bdd5e5bb50dcd5d0426f3b38f5c9c3ea43879aa
+DONE hush/act_pop 6fa17fe236022290f6a26171ce1001e964dc32d60f0c957b230cad6c6375e563
+DONE hush/freeze_1 5bf2a0541e7402d8f1e0609f67869259997dd9c92f4cd8814ec6d267d59d2300
+DONE hush/freeze_2 d2e86e3b1f8e7d52a41e5821709943283a1a22102c7a701eb1c20d623ed16f2e
+DONE hush/freeze_3 1134af02d60c9c33470091c348b31b6f52f430e7914ba5a5e332b2d7a9e66dfd
+DONE hush/freeze_4 005609054ea72807f0cce6e4daddd100e384eddffc17f24e12a867ce6643c98c
+DONE hush/act_squeak afd9ecedf190fcd476368f19fc94bdbf78ae4e2b13a1c72801b106a7cc1ab725
+DONE hush/loco_run d669cc60832940ad0dcb5602d61bd86b0fcf16874c8603a823088005aed04b01
+DONE hush/loco_turn f3b3205ab48bdf21c00658923db96a9919defbdbd0da6f217828d10ea34e7075
+DONE hush/act_climb_in caf5ec8b38f6d635cd22e2505de7c1f7ba0fb745adcce58763efdbda4e3f43a8
+DONE hush/rig_allegro_go_go d5579c2759acbf0da3f999f5a21362ef7caae68e43aa5cca67630327486f21ae
+DONE hush/act_bow 97ecf1cca9307ba8b6118d05e13ae7d5f77277749b380a26b84fc4f88dd0edeb
+  NOTE r3d-anim-hush-b / bellows: a re-bake picks up the lib fixes above (ball plants keep the toes flat; straight-arm IK no longer flips); lint --rig=hush (35) and --rig=bellows (32) --strict are clean on the current bakes.
+20:51Z re-baked for the 64 px verb board (stronger silhouettes: freeze_3 arms in a V + a knee jerk, act_snicker tee-hee knees + heel pop, act_squeak the chicken hoisted high + a knee kick, act_bow a deeper hip hinge); bake --strict + lint clean; docs/review/r3d-anim/verbs_64.png (18 silhouettes, max IoU 0.61) + packets/verbs_64 (R17, pending review). New tool game/tools/anim/Verbs3D.tscn (RGBA cut-outs on RigPlayer3D).
+DONE hush/freeze_3 e7d98f8d13e6d14b87c07b54ee0e21d6179a08da25d4503418ca30d4f4d458e9
+DONE hush/act_snicker 80406caec46c5f10072a7b2f1e4534b483b151274f2ec4ec6b0826e12e788e57
+DONE hush/act_squeak 4cbd6951cd81536bf705bf69da2f8a8667180cf70d3d907ae6dcd61351529257
+DONE hush/act_bow 43aab727725af9054249fe48da75eb59f3fd5b94af4aee7350f104a00fa19749
+21:08Z FINAL CHECK — full suite (test_game.sh r3d-anim, with import) 1496 passed / 0 failed / 0 skipped; SANDBOX=r3d-anim lint.sh OK (lint_anim 3d 77 clips 0 errors); lint --format=3d --rig=hush --scope=g0,p00 --strict 35 clips 0 errors; review artefacts docs/review/r3d-anim/ (index.md, rubric.md, verbs_64.png + reviewer packet, achoo_kitchen*.jpg, allegro_parlour.jpg, gate0_path.jpg, audio_rows.md, sheets/ for all 17). Report = the task's final answer.
 REQUESTS
   r3d-rig: honour sidecar "gaze" (look_at_point toward the camera over [f0,f1], weight, blend) — audience glances baked into a clip only read for one facing.
   r3d-view3d: while a rig_* clip plays, set Hush's facing from the sidecar's "stage.facing" (the prop's side), and cheat ≤ 10.
+  orchestrator (R17): run the fresh reviewer on docs/review/r3d-anim/packets/verbs_64/prompt.md (key <SP>/work/r3d-anim/review_key_verbs.json; see docs/review/r3d-anim/reviewer_prompt.md) — W1 bar ≥ 11/13.
+  r3d-sets (house3d.json kitchen_honey): the set pepper pot (pepper_pot part pivot x -0.2 local x 1.5 = 0.30 m beyond the jar) is only reached from the stool in a 30° lean-out on one foot and her glove stops 0.05-0.07 m short on the snatch frame; pivot x ≈ -0.15 (0.22 m) would close it if Bellows' bouffant allows (the clip re-bakes from the data). The jar sits behind her head from the camera: every +0.1 m of reach_pos dx uncovers more of it. parlour_gramophone: its `rig` anim should move the lever over progress 16/48 → 22/48, 40° about the lever pivot's x (toward the front) — rig_allegro_go_go's gloves follow that arc.
+  r3d-cast-hush: her `pepper_pot` prop (a small dark cylinder) should match the set pot (0.44 m tall, white body, dark cap) so the swap at f 7 / f 42 of rig_achoo_ria is invisible; the clip assumes fx_pepper (the holes) 0.215 m up the pot from grip_r.
+  r3d-rig: sheet3d.gd's phone cells crop a stepped clip (rig_achoo_ria on the 0.55 m stool) above the knees — frame them on the clip's AABB.
+  r3d-view3d: kitchen_honey's floor spot (reach_pos x 14.85) lies inside the stool's seat box (14.81-15.19): at f 0 / f 48 of rig_achoo_ria her feet overlap the stool; walk her in beside it (≤ 0.15 m from the clip's origin) or accept the two floor frames.
+  r3d-sets (house3d.json parlour_gramophone): at reach_pos x 7.8 Hush works against the parlour's wall end — the pillar overlaps her back while she is turned in to the lever (docs/review/r3d-anim/allegro_parlour.jpg f 9-19); a reach_pos dx 0.15 m larger (she stands 0.15 m further right, the knob then 0.05 m ahead of her, still at her left) would clear it; rig_allegro_go_go re-bakes from the data.

@@ -76,8 +76,13 @@ var force_stand_ins: bool = false
 var pip: Node = null
 ## Settings `bellows_window` ("sim" | "lean", index R15).
 var window_mode: String = "sim"
-## The HUD's always-on rects (logical px) for the protected set (NightScene hands them over).
-var hud_rects: Array[Rect2] = []
+## The HUD's always-on rects (logical px) for the protected set (WorldOverlays hands them over every frame); the
+## camera's C6 keeps live hit boxes clear of the same rects.
+var hud_rects: Array[Rect2] = []:
+	set(v):
+		hud_rects = v
+		if cam != null:
+			cam.set_hud_rects(v)
 ## The safe rect (logical px); the whole screen by default.
 var safe: Rect2 = Rect2()
 
@@ -119,7 +124,11 @@ var warm_hint: Dictionary = {}
 ## decals + particles, overlays) — ViewSandbox3D's perf line divides by `prof_frames`.
 var profile: bool = false
 var prof_us := PackedInt64Array([0, 0, 0, 0, 0, 0])
+## This frame's µs per phase while `profile` (+ [6] the rest of advance: visibility, sparkles), for spike splits.
+var prof_frame_us := PackedInt64Array([0, 0, 0, 0, 0, 0, 0])
 var prof_frames: int = 0
+## The per-node profiler (`--view3d-prof=/abs.json` only; ScriptProf3D).
+var _prof: ScriptProf3D = null
 var unlocked: PackedStringArray = PackedStringArray()
 var fx: FxShim = null
 var _empty_snap := ViewSnapshot.new()
@@ -153,6 +162,8 @@ func setup(db_or_null: Variant, episode_or_null: Variant, snapshot_source: Objec
 	if source != null and not source.has_method("snapshot"):
 		_own_snap = ViewSnapshot.from_sim(world)
 		_own_prev = ViewSnapshot.from_sim(world)
+	if _prof == null:
+		_prof = ScriptProf3D.maybe_attach(self)
 	built.emit()
 
 
@@ -204,6 +215,7 @@ func _ep_get(ep: Variant, key: String) -> Variant:
 
 
 func _build() -> void:
+	_hb_cache.clear()
 	for c in get_children():
 		c.queue_free()
 	lighting = StageLighting3D.new()
@@ -219,6 +231,8 @@ func _build() -> void:
 	for hs in layout.hotspots:
 		if rooms_lit.has(hs.room):
 			_hotspot_ids.append(hs.id)
+	if cam != null:
+		cam.set_room_boxes(_live_boxes_by_room())
 	decals = Decals3D.new()
 	add_child(decals)
 	fx3d = Fx3D.new()
@@ -403,6 +417,19 @@ func _pool_point(hotspot_id: String) -> Vector3:
 
 ## The hit box of a hotspot (House3D.hotspot_box; the house.json rect at z −1.75 ± 0.3 otherwise).
 func hotspot_box(id: String) -> AABB:
+	var cached: Variant = _hb_cache.get(id, null)
+	if cached is AABB:
+		return cached
+	var out := _hotspot_box_uncached(id)
+	_hb_cache[id] = out
+	return out
+
+
+## Hit boxes are static for a build (house3d.json / house.json): cached per id, cleared by `_build`.
+var _hb_cache: Dictionary = {}
+
+
+func _hotspot_box_uncached(id: String) -> AABB:
 	if set3d != null and set3d.has_method("hotspot_box"):
 		var b: Variant = set3d.call("hotspot_box", id)
 		if b is AABB and (b as AABB).size != Vector3.ZERO:
@@ -456,6 +483,24 @@ func hotspot_rects_in_view() -> Array:
 			_rects_out.append({"id": "floor:" + room, "kind": "floor", "rect": fr.intersection(screen), "room": room,
 				"priority": 0, "enabled": true, "stack": ""})
 	return _rects_out
+
+
+## C6: every live hit box of each lit room ({room: [AABB]}, doors and exits included) for the camera.
+func _live_boxes_by_room() -> Dictionary:
+	var out := {}
+	for id in _hotspot_ids:
+		if not live.is_empty() and not live.has(id):
+			continue
+		var hs := layout.hotspot(id)
+		if hs == null:
+			continue
+		var b := hotspot_box(id)
+		if b.size == Vector3.ZERO:
+			continue
+		if not out.has(hs.room):
+			out[hs.room] = []
+		(out[hs.room] as Array).append(b)
+	return out
 
 
 ## World x range (sim px) covered by tonight's built rooms (the 2D CameraDirector.stage_x_range).
@@ -565,6 +610,8 @@ func advance(delta: float) -> void:
 		if profile:
 			prof_us[0] += t1 - t0
 			prof_us[1] += Time.get_ticks_usec() - t1
+			prof_frame_us[0] = t1 - t0
+			prof_frame_us[1] = Time.get_ticks_usec() - t1
 		_return_on_switch("hush", hush_view)
 		_return_on_switch("bellows", bellows_view)
 	var t2 := Time.get_ticks_usec() if profile else 0
@@ -593,6 +640,10 @@ func advance(delta: float) -> void:
 		prof_us[3] += t4 - t3
 		prof_us[4] += t5 - t4
 		prof_us[5] += t6 - t5
+		prof_frame_us[2] = t3 - t2
+		prof_frame_us[3] = t4 - t3
+		prof_frame_us[4] = t5 - t4
+		prof_frame_us[5] = t6 - t5
 		prof_frames += 1
 	_update_sparkles(delta)
 	if _entry_room != "":
@@ -600,6 +651,9 @@ func advance(delta: float) -> void:
 		if _entry_t <= 0.0:
 			_entry_room = ""
 	_update_visibility(snap)
+	if profile:
+		prof_frame_us[6] = Time.get_ticks_usec() - t0 - (prof_frame_us[0] + prof_frame_us[1] + prof_frame_us[2]
+			+ prof_frame_us[3] + prof_frame_us[4] + prof_frame_us[5])
 
 
 # --- lights --------------------------------------------------------------------------------------------

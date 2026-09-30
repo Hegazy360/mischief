@@ -1,0 +1,124 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_comb_flourish",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_comb_flourish.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "dip": [
+      0,
+      6
+    ],
+    "stroke": [
+      6,
+      20
+    ],
+    "flourish": [
+      20,
+      28
+    ],
+    "tuck": [
+      28,
+      38
+    ],
+    "admire": [
+      38,
+      48
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "comb"
+    },
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "zip",
+      "vol_db": -6.0
+    },
+    {
+      "f": 20,
+      "type": "sfx",
+      "id": "sparkle",
+      "vol_db": -4.0
+    },
+    {
+      "f": 22,
+      "type": "fx",
+      "id": "sparkles"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "admiring"
+    },
+    {
+      "f": 6,
+      "preset": "pompous"
+    },
+    {
+      "f": 20,
+      "preset": "smug"
+    },
+    {
+      "f": 30,
+      "preset": "sly_smile"
+    },
+    {
+      "f": 40,
+      "preset": "admiring"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_comb_flourish.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 20,
+      "f1": 32,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "stage": {
+    "x": 4.76,
+    "z": -1.4,
+    "facing": 1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "fixup_mirror"
+  ]
+}

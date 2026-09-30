@@ -93,5 +93,14 @@
     ],
     "freeze_holds": [],
     "draft": false
-  }
+  },
+  "gaze": [
+    {
+      "f0": 2,
+      "f1": 60,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ]
 }

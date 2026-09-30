@@ -1,0 +1,98 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_walk_hum",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_walk_hum.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "start": [
+      0,
+      8
+    ],
+    "beat_1": [
+      8,
+      16
+    ],
+    "beat_2": [
+      16,
+      24
+    ],
+    "beat_3": [
+      24,
+      32
+    ],
+    "beat_4": [
+      32,
+      40
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "voice",
+      "id": "vo_bellows_hum"
+    },
+    {
+      "f": 2,
+      "type": "fx",
+      "id": "notes"
+    },
+    {
+      "f": 24,
+      "type": "fx",
+      "id": "notes"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "hum"
+    },
+    {
+      "f": 40,
+      "preset": "blissful"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_walk_hum.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 4,
+      "f1": 44,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "tags": [
+    "micro_gag",
+    "walk"
+  ]
+}

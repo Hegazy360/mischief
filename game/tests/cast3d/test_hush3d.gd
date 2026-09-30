@@ -423,3 +423,51 @@ func test_head_variant_shares_every_bone_name() -> void:
 	for i in sa.get_bone_count():
 		assert_eq(sb.get_bone_name(i), sa.get_bone_name(i), "same bone %d" % i)
 	b.free()
+
+
+## The fix-pass face lift (REDESIGN §3.7 "Hush face 96"; tools/art3d/hush/hush_dims.py FACE_LIFT_*): the face card's
+## shading normals lean up (and lose part of their sideways lean), so under the vinyl key — StageLighting3D's
+## `mnd_key_dir` bent `key_front` 0.35 toward the camera, as char_toon does — her white face paint sits in the fully lit
+## band (N·L ≥ 0.11, mnd_vinyl's terminator end) facing either way at the idle and walk cheats. Both head variants.
+func test_face_paint_stays_in_the_lit_band_both_facings() -> void:
+	var key_dir := Vector3(-0.451039, 0.751731, 0.481108)
+	var g: Variant = ProjectSettings.get_setting("shader_globals/mnd_key_dir", null)
+	if g is Dictionary and (g as Dictionary).has("value"):
+		key_dir = (g as Dictionary)["value"]
+	var key := (key_dir.normalized() + Vector3(0.0, 0.0, 0.35)).normalized()
+	var cheats: Dictionary = _rig.get("cheat", {})
+	var scenes := [String(_rig.get("scene", ""))]
+	if FileAccess.file_exists(RIG_DIR + "rig3d_head_b.json"):
+		scenes.append(String(load_json(RIG_DIR + "rig3d_head_b.json")["scene"]))
+	for path in scenes:
+		var n := _instance(path)
+		if not assert_true(n != null, path + " instantiates"):
+			continue
+		var mi := n.get_node_or_null(String(_rig.get("mesh", ""))) as MeshInstance3D
+		var arr: Array = mi.mesh.surface_get_arrays(0)
+		var nrm: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+		var uv2: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV2]
+		var face := PackedVector3Array()
+		var up := 0.0
+		for i in nrm.size():
+			if uv2[i].x > -0.5:
+				face.append(nrm[i])
+				up += nrm[i].y
+		if not assert_gt(face.size(), 100, path + ": face card vertices"):
+			n.free()
+			continue
+		assert_gt(up / float(face.size()), 0.6, path + ": the face paint's normals lean up (the lift is in the glb)")
+		# rest-pose normals: >= 95 % of the face card fully lit at the idle cheat, >= 90 % at the walk cheat (P2 had
+		# 40 % / 24 % facing away from the key: the terminator ran across her face, L* 60-83 under the stage light)
+		for c in ["idle", "walk"]:
+			var cheat := float(cheats.get(c, 35.0))
+			var bar := 0.95 if c == "idle" else 0.9
+			for facing in [1, -1]:
+				var yaw := deg_to_rad(float(facing) * (90.0 - cheat))
+				var lit := 0
+				for v in face:
+					if v.rotated(Vector3.UP, yaw).dot(key) >= 0.11:
+						lit += 1
+				assert_ge(float(lit) / float(face.size()), bar,
+					"%s: face paint in the lit band, %s cheat %d, facing %d" % [path, c, int(cheat), facing])
+		n.free()

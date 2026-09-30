@@ -73,6 +73,16 @@ func test_rule3_safe_hiding() -> void:
 	var in_use := _log(200, [{"e": "caught", "t": 150, "cause": "face_to_face"}], {149: {"hidden": "bathroom_bath", "b_activity": "bath"}})
 	in_use.in_use = {"bathroom_bath": "bath"}
 	assert_eq(Invariants.rule3_safe_hiding(in_use), [] as Array[String], "a red-badged in-use spot may be found")
+	# she popped out into his arms mid-chase: the catch shares the pop_out tick — not a catch in the spot
+	var popped := _log(200, [{"e": "pop_out", "t": 150, "spot": "parlour_piano_back"},
+		{"e": "caught", "t": 150, "cause": "grab", "by": "bellows"}], {149: {"hidden": "parlour_piano_back", "b_state": "CHASE"}})
+	assert_eq(Invariants.rule3_safe_hiding(popped), [] as Array[String], "popped out the same tick: not hidden when grabbed")
+	var other := _log(200, [{"e": "pop_out", "t": 150, "spot": "kitchen_pantry_curtain"},
+		{"e": "caught", "t": 150, "cause": "grab"}], {149: {"hidden": "parlour_piano_back"}})
+	assert_eq(Invariants.rule3_safe_hiding(other).size(), 1, "a pop_out from another spot does not excuse it")
+	var earlier := _log(200, [{"e": "pop_out", "t": 120, "spot": "parlour_piano_back"},
+		{"e": "caught", "t": 150, "cause": "grab"}], {149: {"hidden": "parlour_piano_back"}})
+	assert_eq(Invariants.rule3_safe_hiding(earlier).size(), 1, "an older pop_out does not excuse it")
 
 
 func test_rule4_bubble() -> void:

@@ -46,6 +46,15 @@ BURN = merge(STOMP_ARMS, {"upperarm_l": [("y", 78), ("z", 8)], "upperarm_r": [("
 TOSS = merge(STOMP_ARMS, lean(fwd=-10, turn=-4), head(x=-26, y=-8, z=-12))
 
 
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
+
 def build(ctx):
     c = Clip(ctx, "bellows/cue_picture_bonk", length=L, layer="overlay", mask="upper", blend_in=4, blend_out=6,
              cheat_deg=20, audio="own", tags=["cue", "overlay"],
@@ -79,4 +88,5 @@ def build(ctx):
     for f, p in ((0, "disdain"), (6, "pompous"), (12, "dazed_open"), (24, "huh"), (30, "slow_burn"), (40, "irked"),
                  (44, "furious")):
         c.face(f, p)
+    hide_fx(c)
     return c

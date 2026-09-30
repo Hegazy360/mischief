@@ -337,6 +337,22 @@
     "freeze_holds": [],
     "draft": false
   },
+  "gaze": [
+    {
+      "f0": 0,
+      "f1": 93,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 0
+    },
+    {
+      "f0": 114,
+      "f1": 165,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
   "stage": {
     "x": 15.0,
     "z": -1.4,

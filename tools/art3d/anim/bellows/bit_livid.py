@@ -64,10 +64,19 @@ POUND = merge(STAND, FISTS, lean(fwd=10), head(x=-8),
                "clavicle_r": [("y", -8)], "upperarm_r": [("y", -58), ("z", 40)], "lowerarm_r": [("z", 62)],
                "hand_l": [("x", 30)], "hand_r": [("x", 30)], "_pelvis": (0.0, 0.0, -0.06)})
 # glaring round: over the specs, the body turning with the head
-GLARE_L = merge(STANCE, lean(fwd=8, turn=16), head(x=10, z=34))
-GLARE_R = merge(STANCE, lean(fwd=8, turn=-16), head(x=10, z=-32))
+GLARE_L = merge(STANCE, lean(fwd=8, turn=10), head(x=10, z=30))
+GLARE_R = merge(STANCE, lean(fwd=8, turn=-6), head(x=10, z=-22))
 HARRUMPH = merge(STANCE, lean(fwd=-8), head(x=-12, z=-4), {"clavicle_l": [("y", -6)], "clavicle_r": [("y", 6)]})
 
+
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
 
 def build(ctx):
     c = Clip(ctx, "bellows/bit_livid", length=L, lock="sim", cheat_deg=35, blend_in=6, blend_out=10,
@@ -89,7 +98,7 @@ def build(ctx):
     c.key(86, GLARE_L, "in_out_cubic")
     c.key(92, merge(GLARE_L, head(x=12, z=38)), "in_out_sine")
     c.key(98, GLARE_R, "in_out_cubic")
-    c.key(104, merge(GLARE_R, head(x=12, z=-36)), "in_out_sine")
+    c.key(104, merge(GLARE_R, head(x=12, z=-26)), "in_out_sine")
     c.key(110, HARRUMPH, "in_out_cubic")
     c.key(L, STANCE, "in_out_sine")
     # the rage tremble (fists and head), the vibrato belly on the aria
@@ -114,4 +123,5 @@ def build(ctx):
     for f, p in ((0, "furious"), (4, "irked"), (8, "inhale"), (30, "livid"), (57, "furious"), (62, "livid"),
                  (78, "suspicious"), (86, "furious"), (98, "suspicious"), (104, "furious"), (110, "irked")):
         c.face(f, p)
+    hide_fx(c)
     return c

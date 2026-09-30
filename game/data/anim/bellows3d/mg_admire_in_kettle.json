@@ -1,0 +1,132 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/mg_admire_in_kettle",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/mg_admire_in_kettle.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "head",
+  "blend_in": 6,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {
+    "glint": [
+      0,
+      6
+    ],
+    "vain": [
+      6,
+      14
+    ],
+    "wink": [
+      14,
+      26
+    ],
+    "smug": [
+      26,
+      40
+    ]
+  },
+  "events": [
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "glint"
+    },
+    {
+      "f": 14,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "bouffant_l",
+        "bouffant_r"
+      ],
+      "kick": 0.5
+    },
+    {
+      "f": 14,
+      "type": "voice",
+      "id": "vo_bellows_smug"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 5,
+      "preset": "admiring"
+    },
+    {
+      "f": 14,
+      "preset": "sly_smile"
+    },
+    {
+      "f": 18,
+      "preset": "smug",
+      "slots": {
+        "eyes": "closed",
+        "brows": "one_up",
+        "pupils": "none",
+        "lids": "none"
+      },
+      "blink": false
+    },
+    {
+      "f": 24,
+      "preset": "sly_smile"
+    },
+    {
+      "f": 26,
+      "preset": "smug"
+    },
+    {
+      "f": 40,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/mg_admire_in_kettle.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 13,
+      "f1": 44,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    }
+  ],
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "micro_gag",
+    "tea"
+  ]
+}

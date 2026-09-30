@@ -27,14 +27,19 @@ silhouettes), `<clip>_phone.jpg` (the 1200×540 game framing every 3 f) and `<cl
   so `act_glance` and `st_shrug` are shown by the two overlay captures below.
 
 ## Boards
-- `bands.png`: each band clip in the real N1/N2 sets at 1:1 crops (mid: kettle, fridge shelf; high: pickle jar, clock, mirror;
-  low: recliner). Judge whether a muted player can tell what she is doing to the prop. Today mostly not: the props sit
-  directly upstage of her `reach_pos`, so her body hides them. This is a staging request, not a clip fault.
-- `bands_frames.jpg`: the same six moments as full 1200×540 frames (at ½). Judge the read at phone framing.
-- `bands_staged.jpg`: the kettle, the tap, the clock and the recliner, each at today's `reach_pos` (top) and at the proposed
-  spot (bottom: the prop 0.24–0.30 m ahead and 0.2 m upstage of her, from the sidecar `reach_offset`). Judge whether the
+- `bands.png`: each band clip in the real N1/N2 sets at 1:1 crops, re-shot with r3d-sets' `reach_pos` of 20:42 (mid: kettle,
+  fridge shelf; high: pickle jar, clock, mirror; low: recliner). Judge whether a muted player can tell what she is doing
+  to the prop. The kettle, the jar, the clock face and the chair are now under her gloves; the mirror is still mostly
+  behind her.
+- `bands_frames.jpg`: the same six moments as full 1200×540 frames (at ½; `ViewSandbox3D --sim`, the ideal routes). Judge the
+  read at phone framing.
+- `bands_staged.jpg`: the kettle, the tap, the clock and the recliner, each at the 19:59 `reach_pos` (left) and at the
+  proposed spot (right: the prop 0.24–0.30 m ahead and 0.2 m upstage of her, from the sidecar `reach_offset`). Judge whether the
   proposed spot makes the job read.
-- `bands_staged_strips/`: the three band clips played through at the proposed spots (numbered cells). These are the mute-test items.
+- `bands_staged_strips/`: the three band clips, `rig_mid` at the sink tap, `rig_high` at the clock and `rig_low` at the
+  recliner. Each has 8 frame-locked 1200×540 frames cropped around her, labelled with clip frame numbers. `now_*` is at
+  the 19:59 `reach_pos` and `staged_*` at the proposed spot. Judge the same question as `bands.png`. These strips are the
+  mute-test items.
 - `statues_8.png` + `statues_8.json`: all eight statues (`freeze_1..4` by r3d-anim, `5..8` here) as 64 px black masks, with the
   pairwise IoU matrix. Judge that no pair reaches 0.80 (the closest pair is printed in the JSON).
 - `statues_8_marble.png`: the same eight statues as marble (`--stone`), studio front view. Judge whether each reads as a pose.
@@ -47,3 +52,5 @@ silhouettes), `<clip>_phone.jpg` (the 1200×540 game framing every 3 f) and `<cl
 ## Text
 - `rubric.md`: the TECH §11 rubric per clip, with frame numbers and scores (the author's pass).
 - `reviewer_prompt.md`: the fresh-reviewer mute test of the band clips (R17). It is pending, because the orchestrator runs it.
+- `packets/bands_now/`, `packets/bands_staged/`: the opaque packets for that test, made by `packets.py build`, each with a
+  `prompt.md`. The answer keys are outside the repo, in the task scratch.

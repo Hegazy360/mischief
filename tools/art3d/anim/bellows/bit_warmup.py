@@ -91,11 +91,11 @@ def build(ctx):
     c.overshoot(38, body(CLUTCH, grip("r", 70, 44), glove("l", 46, 28), lean(fwd=8, side=4), head(x=0, y=12, z=2)), pct=0.3,
                 frames=4)
     # the moving hold: pats, peers down at the throat, then the face to the house
-    c.key(46, body(CLUTCH, grip("r", 70, 44), glove("l", 30, 20), lean(fwd=2, side=5), head(x=12, y=12, z=0)),
+    c.key(46, body(CLUTCH, grip("r", 70, 44), glove("l", 30, 20), lean(fwd=-6, side=5), head(x=-18, y=14, z=0)),
           "in_out_sine")
-    c.key(52, body(CLUTCH, grip("r", 70, 44), glove("l", 40, 24), lean(fwd=0, side=3), head(x=-2, y=8, z=0)),
+    c.key(52, body(CLUTCH, grip("r", 70, 44), glove("l", 40, 24), lean(fwd=-8, side=3), head(x=-20, y=10, z=0)),
           "in_out_sine")
-    c.key(62, body(CLUTCH, grip("r", 70, 44), glove("l", 36, 22), lean(fwd=-2, side=1), head(x=-4, y=10, z=0)),
+    c.key(62, body(CLUTCH, grip("r", 70, 44), glove("l", 36, 22), lean(fwd=-6, side=1), head(x=-12, y=12, z=0)),
           "in_out_sine")
     c.key(68, body(CLUTCH, grip("r", 70, 44), glove("l", 30, 20), lean(fwd=-4), head(x=-6, y=-4, z=0)),
           "in_out_sine")
@@ -104,7 +104,7 @@ def build(ctx):
     c.key(L, body(SING), "in_out_sine")
 
     # the gloves on the throat (IK over the clutch; blends in over the snap, out into the recovery)
-    c.ik("l", THROAT_L, 35, 74, pole=(0.9, 0.25, 0.35), effector="palm", blend=(1, 6), world=False)
+    c.ik("l", THROAT_L, 35, 74, pole=(0.9, 0.25, 0.2), effector="palm", blend=(1, 6), world=False)
     c.ik("r", HEART_R, 35, 74, pole=(-0.9, 0.3, -0.3), effector="palm", blend=(1, 8), world=False)
     # little pats on the throat (the left glove) and the cough shake
     c.motion(lambda f: {"hand_l": [("x", 12 * math.sin(2 * math.pi * (f - 44) / 8.0))]}, 44, 60,

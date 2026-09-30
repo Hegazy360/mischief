@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Every lint in one go: tools/scripts/lint.sh (content, hotspot, IP, anim/rig) + every
-# tools/art/*/validate*.py (and lint_*.py) + `python3 tools/audio/gen_audio.py --check`, each only
+# tools/art/*/validate*.py (and lint_*.py) + the 3D review toolset tests (tools/art3d/review/test_review.py) +
+# `python3 tools/audio/gen_audio.py --check`, each only
 # when it exists. Usage: tools/ci/lint_all.sh [--no-godot]   (--no-godot: only the Python checks)
 # Needs Python 3 + numpy + Pillow, and `rsvg-convert` (apt librsvg2-bin) for the art validators.
 set -uo pipefail
@@ -22,6 +23,11 @@ for s in "${py[@]}"; do
   echo "[lint_all] python3 $s"
   python3 "$s" || rc=1
 done
+if [ -f tools/art3d/review/test_review.py ]; then
+  # the R14 review toolset every 3D art lint measures with (r3d-tools-a): numpy + Pillow, ~10 s
+  echo "[lint_all] python3 -m unittest tools/art3d/review/test_review.py"
+  python3 -m unittest tools/art3d/review/test_review.py || rc=1
+fi
 if [ -f tools/audio/gen_audio.py ]; then
   echo "[lint_all] python3 tools/audio/gen_audio.py --check"
   python3 tools/audio/gen_audio.py --check || rc=1

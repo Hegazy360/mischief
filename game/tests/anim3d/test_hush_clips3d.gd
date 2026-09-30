@@ -102,6 +102,45 @@ func test_lint_strict_clean() -> void:
 		assert_eq(errs.size(), 0, "hush/%s lints --strict clean: %s" % [short, "\n".join(errs)])
 
 
+## The Hush rows of the 3D manifest (g0 + p00), keyed by short name; {} when SliceClips.build3d is not there.
+func _manifest() -> Dictionary:
+	var sc := _soft("res://view/world/slice_clips.gd")
+	if sc == null or not sc.has_method("build3d"):
+		return {}
+	var rows: Array = sc.call("build3d", PackedStringArray(["g0_sneeze", "p00_curtain_up"]))
+	var out := {}
+	for r in rows:
+		var d: Dictionary = r
+		if String(d.get("rig", "")) == "hush":
+			out[String(d.get("clip", "")).get_slice("/", 1)] = d
+	return out
+
+
+func test_manifest_rows_of_mine_exist_and_match() -> void:
+	var man := _manifest()
+	if man.is_empty():
+		skip("SliceClips.build3d not available — r3d-view3d")
+		return
+	var n := 0
+	for short in man:
+		if not LIST.has(short):
+			continue           # r3d-anim-hush-b's rows: its own test
+		n += 1
+		var v: Variant = _sidecar(String(short))
+		if not assert_true(v != null, "manifest row hush/%s is made" % short):
+			continue
+		var sc: Dictionary = v
+		var row: Dictionary = man[short]
+		var want := int(row.get("expect_f", -1))
+		var tol := int(row.get("tol_f", 0))
+		var len_f := int(sc.get("length", 0))
+		if want > 0 and not (bool(sc.get("loop", false)) and bool(row.get("loop_ok", false))):
+			assert_between(len_f, want - tol, want + tol, "hush/%s: %d f (manifest %d ± %d)" % [short, len_f, want, tol])
+		if bool(sc.get("loop", false)):
+			assert_true(bool(row.get("loop_ok", true)) or want <= 0, "hush/%s: a loop where the manifest allows one" % short)
+	assert_gt(n, 10, "the g0 + p00 manifest asks for my Hush clips")
+
+
 func test_map_keys_resolve_to_clips() -> void:
 	var p := "res://data/anim/hush3d/map.json"
 	if not FileAccess.file_exists(p):

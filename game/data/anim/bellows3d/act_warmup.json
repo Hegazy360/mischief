@@ -195,8 +195,8 @@
       "f0": 40,
       "f1": 456,
       "at": "camera",
-      "weight": 0.5,
-      "blend": 10
+      "weight": 1.0,
+      "blend": 8
     }
   ],
   "stage": {

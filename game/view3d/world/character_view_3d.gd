@@ -160,6 +160,38 @@ var _stone := false
 var _plinth_t := 0.0
 var _shiver_t := 0.0
 var _tomato_s := 0.0
+## Anchor caches (the anchor source asks for these several times a frame; valid for one process frame and one pose:
+## `_pose_serial` moves whenever apply / show_* / preroll / reset changes the pose).
+var _pose_serial := 0
+## µs totals while `profile` (ScriptProf3D): [ctx + ClipMap.resolve, placement, rig driving without advance,
+## RigPlayer3D.advance], `prof_frames` applies.
+var profile: bool = false
+var prof_us := PackedInt64Array([0, 0, 0, 0])
+var prof_frames: int = 0
+var _prof_adv_us := 0
+## This frame's µs (same split as prof_us) while `profile`.
+var prof_frame_us := PackedInt64Array([0, 0, 0, 0, 0, 0])
+var _prof_play_us := 0
+var _prof_meter_us := 0
+var _c_head_k := Vector2i(-1, -1)
+var _c_head := Vector3.ZERO
+var _c_top_k := Vector2i(-1, -1)
+var _c_top := Vector3.ZERO
+var _c_aabb_k := Vector2i(-1, -1)
+var _c_aabb := AABB()
+var _c_pos := Vector3.INF
+## Bellows' looks key parts last applied (no per-frame string building).
+var _lk_res := PackedStringArray()
+var _lk_combos := PackedStringArray()
+var _lk_blind := false
+var _lk_costume := "\u0001"
+## The rig setters' last values (_drive_rig calls a setter only when its value changes; −9 / NAN = unknown).
+var _d_facing := -9
+var _d_facing_anim := false
+var _d_cheat := NAN
+var _d_look := Vector3(NAN, NAN, NAN)
+var _d_look_w := -1.0
+var _d_light := -1.0
 
 
 func _init() -> void:
@@ -315,18 +347,38 @@ func feet_world() -> Vector3:
 	return _world_pos()
 
 
+## The anchor-cache key of this frame and pose (a moved node invalidates every cached anchor).
+func _cache_key() -> Vector2i:
+	if position != _c_pos:
+		_c_pos = position
+		_pose_serial += 1
+	return Vector2i(Engine.get_process_frames(), _pose_serial)
+
+
 ## World head centre (the rig's head bone when available).
 func head_world() -> Vector3:
+	var k := _cache_key()
+	if k == _c_head_k:
+		return _c_head
+	_c_head_k = k
 	if uses_rig and bool(_has.get("head_global", false)) and rig.is_inside_tree():
-		return rig.call("head_global")
-	return _world_pos() + Vector3(0.0, height_m() - 0.22, 0.0)
+		_c_head = rig.call("head_global")
+	else:
+		_c_head = _world_pos() + Vector3(0.0, height_m() - 0.22, 0.0)
+	return _c_head
 
 
 ## World head top.
 func top_world() -> Vector3:
+	var k := _cache_key()
+	if k == _c_top_k:
+		return _c_top
+	_c_top_k = k
 	if uses_rig and bool(_has.get("top_global", false)) and rig.is_inside_tree():
-		return rig.call("top_global")
-	return _world_pos() + Vector3(0.0, height_m(), 0.0)
+		_c_top = rig.call("top_global")
+	else:
+		_c_top = _world_pos() + Vector3(0.0, height_m(), 0.0)
+	return _c_top
 
 
 ## World chest (the punch-in focus for Bellows).
@@ -336,13 +388,19 @@ func chest_world() -> Vector3:
 
 ## The skinned bounds (world) for projection; the height box when the rig cannot tell.
 func world_aabb() -> AABB:
+	var k := _cache_key()
+	if k == _c_aabb_k:
+		return _c_aabb
+	_c_aabb_k = k
 	if uses_rig and bool(_has.get("screen_aabb", false)) and rig.is_inside_tree():
 		var b: Variant = rig.call("screen_aabb")
 		if b is AABB and (b as AABB).size != Vector3.ZERO:
-			return b
+			_c_aabb = b
+			return _c_aabb
 	var w := 0.5 if actor == "hush" else 0.8
 	var p := _world_pos()
-	return AABB(p + Vector3(-w * 0.5, 0.0, -0.2), Vector3(w, height_m(), 0.4))
+	_c_aabb = AABB(p + Vector3(-w * 0.5, 0.0, -0.2), Vector3(w, height_m(), 0.4))
+	return _c_aabb
 
 
 ## A rig socket's world transform (the node's transform without a rig).
@@ -424,7 +482,18 @@ func reset_counts() -> void:
 
 ## Retry / seek: drop flavours, overlays, combos, the meter cache and every clip-owned body slot
 ## (`RigPlayer3D.reset()`); residue looks are re-applied from the next snapshot.
+## The next _drive_rig sends every setter again (after a replay / explicit pose / reset drove the rig directly).
+func _forget_rig_setters() -> void:
+	_d_facing = -9
+	_d_cheat = NAN
+	_d_look = Vector3(NAN, NAN, NAN)
+	_d_look_w = -1.0
+	_d_light = -1.0
+
+
 func reset() -> void:
+	_pose_serial += 1
+	_forget_rig_setters()
 	_y_ease = 0.0
 	ctx.flavour = ""
 	ctx.ov_flavour = ""
@@ -446,6 +515,7 @@ func reset() -> void:
 	_specs = ""
 	_looks = PackedStringArray()
 	_looks_key = "#"
+	_lk_costume = "\u0001"
 	_slots.clear()
 	_rx_key = ""
 	_landed = false
@@ -503,12 +573,14 @@ func play_cue(id: String, len_f: float = 0.0) -> void:
 func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view_dt: float) -> void:
 	if replay:
 		return
+	_pose_serial += 1
 	visible = cur.present
 	if not cur.present:
 		return
 	_t += view_dt
 	_view_dt = view_dt
 	var vf := view_dt * 60.0
+	var t0 := Time.get_ticks_usec() if profile else 0
 	var p2 := CharacterView3D.stage_position_px(prev, cur, alpha)
 	_update_ctx(cur, vf)
 	ClipMap.resolve(map, cur, alpha, _pick, ctx)
@@ -516,11 +588,29 @@ func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view
 	_note_fallbacks()
 	var hidden := _pick.hidden or (actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != ""
 		or (cur.entering and cur.oneshot != "enter")))
+	var t1 := Time.get_ticks_usec() if profile else 0
 	_place(cur, p2, view_dt)
+	var t2 := Time.get_ticks_usec() if profile else 0
 	if uses_rig:
 		_drive_rig(cur, hidden)
 	elif stand_in != null:
 		_drive_stand_in(cur, hidden)
+	if profile:
+		var t3 := Time.get_ticks_usec()
+		prof_us[0] += t1 - t0
+		prof_us[1] += t2 - t1
+		prof_us[2] += t3 - t2 - _prof_adv_us
+		prof_us[3] += _prof_adv_us
+		prof_frame_us[0] = t1 - t0
+		prof_frame_us[1] = t2 - t1
+		prof_frame_us[2] = t3 - t2 - _prof_adv_us
+		prof_frame_us[3] = _prof_adv_us
+		prof_frame_us[4] = _prof_play_us
+		prof_frame_us[5] = _prof_meter_us
+		_prof_adv_us = 0
+		_prof_play_us = 0
+		_prof_meter_us = 0
+		prof_frames += 1
 	if blob != null:
 		blob.visible = not hidden
 		blob.position = Vector3(0.0, View3DConst.DECAL_Y - _y_off, 0.0)
@@ -571,8 +661,8 @@ static func placement_for(actor_id: String, cur: ViewSnapshot.Actor, reach: Dict
 
 
 func _place(cur: ViewSnapshot.Actor, p2: Vector2, view_dt: float) -> void:
-	var reach := _reach_for(cur) if actor == "hush" else {}
-	var station := _station_for(cur) if actor == "bellows" else {}
+	var reach := _reach_for(cur) if actor == "hush" else _NO_STATION
+	var station := _station_for(cur) if actor == "bellows" else _NO_STATION
 	var hide_z := _hide_z_for(cur) if actor == "hush" else NAN
 	var pl := CharacterView3D.placement_for(actor, cur, reach, station, hide_z)
 	var want_z: float = pl["z"]
@@ -693,7 +783,7 @@ func _arc_for(archetype: String, v: String) -> float:
 ## The rigged hotspot's reach_pos (House3D.reach_pos, else house3d.json, else {z −1.6}).
 func _reach_for(cur: ViewSnapshot.Actor) -> Dictionary:
 	if cur.state != "RIGGING" or cur.rig_prank == "":
-		return {}
+		return _NO_STATION
 	var hs := _rig_point_of(cur.rig_prank)
 	if hs == "":
 		return {"z": View3DConst.REACH_Z}
@@ -719,7 +809,23 @@ func _rig_point_of(prank: String) -> String:
 ## The house3d.json station entry of Bellows' current activity ({} when none).
 func _station_for(cur: ViewSnapshot.Actor) -> Dictionary:
 	if cur.activity == "" or info == null or info.world == null:
-		return {}
+		return _NO_STATION
+	# static per (activity, detour station): cached, no per-frame sim lookups
+	if cur.activity == _st_act and cur.detour_station == _st_detour:
+		return _st_val
+	_st_act = cur.activity
+	_st_detour = cur.detour_station
+	_st_val = _station_uncached(cur)
+	return _st_val
+
+
+const _NO_STATION := {}
+var _st_act := "\u0001"
+var _st_detour := ""
+var _st_val: Dictionary = {}
+
+
+func _station_uncached(cur: ViewSnapshot.Actor) -> Dictionary:
 	var ai := ViewSnapshot.activity_info(info.world, cur.activity)
 	var st := str(ai.get("station", "")) if ai.get("station", null) != null else ""
 	if st == "" and cur.detour_station != "":
@@ -925,9 +1031,13 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 		var st := CharacterView3D.rig_stage(_clip, facing, cheat)
 		facing = st.x
 		cheat = st.y
-	if bool(_has.get("set_facing", false)):
-		rig.call("set_facing", facing, not (actor == "hush" and cur.entering))
-	if bool(_has.get("set_cheat", false)):
+	var anim := not (actor == "hush" and cur.entering)
+	if bool(_has.get("set_facing", false)) and (facing != _d_facing or anim != _d_facing_anim):
+		_d_facing = facing
+		_d_facing_anim = anim
+		rig.call("set_facing", facing, anim)
+	if bool(_has.get("set_cheat", false)) and cheat != _d_cheat:
+		_d_cheat = cheat
 		rig.call("set_cheat", cheat, View3DConst.CHEAT_EASE_S)
 	if bool(_has.get("look_at_point", false)):
 		var lt := look_target
@@ -936,15 +1046,28 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 			# R5d: while reaching the body cheats ≤ 10°, the head gives the face to the camera
 			lt = _world_pos() + Vector3(0.0, height_m() - 0.2, 4.0)
 			lw = 0.6
-		rig.call("look_at_point", lt if lt != Vector3.INF else _world_pos() + Vector3(0, 1.4, 3.0), lw if lt != Vector3.INF else 0.0)
-	if bool(_has.get("set_stage_light", false)):
+		var lp := lt if lt != Vector3.INF else _world_pos() + Vector3(0, 1.4, 3.0)
+		var lwv := lw if lt != Vector3.INF else 0.0
+		# an unweighted look only needs its weight sent (the point is not used at weight 0)
+		if lwv != _d_look_w or (lwv > 0.0 and not lp.is_equal_approx(_d_look)):
+			_d_look = lp
+			_d_look_w = lwv
+			rig.call("look_at_point", lp, lwv)
+	if bool(_has.get("set_stage_light", false)) and stage_level != _d_light:
+		_d_light = stage_level
 		rig.call("set_stage_light", stage_level, 0.0)
+	var tm := Time.get_ticks_usec() if profile else 0
 	if actor == "bellows":
 		_apply_meter(cur)
 	else:
 		_apply_hush_looks(cur)
+	if profile:
+		_prof_meter_us += Time.get_ticks_usec() - tm
 	if bool(_has.get("advance", false)):
+		var ta := Time.get_ticks_usec() if profile else 0
 		rig.call("advance", _view_dt)
+		if profile:
+			_prof_adv_us += Time.get_ticks_usec() - ta
 
 
 func _play_base(cur: ViewSnapshot.Actor) -> void:
@@ -975,7 +1098,10 @@ func _play_base(cur: ViewSnapshot.Actor) -> void:
 				opts["last_beat"] = _pick.last_beat
 			if _pick.key == "reaction_fallback":
 				opts["hold"] = true
+		var tp := Time.get_ticks_usec() if profile else 0
 		rig.call("play", _clip, opts)
+		if profile:
+			_prof_play_us += Time.get_ticks_usec() - tp
 	if _pick.external and bool(_has.get("set_external_frame", false)):
 		rig.call("set_external_frame", _pick.frame)
 		_frame = _pick.frame
@@ -997,7 +1123,10 @@ func _play_overlay() -> void:
 		if mask == "":
 			mask = ClipRules.mask_of(_pick.ov_key, actor)
 		if bool(_has.get("play_overlay", false)):
+			var tq := Time.get_ticks_usec() if profile else 0
 			rig.call("play_overlay", want, mask if mask != "" else "upper", 6)
+			if profile:
+				_prof_play_us += Time.get_ticks_usec() - tq
 		_ov_clip = want
 	elif want == "" and _ov_clip != "":
 		if bool(_has.get("stop_overlay", false)):
@@ -1025,10 +1154,13 @@ func _apply_meter(cur: ViewSnapshot.Actor) -> void:
 		_costume = info.costume_look(cur.react_prank if cur.react_prank != "" else _last_prank)
 	elif not cur.residues.has("COSTUME"):
 		_costume = ""
-	var key := "%s|%s|%s|%s" % [",".join(cur.residues), ",".join(combos_formed), "b" if cur.blinded else "", _costume]
-	if key == _looks_key:
+	if cur.residues == _lk_res and combos_formed == _lk_combos and cur.blinded == _lk_blind and _costume == _lk_costume:
 		return
-	_looks_key = key
+	_lk_res = cur.residues.duplicate()
+	_lk_combos = combos_formed.duplicate()
+	_lk_blind = cur.blinded
+	_lk_costume = _costume
+	_looks_key = "%s|%s|%s|%s" % [",".join(cur.residues), ",".join(combos_formed), "b" if cur.blinded else "", _costume]
 	var want := _known_looks(CharacterView3D.rig_looks(cur.residues, combos_formed, cur.blinded, _costume))
 	if bool(_has.get("set_look", false)):
 		for r in _looks:
@@ -1276,6 +1408,8 @@ func _ensure_plinth() -> void:
 ## (frame-locked), visibility, looks and tier.
 func show_explicit(pos_px: Vector2, facing: int, clip: String, frame: float, shown: bool,
 		looks_on: PackedStringArray = PackedStringArray(), tier: int = -1, ov_clip: String = "", ov_frame: float = 0.0) -> void:
+	_pose_serial += 1
+	_forget_rig_setters()
 	visible = true
 	position = Vector3(pos_px.x / View3DConst.PX_PER_M, -pos_px.y / View3DConst.PX_PER_M, _z)
 	_facing = facing
@@ -1336,6 +1470,7 @@ func pose_replay(pos_px: Vector2, facing: int, clip: String, frame: float, state
 
 ## Pre-roll: advance the clip by `dt` of real time without a new snapshot (sound events muted).
 func preroll(dt: float) -> void:
+	_pose_serial += 1
 	if not uses_rig or rig == null:
 		return
 	var was := mute_sounds

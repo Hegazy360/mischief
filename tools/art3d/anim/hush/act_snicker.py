@@ -13,16 +13,19 @@ L = 60
 def build(ctx):
     c = Clip(ctx, "hush/act_snicker", length=L, cheat_deg=35, audio="table", blend_in=4, blend_out=10)
     stand = merge(ARMS_DOWN, STAND, gloves(20, 14), head(x=-3))
-    hunch = merge(STAND, CHIN, gloves(62, 40), {"clavicle_l": [("y", -18)], "clavicle_r": [("y", 18)]})
+    # the tee-hee: knees knocked together and bent, one heel popped up, shoulders to the ears, gloves at the chin
+    TEEHEE = {"thigh_l": [("x", -22), ("z", -6)], "calf_l": [("x", 38)], "foot_l": [("x", -14)],
+              "thigh_r": [("x", -30), ("z", 8)], "calf_r": [("x", 56)], "foot_r": [("x", 36)], "ball_r": [("x", -30)]}
+    hunch = merge(STAND, TEEHEE, CHIN, gloves(62, 40), {"clavicle_l": [("y", -24)], "clavicle_r": [("y", 24)]})
     c.key(0, stand)
     c.key(2, merge(stand, {"clavicle_l": [("y", -10)], "clavicle_r": [("y", 10)]}, lean(fwd=-4), head(x=-10)), "out_quad")
     half = sym({"clavicle_l": [("y", -6)], "upperarm_l": [("y", 54), ("z", -48)], "lowerarm_l": [("y", -54), ("z", -12)],
                 "hand_l": [("x", -18), ("z", -10)]})
     c.key(5, merge(stand, half, gloves(40, 24), lean(fwd=6), head(x=4)), "in_out_sine")
     c.key(8, merge(hunch, lean(fwd=16, turn=-6), head(x=5, z=-4)), "out_sine")              # gloves to the chin
-    c.key(20, merge(hunch, lean(fwd=12, side=4, turn=-4), head(x=2, y=8, z=4)))
-    c.key(26, merge(hunch, lean(fwd=8, side=6, turn=4), head(x=-6, y=10, z=6)), "in_out_sine")   # the sly look
-    c.key(36, merge(hunch, lean(fwd=8, side=6, turn=4), head(x=-4, y=10, z=6)))
+    c.key(20, merge(hunch, lean(fwd=22, side=4, turn=-4), head(x=-2, y=8, z=4)))
+    c.key(26, merge(hunch, lean(fwd=20, side=6, turn=4), head(x=-10, y=10, z=6)), "in_out_sine")   # the sly look
+    c.key(36, merge(hunch, lean(fwd=20, side=6, turn=4), head(x=-8, y=10, z=6)))
     c.key(40, merge(hunch, lean(fwd=20, turn=-8), head(x=12, z=-4)), "out_quad")            # the snort
     c.key(48, merge(stand, lean(fwd=2), head(x=-4)), "in_out_cubic")                        # composure
     c.key(L, stand)
@@ -38,7 +41,8 @@ def build(ctx):
     c.motion(giggle)
     c.motion(lambda f: breath(f, 90.0, 0.6))
     c.ground()
-    c.auto_plant(speed_m_s=0.0)
+    c.plant("r", 0, L, part="ball")                        # the heel pops up; the ball (and toes) stay put
+    c.auto_plant(speed_m_s=0.0, sides=("l",))
     c.look_camera(22, 40, weight=0.9, blend=4)
     c.face(0, "grin")
     c.face(6, "snicker")

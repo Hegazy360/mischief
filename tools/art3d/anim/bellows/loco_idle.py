@@ -59,7 +59,7 @@ def build(ctx):
     c.motion(lambda f: {"Head": [("z", 1.5 * math.sin(2 * math.pi * f / 80.0))]})
     c.ground()
     c.auto_plant(speed_m_s=0.0)
-    c.look_camera(116, 150, weight=0.8, blend=6)
+    c.look_camera(116, 150, weight=1.0, blend=6)
     c.beats(flourish=(56, 80), glance=(118, 150), tug=(170, 184))
     for f, p in ((0, "pompous"), (70, "smug"), (104, "pompous"), (118, "sly_smile"), (150, "pompous"),
                  (170, "disdain"), (190, "pompous")):

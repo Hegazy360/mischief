@@ -28,18 +28,27 @@ class Stomp(Gait):
         return y, z, -26.0 * math.sin(math.pi * v), False
 
 
-G = Stomp(L, SPEED, stance=12, lift=0.15, toe_out=6.0, width=1.05, pitch_sw=-26.0)
+G = Stomp(L, SPEED, stance=12, lift=0.155, toe_out=6.0, width=1.05, pitch_sw=-26.0)
 
 
 def upper(k):
     """k = +1 while the left foot is planted (the right arm forward), -1 the right."""
     arms = {"clavicle_l": [("z", -6)], "clavicle_r": [("z", -6)],
-            "upperarm_l": [("y", 76), ("z", -10 - 40 * k)], "upperarm_r": [("y", -76), ("z", 10 - 40 * k)],
-            "lowerarm_l": [("z", -62 - 16 * k)], "lowerarm_r": [("z", 62 - 16 * k)],
+            "upperarm_l": [("y", 74 - 6 * k), ("z", -14 - 58 * k)], "upperarm_r": [("y", -74 - 6 * k), ("z", 14 - 58 * k)],
+            "lowerarm_l": [("z", -70 - 26 * k)], "lowerarm_r": [("z", 70 - 26 * k)],
             "hand_l": [("x", -12)], "hand_r": [("x", -12)]}
     return merge(arms, fist("l"), fist("r"), lean(fwd=14, side=-4 * k, turn=-10 * k), head(x=10, y=3 * k, z=5 * k),
                  {"pelvis": [("y", 4 * k), ("z", 8 * k)], "_pelvis": (0.022 * k, 0.0, 0.0)})
 
+
+
+def hide_fx(c):
+    """Key the FX bones (the dazed stars, the orbiting notes, the CHOO puff) at scale 0 on every key: a clip that
+    never shows them must still say so, or a stray scale track (exporter float drift) leaves them visible."""
+    for k in c._keys:
+        for b, v in fx_hidden("fx_notes", "fx_stars", "fx_choo").items():
+            k.pose.setdefault(b, v)
+    c._key_poses = None
 
 def build(ctx):
     c = Clip(ctx, "bellows/loco_stomp", length=L, loop=True, cheat_deg=20, stride_m=round(SPEED * L / 60.0, 4),
@@ -62,4 +71,5 @@ def build(ctx):
     c.event(0, "fx", id="steam")
     c.event(0, "jiggle", bones=["belly", "sideburn_l", "sideburn_r"], kick=0.3)
     c.face(0, "furious")
+    hide_fx(c)
     return c

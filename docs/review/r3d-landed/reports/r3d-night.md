@@ -13,7 +13,7 @@ New:
 - `game/scenes/night/perf3d.gd` — `Perf3D`: the 3D frame-budget sampler of PLAY frames.
 - `game/scenes/night/curtain_bows_3d.gd` — `CurtainBows3D`: the curtain call's 3D bows (its own transparent world).
 - `game/scenes/results/gag_reel_3d.gd` — `GagReel3D`: the Gag Reel re-staged from `MomentRecorder3D`.
-- `game/tests/night/test_night3d.gd` (24 tests), `game/tests/night/compile_probe.gd` + `CompileProbe.tscn` (the
+- `game/tests/night/test_night3d.gd` (23 tests), `game/tests/night/compile_probe.gd` + `CompileProbe.tscn` (the
   measurement that GLES3 reports 0 pipeline compilations).
 
 Changed: `game/scenes/boot/{boot.gd, boot_config.json}`, `game/scenes/night/{night_scene.gd, night_args.gd,
@@ -104,7 +104,7 @@ Commands (all with the slot wrappers): `tools/scripts/test_game.sh r3d-night` (f
 r3d-night`; `SANDBOX=r3d-night tools/scripts/lint.sh`.
 
 - **Full suite**: `== OK: 1482 passed, 0 failed, 1 skipped, 1483 tests in 163 files ==`; `night/` 107/107
-  (test_night3d 24). **Lint**: `[lint] OK: 0 lint(s) failed, 0 skipped` (lint_anim 3d: 61 clips, 0 errors, 16 missing =
+  (test_night3d 23). **Lint**: `[lint] OK: 0 lint(s) failed, 0 skipped` (lint_anim 3d: 61 clips, 0 errors, 16 missing =
   info).
 - **Perf (desktop proxy, 3D, MSAA off, PLAY frames)**:
 
@@ -193,4 +193,4 @@ r3d-night`; `SANDBOX=r3d-night tools/scripts/lint.sh`.
 
 ## 8. Hours
 
-18:01Z → ~20:25Z, ≈ 2.4 h wall (of which ≈ 1 h waiting on slot-wrapped runs).
+18:01Z → 20:20Z, ≈ 2.3 h wall (of which ≈ 1 h waiting on slot-wrapped runs).

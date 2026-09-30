@@ -97,7 +97,8 @@ def warmup_trigger_pose(ctx):
 
 def blend_from(c, src, f0, f1):
     """Every bone's final basis eased from `src` (an evaluated pose) at f0 to this clip's own at f1 (a custom
-    constraint added LAST, so the feet, the root and the IK are blended too)."""
+    constraint added LAST, so the feet, the root and the IK are blended too); scales are never blended (the FX and
+    prop bones keep this clip's keyed scale)."""
     names = list(src.basis.keys())
 
     def fn(pose, f):
@@ -107,7 +108,7 @@ def blend_from(c, src, f0, f1):
         for n in set(names) | set(pose.basis.keys()):
             la, ra, sa = src.get(n)
             lb, rb, sb = pose.get(n)
-            pose.basis[n] = (lb.lerp(la, w), P.qslerp(rb, ra, w), sb.lerp(sa, w))
+            pose.basis[n] = (lb.lerp(la, w), P.qslerp(rb, ra, w), sb)     # scales stay this clip's (FX hidden)
         pose.solve()
     c.custom(fn, f0, f1)
 

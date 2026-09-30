@@ -71,7 +71,12 @@ def build(ctx):
 
     # ---- constraints ---------------------------------------------------------------------------------------------
     seat(c, 0, L)
-    c.look(("camera",), 380, 460, weight=0.4, blend=8)        # the sip keeps his face on the audience (= the sneeze)
+    # D8: the face to the audience on the face beats (yaw only, the keyed pitch stays): a smug glance with the kettle
+    # up (18-40), "huh" at the lid flip and the smug look after it (128-166), and the whole performance from the
+    # smug stir to the loop seam (240-480 + 0-12: the sniff, the kiss, THE SIP = the sneeze's f 0, the creak)
+    for f0, f1, ease in ((0, 12, (0, 8)), (18, 40, (6, 6)), (128, 166, (8, 8)), (240, L, (10, 0))):
+        face_cam(c, f0, f1, ease=ease)
+        c.look_camera(f0, f1, weight=1.0, blend=max(ease))
 
     R_REST = qz(-40) @ qx(10)
     PALM_R, PALM_L = ts.palm_rest("r"), ts.palm_rest("l")
@@ -127,7 +132,7 @@ def build(ctx):
             arm_ik(pose, "r", arch, POLE_R, hand_R=Rk @ KETTLE_R, effector=PALM_R, w=window(f, 4, 13, 80, 92))
             if 14 <= f < 88:
                 place_prop(pose, sk, "prop_r", Rk, ts.palm(pose, "r") - Rk @ (UP * KETTLE_ARCH), w=window(f, 14, 20, 78, 88))
-        if 104 <= f < 252:                          # the spoon: into the jar, then the cup
+        if 104 <= f < 258:                          # the spoon: into the jar, then the cup (hidden from 250)
             if f < 150:
                 mouth = ts.palm(pose, "l") + UP * (0.012 + JAR_MOUTH)
                 dip = track(f, [(108, 0.20), (120, 0.10), (126, 0.035), (134, 0.06), (144, 0.16), (150, 0.22)])
@@ -141,7 +146,7 @@ def build(ctx):
                 bowl_t = cup_top + circ + Vector((0.0, 0.0, dip - 0.04))
                 palm_t = cup_top + circ * 0.6 + Vector((-0.07, -0.02, dip + 0.14))
             arm_ik(pose, "r", palm_t, POLE_R, hand_R=qz(-60) @ qx(20), effector=PALM_R, w=window(f, 104, 112, 244, 252))
-            ts.place_spoon(pose, ts.palm(pose, "r"), bowl_t - ts.palm(pose, "r"), w=window(f, 104, 108, 250, 252))
+            ts.place_spoon(pose, ts.palm(pose, "r"), bowl_t - ts.palm(pose, "r"), w=window(f, 104, 108, 250, 257))
         if 250 <= f < 266:                          # takes the cup off the saucer
             arm_ik(pose, "r", cup_c, POLE_R, hand_R=cup_R, effector=ts.cup_c, w=ramp(f, 250, 262))
         if cup_in_hand:
@@ -156,6 +161,14 @@ def build(ctx):
         if not cup_in_hand:
             ts.place_cup(pose, cup_c, cup_R)
     c.custom(hands, 0, L)
+
+    def settle_fingers(pose, f):
+        """Two held left-glove joints nudged 0.5 deg: their constant values otherwise defeat the converter's key
+        reduction (glb_to_res angle_to noise on identical quaternions: ~470 identical keys each, ~23 KB)."""
+        for b in ("middle_02_l", "pinky_02_l"):
+            pose.set_rot(b, pose.get(b)[1] @ Quaternion((1.0, 0.0, 0.0), math.radians(0.5)))
+        pose.solve()
+    c.custom(settle_fingers, 0, L)
 
     # ---- events ---------------------------------------------------------------------------------------------------
     c.event(0, "prop", op="show", prop="teacup")

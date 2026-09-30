@@ -1,0 +1,32 @@
+Saturday Cartoon look-dev - measured numbers (Godot 4.7.2 Compatibility / opengl3, Mesa llvmpipe, 4 CPU cores, 1200x540)
+
+PER CHARACTER (from the exported .glb)                 Hush            Bellows
+  triangles                                            9,680           9,966        (budget REDESIGN 5.6: <= 10k)
+  GPU vertices (after UV/normal seams)                 7,865           8,063
+  skeleton joints                                      71              72           (65 UAL/UE5 + eye/lid/brow x2 [+ bouffant])
+  weighted (deforming) joints                          52              53           (46 body + 6 face [+1 bouffant]; budget <= 50 + jiggle)
+  skinned meshes / materials / surfaces                1 / 1 / 1       1 / 1 / 1
+  textures                                             1 x 1024^2 RGBA (albedo, A = gloss, top 256 rows = face decal atlas)
+    uncompressed + mipmaps (as shipped, lossless)      5.33 MB         5.33 MB      (measured: +10.67 MB texture mem for both)
+    VRAM-compressed 8 bpp (S3TC here; ETC2/ASTC4x4)    1.33 MB         1.33 MB      (measured: +2.67 MB for both; small-island bleed, see NOTES)
+  vertex colour masks (COLOR_0)                        R skin/temper, G eyeball
+  clips in the .glb                                    37 (31 UAL + 6) 36 (31 UAL + 5)
+  .glb size (mesh + 1 PNG + 37 clips)                  3.63 MB         3.88 MB
+  draw calls per frame                                 2 (base + inverted-hull outline); +2 shadow-caster passes under the set's shadowed key light
+  primitives per frame                                 ~19.4k (2 passes) / ~39k with the shadow passes
+
+SCENE (shared diorama, kitchen framing h 4.0 m, MSAA 2x, avg over 129 frames)
+  empty set, key shadows on          45 draw calls   57,348 prims   texture 16.28 MB  buffer 6.90 MB
+  + Hush + Bellows, shadows on       53 draw calls  135,932 prims   texture 26.95 MB  buffer 8.29 MB   (+8 draws)
+  empty set, shadows off             25 draw calls   29,884 prims
+  + Hush + Bellows, shadows off      29 draw calls   69,176 prims                                        (+4 draws)
+  studio, one character, no shadows  2 draw calls   ~19.4-19.9k prims
+
+FRAME TIME (software rasterizer - RELATIVE ONLY, not a phone number)
+  empty set, shadows off  64.9 ms/frame   -> + both characters  84.3 ms/frame  (+19.4 ms, pixel/vertex bound on llvmpipe)
+  empty studio            16.7 ms (vsync) -> one character      31.5-33.9 ms
+  character shader is unshaded (lighting computed in-shader): no per-light passes, same cost on Mobile/Forward+
+
+RENDER / BUILD TIME (this container)
+  Blender pipeline per character: geometry 8.8-9.1 s | UV + Cycles data bakes 9.3-10.0 s | numpy paint 5.3 s | clips + glTF export 24-27 s | total 47.5-51.4 s
+  Godot still 1200x540 (incl. engine start): ~8-12 s    195-frame sequence at --fixed-fps 30: ~45 s    all deliverables (work/render_all.sh): 2 min 20 s

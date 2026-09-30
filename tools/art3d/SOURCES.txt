@@ -1,0 +1,17 @@
+Third-party assets downloaded for the MND 3D spike (all CC0 1.0 / public domain; each pack's own License.txt is kept inside its folder).
+
+kenney/kenney_furniture-kit/     Kenney "Furniture Kit" 2.0 (140 models, GLB/FBX/OBJ/DAE)   https://kenney.nl/assets/furniture-kit
+                                 zip: https://kenney.nl/media/pages/assets/furniture-kit/440e0608a4-1677580847/kenney_furniture-kit.zip   CC0 (License.txt)
+kenney/kenney_food-kit/          Kenney "Food Kit" 2.0                                        https://kenney.nl/assets/food-kit   CC0
+kenney/kenney_mini-characters/   Kenney "Mini Characters" 1.0 (12 chars, 7-bone rig, 32 clips) https://kenney.nl/assets/mini-characters   CC0
+quaternius/universal-animation-library/    Quaternius "Universal Animation Library" [Standard] (free tier; 43 clips, UE5-mannequin 65-bone rig)
+                                 https://quaternius.com/packs/universalanimationlibrary.html -> https://quaternius.itch.io/universal-animation-library   CC0 (License.txt)
+quaternius/universal-animation-library-2/  Quaternius "Universal Animation Library 2" [Standard] (43 clips + female mannequin)
+                                 https://quaternius.itch.io/universal-animation-library-2   CC0
+quaternius/universal-base-characters/      Quaternius "Universal Base Characters" [Standard] (superhero base meshes + hairstyles, same rig)
+                                 https://quaternius.itch.io/universal-base-characters   CC0 (License_Standard.txt)
+quaternius/ultimate-home-interior/         Quaternius "Ultimate House Interior Pack" (9 of its FBX + License + Preview; Drive folder listing shows only 50 files)
+                                 https://quaternius.com/packs/ultimatehomeinterior.html -> https://drive.google.com/drive/folders/1SNK9PwPi8xqqxmpU5xEZeiQjB26C1oX6   CC0 (License.txt)
+polyhaven/ArmChair_01/           Poly Haven "Arm Chair 01" 1k glTF (Kirill Sannikov)          https://polyhaven.com/a/ArmChair_01   CC0 (polyhaven.com/license)
+
+Helpers: itch_free_dl.py (free-tier itch.io download: csrf -> download_url -> file/<upload_id>), gdrive_ls.py (public Drive folder listing), glb_info.py (meshes/skins/clips of a .glb/.gltf).

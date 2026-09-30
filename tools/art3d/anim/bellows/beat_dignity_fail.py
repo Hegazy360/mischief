@@ -70,12 +70,14 @@ def build(ctx):
     c.key(8, stand(fwd=2, side=3, hx=6, hy=4, arms=AT_CRAVAT, cravat=-2), "in_out_sine")
     c.key(16, stand(fwd=2, side=-3, hx=6, hy=-4, arms=AT_CRAVAT, cravat=2), "in_out_sine")      # the shimmy
     c.key(26, stand(fwd=-6, hx=-6, arms=AT_CRAVAT, cravat=0), "in_out_sine")
-    c.key(34, stand(fwd=-8, turn=8, hx=-14, hz=18, arms=SMOOTH), "in_out_cubic")                 # ahem — to the Stalls
-    c.key(46, stand(fwd=-8, turn=-4, hx=-14, hz=-12, arms=SMOOTH), "in_out_sine")                # … the wings
+    # the survey is facing-proof: the rig yaws with facing (no mirror), so each way is kept to 12 deg of turn and the
+    # face stays at >= 23 deg of cheat in either facing (a 26 deg turn went edge-on under the bouffant at facing +1)
+    c.key(34, stand(fwd=-8, turn=4, hx=-14, hz=8, arms=SMOOTH), "in_out_cubic")                  # ahem — one way
+    c.key(46, stand(fwd=-8, turn=-4, hx=-14, hz=-8, arms=SMOOTH), "in_out_sine")                 # … and the other
     c.key(57, stand(fwd=-9, hx=-16, hz=4, arms=SMOOTH), "in_out_sine")                           # satisfied
     c.key(60, stand(fwd=-14, hx=-10, hz=4, arms=PING, cravat=-80), "pop")                        # PING — a jolt back
-    c.key(64, stand(fwd=10, hx=26, hz=2, arms=PING, cravat=-50), "out_quad")                     # eyes down at it
-    c.key(L, stand(fwd=12, hx=30, hz=0, arms=merge(PING, {"clavicle_l": [("y", 6)], "clavicle_r": [("y", -6)]}),
+    c.key(64, stand(fwd=8, hx=16, hz=2, arms=PING, cravat=-50), "out_quad")                      # eyes down at it
+    c.key(L, stand(fwd=9, hx=18, hz=0, arms=merge(PING, {"clavicle_l": [("y", 6)], "clavicle_r": [("y", -6)]}),
                    cravat=-40), "in_out_sine")
     # the gloves ON the cravat while he straightens it (IK, riding the chest)
     c.ik("l", CRAVAT_L, 0, 28, pole=POLE_L, effector="palm", blend=(0, 5), world=False)

@@ -3,8 +3,9 @@
 ## clip events — on engine nodes:
 ##
 ## * **Tree:** `RigPlayer3D` (the view positions it) → `Body` (yaw = facing ± cheat-out; the view never touches it)
-##   → the rig scene (`Armature/Skeleton3D` + the mesh) with the player's `RigMods3D`, a `LookAtModifier3D` and a
-##   `SpringBoneSimulator3D` under the skeleton, `BoneAttachment3D`s for sockets and attachments; an
+##   → the rig scene (`Armature/Skeleton3D` + the mesh) with the player's `RigMods3D`, a `LookAtModifier3D`, the
+##   `RigGaze3D` (sidecar `gaze` windows: the face to the active camera, D8) and a `SpringBoneSimulator3D` under the
+##   skeleton, `BoneAttachment3D`s for sockets and attachments; an
 ##   `AnimationTree` (manual callback) whose blend tree is two base slots cross-faded (`X`) + one masked overlay
 ##   (`M`, per-bone filters for `upper` / `head` / `arms`), each behind a `TimeSeek`.
 ## * **The clock is the player's own float** (timeline frames of a PlayPlan3D): every frame it seeks each slot to its
@@ -29,6 +30,14 @@ signal clip_event(ev: Dictionary)
 signal clip_finished(clip_id: String)
 
 const CHAR_SHADER := "res://art3d/shaders/char_toon.gdshader"
+## Attachments built by the set / props pipelines (r3d-sets) keep their own look: the set shader + the palette the
+## glb was built on (a room palette, or the props palette) — never the rig's palette.
+const SET_SHADER := "res://art3d/shaders/set_toon.gdshader"
+const PROP_SHADER := "res://art3d/shaders/prop_toon.gdshader"
+const SET_ART := "res://art3d/set/"
+const PROPS_ART := "res://art3d/props/"
+const PROPS_PALETTE := "res://art3d/props/palette_props.png"
+const HOUSE3D := "res://data/house/house3d.json"
 const OUTLINE_SHADER := "res://art3d/shaders/outline.gdshader"
 ## Visual layer 2 = View3DConst.CHAR (bit value 2).
 const CHAR_LAYER_BITS := 2
@@ -44,9 +53,14 @@ const MASK_ROOTS := {"upper": ["spine_02"], "head": ["neck_01"], "arms": ["clavi
 const LOOK_YAW_DEG := 35.0
 const LOOK_PITCH_DEG := 20.0
 const LOOK_EASE_S := 0.2
+## Yaw shares of the runtime gaze chain (spine_02, spine_top, neck, head) — r3d-anim's `face_cam` FACE_SHARE.
+const GAZE_SHARE: PackedFloat32Array = [0.15, 0.15, 0.25, 0.45]
 
 ## Step the clock from `_process` (the view may turn it off and call `advance(view_dt)` itself).
 @export var auto_advance: bool = true
+
+static var _house3d_cache: Dictionary = {}
+static var _house3d_loaded: bool = false
 
 var rig_id: String = ""
 var variant: String = ""
@@ -61,6 +75,9 @@ var outline_mat: ShaderMaterial = null
 var tree: AnimationTree = null
 var mods: RigMods3D = null
 var look_mod: LookAtModifier3D = null
+var gaze_mod: RigGaze3D = null
+## Sidecar gaze windows turn the face to the camera (the view may switch it off, e.g. for a staged look elsewhere).
+var gaze_enabled: bool = true
 var jiggle: SpringBoneSimulator3D = null
 var jiggle_clamp: RigJiggleClamp3D = null
 var face: FaceCards3D = FaceCards3D.new()
@@ -69,6 +86,7 @@ var facing: int = 1
 
 var _mats: Array[ShaderMaterial] = []
 var _att_mats: Array[ShaderMaterial] = []
+var _set_mats: Array[ShaderMaterial] = []    ## set / props attachments (stage light + desat only)
 var _libs: Dictionary = {}                   ## rig prefix -> AnimationLibrary
 var _anim_a: AnimationNodeAnimation
 var _anim_b: AnimationNodeAnimation
@@ -101,6 +119,7 @@ var _ov_w: float = 0.0
 var _ov_target: float = 0.0
 var _ov_blend: float = 6.0
 var _ov_ev_from: float = -1.0
+var _ov_locked: bool = false
 
 # facing / cheat
 var _yaw_cur: float = 90.0
@@ -150,6 +169,8 @@ var _look_target: Node3D = null
 var _look_w: float = 0.0
 var _look_w_to: float = 0.0
 var _look_point: Vector3 = Vector3.ZERO
+var _gaze_cam: Camera3D = null
+var _gaze_w: float = 0.0
 var _kick_left: float = 0.0
 var _last_applied_t: float = -INF
 var _pose_dirty: bool = true
@@ -242,11 +263,13 @@ func _teardown() -> void:
 	tree = null
 	mods = null
 	look_mod = null
+	gaze_mod = null
 	jiggle = null
 	jiggle_clamp = null
 	stand_in = null
 	_mats.clear()
 	_att_mats.clear()
+	_set_mats.clear()
 	_libs.clear()
 	_att_nodes.clear()
 	_bone_att.clear()
@@ -493,12 +516,15 @@ func _build_attachments() -> void:
 			holder.position = at.pos
 			holder.rotation_degrees = at.rot_deg
 			holder.add_child(inst)
+		var set_piece := at.scene.begins_with(SET_ART) or at.scene.begins_with(PROPS_ART)
 		for mi2 in holder.find_children("*", "MeshInstance3D", true, false):
 			var m4 := mi2 as MeshInstance3D
 			m4.layers = CHAR_LAYER_BITS
 			m4.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			if mat != null and m4.mesh != null:
-				var am := _attachment_material(m4)
+			if m4.mesh == null:
+				continue
+			var am: Material = _set_piece_material(at, m4) if set_piece else (_attachment_material(m4) if mat != null else null)
+			if am != null:
 				for s in m4.mesh.get_surface_count():
 					m4.set_surface_override_material(s, am)
 		holder.visible = at.visible_default
@@ -529,6 +555,89 @@ func _attachment_material(m4: MeshInstance3D) -> ShaderMaterial:
 	return am
 
 
+## A set / props glb riding on the rig (Bellows' kitchen stool): the set's own shader and palette, so it is the same
+## stool as the one on the set (House3D draws furniture with set_toon on the room palette, live props with prop_toon
+## on the props palette). No outline (set furniture has none) and none of the character's face / tint / stone state.
+func _set_piece_material(at: RigDef3D.Attachment, m4: MeshInstance3D) -> Material:
+	var props := at.scene.begins_with(PROPS_ART)
+	var sh := _soft_shader(PROP_SHADER if props else SET_SHADER, "")
+	var pal := _set_piece_palette(at, m4)
+	if sh == null:
+		var st := StandardMaterial3D.new()
+		st.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		st.albedo_texture = pal
+		st.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		return st
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	sm.resource_name = "set_%s_att_%s" % [rig_id, at.id]
+	if pal != null:
+		sm.set_shader_parameter("palette", pal)
+	sm.set_shader_parameter("stage_light", 1.0)
+	sm.set_shader_parameter("desat", 0.0)
+	_set_mats.append(sm)
+	var s := _soft_class("MaterialWarm3D")
+	if s != null and s.has_method("register"):
+		s.call("register", sm, &"prop" if props else &"set")
+	return sm
+
+
+## The palette a set / props glb was built on: the descriptor's `palette`, else the glb's own texture, else (props/)
+## the props palette, else (set/) the palette of the room house3d.json places that model in (a furniture / dressing /
+## decor entry with the same `model`), else the room its file name starts with (kitchen_arch.glb → kitchen).
+func _set_piece_palette(at: RigDef3D.Attachment, m4: MeshInstance3D) -> Texture2D:
+	if at.palette != "":
+		return _tex(at.palette)
+	var src: Material = m4.get_active_material(0) if m4.mesh.get_surface_count() > 0 else null
+	if src is BaseMaterial3D and (src as BaseMaterial3D).albedo_texture != null:
+		return (src as BaseMaterial3D).albedo_texture
+	if at.scene.begins_with(PROPS_ART):
+		return _tex(PROPS_PALETTE)
+	var room := set_piece_room(at.scene)
+	return _tex(room_palette(room)) if room != "" else null
+
+
+## The room house3d.json places `model` in ("" when none): furniture / dressing / decor / hotspot entries with that
+## `model` and a `room`, else the room its file name starts with.
+static func set_piece_room(model: String) -> String:
+	var h := _house3d()
+	var rooms: Dictionary = h.get("rooms", {}) if h.get("rooms", {}) is Dictionary else {}
+	for sec in ["furniture", "dressing", "decor", "hotspots"]:
+		var v: Variant = h.get(sec, {})
+		if not (v is Dictionary):
+			continue
+		for k in (v as Dictionary):
+			var e: Variant = (v as Dictionary)[k]
+			if not (e is Dictionary):
+				continue
+			var mv: Variant = (e as Dictionary).get("model", "")
+			if mv is String and String(mv) == model and (e as Dictionary).get("room", null) is String:
+				return String((e as Dictionary)["room"])
+	var base := model.get_file()
+	for r in rooms:
+		if base.begins_with(String(r) + "_"):
+			return String(r)
+	return ""
+
+
+## The palette path of `room` in house3d.json ("" when none).
+static func room_palette(room: String) -> String:
+	var rooms: Variant = _house3d().get("rooms", {})
+	if rooms is Dictionary and (rooms as Dictionary).get(room, null) is Dictionary:
+		return String(((rooms as Dictionary)[room] as Dictionary).get("palette", ""))
+	return ""
+
+
+static func _house3d() -> Dictionary:
+	if not _house3d_loaded:
+		_house3d_loaded = true
+		if FileAccess.file_exists(HOUSE3D):
+			var j := JSON.new()
+			if j.parse(FileAccess.get_file_as_string(HOUSE3D)) == OK and j.data is Dictionary:
+				_house3d_cache = j.data
+	return _house3d_cache
+
+
 func _build_look_at() -> void:
 	var hb := def.bone("head", "Head")
 	var hi := skeleton.find_bone(hb)
@@ -557,6 +666,30 @@ func _build_look_at() -> void:
 	look_mod.target_node = look_mod.get_path_to(_look_target)
 	look_mod.influence = 0.0
 	look_mod.active = false
+	_build_gaze(hi)
+
+
+## The runtime gaze (after the look-at, before the springs): upper spine → neck → head of this rig.
+func _build_gaze(head_i: int) -> void:
+	var names := PackedStringArray()
+	var st := skeleton.find_bone(def.bone("spine_top", "spine_03"))
+	var sp := skeleton.get_bone_parent(st) if st >= 0 else -1
+	names.append(skeleton.get_bone_name(sp) if sp >= 0 and skeleton.get_bone_name(sp).begins_with("spine") else "")
+	names.append(skeleton.get_bone_name(st) if st >= 0 else "")
+	names.append(def.bone("neck", "neck_01"))
+	names.append(skeleton.get_bone_name(head_i))
+	var bi := PackedInt32Array()
+	var sh := PackedFloat32Array()
+	for k in names.size():
+		var b := skeleton.find_bone(names[k]) if names[k] != "" else -1
+		if b >= 0 and not bi.has(b):
+			bi.append(b)
+			sh.append(GAZE_SHARE[k])
+	gaze_mod = RigGaze3D.new()
+	gaze_mod.name = "Gaze"
+	skeleton.add_child(gaze_mod)
+	gaze_mod.setup(bi, sh, skeleton.get_bone_global_rest(head_i))
+	gaze_mod.active = false
 
 
 static func _closest_axis(v: Vector3) -> int:
@@ -681,6 +814,7 @@ func play_overlay(clip_id: String, mask := "upper", blend_f := 6) -> void:
 	_ov_clip = c
 	_ov_t = 0.0
 	_ov_ev_from = -1.0
+	_ov_locked = false
 	_ov_blend = maxf(0.0, float(blend_f))
 	_ov_target = 1.0
 	_pose_dirty = true
@@ -701,6 +835,7 @@ func play_overlay(clip_id: String, mask := "upper", blend_f := 6) -> void:
 
 ## Fades the overlay out over `blend_f` frames.
 func stop_overlay(blend_f := 6) -> void:
+	_ov_locked = false
 	_ov_target = 0.0
 	_ov_blend = maxf(0.0, float(blend_f))
 	_pose_dirty = true
@@ -730,6 +865,33 @@ func set_external_frame(frame: float) -> void:
 			_pending_last_beat = _plan.last_beat
 	_apply_pose(0.0)
 	_flush_events()
+
+
+## Frame-lock of the overlay (sheets, the viewer): shows frame `frame` of the playing overlay at its full weight; the
+## overlay's events between the previous locked frame and this one fire. `play_overlay` / `stop_overlay` unlock it.
+func set_overlay_frame(frame: float) -> void:
+	if not ok or _ov_clip == null:
+		return
+	_ov_locked = true
+	var f := clampf(frame, 0.0, float(_ov_clip.length))
+	if f >= _ov_ev_from:
+		ClipEvents3D.between_into(_ov_clip, _ov_ev_from, f, _ov_events)
+		_pending.append_array(_ov_events)
+	_ov_ev_from = f
+	_ov_t = f
+	_ov_w = _ov_target
+	_pose_dirty = true
+	_apply_pose(0.0)
+	_flush_events()
+
+
+## The overlay clip id ("" = none) and its frame.
+func current_overlay() -> String:
+	return _ov_clip.id if _ov_clip != null else ""
+
+
+func current_overlay_frame() -> float:
+	return _ov_t
 
 
 ## Back to the player's own clock (continues from the locked frame).
@@ -762,6 +924,7 @@ func advance(view_dt: float) -> void:
 	_update_flying(view_dt)
 	_apply_pose(view_dt)
 	_flush_events()
+	_update_gaze()
 	_update_look(view_dt)
 	skeleton.advance(view_dt)
 	_push_face(df)
@@ -828,7 +991,7 @@ func _flush_events() -> void:
 
 
 func _step_overlay(df: float) -> void:
-	if _ov_clip == null:
+	if _ov_clip == null or _ov_locked:
 		return
 	if _ov_blend > 0.0:
 		_ov_w = move_toward(_ov_w, _ov_target, df / _ov_blend)
@@ -1197,6 +1360,56 @@ func _push_face(df: float) -> void:
 			m.set_shader_parameter("pupil_offset", face.pupil)
 
 
+# --- gaze (sidecar `gaze`, D8) ---------------------------------------------------------------------------------
+
+## The camera the sidecar gaze windows turn the face to (null = the viewport's active camera).
+func set_gaze_camera(cam: Camera3D) -> void:
+	_gaze_cam = cam
+
+
+## The camera gaze windows look at now (the explicit one, else the viewport's active camera; null = none).
+func gaze_camera() -> Camera3D:
+	if _gaze_cam != null and is_instance_valid(_gaze_cam) and _gaze_cam.is_inside_tree():
+		return _gaze_cam
+	var vp := get_viewport() if is_inside_tree() else null
+	return vp.get_camera_3d() if vp != null else null
+
+
+## The gaze weight applied this frame (0..1).
+func gaze_weight() -> float:
+	return _gaze_w
+
+
+## The gaze weight of the playing clips at their current frames: the base clip's window (cross-faded with the
+## outgoing clip's during a blend) and the overlay's (× its blend weight) — the larger one.
+func gaze_weight_now() -> float:
+	var w := 0.0
+	if _plan != null:
+		var c := _plan.clip_at(_t)
+		if c != null and c.has_gaze():
+			w = c.gaze_weight(_plan.frame_at(_t))
+		if _old_clip != null and _xfade_len > 0.0:
+			var k := clampf(_xfade_f / _xfade_len, 0.0, 1.0)
+			w = lerpf(_old_clip.gaze_weight(_old_t) if _old_clip.has_gaze() else 0.0, w, k)
+	if _ov_clip != null and _ov_clip.has_gaze():
+		w = maxf(w, _ov_clip.gaze_weight(_ov_t) * _ov_w)
+	return w
+
+
+func _update_gaze() -> void:
+	if gaze_mod == null:
+		return
+	var cam := gaze_camera() if gaze_enabled else null
+	_gaze_w = gaze_weight_now() if cam != null else 0.0
+	gaze_mod.weight = _gaze_w
+	gaze_mod.active = _gaze_w > 0.0001
+	if not gaze_mod.active:
+		return
+	var inv := skeleton.global_transform.affine_inverse()
+	gaze_mod.target = inv * cam.global_position
+	gaze_mod.up = (inv.basis * Vector3.UP).normalized()
+
+
 # --- look-at ----------------------------------------------------------------------------------------------------
 
 ## Head (+ pupils) toward a world point, additive, clamped (±35° yaw, ±20° pitch); `weight` eased over 0.2 s.
@@ -1229,7 +1442,8 @@ func _update_look(dt: float) -> void:
 	var fwd := maxf(0.05, local.z)
 	var yaw := atan2(local.x, fwd)
 	var pitch := atan2(local.y, Vector2(local.x, fwd).length())
-	face.look = Vector2(clampf(yaw / deg_to_rad(LOOK_YAW_DEG), -1.0, 1.0), clampf(pitch / deg_to_rad(LOOK_PITCH_DEG), -1.0, 1.0)) * _look_w
+	# A gaze window puts the face (and the painted pupils, centred) on the camera: the look-at pupils fade with it.
+	face.look = Vector2(clampf(yaw / deg_to_rad(LOOK_YAW_DEG), -1.0, 1.0), clampf(pitch / deg_to_rad(LOOK_PITCH_DEG), -1.0, 1.0)) * _look_w * (1.0 - _gaze_w)
 
 
 # --- jiggle -----------------------------------------------------------------------------------------------------
@@ -1558,6 +1772,9 @@ func set_outline_scale(k: float) -> void:
 func set_stage_light(level: float, desat := 0.0) -> void:
 	_set_all("stage_light", level)
 	_set_all("desat", desat)
+	for sm in _set_mats:
+		sm.set_shader_parameter("stage_light", level)
+		sm.set_shader_parameter("desat", desat)
 	if outline_mat != null:
 		outline_mat.set_shader_parameter("stage_light", level)
 

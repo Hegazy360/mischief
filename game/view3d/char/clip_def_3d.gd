@@ -4,6 +4,10 @@
 ##
 ## Validation (`errors` / `warnings`, `"<file>: <key>: <what>"`): format anim3d, length > 0, fps 60, every frame
 ## inside the clip, known event types, beats inside the clip, the face timeline sorted, layer / mask / lock known.
+##
+## `gaze` (optional, r3d-anim's runtime audience look, lead ruling D8): `[{f0, f1, at: "camera", weight, blend}]` —
+## over [f0, f1] the player turns the face to the active camera with `weight`, ramped in and out over `blend` frames
+## inside the window (`gaze_weight(f)`); on a loop a window touching the seam continues across it.
 class_name ClipDef3D
 extends RefCounted
 
@@ -13,6 +17,7 @@ const LAYERS: PackedStringArray = ["base", "overlay", "additive"]
 const MASKS: PackedStringArray = ["upper", "head", "arms", "face"]
 const LOCKS: PackedStringArray = ["sim", "rig_pm"]
 const DEFAULT_BLEND := 6
+const DEFAULT_GAZE_BLEND := 6
 
 var id: String = ""
 var rig_id: String = ""
@@ -50,6 +55,13 @@ var rot_jitter_deg: float = 0.0
 var source: Dictionary = {}
 var lint: Dictionary = {}
 var keeps: PackedStringArray = PackedStringArray()   ## set pieces kept lent across a switch to this clip
+## Gaze windows (sidecar `gaze`, at "camera"): frames, weight 0..1, blend frames.
+var gaze_f0: PackedFloat32Array = PackedFloat32Array()
+var gaze_f1: PackedFloat32Array = PackedFloat32Array()
+var gaze_w: PackedFloat32Array = PackedFloat32Array()
+var gaze_blend: PackedFloat32Array = PackedFloat32Array()
+var _gaze_at_start: bool = false
+var _gaze_at_end: bool = false
 
 
 ## Parses sidecar dictionary `d` for clip `clip_id` found at `p`.
@@ -130,6 +142,73 @@ func parse(clip_id: String, d: Dictionary, p := "") -> void:
 	if kv is Array:
 		for k in kv:
 			keeps.append(String(k))
+	_parse_gaze(d.get("gaze", []))
+
+
+func _parse_gaze(gv: Variant) -> void:
+	if gv == null:
+		return
+	if not (gv is Array):
+		_err("gaze", "must be an array")
+		return
+	var i := 0
+	for g in gv:
+		if not (g is Dictionary) or not (g as Dictionary).has("f0") or not (g as Dictionary).has("f1"):
+			_err("gaze[%d]" % i, "needs f0 and f1")
+			i += 1
+			continue
+		var gd := g as Dictionary
+		var at := String(gd.get("at", "camera"))
+		var f0 := int(gd["f0"])
+		var f1 := int(gd["f1"])
+		if at != "camera":
+			_warn("gaze[%d].at" % i, "'%s' is not supported (only \"camera\"): ignored" % at)
+			i += 1
+			continue
+		if f0 < 0 or f1 > length or f1 < f0:
+			_err("gaze[%d]" % i, "[%d, %d] outside the clip (0..%d)" % [f0, f1, length])
+			i += 1
+			continue
+		gaze_f0.append(float(f0))
+		gaze_f1.append(float(f1))
+		gaze_w.append(clampf(float(gd.get("weight", 1.0)), 0.0, 1.0))
+		gaze_blend.append(maxf(0.0, float(gd.get("blend", DEFAULT_GAZE_BLEND))))
+		if f0 <= 0:
+			_gaze_at_start = true
+		if f1 >= length:
+			_gaze_at_end = true
+		i += 1
+
+
+## True when the clip has gaze windows.
+func has_gaze() -> bool:
+	return not gaze_f0.is_empty()
+
+
+## The gaze weight at clip frame `f` (0 outside every window): the window's weight, eased in over `blend` frames
+## from f0 and out over `blend` frames to f1 (inside the window; blend 0 = full at the edges). On a loop, a window
+## edge at the seam does not ramp when another window continues on the other side. Overlapping windows: the max.
+func gaze_weight(f: float) -> float:
+	var w := 0.0
+	for i in gaze_f0.size():
+		var a := gaze_f0[i]
+		var b := gaze_f1[i]
+		if f < a or f > b:
+			continue
+		var k := 1.0
+		var bl := gaze_blend[i]
+		if bl > 0.0:
+			if not (loop and a <= 0.0 and _gaze_at_end):
+				k = minf(k, _smooth((f - a) / bl))
+			if not (loop and b >= float(length) and _gaze_at_start):
+				k = minf(k, _smooth((b - f) / bl))
+		w = maxf(w, gaze_w[i] * k)
+	return w
+
+
+static func _smooth(x: float) -> float:
+	var t := clampf(x, 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
 
 
 func _parse_events(ev: Variant) -> void:

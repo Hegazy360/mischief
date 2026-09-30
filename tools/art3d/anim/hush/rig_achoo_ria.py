@@ -13,14 +13,14 @@ from lib.clip import Clip
 from lib.stage import Stage, reach_geometry, house3d, prop_point
 from lib import pose as P
 from lib.pose import merge, sym
-from lib.hush_presets import ARMS_DOWN, STAND, gloves, lean, head
+from lib.hush_presets import ARMS_DOWN, STAND, gloves, glove, lean, head
 
 L = 48
 SHAKES = (16, 26, 36)
 GRAB, PUT = 7, 42                     # the pot leaves the shelf / is back on it
 FALLBACK = {"target": (14.55, 2.0225, -1.72), "pos": {"x": 14.85, "z": -1.42, "step": "stool:kitchen_stool", "step_h": 0.55},
             "facing": -1, "band": "high"}
-POT_PIVOT = (-0.2, 0.0, 0.0)          # the set pot's part pivot in the honey_jar prop (tools/art3d/set/build.py), unscaled
+POT_PIVOT = (-0.16, 0.0, 0.0)         # the set pot's part pivot in the honey_jar prop (tools/art3d/set/build.py PEPPER_X), unscaled
 POT_HOLES_Y = 0.288                   # the set pot's holes above the shelf (prop-local, unscaled)
 
 CROUCH = {"thigh_l": [("x", -44), ("z", 6)], "calf_l": [("x", 74)], "foot_l": [("x", -28)],
@@ -35,6 +35,10 @@ READY_R = {"clavicle_r": [("y", 12)], "upperarm_r": [("y", 28), ("z", -4)], "low
            "hand_r": [("x", -20)]}                                                                  # her shoulder
 REACH_R = {"clavicle_r": [("y", 14)], "upperarm_r": [("y", 30), ("z", 55)], "lowerarm_r": [("z", 15)]}   # out front, for the pot
 SHRUG_R = {"clavicle_r": [("y", 26), ("z", 8)]}                      # the reaching shoulder rides up
+# through the shakes the free glove goes UP and out to her left (clear of her face), fingers spread (a flamenco "olé!" with the pepper as the
+# maraca): both arms up on the step — the 64 px board's reach-high silhouette (issues.md D12)
+OLE_L = merge({"clavicle_l": [("y", -22)], "upperarm_l": [("y", -58), ("z", 26)], "lowerarm_l": [("z", -18)],
+               "hand_l": [("x", -14), ("y", -16)]}, glove("l", 4, 2, spread=22))
 HIGH_TOE = {"foot_l": [("x", 52)], "ball_l": [("x", -48)], "foot_r": [("x", 52)], "ball_r": [("x", -48)]}
 # the lean-out: on the ball of the right foot, the left leg kicked back, the hips over the seat's front edge
 LEAN_OUT = merge({"thigh_r": [("x", -6), ("z", -4)], "calf_r": [("x", 8)], "foot_r": [("x", 48)], "ball_r": [("x", -46)],
@@ -76,13 +80,13 @@ def build(ctx):
     c.key(GRAB + 2, merge(stand, LEAN_OUT, REACH_R, lean(fwd=26, side=-4, turn=16)))                   # teeters
     WALL = {"_pelvis": (-0.04, 0.0, 0.0)}
     # over the jar she leans BACK (screen right, away from it) so her head clears the jar and the pot from the camera
-    body = merge(stand, HIGH_TOE, BALANCE_L, REACH_R, SHRUG_R, WALL, lean(fwd=-6, side=6, turn=10))
+    body = merge(stand, HIGH_TOE, OLE_L, REACH_R, SHRUG_R, WALL, lean(fwd=-6, side=6, turn=10))
     c.key(14, merge(body, head(x=-6, z=24)), "in_out_sine")                                            # back upright
     for f in (22, 32):
-        c.key(f, merge(body, {"clavicle_l": [("y", -10)]}))
-    for f in SHAKES:                              # the pop: the hips kick, the free arm flings out
+        c.key(f, merge(body, {"upperarm_l": [("y", -50), ("z", 24)], "lowerarm_l": [("z", -28)]}))
+    for f in SHAKES:                              # the pop: the hips kick, the free glove flicks up higher
         c.key(f, merge(body, lean(fwd=-2, side=9, turn=12), {"pelvis": [("y", -5)]},
-                       {"upperarm_l": [("y", 0), ("z", 14)], "lowerarm_l": [("z", -4), ("y", 10)]}), "pop")
+                       {"upperarm_l": [("y", -66), ("z", 30)], "lowerarm_l": [("z", -10)], "hand_l": [("x", -24)]}), "pop")
     c.key(37, merge(body, lean(fwd=-4, side=7, turn=10)), "out_back")
     c.key(PUT - 1, merge(stand, LEAN_OUT, REACH_R), "in_out_sine")                                    # puts it back
     c.key(PUT, merge(stand, LEAN_OUT, REACH_R, lean(fwd=25, side=-4, turn=15)))

@@ -35,4 +35,5 @@ def build(ctx):
                         "index_01_r": [("y", -10 * math.sin(2 * math.pi * f / 12.0 + 2.0))],
                         "middle_01_r": [("y", -10 * math.sin(2 * math.pi * f / 12.0 + 3.0))]})
     c.face(0, "huh")
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

@@ -59,8 +59,8 @@ camera. Request filed (report §Requests).
 
 ### `st_specs_on` (12 f, overlay `upper`, lock sim)
 - The right glove whips the dangling specs off his chest and slaps them on (prop `specs` shown on f4 = the `magnified`
-  face), pushes them up the bridge, drops. A glint (fx sparkles f5); the tink is cues.json's. When he faces −1 the
-  right glove is on the far side, so the slap itself is half hidden — the specs appearing + the tink carry it.
+  face), pushes them up the bridge, drops. A glint (fx sparkles f5); the tink is cues.json's. The glove at the bridge reads
+  in both facings (`boards/oneshots.png` row 2, facing −1); the specs appearing + the tink carry the beat.
 - **Scores:** funny 3 · readable 3 · fresh 3.
 
 ## The other fifteen (all authored as real clips — no drafts)
@@ -70,21 +70,26 @@ camera. Request filed (report §Requests).
 | `st_look` | 180 loop | base | specs on, crouched peer left (20–58) / right (58–100) / at the floor (100–128), the palms-up shrug (128–160) | 3 | 3 | 3 |
 | `st_look_back` | 60 | base | a paranoid double look back: over the left shoulder (12–30), SNAP over the right (31–35), "hmph" front (44–60) — one of the two always passes the face across the camera | 3 | 3 | 3 |
 | `st_smirk` | 30 | overlay upper | the fizzle: chin up, belly pats, a smug little chuckle (8–22) | 3 | 3 | 3 |
-| `st_straighten_cravat` | 60 loop | base | the doorway pause: both gloves to the cravat, TUG (14, cravat_tug), lapels smoothed, chin-up sniff | 3 | 3 | 3 |
+| `st_straighten_cravat` | 92 loop | base | the doorway pause: both gloves to the cravat, TUG (20, cravat_tug), lapels smoothed, chin-up sniff; 92 f so one cycle covers the longest pause (90 − eta + 1 ticks — the view frame-locks one-shots without wrapping) | 3 | 3 | 3 |
 | `mg_hum` | 48 | overlay upper | eyes shut, the barrel tick-tocking like a metronome, the baton wagging, a note burst | 3 | 3 | 3 |
 | `mg_trill` | 48 | overlay upper | arms flung wide and chin right up, the head vibrating (4–30), throat taps "still got it" (30–42) | 4 | 4 | 3 |
 | `mg_conduct_air` | 60 | overlay upper | baton down / across / UP on the table's swishes (5/20/30), the deep bow to the empty room (42) | 3 | 3 | 3 |
 | `mg_admire_reflection_horn` | 60 | overlay upper | leans into the horn (6, glint), a smug look to the house (14–26), pucker, the blown kiss (42) | 4 | 3 | 4 |
 | `mg_pinkie_up` | 48 | overlay upper | THE SIP path of act_tea (f420): the cup up, the pinkie cocked to 1.35 with a tuning-fork wobble, "Ahhh" (30) | 3 | 3 | 3 |
-| `mg_admire_in_kettle` | 48 | overlay (head) | the head turns down to the kettle, vain tilt, a WINK (face slots, 18–24), smug to the house (26–40) — see staging note | 3 | 2–3 | 3 |
+| `mg_admire_in_kettle` | 48 | overlay (head) | a glance down at the kettle (2–13, glint), then the vanity is played TO THE HOUSE: chin up, a WINK (face slots, 18–24), a preening head roll (26–40) — see staging note | 3 | 3 | 3 |
 | `mg_comb_flourish` | 48 | overlay upper | at the hall mirror (facing +1, the comb hand on the camera side): one big stroke over the bouffant, the flourish, the tuck behind the ear | 4 | 4 | 3 |
 | `mg_cravat_tug` | 48 | overlay upper | the tug (10) and the chest swelling enormous mid-stride, a second ping (27) | 3 | 3 | 3 |
 | `mg_walk_hum` | 48 | overlay upper | chin up, eyes shut, the index finger beating the march on the strut's 16 f period | 3 | 3 | 3 |
 | `mg_walk_scale` | 48 | overlay upper | do-re-mi on 0/16/32: the chin and the glove climb a rung per note, the last one held with the arm flung out | 3 | 3 | 3 |
 
-**Below the bar / known weak spots (all ≥ 3 except one readable score):**
-- `mg_admire_in_kettle` readable 2–3: the kettle sits on his far (right-back) side at the stool, so looking at it turns
-  his face AWAY from the house; and the mg fires at act_tea's honey beat (f120), so the hands cannot pat the bouffant
-  (they hold the lent jar and the spoon). Authored for the `head` mask; staging reported to r3d-sets / -a / content
-  (report §Requests). With the kettle lent into his free hand at another moment of the tea it would read at 4.
+**Known weak spots (every clip ≥ 3):**
+- `mg_admire_in_kettle`: the kettle sits on his far (right-back) side at the stool, so looking at it turns his face
+  away from the house (so the look is only 11 f and the wink goes to the house); and the mg fires at act_tea's honey
+  beat (f120), so the hands cannot pat the bouffant (they hold the lent jar and the spoon). Authored for the `head`
+  mask; staging reported to r3d-sets / -a / content (report §Requests). With the kettle lent into a free glove at
+  another moment of the tea it would read at 4.
+- `bit_warmup` in the Bellows window (≈ 200 px): the yodel flap and the wide wind-up read, the collar clutch reads only
+  as "hand to the chest" (`boards/ingame_bit_warmup_pip.png`).
+- `mg_conduct_air`: the baton is in the far glove when he faces −1 at the gramophone — the strokes read smaller than
+  the bow.
 - Face beats of the facing-proof clips wait on the runtime `gaze` (D8) — see the caveat at the top.

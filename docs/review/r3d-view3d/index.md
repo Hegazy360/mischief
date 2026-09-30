@@ -37,3 +37,8 @@ clips r3d-anim* had landed (Bellows had none yet: his static pose), set = r3d-se
   only: `test_world_view3d` — g0 16.8 % / P00 9.4 % open vs 30.4 % in the sim mode), a run with noise rings.
 - The armed tag is black (see the armed board) and Bellows' FRAZZLED bouffant reads as bald at game scale — both
   requests in the report.
+- `d7_outline_p00_t300.png` (fix pass, 20:5xZ) — lead ruling D7 in game: P00 kitchen at tick 300, 1200×540, ViewSandbox3D on
+  the real sim. Hush's ink 4.8 px @1080 (look A's 2.4 px @540), the live props' ink 3.4 px (honey jar + pepper pot with
+  the gold halo, the pantry curtain with the blue halo), dressing (kettle, stool) without ink. Judge: does Hush read as a
+  vinyl toy against the wall, and do the live props still separate from the dressing? (Bellows, in the window, is still
+  3.5 px until his rig3d.json takes 4.8 — request in the report.)

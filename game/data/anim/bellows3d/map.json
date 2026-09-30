@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rig": "bellows",
-  "doc": "Bellows' 3D clip map (owner r3d-anim-bellows-a; index §7.10): the s2-view §4.1.1 schema over view/world/default_maps/bellows.json (every key left out falls back to it; this file wins key by key). Clip ids = the 2D ids; sidecars data/anim/bellows3d/<clip>.json. walk entries carry the 3D gait (stride_m, speed_m_s: the clip's sidecar values; RigPlayer3D scales playback to the actor's speed) and the 2D stride_px / speed_px_s the ClipMap uses to detect a walk and its nominal speed (1 m = 200 px). Rows of r3d-anim-bellows-b / -c are added when their DONE lines appear. The curtain-call clips (curtain:wander_on / slow_burn / bonk / double_take) are clip_rules.json rows with the same ids.",
+  "doc": "Bellows' 3D clip map (owner r3d-anim-bellows-a; index §7.10): the s2-view §4.1.1 schema over view/world/default_maps/bellows.json (every key left out falls back to it; this file wins key by key). Clip ids = the 2D ids; sidecars data/anim/bellows3d/<clip>.json. walk entries carry the 3D gait (stride_m, speed_m_s: the clip's sidecar values; RigPlayer3D scales playback to the actor's speed) and the 2D stride_px / speed_px_s the ClipMap uses to detect a walk and its nominal speed (1 m = 200 px). Rows of r3d-anim-bellows-b (state:spotted, activity:curious, oneshot:*, bit:*, mg:*) and -c (walk@tier3, activity:hunt, cue:laugh_*) are listed from their DONE lines (the same ids as the default map). The curtain-call clips (curtain:wander_on / slow_burn / bonk / double_take) are clip_rules.json rows with the same ids.",
   "idle": "bellows/loco_idle",
   "walk": {
     "clip": "bellows/loco_strut",
@@ -17,6 +17,13 @@
     "stride_px": 123,
     "speed_px_s": 264
   },
+  "walk@tier3": {
+    "clip": "bellows/loco_stomp",
+    "stride_m": 0.598,
+    "speed_m_s": 1.38,
+    "stride_px": 120,
+    "speed_px_s": 276
+  },
   "walk@blind": {
     "clip": "bellows/loco_blind_shuffle",
     "stride_m": 0.48,
@@ -28,7 +35,34 @@
   "activity:tea": "bellows/act_tea",
   "activity:warmup": "bellows/act_warmup",
   "activity:fixup_mirror": "bellows/act_fixup_mirror",
+  "activity:hunt": "bellows/act_hunt",
   "oneshot:stun": "bellows/st_bonk",
+  "state:spotted": "bellows/st_double_take",
+  "activity:curious": {
+    "clip": "bellows/st_look",
+    "loop": true
+  },
+  "oneshot:head_turn": "bellows/st_head_turn",
+  "oneshot:specs_on": "bellows/st_specs_on",
+  "oneshot:doorway_pause": {
+    "clip": "bellows/st_straighten_cravat",
+    "loop": true
+  },
+  "oneshot:look_back": "bellows/st_look_back",
+  "oneshot:bump_look": {
+    "clip": "bellows/st_look",
+    "loop": true
+  },
+  "oneshot:curious_stop": "bellows/st_suspicious",
+  "oneshot:curious_look": {
+    "clip": "bellows/st_look",
+    "loop": true
+  },
+  "oneshot:fizzle": "bellows/st_smirk",
+  "bit:*": "bellows/{id}",
+  "mg:*": "bellows/mg_{id}",
+  "cue:laugh_doorframe": "bellows/cue_doorframe_bonk",
+  "cue:laugh_picture": "bellows/cue_picture_bonk",
   "reaction": "<from sim>",
   "reaction_fallback": "bellows/st_double_take"
 }

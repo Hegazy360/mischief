@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+INFO L24_sound_table res://data/anim/bellows3d/rx_dizzy_spin_a.json no audio-table row: new sound frames ["0 record_scratch", "12 vo_bellows_dizzy_babble", "40 spin", "88 thud", "89 dizzy_tweets", "149 vo_bellows_ugh"] for r3d-integrate
+lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 366 ms
+[Content] loaded res://data in 37 ms: 0 errors, 27 warnings

@@ -20,6 +20,8 @@ FRONT = -0.20          # the ball's y at touch-down (armature -y = her front), a
 LIFT = 0.34            # swing height of the ball
 PITCH_ST, PITCH_SW = 22.0, 40.0
 TOE_SW = 20.0
+KICK = 0.30            # the heel's kick back behind her early in the swing
+REACH = 0.16           # the swing foot's reach out ahead late in the flight (0 at touch-down: it paws back)
 H0, BOB = 0.82, 0.05   # pelvis height at mid-stance and the rise into the flight
 
 
@@ -34,9 +36,11 @@ def foot_target(f, side):
         u = ph / s
         return FRONT + D * u, 0.0, PITCH_ST + 8.0 * u, 0.0, True
     v = (ph - s) / (1.0 - s)
-    # the heel kicks up behind first, then the knee drives the foot forward and high
+    # the heel kicks up behind first, then the knee drives the foot forward and high, reaching out ahead in the
+    # flight (the long split the 64 px board samples: issues.md D12) and pawing back onto the touch-down point
     e = 0.5 - 0.5 * math.cos(math.pi * v)
-    y = FRONT + D - D * e + 0.22 * math.sin(math.pi * min(1.0, v * 1.6)) * (1.0 - v)
+    reach = REACH * math.sin(math.pi * min(1.0, max(0.0, (v - 0.45) / 0.55)))
+    y = FRONT + D - D * e + KICK * math.sin(math.pi * min(1.0, v * 1.6)) * (1.0 - v) - reach
     z = LIFT * math.sin(math.pi * v) ** 0.8
     return y, z, PITCH_SW, TOE_SW * math.sin(math.pi * v), False
 

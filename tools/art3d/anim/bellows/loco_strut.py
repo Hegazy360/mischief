@@ -38,4 +38,5 @@ def build(ctx):
                         "hand_l": [("y", 8 * math.sin(2 * math.pi * f / L + 0.8))],
                         "hand_r": [("y", 8 * math.sin(2 * math.pi * f / L + 0.8))]})
     c.face(0, "pompous")
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

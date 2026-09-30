@@ -91,4 +91,5 @@ def build(ctx):
                  (405, "sing_big"), (430, "sing_mid"), (456, "pompous")):
         c.face(f, p)
     c.look_camera(40, 456, weight=1.0, blend=8)
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

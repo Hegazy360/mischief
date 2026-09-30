@@ -19,4 +19,5 @@ def build(ctx):
     c.auto_plant(speed_m_s=0.0)
     c.face(0, "pompous")
     c.face(3, "disdain")
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

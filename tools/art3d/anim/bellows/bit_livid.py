@@ -64,8 +64,8 @@ POUND = merge(STAND, FISTS, lean(fwd=10), head(x=-8),
                "clavicle_r": [("y", -8)], "upperarm_r": [("y", -58), ("z", 40)], "lowerarm_r": [("z", 62)],
                "hand_l": [("x", 30)], "hand_r": [("x", 30)], "_pelvis": (0.0, 0.0, -0.06)})
 # glaring round: over the specs, the body turning with the head
-GLARE_L = merge(STANCE, lean(fwd=8, turn=10), head(x=10, z=30))
-GLARE_R = merge(STANCE, lean(fwd=8, turn=-6), head(x=10, z=-22))
+GLARE_L = merge(STANCE, lean(fwd=8, turn=6), head(x=10, z=18))
+GLARE_R = merge(STANCE, lean(fwd=8, turn=-4), head(x=10, z=-12))
 HARRUMPH = merge(STANCE, lean(fwd=-8), head(x=-12, z=-4), {"clavicle_l": [("y", -6)], "clavicle_r": [("y", 6)]})
 
 
@@ -96,9 +96,9 @@ def build(ctx):
     c.key(72, merge(BELLOW_B, {"_pelvis": (0.0, 0.0, -0.03)}), "in_out_sine")
     c.key(78, merge(STANCE, head(x=0)), "in_out_cubic")
     c.key(86, GLARE_L, "in_out_cubic")
-    c.key(92, merge(GLARE_L, head(x=12, z=38)), "in_out_sine")
+    c.key(92, merge(GLARE_L, head(x=12, z=22)), "in_out_sine")
     c.key(98, GLARE_R, "in_out_cubic")
-    c.key(104, merge(GLARE_R, head(x=12, z=-26)), "in_out_sine")
+    c.key(104, merge(GLARE_R, head(x=12, z=-16)), "in_out_sine")
     c.key(110, HARRUMPH, "in_out_cubic")
     c.key(L, STANCE, "in_out_sine")
     # the rage tremble (fists and head), the vibrato belly on the aria

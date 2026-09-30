@@ -65,6 +65,9 @@ class Attachment extends RefCounted:
 	var rot_deg: Vector3 = Vector3.ZERO
 	var visible_default: bool = false
 	var soft: bool = false               ## another task's scene: missing = a warning, the attachment is skipped
+	## Optional: the palette texture the scene was built on (a set / props glb keeps it; default: derived, see
+	## RigPlayer3D._set_piece_palette).
+	var palette: String = ""
 
 
 ## A jiggle group (`jiggle[]`): one SpringBoneSimulator3D setting per bone chain.
@@ -414,6 +417,9 @@ func _parse_attachments(d: Dictionary) -> void:
 		at.rot_deg = _vec3(ed.get("rot_deg", [0, 0, 0]), "attachments.%s.rot_deg" % k)
 		at.visible_default = bool(ed.get("default", false))
 		at.soft = bool(ed.get("soft", false))
+		at.palette = String(ed.get("palette", ""))
+		if at.palette != "" and not ResourceLoader.exists(at.palette) and not FileAccess.file_exists(at.palette):
+			_err("attachments.%s.palette" % k, "'%s' does not exist" % at.palette)
 		if at.scene == "":
 			_err("attachments.%s.scene" % k, "missing")
 		elif not ResourceLoader.exists(at.scene):

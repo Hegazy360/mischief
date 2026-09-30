@@ -9,11 +9,14 @@ extends Node3D
 
 const USAGE := """AnimViewer3D — user args (after `--`):
   --rig=<id> [--variant=head_b]    the rig (data/rigs3d/<id>/rig3d[_<variant>].json)
-  --clip=<id>                      a clip id (hush/loco_walk) or a bare name (loco_walk → <rig>/loco_walk)
+  --clip=<id>                      a clip id (hush/loco_walk) or a bare name (loco_walk → <rig>/loco_walk); an
+                                   overlay clip plays over <rig>/loco_idle (--frame locks the overlay's frame)
   --pose=rest                      the rest pose (no clip)
   --anim-glb=/abs.glb [--anim-name=N]   play an action from a raw glb (GLTFDocument; same UAL skeleton)
   --frame=N                        show frame N (frame-locked); with --play: start there
   --play [--speed=k]               play on the view clock
+  --fixed-step                     advance exactly 1/60 s per rendered frame (exact --shot-seq sequences, whatever the
+                                   real frame time; a heavy --episode set no longer skips the clip start)
   --tier=1..3 --suppressed         reaction tier remap / suppressed settle
   --overlay=<clip> [--mask=upper]  an overlay clip over the base
   --cam=game|front|q34|side|back|face|turn   game = the base framing (7.5 m, FOV 30); the rest orbit the rig
@@ -25,6 +28,8 @@ const USAGE := """AnimViewer3D — user args (after `--`):
   --tint=0..4 --stone              temper tier (4 = livid) / the marble statue
   --facing=1|-1 --cheat=<deg>      sim facing / cheat-out toward the camera (default 35 on game cam)
   --look-at=x,y,z                  head + pupils toward a world point
+  --no-gaze                        ignore the clips' sidecar gaze windows (D8 before/after; default: the face turns
+                                   to this camera inside a window)
   --room=<room> --x=<m> --z=<m>    the real room (house.json x range; RoomShell3D when built, else a greybox)
   --episode=<id>                   with --room: tonight's whole set through House3D (props, furniture; r3d-sets)
   --rig2=<id> --clip2=<id> --x2=<m> --facing2=±1 --frame2=N   a second rig
@@ -54,6 +59,7 @@ var _t: float = 0.0
 var _reload_t: float = 0.0
 var _frame_lock: float = -1.0
 var _frame2_lock: float = -1.0
+var _ov_lock: float = -1.0
 var _orbit: float = 0.0
 var _cam_mode: String = "game"
 var _last_events: PackedStringArray = PackedStringArray()
@@ -179,6 +185,16 @@ func _start(r: RigPlayer3D, id: String, c: Dictionary, frame_key: String) -> voi
 		return
 	var opts := {"tier": int(c.get("tier", 1)), "suppressed": c.has("suppressed"), "speed": float(c.get("speed", 1.0))}
 	var fr: Variant = c.get(frame_key, null)
+	var cd := ClipLib3D.get_clip(id)
+	if cd != null and cd.layer == "overlay":
+		# An overlay clip (micro-gags, st_shrug): over the rig's idle, its own frame locked by --frame.
+		var base := "%s/loco_idle" % r.rig_id
+		if ClipLib3D.exists(base):
+			r.play(base, {})
+		r.play_overlay(id, cd.mask if cd.mask != "" else "upper", 0)
+		if fr != null and not c.has("play") and r == rig:
+			_ov_lock = float(fr)
+		return
 	if fr != null and c.has("play"):
 		opts["start_frame"] = float(fr)
 	r.play(id, opts)
@@ -213,6 +229,8 @@ func _apply_state(r: RigPlayer3D, c: Dictionary) -> void:
 	var studio := cam_mode != "game" and not c.has("facing")
 	var cheat := float(c.get("cheat", 35.0 if cam_mode == "game" else (90.0 if studio else 0.0)))
 	r.set_cheat(cheat, 0.0)
+	if c.has("no-gaze"):
+		r.gaze_enabled = false
 	if c.has("look-at"):
 		var v := String(c["look-at"]).split(",")
 		if v.size() == 3:
@@ -411,7 +429,8 @@ func _timeline_actions() -> void:
 			rig.set_stone(false, 0.15)
 
 
-func _process(delta: float) -> void:
+func _process(real_delta: float) -> void:
+	var delta := 1.0 / 60.0 if cfg.has("fixed-step") else real_delta
 	_t += delta
 	_reload_t += delta
 	if _reload_t >= 0.5:
@@ -429,6 +448,8 @@ func _process(delta: float) -> void:
 			continue
 		if float(pair2[1]) >= 0.0:
 			r2.set_external_frame(float(pair2[1]))
+		if r2 == rig and _ov_lock >= 0.0:
+			r2.set_overlay_frame(_ov_lock)
 		r2.advance(delta)
 	_vf += 1
 	_timeline_actions()
@@ -438,8 +459,11 @@ func _process(delta: float) -> void:
 		_aim_camera()
 	if label != null:
 		var c := rig.current_clip()
-		label.text = "%s%s  %s  f %.1f / %d   face %s%s%s" % [rig.rig_id, " (%s)" % rig.variant if rig.variant != "" else "",
-			c if c != "" else "rest pose", rig.current_frame(), rig.clip_length(c) if c != "" else 0, rig.face.active_preset,
-			"  tint %d" % rig.tint_tier() if rig.tint_tier() > 0 else "", "  STONE" if rig.stone_amount() > 0.5 else ""]
+		var oc := rig.current_overlay()
+		label.text = "%s%s  %s  f %.1f / %d%s   face %s%s%s%s" % [rig.rig_id, " (%s)" % rig.variant if rig.variant != "" else "",
+			c if c != "" else "rest pose", rig.current_frame(), rig.clip_length(c) if c != "" else 0,
+			"  + %s f %.1f" % [oc, rig.current_overlay_frame()] if oc != "" else "", rig.face.active_preset,
+			"  tint %d" % rig.tint_tier() if rig.tint_tier() > 0 else "", "  STONE" if rig.stone_amount() > 0.5 else "",
+			"  gaze %.2f" % rig.gaze_weight() if rig.gaze_weight() > 0.0 else ("  gaze off" if not rig.gaze_enabled else "")]
 		if not _last_events.is_empty():
 			label.text += "\n" + "\n".join(_last_events)

@@ -1,0 +1,4 @@
+# Fresh reviewer answers — r3d-anim-bellows-a mute packet (orchestrator-run, R17, 2026-09-30; verbatim)
+
+pkt_01: funny=4 readable=4 fresh=3 — After a long wind-up of twitching by the shelf with his head tipping back (frames 16-30), the man lets out a huge "ACHOO-RIA!" sneeze at 33 that blasts him backwards across the room in a flailing flat-out flight (34-40), slams him down slumped on the chest by the door (41-51), and leaves him seeing stars and then wandering off with a question bubble (52-60); the wind-up at tiny wide-shot size (1-30) and the stock sneeze-blast idea hold it back.
+pkt_02: funny=1 readable=2 fresh=2 — The man simply stands at the shelf holding a kettle and fidgeting slightly, with a cup/food thought bubble (1-30) that swaps to a red-circled icon (31-53), and nothing visibly happens to him across all 53 frames, with no hit, reaction or payoff (unsure what the bubble is meant to say).

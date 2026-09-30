@@ -28,3 +28,31 @@ DONE bellows/mg_walk_scale 9875e28b5234927fff5772f05d09d54c138d9455cd5a2b3248ae7
 20:28Z LANDED the 10 micro-gags (overlays; warm-up 4 + tea 2 staged at st_gramophone / the stool with their audio-table rows; mg_comb_flourish at st_hall_mirror facing +1; walking 3 facing-proof, own sounds): all lint --strict clean. mg_admire_in_kettle is authored for mask head (the mg fires at tea 2.0 s = act_tea f120, the honey beat) — see REQUESTS. ALL 20 CLIPS OF THE LIST BAKED (no drafts).
 DONE bellows/bit_warmup 60a37c1ce16fb0093bc80d47c58051b617524a94127d966ed1e704b880f17ba0
 DONE bellows/mg_admire_in_kettle ed0423f9d2b79699a63011c60c9599f8782c713c7bada821b10401ed1fb496af
+DONE bellows/st_straighten_cravat bac054f24bfbba98e07cbfa097b8daa4a52774deddd9468c615fc294b9dcd7f3
+21:29Z FINISH — all 20 clips final (no drafts; R19 cut line 02:51Z never reached). Current DONE set (the spec sha256 of every clip as landed):
+  DONE bellows/bit_warmup 60a37c1ce16fb0093bc80d47c58051b617524a94127d966ed1e704b880f17ba0
+  DONE bellows/bit_tea e6d03f758c5b5636f1eb13d1186bfbdcbfb512bb727841f1bf58e0d67471a5cc
+  DONE bellows/st_head_turn 69282d52379ee61c1f299b74d77beceb7d9dcf7bca6a4a8d4bf1d379b386acf0
+  DONE bellows/st_specs_on fc555e553364ef7e961dbb7abf176bf9e87e1c4e42e1e572d90312aef346871d
+  DONE bellows/st_double_take 7d0bce6da18f49c1fa9ca53f3ddb690ed22d1495f7bdd6f910b8ee215980a798
+  DONE bellows/st_suspicious 028113498385f7b6d45179f457c64ab85888a702869bdbd43578a06ab38d2f99
+  DONE bellows/st_look 5833ed933f81bfec9ed9253038de07b54f506a59227487bf7b76a0252ad4bb25
+  DONE bellows/st_look_back 376677c969e2ec34e596ce528602518f44217ac732b22343c06a24dec273aa8b
+  DONE bellows/st_smirk 2e72ebdc3da3162e450a91b0c0b71aea7ee9362fc4579ff26d0744ec6f4a4bfb
+  DONE bellows/st_straighten_cravat bac054f24bfbba98e07cbfa097b8daa4a52774deddd9468c615fc294b9dcd7f3
+  DONE bellows/mg_hum 03475e598f327463f693fba998599e4be542210073fdfeb2f3e3601bb70c7d4b
+  DONE bellows/mg_trill e6f529a4be38953bcfb396f12a3caca00d1688916e49e248bdea6c0c40c59e28
+  DONE bellows/mg_conduct_air 9bf4c38a7e6642637cff3836cabb234f9199430e4e4ef3d88d43d984b147edbf
+  DONE bellows/mg_admire_reflection_horn da396b5cdbf4a6cfe271fd80c1193423e624049514ba3b97491b7f76767ab892
+  DONE bellows/mg_pinkie_up 7e8ec908afb95719773293d9b7a0b25328447985aaa356ce6e250a0d3e969bfc
+  DONE bellows/mg_admire_in_kettle ed0423f9d2b79699a63011c60c9599f8782c713c7bada821b10401ed1fb496af
+  DONE bellows/mg_comb_flourish a5b2e1bc32aa4e8b0f9ba25107919a20a87dc19043da30f14ab7464a68f8e976
+  DONE bellows/mg_cravat_tug 2932130d4c73e02ce969bdeacbd83dbdee7464188d0d5c724cbdb4da85d9830b
+  DONE bellows/mg_walk_hum 1496bc8e72e6f66127d66874e26eb75d39330456d9bb65d09a67ece8efae8c9c
+  DONE bellows/mg_walk_scale 9875e28b5234927fff5772f05d09d54c138d9455cd5a2b3248ae7f4960c25b14
+  Changes since the first DONE lines: st_straighten_cravat 60 → 92 f (the doorway pause is 90 − eta + 1 ticks and the view frame-locks one-shots without wrapping); mg_admire_in_kettle restaged (11 f glance at the kettle, the wink played to the house); bit_warmup clutch keeps the face clear. Verify: bake --strict all OK; lint_anim --format=3d --rig=bellows --scope=g0,p00 --strict 42 clips 0 errors; anim3d/test_bellows 9/9 (0 skips); full suite 1496/1496 (21:15Z, before the cravat re-length; anim3d/ re-run after it: only r3d-anim's hush/act_squeak L10 fails); lint.sh rc 0. Review: docs/review/r3d-anim-bellows-b/ (index.md, rubric.md, boards/, sheets/). Report: <SP>/reports/r3d-anim-bellows-b.md
+REQUESTS (details in the report):
+  r3d-rig → r3d-integrate: RigPlayer3D must honour sidecar "gaze" (look_at_point(camera, weight) over [f0,f1], base AND overlay) — D8 for every facing-proof face beat depends on it; sheet3d.gd fails on overlay clips (plan() null at line 126) and its phone pass ignores facing/z.
+  r3d-view3d → r3d-integrate: _play_overlay should use the sidecar mask (mg_admire_in_kettle = head); the squeak noise-gaze turns his face away from the house (bias toward the camera); frame-locked loop one-shots are clamped, not wrapped.
+  r3d-integrate: new audio-table rows for bit_warmup, bit_tea, st_suspicious, st_straighten_cravat, mg_comb_flourish, mg_cravat_tug, mg_walk_hum, mg_walk_scale.
+  r3d-anim-bellows-a: map rows optional (everything resolves through default_maps/bellows.json).

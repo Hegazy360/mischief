@@ -39,4 +39,5 @@ def build(ctx):
     c.face(0, "hum")
     c.face(64, "blissful")
     c.face(112, "hum")
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

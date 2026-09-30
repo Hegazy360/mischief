@@ -187,4 +187,5 @@ def build(ctx):
                  (270, "sniff"), (300, "blissful"), (330, "kiss"), (360, "smug"), (388, "sip"), (446, "blissful"),
                  (462, "relief"), (472, "pompous")):
         c.face(f, p)
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

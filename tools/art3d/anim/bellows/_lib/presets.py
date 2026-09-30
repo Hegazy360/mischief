@@ -541,6 +541,25 @@ def fx_hidden(*bones):
     return {b: {"r": [], "s": 0.0} for b in bones}
 
 
+FX_BONES = ("fx_choo", "fx_stars", "fx_notes")
+
+
+def fx_off(c, keep=(), f0=0, f1=None):
+    """Every FX bone the clip does not show (`keep` = the ones it keys itself) held at scale 0 on every frame, so the
+    BASE clip resets them: an overlay that showed notes / stars / the puff (-b's mg_walk_hum, mg_hum) otherwise leaves
+    them floating over his head after it ends (the player keeps a bone's last scale when no track drives it)."""
+    bones = [b for b in FX_BONES if b not in keep]
+
+    def fn(pose, f):
+        for b in bones:
+            if pose.skel.has(b):
+                loc, rot, _ = pose.get(b)
+                pose.basis[b] = (loc, rot, Vector((0.0, 0.0, 0.0)))
+                pose.update_from(b)
+    c.custom(fn, f0, c.length if f1 is None else f1)
+    return c
+
+
 def stars(f, k=1.0, rate=9.0):
     """fx_stars: the vinyl star ring spinning over his head (rate deg/f)."""
     return {"fx_stars": {"r": [("z", rate * f)], "s": max(0.0, k)}}

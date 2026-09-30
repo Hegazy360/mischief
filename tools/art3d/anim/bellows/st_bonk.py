@@ -47,4 +47,5 @@ def build(ctx):
     c.face(6, "dazed")
     c.face(48, "dazed_open")
     c.face(56, "dazed")
+    fx_off(c, keep=("fx_stars",))      # the puff and the notes reset to hidden (an overlay may have left them up)
     return c

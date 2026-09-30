@@ -37,7 +37,7 @@ LOOK_DOWN = merge({"clavicle_l": [("y", 2)], "upperarm_l": [("y", 76), ("z", 14)
                    "hand_l": [("x", 10), ("y", 20)],
                    "clavicle_r": [("y", -2)], "upperarm_r": [("y", -80), ("z", -10)], "lowerarm_r": [("z", 16)],
                    "hand_r": [("x", 14), ("y", -18)]},
-                  glove("l", 14, 8), glove("r", 12, 8), lean(fwd=6), head(x=28, y=-4))
+                  glove("l", 14, 8), glove("r", 12, 8), lean(fwd=4), head(x=19, y=-6))
 # the framed slow burn at the Stalls: chin level, trembling fists
 BURN = merge(STOMP_ARMS, {"upperarm_l": [("y", 78), ("z", 8)], "upperarm_r": [("y", -78), ("z", -6)],
                           "lowerarm_l": [("z", -48)], "lowerarm_r": [("z", 52)]},
@@ -68,7 +68,7 @@ def build(ctx):
     c.key(15, merge(BONK, head(x=32, y=6, neck=0.5), lean(fwd=32), glove("l", 40, 20), glove("r", 40, 20)), "out_quad")
     c.key(18, merge(BONK, head(x=30, y=5, neck=0.5), lean(fwd=26), open_hand("l", 26), open_hand("r", 24)), "in_out_sine")
     c.key(24, LOOK_DOWN, "in_out_sine")
-    c.key(29, merge(LOOK_DOWN, head(x=24, y=4)), "in_out_sine")
+    c.key(29, merge(LOOK_DOWN, head(x=16, y=4)), "in_out_sine")
     c.key(34, BURN, "in_out_cubic")
     c.key(39, merge(BURN, head(x=-6, y=4, z=6)), "in_out_sine")
     c.key(41, TOSS, "out_back")

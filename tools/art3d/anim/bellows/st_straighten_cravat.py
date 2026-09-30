@@ -1,13 +1,14 @@
 """bellows/st_straighten_cravat — the doorway pause (clip_rules.json `oneshot:doorway_pause`, base, a LOOP: the sim
 inserts 90 − eta ticks at a portal so Hush always gets the 1.5 s entry warning; the event's own "ahem" is cues.json's).
 He stops in the doorway and makes himself presentable before he sweeps in: both gloves straighten the cravat, a sharp
-tug (cravat_tug), the lapels smoothed, chin up — a pompous entrance being prepared. 60 f per cycle.
+tug (cravat_tug), the lapels smoothed, chin up — a pompous entrance being prepared. 92 f per cycle: the pause is
+90 − eta (+1) ticks and the view frame-locks one-shots without wrapping, so one cycle covers the longest pause.
 
-  0-10    both gloves come up to the cravat
-  10-16   the TUG (both hands pull down, the chin lifts: cravat_tug on 14)
-  16-32   smooths the lapels outward, down the barrel
-  32-48   chin up, a haughty sniff, weight shift
-  48-60   the gloves drift back up (= frame 0)
+  0-14    both gloves come up to the cravat
+  14-20   the TUG (both hands pull down, the chin lifts: cravat_tug on 20)
+  20-46   smooths the lapels outward, down the barrel
+  46-70   chin up, a haughty sniff, weight shift
+  70-92   the gloves drift back up (= frame 0)
 
 Facing-proof; the preening face carries the sidecar gaze (D8)."""
 import math
@@ -15,7 +16,7 @@ from mathutils import Vector
 from lib.clip import Clip
 from _lib.presets import *
 
-L = 60
+L = 92
 CRAVAT_L = ("spine_03", Vector((0.06, -0.38, 0.99)))
 CRAVAT_R = ("spine_03", Vector((-0.07, -0.38, 0.97)))
 
@@ -40,35 +41,35 @@ def build(ctx):
     hide_fx(c)
     A = base(0.4, grip("l", 50, 30), grip("r", 54, 32), pompous(0.9), head(x=2))
     c.key(0, A)
-    c.key(10, base(0.2, grip("l", 60, 36), grip("r", 62, 36), pompous(0.8), head(x=6, y=2)), "in_out_sine")
-    c.key(14, base(0.0, grip("l", 70, 40), grip("r", 70, 40), pompous(1.4), head(x=-16, y=-2)), "out_back")   # TUG
-    c.key(18, base(0.0, grip("l", 66, 38), grip("r", 66, 38), pompous(1.3), head(x=-12)), "in_out_sine")
-    c.key(30, base(-0.4, open_hand("l", 6), open_hand("r", 6), pompous(1.3), head(x=-10, y=-3, z=-4)), "in_out_sine")
-    c.key(40, base(-0.6, gloves(18, 10), pompous(1.6), head(x=-18, y=-4, z=-6)), "in_out_cubic")   # chin up: sniff
-    c.key(48, base(-0.2, gloves(22, 12), pompous(1.3), head(x=-12, y=2, z=4)), "in_out_sine")
+    c.key(14, base(0.2, grip("l", 60, 36), grip("r", 62, 36), pompous(0.8), head(x=6, y=2)), "in_out_sine")
+    c.key(20, base(0.0, grip("l", 70, 40), grip("r", 70, 40), pompous(1.4), head(x=-16, y=-2)), "out_back")   # TUG
+    c.key(26, base(0.0, grip("l", 66, 38), grip("r", 66, 38), pompous(1.3), head(x=-12)), "in_out_sine")
+    c.key(44, base(-0.4, open_hand("l", 6), open_hand("r", 6), pompous(1.3), head(x=-10, y=-3, z=-4)), "in_out_sine")
+    c.key(60, base(-0.6, gloves(18, 10), pompous(1.6), head(x=-18, y=-4, z=-6)), "in_out_cubic")   # chin up: sniff
+    c.key(72, base(-0.2, gloves(22, 12), pompous(1.3), head(x=-12, y=2, z=4)), "in_out_sine")
     c.key(L, A, "in_out_sine")
     # the gloves: the cravat (0-18), sliding outward down the lapels (18-32), back to the sides, up again (48-60)
     def lap(side, f):
         s = 1.0 if side == "l" else -1.0
-        k = ramp(f, 18, 32)
+        k = ramp(f, 26, 46)
         return Vector((s * (0.07 + 0.22 * k), -0.38 - 0.03 * k, 0.99 - 0.22 * k))
 
     def hands(pose, f):
         for side, tgt0, pole in (("l", CRAVAT_L, POLE_L), ("r", CRAVAT_R, POLE_R)):
-            if f <= 18 or f >= 50:
+            if f <= 26 or f >= 76:
                 p_rest = tgt0[1]
             else:
                 p_rest = lap(side, f)
-            w = window(f, -1, 0, 32, 40) if f < 45 else ramp(f, 48, 58)
+            w = window(f, -1, 0, 46, 56) if f < 66 else ramp(f, 72, 88)
             arm_ik(pose, side, chest_point(pose, p_rest), pole, w=w)
     c.custom(hands, 0, L)
-    c.motion(lambda f: breath(f, 60.0, 1.0))
+    c.motion(lambda f: breath(f, 46.0, 1.0))
     c.ground()
     c.auto_plant(speed_m_s=0.0)
-    c.look_camera(10, 50, weight=1.0, blend=8)
-    c.beats(reach=(0, 10), tug=(10, 14), tugged=(14, 18), lapels=(18, 32), sniff=(32, 48))
-    c.event(14, "sfx", id="cravat_tug", vol_db=-3.0)
-    c.event(14, "jiggle", bones=["cravat"], kick=0.6)
-    for f, p in ((0, "pompous"), (12, "strained_grin"), (18, "smug"), (34, "sniff"), (44, "disdain"), (52, "pompous")):
+    c.look_camera(14, 76, weight=1.0, blend=8)
+    c.beats(reach=(0, 14), tug=(14, 20), tugged=(20, 26), lapels=(26, 46), sniff=(46, 70))
+    c.event(20, "sfx", id="cravat_tug", vol_db=-3.0)
+    c.event(20, "jiggle", bones=["cravat"], kick=0.6)
+    for f, p in ((0, "pompous"), (16, "strained_grin"), (26, "smug"), (50, "sniff"), (64, "disdain"), (78, "pompous")):
         c.face(f, p)
     return c

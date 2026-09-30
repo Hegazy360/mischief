@@ -224,4 +224,5 @@ def build(ctx):
                  (88, "smug"), (93, "sneeze_gasp"), (94, "sneeze_choo"), (97, "wild_take"), (112, "dazed_open"),
                  (146, "dazed"), (151, "dazed_open"), (158, "dazed")):
         c.face(f, p)
+    fx_off(c, keep=("fx_choo", "fx_stars"))      # fx_notes reset to hidden (an overlay may have left them up)
     return c

@@ -25,9 +25,9 @@ to a room Hush may enter tonight; the kitchen window stays untappable.
 | `solve.sh all --auto` | N01, N02, P00: script, lines alone, ★★★ (authored), soft-lock proofs OK |
 | D1 (gate ⏩) | P00 3.0 / 1.8 / 5.9 %, N1 7.8 / 4.8 / 1.9 %, N2 6.9 / 1.9 / 1.6 % (ideal / required / slow); worst gap ≤ 5.5 s; edge share ≤ 0.22 (ruling L1); N2 first prank 19.4 s |
 | stars / applause | N1 ideal ★★★ 116, N2 ideal ★★★ 118, required ★ 44 / 59, P00 `[null, null, null]` |
-| fuzz 200 / episode | see `fuzz.md` (rule 13 — no command on a struck hotspot accepted — included) |
+| fuzz 200 / episode | FUZZ_ROW — `fuzz.md` (rule 13 — no command on a struck hotspot accepted — included; rule 3 no longer flags a catch on the tick she popped out of her spot) |
 | `lint.sh --strict` | content rules 0 errors; hotspot OK; IP OK; RED rows: 2D clip coverage 103/137 (pre-existing since Stage 2, until `r3d-integrate` drops the 2D check), 3D coverage 70/77 g0+p00 clips without a v2 sidecar (the animation keys are still authoring), lint_anim 3D 1 error (`rig_achoo_ria` L10, `r3d-anim`) |
-| `tools/ci/lint_all.sh --no-godot` | RED only on `tools/art/hush/validate.py` × the new Figgis SVGs (`r3d-hud`, request filed) |
+| `tools/ci/lint_all.sh --no-godot` | RED only on `tools/art/hush/validate.py` × the new Figgis SVGs (`r3d-hud`, request filed); now also runs the R14 review toolset tests (`tools/art3d/review/test_review.py`, 51 OK — r3d-tools-a's request) |
 | full suite | 1376 passed, 0 failed, 1 skipped |
 
 ## Artefacts (one line each: what it shows, what to judge)

@@ -37,7 +37,7 @@ CLASP = merge({"clavicle_l": [("z", 8)], "upperarm_l": [("y", 70), ("z", -40)], 
 
 def sag(k=1.0, hx=0.0, hy=0.0, hz=0.0):
     """Deflated: shoulders dropped and rounded, the head bowed and tilted (k 0..1), the knees giving."""
-    return merge(STAND, CLASP, lean(fwd=16 * k, side=3 * k), head(x=18 * k + hx, y=8 * k + hy, z=hz),
+    return merge(STAND, CLASP, lean(fwd=16 * k, side=3 * k), head(x=9 * k + hx, y=10 * k + hy, z=hz),
                  {"clavicle_l": [("y", 14 * k), ("z", 8)], "clavicle_r": [("y", -14 * k), ("z", -8)],
                   "_pelvis": (0.0, 0.0, -0.045 * k)})
 

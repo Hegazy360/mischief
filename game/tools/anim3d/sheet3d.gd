@@ -10,6 +10,8 @@
 ##   orthographic profile camera fitted to the whole clip) and `game_<f>.png` (the 1200×540 base framing in the room,
 ##   the phone-scale copy); per frame the bone angles for the curves and the screen positions of head top, hands and
 ##   pelvis for the onion dots go to `manifest.json` with the clip's beats, events and marks.
+##   An overlay clip (layer `overlay`: micro-gags, st_shrug, act_glance) is sheeted over the rig's `loco_idle` held at
+##   frame 0 (the rest pose without one), the overlay frame-locked (`RigPlayer3D.set_overlay_frame`).
 ## * `turntable`: front / 3/4 / side / back at 1200×540 (`turn_<view>.png`), the rest pose or `--clip` at `--frame`.
 ## * `faces`: every face preset on the head (`face_<preset>.png`, a 3× close-up) + `faces_game.png` crops at 1×.
 extends SceneTree
@@ -25,6 +27,7 @@ var _cam: Camera3D = null
 var _rig: RigPlayer3D = null
 var _world: Node3D = null
 var _phone_crop: Array = []
+var _overlay: bool = false
 
 
 func _initialize() -> void:
@@ -121,19 +124,20 @@ func _mode_clip() -> int:
 	var cell := int(_args.get("cell", 420))
 	_setup_world(Vector2i(cell, cell), true)
 	var opts := {"tier": int(_args.get("tier", 1)), "suppressed": _args.has("suppressed")}
-	_rig.play(cid, opts)
-	var plan := _rig.plan()
+	_overlay = c.layer == "overlay"
+	_start_clip(cid, c, opts)
+	var plan := PlayPlan3D.build(c, opts) if _overlay else _rig.plan()
 	var n := plan.length
 	# Pre-pass (no render): the clip's world bounds in profile, for one fixed orthographic camera.
 	_rig.set_facing(1, false)
 	_rig.set_cheat(0.0, 0.0)
 	var bounds := AABB()
 	for f in range(0, n + 1):
-		_rig.set_external_frame(float(f))
+		_show(float(f))
 		var b := _rig.screen_aabb()
 		bounds = b if f == 0 else bounds.merge(b)
 	_rig.reset()
-	_rig.play(cid, opts)
+	_start_clip(cid, c, opts)
 	var centre := bounds.get_center()
 	var half := maxf(bounds.size.y, bounds.size.x) * 0.5 + 0.12
 	_cam.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -157,7 +161,7 @@ func _mode_clip() -> int:
 		angles[bn2 + ".speed"] = []
 	var dots: Array = []
 	for f3 in range(0, n + 1):
-		_rig.set_external_frame(float(f3))
+		_show(float(f3))
 		_rig.advance(1.0 / 60.0)
 		for bn3 in CURVE_BONES:
 			var bi := _rig.skeleton.find_bone(bn3)
@@ -184,7 +188,7 @@ func _mode_clip() -> int:
 	# The phone-scale copy: the game framing in the room (1200×540), every 3 f.
 	var phone: Array = []
 	if not _args.has("no-phone"):
-		phone = await _phone_pass(cid, opts, n)
+		phone = await _phone_pass(cid, c, opts, n)
 	var ev: Array = []
 	for e in plan.events:
 		ev.append({"f": int(e["f"]), "type": String(e.get("type", "")), "id": String(e.get("id", e.get("name", e.get("op", "")))),
@@ -194,6 +198,7 @@ func _mode_clip() -> int:
 		var br2: Vector2i = c.beats[bn4]
 		beats[bn4] = [plan.timeline_frame(br2.x), plan.timeline_frame(br2.y)]
 	var man := {"clip": cid, "rig": String(_args["rig"]), "length": n, "loop": c.loop, "tier": plan.tier, "suppressed": plan.suppressed,
+		"layer": c.layer, "mask": c.mask,
 		"beats": beats, "events": ev, "marks": c.marks, "cells": frames, "cell_px": cell, "phone": phone, "phone_crop": _phone_crop,
 		"channels": angles, "dots": dots, "face": c.face_entries, "lint": c.lint}
 	var fa := FileAccess.open(_out.path_join("manifest.json"), FileAccess.WRITE)
@@ -203,17 +208,37 @@ func _mode_clip() -> int:
 	return 0
 
 
+## Plays the clip: a base clip as given; an overlay over the rig's idle (held at frame 0), or the rest pose.
+func _start_clip(cid: String, c: ClipDef3D, opts: Dictionary) -> void:
+	if c.layer != "overlay":
+		_rig.play(cid, opts)
+		return
+	var base := "%s/loco_idle" % _args["rig"]
+	if ClipLib3D.exists(base):
+		_rig.play(base, {})
+	_rig.play_overlay(cid, c.mask if c.mask != "" else "upper", 0)
+
+
+## Shows clip frame `f` (frame-locked): the base clip's timeline frame, or the overlay's frame over the held idle.
+func _show(f: float) -> void:
+	if _overlay:
+		_rig.set_external_frame(0.0)
+		_rig.set_overlay_frame(f)
+	else:
+		_rig.set_external_frame(f)
+
+
 func _px(p: Vector3, cell: int) -> Array:
 	var s := _cam.unproject_position(p)
 	return [snappedf(s.x, 0.1), snappedf(s.y, 0.1)]
 
 
-func _phone_pass(cid: String, opts: Dictionary, n: int) -> Array:
+func _phone_pass(cid: String, c: ClipDef3D, opts: Dictionary, n: int) -> Array:
 	_vp.size = Vector2i(1200, 540)
 	_vp.transparent_bg = false
 	_build_room(String(_args.get("room", "")))
 	_rig.reset()
-	_rig.play(cid, opts)
+	_start_clip(cid, c, opts)
 	var x := float(_args.get("x", _room_centre(String(_args.get("room", "")))))
 	_rig.position = Vector3(x, 0.0, -1.0)
 	_rig.set_facing(1, false)
@@ -230,16 +255,16 @@ func _phone_pass(cid: String, opts: Dictionary, n: int) -> Array:
 	await RenderingServer.frame_post_draw
 	var r := Rect2()
 	for f0 in range(0, n + 1, 2):
-		_rig.set_external_frame(float(f0))
+		_show(float(f0))
 		var rr := _project_aabb(_rig.screen_aabb())
 		r = rr if f0 == 0 else r.merge(rr)
 	r = r.grow(24.0).intersection(Rect2(0, 0, 1200, 540))
 	_phone_crop = [int(r.position.x), int(r.position.y), int(r.end.x), int(r.end.y)]
 	_rig.reset()
-	_rig.play(cid, opts)
+	_start_clip(cid, c, opts)
 	var out: Array = []
 	for f in range(0, n + 1):
-		_rig.set_external_frame(float(f))
+		_show(float(f))
 		_rig.advance(1.0 / 60.0)
 		if f % 3 == 0 or f == n:
 			await _save(_out.path_join("game_%04d.png" % f))
@@ -307,8 +332,10 @@ static func _room_centre(room: String) -> float:
 func _pose_for_board() -> void:
 	var cid := _clip_id()
 	if cid != "" and ClipLib3D.exists(cid):
-		_rig.play(cid)
-		_rig.set_external_frame(float(_args.get("frame", 0)))
+		var c := ClipLib3D.get_clip(cid)
+		_overlay = c.layer == "overlay"
+		_start_clip(cid, c, {})
+		_show(float(_args.get("frame", 0)))
 	_rig.advance(1.0 / 60.0)
 
 

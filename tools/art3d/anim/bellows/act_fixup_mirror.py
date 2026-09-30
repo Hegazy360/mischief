@@ -75,4 +75,5 @@ def build(ctx):
     for f, p in ((0, "admiring"), (24, "smug"), (40, "pompous"), (100, "admiring"), (118, "kiss"), (136, "smug"),
                  (152, "pompous"), (212, "admiring")):
         c.face(f, p)
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

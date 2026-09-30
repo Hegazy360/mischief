@@ -71,9 +71,19 @@
     "skippable": false,
     "pop_frames": [
       4,
+      5,
       8
     ],
     "freeze_holds": [],
     "draft": false
-  }
+  },
+  "gaze": [
+    {
+      "f0": 6,
+      "f1": 13,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 2
+    }
+  ]
 }

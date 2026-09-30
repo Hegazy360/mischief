@@ -4,7 +4,7 @@
   "clip": "bellows/st_straighten_cravat",
   "rig": "bellows",
   "anim": "res://art3d/anim/bellows/st_straighten_cravat.res",
-  "length": 60,
+  "length": 92,
   "fps": 60,
   "loop": true,
   "layer": "base",
@@ -15,34 +15,34 @@
   "beats": {
     "reach": [
       0,
-      10
-    ],
-    "tug": [
-      10,
       14
     ],
-    "tugged": [
+    "tug": [
       14,
-      18
+      20
+    ],
+    "tugged": [
+      20,
+      26
     ],
     "lapels": [
-      18,
-      32
+      26,
+      46
     ],
     "sniff": [
-      32,
-      48
+      46,
+      70
     ]
   },
   "events": [
     {
-      "f": 14,
+      "f": 20,
       "type": "sfx",
       "id": "cravat_tug",
       "vol_db": -3.0
     },
     {
-      "f": 14,
+      "f": 20,
       "type": "jiggle",
       "bones": [
         "cravat"
@@ -56,23 +56,23 @@
       "preset": "pompous"
     },
     {
-      "f": 12,
+      "f": 16,
       "preset": "strained_grin"
     },
     {
-      "f": 18,
+      "f": 26,
       "preset": "smug"
     },
     {
-      "f": 34,
+      "f": 50,
       "preset": "sniff"
     },
     {
-      "f": 44,
+      "f": 64,
       "preset": "disdain"
     },
     {
-      "f": 52,
+      "f": 78,
       "preset": "pompous"
     }
   ],
@@ -99,8 +99,8 @@
   },
   "gaze": [
     {
-      "f0": 10,
-      "f1": 50,
+      "f0": 14,
+      "f1": 76,
       "at": "camera",
       "weight": 1.0,
       "blend": 8

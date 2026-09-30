@@ -172,8 +172,8 @@ func test_map_keys_are_schema_keys_and_resolve() -> void:
 		assert_true(ClipMap.SCHEMA_KEYS.has(k) or ClipMap.SCHEMA_KEYS.has(fam), "map key %s is a schema key" % k)
 		var e: Variant = md[k]
 		var clip := String(e) if e is String else (String((e as Dictionary).get("clip", "")) if e is Dictionary else "")
-		if clip == "" or clip == ClipMap.FROM_SIM:
-			continue
+		if clip == "" or clip == ClipMap.FROM_SIM or clip.contains("{"):
+			continue      # the sim's reaction, or a family pattern (bit:* → bellows/{id}) resolved per id
 		var short := clip.get_slice("/", 1)
 		if FileAccess.file_exists(DIR % short):
 			continue

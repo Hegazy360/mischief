@@ -207,3 +207,148 @@ for puppets and greybox props until the clips above land.
 ## Hours
 About 3 h of wall time in this run (16:1x–19:1x UTC), inside the ≈ 8 h P0b box; most of the render time is llvmpipe
 at 2–5 fps under a shared CPU.
+
+---
+
+## Addendum — lint fix pass (2026-09-30, 20:16–21:30Z; index §3.3.1, tools-b status.md 20:10Z)
+
+**Result.** All 7 screen rows are fixed, and D7 is applied. The 5 perf rows still fail on the llvmpipe proxy (view + HUD
+p95 5.1–6.7 ms against 4.0). I cut my own share. What is left is mostly RigPlayer3D, NightScene and CPU contention on
+the shared box; the exact hotspots are in the requests below.
+
+### What changed
+- **`CameraDirector3D` C6, rebuilt** (`game/view3d/camera/camera_director_3d.gd`):
+  - **Exact box edges.** Each box's screen edges come from its nearest and farthest corner depths along the pitched
+    view axis. The old estimate ignored the y term, so the high honey jar came out −4.6 px and the gramophone −2.8 px.
+    Each box gives a camera-x interval, and C6 takes the allowed x nearest the C1/C3/C4 target. The result now stays
+    inside C2 (C2 used to be applied after C6 and could undo it).
+  - **Every live hit box of the room, doors and exits included.** The keep lists (mine, NightScene's and the lint's)
+    all left out the front door. The new `set_room_boxes({room: [AABB]})` fills from WorldView3D's House3D boxes;
+    `setup(db, SetList.Result)` derives the same boxes itself through `SetGeo.hit_box`. The `set_keep_visible` boxes
+    are still kept too.
+  - **Clear of the four always-on HUD hit rects.**
+    - Each HUD rect a box overlaps vertically becomes a forbidden camera-x gap. When the target falls inside a gap,
+      the camera keeps to its current side (0.3 m hysteresis).
+    - The rects come from the new `set_hud_rects(rects)`. `WorldView3D.hud_rects` (fed every frame by WorldOverlays
+      from `Hud.always_on_rects()`) now forwards them.
+    - When nothing is handed over, the camera uses `hud_rects_for(view, safe, left_handed)`, which applies REDESIGN
+      §2.1 through HudLayout and UiScale. A view narrower than the 1920 base is laid out on the expanded canvas, so 4:3
+      gets 1920 × 1440 at ×0.8, the same mapping the lint uses.
+  - **C6 pull-back.** When shifting cannot hold Hush plus every box, the camera dollies back just enough (bisection),
+    never past the C3 limit of 1.15×. This happens at 4:3 in the P00 parlour and the N1/N2 hall. The back wall stays
+    ≥ 206 px/m and the smallest box is 154 px. Past 1.15×, Hush wins and a box is dropped, as before.
+- **D7** (`View3DConst.OUTLINE_CHAR_PX` 4.8, `OUTLINE_PROP_PX` 3.4; shader defaults `outline.gdshader` 4.8,
+  `outline_prop.gdshader` 3.4, `halo.gdshader ink_px` 3.4; Settings "Outline +50 %" still multiplies through
+  `mnd_outline_scale`):
+  - r3d-sets already switched `set_mats.gd ink_mat()` to `View3DConst.OUTLINE_PROP_PX`.
+  - Re-shot: `docs/review/r3d-view3d/d7_outline_p00_t300.png` (P00 kitchen, 1200×540, the real sim). I looked at it
+    and at a 2× crop. Hush's 4.8 px navy ink reads as a vinyl toy against the wall. The honey jar and pepper pot show
+    a thin ink line plus the gold halo, and the pantry curtain shows the blue halo. The dressing (kettle, stool) has no
+    ink, so the live props still separate from it.
+  - Bellows in the window is still 3.5 px: see the requests.
+- **Perf, in my files:**
+  - Projection caches: the frame transform and its inverse (previously rebuilt with `Basis.looking_at` +
+    `affine_inverse` on every `project()` call), the focal length, and the view size per frame.
+  - Per-pose caches of `head_world` / `top_world` / `world_aabb`. `bellows_on_screen` alone is asked 4× a frame, and
+    each call re-read 6 bone global poses.
+  - A static hit-box cache in WorldView3D. `House3D.hotspot_box` rebuilt `SetGeo.hit_box` on every call.
+  - RigPlayer3D setters (facing, cheat, look-at, stage light) are called only when the value changes. A side effect:
+    `set_cheat` used to restart its 0.2 s ease every frame.
+  - Keep-visible boxes are fetched once per room change or every 15 frames.
+  - No shake/kick spring steps at rest (up to 24 steps per 100 ms frame).
+  - The Overlays3D lane inverse is cached.
+  - Bellows' looks key is no longer rebuilt as a string every frame, and his station is cached per activity.
+- **New `ScriptProf3D`** (`game/view3d/probe/script_prof_3d.gd`; it needs a `.uid` from the K2 import):
+  - Runs only when the game gets the user arg `--view3d-prof=/abs.json`.
+  - Brackets every watched node (and every autoload) with sentinel nodes at its own `process_priority`, and writes
+    per-class p50/p95, the WorldView3D / CharacterView3D phase means, and the 60 slowest frames split by class and phase.
+  - Its total matches the e2e `view_ms` to within 0.05 ms. It adds about 0.2 ms of its own.
+  - Command: `E2E_SANDBOX=<sb> tools/scripts/e2e.sh prologue_ideal --perf-log -- --view3d-prof=/abs.json`.
+- **r3d-night's request is done:** `StageLighting3D._globals_available()` now checks
+  `ProjectSettings.has_setting("shader_globals/mnd_fill")`, so the editor-only call no longer logs an engine ERROR
+  every Night.
+
+### New numbers
+**Screen lint** (`SANDBOX=r3d-view3d-fix tools/scripts/lint3d.sh --screen --all-nights --aspects=20x9,16x9,4x3`):
+- **0 errors**, down from 10. My 7 are fixed, and r3d-sets' fridge gap is gone too.
+- **1 warning:** N02 16:9 hall, `hall_clock` 8.8 px under the Bellows window rect at camera x 4.64.
+  - Clearing the front door off Clarence moves the 16:9 hall framing from 5.0 to 4.64. Holding both the door clear of
+    Clarence and the clock clear of the window needs 0.04 m more room than the hall has.
+  - If r3d-sets raises the door's hit box y0 to about 0.6 m (tools-b's request), the hall frames at 5.0 again and the
+    warning goes away.
+
+**Perf** (e2e + `tools/scripts/perf3d.sh`, llvmpipe proxy, MSAA off, load 4–6, no profiler in these runs). All values
+are p95 in ms:
+
+| route | before (status.md) | view + HUD p95 after | view + HUD p50 | script p95 (sim) |
+|---|---|---|---|---|
+| g0_night (g0_sneeze, fixed 60) | 7.59 (script, no split) | 6.67 | 2.81 | 8.03 (2.35) |
+| p00 (prologue_ideal) | 5.66 | 5.45 | 2.97 | 9.73 (4.87) |
+| p00_ideal_night | 6.84 | 5.45 (same scenario) | 2.97 | — |
+| p00_required_night | 10.48 (script, no split) | 6.00 | 2.95 | 10.49 (4.83) |
+| p00_slow_night | 9.79 (script, no split) | 5.07 | 2.94 | 9.27 (4.69) |
+
+The three "before" values marked "no split" were script time *including the sim* (those older reports had no
+view/sim split). Draw calls p95 57–73, tris ≤ 93k, emitters 4, textures ≤ 103 MB and compiles in PLAY 0 all pass.
+
+**The P00 ideal split**, from ScriptProf3D over 879 PLAY frames. Values are mean / p95 in ms, before → after my cuts:
+- Total: 3.55 / 5.40 → 3.42 / 5.44.
+- WorldView3D: 1.71 / 3.11 → 1.65 / 3.04. Of that:
+  - RigPlayer3D.advance (r3d-rig): 0.56 mean;
+  - Hush CharacterView3D (my code): 0.19;
+  - Bellows CharacterView3D (my code): 0.17;
+  - Overlays3D: 0.25;
+  - recorder + caught: 0.11;
+  - props + cues: 0.12;
+  - decals + FX: 0.05.
+- NightScene._process (r3d-night; it also contains WorldOverlays.apply): 0.80 / 1.29.
+- CameraDirector3D: 0.20 / 0.28 → 0.18 / 0.26, now with the exact C6 and the pull-back test.
+- PipView3D: 0.09 / 0.16 → 0.06 / 0.11.
+- Hud: 0.05 / 0.10. The WorldOverlays node: 0.01. AudioDirector: 0.08. StallsView: 0.06. Autoloads: about 0.1.
+- Unexplained: about 0.35 (sentinel overhead plus preemption).
+
+**What sets the p95** (the 60 slowest frames, all ≥ 4.9 ms):
+- RigPlayer3D: play() costs 1.4–2.1 ms per base-clip switch; advance() spikes 2.3–9.1 ms; set_look took 1.6 ms once.
+- NightScene: spikes of 3–17 ms in 12 of the 60 frames.
+- Preemption: gaps between two sentinels of up to 34 ms.
+- My code, a few frames each:
+  - a caption start: 4.4–6.7 ms;
+  - `MomentRecorder3D.keep` at a laugh: 4.2–8.2 ms;
+  - one cue staging: 8.4 ms;
+  - a first-use `ClipMap.resolve`: 2.1 ms.
+
+The p50 is about 3.0 ms on every route, and the same route moves ±0.5 ms p95 from run to run. On this proxy the 4 ms
+p95 cannot be reached by the view files alone.
+
+### Requests handed to r3d-integrate
+1. **r3d-rig** (`game/view3d/char/`):
+   - `RigPlayer3D.play()` costs 1.4–2.1 ms per base-clip switch on the proxy (`_ensure_anim` + `_start_base` +
+     `_prop_on_clip_switch` + `_refresh_looks`). Ensure every clip of the Night's warm list at setup, and skip
+     `_refresh_looks` when the looks did not change.
+   - `advance()`: 0.23 ms mean (Bellows) and 0.33 ms (Hush), with 2–9 ms spikes right after a switch.
+   - `set_look()`: 1.6 ms.
+   - `screen_aabb()` allocates an array literal on every call; make it a const.
+   - `rig_def_3d.gd:153/698`: default `outline_px` 3.5 → `View3DConst.OUTLINE_CHAR_PX` (D7).
+2. **r3d-night** (`game/scenes/night/night_scene.gd`): `NightScene._process` costs 0.80 ms mean / 1.29 p95 inside the
+   measured window, with 3–17 ms spikes. `perf3d.frame()` (six `Performance` monitor reads) and `shader_watch.frame()`
+   are measurement code that sits inside the window. Move them to a node after `_FrameEnd` (priority 901), and cache
+   `_context()` (`world.action_context`) per tick.
+3. **r3d-cast-bellows:** `game/data/rigs3d/bellows/rig3d.json` `outline_px` 3.5 → 4.8 (D7; Hush's is already 4.8).
+4. **Lead / tools-b:** on this proxy the view + HUD p95 is bounded by noise (p50 3.0 ms). Judge the proxy on p50 and
+   take p95 from O2's device. Otherwise run the perf e2e on a quiet box.
+5. **r3d-sets (optional):** raise `hall_front_door` `hit_box` y0 to about 0.6 m (see the screen warning above).
+
+### Verification
+All commands ran with the sandbox names r3d-view3d / r3d-view3d-fix.
+- `test_game.sh -- view3d/`: 61/61. There are 3 new tests in `test_camera3d.gd`: the exact 4:3 honey edges, HUD-rect
+  clearance (with handed-over rects and with the HudLayout fallback), and the pull-back (≤ 1.15×, back to 7.5 m).
+- `test_game.sh -- view3d/ view/`: 241/241. Full suite: **1496 passed, 0 failed**.
+- `lint.sh`: rc 0.
+- Rendered shader smoke: PASS (8 shaders, floor 0.330, halo 1104 px).
+- `lint3d.sh --set --night=p00_curtain_up` (with renders): **0 errors**. The silhouette IoU and the "C* or halo" rows
+  pass after D7.
+- `lint3d.sh --screen` (3 aspects, all Nights): 0 errors.
+- Artefacts: `<SP>/work/r3d-view3d/fix/{before,after1..5,final}/` (e2e reports, profiles, lint JSONs).
+
+### Hours
+About 1.25 h (20:16–21:30Z).

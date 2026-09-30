@@ -40,9 +40,9 @@ def build(ctx):
     c.key(70, merge(A, FLOURISH_UP, pinkie_up("r", 0.8), head(x=-12, y=4, z=-6)), "out_cubic")
     c.key(80, merge(A, FLOURISH_TA, pinkie_up("r", 1.25), head(x=-14, y=6, z=-8)), "out_back")          # the pinkie!
     c.key(92, merge(A, FLOURISH_TA, pinkie_up("r", 1.0), head(x=-13, y=5, z=-8)))
-    c.key(104, merge(B, FLOURISH_UP, pinkie_up("r", 0.6), head(x=-10, y=-2, z=10)), "in_out_sine")
-    c.key(118, merge(B, head(x=-9, y=-4, z=14), lean(turn=6)), "in_out_cubic")                          # the glance
-    c.key(146, merge(B, head(x=-8, y=-6, z=12), lean(turn=6)))
+    c.key(104, merge(B, FLOURISH_UP, pinkie_up("r", 0.6), head(x=-10, y=-2, z=5)), "in_out_sine")
+    c.key(118, merge(B, head(x=-9, y=-4, z=4), lean(turn=2)), "in_out_cubic")                          # the glance
+    c.key(146, merge(B, head(x=-8, y=-6, z=3), lean(turn=2)))
     c.key(162, merge(B, {"upperarm_r": [("y", 64), ("z", 20)]}, head(x=-6)), "in_out_sine")
     c.key(170, merge(B, CRAVAT, grip("r", 60, 36), head(x=-16, y=-2)), "out_quad")                        # tug
     c.key(176, merge(B, CRAVAT, grip("r", 64, 36), {"lowerarm_r": [("z", 112), ("y", 14)]}, head(x=-18, y=-3)))
@@ -64,4 +64,5 @@ def build(ctx):
     for f, p in ((0, "pompous"), (70, "smug"), (104, "pompous"), (118, "sly_smile"), (150, "pompous"),
                  (170, "disdain"), (190, "pompous")):
         c.face(f, p)
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

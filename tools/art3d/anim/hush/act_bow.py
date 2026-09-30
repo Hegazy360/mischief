@@ -1,6 +1,6 @@
 """hush/act_bow — the curtain-call bow (curtain:bow / state:bowing, loop 150 f = 2.5 s): she steps into it with a
-flourish — the right glove sweeps across her middle, the left flung out wide — folds into a deep bow (held, the
-beret nearly off), rises beaming with the left glove high to the gallery, blows a little kiss, and settles to take the
+flourish — the right glove sweeps across her middle, the left flung out wide — folds into a deep bow (held: heels
+together, legs plumb, the hinge at the hips near 90°, the left glove flung back and up like a plume, the beret nearly off), rises beaming with the left glove high to the gallery, blows a little kiss, and settles to take the
 applause before bowing again (the roses are the view's). Cheat 40 (facing the house)."""
 import math
 from lib.clip import Clip
@@ -14,6 +14,14 @@ SWEEP = {"clavicle_r": [("y", 6)], "upperarm_r": [("y", -50), ("z", 70)], "lower
          "hand_l": [("x", -30), ("y", -20)]}
 BOW_LEGS = {"thigh_l": [("x", -10), ("z", 4)], "calf_l": [("x", 8)], "foot_l": [("x", -4)],
             "thigh_r": [("x", 18), ("z", -6)], "calf_r": [("x", 22)], "foot_r": [("x", 10)], "ball_r": [("x", -10)]}
+# the held bow: heels together, legs straight and plumb under the hinge (the thighs undo the pelvis tip) — the 64 px
+# board samples it (issues.md D12: bow = the deepest hinge, feet together; a run has its legs apart)
+HINGE_LEGS = {"thigh_l": [("x", -30), ("z", 1)], "calf_l": [("x", 4)], "foot_l": [("x", -6), ("z", -2)],
+              "thigh_r": [("x", -30), ("z", -1)], "calf_r": [("x", 4)], "foot_r": [("x", -6), ("z", 2)]}
+# the sweep at full stretch: the right glove across her middle, the left flung back and UP behind her like a plume
+# (torso axes: with the torso hinged ~100°, "toward her hips" is world-back and "toward her back" is world-up)
+PLUME_L = {"clavicle_l": [("y", -10)], "upperarm_l": [("y", 50), ("z", 92)], "lowerarm_l": [("z", -8)],
+           "hand_l": [("x", -30), ("y", -20)]}
 HIGH_L = {"clavicle_l": [("y", -24)], "upperarm_l": [("y", -64), ("z", -14)], "lowerarm_l": [("z", -10)],
           "hand_l": [("x", -10), ("y", -24)]}
 KISS_L = {"clavicle_l": [("y", -8)], "upperarm_l": [("y", 36), ("z", -84)], "lowerarm_l": [("y", -110)],
@@ -26,8 +34,9 @@ def build(ctx):
     proud = merge(stand, lean(fwd=-4), head(x=-10, z=4), glove("l", 6, 4, spread=12))
     c.key(0, proud)
     c.key(12, merge(stand, SWEEP, BOW_LEGS, lean(fwd=12), head(x=-4)), "in_out_sine")              # the flourish
-    c.key(28, merge(stand, SWEEP, BOW_LEGS, lean(fwd=66), head(x=30), {"pelvis": [("x", 30)]}), "in_out_cubic")  # BOW
-    c.key(52, merge(stand, SWEEP, BOW_LEGS, lean(fwd=68), head(x=32), {"pelvis": [("x", 31)]}))
+    c.key(28, merge(stand, SWEEP, PLUME_L, HINGE_LEGS, lean(fwd=72), head(x=30), {"pelvis": [("x", 32)]}),
+          "in_out_cubic")                                                                                     # BOW
+    c.key(52, merge(stand, SWEEP, PLUME_L, HINGE_LEGS, lean(fwd=74), head(x=32), {"pelvis": [("x", 33)]}))
     c.key(66, merge(stand, HIGH_L, gloves(4, 2, spread=20), lean(fwd=-10), head(x=-18, z=-6)), "out_back")    # up!
     c.key(84, merge(stand, HIGH_L, gloves(4, 2, spread=20), lean(fwd=-8, side=-4), head(x=-16, z=-10)))
     c.key(94, merge(stand, KISS_L, glove("l", 40, 30), lean(fwd=2), head(x=-2, z=-4)), "in_out_sine")         # a kiss

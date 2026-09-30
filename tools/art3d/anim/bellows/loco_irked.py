@@ -29,4 +29,5 @@ def build(ctx):
     c.sfx(0, "bellows_step")
     c.sfx(L // 2, "bellows_step")
     c.face(0, "irked")
+    fx_off(c)                     # the FX bones it never shows reset to hidden (an overlay's notes / stars)
     return c

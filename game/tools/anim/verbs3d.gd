@@ -4,18 +4,22 @@
 ##   tools/scripts/shot.sh res://tools/anim/Verbs3D.tscn /abs/unused.png <frames> <sandbox> -- \
 ##     --out=/abs/dir --items="name=hush/loco_walk@13,name2=hush/rig_low@60:facing=-1:cheat=10:prop=clarence.held"
 ## Per item: `<name>=<clip>@<frame>` plus optional `:facing=±1`, `:cheat=<deg>` (default: the clip's sidecar
-## cheat_deg) and `:prop=<id>.<state>`. Writes `<out>/<name>.png` (1024 px tall RGBA). `<frames>` ≥ 6 × items + 10.
+## cheat_deg), `:prop=<id>.<state>` and `:plinth=1` (the freeze's stone plinth under her, the same plinth.glb geometry
+## CharacterView3D._ensure_plinth shows in game — a statue is judged WITH it, issues.md D12). Writes
+## `<out>/<name>.png` (1024 px tall RGBA). `<frames>` ≥ 6 × items + 10.
 extends Node3D
 
 const H := 1024
 const W := 1024
 const SETTLE := 4
+const PLINTH_SCENE := "res://art3d/chars/hush/plinth.glb"   ## = CharacterView3D.PLINTH_SCENE
 
 var _items: Array[Dictionary] = []
 var _out := ""
 var _vp: SubViewport = null
 var _cam: Camera3D = null
 var _rig: RigPlayer3D = null
+var _plinth: Node3D = null
 var _i := 0
 var _wait := 0
 
@@ -62,7 +66,32 @@ func _ready() -> void:
 	_vp.add_child(_rig)
 	if not _rig.setup("hush"):
 		printerr("[verbs3d] rig hush failed")
+	_plinth = _make_plinth()
+	_vp.add_child(_plinth)
 	_pose(_items[0])
+
+
+## The freeze plinth at the character's origin, unscaled (the game's pop-in ends at scale 1): plinth.glb, else the
+## same fallback cylinder as CharacterView3D.
+static func _make_plinth() -> Node3D:
+	var p: Node3D = null
+	if ResourceLoader.exists(PLINTH_SCENE):
+		var ps: Variant = load(PLINTH_SCENE)
+		if ps is PackedScene:
+			p = (ps as PackedScene).instantiate() as Node3D
+	if p == null:
+		var mi := MeshInstance3D.new()
+		var cy := CylinderMesh.new()
+		cy.top_radius = 0.25
+		cy.bottom_radius = 0.27
+		cy.height = 0.12
+		mi.mesh = cy
+		mi.position.y = 0.06
+		p = Node3D.new()
+		p.add_child(mi)
+	p.name = "Plinth"
+	p.visible = false
+	return p
 
 
 static func _parse(spec: String) -> Dictionary:
@@ -83,6 +112,8 @@ static func _parse(spec: String) -> Dictionary:
 				it["cheat"] = float(v)
 			"prop":
 				it["prop"] = v
+			"plinth":
+				it["plinth"] = v == "1" or v == "true"
 	return it
 
 
@@ -91,7 +122,8 @@ func _pose(it: Dictionary) -> void:
 	if rig_id != _rig.rig_id:
 		_rig.setup(rig_id)
 	_rig.reset(true)                           # props home, looks off: each cut-out starts clean
-	_rig.play(String(it["clip"]), {})
+	# no cross-fade from the previous item's pose (a clip's blend_in would ghost the last cut-out into this one)
+	_rig.play(String(it["clip"]), {"blend_in": 0})
 	var cheat := float(it.get("cheat", -1.0))
 	if cheat < 0.0:
 		var c := ClipLib3D.get_clip(String(it["clip"]))
@@ -101,6 +133,8 @@ func _pose(it: Dictionary) -> void:
 	var pv := String(it.get("prop", ""))
 	if pv.contains("."):
 		_rig.set_prop(pv.get_slice(".", 0), pv.get_slice(".", 1))
+	if _plinth != null:
+		_plinth.visible = bool(it.get("plinth", false))
 	_rig.set_external_frame(float(it["frame"]))
 	_rig.advance(1.0 / 60.0)
 	_wait = SETTLE

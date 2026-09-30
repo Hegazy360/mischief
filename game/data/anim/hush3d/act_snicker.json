@@ -64,7 +64,10 @@
   },
   "lint": {
     "skippable": false,
-    "pop_frames": [],
+    "pop_frames": [
+      6,
+      7
+    ],
     "freeze_holds": [],
     "draft": false
   },

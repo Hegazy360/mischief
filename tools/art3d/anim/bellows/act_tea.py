@@ -3,11 +3,11 @@
 left glove the whole time it is not at his lips:
 
   0-96    the KETTLE comes to his right glove (`prop lend set:kitchen_kettle grip_r` f 14) — he lifts it over the cup
-          and pours (kettle_pour f 40), sets it back (`return` f 78)
+          HIGH and pours from a height, chin up (kettle_pour f 40), sets it back (`return` f 78)
   96-160  the saucer goes onto the shelf of his belly; the HONEY jar comes to his left palm (`lend set:kitchen_honey
           grip_l` f 104), the spoon dips in and the jar's lid FLIPS on the spoon contact (`set_anim lid_flip` f 126);
           the jar goes home on f 148 (`return`)
-  160-250 the honey spoon into the cup (spoon_clink 169), a stir (tea_stir 182), a tap on the rim (spoon_clink 243)
+  160-250 the honey spoon into the cup (spoon_clink 169), a big stir (tea_stir 182), a tap on the rim (spoon_clink 243)
   250-480 saucer back in the left glove, the cup in the right: a sniff (270), a pompous blow, the sip with the PINKIE
           up (tea_slurp 388) — f 420 (ACHOO-RIA!'s trigger, mark_s 7.0) is THE SIP of _lib.presets, the sneeze's f 0 —
           then the cup down on the saucer (teacup_clink 462), a shift on the stool (stool_creak 472).
@@ -44,13 +44,13 @@ def build(ctx):
     c.key(0, REST)
     c.key(12, sit(fwd=0, turn=-6, hx=-2, hz=-6, extra=glove("r", 20, 12)), "in_out_sine")        # eyes the kettle
     c.key(22, sit(fwd=2, turn=-4, hx=0, hz=2, extra=grip("r", 70, 44)), "in_out_sine")          # it's in his glove
-    c.key(40, sit(fwd=6, turn=2, hx=6, hz=12, extra=grip("r", 70, 44)), "in_out_cubic")         # pours, peering in
-    c.key(66, sit(fwd=6, turn=2, hx=8, hz=14, extra=grip("r", 70, 44)))
+    c.key(40, sit(fwd=-8, turn=2, hx=-10, hz=12, extra=grip("r", 70, 44)), "in_out_cubic")      # the pour from on high
+    c.key(66, sit(fwd=-9, turn=2, hx=-12, hz=14, extra=grip("r", 70, 44)))
     c.key(80, sit(fwd=0, turn=-4, hx=-4, hz=-2, extra=grip("r", 70, 44)), "in_out_sine")
     c.key(96, sit(fwd=-8, turn=4, hx=-8, hz=10), "in_out_sine")                                  # belly out: a shelf!
     c.key(110, sit(fwd=-10, turn=6, hx=-4, hz=16, extra=grip("r", 60, 40)), "in_out_sine")
     c.key(126, sit(fwd=-8, turn=6, hx=2, hz=18, extra=grip("r", 60, 40)), "in_out_sine")        # the lid flips
-    c.key(132, sit(fwd=-10, turn=6, hx=-10, hy=6, hz=18, extra=grip("r", 60, 40)), "out_back")   # "huh" — a tilt
+    c.key(132, sit(fwd=-15, turn=6, hx=-16, hy=12, hz=18, extra=grip("r", 60, 40)), "out_back")  # "huh" — recoil, tilt
     c.key(150, sit(fwd=-6, turn=4, hx=-4, hz=12, extra=grip("r", 60, 40)), "in_out_sine")
     c.key(169, sit(fwd=-4, turn=4, hx=4, hz=10, extra=grip("r", 60, 40)), "in_out_sine")         # clink
     c.key(206, sit(fwd=-5, turn=5, hx=0, hy=4, hz=12, extra=grip("r", 60, 40)))                  # stirring, humming
@@ -68,6 +68,9 @@ def build(ctx):
     c.key(L, REST, "in_out_sine")
     c.motion(lambda f: dangle(f, 60.0, 6.0, feet=False))
     c.motion(lambda f: {"spine_02": [("x", -1.4 * math.sin(2 * math.pi * f / 120.0))]})    # breathing (light: size)
+    c.motion(lambda f: {"spine_03": [("y", 4.0 * math.sin(2 * math.pi * (f - 169) / 24.0))],     # rocking with the stir
+                        "Head": [("y", -3.0 * math.sin(2 * math.pi * (f - 169) / 24.0))]}, 169, 243,
+             weight=lambda f: window(f, 169, 178, 234, 243))
 
     # ---- constraints ---------------------------------------------------------------------------------------------
     seat(c, 0, L)
@@ -125,9 +128,10 @@ def build(ctx):
         rest_t = chest_point(pose, (-0.40, -0.40, 0.90))
         arm_ik(pose, "r", rest_t, POLE_R, hand_R=R_REST, effector=PALM_R)
         if 4 <= f < 92:                             # the kettle
-            tilt = track(f, [(14, 0.0), (32, 0.0), (40, 46.0), (64, 50.0), (72, 0.0)])
+            tilt = track(f, [(14, 0.0), (32, 0.0), (40, 58.0), (64, 62.0), (72, 0.0)])
             Rk = qy(tilt) @ qz(180)
-            arch_pour = cup_top + Vector((-0.36, -0.02, 0.10)) + Rk @ (UP * KETTLE_ARCH)
+            high = track(f, [(16, 0.0), (32, 0.10), (40, 0.26), (64, 0.30), (72, 0.10)])   # the pour from a height
+            arch_pour = cup_top + Vector((-0.36, -0.04, 0.10 + high)) + Rk @ (UP * KETTLE_ARCH)
             arch = kettle_arch_home.lerp(arch_pour, ramp(f, 16, 32)).lerp(kettle_arch_home, ramp(f, 72, 84))
             arm_ik(pose, "r", arch, POLE_R, hand_R=Rk @ KETTLE_R, effector=PALM_R, w=window(f, 4, 13, 80, 92))
             if 14 <= f < 88:
@@ -140,7 +144,7 @@ def build(ctx):
                 palm_t = mouth + Vector((-0.06, -0.03, dip + 0.15))
             else:
                 a = 2 * math.pi * (f - 169) / 24.0 if 169 <= f < 243 else 0.0
-                r = 0.028 * ramp(f, 169, 176) * (1.0 - ramp(f, 236, 243))
+                r = 0.042 * ramp(f, 169, 176) * (1.0 - ramp(f, 236, 243))
                 circ = Vector((r * math.cos(a), r * math.sin(a), 0.0))
                 dip = track(f, [(150, 0.22), (164, 0.08), (169, 0.03), (243, 0.03), (250, 0.14)])
                 bowl_t = cup_top + circ + Vector((0.0, 0.0, dip - 0.04))
@@ -180,6 +184,8 @@ def build(ctx):
     c.event(126, "set_anim", hotspot="kitchen_honey", anim="lid_flip")
     c.event(148, "prop", op="return", prop="set:kitchen_honey", frames=8)
     c.event(250, "prop", op="hide", prop="spoon")
+    c.event(270, "fx", id="steam")                  # the sniff: hot tea
+    c.event(446, "fx", id="sparkles")               # bliss after the sip (the sneeze usually interrupts at 420)
     c.beats(kettle=(14, 86), pour=(40, 72), honey=(104, 156), stir=(169, 243), stirring=(182, 236),
             sniff=(270, 300), sip=(388, 455), put_down=(462, 472), creak=(472, 480))
     for f, p in ((0, "pompous"), (12, "suspicious"), (22, "smug"), (40, "admiring"), (80, "pompous"),

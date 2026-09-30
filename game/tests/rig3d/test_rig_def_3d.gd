@@ -121,3 +121,10 @@ func test_real_cast_descriptors_when_present() -> void:
 		assert_gt(def.bone_names.size(), 60, "%s is on the UAL skeleton" % rig)
 	if n == 0:
 		skip("cast rigs not landed yet — r3d-cast-hush / r3d-cast-bellows")
+
+
+func test_outline_default_is_d7() -> void:
+	var d := Env.rig_dict()
+	(d["material"] as Dictionary).erase("outline_px")
+	var rd := _parse(d)
+	assert_almost_eq(rd.outline_px, View3DConst.OUTLINE_CHAR_PX, 0.0001, "no outline_px → D7's character width")

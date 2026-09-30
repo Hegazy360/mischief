@@ -227,3 +227,21 @@ func test_viewport_camera_pupils_and_clamp() -> void:
 	assert_lt(_off_camera(ba), 2.0, "the gaze wins over a look-at elsewhere (%.1f° off)" % _off_camera(ba))
 	assert_lt(_p.face.look.length(), 0.05, "pupils centre on the camera while the gaze is full (%s)" % [_p.face.look])
 	assert_le(worst, 30.5, "the beret spring stays inside its clamp_deg 30° through the gaze (%.1f°)" % worst)
+
+
+func test_off_screen_faces_the_audience_in_front() -> void:
+	# Drawn only in the PiP window (the main camera does not see him): the face goes to the audience straight in
+	# front of him (the camera's height and depth at his x), not sideways toward the far-off main camera.
+	_gaze_clip("fix/st_gaze", [{"f0": 0, "f1": 90, "at": "camera", "weight": 1.0, "blend": 0}])
+	var ba := _setup(1, Vector3(6.0, 1.5, 6.0))
+	_p.set_gaze_camera(null)
+	_cam.current = true
+	_cam.rotation_degrees = Vector3(0.0, 180.0, 0.0)   # looking away (+z): the head is off its screen
+	_p.play("fix/st_gaze")
+	await _show(45.0)
+	assert_false(_cam.is_position_in_frustum(_p.head_global()))
+	assert_lt(absf(_yaw(_face(ba))), 3.0, "the face points straight to the front (yaw %.1f°)" % _yaw(_face(ba)))
+	_cam.look_at(_p.head_global(), Vector3.UP)
+	await _show(46.0)
+	assert_true(_cam.is_position_in_frustum(_p.head_global()))
+	assert_lt(_off_camera(ba), 2.0, "on screen: the face goes to the camera itself (%.1f° off)" % _off_camera(ba))

@@ -14,4 +14,5 @@ locomotion set, the stun, and the curtain-call wander-on / slow burn. Captures a
 | `sheets/<clip>_sil64.png` | 64 px silhouettes of the beat frames + IoU matrix | every beat its own outline (the sneeze: IoU 0.24–0.63) |
 | `sheets/<clip>_lint.txt` | r3d-anim's 3D lint for the clip | 0 errors, 0 warnings |
 | `rubric.md` | the TECH §11 rubric per clip with frame numbers and funny / readable / fresh scores | the bar: sneeze ≥ 4 funny and readable, every clip ≥ 3 |
-| `packets/` + `reviewer_prompt.md` | a mute fresh-reviewer packet: the sneeze and the tea as unlabeled frame sheets, scored funny / readable / fresh | pending review (the orchestrator runs it; the answer key is in the task's scratch dir) |
+| `reviewer_answers_r1.md`, `verdict_r1.md` | round 1 of the mute fresh review (orchestrator-run): sneeze funny 4 / readable 4 / fresh 3; tea 1 / 2 / 2 → act_tea v2 | what a stranger reads at phone size |
+| `packets/` + `reviewer_prompt.md` | round 2 packet: the current sneeze and the reworked tea as unlabeled frame sheets, scored funny / readable / fresh | pending review (the orchestrator runs it; the answer key is in the task's scratch dir) |

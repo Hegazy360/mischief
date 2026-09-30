@@ -5,7 +5,8 @@
 ##     --out=/abs/dir --items="name=hush/loco_walk@13,name2=hush/rig_low@60:facing=-1:cheat=10:prop=clarence.held"
 ## Per item: `<name>=<clip>@<frame>` plus optional `:facing=±1`, `:cheat=<deg>` (default: the clip's sidecar
 ## cheat_deg), `:prop=<id>.<state>` and `:plinth=1` (the freeze's stone plinth under her, the same plinth.glb geometry
-## CharacterView3D._ensure_plinth shows in game — a statue is judged WITH it, issues.md D12). Writes
+## CharacterView3D._ensure_plinth shows in game — a statue is judged WITH it, issues.md D12; `:plinth=<k>` scales it
+## by k across and √k in height, about her origin, for a crouched freeze whose legs would hide it at 64 px). Writes
 ## `<out>/<name>.png` (1024 px tall RGBA). `<frames>` ≥ 6 × items + 10.
 extends Node3D
 
@@ -113,7 +114,8 @@ static func _parse(spec: String) -> Dictionary:
 			"prop":
 				it["prop"] = v
 			"plinth":
-				it["plinth"] = v == "1" or v == "true"
+				it["plinth"] = v == "1" or v == "true" or v.is_valid_float() and float(v) > 0.0
+				it["plinth_k"] = float(v) if v.is_valid_float() and float(v) > 0.0 else 1.0
 	return it
 
 
@@ -135,6 +137,8 @@ func _pose(it: Dictionary) -> void:
 		_rig.set_prop(pv.get_slice(".", 0), pv.get_slice(".", 1))
 	if _plinth != null:
 		_plinth.visible = bool(it.get("plinth", false))
+		var k := float(it.get("plinth_k", 1.0))
+		_plinth.scale = Vector3(k, sqrt(k), k)
 	_rig.set_external_frame(float(it["frame"]))
 	_rig.advance(1.0 / 60.0)
 	_wait = SETTLE

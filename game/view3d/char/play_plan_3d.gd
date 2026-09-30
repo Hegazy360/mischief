@@ -22,6 +22,7 @@ const TIER_SCALE: PackedInt32Array = [100, 100, 120, 150]
 ## reactions.json roots (tests may point it at a fixture table).
 static var reaction_files: PackedStringArray = ["res://data/reactions.json"]
 static var _tables: Dictionary = {}
+static var _entries: Dictionary = {}     ## clip id -> its archetype entry (a tiered play scans the tables once per clip)
 
 var clip: ClipDef3D
 var tier: int = 1
@@ -80,7 +81,7 @@ static func build(c: ClipDef3D, opts: Dictionary) -> PlayPlan3D:
 	p.suppressed = bool(opts.get("suppressed", false))
 	var entry: Dictionary = {}
 	if not c.loop and (p.tier >= 2 or p.suppressed):
-		entry = entry_for_clip(c.id)
+		entry = _entry_cached(c.id)
 	var hv: Variant = opts.get("hold", null)
 	var hold := Vector2i(-1, -1)
 	if hv is Array and (hv as Array).size() == 2:
@@ -241,6 +242,15 @@ static func entry_for_clip(clip_id: String) -> Dictionary:
 	return {}
 
 
+## entry_for_clip, cached per clip id (read-only: build() never mutates it).
+static func _entry_cached(clip_id: String) -> Dictionary:
+	var hit: Variant = _entries.get(clip_id, null)
+	if hit == null:
+		hit = entry_for_clip(clip_id)
+		_entries[clip_id] = hit
+	return hit
+
+
 ## The `suppressed` entry ({clip, frames}) for rig `rig_id` ({} when none).
 static func suppressed_for(rig_id: String) -> Dictionary:
 	for t in _all_tables():
@@ -267,6 +277,7 @@ static func last_beats_for(rig_id: String) -> PackedStringArray:
 ## Forget cached reaction tables.
 static func invalidate() -> void:
 	_tables.clear()
+	_entries.clear()
 
 
 static func _all_tables() -> Array[Dictionary]:

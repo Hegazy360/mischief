@@ -25,3 +25,17 @@ scale keys are dropped). Regenerate: `tools/scripts/anim_sheet3d.sh`, AnimViewer
 
 Measured (report §Verification): RigPerf3D `hush/loco_walk` median of 5 runs = **189 µs / frame** (p95 ≈ 282 µs) on a box at load
 average 5–7 on 4 cores; the same player headless in the test suite: 27 µs. 9,838 triangles, 48 deform bones, 2 draw calls.
+
+## Fix pass (2026-09-30 21:26–21:57Z): D8 runtime gaze, set-palette attachments, sheet / viewer tools
+
+| Artefact | What it shows | What to judge |
+|---|---|---|
+| `gaze_before_after.jpg` | AnimViewer3D at the game camera in the kitchen; left `--no-gaze`, right the sidecar `gaze` windows (RigGaze3D). Rows: `bellows/rx_sneeze_blast_a` f 60 facing −1 (its staged facing), the same facing +1 (mirrored), `hush/st_shrug` f 10 facing −1 | Staged facing: identical (the clip bakes `face_cam`; the runtime gaze is absolute, so it adds ~0). Mirrored Bellows: the back of the bouffant → his face comes round to us (±85° cap). Hush facing −1: a 3/4-left face → full face to the camera, the shrug's arms untouched (yaw only; keyed pitch / roll kept) |
+| `stool_set_palette.jpg` | `--episode=g0_sneeze` kitchen: f 60 (the set's stool under him) · f 100 · f 110 (the ride-along `stool` attachment on bone `ride`) | The ride-along stool is the set's brown stool (set_toon on `palette_kitchen.png`, found through house3d.json `furniture.kitchen_stool.model`), not the salmon it was on the rig's palette. The viewer does not honour the sneeze's `decor` event, so the set stool stays visible behind the flying one — the colours match side by side |
+| `sheet3d_stepped_phone.jpg` | `anim_sheet3d.sh hush rig_achoo_ria --room=kitchen`: the phone strip of the stepped ACHOO-RIA! rig | Framed on the whole clip: feet, knees and the arm up on the 0.55 m step (before: cut above the knees — the crop measured the previous pass's pose through a cross-fade that never advanced); staged at the sidecar's `stage` (x 14.85, z −1.42, facing −1, cheat 10), face to the camera |
+| `sheet3d_overlay_contact.png` | `anim_sheet3d.sh hush st_shrug`: an overlay clip (crashed the sheet before) | The shrug over `loco_idle` held at f 0, the overlay frame-locked |
+
+Tools added: AnimViewer3D `--no-gaze`, `--fixed-step` (exactly 1/60 s per rendered frame: a `--shot-seq --every=10` run with
+`--episode` loaded shows clip f 9 / 19 / 29 / 39), overlay clips through `--clip` (over the rig's idle, `--frame` locks the
+overlay); sheet3d `--no-gaze`, `--facing`; RigPerf3D `--no-gaze` (gaze cost is inside the run-to-run noise: hush
+idle_fidget_proud 189 / 201 µs with, 205 / 187 µs without, load average 4–5).

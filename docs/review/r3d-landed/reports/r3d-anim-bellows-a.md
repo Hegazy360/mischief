@@ -1,26 +1,26 @@
 # r3d-anim-bellows-a — report
 
-Horace Bellows' 12 Gate-0 3D clips (all FINAL, no drafts), the shared Bellows `_lib`, `bellows3d/map.json` and the
-42-clip Bellows test. Branch r3d, no git writes (the orchestrator commits). Time box 14 h, started 18:02Z; @@HOURS@@.
+Horace Bellows' 12 Gate-0 3D clips (no drafts), the shared Bellows `_lib`, `bellows3d/map.json` and the
+42-clip Bellows test. Branch r3d, no commits (the orchestrator commits; one accidental `git mv`, see Known gaps). Time box 14 h, started 18:02Z; ≈ 4.2 h active (the R19 cut line was never reached).
 
 ## Clips (all lint `--strict` clean, in game/, DONE lines in LANDED.md)
 
 | clip | frames | kind | source | .res KB | hours |
 |---|---|---|---|---|---|
-| `rx_sneeze_blast_a` | 165, lock sim | base, reaction (FINAL, first) | keyed + IK/customs, staged st_tea (x 15.0, z −1.4, facing −1, cheat 35); audio table | 120 | 1.4 |
+| `rx_sneeze_blast_a` | 165, lock sim | base, reaction (FINAL, first) | keyed + IK/customs, staged st_tea (x 15.0, z −1.4, facing −1, cheat 35); audio table | 119 | 1.4 |
 | `loco_idle` | 240 loop | base | keyed + IK (gloves on the barrel), finger drum, runtime glance | 159 | 0.3 |
 | `loco_strut` | 32 loop, 1.2 m/s, stride 0.64 | base | `_lib` Gait (heel–ball roll, auto-plant); audio table | 43 | 0.35 |
-| `act_tea` | 480 loop | base, activity (FINAL) | keyed + IK customs, staged st_tea; kettle / honey lend-return, lid_flip; f420 = THE SIP = the sneeze f0; audio table | 230 | 0.9 |
-| `act_warmup` | 480 loop | base, activity (FINAL) | keyed + baton-tip IK on the record, staged st_gramophone; audio **own** | 239 | 0.4 |
+| `act_tea` | 480 loop | base, activity | keyed + IK customs, staged st_tea; kettle / honey lend-return, lid_flip; f420 = THE SIP = the sneeze f0; audio table | 231 | 1.0 |
+| `act_warmup` | 480 loop | base, activity | keyed + baton-tip IK on the record, staged st_gramophone; audio **own** | 241 | 0.45 |
 | `loco_blind_shuffle` | 24 loop, 1.2 m/s | base (walk@blind) | Gait + groping keys; audio table | 38 | 0.15 |
-| `cc_wander_on` | 144 | base, curtain call | Gait + look-round keys; audio **own** | 93 | 0.15 |
+| `cc_wander_on` | 144 | base, curtain call | Gait + look-round keys; audio **own** | 92 | 0.15 |
 | `st_bonk` | 60 | base, oneshot:stun | keyed pop + stars; audio table | 53 | 0.15 |
-| `beat_slow_burn` | 70 | base, last beat / curtain call | keyed, facing-proof; audio table | 43 | 0.15 |
+| `beat_slow_burn` | 70 | base, last beat / curtain call | keyed, facing-proof; audio table | 42 | 0.15 |
 | `loco_turn` | 8 | base | keyed | 25 | 0.05 |
-| `loco_irked` | 28 loop, 1.32 m/s, stride 0.616 | base (walk@tier2) | Gait + fists; audio **own** | 34 | 0.1 |
+| `loco_irked` | 28 loop, 1.32 m/s, stride 0.616 | base (walk@tier2) | Gait + fists; audio **own** | 33 | 0.1 |
 | `act_fixup_mirror` | 240 loop | base, activity | keyed + comb-tip IK along the hair, staged st_hall_mirror (x 4.76, facing +1); audio **own** | 111 | 0.3 |
 
-Set total ≈ 1.19 MB (≤ 10 MB); largest 239 KB (≤ 250 KB). Shared work (`_lib`, test, map, review, D8 pass, fixes): ≈ @@SHARED@@ h.
+Set total 1.17 MB (≤ 10 MB); largest 241 KB (≤ 250 KB). Shared work (`_lib`, the test, the map, the in-game captures, sheets, rubric, the D8 / FX passes): ≈ 0.8 h.
 
 ## Files (all inside §2)
 - `tools/art3d/anim/bellows/_lib/{__init__,presets}.py` — the shared Bellows presets (read-only for -b/-c).
@@ -38,9 +38,9 @@ Set total ≈ 1.19 MB (≤ 10 MB); largest 239 KB (≤ 250 KB). Shared work (`_l
   1.4, hitstop 5, the puff, stool decor hidden + ride-along stool shown at 95, the bouffant look, no clip laugh); tea
   (480 f, lid_flip on the spoon contact, lend/return pairs balanced and home by the end); THE SIP continuity (UAL
   bones ≤ 1.5° between act_tea f420 and the sneeze f0).
-- `docs/review/r3d-anim-bellows-a/` (24 MB ≤ 25): `sneeze_strip.png` (+ `_2`), `sneeze.gif` + `sneeze_mute.gif`
+- `docs/review/r3d-anim-bellows-a/` (23.5 MB ≤ 25): `sneeze_strip.png` (+ `_2`), `sneeze.gif` + `sneeze_mute.gif`
   (3.4 MB each), `tea_strip.png` (+ `_2`), `sheets/` (12 clips × contact / onion / curves / sil64 / phone / lint),
-  `rubric.md`, `index.md`, `packets/` + `reviewer_prompt.md`.
+  `rubric.md`, `index.md`, `packets/` (round 2) + `reviewer_prompt.md`, round 1 `reviewer_answers_r1.md` / `verdict_r1.md`.
 
 ## APIs / contracts others use (`from _lib.presets import *`)
 - Staging: `tea_stage()` (TEA_X 15.0, TEA_Z −1.4, facing −1, cheat 35), `SEAT_H` 0.55, `seat(c, f0, f1)` (the barrel's
@@ -65,7 +65,24 @@ Set total ≈ 1.19 MB (≤ 10 MB); largest 239 KB (≤ 250 KB). Shared work (`_l
   act_warmup's f30 pose).
 
 ## Verification
-@@VERIFY@@
+- Bake: `tools/art3d/anim/bake.sh bellows <clips> --strict` (via scratch first: BAKE_SIDECAR_DIR / BAKE_RES_DIR) — all 12
+  OK, lint clean; sizes in the table.
+- `tools/scripts/test_game.sh r3d-anim-bellows-a -- anim3d/test_bellows`: 9 passed, 0 failed, 0 skipped (all 42 clips made).
+- `NO_IMPORT=1 tools/scripts/sandbox.sh r3d-anim-bellows-a -s res://tools/anim/lint_anim.gd -- --format=3d --rig=bellows
+  --scope=g0,p00 --strict`: 42 clips, 0 errors, 0 warnings, 0 missing.
+- Full suite `tools/scripts/test_game.sh r3d-anim-bellows-a` (after the last landing): 1507 passed, 0 failed, 0 skipped
+  (166 files). `SANDBOX=r3d-anim-bellows-a tools/scripts/lint.sh`: OK, 0 lints failed (3D anim lint 77 clips, 0 errors).
+- `E2E_SANDBOX=r3d-anim-bellows-a tools/scripts/e2e.sh g0_sneeze` (3D NightScene): PASS, end g0_done, **0 clip
+  fallbacks**, draw p95 57, shader_compiles_play 0, hitches 0.
+- In game, looked at 1200×540 (`ViewSandbox3D --sim --episode=g0_sneeze`, ideal cmds): the sneeze (seek 1040; clip f0 =
+  engine 29, accent 123, the sink 145) — the face on the camera through the build with the cup at the lips, CHOO with
+  the puff out in front, the caption, crockery and the stool ride, the dazed sit-up in the sink
+  (`docs/review/r3d-anim-bellows-a/sneeze_strip.png`, `sneeze.gif`); the tea (seek 600; clip f0 = engine 50) — the high
+  pour, the jar and lid flip, the stir, the sniff, THE SIP into the sneeze (`tea_strip.png`). The warm-up / mirror /
+  idle / slow burn checked frame-locked in AnimViewer3D in the real rooms (both facings for the facing-proof two).
+- Mute fresh review, round 1 (orchestrator-run on my packet): sneeze funny 4 / readable 4 / fresh 3; tea 1 / 2 / 2 →
+  act_tea v2 (a round-2 packet with the current captures is in `packets/`, pending).
+- THE SIP: UAL bones ≤ 1.5° between act_tea f420 and the sneeze f0 (test).
 
 ## What changed after the first landing (the review pass)
 - **D8 (lead note 19:20Z): faces to the camera on every face beat.** Staged clips bake a yaw-only turn of spine_02 /
@@ -83,6 +100,11 @@ Set total ≈ 1.19 MB (≤ 10 MB); largest 239 KB (≤ 250 KB). Shared work (`_l
   head turned to the camera). act_tea: two held left-glove joints nudged 0.5° (their constant tracks defeated the
   converter's key reduction: 250.6 KB → 230 KB). act_fixup_mirror: the mirror look now runs before the comb / pat IK
   (the comb rode a head pose the look then moved).
+- **act_tea v2** after the fresh reviewer's "holding a kettle and fidgeting": the pour from a height (kettle raised
+  0.26–0.30 m over the cup, tipped 58–62°, leaning back chin up), a bigger recoil on the lid flip, a bigger stir with the
+  chest rocking in time, fx `steam` on the sniff (f270) and `sparkles` after the sip (f446).
+- act_warmup: a bigger baton beat (upper arm ±17°, forearm ±26°, wrist ±32° per beat).
+- map.json: -b's and -c's rows added from their DONE lines; the test skips family patterns (`bellows/{id}`).
 
 ## Deviations
 - `act_warmup` is a 480 f (8 s) loop with audio **"own"**: the 2D audio row is 1200 f (two phrases); re-timed into one
@@ -124,6 +146,11 @@ Set total ≈ 1.19 MB (≤ 10 MB); largest 239 KB (≤ 250 KB). Shared work (`_l
 ## Known gaps
 - The facing-proof face beats (idle glance, slow burn stare, bonk, wander-on) turn to the camera only once r3d-rig
   reads the sidecar gaze; until then they sit at the view's 35° cheat.
-- The rubric is self-scored (sneeze 4 / 4 / 4, every other clip ≥ 3); the fresh-reviewer packet is pending.
+- The rubric's scores are mine (sneeze 4 / 4 / 3–4, every other clip ≥ 3); the fresh reviewer's round 1 agreed on the
+  sneeze (4 / 4 / 3) and failed the old tea (1 / 2 / 2); round 2 on the reworked tea is pending. The tea is an ambient
+  loop with small props at the kitchen's wide shot — it may still score low on funny.
+- Process slip: I ran one `git mv` (renaming the orchestrator's `reviewer_answers.md` in my review dir to
+  `reviewer_answers_r1.md`); the index now holds that staged rename. No commit or other git write was made; the
+  working tree matches it.
 - In the sink the flipped bouffant covers his eyes (the residue gag by design); the dazed face reads by the nose and
   the mouth only.

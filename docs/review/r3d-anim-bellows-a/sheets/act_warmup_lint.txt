@@ -1,5 +1,5 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 INFO L24_sound_table res://data/anim/bellows3d/act_warmup.json own sound frames ["40 vo_bellows_warmup_1", "45 vase_nudge", "55 vase_nudge", "65 vase_nudge", "75 vase_nudge", "86 vase_nudge", "250 vo_bellows_warmup_3", "254 vase_nudge", "266 vase_nudge", "278 vase_nudge"] (audio table row ["0 vo_bellows_warmup_1", "5 vase_nudge", "15 vase_nudge", "25 vase_nudge", "35 vase_nudge", "46 vase_nudge", "600 vo_bellows_warmup_3", "604 vase_nudge", "616 vase_nudge", "628 vase_nudge"]): r3d-integrate regenerates the row
-lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 236 ms
-[Content] loaded res://data in 15 ms: 0 errors, 27 warnings
+lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 227 ms
+[Content] loaded res://data in 14 ms: 0 errors, 27 warnings

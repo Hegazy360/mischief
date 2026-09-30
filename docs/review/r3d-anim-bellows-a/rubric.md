@@ -5,7 +5,10 @@ commands: `sneeze_strip.png` / `sneeze.gif` seek 1040, `tea_strip.png` seek 600)
 real kitchen / parlour / hall at the game camera, and r3d-rig's sheets (`sheets/<clip>_*`). Engine frame = clip frame
 + 29 in the sneeze strip (+ 5 after the f 94 hit-stop), + 50 in the tea strip. No clip is a draft (the R19 cut line
 was never reached). Scores 1–5 on funny / readable / fresh; the bar: ≥ 4 funny and readable on the sneeze, ≥ 3 on every
-other clip. Self-scored: a fresh-reviewer packet (mute, both takes) is in `packets/` — pending review (see index).
+other clip. Self-scored, with a mute fresh review: round 1 (orchestrator-run) scored the sneeze funny 4 / readable 4 /
+fresh 3 ("a huge ACHOO-RIA! sneeze at 33 that blasts him backwards across the room … slumped … seeing stars"; held back
+by "the wind-up at tiny wide-shot size") and the tea 1 / 2 / 2 ("holding a kettle and fidgeting slightly") → act_tea v2
+below; the round-2 packet (current captures) is in `packets/`, pending.
 
 **D8 (faces face the camera).** Staged clips bake it (`_lib` `face_cam()`: a yaw-only turn of spine_02 / spine_03 /
 neck / head to the stage camera — the keyed pitch and roll stay, the chest turns with it so a glove at the mouth never
@@ -40,9 +43,9 @@ beats sit at the view's 35° cheat.
   test asserts it).
 - **Different from last time?** It is the Gate-0 payoff, seen once a night; in 3D the ride on the stool, the tumble of
   the stool and the puff blasting forward past the face are new against the 2D take.
-- **Scores:** funny **4**, readable **4**, fresh **4**. Holding it back from 5: view-side items (the slow push at f4 is
-  not played; the punch-in framing puts him at the right edge in the sink; the ride-along stool renders pink; the
-  basin front hides the slippers) — requests in the report.
+- **Scores:** funny **4**, readable **4**, fresh **3–4** (the reviewer: 3, a stock sneeze-blast idea). Holding it
+  back from 5: view-side items (the punch-in framing puts him at the right edge in the sink; the ride-along stool
+  renders pink; the basin front hides the slippers) — requests in the report.
 
 ## The other eleven
 
@@ -58,7 +61,10 @@ beats sit at the view's 35° cheat.
   `mg_admire_in_kettle` overlay turns his head away (note to -b in LANDED).
 - SFX: kettle_pour 40, spoon_clink 169 / 243, tea_stir 182, tea_sniff 270, tea_slurp 388, teacup_clink 462,
   stool_creak 472 (the audio table). No sliding (seated; the slippers dangle).
-- **Scores:** funny 3, readable 4, fresh 3.
+- v2 after the fresh review: the pour from a height (kettle 0.26–0.30 m over the cup, tipped 58–62°, the body leaning
+  back, chin up: strip engine f80–125), the lid-flip recoil (f132), a bigger stir with the chest rocking in time
+  (f169–243), steam on the sniff (f270), sparkles of bliss after the sip (f446).
+- **Scores:** funny 3, readable 3 (the small props still carry most of it at the wide shot), fresh 3.
 
 ### `act_warmup` (480 f loop, base; st_gramophone, facing −1)
 - The baton's tip taps the needle down (IK on the tip, f6–34; `set_anim parlour_gramophone play` f24 = ALLEGRO-GO-GO!'s

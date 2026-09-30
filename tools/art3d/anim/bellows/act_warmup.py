@@ -35,8 +35,8 @@ def build(ctx):
 
     def baton(k, up=0.0):
         """The baton arm beating time: k = -1 (down beat) .. +1 (up), `up` raises the whole arm (a top note)."""
-        return {"clavicle_r": [("y", 6 + 6 * up)], "upperarm_r": [("y", -18 - 26 * up - 10 * k), ("z", 46)],
-                "lowerarm_r": [("z", 70 - 20 * up + 18 * k)], "hand_r": [("x", -20 - 24 * k), ("y", 10)]}
+        return {"clavicle_r": [("y", 6 + 6 * up + 3 * k)], "upperarm_r": [("y", -18 - 26 * up - 17 * k), ("z", 46)],
+                "lowerarm_r": [("z", 70 - 20 * up + 26 * k)], "hand_r": [("x", -20 - 32 * k), ("y", 10)]}
     # 0-40: the needle (with the baton's tip), a turn to the Stalls, the big breath
     c.key(0, stand(turn=-6, hx=-6, hz=-10, arm=baton(0.0)))
     c.key(14, stand(fwd=6, turn=-14, hx=4, hz=-28), "in_out_sine")          # a look back at the record

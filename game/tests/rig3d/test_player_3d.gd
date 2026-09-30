@@ -56,7 +56,10 @@ func test_setup_on_the_fixture() -> void:
 		assert_true(p.material().next_pass != null, "outline next pass")
 		assert_eq(p.material().next_pass.get_shader_parameter("outline_px"), 3.5)
 		p.set_outline_scale(1.5)
-		assert_almost_eq(float(p.material().next_pass.get_shader_parameter("outline_px")), 5.25)
+		assert_almost_eq(float(p.material().next_pass.get_shader_parameter("outline_px")), 3.5, 0.0001,
+			"one path: Settings scales the global mnd_outline_scale, never outline_px (no 1.5 × 1.5)")
+		assert_almost_eq(p.outline_scale(), 1.5)
+		p.set_outline_scale(1.0)
 
 
 func test_stand_in_on_a_broken_descriptor() -> void:
@@ -413,6 +416,23 @@ func test_overlay_masks_the_upper_body() -> void:
 	for i in 60:
 		p.advance(1.0 / 60.0)
 	assert_true(p._ov_clip == null, "a one-shot overlay ends and fades out")
+
+
+func test_overlay_frame_lock() -> void:
+	var p := _player()
+	p.play("fix/loco_idle")
+	p.play_overlay("fix/mg_wave", "upper", 6)
+	p.set_overlay_frame(30.0)
+	for i in 20:
+		p.advance(1.0 / 60.0)
+	assert_eq(p.current_overlay(), "fix/mg_wave")
+	assert_almost_eq(p.current_overlay_frame(), 30.0, 0.0001, "a locked overlay does not run on the view clock")
+	assert_true(_qeq(_pose_rot("upperarm_r"), _track_rot("fix/mg_wave", "upperarm_r", 30.0), 0.01),
+		"frame 30 of the overlay, at full weight")
+	p.set_overlay_frame(12.0)
+	assert_true(_qeq(_pose_rot("upperarm_r"), _track_rot("fix/mg_wave", "upperarm_r", 12.0), 0.01), "seek back to 12")
+	p.stop_overlay(0)
+	assert_eq(p.current_overlay(), "", "stop unlocks and ends it")
 
 
 func test_tier3_appends_the_last_beat_and_suppressed_plays_the_tail() -> void:

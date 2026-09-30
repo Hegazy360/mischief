@@ -134,6 +134,11 @@
     },
     {
       "f": 270,
+      "type": "fx",
+      "id": "steam"
+    },
+    {
+      "f": 270,
       "type": "sfx",
       "id": "tea_sniff"
     },
@@ -141,6 +146,11 @@
       "f": 388,
       "type": "sfx",
       "id": "tea_slurp"
+    },
+    {
+      "f": 446,
+      "type": "fx",
+      "id": "sparkles"
     },
     {
       "f": 462,

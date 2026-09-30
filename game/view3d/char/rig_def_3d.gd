@@ -153,7 +153,7 @@ var no_pupils: PackedStringArray = PackedStringArray()   ## eyes cells that hide
 var mirror_cells: Dictionary = {}       ## "layer/cell" -> cell (facing −1)
 
 var palette: String = ""
-var outline_px: float = 3.5
+var outline_px: float = View3DConst.OUTLINE_CHAR_PX   ## D7: the character outline width when the descriptor names none
 var rim: float = 0.45
 var vertex_color: Dictionary = {}
 var tint_tiers: Array[Color] = [Color.WHITE]
@@ -701,7 +701,7 @@ func _parse_misc(d: Dictionary) -> void:
 	var m: Variant = d.get("material", {})
 	if m is Dictionary:
 		palette = String((m as Dictionary).get("palette", ""))
-		outline_px = float((m as Dictionary).get("outline_px", 3.5))
+		outline_px = float((m as Dictionary).get("outline_px", View3DConst.OUTLINE_CHAR_PX))
 		rim = float((m as Dictionary).get("rim", 0.45))
 		if palette != "" and not ResourceLoader.exists(palette) and not FileAccess.file_exists(palette):
 			_err("material.palette", "'%s' does not exist" % palette)

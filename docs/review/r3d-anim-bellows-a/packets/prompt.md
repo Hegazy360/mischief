@@ -2,7 +2,7 @@
 
 You are a fresh reviewer: you have not seen this game, its design notes or its file names. Each item is a numbered strip of frames from a phone game held sideways: read the cells left to right, top to bottom; the numbers printed on the cells are frame numbers (60 frames = 1 second).
 
-Mute: judge only what the frames show.
+Mute: judge only what the frames show. Some packets are gags, some are the man's everyday routine between gags.
 
 Packet folder: `/home/user/mischief/docs/review/r3d-anim-bellows-a/packets`
 

@@ -3,7 +3,8 @@
 ##   godot --rendering-driver opengl3 --path <sandbox> -s res://tools/anim3d/sheet3d.gd -- --rig=bellows \
 ##         --clip=bellows/rx_sneeze_blast_a --out=/abs/raw [--mode=clip|turntable|faces] [--room=kitchen] \
 ##         [--cam=side|game] [--tier=2] [--suppressed] [--variant=head_b] [--frame=N] [--x=<m>] [--cell=420]
-##         [--anim-glb=/abs.glb --anim-name=N] [--data-root=res://tests/rig3d/fixtures/data] [--no-phone]
+##         [--anim-glb=/abs.glb --anim-name=N] [--data-root=res://tests/rig3d/fixtures/data] [--no-phone] [--no-gaze]
+##         [--facing=-1]
 ## (tools/scripts/anim_sheet3d.sh wraps it.) Modes:
 ## * `clip`: every frame is played in order (frame-locked, so springs and blinks run as in the game) and the cell
 ##   frames (every 3 f + every beat boundary) are saved as `side_<f>.png` (RGBA, transparent background, an
@@ -125,11 +126,14 @@ func _mode_clip() -> int:
 	_setup_world(Vector2i(cell, cell), true)
 	var opts := {"tier": int(_args.get("tier", 1)), "suppressed": _args.has("suppressed")}
 	_overlay = c.layer == "overlay"
+	# The profile cells show the authored motion: no runtime audience gaze toward the side camera (the phone pass,
+	# at the game camera, shows it as the game does).
+	_rig.gaze_enabled = false
 	_start_clip(cid, c, opts)
 	var plan := PlayPlan3D.build(c, opts) if _overlay else _rig.plan()
 	var n := plan.length
 	# Pre-pass (no render): the clip's world bounds in profile, for one fixed orthographic camera.
-	_rig.set_facing(1, false)
+	_rig.set_facing(_facing(c), false)
 	_rig.set_cheat(0.0, 0.0)
 	var bounds := AABB()
 	for f in range(0, n + 1):
@@ -208,14 +212,28 @@ func _mode_clip() -> int:
 	return 0
 
 
-## Plays the clip: a base clip as given; an overlay over the rig's idle (held at frame 0), or the rest pose.
+## The sheet's facing: --facing, else the sidecar's stage facing, else +1.
+func _facing(c: ClipDef3D) -> int:
+	if _args.has("facing"):
+		return -1 if int(_args["facing"]) < 0 else 1
+	var st: Variant = c.raw.get("stage", null)
+	if st is Dictionary and (st as Dictionary).has("facing"):
+		return -1 if int((st as Dictionary)["facing"]) < 0 else 1
+	return 1
+
+
+## Plays the clip: a base clip as given; an overlay over the rig's idle (held at frame 0), or the rest pose. Never
+## cross-faded from the previous pass's pose (blend 0): a frame-locked sheet advances no view time, so a blend would
+## freeze on the old pose (the phone crop measured the previous pass's last frame — stepped clips were cut).
 func _start_clip(cid: String, c: ClipDef3D, opts: Dictionary) -> void:
+	var o := opts.duplicate()
+	o["blend_in"] = 0
 	if c.layer != "overlay":
-		_rig.play(cid, opts)
+		_rig.play(cid, o)
 		return
 	var base := "%s/loco_idle" % _args["rig"]
 	if ClipLib3D.exists(base):
-		_rig.play(base, {})
+		_rig.play(base, {"blend_in": 0})
 	_rig.play_overlay(cid, c.mask if c.mask != "" else "upper", 0)
 
 
@@ -238,11 +256,20 @@ func _phone_pass(cid: String, c: ClipDef3D, opts: Dictionary, n: int) -> Array:
 	_vp.transparent_bg = false
 	_build_room(String(_args.get("room", "")))
 	_rig.reset()
+	_rig.gaze_enabled = not _args.has("no-gaze")
 	_start_clip(cid, c, opts)
-	var x := float(_args.get("x", _room_centre(String(_args.get("room", "")))))
-	_rig.position = Vector3(x, 0.0, -1.0)
-	_rig.set_facing(1, false)
-	_rig.set_cheat(float(_args.get("cheat", 35.0)), 0.0)
+	# Staged clips (sidecar `stage`: rigs, tea, the sneeze) play where and how the game stages them.
+	var st: Dictionary = c.raw.get("stage", {}) if c.raw.get("stage", null) is Dictionary else {}
+	var room := String(_args.get("room", ""))
+	var room_r := _room_range(room)
+	var x := _room_centre(room)
+	if _args.has("x"):
+		x = float(_args["x"])
+	elif st.has("x") and (room_r.y <= room_r.x or (float(st["x"]) >= room_r.x and float(st["x"]) <= room_r.y)):
+		x = float(st["x"])
+	_rig.position = Vector3(x, 0.0, float(st.get("z", -1.0)))
+	_rig.set_facing(_facing(c), false)
+	_rig.set_cheat(float(_args.get("cheat", st.get("cheat_deg", 35.0))), 0.0)
 	_cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 	_cam.fov = 30.0
 	_cam.near = 0.5

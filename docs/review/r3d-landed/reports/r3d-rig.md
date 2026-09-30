@@ -266,3 +266,262 @@ Looked at (all in `docs/review/r3d-rig/`):
 
 ## 9. Hours
 About 2.0 h wall-clock, 16:20–18:20 UTC. P0 took 0.9 h.
+
+---
+
+# Fix pass addendum (2026-09-30 21:26–21:57Z, about 0.5 h of the 2 h box)
+
+**Status: done.** Everything in the brief's three priorities landed and was checked:
+- the D8 runtime gaze;
+- the set and props attachment palette;
+- the sheet crash, the stepped phone framing, `--fixed-step` and the single outline path.
+
+I touched only my own files. Godot ran only through the slot-wrapped scripts, one process at a time, in the `r3d-rig` and `r3d-rig-shot` sandboxes.
+
+## 1. D8: the sidecar `gaze` is honoured
+
+**What it does.** Inside `[f0, f1]` of the playing clip, the face turns to the active camera. `blend` defaults to 6 frames.
+- It works for both base and overlay clips.
+- It turns about the vertical only. The yaw is shared the same way as the clips' own `face_cam`: spine_02 0.15, spine_03 0.15, neck 0.25, head 0.45. The keyed pitch and roll stay.
+- It works for either facing.
+- It runs after RigMods3D and the look-at, and before the springs and the jiggle clamp. The beret stays within `clamp_deg` (tested).
+
+**The turn is absolute, not added on top.** It measures where the face points now and turns the rest of the way. So:
+- A clip whose `face_cam` is already baked for its staged facing gets about 0 extra.
+- The mirrored facing gets the whole turn.
+- The total turn is capped at ±85°.
+
+**Files.**
+- `ClipDef3D` (`clip_def_3d.gd`) parses `gaze` and adds `gaze_weight(f)`:
+  - The ramps are inside the window.
+  - On a loop, a window touching the seam carries straight across it (act_tea 0–12 plus 240–480, Hush loco_idle).
+  - Overlapping windows take the higher weight.
+  - A window outside the clip is an error. An `at` other than `"camera"` is a warning and is ignored.
+  - All 43 current sidecars with `gaze` validate.
+- `RigGaze3D` is a new modifier: `game/view3d/char/rig_gaze_3d.gd`.
+- `RigPlayer3D` changes:
+  - The base window cross-fades with the outgoing clip's window. An overlay window counts × the overlay's blend weight.
+  - Which camera it turns to:
+    - `set_gaze_camera(cam)` if the view gave one.
+    - Otherwise `get_viewport().get_camera_3d()`.
+    - When the head is outside that camera's view, the face goes to the audience straight in front of him (the camera's height and depth, his x). This case is Bellows drawn only in the PiP, which shares the World3D and this pose.
+  - `gaze_enabled` lets the view switch it off. `gaze_weight()` and `gaze_weight_now()` read the weight.
+  - While the gaze is full, the look-at pupils return to centre, so he looks at the camera.
+- Also new: `set_overlay_frame(f)`, `current_overlay()`, `current_overlay_frame()`.
+
+**Tests.** `game/tests/rig3d/test_gaze_3d.gd` has 8 tests:
+- The camera placed left and right.
+- Both facings.
+- Weight 0 changes nothing, and frames outside the window change nothing.
+- The ramp values, and the turn growing through the ramp.
+- The default blend and the loop seam.
+- The overlay's weight.
+- The viewport camera, the gaze winning over a look-at pointed elsewhere, the pupils and the clamp.
+- The off-screen audience fallback.
+
+**Looked at:** `docs/review/r3d-rig/gaze_before_after.jpg`, at the game camera in the kitchen, `--no-gaze` against gaze.
+
+| Frame | Facing | `--no-gaze` | With gaze |
+|---|---|---|---|
+| Bellows `rx_sneeze_blast_a` f 60 | −1 (staged) | face to camera (baked) | the same image: nothing extra |
+| Bellows `rx_sneeze_blast_a` f 60 | +1 | the back of the bouffant | his face comes round to the camera |
+| Hush `st_shrug` f 10 | −1 | a 3/4-left face | full face to the camera, the arms unchanged |
+
+**Perf.** The gaze cost is inside the run-to-run noise. Hush `idle_fidget_proud` measured 189 and 201 µs with the gaze, and 205 and 187 µs without (RigPerf3D `--no-gaze`, load average 4–5). Bellows `act_tea` measured 233 µs. Both are within the 250 µs budget, with 2 draw calls.
+
+## 2. Attachments keep the palette they were built with
+
+**Rule.** An attachment whose scene is under `res://art3d/set/` or `res://art3d/props/` now draws with `set_toon` (`prop_toon` for props/). It uses the palette the glb was built on, found in this order:
+1. The new optional descriptor field `attachments.<id>.palette`.
+2. The glb's own texture.
+3. `palette_props.png` for props/.
+4. For set/, the palette of the room that `house3d.json` places the model in (`rooms.<room>.palette`).
+5. The room named at the start of the file name.
+
+These attachments get no outline, like set furniture, and no face, tint or stone state. `set_stage_light` reaches them.
+
+**Result.** The ride-along stool (`res://art3d/set/stool.glb` on bone `ride`) is now the kitchen's brown stool, not salmon.
+- Looked at: `docs/review/r3d-rig/stool_set_palette.jpg`, with the `g0_sneeze` set built. It shows f 60 (the set's stool), then f 100 and f 110 (the ride-along stool), with the colours matching side by side.
+- Tests: `rig3d/test_attachments_3d.gd`. The room and palette lookup is checked, and the real Bellows stool gets `set_toon`, the kitchen palette, no `next_pass` and the stage light. The bouffants stay on `char_toon`.
+
+## 3. My own queued items
+- **Overlay sidecars no longer crash `sheet3d.gd`** (act_glance, st_shrug, mg_*). An overlay is sheeted over `<rig>/loco_idle` held at f 0, with the overlay's frame locked.
+- **Stepped clips were cut in the phone strip, and the cause was a cross-fade.** Each pass restarted the clip with the default 6-frame cross-fade. A frame-locked sheet advances no view time, so the crop measured the previous pass's last pose. That is what cut `rig_achoo_ria` above the knees. Every pass now starts with `blend_in` 0, and the phone crop covers the whole clip.
+- **Staged clips are sheeted as staged.** A sidecar `stage` gives the x, z, facing and cheat; `--facing`, `--x` and `--cheat` override it.
+- **Gaze in sheets.** The profile cells show the authored motion (gaze off). The phone pass shows the game's gaze, and `--no-gaze` turns it off.
+- **Looked at:** `sheet3d_stepped_phone.jpg` (feet, knees and the raised arm on the step, at facing −1) and `sheet3d_overlay_contact.png`.
+- **AnimViewer3D:**
+  - `--fixed-step`: exactly 1/60 s per rendered frame. A `--shot-seq --every=10` run with `--episode=g0_sneeze` loaded read clip f 9, 19, 29, 39 exactly.
+  - `--no-gaze`.
+  - An overlay clip given through `--clip` plays over the idle, and `--frame` locks the overlay's frame.
+  - The label shows the overlay and the gaze weight.
+- **Outline, one path.** `RigPlayer3D.set_outline_scale(k)` now sets the global `mnd_outline_scale`, the same global `StageLighting3D.set_outline_scale` sets, and never scales `outline_px`. The view calling both gives 1.5, not 2.25. `outline_px` stays the descriptor value; this is tested in `test_player_3d`. `outline_scale()` is a new getter.
+
+## 4. Verification
+
+| Check | Result |
+|---|---|
+| Full suite (`test_game.sh r3d-rig`) | **1506 passed, 0 failed, 0 skipped**, 166 files |
+| rig3d, after the last change (the off-screen fallback) | 57/57 |
+| view3d/ | 61/61 |
+| `SANDBOX=r3d-rig lint.sh` | exit 0; lint_anim 3d: 77 clips, 0 errors, 0 warnings |
+
+## 5. Requests
+- **r3d-view3d / r3d-integrate:**
+  - Nothing is needed for the gaze. `CharacterView3D`'s RigPlayer3D picks up the sidecar windows at the viewport camera.
+  - If Bellows' PiP window should be exact, call `rig.set_gaze_camera(pip.cam)` while he is drawn only there, and `set_gaze_camera(null)` after. The built-in fallback (the audience straight in front of him) is close enough otherwise.
+  - Do not also call `look_at_point(camera, 1.0)` for these windows. It is harmless, but it is not needed.
+  - Settings "Outline +50 %": keep the one call (`StageLighting3D.set_outline_scale`). `RigPlayer3D.set_outline_scale` now writes the same global.
+- **r3d-anim-hush-b (or r3d-integrate):** `hush/act_glance` (overlay, head) has no `gaze` window. Its audience snap is baked for facing +1 only, so as `flavour:glance` at facing −1 it still looks upstage. Add `c.look_camera(f0, f1)` over the snap, and the runtime then gives it for either facing.
+- **r3d-anim:** the `glb_to_res.gd` key-reduction request from r3d-anim-bellows-a (Quaternion.angle_to on float32 near identical values) is addressed to me, but `game/tools/anim/**` is r3d-anim's. Their suggested metric (`2*atan2(|q-p|, |q+p|)` after the sign fix, or `1-|dot| < 1e-9`) looks right.
+- **r3d-cast-bellows:** the `stool` attachment can stay as it is: the palette is derived. The optional `"palette": "res://art3d/set/palette_kitchen.png"` would make it explicit.
+- **Orchestrator (R13):** new `game/view3d/char/rig_gaze_3d.gd` and `game/tests/rig3d/test_gaze_3d.gd`, `test_attachments_3d.gd` need `.uid` sidecars. No asset needs non-default import settings.
+
+## 6. Known gaps
+- The gaze has not been seen inside the full NightScene or e2e, only in AnimViewer3D, the sheets and the tests. CharacterView3D uses the same RigPlayer3D, so no view change is needed.
+- AnimViewer3D does not act on clip `decor` events, so the set's stool stays visible during the sneeze there. The game view does act on them.
+
+---
+
+# Fix pass 2 addendum — rig perf (2026-09-30, 21:57–22:36Z; LEAD_NOTE 21:45Z PERF, issues.md D14)
+
+**Result.** Every target is met on the llvmpipe proxy.
+- `play()` after `prepare_clips` costs 0.07–0.08 ms mean and 0.12 ms max in the final run. It was 0.95–0.96 ms mean,
+  4.1 ms max.
+- The frame after a switch now costs about what any other frame costs: 0.16–0.20 ms mean, 0.50 ms max. It was
+  0.38–0.40 ms mean with 0.7–0.8 ms p95.
+- The per-character mean with clips switching every 10 frames and the skin bound is 0.12–0.16 ms (0.18–0.25 ms in
+  the earlier runs).
+- The only advance() frames over 1 ms were single non-switch frames that moved to a different clip and frame on
+  every run, and a re-run had none. That pattern is preemption on the shared box, not a code path.
+
+**Where the old costs came from** (measured per step):
+- **play():** the first play of each clip loaded its `.res`: 0.8 ms on Hush and 1.5 ms on Bellows, per clip. On
+  top of that came the library add, a rebuilt PlayPlan3D (16–46 µs) and a full looks refresh on every switch
+  (15–80 µs).
+- **The spike in the frame after a switch:** a new library entry invalidates the AnimationTree's track caches, so
+  the next evaluation rebuilt them over every animation of every library. That frame also re-ran the whole looks
+  refresh for look and prop events.
+
+## What changed (all in `game/view3d/char/`)
+1. **`RigPlayer3D.prepare_clips(ids: PackedStringArray) -> int` and `prepare_all_clips()`.** For every clip, they:
+   - load the Animation and conform its loop mode;
+   - add it to the tree's library;
+   - cache its playable StringName, its plain plans in both loop modes, and the bones its scale tracks key;
+   - then run ONE mixer evaluation, so the track caches are rebuilt now and not after the first switch.
+
+   It is idempotent: an already prepared clip costs a lookup. `warm()` calls `prepare_all_clips()`. That is the path
+   the Night already takes: NightWarmer's materials step → `WorldView3D.warm_materials` → `rig.warm()` on both
+   live rigs, under the curtain. With `--prepare`, RigPerf3D measured 25–29 ms for Hush's 33 base clips and 25–31 ms
+   for Bellows' 26 on the proxy. Headless, warm() with every clip of the rig (35 / 42) took 41 / 59 ms, about
+   1.2–1.4 ms a clip, almost all of it `.res` loads. **No integrate change is needed.** Optionally,
+   `WorldView3D.warm_clips` can also call `cv.rig.prepare_clips(ids)` with the Night's list, which is cheap after
+   warm().
+2. **play() does no load, no Animation build, no library add and no string building.**
+   - `_ensure_anim` is cached per ClipDef3D, checked against ClipLib3D's current Animation, so a hot reload still
+     re-adds.
+   - Plain plays (tier ≤ 1, not suppressed, no hold override) reuse one cached, never-mutated plan per clip and loop
+     mode. Tiered and suppressed plays still build their own plan.
+   - `PlayPlan3D` caches `entry_for_clip` per clip id.
+   - The no-op `_prop_on_clip_switch` is gone.
+3. **Looks are precomputed at setup** (`_build_look_fx`). Each look and slot variant becomes a `_LookFx`:
+   attachment indices shown and hidden, bone props, hidden bone indices, uniforms converted to StringName → value,
+   and face cells. `_refresh_looks` is split into two passes:
+   - **The looks pass** (attachments, uniforms, face cells) runs only when the looks, slots or forced attachments
+     changed (`_looks_dirty`). It sets a node's visibility or a uniform only when the value changes.
+   - **The bones pass** (the props' scale fix and hidden bones, from packed per-bone marks) runs on a clip switch or
+     a prop state change.
+
+   `set_look`, `set_body_slot`, the clip-ownership release, `reset`, attachment `set_prop` (a no-op when the state
+   is unchanged) and the end of warm() mark the looks dirty. Prop events run the bones pass only. A new stats
+   field, `looks_passes`, counts the looks passes.
+4. **`screen_aabb()`:** the roles are a const `AABB_ROLES`, and their bone indices and the skeleton-to-world
+   transform are resolved once per call instead of per bone. `socket_global` caches each socket's bone index.
+5. **D7 default** (view3d request): `RigDef3D.outline_px` now defaults to `View3DConst.OUTLINE_CHAR_PX` (4.8) when
+   the descriptor names none.
+
+## RigPerf3D switch mode (new; `game/scenes/dev/anim3d/rig_perf_3d.gd`)
+Command:
+`tools/scripts/shot.sh res://scenes/dev/anim3d/RigPerf3D.tscn out.png 600 <sb> -- --rig=hush --switch-every=10 --look-every=40 [--prepare] [--clips=a,b] --perf-log`
+
+- It plays the next base clip every N frames: every base clip of the rig with a baked Animation, cycling. Nothing
+  is loaded before the run.
+- It toggles the rig's looks every M frames.
+- `--prepare` calls `prepare_clips(list)` after setup.
+- The skin stays bound for the whole run.
+- Each of play(), advance(), the advance right after a play, the other advances and set_look() is timed on its
+  own. The run prints {n, mean, p95, max} for each, the 5 slowest advances (µs, frame, clip, clip frame, and
+  whether it was a switch or look frame), `looks_passes` and `prepare_ms`.
+
+## Before → after
+Proxy: llvmpipe via shot.sh at 1200x540, 598 frames, a switch every 10 frames (60 switches), a look toggle every
+40 frames. Values are mean / p95 / max in µs.
+- **Before:** the code at the start of this pass, lazy loads, at load 3.3–3.8.
+- **After:** the final code with `--prepare`, at load 1.8.
+- **Earlier after-runs:** before the last bones-pass tweak, at load 0.6–0.9. Ranges are over those runs (two for
+  Hush, four for Bellows, including the 21:52Z timing run).
+
+| call | Hush before | Hush after | Hush earlier | Bellows before | Bellows after | Bellows earlier |
+|---|---|---|---|---|---|---|
+| play() | 962 / 1896 / 2309 | **69 / 83 / 115** | 98–100 / 124–139 / 137–173 | 954 / 2226 / 4089 | **84 / 110 / 123** | 106–128 / 141–175 / 148–215 |
+| advance(), frame after a switch | 400 / 744 / 1141 | **159 / 225 / 385** | 213–246 / 286–324 / 327–441 | 382 / 705 / 805 | **204 / 295 / 500** | 232–292 / 332–426 / 369–613 |
+| advance(), every frame | 262 / 395 / 1141 | **122 / 206 / 385** | 180–221 / 263–318 / 462–638 | 280 / 404 / 3738 | **159 / 257 / 500** | 192–250 / 283–368 / 613–1633* |
+| set_look() | 39 / 55 / 97 | 39 / 47 / 79 | 46–55 / 55–62 / 68–75 | 60 / 76 / 106 | 64 / 100 / 106 | 87 / 111–121 / 117–145 |
+| prepare_clips (ms) | — | 30 | 27–29 | — | 23 | 25–31 |
+
+\* **Bellows' advance() over 1 ms.** Across the Bellows runs there were four such frames, each once:
+- bit_livid f9, 1633 µs, and bit_tea f5, 1563 µs, in the same run;
+- st_look f8, 1324 µs, in the next;
+- the 21:52Z timing run's 1041 µs frame (the clip was not logged).
+
+None of them was a switch or look frame, the three logged ones repeat at no clip or frame, and the final run's max
+was 500 µs. So this is preemption on the shared box (D14), not a code path. Every frame right after a switch
+stayed ≤ 0.61 ms.
+
+**set_look().** It is a single precomputed looks pass (0.05–0.12 ms). The in-game 1.6 ms outlier did not reproduce
+in any run.
+
+**Per-character budget (exit row 17), budget mode.** This is the existing RigPerf3D mode with the meshes unbound,
+median / p95 / max in µs:
+- Hush loco_walk: 133 / 199 / 245 (it was 186–192 median at load 3–6).
+- Bellows loco_strut: 89 / 159 / 288.
+- 2 draw calls each.
+
+**Headless** (the rig3d tests, dummy renderer): 26–27 µs a frame, and with the churn test play() is 19–24 µs median.
+On the proxy most of the per-frame rig cost therefore sits with the software rasteriser. Its threads compete with
+the main thread, or its RenderingServer calls are what costs; RigPerf3D cannot separate the two. This supports
+D14's ruling that the device p95 is what counts.
+
+## Tests (game/tests/rig3d/)
+- **test_perf_3d.gd:**
+  - new `test_play_after_prepare_allocates_nothing` (fixture rig). After `prepare_clips`:
+    - 3 × every base clip, plain and loop-flipped, creates 0 objects (`OBJECT_COUNT`);
+    - no library entry is added;
+    - ClipLib3D's Animation for each clip is the same object;
+    - switching loco_walk ⇄ loco_idle runs 0 looks passes, and a slot change runs exactly 1;
+    - a tiered play builds its own plan, and the cached plain plan keeps tier 1 and its loop mode, with opts.loop
+      getting its own cached plan.
+  - new `test_clip_churn_costs` (Hush, else the fixture): a switch every 10 frames over 300 frames. play() median
+    must be ≤ 300 µs × load scale and the advance after a switch ≤ 1000 µs × load scale (headless: 19 µs and
+    71 µs).
+  - the warm budget is now `prepare_all_clips` ≤ 3 ms a clip, then warm() ≤ 20 ms with the clips prepared.
+- **test_rig_def_3d.gd:** new `test_outline_default_is_d7`.
+
+## Verification
+All runs used the sandbox r3d-rig-p2.
+- `test_game.sh -- rig3d/ view3d/`: **121/121** (rig3d 60, view3d 61). This re-ran on the final code after the last
+  edit, which covered teardown clears, the bone → prop map and the forced-attachment guard.
+- Full suite (`test_game.sh r3d-rig-p2`): **1510 passed, 0 failed, 0 skipped** (rc 0). It ran one edit before the
+  final code; that edit was only the small rig_player_3d.gd changes above, re-verified by rig3d/view3d.
+- `SANDBOX=r3d-rig-p2 lint.sh`: **rc 0** (lint_anim 3d: 77 clips, 0 errors, 0 warnings).
+- Artefacts: `<SP>/work/r3d-rig/perf2/` holds before.txt, after1–3.txt, budget.txt, the scratch profilers
+  prof.gd / prof2.gd, and their logs.
+
+## Requests
+- **r3d-integrate:** none required: the Night already reaches `prepare_all_clips` through `warm_materials`. Optional:
+  `WorldView3D.warm_clips` calls `cv.rig.prepare_clips(ids)`.
+- **Lead / QA:** judge exit row 17 with RigPerf3D `--switch-every=10 --prepare` (the in-game churn) or the budget
+  mode, and read one-off >1 ms frames against the D14 preemption rule. The deterministic post-switch costs are gone.
+
+## Hours
+About 0.65 h (21:57–22:36Z).

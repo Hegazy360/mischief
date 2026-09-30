@@ -55,6 +55,8 @@ const LOOK_PITCH_DEG := 20.0
 const LOOK_EASE_S := 0.2
 ## Yaw shares of the runtime gaze chain (spine_02, spine_top, neck, head) — r3d-anim's `face_cam` FACE_SHARE.
 const GAZE_SHARE: PackedFloat32Array = [0.15, 0.15, 0.25, 0.45]
+## The bones screen_aabb() spans (with the head top).
+const AABB_ROLES: PackedStringArray = ["hand_l", "hand_r", "foot_l", "foot_r", "pelvis", "head"]
 
 ## Step the clock from `_process` (the view may turn it off and call `advance(view_dt)` itself).
 @export var auto_advance: bool = true
@@ -78,6 +80,8 @@ var look_mod: LookAtModifier3D = null
 var gaze_mod: RigGaze3D = null
 ## Sidecar gaze windows turn the face to the camera (the view may switch it off, e.g. for a staged look elsewhere).
 var gaze_enabled: bool = true
+## Stats (tests, RigPerf3D): looks passes run since setup (a clip switch with unchanged looks runs none).
+var looks_passes: int = 0
 var jiggle: SpringBoneSimulator3D = null
 var jiggle_clamp: RigJiggleClamp3D = null
 var face: FaceCards3D = FaceCards3D.new()
@@ -185,6 +189,45 @@ var _bone_cache: Dictionary = {}             ## role / bone name -> index
 var _scale_bones_cache: Dictionary = {}      ## clip id -> PackedInt32Array (bones with scale tracks)
 var _refreshing: bool = false
 
+# prepared clips (prepare_clips / warm): play() then loads nothing, builds no Animation, adds nothing to a library
+var _anim_names: Dictionary = {}             ## ClipDef3D -> StringName (its tree library entry "<rig>/<name>")
+var _anim_objs: Dictionary = {}              ## ClipDef3D -> the Animation that entry holds (a hot reload re-adds)
+var _plans: Dictionary = {}                  ## ClipDef3D -> PlayPlan3D: the plain plan, the clip's own loop mode
+var _plans_flip: Dictionary = {}             ## ClipDef3D -> PlayPlan3D: the plain plan, loop mode flipped (opts.loop)
+
+# looks, precomputed at setup (_build_look_fx): set_look / body slots swap cached nodes / params only
+var _att_ids := PackedStringArray()          ## attachment index -> id (def.attachment_order)
+var _att_index: Dictionary = {}              ## attachment id -> index
+var _att_list: Array[Node3D] = []            ## attachment index -> holder (null when not built)
+var _att_default := PackedByteArray()        ## attachment index -> visible by default
+var _att_vis := PackedByteArray()            ## scratch: attachment index -> visible now
+var _look_fx: Dictionary = {}                ## look id -> _LookFx
+var _slot_ids := PackedStringArray()         ## slot index -> slot name
+var _slot_fx: Array[Dictionary] = []         ## slot index -> {variant: _LookFx}
+var _slot_clear: Array[PackedInt32Array] = []   ## slot index -> every attachment index any variant shows
+var _slot_hide: Array[PackedInt32Array] = []    ## slot index -> bones hidden while a non-default variant shows
+var _default_hidden := PackedInt32Array()    ## descriptor hidden_bones (indices)
+var _look_hide := PackedInt32Array()         ## bones the looks / slots hide now (the looks pass fills it)
+var _anim_mark := PackedByteArray()          ## scratch per bone: 1 = a playing clip keys its scale
+var _params_now: Dictionary = {}             ## StringName -> value: the looks' uniforms set now
+var _looks_dirty: bool = true                ## the looks / slots / forced attachments changed since the last pass
+var _looks_props: bool = false               ## an on look shows / hides a bone prop (re-applied on every refresh)
+var _aabb_bones := PackedInt32Array()        ## screen_aabb's bones (AABB_ROLES), resolved on first use
+var _sock_bone: Dictionary = {}              ## socket -> bone index
+var _prop_of_bone: Dictionary = {}           ## bone index -> the first bone prop riding it (index into mods arrays)
+
+
+## One look or body-slot variant, resolved at setup: attachment indices it shows / hides, bone props it shows /
+## hides, bones it hides, its uniforms (StringName -> converted value) and face cells.
+class _LookFx extends RefCounted:
+	var show_att := PackedInt32Array()
+	var hide_att := PackedInt32Array()
+	var show_props := PackedStringArray()
+	var hide_props := PackedStringArray()
+	var hide_bones := PackedInt32Array()
+	var params: Dictionary = {}
+	var face: Dictionary = {}
+
 
 # --- setup ------------------------------------------------------------------------------------------------------
 
@@ -238,6 +281,7 @@ func setup_def(d: RigDef3D, scene: PackedScene = null) -> bool:
 	_build_attachments()
 	_build_look_at()
 	_build_jiggle()
+	_build_look_fx()
 	# The modifiers (props, look-at, springs) run when the player advances, on the view's clock (a hit-stop freezes
 	# the springs too); call advance() every frame (auto_advance does).
 	skeleton.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
@@ -281,6 +325,23 @@ func _teardown() -> void:
 	_slot_residue.clear()
 	_looks_on.clear()
 	_bone_cache.clear()
+	_anim_names.clear()
+	_anim_objs.clear()
+	_plans.clear()
+	_plans_flip.clear()
+	_att_list.clear()
+	_look_fx.clear()
+	_slot_fx.clear()
+	_slot_clear.clear()
+	_slot_hide.clear()
+	_params_now.clear()
+	_aabb_bones.clear()
+	_sock_bone.clear()
+	_att_index.clear()
+	_scale_bones_cache.clear()
+	_prop_of_bone.clear()
+	_looks_dirty = true
+	_looks_props = false
 	_clip = null
 	_plan = null
 	_clip_id = ""
@@ -352,7 +413,7 @@ func _build_materials() -> void:
 			outline_mat = ShaderMaterial.new()
 			outline_mat.shader = osh
 			outline_mat.resource_name = "outline_%s" % rig_id
-			outline_mat.set_shader_parameter("outline_px", def.outline_px * _outline_scale)
+			outline_mat.set_shader_parameter("outline_px", def.outline_px)
 			mat.next_pass = outline_mat
 		_mats.append(mat)
 	for mi in rig_root.find_children("*", "MeshInstance3D", true, false):
@@ -779,11 +840,7 @@ func play(clip_id: String, opts := {}) -> void:
 	var prev_t := _t
 	_clip = c
 	_clip_id = clip_id
-	_plan = PlayPlan3D.build(c, opts)
-	for w in _plan.warnings:
-		push_warning("RigPlayer3D(%s): %s" % [rig_id, w])
-	if opts.has("loop"):
-		_plan.loop = bool(opts["loop"])
+	_plan = _plan_for(c, opts)
 	_speed = float(opts.get("speed", 1.0))
 	_rate = 1.0
 	_t = clampf(float(opts.get("start_frame", 0.0)), 0.0, float(_plan.length))
@@ -798,7 +855,6 @@ func play(clip_id: String, opts := {}) -> void:
 		_release_f = float(_plan.length)
 	var blend := float(opts.get("blend_in", c.blend_in if c.has_blend_in else ClipDef3D.DEFAULT_BLEND))
 	_start_base(anim_name if anim_name != &"" else REST_ANIM, prev, prev_t, blend if prev != null else 0.0)
-	_prop_on_clip_switch()
 	_refresh_looks()
 
 
@@ -1091,10 +1147,14 @@ static func _clip_seconds(c: ClipDef3D, f: float) -> float:
 	return clampf(f, 0.0, float(c.length)) / 60.0
 
 
+## The clip's playable name in the tree ("<rig>/<name>"); loads + adds it to this player's library the first time
+## (prepare_clips does that for the Night's clips under the curtain). &"" when the clip has no Animation.
 func _ensure_anim(c: ClipDef3D) -> StringName:
 	var a := ClipLib3D.animation(c.id)
 	if a == null:
 		return &""
+	if _anim_objs.get(c, null) == a:
+		return _anim_names[c]
 	var lib_name := c.rig_id
 	var lib: AnimationLibrary = _libs.get(lib_name, null)
 	if lib == null:
@@ -1107,7 +1167,67 @@ func _ensure_anim(c: ClipDef3D) -> StringName:
 	elif lib.get_animation(an) != a:
 		lib.remove_animation(an)
 		lib.add_animation(an, a)
-	return StringName("%s/%s" % [lib_name, c.name])
+	var full := StringName("%s/%s" % [lib_name, c.name])
+	_anim_names[c] = full
+	_anim_objs[c] = a
+	return full
+
+
+## The plan for playing `c` with `opts`: plain plays (tier ≤ 1, not suppressed, no hold override) reuse one cached
+## plan per clip and loop mode (never mutated); tiered / suppressed plays build their own.
+func _plan_for(c: ClipDef3D, opts: Dictionary) -> PlayPlan3D:
+	var loop := bool(opts.get("loop", c.loop))
+	if int(opts.get("tier", 1)) <= 1 and not bool(opts.get("suppressed", false)) and not opts.has("hold"):
+		var cache := _plans if loop == c.loop else _plans_flip
+		var hit: PlayPlan3D = cache.get(c, null)
+		if hit == null:
+			hit = PlayPlan3D.build(c, {})
+			hit.loop = loop
+			cache[c] = hit
+		return hit
+	var p := PlayPlan3D.build(c, opts)
+	for w in p.warnings:
+		push_warning("RigPlayer3D(%s): %s" % [rig_id, w])
+	if opts.has("loop"):
+		p.loop = loop
+	return p
+
+
+## Loads and converts every clip of `ids` for this player, so a later play() / play_overlay() of one loads nothing,
+## builds no Animation, adds nothing to a library and builds no plain plan: its Animation (loaded, loop mode from
+## the sidecar), its entry in the tree's library, its playable name, its plain plans (both loop modes), the bones
+## its scale tracks key — then ONE mixer evaluation, so the AnimationTree's track caches (rebuilt over every
+## animation of every library after a library add) are rebuilt now, not in the frame after a switch. Ids of clips
+## without a baked Animation are skipped; already prepared clips cost a lookup. Returns the clips ready.
+## `warm()` (NightWarmer's materials step, under the curtain) calls it with every clip of the rig; a view may call
+## it with the Night's warm list (WorldView3D.warm_clips) — either way before PLAY.
+func prepare_clips(ids: PackedStringArray) -> int:
+	if not ok:
+		return 0
+	var n := 0
+	var added := false
+	for id in ids:
+		var c := ClipLib3D.get_clip(id)
+		if c == null:
+			continue
+		var had := _anim_objs.has(c)
+		if _ensure_anim(c) == &"":
+			continue
+		added = added or not had
+		if c.layer != "overlay":
+			_plan_for(c, {})
+			_plan_for(c, {"loop": not c.loop})
+		_scale_bones_of(c)
+		n += 1
+	if added:
+		_pose_dirty = true
+		_apply_pose(0.0)
+	return n
+
+
+## Every clip of this rig (ClipLib3D.clips_of) through prepare_clips; the count.
+func prepare_all_clips() -> int:
+	return prepare_clips(ClipLib3D.clips_of(rig_id)) if ok else 0
 
 
 func _set_mask(mask: String) -> void:
@@ -1362,7 +1482,8 @@ func _push_face(df: float) -> void:
 
 # --- gaze (sidecar `gaze`, D8) ---------------------------------------------------------------------------------
 
-## The camera the sidecar gaze windows turn the face to (null = the viewport's active camera).
+## The camera the sidecar gaze windows turn the face to (null = the viewport's active camera; while the head is off
+## that camera's screen — e.g. drawn only in the PiP window — the face goes to the audience straight in front of it).
 func set_gaze_camera(cam: Camera3D) -> void:
 	_gaze_cam = cam
 
@@ -1406,7 +1527,14 @@ func _update_gaze() -> void:
 	if not gaze_mod.active:
 		return
 	var inv := skeleton.global_transform.affine_inverse()
-	gaze_mod.target = inv * cam.global_position
+	var at := cam.global_position
+	if _gaze_cam == null:
+		# Off the main camera's screen (Bellows drawn only in the PiP window, which shares this pose): face the
+		# audience straight in front of him (a camera's height and depth, his x) — how the PiP frames his room.
+		var head := head_global()
+		if not cam.is_position_in_frustum(head):
+			at = Vector3(head.x, at.y, at.z)
+	gaze_mod.target = inv * at
 	gaze_mod.up = (inv.basis * Vector3.UP).normalized()
 
 
@@ -1479,7 +1607,7 @@ func set_look(look: String, on: bool) -> void:
 		_looks_on.remove_at(i)
 	else:
 		return
-	_refresh_looks()
+	_looks_changed()
 
 
 ## True when `look` is on.
@@ -1508,7 +1636,7 @@ func set_body_slot(slot: String, p_variant: String, owner := &"clip") -> void:
 			_slot_residue.erase(slot)
 		else:
 			_slot_residue[slot] = p_variant
-	_refresh_looks()
+	_looks_changed()
 
 
 ## The variant a body slot shows now (clip-owned > residue > the looks' swaps > the default).
@@ -1545,123 +1673,217 @@ func _end_clip_ownership() -> void:
 	if _slot_clip.is_empty():
 		return
 	_slot_clip.clear()
-	_refresh_looks()
+	_looks_changed()
 
 
+## Re-applies the looks: the looks pass (attachments, slot / look uniforms, face cells, look-driven props) only when
+## the looks / slots / forced attachments changed (`_looks_dirty`), then the bones pass (hidden bones, props' scale
+## fix: they follow the playing clips).
 func _refresh_looks() -> void:
 	if not ok or _refreshing:
 		return
 	_refreshing = true
-	_refresh_looks_now()
+	if _looks_dirty or _looks_props:
+		_looks_dirty = false
+		looks_passes += 1
+		_refresh_looks_now()
+	_refresh_bones_now()
 	_refreshing = false
 
 
-func _refresh_looks_now() -> void:
-	var vis: Dictionary = {}
+## The looks changed: mark them and re-apply.
+func _looks_changed() -> void:
+	_looks_dirty = true
+	_refresh_looks()
+
+
+## Resolves the descriptor's looks and slot variants to indices / converted values once (setup).
+func _build_look_fx() -> void:
+	_att_ids = PackedStringArray()
+	_att_default = PackedByteArray()
 	for aid in def.attachment_order:
-		vis[aid] = (def.attachments[aid] as RigDef3D.Attachment).visible_default
-	var hide_b: Dictionary = {}
-	var params: Dictionary = {}
+		_att_index[aid] = _att_ids.size()
+		_att_ids.append(aid)
+		_att_list.append(_att_nodes.get(aid, null))
+		_att_default.append(1 if (def.attachments[aid] as RigDef3D.Attachment).visible_default else 0)
+	_att_vis.resize(_att_ids.size())
+	_slot_ids = PackedStringArray()
 	for slot in def.slots:
+		_slot_ids.append(String(slot))
 		var vars: Dictionary = def.slots[slot]
+		var fxs: Dictionary = {}
+		var clear := PackedInt32Array()
 		for vn in vars:
-			for a in (vars[vn] as RigDef3D.SlotVariant).show:
-				vis[a] = false
-		var cur := body_slot(String(slot))
-		if vars.has(cur):
-			var sv: RigDef3D.SlotVariant = vars[cur]
-			for a in sv.show:
-				vis[a] = true
-			for b in sv.hide_bones:
-				hide_b[b] = true
+			var sv: RigDef3D.SlotVariant = vars[vn]
+			var fx := _LookFx.new()
+			_fx_items(sv.show, fx, true)
+			for ai in fx.show_att:
+				if not clear.has(ai):
+					clear.append(ai)
+			fx.hide_bones = _bone_indices(sv.hide_bones)
 			for pk in sv.params:
-				params[pk] = sv.params[pk]
-	for ln in _looks_on:
+				fx.params[StringName(String(pk))] = _param_value(sv.params[pk])
+			fxs[String(vn)] = fx
+		_slot_fx.append(fxs)
+		_slot_clear.append(clear)
+		var hb: Variant = def.slot_hide_bones.get(slot, PackedStringArray())
+		_slot_hide.append(_bone_indices(hb if hb is PackedStringArray else PackedStringArray()))
+	for ln in def.looks:
 		var lk: RigDef3D.Look = def.looks[ln]
-		for a in lk.show:
-			if vis.has(a):
-				vis[a] = true
-			elif def.props.has(a):
-				set_prop(a, _home_state(a))
-		for a in lk.hide:
-			if vis.has(a):
-				vis[a] = false
-			elif def.props.has(a):
-				set_prop(a, "hidden")
-		for b in lk.hide_bones:
-			hide_b[b] = true
-		for pk in lk.params:
-			params[pk] = lk.params[pk]
+		var fx2 := _LookFx.new()
+		_fx_items(lk.show, fx2, true)
+		_fx_items(lk.hide, fx2, false)
+		fx2.hide_bones = _bone_indices(lk.hide_bones)
+		for pk2 in lk.params:
+			fx2.params[StringName(String(pk2))] = _param_value(lk.params[pk2])
+		fx2.face = lk.face.duplicate()
+		_look_fx[String(ln)] = fx2
+	_default_hidden = _bone_indices(def.default_hidden_bones)
+	_anim_mark.resize(skeleton.get_bone_count())
+	for pid in def.prop_order:
+		var pi: int = _prop_index[pid]
+		if not _prop_of_bone.has(mods.prop_bone[pi]):
+			_prop_of_bone[mods.prop_bone[pi]] = pi
+	_looks_dirty = true
+
+
+## Splits descriptor names into attachment indices / bone prop ids (unknown names are dropped, as before).
+func _fx_items(names: PackedStringArray, fx: _LookFx, show: bool) -> void:
+	for a in names:
+		if _att_index.has(a):
+			if show:
+				fx.show_att.append(int(_att_index[a]))
+			else:
+				fx.hide_att.append(int(_att_index[a]))
+		elif def.props.has(a):
+			if show:
+				fx.show_props.append(a)
+			else:
+				fx.hide_props.append(a)
+
+
+func _bone_indices(names: PackedStringArray) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	for b in names:
+		var bi := skeleton.find_bone(b)
+		if bi >= 0 and not out.has(bi):
+			out.append(bi)
+	return out
+
+
+## The looks pass: attachment visibility, the bones the looks / slots hide, slot / look uniforms (set the active
+## ones, restore the rest), face cells, look-driven prop states — from the precomputed _LookFx (no string lookups).
+func _refresh_looks_now() -> void:
+	var na := _att_ids.size()
+	for i in na:
+		_att_vis[i] = _att_default[i]
+	var hide := PackedInt32Array()
+	var params: Dictionary = {}
+	var props_touched := false
+	for si in _slot_ids.size():
+		for ai in _slot_clear[si]:
+			_att_vis[ai] = 0
+		var fx: _LookFx = (_slot_fx[si] as Dictionary).get(body_slot(_slot_ids[si]), null)
+		if fx != null:
+			for ai2 in fx.show_att:
+				_att_vis[ai2] = 1
+			hide.append_array(fx.hide_bones)
+			params.merge(fx.params, true)
+	var cells: Dictionary = {}
+	for ln in _looks_on:
+		var lk: _LookFx = _look_fx[ln]
+		for ai3 in lk.show_att:
+			_att_vis[ai3] = 1
+		for pid in lk.show_props:
+			props_touched = true
+			set_prop(pid, _home_state(pid))
+		for ai4 in lk.hide_att:
+			_att_vis[ai4] = 0
+		for pid2 in lk.hide_props:
+			props_touched = true
+			set_prop(pid2, "hidden")
+		hide.append_array(lk.hide_bones)
+		params.merge(lk.params, true)
+		cells.merge(lk.face, true)
+	_looks_props = props_touched
 	for aid in _att_forced:
-		vis[aid] = bool(_att_forced[aid])
-	for aid in _att_nodes:
-		var n: Node3D = _att_nodes[aid]
-		n.visible = bool(vis.get(aid, false)) or _warm_frames > 0
-	for slot2 in def.slot_hide_bones:
-		if body_slot(String(slot2)) != String(def.slot_default.get(slot2, "")):
-			for b2 in def.slot_hide_bones[slot2]:
-				hide_b[b2] = true
-	var hb := PackedInt32Array()
-	for b in hide_b:
-		var bi := skeleton.find_bone(String(b))
-		if bi >= 0:
-			hb.append(bi)
-	var animated := _scale_animated()
-	for pi in mods.prop_bone.size():
-		mods.prop_fix_scale[pi] = 1 if animated.has(mods.prop_bone[pi]) and mods.prop_mode[pi] == RigMods3D.MODE_HOME else 0
-	for b3 in def.default_hidden_bones:
-		var bi3 := skeleton.find_bone(b3)
-		if bi3 >= 0 and not animated.has(bi3) and not hb.has(bi3) and not _prop_bone_shown(bi3):
-			hb.append(bi3)
-	mods.hidden_bones = hb
-	var fx: Dictionary = {}
-	for ln2 in _looks_on:
-		var lk2: RigDef3D.Look = def.looks[ln2]
-		for layer in lk2.face:
-			fx[layer] = lk2.face[layer]
-	face.set_look_cells(fx)
-	# Look params: set the active ones, restore the rest.
+		var fi: int = _att_index.get(aid, -1)
+		if fi >= 0:
+			_att_vis[fi] = 1 if bool(_att_forced[aid]) else 0
+	for i2 in na:
+		var n: Node3D = _att_list[i2]
+		if n != null:
+			var v := _att_vis[i2] == 1 or _warm_frames > 0
+			if n.visible != v:
+				n.visible = v
+	for si2 in _slot_ids.size():
+		var sn := _slot_ids[si2]
+		if body_slot(sn) != String(def.slot_default.get(sn, "")):
+			hide.append_array(_slot_hide[si2])
+	_look_hide = hide
+	face.set_look_cells(cells)
+	# Look uniforms: set the active ones, restore the rest (only what changed).
 	for pk in _param_defaults.keys():
 		if not params.has(pk):
 			for m in _mats:
-				m.set_shader_parameter(StringName(pk), _param_defaults[pk])
+				m.set_shader_parameter(pk, _param_defaults[pk])
 			_param_defaults.erase(pk)
-	for pk in params:
-		if not _param_defaults.has(pk) and mat != null:
-			_param_defaults[pk] = mat.get_shader_parameter(StringName(pk))
-		for m in _mats:
-			m.set_shader_parameter(StringName(pk), _param_value(params[pk]))
+			_params_now.erase(pk)
+	for pk2 in params:
+		if not _param_defaults.has(pk2) and mat != null:
+			_param_defaults[pk2] = mat.get_shader_parameter(pk2)
+		if not _params_now.has(pk2) or _params_now[pk2] != params[pk2]:
+			_params_now[pk2] = params[pk2]
+			for m2 in _mats:
+				m2.set_shader_parameter(pk2, params[pk2])
 
 
-## Bones whose scale the playing clips (base, the fading-out base, overlay) animate — `hidden_bones` stay visible then.
-func _scale_animated() -> Dictionary:
-	var out: Dictionary = {}
-	for c in [_clip, _old_clip, _ov_clip]:
-		if c == null:
-			continue
-		var cd: ClipDef3D = c
-		if not _scale_bones_cache.has(cd.id):
-			var arr := PackedInt32Array()
-			var a := ClipLib3D.animation(cd.id)
-			if a != null:
-				for t in a.get_track_count():
-					if a.track_get_type(t) == Animation.TYPE_SCALE_3D:
-						var bi := skeleton.find_bone(String(a.track_get_path(t).get_concatenated_subnames()))
-						if bi >= 0:
-							arr.append(bi)
-			_scale_bones_cache[cd.id] = arr
-		for bi2 in (_scale_bones_cache[cd.id] as PackedInt32Array):
-			out[bi2] = true
-	return out
+## The bones pass: the props' scale fix and the hidden-bone list, from the looks' hidden bones + the descriptor's
+## hidden bones that no playing clip keys and no shown prop rides. Runs on every clip switch and prop state change.
+func _refresh_bones_now() -> void:
+	_anim_mark.fill(0)
+	_mark_scale(_clip)
+	_mark_scale(_old_clip)
+	_mark_scale(_ov_clip)
+	for pi in mods.prop_bone.size():
+		var pb := mods.prop_bone[pi]
+		mods.prop_fix_scale[pi] = 1 if pb >= 0 and _anim_mark[pb] == 1 and mods.prop_mode[pi] == RigMods3D.MODE_HOME else 0
+	var hb := _look_hide.duplicate()
+	for bi in _default_hidden:
+		if _anim_mark[bi] == 0 and not hb.has(bi) and not _prop_bone_shown(bi):
+			hb.append(bi)
+	mods.hidden_bones = hb
+
+
+func _mark_scale(c: ClipDef3D) -> void:
+	if c == null:
+		return
+	for bi in _scale_bones_of(c):
+		if bi >= 0 and bi < _anim_mark.size():
+			_anim_mark[bi] = 1
+
+
+## The bones whose scale clip `c` keys (cached per clip id).
+func _scale_bones_of(c: ClipDef3D) -> PackedInt32Array:
+	var hit: Variant = _scale_bones_cache.get(c.id, null)
+	if hit != null:
+		return hit
+	var arr := PackedInt32Array()
+	var a := ClipLib3D.animation(c.id)
+	if a != null:
+		for t in a.get_track_count():
+			if a.track_get_type(t) == Animation.TYPE_SCALE_3D:
+				var bi := skeleton.find_bone(String(a.track_get_path(t).get_concatenated_subnames()))
+				if bi >= 0:
+					arr.append(bi)
+	_scale_bones_cache[c.id] = arr
+	return arr
 
 
 ## True when a bone-driven prop on bone `bi` is in a visible state (its own state machine rules it).
 func _prop_bone_shown(bi: int) -> bool:
-	for pid in _prop_index:
-		var i: int = _prop_index[pid]
-		if mods.prop_bone[i] == bi:
-			return mods.prop_mode[i] != RigMods3D.MODE_HIDDEN
-	return false
+	var i: int = _prop_of_bone.get(bi, -1)
+	return i >= 0 and mods.prop_mode[i] != RigMods3D.MODE_HIDDEN
 
 
 static func _param_value(v: Variant) -> Variant:
@@ -1693,7 +1915,7 @@ func reset(clear_residues := false) -> void:
 		_set_prop_state(pid, (def.props[pid] as RigDef3D.Prop).default_state, false)
 	_prop_forced.clear()
 	reset_jiggle()
-	_refresh_looks()
+	_looks_changed()
 
 
 # --- tint, stone, flash, outline, stage light ------------------------------------------------------------------
@@ -1760,11 +1982,19 @@ func flash(color: Color, s := 0.15) -> void:
 	_set_all("flash", 1.0)
 
 
-## Settings "Outline +50 %" → 1.5 (outline_px = descriptor × k).
+## Settings "Outline +50 %" → 1.5. ONE path: the multiplier is the global `mnd_outline_scale` that every outline
+## shader (characters, props, halos) already multiplies by (StageLighting3D.set_outline_scale sets the same global);
+## this sets that global (when registered) and never scales `outline_px`, so calling both never compounds (1.5, not
+## 2.25). `outline_px` stays the descriptor's value.
 func set_outline_scale(k: float) -> void:
 	_outline_scale = maxf(0.0, k)
-	if outline_mat != null and def != null:
-		outline_mat.set_shader_parameter("outline_px", def.outline_px * _outline_scale)
+	if ProjectSettings.has_setting("shader_globals/mnd_outline_scale"):
+		RenderingServer.global_shader_parameter_set(&"mnd_outline_scale", _outline_scale)
+
+
+## The last Settings outline multiplier set through this player (the live value is the global).
+func outline_scale() -> float:
+	return _outline_scale
 
 
 ## The room's stage light on this character (REDESIGN §5.3; Bellows' never below 0.9 — the view's rule) and the
@@ -1796,7 +2026,8 @@ func _update_material(dt: float) -> void:
 		_set_all("stone", _stone)
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - dt / _flash_s)
-		_set_all("flash", _flash)
+		# A look's own `flash` uniform (FLOURY's dusting) comes back once the flash has decayed.
+		_set_all("flash", _flash if _flash > 0.0 or not _params_now.has(&"flash") else _params_now[&"flash"])
 	if _kick_left > 0.0:
 		_kick_left -= dt
 		if _kick_left <= 0.0 and jiggle != null:
@@ -1806,14 +2037,17 @@ func _update_material(dt: float) -> void:
 		if _warm_frames == 0:
 			set_tint_tier(_tier)
 			_set_all("stone", _stone)
-			_refresh_looks()
+			_params_now.clear()
+			_looks_changed()
 
 
 ## Every look, tint tier, stone and prop state drawn once (instances exist from setup; this shows every attachment
-## and the livid / stone uniforms for one frame) and every material registered with MaterialWarm3D.
+## and the livid / stone uniforms for one frame), every material registered with MaterialWarm3D, and every clip of
+## the rig prepared (`prepare_all_clips`: no load / Animation build / library add left for play()).
 func warm() -> void:
 	if not ok:
 		return
+	prepare_all_clips()
 	_warm_frames = 2
 	for m in _mats:
 		m.set_shader_parameter("tint_color", Color(def.tint_livid.r, def.tint_livid.g, def.tint_livid.b, 1.0))
@@ -1834,8 +2068,11 @@ func set_prop(prop: String, state: String) -> void:
 		_set_prop_state(prop, state, true)
 		return
 	if def.attachments.has(prop):
-		_att_forced[prop] = state != "hidden"
-		_refresh_looks()
+		var f := state != "hidden"
+		if _att_forced.get(prop, null) is bool and bool(_att_forced[prop]) == f:
+			return
+		_att_forced[prop] = f
+		_looks_changed()
 		return
 	push_error("RigPlayer3D(%s): unknown prop '%s' (clip %s)" % [rig_id, prop, _clip_id])
 
@@ -1894,9 +2131,10 @@ func _rides(bi: int, sock_bone: int) -> bool:
 	return bi == sock_bone or skeleton.get_bone_parent(bi) == sock_bone
 
 
-## Recomputes only the bone-hiding list (a prop's visibility changed).
+## Recomputes only the bones pass (a prop's state changed: hidden bones, scale fix); attachments are untouched.
 func _refresh_hidden_only() -> void:
-	_refresh_looks()
+	if ok and not _refreshing:
+		_refresh_bones_now()
 
 
 ## Launches a bone prop on a deterministic ballistic path from where it is now (vel m/s in the character's facing
@@ -1941,11 +2179,6 @@ func _update_flying(dt: float) -> void:
 			_fly_t[i] += dt
 			t = _fly_t[i]
 		mods.prop_world_xf[i] = PropSim3D.pose_at(_fly_start[i], _fly_vel[i], _fly_spin[i], t, floor_y)
-
-
-func _prop_on_clip_switch() -> void:
-	# Launched props keep flying on the view clock after a clip switch (their clip id no longer matches).
-	pass
 
 
 ## Attaches `node` to `socket` (snapped to it; `keep_world` keeps its world transform).
@@ -2006,7 +2239,10 @@ func socket_global(socket: String) -> Transform3D:
 	if not ok or not def.sockets.has(socket):
 		return global_transform if is_inside_tree() else Transform3D.IDENTITY
 	var so: RigDef3D.Socket = def.sockets[socket]
-	var bi := skeleton.find_bone(so.bone)
+	var bi: int = _sock_bone.get(socket, -2)
+	if bi == -2:
+		bi = skeleton.find_bone(so.bone)
+		_sock_bone[socket] = bi
 	return _skel_to_world() * (skeleton.get_bone_global_pose(bi) * so.local_xf())
 
 
@@ -2041,10 +2277,13 @@ func screen_aabb() -> AABB:
 		var h := def.height_m if def != null else 1.6
 		return AABB(base + Vector3(-0.3, 0.0, -0.3), Vector3(0.6, h, 0.6))
 	var b := AABB(top_global(), Vector3.ZERO)
-	for role in ["hand_l", "hand_r", "foot_l", "foot_r", "pelvis", "head"]:
-		var bi := _bone(role)
+	if _aabb_bones.is_empty():
+		for role in AABB_ROLES:
+			_aabb_bones.append(_bone(role))
+	var xf := _skel_to_world()
+	for bi in _aabb_bones:
 		if bi >= 0:
-			b = b.expand(_bone_world(bi))
+			b = b.expand(xf * skeleton.get_bone_global_pose(bi).origin)
 	return b.grow(0.08)
 
 

@@ -204,3 +204,121 @@ Wall clock was about 16:25 to 21:10 UTC, roughly 4.75 h, on a shared machine wit
   - `achoo_kitchen.jpg`, `achoo_kitchen_pot.jpg`, `allegro_parlour.jpg`, `gate0_path.jpg`;
   - `audio_rows.md`, `sheets/`.
 - **Landing log:** `/tmp/claude-0/-home-user-ideaboard/6a6517aa-4127-5e59-9718-da742a6ce0ad/scratchpad/mnd/work/r3d-anim/LANDED.md`
+
+# r3d-anim fix-pass addendum (index §3.3.1; D12 + r3d-sets 21:06Z)
+
+The new verb packet (v2) is built and "R17 verbs_64 v2 ready" is posted in my LANDED.md; a new fresh reviewer still has to run it, and I did not score it. The moved pepper pot is baked in and the spout-to-mouth test still passes. The gramophone was not re-baked because nothing about it changed. Full suite: 1506 passed, 0 failed, 0 skipped; `lint.sh` is clean. I could not write `<SP>/reports/r3d-anim.md` (report files are blocked for subagents), so this answer is the addendum.
+
+Two things to know first:
+- **Run 1 was partly testing blended poses.** The silhouette renderer cross-faded each item from the previous one for up to 8 frames, but only settled for 4. Some of run 1's silhouettes were therefore mixes of two verbs; the bow was blended with the squeak, and reach high with the run. That is fixed.
+- **Reach high is not on the mime step.** The mime-step clip (`rig_high`) belongs to r3d-anim-hush-b, and none of its frames reads as reach high at 64 px. The packet uses my ACHOO-RIA clip instead: on the stool with both arms up.
+
+## 1. D12: the 64 px verb test, v2
+
+**Renderer fixes** (`game/tools/anim/verbs3d.gd`):
+- Each item now plays with no cross-fade, so every silhouette is its own clip frame only.
+- New `:plinth=1` option: puts the game's own `plinth.glb` under her, the same model `CharacterView3D._ensure_plinth` uses.
+
+**Per-verb changes.** Every changed clip was re-baked with `--strict` and lints clean.
+
+| verb | run 1 sample | v2 sample and change |
+|---|---|---|
+| statue ×4 | `freeze_1..4` f 30, no plinth | Same frames, with the stone plinth in the silhouette as in game. |
+| squeak | `act_squeak` f 9, chicken hoisted overhead | Clip re-authored, sampled at f 8. She squeezes Clarence at chest height with a whole-body squash: knees deep, spine curled over him, shoulders up, feet planted. Both fists hold him by IK, and his neck and head point forward-up in front of her face, clear of it. Tucked back by f 15. The whip out of the holder is declared as pops on f 4–5. New camera gaze over f 6–13 (D8). |
+| bow | `act_bow` f 40, legs in a stride | Held bow (f 28–52) re-keyed, sampled at f 40: heels together, legs straight, about a 100° hinge at the hips. The right glove sweeps across her middle; the left is flung up behind like a plume. |
+| run | `loco_run` f 3 (a contact frame) | Sampled at f 9, mid-flight with both feet off. The back foot kicks further back early in the swing (0.30 m, was 0.22). The front foot reaches 0.16 m further ahead late in the flight and paws back to the contact point. Speed (3.6 m/s), stance and loop are unchanged. |
+| reach high | `rig_achoo_ria` f 16, pot in one glove | Same frame. During the shakes (f 14–37) the free glove now goes up and out to her left with fingers spread, so both arms are up while she stands on tiptoe on the stool. The raised glove stays clear of her face and the jar in the kitchen view (`achoo_kitchen_fix.jpg`). |
+
+**Board:** `docs/review/r3d-anim/verbs_64.png` / `.json` (v2), 18 silhouettes (mine plus hush-b's rummage and statues 5–8, all statues on the plinth).
+- The most similar pair (IoU) is sneak/snicker at 0.64; no pair reaches 0.80.
+- Next highest: squeak/reach mid 0.62; snicker/statue 8, squeak/statue 7 and reach mid/statue 7 at 0.61 each.
+- Item list: `<SP>/work/r3d-anim/verbs_items_v2.txt`.
+
+**Packet:** `docs/review/r3d-anim/packets/verbs_64/`
+- 13 items, shuffle seed 41 (run 1 used seed 7), black on white (run 1 was black on transparent).
+- New key: `<SP>/work/r3d-anim/review_key_verbs_v2.json`. Run 1's key is renamed `review_key_verbs_v1.json`; the old packet is kept in `<SP>/work/r3d-anim/packet_v1/`.
+- `reviewer_prompt.md` has the v2 scoring command; it writes `reviewer_answers_verbs_v2.md` and `verdict_verbs_v2.md`. Run 1's files are untouched.
+
+**Why not `rig_high`:** I sampled frames 16–104. At 64 px the crank reads as a standing pole with the gloves bunched at her head (`<SP>/work/r3d-anim/fx/e2_sil.png`).
+
+**Weakest item (my guess, not a score):** squeak. Clarence's neck and head are only about 8 px in front of her chin. They are rigid; only his body scales, so her crouch carries most of the squash.
+
+## 2. Pepper pot moved (r3d-sets request)
+- `POT_PIVOT` is now (-0.16, 0, 0) in `tools/art3d/anim/hush/rig_achoo_ria.py`, matching `PEPPER_X` in `tools/art3d/set/build.py`.
+- **Grab frame f 7:** her glove now stops 0.041 m short of the pot (was 0.05–0.07 m); f 8 is 0.028 m short. I tried pushing the hips forward and shrugging the shoulder; it made no difference (0.043 m), so I reverted it — her arm is at full stretch from the stool. The leftover gap is on the frame where the shelf pot swaps for the held one, about 2 px at 1200×540.
+- **Spout to jar mouth:** `test_hush_clips3d` passes 9/9; within 0.03 m at f 16, 26 and 36 (actual 0.014 m).
+
+## 3. Gramophone: not re-baked
+- `parlour_gramophone.reach_pos` is still dx −0.4, z −1.30.
+- `gramophone.glb` was last written at 19:47Z, before my 20:17Z bake.
+- r3d-sets' 21:06Z landing does not mention the lever.
+
+## 4. Verification
+- **Full suite** (`test_game.sh r3d-anim`, with import): 1506 passed, 0 failed, 0 skipped. The red "FAIL" words in the solver's `d1_lean` printouts are metric prints, not test failures.
+- **Repo lint:** `SANDBOX=r3d-anim lint.sh` returns 0; the 3D animation lint covers 77 clips with 0 errors.
+- **Hush strict lint:** `lint --format=3d --rig=hush --strict` gives 35 clips, 0 errors.
+- **Looked at:** every candidate frame in colour and at 64 px, the v2 board, the packet images, and the kitchen strip.
+
+## For r3d-integrate
+- **Renderer:** `verbs3d.gd` changes are listed in §1. Its `.uid` still comes from the real-project import.
+- **Re-baked clips:** `act_squeak` (new pose, pops f 4–5, new camera gaze f 6–13, prop events still at f 4 and f 15), `act_bow` (`bow_creak` still at f 28), `loco_run` (sound table row unchanged), `rig_achoo_ria` (sound rows unchanged). Lengths are unchanged, so `map.json` and the manifest are untouched.
+- **Stale:** `docs/review/r3d-anim/sheets/` for those four clips still show the old bakes; I skipped re-rendering them to stay in the time box. Re-run `anim_sheet3d.sh hush <clip>`.
+- **Request (r3d-anim-hush-b or integrate):** in `rig_high`'s crank (f 42–96), straighten the elbows fully over her head so the gloves clear the beret by at least 0.15 m. Then the band clip itself reads as reach high.
+- **Still open from D12:** the held `pepper_pot` prop should match the shelf pot (0.44 m, white, dark cap, holes 0.215 m up from the grip). In `achoo_kitchen_fix.jpg` it is barely visible.
+- **Not mine:** with `NO_IMPORT=1`, `tests/rig3d/test_gaze_3d.gd` and `test_attachments_3d.gd` fail to parse (`RigGaze3D` / `gaze_mod`). This comes from someone's in-progress gaze work in `rig_player_3d.gd`; the full run with import passes.
+
+## Files changed
+- **Clip specs:** `tools/art3d/anim/hush/{act_squeak,act_bow,loco_run,rig_achoo_ria}.py`
+- **Baked clips:** `game/art3d/anim/hush/{act_squeak,act_bow,loco_run,rig_achoo_ria}.res`
+- **Sidecars:** `game/data/anim/hush3d/{act_squeak,act_bow,loco_run,rig_achoo_ria}.json`
+- **Tool:** `game/tools/anim/verbs3d.gd`
+- **Review docs** (`docs/review/r3d-anim/`): `verbs_64.png`, `verbs_64.json`, `packets/verbs_64/*`, `reviewer_prompt.md`, `index.md`, `achoo_kitchen_fix.jpg`
+- **Scratch:** `<SP>/work/r3d-anim/` — `LANDED.md` (FIX PASS lines, 4 DONE lines, "R17 verbs_64 v2 ready"), `review_key_verbs_v2.json`, `verbs_items_v2.txt`, `fx/`
+
+FIX PASS 2 addendum (r3d-anim, lead note 22:15Z)
+
+The v3 verb packet is built and "R17 verbs_64 v3 ready" is in my LANDED.md. It still needs a new fresh reviewer, and I have not scored it. Both issues from the lead note are fixed: squeak and snicker are now different shapes, and every statue has a plinth you can see. The anim3d tests pass (52/0), the clip-event test passes (12/0), `lint.sh` is clean and the strict Hush lint is clean. I did not write `<SP>/reports/r3d-anim.md` because report files are blocked for subagents, so this answer is the addendum.
+
+**Squeak (`act_squeak`, sampled at f 8)**
+- She now holds Clarence out at arm's length. Her grip is 0.43 m in front of her chest, both arms straight and both fists on him. His neck, beak and comb stick out past her outline.
+- Her body squashes behind the arms: a deep squat with her shoulders up.
+- His body swells to 1.8× between her fists and his comb flares to 2.4×.
+- **Held chicken could not be scaled up:** the game resets the scale of an attached prop to 1 (in `RigMods3D`, which is not my file). So his neck and head cannot grow and he is still only about 10 px at 64. I scaled his body and comb instead. The lead's "dangling feet" do not exist; the model has no legs.
+- **Why the old squeak read wrong:** its turn-to-camera window covered f 8, and it rotates her whole upper spine, which pointed her straight arms at the camera. I moved the window from f 6–13 to f 9–14. In game she now looks at the audience just after the squeeze.
+- I added a hold key at f 10 and moved the recoil to f 12 to clear two frame-jump lint errors.
+
+**Snicker (`act_snicker`, sampled at f 18)**
+- Both gloves are over her mouth by IK on the head from f 4 to f 46, and she bends forward at the hips into a giggling hunch.
+- Her left heel flicks up behind her and her right heel is popped. I put the heel behind her rather than the knee forward because a knee stepping forward is the stock sneak pose.
+- The clap onto the mouth is declared as a 2-frame snap at f 6–7.
+- I sample f 18 because her turn-to-camera window (f 22–40) straightens the hunch in silhouette.
+
+**Statues**
+- The silhouette renderer (`verbs3d.gd`) now takes `:plinth=<k>`: the plinth is k times wider and √k times taller.
+- The thinker crouch uses 1.8, which gives a clear slab under her. The other three of my statues use 1.4. r3d-anim-hush-b's statues 5–8 stay at 1.
+- **Not true to the game:** the plinth in game is 1×, so these silhouettes show a bigger plinth than the player sees. The lead's note allowed this.
+
+**Board and packet**
+- `docs/review/r3d-anim/verbs_64.png` / `.json` v3 has 18 silhouettes. The most similar pair is reach mid / statue 7 at 0.61 IoU, so no pair reaches 0.80. Squeak / snicker is now 0.35.
+- The packet is at `docs/review/r3d-anim/packets/verbs_64/`: 13 items, seed 19, and a prompt identical to v2's.
+- The key is `<SP>/work/r3d-anim/review_key_verbs_v3.json`. The v1 and v2 keys and the v2 answers and verdict are untouched. The v2 packet is saved in `<SP>/work/r3d-anim/packet_v2/`.
+- `reviewer_prompt.md` has the v3 notes and a scoring command that writes `reviewer_answers_verbs_v3.md` and `verdict_verbs_v3.md`. `index.md` is updated.
+- I looked at every candidate frame in colour and at 64 px, and at the board, the packet sheet and the new contact and phone sheets.
+- My guesses at the weakest reads (not a score): squeak vs reach mid (0.53), since both have the arms forward at chest height; and snicker vs sneak, since both lean forward on one foot.
+
+**Sheets:** re-rendered for `act_squeak`, `act_snicker`, `act_bow`, `loco_run` and `rig_achoo_ria`, so none are stale now.
+
+**For r3d-integrate**
+- `act_squeak`'s turn-to-camera window is now f 9–14. Its prop events are still at f 4 and f 15, and its length is still 18.
+- `act_snicker` gains pops at f 6–7. Its length (60), its `hush_snicker` sound at f 0 and its camera window (f 22–40) are unchanged.
+- `map.json` and the manifest are unchanged.
+
+**Request (r3d-rig):** in `MODE_SOCKET`, keep a clip's baked scale on the prop bone instead of forcing it to 1. That would let a held Clarence (or any held prop) grow for a squeeze.
+
+**Files changed**
+- `tools/art3d/anim/hush/{act_squeak,act_snicker}.py`
+- `game/art3d/anim/hush/{act_squeak,act_snicker}.res`
+- `game/data/anim/hush3d/{act_squeak,act_snicker}.json`
+- `game/tools/anim/verbs3d.gd`
+- In `docs/review/r3d-anim/`: `verbs_64.png`, `verbs_64.json`, `packets/verbs_64/*`, `reviewer_prompt.md`, `index.md`, and `sheets/` for the five clips above
+- In `<SP>/work/r3d-anim/`: `LANDED.md` (FIX PASS 2 lines, two DONE lines, the R17 line), `review_key_verbs_v3.json`, `verbs_items_v3.txt`, `packet_v2/`, `fp2/`

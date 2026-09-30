@@ -12,6 +12,7 @@
 #   two rigs: [--rig2=<rig> --clip2=<clip> --x2=<px>] adds rig 2 to every cell (tag _2rig)
 # Runs in a private sandbox copy (ANIM_SANDBOX, default anim_<rig>) under xvfb + opengl3; runs
 # sharing a sandbox are serialised with a lock. Tier / suppressed sheets get a _t2 / _sup suffix.
+# Godot runs through tools/scripts/slot.sh (R3D ruling R11).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RIG="${1:?rig id}"; WHAT="${2:?clip | --poses | --rig | --all}"; OUT="${3:?out dir}"
@@ -32,7 +33,7 @@ esac
   flock 9
   "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" >/dev/null
   SB="$BASE/$SB_NAME/game"
-  timeout "${SHEET_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
+  "$ROOT/tools/scripts/slot.sh" timeout "${SHEET_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
     --audio-driver Dummy --resolution 640x360 --path "$SB" -s res://tools/anim/sheet.gd -- \
     "--rig=$RIG" "${MODE[@]}" "--out=$OUT" "$@" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)" | tail -60

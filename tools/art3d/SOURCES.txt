@@ -15,3 +15,6 @@ quaternius/ultimate-home-interior/         Quaternius "Ultimate House Interior P
 polyhaven/ArmChair_01/           Poly Haven "Arm Chair 01" 1k glTF (Kirill Sannikov)          https://polyhaven.com/a/ArmChair_01   CC0 (polyhaven.com/license)
 
 Helpers: itch_free_dl.py (free-tier itch.io download: csrf -> download_url -> file/<upload_id>), gdrive_ls.py (public Drive folder listing), glb_info.py (meshes/skins/clips of a .glb/.gltf).
+
+Vendored (committed) build inputs: tools/art3d/vendor/ual/{UAL1_Standard.glb, UAL2_Standard.glb} (the Unreal-Godot exports of the two
+UAL packs above, CC0; License_UAL1.txt / License_UAL2.txt, SHA256SUMS) — credited in game/art3d/CREDITS.md.

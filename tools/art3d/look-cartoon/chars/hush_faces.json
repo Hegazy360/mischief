@@ -1,0 +1,38 @@
+{
+ "Snicker": [
+  [
+   0.0,
+   "neutral"
+  ],
+  [
+   0.14,
+   "glee"
+  ],
+  [
+   0.3,
+   "snicker"
+  ],
+  [
+   1.55,
+   "sneaky"
+  ]
+ ],
+ "Freeze_Statue": [
+  [
+   0.0,
+   "statue"
+  ]
+ ],
+ "Rig_Pour_Loop": [
+  [
+   0.0,
+   "focus"
+  ]
+ ],
+ "Peek_Loop": [
+  [
+   0.0,
+   "peek"
+  ]
+ ]
+}

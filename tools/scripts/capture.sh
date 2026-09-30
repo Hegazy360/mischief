@@ -15,6 +15,7 @@
 #      GIF_FPS (30), GIF_MAX_MB (4), STRIP_EVERY (3), STRIP_RANGE (F0-F1, default all),
 #      STRIP_W (cell width px, 400), STRIP_COLS (6), STRIP_MAX (cells per sheet, 60),
 #      CAPTURE_TIMEOUT (s, 600), KEEP_FRAMES=<dir> (keep the raw PNG frames there).
+# Godot runs through tools/scripts/slot.sh (R3D ruling R11).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCENE="${1:?res://scene.tscn}"; FRAMES="${2:?frames}"; OUT="${3:?out.gif}"
@@ -31,7 +32,7 @@ SIZE="${SHOT_SIZE:-1200x540}"
   flock 9
   "$ROOT/tools/scripts/sandbox.sh" "$NAME" >/dev/null
   SB="$BASE/$NAME/game"
-  timeout "${CAPTURE_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
+  "$ROOT/tools/scripts/slot.sh" timeout "${CAPTURE_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
     --resolution "$SIZE" --path "$SB" --write-movie "$TMP/f.png" --fixed-fps 60 --quit-after "$((FRAMES + 2))" \
     -s res://tools/anim/capture.gd -- "--scene=$SCENE" "--frames=$FRAMES" "--log=$TMP/events.json" "$@" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)|V-Sync|set_use_vsync" | tail -20

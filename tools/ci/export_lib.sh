@@ -74,7 +74,7 @@ run_export() {
   logf="$MND_SANDBOX_ROOT/export-$(echo "$preset" | tr ' A-Z' '_a-z').log"
   log "godot $mode \"$preset\" -> $out"
   set +e
-  timeout "${EXPORT_TIMEOUT:-1800}" "$GODOT" --headless --path "$sb" "$@" "$mode" "$preset" "$out" >"$logf" 2>&1
+  "$MND_ROOT/tools/scripts/slot.sh" timeout "${EXPORT_TIMEOUT:-1800}" "$GODOT" --headless --path "$sb" "$@" "$mode" "$preset" "$out" >"$logf" 2>&1
   local rc=$?
   set -e
   # Godot can exit 0 after a failed export, so the artifact is the real check.

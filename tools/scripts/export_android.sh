@@ -8,7 +8,8 @@
 # Options: --out PATH   --sandbox NAME (default android)   --no-verify
 #
 # Env:
-#   ANDROID_HOME | ANDROID_SDK_ROOT   Android SDK (default /opt/android-sdk, ~/Android/Sdk)
+#   ANDROID_HOME | ANDROID_SDK_ROOT   Android SDK (the first complete one of these, /opt/android-sdk, ~/Android/Sdk;
+#                                     tools/ci/setup_godot.sh installs /opt/android-sdk)
 #   JAVA_HOME                         JDK 17+ (default: derived from `java` on PATH)
 #   Debug signing:   GODOT_ANDROID_KEYSTORE_DEBUG_PATH/_USER/_PASSWORD
 #                    (default ~/.android/debug.keystore / androiddebugkey / android; created if missing)
@@ -45,13 +46,27 @@ OUT="${OUT:-$MND_ROOT/build/android/mischief-$MODE.$EXT}"
 check_godot
 
 # --- toolchain ------------------------------------------------------------------------------
-SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
-for cand in "$SDK" /opt/android-sdk "$HOME/Android/Sdk" /usr/local/lib/android/sdk; do
-  if [[ -n "$cand" && -d "$cand/platform-tools" ]]; then SDK="$cand"; break; fi
+# The first COMPLETE SDK wins: $ANDROID_HOME, $ANDROID_SDK_ROOT, then the usual locations (tools/ci/setup_godot.sh
+# installs /opt/android-sdk with CI's packages). Complete = platform-tools/adb (Godot's export check wants it),
+# a build-tools/<v>/apksigner and a platforms/android-<n>; an incomplete $ANDROID_HOME is skipped with a warning.
+sdk_complete() {
+  local d="$1" bt
+  [[ -n "$d" && -x "$d/platform-tools/adb" ]] || return 1
+  bt="$(ls -d "$d"/build-tools/* 2>/dev/null | sort -V | tail -1)"
+  [[ -n "$bt" && -x "$bt/apksigner" ]] || return 1
+  compgen -G "$d/platforms/android-*" >/dev/null
+}
+SDK=""
+for cand in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" /opt/android-sdk "$HOME/Android/Sdk" /usr/local/lib/android/sdk; do
+  [[ -n "$cand" ]] || continue
+  if sdk_complete "$cand"; then SDK="$cand"; break; fi
+  if [[ -d "$cand" ]]; then
+    log "warning: Android SDK $cand is incomplete (needs platform-tools/adb, build-tools/*/apksigner, platforms/android-*), skipping"
+  fi
 done
-[[ -d "$SDK/build-tools" ]] || die "Android SDK not found (set ANDROID_HOME); needs platform-tools + build-tools"
+[[ -n "$SDK" ]] || die "Android SDK not found (set ANDROID_HOME, or run tools/ci/setup_godot.sh)"
 BT="$(ls -d "$SDK"/build-tools/* 2>/dev/null | sort -V | tail -1)"
-[[ -x "$BT/apksigner" ]] || die "no apksigner in $SDK/build-tools"
+log "Android SDK $SDK (build-tools $(basename "$BT"), $(cd "$SDK/platforms" && ls -d android-* | sort -V | tail -1))"
 if [[ -z "${JAVA_HOME:-}" ]]; then
   command -v java >/dev/null || die "java not found (install JDK 17+ or set JAVA_HOME)"
   JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"

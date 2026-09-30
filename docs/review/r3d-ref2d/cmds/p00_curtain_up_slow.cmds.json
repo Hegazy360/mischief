@@ -1,0 +1,14 @@
+{"episode": "p00_curtain_up", "hash": 411798892, "persona": "slow", "route": "slow", "ticks": 3752,
+ "cmds": [
+  [260, {"c":"squeak"}],
+  [389, {"c":"go","hotspot":"kitchen_sink_tap","run":false}],
+  [428, {"c":"go","hotspot":"kitchen_honey","run":false}],
+  [556, {"c":"rig","on":true}],
+  [604, {"c":"rig","on":false}],
+  [641, {"c":"go","hotspot":"kitchen_pantry_curtain","run":false}],
+  [2144, {"c":"pop_out","run":false}],
+  [2159, {"c":"go","hotspot":"parlour_gramophone","run":false}],
+  [2456, {"c":"rig","on":true}],
+  [2504, {"c":"rig","on":false}],
+  [2541, {"c":"go","hotspot":"parlour_piano_back","run":false}]
+]}

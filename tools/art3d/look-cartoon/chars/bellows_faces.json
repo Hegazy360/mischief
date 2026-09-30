@@ -1,0 +1,80 @@
+{
+ "Pompous_Idle_Loop": [
+  [
+   0.0,
+   "pompous"
+  ]
+ ],
+ "Strut_Loop": [
+  [
+   0.0,
+   "pompous"
+  ]
+ ],
+ "Tea_Sip_Loop": [
+  [
+   0.0,
+   "pompous"
+  ],
+  [
+   0.5,
+   "sip"
+  ],
+  [
+   2.0,
+   "pompous"
+  ]
+ ],
+ "Sneeze": [
+  [
+   0.0,
+   "sip"
+  ],
+  [
+   0.3,
+   "pompous"
+  ],
+  [
+   0.55,
+   "sneeze_build"
+  ],
+  [
+   1.2,
+   "neutral"
+  ],
+  [
+   1.4,
+   "sneeze_build"
+  ],
+  [
+   3.2,
+   "sneeze_build"
+  ],
+  [
+   3.45,
+   "neutral"
+  ],
+  [
+   4.08,
+   "sneeze_build"
+  ],
+  [
+   4.23,
+   "choo"
+  ],
+  [
+   4.33,
+   "shock"
+  ],
+  [
+   4.9,
+   "dazed"
+  ]
+ ],
+ "Dazed_Loop": [
+  [
+   0.0,
+   "dazed"
+  ]
+ ]
+}

@@ -54,6 +54,77 @@ textures/vram_compression/import_etc2_astc=true
 2d/snap/snap_2d_transforms_to_pixel=false
 environment/defaults/default_clear_color=Color(0.12, 0.1, 0.18, 1)
 
+[shader_globals]
+
+; R3D index §7.6 / ruling R8: every mnd_* global the 3D shaders read (game/art3d/shaders/), registered here so a
+; `global uniform` compiles from a fresh process; StageLighting3D only sets values at runtime. New globals: ask the
+; orchestrator (the owner of this file). mnd_key_dir = toward the key = -normalize(travel (0.45, -0.75, -0.48)).
+
+mnd_key_dir={
+"type": "vec3",
+"value": Vector3(-0.451039, 0.751731, 0.481108)
+}
+mnd_key_color={
+"type": "color",
+"value": Color(1, 0.956863, 0.878431, 1)
+}
+mnd_key_lit={
+"type": "float",
+"value": 0.28
+}
+mnd_key_top={
+"type": "float",
+"value": 0.08
+}
+mnd_fill={
+"type": "float",
+"value": 0.66
+}
+mnd_fill_color={
+"type": "color",
+"value": Color(0.658824, 0.643137, 0.682353, 1)
+}
+mnd_band_soft={
+"type": "float",
+"value": 0.08
+}
+mnd_rim_color={
+"type": "color",
+"value": Color(0.74902, 0.878431, 1, 1)
+}
+mnd_rim_power={
+"type": "float",
+"value": 2.5
+}
+mnd_foot_strength={
+"type": "float",
+"value": 0.12
+}
+mnd_foot_fade_m={
+"type": "float",
+"value": 1.2
+}
+mnd_lip_z={
+"type": "float",
+"value": 0.25
+}
+mnd_outline_scale={
+"type": "float",
+"value": 1.0
+}
+mnd_shadow_tint={
+"type": "color",
+"value": Color(0.72549, 0.639216, 0.878431, 1)
+}
+mnd_bounce={
+"type": "float",
+"value": 0.14
+}
+mnd_sheen={
+"type": "float",
+"value": 0.1
+}
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/mnd_export/plugin.cfg")

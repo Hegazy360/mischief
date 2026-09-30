@@ -1,0 +1,30 @@
+; Mischief Next Door — shared 3D look-dev diorama (standalone Godot 4.7 project).
+; Same renderer and window contract as the game: Compatibility, landscape 1920x1080 base,
+; 1200x540 (20:9) window, canvas_items + expand.
+
+config_version=5
+
+[application]
+
+config/name="MND Diorama"
+run/main_scene="res://diorama/DioramaShot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+run/max_fps=60
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1200
+window/size/window_height_override=540
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.105, 0.08, 0.15, 1)
+anti_aliasing/quality/msaa_3d=2

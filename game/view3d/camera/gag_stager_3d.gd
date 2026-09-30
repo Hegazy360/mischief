@@ -134,10 +134,10 @@ func _feet() -> Vector3:
 	return world_view.actor_anchor(&"bellows", &"feet") if world_view != null else Vector3.ZERO
 
 
-func _caption(text: String, at: Vector3, size: int) -> void:
+func _caption(text: String, at: Vector3, size: int, actor: StringName = &"bellows") -> void:
 	if world_view == null or world_view.overlays == null or text == "":
 		return
-	world_view.overlays.caption(text, at, size)
+	world_view.overlays.caption(text, at, size, actor)
 	captions += 1
 
 
@@ -194,7 +194,7 @@ func on_ticked(events: Array) -> void:
 				_small_gag(ViewKit.word("fx.boo", "BOO!"), 0.3)
 			"near_miss":
 				if world_view != null:
-					_caption(ViewKit.word("fx.near_miss", "NEAR MISS!"), world_view.actor_anchor(&"hush", &"top") + Vector3(0, 0.6, 0), 64)
+					_caption(ViewKit.word("fx.near_miss", "NEAR MISS!"), world_view.actor_anchor(&"hush", &"top") + Vector3(0, 0.6, 0), 64, &"hush")
 			"specs":
 				if bool(d.get("on", false)):
 					_burst("sparkles", _head())

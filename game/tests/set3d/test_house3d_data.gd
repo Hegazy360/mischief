@@ -3,6 +3,9 @@
 ## landings, hand-offs, quake-prop heights.
 extends TestBase
 
+## Half the stool seat's width (index R5 table: the seat spans 14.77–15.24 m at z −1.4).
+const STOOL_SEAT_HALF_M := 0.23
+
 const SLICE: Array[String] = ["p00_curtain_up", "g0_sneeze", "n01_throat_tea", "n02_something_fishy"]
 const STRICT: Array[String] = ["p00_curtain_up", "g0_sneeze"]
 const PROP_FIELDS: Array[String] = ["model", "z", "yaw", "scale", "visual_offset", "bounds", "silhouette", "view_kind",
@@ -150,7 +153,8 @@ func test_achoo_ria_climbs_bellows_stool() -> void:
 	assert_almost_eq(float(stool["x_m"]), 15.0, 0.001, "the stool is Bellows' seat at st_tea.stand_x")
 	assert_almost_eq(float(rp["step_h"]), float(stool["seat_y_m"]), 0.001)
 	var h := db.house.hotspot("kitchen_honey")
-	assert_almost_eq(float(h.use_sub) / 12000.0 + float(rp["dx"]), 15.0, 0.001, "Hush stands on the stool at 15.0")
+	var stand_x := float(h.use_sub) / 12000.0 + float(rp["dx"])
+	assert_true(absf(stand_x - 15.0) <= STOOL_SEAT_HALF_M, "Hush stands on the stool's seat (x %.2f, seat 15.0 ± %.2f)" % [stand_x, STOOL_SEAT_HALF_M])
 	var st := db.house.station("st_tea")
 	assert_almost_eq(float(st.stand_sub) / 12000.0, 15.0, 0.001)
 
@@ -185,8 +189,9 @@ func test_hit_boxes_contain_their_visuals() -> void:
 
 
 func test_default_hit_box_is_rect_plus_offset() -> void:
-	var e: Dictionary = h3["hotspots"]["kitchen_honey"]
-	var h := db.house.hotspot("kitchen_honey")
+	var e: Dictionary = h3["hotspots"]["kitchen_kettle"]
+	assert_eq(e.get("hit_box", null), null, "kitchen_kettle keeps the default hit box")
+	var h := db.house.hotspot("kitchen_kettle")
 	var r := SetGeo.rect_m(h.rect)
 	var box := SetGeo.hit_box(h.rect, e)
 	var vo := SetGeo.vec2(e["visual_offset"])

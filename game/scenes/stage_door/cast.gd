@@ -1,30 +1,53 @@
-## Cast — the stage door's live cast sheet (Gate 0 G3; s2-night §4.1): the real RigPlayers in the
-## engine at phone scale — Hush (with a Hush / Pip skin toggle), Bellows, Figgis — and the Stalls, side
-## by side on the stage floor. "Next" cycles every actor through idle → snicker → freeze → take (each
-## rig's own clip for that beat when it exists; the rig's rest pose and the clip id otherwise). Back
-## returns to the stage door.
+## Cast — the stage door's live cast sheet (Gate 0 G3; s2-night §4.1; R3D brief r3d-night §4.3).
+## **3D** (boot_config.json `view: "3d"`, the default): Hush and Bellows as the game's own RigPlayer3D on the lane at
+## the base framing (REDESIGN §5.2: FOV 30°, 7.5 m in front of the lane, y 1.9 aimed at 1.35), on a plain lit stage.
+## "Next" cycles both through idle → snicker → freeze (Hush turns to marble on her stone plinth) → take (Bellows'
+## CHOO frame of the sneeze, held); "Turn" rotates both by 45° (a turntable); "Back" returns to the stage door. A
+## clip that has not landed yet shows the rig's idle (the label says which clip is missing).
+## **2D** (`view: "2d"`): the Stage-2 sheet — the 2D RigPlayers (Hush with a Hush / Pip toggle, Bellows, Figgis) and
+## the Stalls.
 class_name CastPage
 extends Control
 
 const BEATS: PackedStringArray = ["idle", "snicker", "freeze", "take"]
-## rig → the clip per beat.
+## rig → the clip per beat (2D).
 const CLIPS := {
 	"hush": ["hush/loco_idle", "hush/act_snicker", "hush/freeze_1", "hush/st_near_miss"],
 	"bellows": ["bellows/loco_idle", "bellows/act_tea", "bellows/st_spotted", "bellows/rx_sneeze_blast_a"],
 	"figgis": ["figgis/f_idle", "figgis/f_psst", "figgis/f_shh", "figgis/f_proud"],
 }
+## rig → [clip, frame (−1 = play it looped)] per beat (3D). The take holds Bellows on the CHOO (the sneeze's accent).
+const CLIPS3D := {
+	"hush": [["hush/loco_idle", -1], ["hush/act_snicker", -1], ["hush/freeze_1", 40], ["hush/loco_idle", -1]],
+	"bellows": [["bellows/loco_idle", -1], ["bellows/st_smirk", -1], ["bellows/st_suspicious", -1],
+		["bellows/rx_sneeze_blast_a", 94]],
+}
 const RIGS: PackedStringArray = ["hush", "bellows", "figgis"]
+const RIGS3D: PackedStringArray = ["hush", "bellows"]
 const STALL_TIERS := [0, 1, 3, 4]
 ## The cast at a size that reads on a phone (world px × this).
 const ACTOR_SCALE := 1.45
+## 3D: lane x (m) of each actor and the camera (REDESIGN §5.2 base framing).
+const LANE_X := {"hush": -1.25, "bellows": 1.35}
+const CAM_POS := Vector3(0.0, 1.9, 6.5)
+const CAM_AIM := Vector3(0.0, 1.35, -1.0)
+const PLINTH := "res://art3d/chars/hush/plinth.glb"
 
 var beat: int = 0
 var skin: String = ""
-var players: Dictionary = {}          ## rig → RigPlayer (or a FallbackPuppet)
+var players: Dictionary = {}          ## rig → RigPlayer / RigPlayer3D (or a FallbackPuppet)
 var stalls: StallsView = null
 var buttons: Dictionary = {}
+## True on the 3D page.
+var view3d: bool = true
+## 3D: the turntable yaw (degrees) and the clips of this beat that have not landed.
+var yaw: float = 0.0
+var missing: PackedStringArray = PackedStringArray()
 var _labels: Dictionary = {}
 var _stalls_layer: CanvasLayer = null
+var _pivots: Dictionary = {}
+var _plinth: Node3D = null
+var _cam: Camera3D = null
 
 
 func _init() -> void:
@@ -35,8 +58,12 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	view3d = BootConfig.view() != "2d"
 	skin = String(ViewKit.setting("hush_skin", ""))
-	_build()
+	if view3d:
+		_build3d()
+	else:
+		_build()
 	resized.connect(_layout)
 	_layout()
 	set_beat(0)
@@ -57,21 +84,93 @@ func _build() -> void:
 			add_child(fp)
 			n = fp
 		players[id] = n
-		var l := Label.new()
-		l.add_theme_font_override("font", UiKit.ui_font())
-		l.add_theme_font_size_override("font_size", UiKit.SIZE_MIN)
-		l.add_theme_color_override("font_color", UiKit.CREAM)
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		add_child(l)
-		_labels[id] = l
+		_add_label(id)
 	_stalls_layer = CanvasLayer.new()
 	_stalls_layer.layer = 1
 	add_child(_stalls_layer)
 	stalls = StallsView.new()
 	_stalls_layer.add_child(stalls)
-	for spec in [["next", "stage_door.cast_next", UiKit.GOLD, UiKit.GOLD_SHADE], ["skin", "stage_door.cast_skin",
-			UiKit.CREAM, UiKit.CREAM_SHADE], ["back", "stage_door.back", UiKit.CREAM, UiKit.CREAM_SHADE]]:
-		var b := UiButton.make(UiStrings.t(String(spec[1])), Vector2(360, 144), spec[2], spec[3])
+	_add_buttons([["next", "stage_door.cast_next", UiKit.GOLD, UiKit.GOLD_SHADE], ["skin", "stage_door.cast_skin",
+		UiKit.CREAM, UiKit.CREAM_SHADE], ["back", "stage_door.back", UiKit.CREAM, UiKit.CREAM_SHADE]])
+
+
+## 3D: a plain lit stage (floor, wainscot, back wall; the stage lighting's globals), the camera at the base framing and
+## the two rigs on the lane (z −1.0), each under a turntable pivot.
+func _build3d() -> void:
+	var env := WorldEnvironment.new()
+	var e := Environment.new()
+	e.background_mode = Environment.BG_COLOR
+	e.background_color = View3DConst.BG
+	e.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.environment = e
+	add_child(env)
+	add_child(StageLighting3D.new())
+	_cam = Camera3D.new()
+	_cam.name = "CastCamera"
+	_cam.keep_aspect = Camera3D.KEEP_HEIGHT
+	_cam.fov = View3DConst.CAM_FOV_DEG
+	_cam.near = View3DConst.CAM_NEAR
+	_cam.far = View3DConst.CAM_FAR
+	add_child(_cam)
+	_cam.look_at_from_position(CAM_POS, CAM_AIM, Vector3.UP)
+	_cam.current = true
+	_add_stage_mesh(Vector3(0.0, -0.01, -1.2), Vector3(14.0, 0.02, 2.8), Color("#8E6E52"))
+	_add_stage_mesh(Vector3(0.0, 1.6, -2.45), Vector3(14.0, 3.2, 0.1), Color("#C7B684"))
+	_add_stage_mesh(Vector3(0.0, 0.45, -2.38), Vector3(14.0, 0.9, 0.06), Color("#AE9C70"))
+	for id in RIGS3D:
+		var pivot := Node3D.new()
+		pivot.name = "Pivot_" + id
+		pivot.position = Vector3(float(LANE_X[id]), 0.0, View3DConst.LANE_Z)
+		add_child(pivot)
+		_pivots[id] = pivot
+		var rp := RigPlayer3D.new()
+		rp.name = "Rig3D_" + id
+		pivot.add_child(rp)
+		rp.setup(id, String(ViewKit.setting("hush_head", "")) if id == "hush" else "")
+		rp.set_facing(1 if id == "hush" else -1, false)
+		rp.set_cheat(View3DConst.CHEAT_IDLE, 0.0)
+		players[id] = rp
+		_add_label(id)
+	if ResourceLoader.exists(PLINTH):
+		var ps: Variant = load(PLINTH)
+		if ps is PackedScene:
+			_plinth = (ps as PackedScene).instantiate() as Node3D
+			if _plinth != null:
+				(_pivots["hush"] as Node3D).add_child(_plinth)
+				_plinth.visible = false
+	_add_buttons([["next", "stage_door.cast_next", UiKit.GOLD, UiKit.GOLD_SHADE], ["turn", "stage_door.cast_turn",
+		UiKit.CREAM, UiKit.CREAM_SHADE], ["back", "stage_door.back", UiKit.CREAM, UiKit.CREAM_SHADE]])
+
+
+func _add_stage_mesh(pos: Vector3, size_m: Vector3, col: Color) -> void:
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = size_m
+	mi.mesh = bm
+	var sm := ShaderMaterial.new()
+	sm.shader = load(View3DConst.SH_SET)
+	sm.set_shader_parameter("albedo_color", col)
+	sm.set_shader_parameter("stage_light", 1.0)
+	mi.material_override = sm
+	mi.position = pos
+	add_child(mi)
+
+
+func _add_label(id: String) -> void:
+	var l := Label.new()
+	l.add_theme_font_override("font", UiKit.ui_font())
+	l.add_theme_font_size_override("font_size", UiKit.SIZE_MIN)
+	l.add_theme_color_override("font_color", UiKit.CREAM)
+	l.add_theme_color_override("font_outline_color", UiKit.NAVY)
+	l.add_theme_constant_override("outline_size", 8)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(l)
+	_labels[id] = l
+
+
+func _add_buttons(specs: Array) -> void:
+	for spec in specs:
+		var b := UiButton.make(StageDoor.label(String(spec[1])), Vector2(360, 144), spec[2], spec[3])
 		b.name = "Btn_" + String(spec[0])
 		b.pressed.connect(press.bind(String(spec[0])))
 		add_child(b)
@@ -81,28 +180,41 @@ func _build() -> void:
 func _layout() -> void:
 	var vs := size if size.x > 0.0 else Vector2(1920, 1080)
 	var floor_y := vs.y * 0.74
-	var xs := [0.2, 0.48, 0.76]
-	for i in RIGS.size():
-		var n: Node2D = players[RIGS[i]]
-		n.position = Vector2(vs.x * float(xs[i]), floor_y)
-		n.scale = Vector2.ONE * (ACTOR_SCALE * (1.6 if RIGS[i] == "figgis" else 1.0))
-		var l: Label = _labels[RIGS[i]]
-		l.position = Vector2(vs.x * float(xs[i]) - 300.0, floor_y + 20.0)
-		l.size = Vector2(600, 60)
+	if view3d:
+		for id in RIGS3D:
+			var l: Label = _labels[id]
+			var p := Vector2(vs.x * (0.35 if id == "hush" else 0.65), floor_y)
+			if _cam != null and _cam.is_inside_tree():
+				p = _cam.unproject_position(Vector3(float(LANE_X[id]), 0.0, View3DConst.LANE_Z))
+			l.position = Vector2(p.x - 300.0, minf(p.y + 24.0, vs.y - 90.0))
+			l.size = Vector2(600, 60)
+	else:
+		var xs := [0.2, 0.48, 0.76]
+		for i in RIGS.size():
+			var n: Node2D = players[RIGS[i]]
+			n.position = Vector2(vs.x * float(xs[i]), floor_y)
+			n.scale = Vector2.ONE * (ACTOR_SCALE * (1.6 if RIGS[i] == "figgis" else 1.0))
+			var l: Label = _labels[RIGS[i]]
+			l.position = Vector2(vs.x * float(xs[i]) - 300.0, floor_y + 20.0)
+			l.size = Vector2(600, 60)
 	var by := 40.0
 	var bx := vs.x - 48.0
-	for id in ["next", "skin", "back"]:
+	for id in ["next", "turn", "skin", "back"]:
+		if not buttons.has(id):
+			continue
 		var b: UiButton = buttons[id]
 		bx -= b.size.x
 		b.position = Vector2(bx, by)
 		bx -= 24.0
 
 
-## next | skin | back
+## next | turn (3D) | skin (2D) | back
 func press(id: String) -> void:
 	match id:
 		"next":
 			set_beat((beat + 1) % BEATS.size())
+		"turn":
+			turn(45.0)
 		"skin":
 			skin = "" if skin == "pip" else "pip"
 			var s := ViewKit.autoload("Settings")
@@ -116,9 +228,19 @@ func press(id: String) -> void:
 			get_tree().change_scene_to_file(StageDoor.SCENE)
 
 
+## 3D: rotate both actors by `deg` on their turntables.
+func turn(deg: float) -> void:
+	yaw = fposmod(yaw + deg, 360.0)
+	for id in _pivots:
+		(_pivots[id] as Node3D).rotation_degrees.y = yaw
+
+
 ## Show beat `i` on every actor.
 func set_beat(i: int) -> void:
 	beat = i
+	if view3d:
+		_set_beat3d(i)
+		return
 	for id in RIGS:
 		var clip := String((CLIPS[id] as Array)[i])
 		var n: Variant = players[id]
@@ -132,6 +254,30 @@ func set_beat(i: int) -> void:
 		stalls.react(int(STALL_TIERS[i]))
 
 
+func _set_beat3d(i: int) -> void:
+	missing.clear()
+	for id in RIGS3D:
+		var spec: Array = (CLIPS3D[id] as Array)[i]
+		var clip := String(spec[0])
+		var fr := int(spec[1])
+		var rp: RigPlayer3D = players[id]
+		var ok := ClipMap.clip_exists3d(clip)
+		var play := clip if ok else "%s/loco_idle" % id
+		if not ok:
+			missing.append(clip)
+		if ClipMap.clip_exists3d(play):
+			rp.release_external()
+			rp.play(play, {"loop": fr < 0 or not ok, "blend_in": 6, "start_frame": maxf(0.0, float(fr))})
+			if fr >= 0 and ok:
+				rp.set_external_frame(float(fr))
+		var frozen := id == "hush" and BEATS[i] == "freeze"
+		rp.set_stone(frozen, 0.1)
+		if id == "hush" and _plinth != null:
+			_plinth.visible = frozen
+		var nm := "Hush" if id == "hush" else "Bellows"
+		(_labels[id] as Label).text = "%s · %s%s" % [nm, BEATS[i], "" if ok else " (%s not in yet)" % clip.get_file()]
+
+
 func handle_back() -> bool:
 	press("back")
 	return true
@@ -139,8 +285,9 @@ func handle_back() -> bool:
 
 func _draw() -> void:
 	var vs := size if size.x > 0.0 else Vector2(1920, 1080)
-	draw_rect(Rect2(Vector2.ZERO, vs), Color("#3A2A4A"))
-	draw_rect(Rect2(0, vs.y * 0.74, vs.x, vs.y * 0.26), Color("#5A3A2A"))
-	draw_rect(Rect2(0, vs.y * 0.74, vs.x, 8), UiKit.GOLD_SHADE)
+	if not view3d:
+		draw_rect(Rect2(Vector2.ZERO, vs), Color("#3A2A4A"))
+		draw_rect(Rect2(0, vs.y * 0.74, vs.x, vs.y * 0.26), Color("#5A3A2A"))
+		draw_rect(Rect2(0, vs.y * 0.74, vs.x, 8), UiKit.GOLD_SHADE)
 	UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(260.0, 110.0), UiStrings.t("stage_door.cast"),
 		UiKit.SIZE_TITLE, UiKit.GOLD_LIGHT, 16)

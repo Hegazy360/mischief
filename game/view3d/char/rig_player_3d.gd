@@ -484,7 +484,10 @@ func _build_attachments() -> void:
 		else:
 			var parent: Node3D = socket_node(at.socket) if at.socket != "" else _bone_attachment(at.bone)
 			if parent == null:
+				push_warning("RigPlayer3D(%s): attachment '%s' has no socket / bone '%s' on this rig" % [rig_id, aid,
+					at.socket if at.socket != "" else at.bone])
 				inst.free()
+				holder.free()
 				continue
 			parent.add_child(holder)
 			holder.position = at.pos
@@ -512,10 +515,12 @@ func _attachment_material(m4: MeshInstance3D) -> ShaderMaterial:
 		var bm := src as BaseMaterial3D
 		if bm.albedo_texture != null:
 			am.set_shader_parameter("palette", bm.albedo_texture)
-		else:
+		elif not bm.albedo_color.is_equal_approx(Color.WHITE):
 			# A flat-coloured attachment: white palette × its colour.
 			am.set_shader_parameter("palette", null)
 			am.set_shader_parameter("albedo_color", bm.albedo_color)
+		# else: a white, untextured material = the cast's convention (palette UVs into the rig's own palette, like the
+		# body mesh): keep the rig palette.
 	am.set_shader_parameter("vc_masks", _has_vertex_colors(m4.mesh))
 	if outline_mat != null:
 		am.next_pass = outline_mat
@@ -1751,7 +1756,8 @@ func detach(node: Node3D) -> void:
 func socket_node(socket: String) -> Node3D:
 	if _sock_nodes.has(socket):
 		return _sock_nodes[socket]
-	if not ok or not def.sockets.has(socket):
+	# Not `ok`: setup builds the socket attachments before it sets `ok` (a skeleton is all this needs).
+	if skeleton == null or def == null or not def.sockets.has(socket):
 		return null
 	var so: RigDef3D.Socket = def.sockets[socket]
 	var ba := _bone_attachment(so.bone)

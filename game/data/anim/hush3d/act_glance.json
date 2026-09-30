@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_glance",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_glance.res",
+  "length": 30,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "head",
+  "blend_in": 4,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "glance"
+    },
+    {
+      "f": 6,
+      "preset": "sneak"
+    },
+    {
+      "f": 20,
+      "preset": "worried"
+    },
+    {
+      "f": 26,
+      "preset": "sneak"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_glance.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

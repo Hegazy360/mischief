@@ -23,7 +23,7 @@ COLORS = [
     ("cravat_dk", "#C99422", "", (0, 0, 0)),
     ("cravat_dot", "#FFF1C2", "", (0, 0, 0)),
     ("bouffant", "#E6E8F1", "", (0, 0, 0)),          # silver dandelion clock, L* ~92
-    ("bouffant_dk", "#CDD1DE", "", (0, 0, 0)),       # the combed grooves (thin, soft)
+    ("bouffant_dk", "#D3D6E2", "", (0, 0, 0)),       # the combed grooves (thin, soft)
     ("brow", "#D5D9E4", "", (0, 0, 0)),
     ("shirt", "#FBF7EE", "", (0, 0, 0)),             # white shirt V
     ("button", "#D9A93F", "", (0, 0, 0)),
@@ -38,7 +38,7 @@ COLORS = [
     ("specs", "#D2A33C", "", (0, 0, 0)),             # gold specs + chain
     ("lens", "#DCEBF2", "", (0, 0, 0)),
     # held props (x1.5-1.8, R5)
-    ("cup", "#FFFDF8", "", (0, 0, 0)),               # teacup + saucer: white
+    ("cup", "#EEF4FC", "", (0, 0, 0)),               # teacup + saucer: bone china (a cool white, apart from the gloves)
     ("cup_band", "#E0A21E", "", (0, 0, 0)),          # the gold band, C* >= 45
     ("tea", "#8E4E26", "", (0, 0, 0)),
     ("honey", "#F2A92E", "", (0, 0, 0)),

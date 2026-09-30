@@ -95,6 +95,9 @@ var _ring: Array[Frame] = []
 var _head := 0
 var _count := 0
 var _pool: Array[Moment] = []
+## hotspot_ids / decor_ids resolved once (null where the set has none)
+var _props: Array = []
+var _decor_nodes: Array = []
 
 
 ## Preallocate the ring and the pool for `wv`'s set (call once after the set is built).
@@ -108,6 +111,14 @@ func setup(wv: WorldView3D) -> void:
 	if wv != null and wv.house3d.get("decor", null) is Dictionary:
 		for id in (wv.house3d["decor"] as Dictionary):
 			decor_ids.append(String(id))
+	_props.clear()
+	for id2 in hotspot_ids:
+		_props.append(wv.prop(id2) if wv != null else null)
+	_decor_nodes.clear()
+	var has_decor := wv != null and wv.set3d != null and wv.set3d.has_method("decor")
+	for d_id in decor_ids:
+		var d: Variant = wv.set3d.call("decor", d_id) if has_decor else null
+		_decor_nodes.append(d if d is Node3D else null)
 	_ring.clear()
 	for i in CAP:
 		_ring.append(_new_frame())
@@ -153,18 +164,18 @@ func record(snap: ViewSnapshot) -> void:
 	if _wv != null:
 		_fill_actor(f.hush, snap.hush, _wv.hush_view)
 		_fill_actor(f.bellows, snap.bellows, _wv.bellows_view)
-		for i in hotspot_ids.size():
-			var p := _wv.prop(hotspot_ids[i])
+		for i in _props.size():
+			var p: Object = _props[i]
 			var code := 0
 			if p != null:
-				code = MomentRecorder3D.state_code(str(p.get_meta("mnd_state", &"idle")))
+				var st: Variant = p.get_meta("mnd_state", &"idle")
+				code = 1 if st == &"armed" else (2 if st == &"spent" else 0)
 				if bool(p.get_meta("mnd_occ", false)):
 					code = 3
 			f.props[i] = code
-		var has_decor := _wv.set3d != null and _wv.set3d.has_method("decor")
-		for j in decor_ids.size():
-			var d: Variant = _wv.set3d.call("decor", decor_ids[j]) if has_decor else null
-			f.decor[j] = 1 if (d is Node3D and (d as Node3D).visible) else 0
+		for j in _decor_nodes.size():
+			var d: Node3D = _decor_nodes[j]
+			f.decor[j] = 1 if d != null and d.visible else 0
 	_head = (_head + 1) % CAP
 	_count = mini(_count + 1, CAP)
 	for m in _pool:

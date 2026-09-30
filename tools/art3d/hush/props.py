@@ -47,7 +47,14 @@ def to_object(bm, name, keep_g=0.0, outline=1.0):
     cols = [layer.data[i].value for i in range(len(me.polygons))] if layer is not None else [0] * len(me.polygons)
     if layer is not None:
         me.attributes.remove(layer)
+    # the primitives' own UV maps (bmesh create_cube / create_cone) would export instead of the palette UVs
+    # (r3d-rig: corner-only TEXCOORD_0 sampling the palette's unused magenta half): drop them first
+    while len(me.uv_layers):
+        me.uv_layers.remove(me.uv_layers[0])
     uv0 = me.uv_layers.new(name="UVMap")
+    fuv = me.uv_layers.new(name="FaceUV")          # TEXCOORD_1 at -2: char_toon's "no face card here"
+    me.uv_layers.active = uv0
+    uv0.active_render = True
     vc = me.color_attributes.new(name="Col", type="FLOAT_COLOR", domain="CORNER")
     names = [c[0] for c in TP.COLORS]
     for i, p in enumerate(me.polygons):
@@ -55,6 +62,7 @@ def to_object(bm, name, keep_g=0.0, outline=1.0):
         damp = 1.0 if names[cols[i]] in T.VC_DAMP else 0.0
         for li in p.loop_indices:
             uv0.data[li].uv = u
+            fuv.data[li].uv = (-2.0, -2.0)
             vc.data[li].color = (0.0, keep_g, damp, outline)
         p.use_smooth = True
     me.color_attributes.active_color = vc

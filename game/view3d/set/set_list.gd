@@ -379,7 +379,8 @@ static func tonight_pranks(db: ContentDB, episode: EpisodeDef) -> PackedStringAr
 
 ## The local live rule (index §7.5, the same rule as `SimCtx.live_hotspots`): rig points of tonight's pranks (and
 ## their step hotspots), containers of their items, hiding spots in `hides` (absent: all of the Night's rooms),
-## doors / exits / stairs that are tappable in a room Hush may enter; never in a backstage room.
+## exits that are tappable in a room Hush may enter, doors / stairs only when they lead to such a room; never in a
+## backstage room.
 static func local_live(db: ContentDB, episode: EpisodeDef, pranks: PackedStringArray = PackedStringArray()) -> Dictionary:
 	var out := {}
 	if db == null or episode == null:
@@ -426,11 +427,20 @@ static func local_live(db: ContentDB, episode: EpisodeDef, pranks: PackedStringA
 					out[h.id] = "hide"
 			HotspotDef.EXIT:
 				out[h.id] = "exit"
-			HotspotDef.STAIRS:
-				out[h.id] = "stairs"
-			HotspotDef.DOOR:
-				out[h.id] = "door"
+			HotspotDef.STAIRS, HotspotDef.DOOR:
+				# only when it leads to a room she may enter tonight (REDESIGN §3.4: the kitchen back door is closed
+				# and the stairs roped off in Act I — architecture, not tappable)
+				if _leads_to(db, h, allowed):
+					out[h.id] = "stairs" if h.kind == HotspotDef.STAIRS else "door"
 	return out
+
+
+## True when door / stairs hotspot `h` links its room to one of `allowed` (room id -> true).
+static func _leads_to(db: ContentDB, h: HotspotDef, allowed: Dictionary) -> bool:
+	if h.link_idx < 0 or h.link_idx >= db.house.links.size():
+		return false
+	var far := db.house.links[h.link_idx].other(h.room_idx)
+	return far >= 0 and far < db.house.rooms.size() and allowed.has(db.house.rooms[far].id)
 
 
 ## A JSON value as a String ("" for null).

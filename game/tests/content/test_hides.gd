@@ -112,3 +112,14 @@ func test_the_retired_scenarios_are_gone() -> void:
 	var n1 := FileAccess.get_file_as_string("res://data/solutions/n01_throat_tea.json")
 	assert_false(n1.contains("\"kitchen_table\""), "N1 hides moved to the pantry curtain")
 	assert_false(n1.contains("\"parlour_chaise_back\""), "N1 chase hides behind the piano")
+
+
+func test_fixup_holds_validate() -> void:
+	var e := _errs(func(ep: Dictionary) -> void: ep["director"] = {"fixup_holds": [{"kind": "COMB", "until": "rigged:nope"}]})
+	assert_true(_has(e, "fixup_holds[0].kind 'COMB'"), str(e))
+	assert_true(_has(e, "fixup_holds[0].until 'rigged:nope' not in pranks.json"), str(e))
+	e = _errs(func(ep: Dictionary) -> void: ep["director"] = {"fixup_holds": [{"kind": "MIRROR"}]})
+	assert_true(_has(e, "fixup_holds[0].until is missing"), str(e))
+	e = _errs(func(ep: Dictionary) -> void: ep["director"] = {"fixup_holds": [{"kind": "MIRROR", "until": "rigged:lift_off"}]})
+	assert_false(_has(e, "fixup_holds"), str(e))
+

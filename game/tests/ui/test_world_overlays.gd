@@ -102,3 +102,69 @@ func test_every_slice_prank_has_its_pictogram_svg() -> void:
 		assert_eq(ids, PackedStringArray((pv[prank] as Dictionary)["pictogram"]),
 			"%s declares the previews.json ids" % path)
 		assert_true(PreviewArt.texture(String(prank), ids) != null, "%s rasterises" % path)
+
+
+func test_the_preview_of_the_prop_she_is_at_is_exempt_from_its_protected_rect() -> void:
+	# WorldView3D protects "the prop Hush is at + its preview" FOR that preview: it must not push it away,
+	# while any other preview under that rect still slides
+	var s := _setup()
+	var fa: FakeAnchors = s[0]
+	var wo: WorldOverlays = s[1]
+	fa.set_point("kitchen_sink_tap", &"preview", Vector2(960, 430))
+	fa.extra_protected = [Rect2(780, 300, 300, 200)]
+	var m := OverlayModel.new()
+	var a := m.add_preview()
+	a.hotspot = "kitchen_honey"
+	a.prank = "achoo_ria"
+	var b := m.add_preview()
+	b.hotspot = "kitchen_sink_tap"
+	b.prank = "tap_dance"
+	m.at_hotspot = "kitchen_honey"
+	wo.apply(m)
+	var ia := wo.placer.item(&"ov_preview_0")
+	var ib := wo.placer.item(&"ov_preview_1")
+	assert_true(ia != null and ib != null)
+	assert_eq(ia.rect, ia.want, "her prop's preview stays on its anchor")
+	assert_true(not ib.visible or ib.rect != ib.want, "another preview under that rect is moved (or waits)")
+	# not at the prop: the same rect pushes it too
+	m.at_hotspot = ""
+	wo.apply(m)
+	assert_ne(wo.placer.item(&"ov_preview_0").rect, wo.placer.item(&"ov_preview_0").want)
+
+
+func test_the_view_takes_the_hud_rects_itself() -> void:
+	var src := _HudRectsSource.new()
+	var hud := _AlwaysOn.new()
+	var wo := WorldOverlays.new()
+	wo.size_override = Vector2(2400, 1080)
+	tree.root.add_child(wo)
+	_made.append(wo)
+	wo.setup(src, hud)
+	wo.apply(OverlayModel.new())
+	assert_eq(src.hud_rects.size(), 1, "handed over")
+	assert_eq(wo.protected_now().size(), 0, "not added a second time")
+
+
+class _HudRectsSource:
+	extends RefCounted
+	var hud_rects: Array[Rect2] = []
+
+	func protected_rects() -> Array[Rect2]:
+		return []
+
+	func anchor_of(_h: String, _k: StringName) -> Vector3:
+		return Vector3.INF
+
+	func actor_anchor(_a: StringName, _k: StringName) -> Vector3:
+		return Vector3.INF
+
+	func project(_p: Vector3) -> Vector2:
+		return Vector2.INF
+
+
+class _AlwaysOn:
+	extends RefCounted
+	var rects: Array[Rect2] = [Rect2(0, 0, 100, 100)]
+
+	func always_on_rects() -> Array[Rect2]:
+		return rects

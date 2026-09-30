@@ -28,7 +28,7 @@ func after_each() -> void:
 	await tree.process_frame
 
 
-func _build(episode: String) -> bool:
+func _build(episode: String, window_mode: String = "") -> bool:
 	var db := ContentDB.load_dir("res://data")
 	var w := SimWorld.create(db, episode, {})
 	if w == null:
@@ -49,6 +49,8 @@ func _build(episode: String) -> bool:
 	_wv.cam = _cam
 	_root.add_child(_wv)
 	_wv.setup(null, null, _driver)
+	if window_mode != "":
+		_wv.window_mode = window_mode
 	_cam.follow(_wv.hush_view, func() -> float: return float(_driver.snapshot().hush.facing) if _driver.snapshot().hush.moving else 0.0)
 	_cam.set_other(_wv.bellows_view)
 	_pip = PipView3D.new()
@@ -88,14 +90,28 @@ func test_p00_route_lights_reach_tags_and_hit_rects() -> void:
 	var rig_z_min := 9.0
 	var rig_cheat_max := 0.0
 	var armed_seen := false
+	var staged: Array = []
+	_wv.cue_staged.connect(func(id: String, kind: String) -> void: staged.append("%s:%s" % [id, kind]))
 	var rects_checked := false
 	var rect_min := 9999.0
 	var rect_ids := PackedStringArray()
 	var frames := 0
+	var obj0 := -1
+	var node0 := -1
+	var obj1 := -1
+	var node1 := -1
 	while not _driver.snapshot().ended and frames < 4200:
 		_step()
 		frames += 1
 		var s := _driver.snapshot()
+		# no per-frame allocation: object / node counts flat over 10 s of PLAY (ticks 2400…3000: the second rig,
+		# the piano hide, his exits and entries)
+		if s.tick == 2400:
+			obj0 = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+			node0 = int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+		elif s.tick == 3000:
+			obj1 = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+			node1 = int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 		bellows_min = minf(bellows_min, _wv.bellows_view.stage_level)
 		# the dark hall with Bellows in it (his FRAZZLED mirror fix-up) — after the 0.4 s ease
 		if s.bellows.present and s.bellows.room == "hall" and s.hush.room != "hall":
@@ -126,6 +142,10 @@ func test_p00_route_lights_reach_tags_and_hit_rects() -> void:
 					rect_min = minf(rect_min, minf(rr.size.x, rr.size.y))
 					rect_ids.append("%s %.0fx%.0f" % [r["id"], rr.size.x, rr.size.y])
 	assert_true(_driver.snapshot().ended, "the Night ends (%d frames)" % frames)
+	print("[test_world_view3d] P00 objects %d -> %d, nodes %d -> %d (ticks 2400 -> 3000)" % [obj0, obj1, node0, node1])
+	if obj0 >= 0 and obj1 >= 0:
+		assert_eq(node1, node0, "no nodes created during PLAY")
+		assert_le(obj1 - obj0, 16, "objects flat during PLAY (pools)")
 	assert_ge(bellows_min, 0.9, "his stage_light never below 0.9")
 	if hall_min < 9.0:
 		assert_ge(hall_min, 0.89, "the backstage hall is lit 0.9 while Bellows is in it")
@@ -142,6 +162,18 @@ func test_p00_route_lights_reach_tags_and_hit_rects() -> void:
 		print("[test_world_view3d] P00 kitchen hit rects: %s" % ", ".join(rect_ids))
 		assert_gt(rect_ids.size(), 0, "kitchen props on screen")
 		assert_ge(rect_min, 144.0, "every kitchen prop's hit rect ≥ 144 px at base framing")
+	# the Prologue's director cues are staged in the set; the ring kept recording
+	print("[test_world_view3d] P00 cues staged: %s" % ", ".join(PackedStringArray(staged)))
+	var ids := PackedStringArray()
+	for e in staged:
+		ids.append(str(e).get_slice(":", 0))
+	assert_has(ids, "laugh_vase", "the vase cue is staged")
+	if _wv.set3d != null and _wv.set3d.has_method("decor") and _wv.set3d.call("decor", "parlour_vase") != null:
+		assert_has(staged, "laugh_vase:prop")
+		assert_eq(_wv.cues.vase_phase(), "smashed", "the vase ended on the floor")
+		assert_gt(_wv.cues.nudges, 0, "it crept along the mantel first")
+	assert_eq(_wv.recorder.count(), MomentRecorder3D.CAP, "the ring is full after a Night")
+	assert_eq(_wv.recorder.last_tick(), _driver.snapshot().tick, "the ring records every frame")
 	var fc := _wv.fallback_counts()
 	print("[test_world_view3d] P00 fallbacks %s | window share %s" % [JSON.stringify(fc), JSON.stringify(_pip.share())])
 	if _wv.hush_view.uses_rig and _wv.bellows_view.uses_rig:
@@ -177,7 +209,8 @@ func test_g0_sneeze_lands_his_pelvis_in_the_sink_on_frame_112() -> void:
 	var pelvis := bv.socket_world("seat").origin if bv.uses_rig else bv.feet_world() + Vector3(0.0, 0.35, 0.0)
 	if bv.uses_rig and pelvis.distance_to(bv.feet_world()) < 0.05:
 		pelvis = bv.feet_world() + Vector3(0.0, 0.35, 0.0)   # no "seat" socket on this rig version
-	print("[test_world_view3d] sneeze f112 pelvis %s landing box %s" % [pelvis, box])
+	print("[test_world_view3d] sneeze f112 at tick %d (reaction from tick %d): pelvis %s landing box %s" % [
+		_driver.snapshot().tick, _driver.snapshot().tick - _driver.snapshot().bellows.react_t, pelvis, box])
 	assert_true(box.grow(0.05).has_point(pelvis), "pelvis %s inside kitchen.sink %s on f112" % [pelvis, box])
 	assert_almost_eq(bv.lane_z(), float((land as Dictionary).get("z", -2.1)), 0.05, "landed at the sink's depth")
 
@@ -192,10 +225,9 @@ func test_c8_on_every_tick_of_the_g0_and_p00_routes_in_both_window_modes() -> vo
 			if _root != null:
 				_root.free()
 				_root = null
-			if not _build(ep):
+			if not _build(ep, mode):
 				skip("%s did not load" % ep)
 				return
-			_wv.window_mode = mode
 			_pip.reset_share()
 			var on_screen_open := 0
 			var missed := 0
@@ -228,4 +260,5 @@ func test_c8_on_every_tick_of_the_g0_and_p00_routes_in_both_window_modes() -> vo
 			assert_eq(on_screen_open, 0, "%s %s: never while he is on screen" % [ep, mode])
 			assert_eq(missed, 0, "%s %s: opens at once when C8 wants it" % [ep, mode])
 			assert_eq(late_close, 0, "%s %s: closes within the hide delay" % [ep, mode])
-	print("[test_world_view3d] C8 / pip_on_share:\n  " + "\n  ".join(report))
+	for line in report:
+		print("[test_world_view3d] C8 / pip_on_share: " + line)

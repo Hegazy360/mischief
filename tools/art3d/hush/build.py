@@ -206,7 +206,10 @@ def torso_warp(d, q):
 
 
 bm = T.se_blob(TC, TA, TB, TCz, TPw, "stripe", n=7, warp=torso_warp)
-STRIPES = [TZ0 + 0.030 + 0.036 * i for i in range(10)]         # 10 cuts -> 5 navy bands + the collar
+# 10 cuts -> 5 navy bands (0.026 m) between wider cream bands (0.048 m) + the navy collar: cream-heavy stripes keep her
+# light share >= 20 % under the 4.8 px outline (REDESIGN 3.7 value rule; value_check.png)
+NAVY_W, CREAM_W = 0.026, 0.048
+STRIPES = [TZ0 + 0.034 + (NAVY_W + CREAM_W) * (i // 2) + NAVY_W * (i % 2) for i in range(10)]
 for z in STRIPES:
     T.bisect(bm, (0, 0, z), (0, 0, 1))
 
@@ -314,7 +317,8 @@ for s, sx in (("l", 1), ("r", -1)):
                          cap_rings=2, samples_per_m=30)
     ax = (wr - sh).normalized()
     L = (wr - sh).length
-    cuts = [0.018 + 0.034 * i for i in range(int(L / 0.034) + 1)]
+    SN, SC_ = 0.024, 0.044                                       # navy / cream band widths along the sleeve
+    cuts = [0.018 + (SN + SC_) * (i // 2) + SN * (i % 2) for i in range(int(2 * L / (SN + SC_)) + 1)]
     for c_ in cuts:
         T.bisect(bm, sh + ax * c_, ax)
 

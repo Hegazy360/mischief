@@ -37,6 +37,8 @@ const MG_FALLBACK_F := 90.0
 const EMOTE_FACE := {"sing": "sing_mid", "hum": "hum", "smug": "smug", "laugh": "blissful", "tut": "disdain",
 	"sniff": "sniff", "yum": "blissful", "yawn": "asleep"}
 const STATIC_CLIP := "#static"
+## After a reaction that landed him up high (the sink), the pelvis lift eases back to the floor at this speed.
+const LANDING_EXIT_M_S := 2.0
 const STEP_DOWN_CLIP := "hush/rig_step_down"
 const GLANCE_CLIP := "hush/act_glance"
 const FALLBACK_REACTION := "bellows/st_double_take"
@@ -111,6 +113,7 @@ var _y_off := 0.0
 var _dx := 0.0
 var _dx_to := 0.0
 var _cheat := View3DConst.CHEAT_IDLE
+var _y_ease := 0.0
 var _facing := 1
 var _station_yaw := NAN
 var _placed := false
@@ -374,6 +377,11 @@ func overlay_clip() -> String:
 	return _ov_clip
 
 
+## The overlay's frame this pick (the ClipMap pick's `ov_frame`; 0 without an overlay).
+func overlay_frame() -> float:
+	return _pick.ov_frame if _ov_clip != "" else 0.0
+
+
 func pick() -> ClipMap.Pick:
 	return _pick
 
@@ -417,6 +425,7 @@ func reset_counts() -> void:
 ## Retry / seek: drop flavours, overlays, combos, the meter cache and every clip-owned body slot
 ## (`RigPlayer3D.reset()`); residue looks are re-applied from the next snapshot.
 func reset() -> void:
+	_y_ease = 0.0
 	ctx.flavour = ""
 	ctx.ov_flavour = ""
 	ctx.fidget_i = -1
@@ -570,13 +579,17 @@ func _place(cur: ViewSnapshot.Actor, p2: Vector2, view_dt: float) -> void:
 	_dx_to = pl["dx"]
 	_cheat = pl["cheat"]
 	_station_yaw = pl["yaw"]
-	# reactions: travel arc + landing depth / pelvis
+	# reactions: travel arc + landing depth / pelvis; after one he climbs down from the landing (no snap)
 	_y_off = 0.0
 	if actor == "bellows" and cur.reacting:
 		want_z = _reaction_travel(cur, p2, want_z)
+		_y_ease = _y_off
 	elif actor == "bellows" and _rx_key != "":
 		_rx_key = ""
 		_landed = false
+	if not cur.reacting and _y_ease > 0.0005:
+		_y_ease = move_toward(_y_ease, 0.0, view_dt * LANDING_EXIT_M_S)
+		_y_off = _y_ease
 	if not _placed:
 		_z = want_z
 		_z_to = want_z
@@ -1082,16 +1095,36 @@ func _known_looks(list: PackedStringArray) -> PackedStringArray:
 ## formed combo's `COMBO:<id>` when all its residues are present (residues.json combos).
 ## The sidecar "stage" block of a 3D clip ({} when none; cached).
 static func clip_stage(clip_id: String) -> Dictionary:
+	var e := CharacterView3D._sidecar_bits(clip_id)
+	return e.get("stage", {})
+
+
+## The set pieces a 3D clip keeps lent across a switch to it (sidecar `keeps`; cached).
+static func clip_keeps(clip_id: String) -> PackedStringArray:
+	var e := CharacterView3D._sidecar_bits(clip_id)
+	return e.get("keeps", PackedStringArray())
+
+
+static func _sidecar_bits(clip_id: String) -> Dictionary:
 	if clip_id == "" or clip_id == STATIC_CLIP:
 		return {}
 	if _stage_cache.has(clip_id):
-		return _stage_cache[clip_id]
+		var c: Variant = _stage_cache[clip_id]
+		# tests inject a bare stage block
+		return c if (c as Dictionary).has("stage") or (c as Dictionary).has("keeps") else {"stage": c}
 	var out := {}
 	var path := ClipMap.sidecar_path(clip_id)
 	if path != "" and FileAccess.file_exists(path):
 		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if d is Dictionary and (d as Dictionary).get("stage") is Dictionary:
-			out = (d as Dictionary)["stage"]
+		if d is Dictionary:
+			if (d as Dictionary).get("stage") is Dictionary:
+				out["stage"] = (d as Dictionary)["stage"]
+			var kv: Variant = (d as Dictionary).get("keeps", [])
+			var keeps := PackedStringArray()
+			if kv is Array:
+				for k in kv:
+					keeps.append(str(k).trim_prefix("set:"))
+			out["keeps"] = keeps
 	_stage_cache[clip_id] = out
 	return out
 
@@ -1284,6 +1317,17 @@ func show_explicit(pos_px: Vector2, facing: int, clip: String, frame: float, sho
 		stand_in.rotation.y = deg_to_rad((90.0 - _cheat) * float(facing))
 	if blob != null:
 		blob.visible = shown
+
+
+## Pose the actor from a MomentRecorder3D frame: the recorded world position (lane depth included) and cheat.
+func show_world(pos: Vector3, facing: int, cheat: float, clip: String, frame: float, shown: bool,
+		looks_on: PackedStringArray = PackedStringArray(), tier: int = -1, ov_clip: String = "", ov_frame: float = 0.0) -> void:
+	_z = pos.z
+	show_explicit(Vector2(pos.x * View3DConst.PX_PER_M, -pos.y * View3DConst.PX_PER_M), facing, clip, frame, shown, looks_on,
+		tier, ov_clip, ov_frame)
+	_cheat = cheat
+	if uses_rig and rig != null and bool(_has.get("set_cheat", false)):
+		rig.call("set_cheat", cheat, 0.0)
 
 
 func pose_replay(pos_px: Vector2, facing: int, clip: String, frame: float, state: String, _view_dt_: float) -> void:

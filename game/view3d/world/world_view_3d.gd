@@ -35,6 +35,10 @@ const HOUSE3D := "res://data/house/house3d.json"
 const HOUSE3D_SCRIPT := "res://view3d/set/house_3d.gd"
 const SET_LIST_SCRIPT := "res://view3d/set/set_list.gd"
 const ENTRY_LEAD_TICKS := 90
+## The Busted Cam window around `spotted` (ticks) and its replay length (frames), as the 2D BustedCam.
+const BUSTED_BEFORE := 45
+const BUSTED_AFTER := 15
+const BUSTED_REPLAY_F := 60
 const PROTECT_PAD := 48.0
 const ACTIVE_NEAR_PX := 110.0
 const SQUEAK_RADIUS_M := 2.1
@@ -64,7 +68,8 @@ var overlays: Overlays3D = null
 var cues: CueStager3D = null
 ## N1/N2's caught sequence (Lecture attach, doorstep).
 var caught: CaughtStager3D = null
-var recorder: MomentRecorder = null
+## The Gag Reel / Busted Cam ring (what was drawn, per frame).
+var recorder: MomentRecorder3D = null
 ## Skip the rig system (tests / `--stand-ins`).
 var force_stand_ins: bool = false
 ## The Bellows window (PipView3D) — for visibility_sample() and the protected rects.
@@ -91,6 +96,11 @@ var _sparkle: Dictionary = {}
 var _gaze_t := 0.0
 var _gaze_at := Vector3.INF
 var _replay_t := -1.0
+var _replay_moment := -1
+## actor → {piece id: true} lent to its rig; actor → the base clip last frame (a switch returns what it does not keep)
+var _lent := {"hush": {}, "bellows": {}}
+var _last_clip := {"hush": "", "bellows": ""}
+var _busted_on := false
 var _noise_t := 0.0
 var _tap_age := 99.0
 var _queued_target := ""
@@ -105,6 +115,11 @@ var _vis := {"tick": 0, "sim": "", "reason": &"", "on_screen": false, "window": 
 ## clip ids are warmed), `unlocked` (tonight's built rooms), `lit_x_range()` (sim px), `fx` (ripple / path_dots /
 ## clear / avoid_screen_fn over the 3D decals and overlays).
 var warm_hint: Dictionary = {}
+## Per-phase µs totals while `profile` (hush apply incl. lights, bellows apply, caught + recorder, props + cues,
+## decals + particles, overlays) — ViewSandbox3D's perf line divides by `prof_frames`.
+var profile: bool = false
+var prof_us := PackedInt64Array([0, 0, 0, 0, 0, 0])
+var prof_frames: int = 0
 var unlocked: PackedStringArray = PackedStringArray()
 var fx: FxShim = null
 var _empty_snap := ViewSnapshot.new()
@@ -132,6 +147,9 @@ func setup(db_or_null: Variant, episode_or_null: Variant, snapshot_source: Objec
 	_build()
 	if source != null and source.has_signal("ticked"):
 		source.connect("ticked", on_ticked)
+	var juice: Variant = source.get("juice") if source != null and "juice" in source else null
+	if juice is Object and (juice as Object).has_signal("freeze_frame_changed") and overlays != null:
+		(juice as Object).connect("freeze_frame_changed", func(on: bool) -> void: overlays.freeze_frame(on))
 	if source != null and not source.has_method("snapshot"):
 		_own_snap = ViewSnapshot.from_sim(world)
 		_own_prev = ViewSnapshot.from_sim(world)
@@ -216,8 +234,10 @@ func _build() -> void:
 	var variant := str(ViewKit.setting("hush_head", ""))
 	hush_view = _make_char("hush", variant)
 	bellows_view = _make_char("bellows", "")
-	recorder = null
+	recorder = MomentRecorder3D.new()
+	recorder.setup(self)
 	_index_triggers()
+	_prop_rows.clear()
 	lighting.snap_now()
 
 
@@ -278,8 +298,15 @@ func reset() -> void:
 		cues.reset()
 	if caught != null:
 		caught.reset()
+	if recorder != null:
+		recorder.clear()
+	_replay_moment = -1
+	for a in _lent:
+		(_lent[a] as Dictionary).clear()
 	if set3d != null and set3d.has_method("return_all"):
 		set3d.call("return_all")
+	for row in _prop_rows:
+		row[5] = -1.0
 	for id in _hotspot_ids:
 		var p := prop(id)
 		if p != null:
@@ -310,6 +337,10 @@ func prop(id: String) -> Object:
 		var p: Variant = set3d.call("prop", id)
 		return p if p is Object else null
 	return null
+
+
+func in_replay_now() -> bool:
+	return _replay_t >= 0.0
 
 
 func is_replaying() -> bool:
@@ -524,21 +555,45 @@ func advance(delta: float) -> void:
 	var vdt := float(source.call("view_delta")) if source != null and source.has_method("view_delta") else delta
 	_frame += 1
 	_tap_age += delta
+	var t0 := Time.get_ticks_usec() if profile else 0
 	_update_lights(snap, delta)
 	if _replay_t < 0.0:
 		_update_gaze(snap, vdt)
 		hush_view.apply(prev.hush, snap.hush, alpha, vdt)
+		var t1 := Time.get_ticks_usec() if profile else 0
 		bellows_view.apply(prev.bellows, snap.bellows, alpha, vdt)
+		if profile:
+			prof_us[0] += t1 - t0
+			prof_us[1] += Time.get_ticks_usec() - t1
+		_return_on_switch("hush", hush_view)
+		_return_on_switch("bellows", bellows_view)
+	var t2 := Time.get_ticks_usec() if profile else 0
 	if caught != null:
 		caught.advance(snap, vdt, _replay_t >= 0.0)
+	# the Gag Reel ring records what was drawn this frame (after the characters applied)
+	if _replay_t < 0.0 and recorder != null:
+		recorder.record(snap)
+	else:
+		_advance_replay(vdt)
+	var t3 := Time.get_ticks_usec() if profile else 0
 	_update_props(snap, vdt)
 	if cues != null:
 		cues.advance(snap, vdt)
+	var t4 := Time.get_ticks_usec() if profile else 0
 	_update_decals(snap, vdt)
 	if fx3d != null:
 		fx3d.advance(vdt)
+	var t5 := Time.get_ticks_usec() if profile else 0
 	if overlays != null:
+		overlays.set_safe(snap.hush.state == "HIDDEN" and not in_replay_now())
 		overlays.advance(snap, delta)
+	if profile:
+		var t6 := Time.get_ticks_usec()
+		prof_us[2] += t3 - t2
+		prof_us[3] += t4 - t3
+		prof_us[4] += t5 - t4
+		prof_us[5] += t6 - t5
+		prof_frames += 1
 	_update_sparkles(delta)
 	if _entry_room != "":
 		_entry_t -= delta
@@ -596,23 +651,42 @@ func _update_gaze(snap: ViewSnapshot, vdt: float) -> void:
 
 # --- readability drivers (REDESIGN §3.7, §4.1–§4.5) --------------------------------------------------------
 
-func _update_props(snap: ViewSnapshot, _vdt: float) -> void:
-	var room := snap.hush.room
-	var hidden := snap.hush.state == "HIDDEN" or snap.hush.hidden_spot != ""
-	var next_act := snap.bubble_next
+## Per-hotspot drivers resolved once per build: [id, prop, HouseLayout.Hotspot, verb, has set_glow, last amp].
+var _prop_rows: Array = []
+const _EMPTY := {}
+
+
+func _index_props() -> void:
+	_prop_rows.clear()
 	for id in _hotspot_ids:
 		var p := prop(id)
 		if p == null:
 			continue
 		var hs := layout.hotspot(id)
+		if hs == null:
+			continue
+		_prop_rows.append([id, p, hs, GreyboxSet3D.verb_of(hs.kind), p.has_method("set_glow"), -1.0])
+
+
+func _update_props(snap: ViewSnapshot, _vdt: float) -> void:
+	var room := snap.hush.room
+	var hidden := snap.hush.state == "HIDDEN" or snap.hush.hidden_spot != ""
+	var next_act := snap.bubble_next
+	if _prop_rows.is_empty() and not _hotspot_ids.is_empty():
+		_index_props()
+	for row in _prop_rows:
+		var id: String = row[0]
+		var p: Object = row[1]
+		var hs: HouseLayout.Hotspot = row[2]
+		var kind: StringName = row[3]
 		var st_v: Variant = snap.hotspots.get(id, null)
-		var st: Dictionary = st_v if st_v is Dictionary else {}
-		var kind := GreyboxSet3D.verb_of(hs.kind)
+		var st: Dictionary = st_v if st_v is Dictionary else _EMPTY
 		var rigged := bool(st.get("rigged", false)) or _rigged.has(id)
 		var spent := bool(st.get("spent", false)) or _spent.has(id)
 		var amp := WorldView3D.glow_amp_for(kind, hs.room == room, bool(st.get("enabled", true)), rigged, spent, hidden,
 			_all_lines, _is_active_spot(snap, id, hs, rigged, next_act))
-		if p.has_method("set_glow"):
+		if bool(row[4]) and amp != float(row[5]):
+			row[5] = amp
 			p.call("set_glow", View3DConst.verb_color(kind), amp)
 		# AFTER: armed look + tag; spent: glow off, tag hidden
 		var want_state := &"spent" if spent else (&"armed" if rigged else &"idle")
@@ -699,9 +773,27 @@ func _update_decals(snap: ViewSnapshot, vdt: float) -> void:
 		if _noise_t <= 0.0:
 			_noise_t = NOISE_EVERY_S
 			decals.ring(hush_view.feet_world(), 2.5, View3DConst.NOISE_RING, 0.6)
+	elif snap.hush.state == "RIGGING" and snap.hush.rig_prank != "" and not in_replay and _rig_noisy(snap.hush.rig_prank):
+		# B-tier rigs are loud: a noise ring at the prop every 0.5 s (rig_actions.json `noise_rings`)
+		_noise_t -= vdt
+		if _noise_t <= 0.0:
+			_noise_t = NOISE_EVERY_S
+			var hs_id := str(info.prank(snap.hush.rig_prank).get("rig_point", "")) if info != null else ""
+			var b_box := hotspot_box(hs_id) if hs_id != "" else AABB()
+			var at := hush_view.feet_world()
+			if b_box.size != Vector3.ZERO:
+				at = Vector3(b_box.get_center().x, hush_view.feet_world().y, View3DConst.LANE_Z)
+			decals.ring(at, 2.5, View3DConst.NOISE_RING, 0.6)
 	else:
 		_noise_t = 0.0
 	decals.advance(vdt)
+
+
+## rig_actions.json `noise_rings` of a prank (B-tier rigs).
+func _rig_noisy(prank: String) -> bool:
+	var ra: Dictionary = hush_view.rig_actions if hush_view != null else {}
+	var pr: Variant = (ra.get("pranks", {}) as Dictionary).get(prank, null) if ra.get("pranks", null) is Dictionary else null
+	return pr is Dictionary and bool((pr as Dictionary).get("noise_rings", false))
 
 
 func _update_sparkles(delta: float) -> void:
@@ -1009,17 +1101,69 @@ func target_point(target: String) -> Vector3:
 	return Vector3.INF
 
 
-## The Busted Cam re-stage (N1/N2): the red overlay, the stamp; the recorded replay is r3d-night's Gag Reel port.
-func start_busted_replay(_spotted_tick: int) -> void:
+## The Busted Cam (N1/N2, GDD §4.6): re-stage the moment he saw her (BUSTED_BEFORE ticks before `spotted` to
+## BUSTED_AFTER after, from the MomentRecorder3D ring) at 1×, a two-shot push-in and the red tint; the characters
+## are posed from the recording (`show_moment_frame`) and handed back to the snapshots when it ends.
+func start_busted_replay(spotted_tick: int) -> void:
+	_busted_on = true
 	if overlays != null:
 		overlays.busted(true)
+	_replay_moment = -1
+	if recorder != null and recorder.count() > 0:
+		var t := spotted_tick if spotted_tick >= 0 else recorder.last_tick() - BUSTED_BEFORE
+		var id := recorder.keep(t - BUSTED_BEFORE, t + BUSTED_AFTER, "busted")
+		var m := recorder.moment(id)
+		if m != null and m.count() > 0:
+			_replay_moment = id
+			_replay_t = 0.0
+			hush_view.replay = true
+			bellows_view.replay = true
+			var f := m.frame(0)
+			if cam != null:
+				var mid := (f.hush.pos + f.bellows.pos) * 0.5 + Vector3(0.0, 1.1, 0.0)
+				cam.request_gag(mid, 1.15, 6, BUSTED_REPLAY_F - 12, 8, 100)
 	replay_changed.emit(true)
 
 
 func end_busted_replay() -> void:
+	if not _busted_on:
+		return
+	_busted_on = false
 	if overlays != null:
 		overlays.busted(false)
+	if _replay_t >= 0.0:
+		_replay_t = -1.0
+		_replay_moment = -1
+		hush_view.replay = false
+		bellows_view.replay = false
 	replay_changed.emit(false)
+
+
+func _advance_replay(vdt: float) -> void:
+	if _replay_t < 0.0:
+		return
+	var m := recorder.moment(_replay_moment) if recorder != null else null
+	if m == null:
+		end_busted_replay()
+		return
+	_replay_t += maxf(vdt, 1.0 / 120.0)
+	var i := int(_replay_t * 60.0)
+	if i >= mini(m.count(), BUSTED_REPLAY_F):
+		end_busted_replay()
+		return
+	show_moment_frame(m.frame(i))
+
+
+## Pose both characters and the props from a recorded frame (the Busted Cam; r3d-night's Gag Reel).
+func show_moment_frame(f: MomentRecorder3D.Frame) -> void:
+	hush_view.mute_sounds = true
+	bellows_view.mute_sounds = true
+	for pair in [[hush_view, f.hush], [bellows_view, f.bellows]]:
+		var cv: CharacterView3D = pair[0]
+		var a: MomentRecorder3D.ActorFrame = pair[1]
+		cv.show_world(a.pos, a.facing, a.cheat, a.clip, a.frame, a.shown, a.looks, a.tint, a.ov_clip, a.ov_frame)
+	hush_view.mute_sounds = false
+	bellows_view.mute_sounds = false
 
 
 # --- clip events -------------------------------------------------------------------------------------------
@@ -1055,18 +1199,46 @@ func _on_clip_event(ev: Dictionary) -> void:
 				fx3d.burst(str(ev.get("id", "")), at)
 
 
-## Set-piece hand-offs (index §7.2): lend a hotspot prop / furniture piece into a rig socket and home again.
+## Set-piece hand-offs (index §7.2): lend a hotspot prop / furniture piece into a rig socket and home again. The
+## piece keeps its state, armed look and tag while lent (House3D moves the Prop3D itself).
 func _handoff(actor: String, op: String, piece: String, socket: String, frames: int) -> void:
 	if set3d == null:
 		return
 	var cv := character(actor)
+	var lent: Dictionary = _lent.get(actor, {})
 	match op:
 		"lend":
 			if cv != null and set3d.has_method("lend"):
 				set3d.call("lend", piece, cv.socket_node(socket), frames)
+				lent[piece] = true
 		"return":
 			if set3d.has_method("return_home"):
 				set3d.call("return_home", piece, frames)
+			lent.erase(piece)
+
+
+## A base-clip switch returns every piece the actor holds that the new clip does not `keeps` (index §7.2).
+func _return_on_switch(actor: String, cv: CharacterView3D) -> void:
+	var clip := cv.current_clip()
+	if clip == str(_last_clip.get(actor, "")):
+		return
+	_last_clip[actor] = clip
+	var lent: Dictionary = _lent.get(actor, {})
+	if lent.is_empty() or set3d == null or not set3d.has_method("return_home"):
+		return
+	var keeps := CharacterView3D.clip_keeps(clip)
+	for piece in lent.keys():
+		if not keeps.has(String(piece)):
+			set3d.call("return_home", String(piece), 6)
+			lent.erase(piece)
+
+
+## Pieces lent to an actor now (tests).
+func lent_pieces(actor: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for k in (_lent.get(actor, {}) as Dictionary):
+		out.append(String(k))
+	return out
 
 
 ## The 2D FxLayer calls NightScene / NightInput make (`world_view.fx`), mapped onto the 3D view: a tap ripple → the

@@ -8,7 +8,10 @@
 ## says so) — the old "the sequence captures nothing" trap.
 ## `--perf-log[=WARMUP]` (with --shot) samples the render stats of every frame after WARMUP
 ## (default 30) and prints them on quit (draw calls, objects, process time, live particles):
-## `[perf] … draw calls avg A p95 P max M …`.
+## `[perf] … draw calls avg A p95 P max M …`, and the 3D line (R3D brief r3d-night §4.4):
+## `[perf3d] {frames, frame_ms_p50/p95/max (wall), draw_calls_p95/max, primitives_max, objects_max, tex_mb_max
+## (Performance.RENDER_TEXTURE_MEM_USED — the texture number of index §6 row 16), vmem_mb_max, emitters_max (live
+## CPUParticles3D), process_ms_p95, shader_compiles_play (the NightScene's ShaderWatch, when one runs)}`.
 ## `--e2e` spawns the end-to-end driver res://tools/e2e.gd (see tools/scripts/e2e.sh).
 ## `--overlay` shows the debug overlay from the start (shots).
 ## `--tex-report` (with --shot) prints the texture-memory breakdown on quit (TexStats.memory_report:
@@ -41,6 +44,12 @@ var _dc := PackedFloat32Array()
 var _proc_ms := PackedFloat32Array()
 var _objects_max := 0
 var _particles_max := 0
+var _wall_ms := PackedFloat32Array()
+var _last_us := 0
+var _prims_max := 0.0
+var _tex_mb_max := 0.0
+var _vmem_mb_max := 0.0
+var _emitters_max := 0
 var _shooting := false
 var _devlog := false
 var _overlay_layer: CanvasLayer = null
@@ -197,8 +206,16 @@ func _sample() -> void:
 	_dc.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 	_proc_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 	_objects_max = maxi(_objects_max, int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)))
+	var now := Time.get_ticks_usec()
+	if _last_us > 0:
+		_wall_ms.append(float(now - _last_us) / 1000.0)
+	_last_us = now
+	_prims_max = maxf(_prims_max, Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+	_tex_mb_max = maxf(_tex_mb_max, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0)
+	_vmem_mb_max = maxf(_vmem_mb_max, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0)
 	if _n % 5 == 0:
 		_particles_max = maxi(_particles_max, count_particles(get_tree().root))
+		_emitters_max = maxi(_emitters_max, count_emitters_3d(get_tree().root))
 
 
 ## One line: the sampled frames' draw calls (avg / p95 / max), max objects, process time
@@ -217,7 +234,39 @@ func perf_summary() -> String:
 		return t / float(maxi(1, a.size()))
 	var p95 := func(a: Array) -> float: return float(a[mini(a.size() - 1, int(floor(float(a.size()) * 0.95)))])
 	return "[perf] %d frames: draw calls avg %.1f p95 %.0f max %.0f | objects max %d | process ms avg %.2f p95 %.2f | particles max %d" % [
-		dc.size(), avg.call(dc), p95.call(dc), float(dc.back()), _objects_max, avg.call(pt), p95.call(pt), _particles_max]
+		dc.size(), avg.call(dc), p95.call(dc), float(dc.back()), _objects_max, avg.call(pt), p95.call(pt), _particles_max] \
+		+ "\n" + perf3d_line()
+
+
+## The 3D perf line (see the class doc).
+func perf3d_line() -> String:
+	var wm := Array(_wall_ms)
+	var dc := Array(_dc)
+	var pt := Array(_proc_ms)
+	wm.sort()
+	dc.sort()
+	pt.sort()
+	var q := func(a: Array, p: float) -> float: return float(a[clampi(int(floor(float(a.size() - 1) * p + 0.5)), 0, a.size() - 1)]) if not a.is_empty() else 0.0
+	var d := {"frames": dc.size(), "frame_ms_p50": snappedf(q.call(wm, 0.5), 0.1), "frame_ms_p95": snappedf(q.call(wm, 0.95), 0.1),
+		"frame_ms_max": snappedf(q.call(wm, 1.0), 0.1), "draw_calls_p95": q.call(dc, 0.95), "draw_calls_max": q.call(dc, 1.0),
+		"primitives_max": _prims_max, "objects_max": _objects_max, "tex_mb_max": snappedf(_tex_mb_max, 0.1),
+		"vmem_mb_max": snappedf(_vmem_mb_max, 0.1), "emitters_max": _emitters_max, "process_ms_p95": snappedf(q.call(pt, 0.95), 0.01)}
+	var ns := get_tree().get_first_node_in_group("night_scene") if is_inside_tree() else null
+	if ns != null and ns.get("shader_watch") is Object:
+		d["shader_compiles_play"] = int((ns.get("shader_watch") as Object).call("compiles_play"))
+	return "[perf3d] " + JSON.stringify(d)
+
+
+## Live CPUParticles3D / GPUParticles3D emitters (emitting and visible) under `n`.
+static func count_emitters_3d(n: Node) -> int:
+	var total := 0
+	if n is CPUParticles3D and (n as CPUParticles3D).emitting and (n as CPUParticles3D).is_visible_in_tree():
+		total += 1
+	elif n is GPUParticles3D and (n as GPUParticles3D).emitting and (n as GPUParticles3D).is_visible_in_tree():
+		total += 1
+	for c in n.get_children():
+		total += count_emitters_3d(c)
+	return total
 
 
 var _tex_last_untracked := 0.0

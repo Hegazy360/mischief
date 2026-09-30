@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+INFO L24_sound_table res://data/anim/hush3d/act_rummage.json no audio-table row: new sound frames ["0 rustle", "18 rustle"] for r3d-integrate
+lint_anim 3d: 1 clip(s), 0 error(s), 0 warning(s), 0 missing; expected lengths from SliceClips.build3d; 195 ms
+[Content] loaded res://data in 21 ms: 0 errors, 27 warnings

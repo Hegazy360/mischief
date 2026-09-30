@@ -8,7 +8,7 @@
 #   --headless  no renderer (no draw-call numbers; slice_all always runs headless)
 #   --max-s=N   stop a route replay after N sim seconds (a perf sample of a long Night)
 #   route scenarios: g0_sneeze prologue_{ideal,required,slow} n01_{ideal,required,slow} n02_{…}
-#                    n01_caught n01_chase n01_meltdown n02_face_to_face n02_face_to_face_lost
+#                    n01_caught n01_chase n01_meltdown   (N02 face_to_face* are retired: r3d-content C2)
 #   flows:           retry pause_back curtain_call touch_smoke tap_accuracy cold_<episode>
 #   slice_all:       every route scenario above, one fresh game process each, at a fixed 60 fps as fast as
 #                    the machine allows; one JSON report per route next to --report (…/<scenario>.json)
@@ -17,8 +17,28 @@
 # and pass the file with --e2e-cmds; launch-clock scenarios (prologue_*) and the flows run in real time,
 # the other route replays at --fixed-fps 60 unless --realtime. --strict makes view fallbacks (puppets, missing clips, greybox props)
 # fail (the pre-gate). Exit 1 when any scenario's thresholds fail.
-# Env: E2E_SANDBOX (default e2e), SHOT_SIZE (default 1200x540), E2E_TIMEOUT (default 900 s per process).
+# Env: E2E_SANDBOX (default e2e), SHOT_SIZE (default 1200x540), E2E_TIMEOUT (seconds per process; default: the
+# scenario's row below), E2E_MSAA (default off: every run passes --msaa=off to NightScene — R11: timing runs on the
+# CPU box run without MSAA; draw counts are unchanged, so the perf rows use the same runs; E2E_MSAA=2 to render
+# with the device default).
 # Every game process runs through tools/scripts/slot.sh (R3D ruling R11); E2E_TIMEOUT starts once a slot is free.
+#
+# E2E_TIMEOUT table (R3D, r3d-night; measured on the 4-core CPU box under llvmpipe, 1200x540, MSAA off, one render
+# thread per slot; r3d-view3d P0b: 85 ms/frame p50, 125 ms p95 real time; Godot clamps a frame at 66.7 ms of game
+# time, so real-time runs take ~1.5x their game length; fixed-fps replays take frames x ~90 ms):
+#   scenario            mode        game length        expected wall     timeout (E2E_TIMEOUT default)
+#   g0_sneeze           fixed 60    1414 ticks ~24 s    ~150 s            600 s
+#   prologue_ideal      real time   ~60 s               ~95 s             600 s
+#   prologue_required   real time   ~70 s               ~110 s            600 s
+#   prologue_slow       real time   ~90 s               ~140 s            700 s
+#   n01_* / n02_*       fixed 60    ~140 s (8400 ticks)  ~13 min           1800 s
+#   n01_caught/chase/meltdown fixed ~40–80 s            ~4–8 min          1200 s
+#   retry / pause_back  real time   ~10 s               ~40 s             400 s
+#   curtain_call        real time   P00+N01x2+N02+g0    ~4 min            900 s
+#   touch_smoke         real time   ~5 s                ~40 s             400 s
+#   tap_accuracy        real time   4 Nights x rooms    ~6 min            1200 s
+#   slice_all           headless    every route          ~20 min total     per row as above
+# (the wall times include the slot wait-free Godot start, ~10 s, and the sandbox import when assets changed)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCEN="${1:?scenario}"; shift
@@ -39,10 +59,23 @@ while [ $# -gt 0 ]; do
   shift
 done
 SB_NAME="${E2E_SANDBOX:-e2e}"
+MSAA_ARG="--msaa=${E2E_MSAA:-off}"
 BASE="${MND_SANDBOX_ROOT:-/tmp/mnd_sandbox}"
 SIZE="${SHOT_SIZE:-1200x540}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/mnd_e2e.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
+
+timeout_of() {  # scenario -> the default E2E_TIMEOUT (s) of the table above
+  case "$1" in
+    g0_sneeze|prologue_ideal|prologue_required) echo 600 ;;
+    prologue_slow) echo 700 ;;
+    n01_caught|n01_chase|n01_meltdown) echo 1200 ;;
+    n01_*|n02_*) echo 1800 ;;
+    curtain_call) echo 900 ;;
+    tap_accuracy) echo 1200 ;;
+    *) echo 400 ;;
+  esac
+}
 
 route_of() {  # scenario -> "episode route" (empty for flows)
   case "$1" in
@@ -60,7 +93,7 @@ SB="$BASE/$SB_NAME/game"
 # one game process: $1 scenario, $2 report path, $3 cmds file ("" = none)
 run_one() {
   local scen="$1" rep="$2" cmds="$3" fps=()
-  local args=("--e2e" "--e2e-scenario=$scen")
+  local args=("--e2e" "--e2e-scenario=$scen" "$MSAA_ARG")
   [ -n "$rep" ] && args+=("--e2e-report=$rep")
   [ -n "$cmds" ] && args+=("--e2e-cmds=$cmds")
   [ -n "$STRICT" ] && args+=("$STRICT")
@@ -74,7 +107,7 @@ run_one() {
   local runner=(xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 --audio-driver Dummy --resolution "$SIZE")
   [ -n "$HEADLESS" ] && runner=(godot --headless --audio-driver Dummy)
   set +e
-  "$ROOT/tools/scripts/slot.sh" timeout "${E2E_TIMEOUT:-900}" "${runner[@]}" ${fps[@]+"${fps[@]}"} --path "$SB" res://scenes/boot/Boot.tscn -- "${args[@]}" 2>&1 \
+  "$ROOT/tools/scripts/slot.sh" timeout "${E2E_TIMEOUT:-$(timeout_of "$scen")}" "${runner[@]}" ${fps[@]+"${fps[@]}"} --path "$SB" res://scenes/boot/Boot.tscn -- "${args[@]}" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)|V-Sync|set_use_vsync" \
     | grep -E "^\[E2E\]|ERROR|SCRIPT ERROR|at: |WARNING: .*E2E" | head -200
   local rc=${PIPESTATUS[0]}
@@ -101,7 +134,7 @@ if [ "$SCEN" = "slice_all" ]; then
   [ -f "$TMP/cmds/g0_sneeze_ideal.cmds.json" ] || dump_cmds g0_sneeze ideal >/dev/null
   fail=0; rows=()
   for s in g0_sneeze prologue_ideal prologue_required prologue_slow n01_ideal n01_required n01_slow n02_ideal n02_required \
-      n02_slow n01_caught n01_chase n01_meltdown n02_face_to_face n02_face_to_face_lost; do
+      n02_slow n01_caught n01_chase n01_meltdown; do
     read -r ep rt <<< "$(route_of "$s")"
     f="$TMP/cmds/${ep}_${rt}.cmds.json"
     if [ ! -f "$f" ]; then
@@ -127,9 +160,9 @@ for r in s["runs"]:
     p = r.get("report", "")
     d = json.load(open(p)) if os.path.exists(p) else {}
     fb = d.get("fallbacks", {}) or {}
-    print("  %-22s %s  end=%s errors=%s fallbacks(clip=%s puppets=%s grey=%s) doubles=%d pages=%s" % (r["scenario"],
-        "PASS" if r.get("ok") else "FAIL", d.get("end_reason"), d.get("script_errors"), fb.get("clip_fallbacks"),
-        fb.get("puppets"), fb.get("greybox_props"), len(d.get("doubles", [])), d.get("pages_built_in_play")))
+    print("  %-22s %s  view=%s end=%s errors=%s fallbacks(clip=%s puppets=%s grey=%s) doubles=%d pip_on_share=%s" % (r["scenario"],
+        "PASS" if r.get("ok") else "FAIL", d.get("view"), d.get("end_reason"), d.get("script_errors"), fb.get("clip_fallbacks"),
+        fb.get("puppets"), fb.get("greybox_props"), len(d.get("doubles", [])), d.get("pip_on_share")))
 PY
   echo "[E2E] slice_all $([ $fail = 0 ] && echo PASS || echo FAIL)"
   exit $fail

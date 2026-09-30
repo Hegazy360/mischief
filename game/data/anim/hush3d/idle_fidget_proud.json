@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/idle_fidget_proud",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/idle_fidget_proud.res",
+  "length": 84,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 10,
+      "preset": "smug"
+    },
+    {
+      "f": 52,
+      "preset": "proud"
+    },
+    {
+      "f": 72,
+      "preset": "neutral"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/idle_fidget_proud.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

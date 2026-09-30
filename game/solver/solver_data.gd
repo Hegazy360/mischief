@@ -549,6 +549,24 @@ func hush_rooms(ep_id: String) -> PackedStringArray:
 	return out
 
 
+## Detour activity ids held by the episode's `director.fixup_holds` (a fix-up that waits for the player; like an
+## uncapped loop gate it is exempt from invariant rule 9's 60 s progress check). Sorted.
+func fixup_hold_activities(ep_id: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	var d: Variant = episode(ep_id).get("director", null)
+	if not (d is Dictionary):
+		return out
+	for fh in (d as Dictionary).get("fixup_holds", []):
+		if not (fh is Dictionary):
+			continue
+		var kind := sv((fh as Dictionary).get("kind", ""))
+		for aid in sorted_ids("activities"):
+			if sv((activities[aid] as Dictionary).get("kind", "")) == kind and is_detour(aid) and not out.has(aid):
+				out.append(aid)
+	out.sort()
+	return out
+
+
 ## The episode's hiding spots (REDESIGN_3D §6.2 C1): its `hides` list, or — absent — every hiding spot of the
 ## rooms Hush may enter. Sorted by house order.
 func live_hides(ep_id: String) -> PackedStringArray:
@@ -634,10 +652,15 @@ func _live_table(ep_id: String) -> Dictionary:
 					out[id] = "hide"
 			"exit":
 				out[id] = "exit"
-			"stairs":
-				out[id] = "stairs"
-			"door":
-				out[id] = "door"
+			"stairs", "door":
+				# only when it leads to a room she may enter tonight (the sim's rule; REDESIGN §3.4)
+				var lk := link(sv(h.get("link", "")))
+				var ra := sv(lk.get("a", ""))
+				var rb := sv(lk.get("b", ""))
+				var here := sv(h.get("room", ""))
+				var far := rb if ra == here else (ra if rb == here else "")
+				if far != "" and rooms.has(far):
+					out[id] = sv(h.get("kind", ""))
 	return out
 
 

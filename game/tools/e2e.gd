@@ -213,12 +213,15 @@ static func check(s: String, rep: Dictionary, p_strict: bool) -> PackedStringArr
 				out.append("%s = %.2f s > %.2f s" % [pair[1], v, float(t[pair[0]])])
 	if t.has("laughs_by_60_min") and int(rep.get("laughs_by_60", 0)) < int(t["laughs_by_60_min"]):
 		out.append("%d laughs by 60 s launch-relative < %d" % [int(rep.get("laughs_by_60", 0)), int(t["laughs_by_60_min"])])
+	# R11: frame-quantised timings compare against max(threshold, one measured frame) (the report carries the frame)
+	var frame_s := float(rep.get("frame_ms_p95", 0.0)) / 1000.0
 	if t.has("cue_crowd_s_max"):
 		for c in rep.get("laugh_cues", []):
 			var d: Dictionary = c
-			if not bool(d.get("staged", false)) or float(d.get("crowd_s", 99.0)) > float(t["cue_crowd_s_max"]):
-				out.append("laugh cue %s: staged %s, crowd after %.2f s" % [d.get("id", "?"), str(d.get("staged", false)),
-					float(d.get("crowd_s", 99.0))])
+			if not bool(d.get("staged", false)) or not E2eScenarios.within_quantised(float(d.get("crowd_s", 99.0)),
+					float(t["cue_crowd_s_max"]), frame_s):
+				out.append("laugh cue %s: staged %s, crowd after %.2f s (frame %.0f ms)" % [d.get("id", "?"),
+					str(d.get("staged", false)), float(d.get("crowd_s", 99.0)), frame_s * 1000.0])
 	if t.has("draw_p95_max") and float(rep.get("draw_p95", 0)) > float(t["draw_p95_max"]):
 		out.append("draw calls p95 %.0f > %d" % [float(rep["draw_p95"]), int(t["draw_p95_max"])])
 	if t.has("draw_max") and float(rep.get("draw_max", 0)) > float(t["draw_max"]):
@@ -236,6 +239,11 @@ static func check(s: String, rep: Dictionary, p_strict: bool) -> PackedStringArr
 			want_hash, int((rep["route"] as Dictionary).get("ticks", 0))])
 	if int(rep.get("script_errors", 0)) > int(t.get("errors_max", 0)):
 		out.append("%d script errors" % int(rep["script_errors"]))
+	if t.has("shader_compiles_play_max") and rep.get("perf3d") is Dictionary:
+		var sc := int((rep["perf3d"] as Dictionary).get("shader_compiles_play", 0))
+		if sc > int(t["shader_compiles_play_max"]):
+			out.append("%d shaders compiled during PLAY: %s" % [sc, str(((rep["perf3d"] as Dictionary).get("compile_detail", {})
+				as Dictionary).get("first_use", []).slice(0, 4))])
 	if p_strict and t.has("fallbacks_max"):
 		var fb: Dictionary = rep.get("fallbacks", {})
 		var n := int(fb.get("clip_fallbacks", 0)) + int(fb.get("puppets", 0)) + int(fb.get("greybox_props", 0))
@@ -289,6 +297,17 @@ func _print_summary() -> void:
 	print("%s %s %s" % [E2E_TAG, scenario, " ".join(parts)])
 	if report.has("fallbacks"):
 		print("%s fallbacks %s" % [E2E_TAG, JSON.stringify(report["fallbacks"])])
+	if report.has("perf3d"):
+		var p3: Dictionary = report["perf3d"]
+		print("%s perf3d view=%s frame_ms p50 %s p95 %s | draw p95 %s max %s | tris %s | emitters %s | tex %s MB | shader_compiles_play %s | hitches %s | script p95 %s ms" % [
+			E2E_TAG, report.get("view", "?"), report.get("frame_ms_p50"), report.get("frame_ms_p95"), p3.get("draw_calls_p95"),
+			p3.get("draw_calls_max"), p3.get("tris_max"), p3.get("emitters_max"), p3.get("tex_mb_max"),
+			p3.get("shader_compiles_play"), p3.get("hitches"), p3.get("script_ms_p95")])
+	if report.has("pip_on_share"):
+		print("%s window pip_on_share %.3f pip_longest_s %.1f windows %d | overlays max %s loud %s | hud samples %d" % [E2E_TAG,
+			float(report["pip_on_share"]), float(report.get("pip_longest_s", 0.0)), (report.get("pip_windows", []) as Array).size(),
+			(report.get("overlays", {}) as Dictionary).get("max"), (report.get("overlays", {}) as Dictionary).get("loud_max"),
+			(report.get("hud_pieces", []) as Array).size()])
 	if report.has("flow"):
 		print("%s flow %s" % [E2E_TAG, JSON.stringify(report["flow"])])
 	for f in failures:

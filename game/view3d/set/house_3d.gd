@@ -30,6 +30,11 @@ var _light: Dictionary = {}
 var _solids: Array[Dictionary] = []
 var _lent: Dictionary = {}
 var _room_x: Dictionary = {}
+## Merge each glb room's static geometry (the arch + tonight's static furniture / dressing pieces + its conditional
+## built-ins) into one mesh (brief §7: ≤ 3 static draws per room). Set false before build() to keep every piece its own
+## mesh (SetPreview3D's ID pass colours each piece).
+var merge_static: bool = true
+var _merged: PackedStringArray = PackedStringArray()
 
 
 ## Builds tonight's set. `p_house3d` defaults to house3d.json; `p_db` to the Content autoload's db.
@@ -70,6 +75,8 @@ func build(p_result: SetList.Result, p_house3d: Dictionary = {}, p_db: ContentDB
 	_build_stage(stage)
 	_build_hotspots()
 	_build_pieces()
+	if merge_static:
+		_merge_static()
 	_build_ropes()
 	for rid in result.rooms_backstage:
 		_apply_light(rid, 0.3, 0.0)
@@ -97,6 +104,7 @@ func _clear() -> void:
 	_solids.clear()
 	_lent.clear()
 	_flat_mats.clear()
+	_merged.clear()
 
 
 # --- the stage ----------------------------------------------------------------------------------
@@ -303,6 +311,150 @@ func _build_pieces() -> void:
 			_by_decor[String(pid)] = p
 			if SetGeo.s(g[0]) == "furniture":
 				_solids.append({"id": String(pid), "kind": "furniture", "room": room, "obb": SetGeo.world_obb(xf, piece_entry)})
+
+
+## One mesh per glb room: the shell's meshes (the door leaf excepted — it opens) + the static pieces of tonight
+## (furniture / dressing from a .glb, no anims, not a quake prop tonight, not hidden). They share the room material,
+## so the room light still drives them; each merged piece keeps its Prop3D (API, boxes, landings), visual hidden.
+func _merge_static() -> void:
+	var tables := {"furniture": house3d.get("furniture", {}), "dressing": house3d.get("dressing", {})}
+	var by_room := {}
+	for g in tables.keys():
+		var ids: PackedStringArray = result.furniture_pieces if g == "furniture" else result.dressing
+		for pid in ids:
+			var d: Dictionary = (tables[g] as Dictionary).get(pid, {})
+			var an: Variant = d.get("anims", [])
+			if (typeof(an) == TYPE_ARRAY and not (an as Array).is_empty()) or (typeof(an) == TYPE_DICTIONARY and not (an as Dictionary).is_empty()):
+				continue
+			if bool(d.get("hidden", false)) or result.quake.has(pid):
+				continue
+			var pc: Prop3D = _pieces.get(String(pid), null)
+			if pc == null or not pc.is_static_glb():
+				continue
+			if not by_room.has(pc.room):
+				by_room[pc.room] = []
+			(by_room[pc.room] as Array).append(pc)
+	for rid in _rooms.keys():
+		var shell: RoomShell3D = _rooms[rid]
+		if not shell.from_glb():
+			continue
+		var sources: Array[MeshInstance3D] = []
+		for n in shell.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if mi.mesh != null and not String(mi.name).contains("leaf"):
+				sources.append(mi)
+		var pieces: Array = by_room.get(rid, [])
+		for pc in pieces:
+			sources.append_array((pc as Prop3D).static_meshes())
+		if sources.size() < 2:
+			continue
+		var st := SurfaceTool.new()
+		var mat: Material = sources[0].material_override
+		var inv := _house_xform(shell).affine_inverse()
+		var used: Array[MeshInstance3D] = []
+		for mi in sources:
+			if mi.material_override != mat:
+				continue
+			var ok := true
+			for si in mi.mesh.get_surface_count():
+				if mi.mesh.surface_get_primitive_type(si) != Mesh.PRIMITIVE_TRIANGLES:
+					ok = false
+			if not ok:
+				continue
+			var xf := inv * _house_xform(mi)
+			for si in mi.mesh.get_surface_count():
+				st.append_from(mi.mesh, si, xf)
+			used.append(mi)
+		if used.size() < 2:
+			continue
+		var merged := MeshInstance3D.new()
+		merged.name = "StaticMerged"
+		merged.mesh = st.commit()
+		merged.material_override = mat
+		merged.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		shell.add_child(merged)
+		for mi in used:
+			mi.visible = false
+		for pc in pieces:
+			var pp := pc as Prop3D
+			var all_in := true
+			for m2 in pp.static_meshes():
+				if not used.has(m2):
+					all_in = false
+			if all_in:
+				pp.hide_visual()
+				_merged.append(pp.hotspot_id)
+
+
+## A node's transform relative to this House3D (walks the parents; works before the node enters the tree).
+func _house_xform(n: Node3D) -> Transform3D:
+	var t := Transform3D.IDENTITY
+	var cur: Node = n
+	while cur != null and cur != self:
+		if cur is Node3D:
+			t = (cur as Node3D).transform * t
+		cur = cur.get_parent()
+	return t
+
+
+## The pieces merged into their room's static mesh tonight (their Prop3D stays, visual hidden).
+func merged_pieces() -> PackedStringArray:
+	return _merged
+
+
+## The draw calls of a room's static set: visible meshes of its shell + its unmerged furniture / dressing / decor pieces
+## (live and furniture-role hotspot props not counted).
+func static_draws(room: String) -> int:
+	var n := 0
+	var shell: RoomShell3D = _rooms.get(room, null)
+	if shell == null:
+		return 0
+	for m in shell.find_children("*", "MeshInstance3D", true, false):
+		if _visible_chain(m as Node3D):
+			n += 1
+	for pid in _pieces.keys():
+		var pc: Prop3D = _pieces[pid]
+		if pc.room != room or _merged.has(String(pid)) or not _visible_chain(pc):
+			continue
+		for m3 in pc.static_meshes():
+			if _visible_chain(m3):
+				n += 1
+	return n
+
+
+## Triangles drawn for a room's set (brief §7: ≤ 25k per lit room): its visible shell meshes, its pieces, its
+## hotspot props — with every ink / halo shell pass counted as another draw of the same mesh.
+func room_tris(room: String) -> int:
+	var nodes: Array[Node3D] = []
+	var shell: RoomShell3D = _rooms.get(room, null)
+	if shell != null:
+		nodes.append(shell)
+	for pid in _pieces.keys():
+		if (_pieces[pid] as Prop3D).room == room:
+			nodes.append(_pieces[pid])
+	for pr in props():
+		if pr.room == room:
+			nodes.append(pr)
+	var n := 0
+	for root in nodes:
+		for m in root.find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			if mi.mesh == null or not _visible_chain(mi):
+				continue
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var idx: Variant = arr[Mesh.ARRAY_INDEX]
+				n += (idx as PackedInt32Array).size() / 3 if idx != null else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+	return n
+
+
+func _visible_chain(n: Node3D) -> bool:
+	var cur: Node = n
+	while cur != null and cur != self:
+		if cur is Node3D and not (cur as Node3D).visible:
+			return false
+		cur = cur.get_parent()
+	return true
 
 
 func _add_room_node(room: String, n: Prop3D) -> void:
@@ -542,4 +694,4 @@ func room_shell(room: String) -> RoomShell3D:
 ## Build statistics: {rooms, props, pieces, solids, build_ms}.
 func stats() -> Dictionary:
 	return {"rooms": _rooms.size(), "props": props().size(), "pieces": _pieces.size(), "solids": _solids.size(),
-		"build_ms": build_ms}
+		"merged": _merged.size(), "build_ms": build_ms}

@@ -80,8 +80,11 @@ func test_live_kinds_and_architecture() -> void:
 	assert_eq(n1.get("hall_confiscated_box"), "take")
 	assert_eq(n1.get("kitchen_pantry_curtain"), "hide")
 	assert_eq(n1.get("hall_front_door"), "exit", "exits as today")
-	assert_eq(n1.get("stairs_foot"), "stairs", "stairs as today")
+	assert_false(n1.has("stairs_foot"), "the stairs are roped off in Act I (they lead to the unbuilt landing)")
+	assert_false(n1.has("kitchen_back_door"), "the back door is closed in Act I (REDESIGN §3.4)")
 	assert_false(n1.has("kitchen_window"), "the kitchen window entry stays untappable")
+	var fx := U.world_patched("fx_act1", func(ep: Dictionary) -> void: (ep["rooms"] as Array).append("landing"))
+	assert_true(fx.ctx.is_live(fx.db.house.hotspot("stairs_foot").idx), "stairs to a room she may enter are live")
 	for struck in ["kitchen_table", "parlour_chaise_back", "parlour_gramophone", "parlour_newspaper", "kitchen_pantry_shelf",
 			"kitchen_fridge", "parlour_bellows", "parlour_chandelier", "hall_clock_case", "landing_airing_cupboard"]:
 		assert_false(n1.has(struck), "N1: %s is struck" % struck)

@@ -20,6 +20,8 @@ class_name SettingsPanel
 extends UiPanel
 
 const ROW_H := 144.0
+## A stacked row (two-column tabs): the label line over a 104-px control line.
+const ROW_H_STACKED := 200.0
 const GAP := 24.0
 const HEADER_H := 144.0
 const MAX_W := 1560.0
@@ -231,15 +233,22 @@ func _layout(rect: Rect2) -> void:
 	var specs := tab_rows(tab)
 	var two_cols := specs.size() > 5
 	var col_w := (w - 64.0 - 24.0) * 0.5 if two_cols else w - 64.0
+	# two columns: each row stacks its label over its control (a half-width row cannot hold both side by side)
+	var per_col := int(ceil(float(specs.size()) / 2.0)) if two_cols else specs.size()
+	var row_h := ROW_H
+	if two_cols:
+		row_h = clampf((h - y - 32.0 - float(per_col - 1) * GAP) / float(maxi(1, per_col)), ROW_H, ROW_H_STACKED)
 	var i := 0
 	for spec in specs:
 		var row: Control = rows.get(String(spec[0]))
 		if row == null:
 			continue
-		var col := 0 if (not two_cols or i < int(ceil(float(specs.size()) / 2.0))) else 1
-		var ri := i if col == 0 else i - int(ceil(float(specs.size()) / 2.0))
-		row.position = Vector2(32.0 + float(col) * (col_w + 24.0), HEADER_H + GAP + float(ri) * (ROW_H + GAP))
-		row.size = Vector2(col_w, ROW_H)
+		var col := 0 if (not two_cols or i < per_col) else 1
+		var ri := i if col == 0 else i - per_col
+		row.position = Vector2(32.0 + float(col) * (col_w + 24.0), y + float(ri) * (row_h + GAP))
+		row.size = Vector2(col_w, row_h)
+		row.set("stacked", two_cols)
+		row.queue_redraw()
 		i += 1
 
 
@@ -263,12 +272,15 @@ class _SettingRow:
 
 	const CTRL_W := 640.0
 	const KNOB := 88.0
+	const STACK_CTRL_H := 104.0
 
 	var panel: SettingsPanel
 	var key: String = ""
 	var kind: String = "toggle"
 	var label: String = ""
 	var desc: String = ""
+	## Label over control (two-column tabs); set by the panel's layout.
+	var stacked: bool = false
 	var _press_seg: int = -1
 
 	func _init() -> void:
@@ -278,7 +290,22 @@ class _SettingRow:
 	func _n_seg() -> int:
 		return SettingsPanel.choices_for(key).size()
 
+	## Segment width / pitch of a choice control.
+	func _seg_w() -> float:
+		if not stacked:
+			return 220.0
+		var n := float(maxi(1, _n_seg()))
+		return minf(260.0, (size.x - 48.0 - (n - 1.0) * 24.0) / n)
+
 	func _ctrl_rect() -> Rect2:
+		if stacked:
+			match kind:
+				"choice":
+					var n := float(_n_seg())
+					return Rect2(24.0, size.y - STACK_CTRL_H - 4.0, n * _seg_w() + (n - 1.0) * 24.0, STACK_CTRL_H)
+				"slider":
+					return Rect2(16.0, size.y - STACK_CTRL_H - 4.0, size.x - 32.0, STACK_CTRL_H)
+			return Rect2(size.x - 220.0, 0, 220.0, size.y)
 		match kind:
 			"slider":
 				return Rect2(size.x - CTRL_W - 16.0, 0, CTRL_W, size.y)
@@ -287,15 +314,20 @@ class _SettingRow:
 				return Rect2(size.x - n * 220.0 - (n - 1.0) * 24.0 - 8.0, 0, n * 220.0 + (n - 1.0) * 24.0, size.y)
 		return Rect2(size.x - 220.0, 0, 220.0, size.y)
 
+	## Segment `i`'s hit rect (the full control height).
+	func _seg_rect(i: int) -> Rect2:
+		var cr := _ctrl_rect()
+		var sw := _seg_w()
+		return Rect2(cr.position.x + float(i) * (sw + 24.0), cr.position.y, sw, cr.size.y)
+
 	func _has_point(p: Vector2) -> bool:
 		if kind == "slider" or kind == "choice":
 			return _ctrl_rect().has_point(p)
 		return Rect2(Vector2.ZERO, size).has_point(p)
 
 	func _seg_at(p: Vector2) -> int:
-		var cr := _ctrl_rect()
 		for i in _n_seg():
-			if Rect2(cr.position.x + float(i) * 244.0, 0, 220.0, size.y).has_point(p):
+			if _seg_rect(i).has_point(p):
 				return i
 		return -1
 
@@ -338,10 +370,13 @@ class _SettingRow:
 		var r := Rect2(Vector2.ZERO, size)
 		UiKit.draw_chunky_rect(self, r.grow(-4.0), 28.0, Color(UiKit.PAPER_SHADE, 0.4), Color(UiKit.PAPER_SHADE, 0.4), 0.0, 0.0)
 		var f := UiKit.ui_font()
-		var ly := size.y * 0.5 + (0.0 if desc == "" else -10.0) + 16.0
-		draw_string(f, Vector2(36, ly), label, HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.text_size(UiKit.SIZE_PLAY), UiKit.NAVY)
-		if desc != "":
-			draw_string(f, Vector2(36, ly + 44.0), desc, HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.SIZE_MIN, Color(UiKit.NAVY, 0.55))
+		if stacked:
+			_draw_stacked_text(f)
+		else:
+			var ly := size.y * 0.5 + (0.0 if desc == "" else -10.0) + 16.0
+			draw_string(f, Vector2(36, ly), label, HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.text_size(UiKit.SIZE_PLAY), UiKit.NAVY)
+			if desc != "":
+				draw_string(f, Vector2(36, ly + 44.0), desc, HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.SIZE_MIN, Color(UiKit.NAVY, 0.55))
 		var cr := _ctrl_rect()
 		match kind:
 			"slider":
@@ -362,7 +397,9 @@ class _SettingRow:
 				var vals := SettingsPanel.choices_for(key)
 				var labels: Array = SettingsPanel.CHOICE_LABELS.get(key, [])
 				for i in vals.size():
-					var sr := Rect2(cr.position.x + float(i) * 244.0, 24.0, 220.0, 96.0)
+					var hr := _seg_rect(i)
+					var sr := Rect2(hr.position.x, hr.get_center().y - 48.0, hr.size.x, 96.0) if not stacked \
+						else Rect2(hr.position.x, hr.position.y + 8.0, hr.size.x, hr.size.y - 16.0)
 					var on := str(vals[i]) == cur
 					var pressed := is_pressed and _press_seg == i
 					var fill := UiKit.GOLD if on else UiKit.CREAM
@@ -370,7 +407,7 @@ class _SettingRow:
 						fill = UiKit.pressed(fill)
 					UiKit.draw_chunky_rect(self, sr, 26.0, fill, UiKit.GOLD_SHADE if on else UiKit.CREAM_SHADE, 5.0, 8.0)
 					var t := UiStrings.t(String(labels[i]), {"s": SettingsPanel.head_b_scale()}) if i < labels.size() else str(vals[i])
-					var fs := ScriptPanel.fit_size(UiKit.display_font(), t, 200.0, UiKit.SIZE_MIN)
+					var fs := ScriptPanel.fit_size(UiKit.display_font(), t, sr.size.x - 20.0, UiKit.SIZE_MIN)
 					UiKit.draw_text_centered(self, UiKit.display_font(), sr.get_center() + Vector2(0, -3), t, fs, UiKit.NAVY, 0)
 			_:
 				var on := bool(panel.value(key)) if kind == "toggle" else float(panel.value(key)) > 1.05
@@ -383,3 +420,17 @@ class _SettingRow:
 				var t := UiStrings.t("settings.on" if on else "settings.off")
 				draw_string(UiKit.display_font(), Vector2(pr.position.x - 110.0, size.y * 0.5 + 14.0), t,
 					HORIZONTAL_ALIGNMENT_RIGHT, 96.0, UiKit.SIZE_MIN, UiKit.NAVY)
+
+	## Stacked text: the label on the top line (fitted to the row, less the toggle); a toggle row's
+	## description on the second line (fitted, else cut with an ellipsis). Choice / slider rows drop it.
+	func _draw_stacked_text(f: Font) -> void:
+		var room := size.x - 64.0 - (300.0 if kind == "toggle" or kind == "text_toggle" else 0.0)
+		var ls := ScriptPanel.fit_size(f, label, room, UiKit.text_size(UiKit.SIZE_PLAY))
+		var top := 30.0 + float(ls)
+		if kind == "choice" or kind == "slider":
+			top = minf(top, _ctrl_rect().position.y - 14.0)
+		draw_string(f, Vector2(36, top), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ls, UiKit.NAVY)
+		if desc != "" and (kind == "toggle" or kind == "text_toggle"):
+			var ds := ScriptPanel.fit_size(f, desc, room, UiKit.SIZE_MIN)
+			draw_string(f, Vector2(36, top + 18.0 + float(ds)), ScriptPanel.clip_text(f, desc, room, ds), HORIZONTAL_ALIGNMENT_LEFT, -1, ds,
+				Color(UiKit.NAVY, 0.55))

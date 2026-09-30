@@ -425,3 +425,21 @@ func test_links_from_content_db_matches_house_json() -> void:
 		var k := "%s|%s" % [l["a"], l["b"]]
 		assert_true(by_ab.has(k), "link %s in house.json" % k)
 		assert_almost_eq(float(l["x_m"]), float(by_ab.get(k, -99.0)), 0.01, "x of %s in metres" % k)
+
+
+func test_a_gag_kept_through_a_seek_restarts_from_the_new_framing() -> void:
+	# a seek into a reaction keeps its punch-in; its approach must not pan in from where the camera was before
+	var cam := _cam()
+	var t := _target(3.0)
+	cam.follow(t, func() -> float: return 0.0)
+	_settle(cam, 60)
+	var id := cam.request_gag(Vector3(16.0, 1.1, -1.0), 1.4, 11, 90, 21, 10, 0.0, 120, 1.1)
+	cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	t.position.x = 16.0
+	cam.clear_gags(id)
+	cam.snap_now()
+	cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	assert_true(cam.is_gag_active(), "the live gag survives the seek")
+	assert_gt(cam.aim().x, 12.0, "the approach starts from the post-seek framing (%.2f)" % cam.aim().x)
+	t.free()
+	cam.free()

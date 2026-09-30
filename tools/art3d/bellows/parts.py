@@ -12,10 +12,10 @@ import bpalette as TP
 import skeleton as SK
 
 # face card: the planar FaceUV square on the head front (face_atlas.py draws in the same 1000 x 1000 face space)
-FACE_W = 0.56
-FACE_H = 0.56
+FACE_W = 0.60
+FACE_H = 0.60
 FACE_DZ = -0.012          # face square centre relative to the head centre
-HEAD_R = (0.255, 0.232, 0.238, 2.1)       # half width, half depth, half height, superellipse power
+HEAD_R = (0.274, 0.240, 0.240, 2.35)       # half width, half depth, half height, superellipse power
 BARREL_R = (0.405, 0.355, 0.43, 2.2)
 CUP_SCALE = 1.8           # R5: Bellows' teacup + saucer x1.8
 
@@ -44,9 +44,9 @@ def landmarks_json(L):
 def head_q(d):
     HA, HB, HCz, HP = HEAD_R
     q = d * T.se_radius(d, HA, HB, HCz, HP)
-    lo = T.smoothstep(0.05, -0.22, q.z)          # jowls: a pompous heavy jaw
+    lo = T.smoothstep(0.05, -0.22, q.z)          # jowls: a pompous heavy jaw, full in front so the mouth faces out
     q.x *= 1.0 + 0.10 * lo
-    q.y *= 1.0 + 0.05 * lo
+    q.y *= 1.0 + 0.20 * lo
     return q
 
 
@@ -152,8 +152,8 @@ def box(center, size, color, rot=(0, 0, 0)):
 BOUFFANT_LOBES = {
     # bone: (centre offset from HC, radii, pole, ridges)
     "bouffant": ((0.0, 0.100, 0.268), (0.300, 0.262, 0.248), (0.0, -0.40, 1.0), 12),
-    "bouffant_l": ((0.222, 0.095, 0.185), (0.180, 0.180, 0.176), (1.0, -0.35, 0.35), 9),
-    "bouffant_r": ((-0.222, 0.095, 0.185), (0.180, 0.180, 0.176), (-1.0, -0.35, 0.35), 9),
+    "bouffant_l": ((0.238, 0.110, 0.190), (0.180, 0.180, 0.176), (1.0, -0.35, 0.35), 9),
+    "bouffant_r": ((-0.238, 0.110, 0.190), (0.180, 0.180, 0.176), (-1.0, -0.35, 0.35), 9),
 }
 
 
@@ -180,18 +180,18 @@ def build_body(body, rig, L):
     lobes = [(HC + Vector(o), r) for o, r, _p, _n in BOUFFANT_LOBES.values()]
     bm = T.blob(lambda d: HC + head_q(d), "peach", n=10)
     T.delete_faces(bm, lambda c, n: any(inside_lobe(c, lc, lr, 0.84) for lc, lr in lobes))
-    body.add(bm, "Head", face_uv={"center": (0.0, FC.z), "w": FACE_W, "h": FACE_H, "front": -0.22, "ymax": HC.y - 0.06},
+    body.add(bm, "Head", face_uv={"center": (0.0, FC.z), "w": FACE_W, "h": FACE_H, "front": -0.10, "ymax": HC.y - 0.04},
              name="head")
     # ---- the bulbous rosy nose ----
-    NC = HC + Vector((0, -HB - 0.034, -0.048))
-    body.add(T.se_blob(NC, 0.072, 0.064, 0.062, 2.0, "nose", n=4), "nose", name="nose")
+    NC = HC + Vector((0, -HB - 0.026, -0.044))
+    body.add(T.se_blob(NC, 0.057, 0.050, 0.051, 2.0, "nose", n=4), "nose", name="nose")
     # ---- ears (peek out between the side lobes and the chops) ----
     for sx in (-1, 1):
-        bm = T.se_blob(HC + Vector((sx * 0.252, 0.035, 0.005)), 0.034, 0.048, 0.062, 2.0, "peach", n=2)
+        bm = T.se_blob(HC + Vector((sx * 0.272, 0.035, 0.005)), 0.034, 0.048, 0.062, 2.0, "peach", n=2)
         body.add(bm, "Head", name="ear")
     # ---- mutton chops: smooth silver teardrops on the jaw sides, clear of the cheeks ----
     for s, sx in (("l", 1), ("r", -1)):
-        c = HC + Vector((sx * 0.236, -0.030, -0.125))
+        c = HC + Vector((sx * 0.258, -0.020, -0.125))
 
         def chop(d, q, sx=sx):
             # fuller at the bottom-front, tapering up toward the ear
@@ -201,7 +201,7 @@ def build_body(body, rig, L):
             if d.y < 0:
                 q.y *= 1.12
             return q
-        bm = T.se_blob(c, 0.058, 0.085, 0.120, 2.3, "bouffant", n=4, warp=chop)
+        bm = T.se_blob(c, 0.058, 0.085, 0.120, 2.3, "bouffant", n=3, warp=chop)
         T.rot_about(bm, c, (12, 0, sx * -18))
         T.recolor(bm, lambda cc, nn, cur: "bouffant_dk" if (cc - c).z < -0.085 and nn.z < -0.3 else None)
         body.add(bm, "sideburn_" + s, name="sideburn")
@@ -300,16 +300,16 @@ def build_body(body, rig, L):
         bm = T.capsule_chain([wr - ax * 0.045, wr + ax * 0.005], [0.074, 0.072], "cuff", seg=8, cap_rings=1, samples_per_m=12)
         body.add(bm, "lowerarm_" + s, name="cuff")
         hx = (H("middle_01_" + s) - wr).normalized()
-        bm = T.se_blob(wr + hx * 0.070, 0.066, 0.060, 0.040, 2.3, "glove", n=4)
+        bm = T.se_blob(wr + hx * 0.070, 0.066, 0.060, 0.040, 2.3, "glove", n=3)
         body.add(bm, "hand_" + s, name="palm")
         for f in ("index", "middle", "ring", "pinky"):
             a, b = H(f + "_01_" + s), rig.tail(f + "_03_" + s)
             r = 0.024 if f != "pinky" else 0.020
-            bm = T.capsule_chain([a - hx * 0.02, b], [r, r * 0.92], "glove", seg=5, cap_rings=1, samples_per_m=20)
+            bm = T.capsule_chain([a - hx * 0.02, b], [r, r * 0.92], "glove", seg=4, cap_rings=1, samples_per_m=20)
             bones = [f + "_01_" + s, f + "_02_" + s] if f != "pinky" else "pinky_01_" + s
             body.add(bm, bones, power=4.0, keep=2, name="finger")
         a, b = H("thumb_01_" + s), rig.tail("thumb_03_" + s)
-        bm = T.capsule_chain([a + hx * 0.01, b], [0.026, 0.023], "glove", seg=5, cap_rings=1, samples_per_m=20)
+        bm = T.capsule_chain([a + hx * 0.01, b], [0.026, 0.023], "glove", seg=4, cap_rings=1, samples_per_m=20)
         body.add(bm, ["thumb_01_" + s, "thumb_02_" + s], power=4.0, keep=2, name="thumb")
     # ---- legs: striped trousers, spats, tiny shoes ----
     for s, sx in (("l", 1), ("r", -1)):
@@ -329,7 +329,7 @@ def build_body(body, rig, L):
             if q.y < 0:
                 q.z *= 1.0 + 0.10 * T.smoothstep(0, -0.1, q.y)
             return q
-        bm = T.se_blob(SC, 0.062, 0.110, 0.042, 2.4, "shoe", n=4, warp=shoe_warp)
+        bm = T.se_blob(SC, 0.062, 0.110, 0.042, 2.4, "shoe", n=3, warp=shoe_warp)
         T.recolor(bm, lambda c, n, cur: "shoe_hi" if n.z > 0.7 and c.y < SC.y - 0.04 else None)
         body.add(bm, ["foot_" + s, "ball_" + s], power=4.0, keep=2, name="shoe")
         bm = T.capsule_chain([ft + Vector((0, 0.005, -0.020)), ft + Vector((0, -0.035, 0.035))], [0.060, 0.056], "spat",
@@ -382,9 +382,9 @@ def build_props(body, rig, L):
     EY = SK.HC_Z + FACE_DZ + (0.5 - 0.423) * FACE_H
     parts = []
     for sx in (-1, 1):
-        ex = sx * (0.667 - 0.5) * FACE_W
-        parts.append(T.torus(0.058, 0.008, Vector((ex, HC.y - HB - 0.030, EY)), "specs", seg=12, rseg=3, rot=(90, 0, 0)))
-        parts.append(T.capsule_chain([Vector((sx * 0.150, HC.y - HB - 0.012, EY + 0.006)), Vector((sx * 0.235, HC.y - 0.10, EY + 0.012))],
+        ex = sx * (0.652 - 0.5) * FACE_W
+        parts.append(T.torus(0.064, 0.008, Vector((ex, HC.y - HB - 0.030, EY)), "specs", seg=10, rseg=3, rot=(90, 0, 0)))
+        parts.append(T.capsule_chain([Vector((sx * 0.158, HC.y - HB - 0.012, EY + 0.006)), Vector((sx * 0.255, HC.y - 0.10, EY + 0.012))],
                                      [0.006, 0.006], "specs", seg=4, cap_rings=1, samples_per_m=10))
     parts.append(T.capsule_chain([Vector((-0.036, HC.y - HB - 0.058, EY + 0.012)), Vector((0.036, HC.y - HB - 0.058, EY + 0.012))],
                                  [0.007, 0.007], "specs", seg=4, cap_rings=1, samples_per_m=10))
@@ -393,7 +393,7 @@ def build_props(body, rig, L):
     SPC = rig.head("specs_chest")
     parts = []
     for sx in (-1, 1):
-        parts.append(T.torus(0.042, 0.008, SPC + Vector((sx * 0.050, 0, 0)), "specs", seg=9, rseg=3, rot=(90, 0, 0)))
+        parts.append(T.torus(0.042, 0.008, SPC + Vector((sx * 0.050, 0, 0)), "specs", seg=8, rseg=3, rot=(90, 0, 0)))
         parts.append(T.se_blob(SPC + Vector((sx * 0.050, 0.004, 0)), 0.038, 0.004, 0.038, 2.0, "lens", n=2))
     parts.append(T.capsule_chain([SPC + Vector((-0.012, 0, 0.004)), SPC + Vector((0.012, 0, 0.004))], [0.006, 0.006], "specs", seg=4, cap_rings=1, samples_per_m=10))
     bm = T.merge(*parts)
@@ -408,31 +408,36 @@ def build_fx(body, rig, L):
     random.seed(11)
     FX = rig.head("fx_choo")
     # the puff: one big scalloped cotton-wool cloud ~0.9 m across in front of the nose (+ two small puffs, droplets)
-    cc = FX + Vector((0, -0.34, 0.02))
-    parts = [lobe(cc, (0.44, 0.22, 0.34), (0, -1, 0), "puff", "puff_sh", n_ridges=9, amp=0.16, rings=6, segs=27)]
-    for off, r in (((0.30, -0.10, 0.26), 0.12), ((-0.33, -0.06, -0.20), 0.10)):
-        parts.append(lobe(cc + Vector(off), (r, r * 0.8, r), (0, -1, 0), "puff", "puff_sh", n_ridges=6, amp=0.18, rings=4, segs=12))
+    cc = FX + Vector((0, -0.44, 0.03))
+    parts = [lobe(cc, (0.46, 0.38, 0.38), (0, -1, 0), "puff", "puff_sh", n_ridges=8, amp=0.16, rings=5, segs=24)]
+    for off, r in (((0.34, -0.14, 0.30), 0.13), ((-0.36, -0.10, -0.24), 0.11)):
+        parts.append(lobe(cc + Vector(off), (r, r * 0.8, r), (0, -1, 0), "puff", "puff_sh", n_ridges=5, amp=0.18, rings=4, segs=10))
     for _ in range(6):
-        p = cc + Vector((random.uniform(-0.52, 0.52), random.uniform(-0.25, -0.05), random.uniform(-0.40, 0.40)))
-        parts.append(T.se_blob(p, 0.024, 0.024, 0.030, 2.0, "drop", n=1))
+        p = cc + Vector((random.uniform(-0.55, 0.55), random.uniform(-0.45, -0.25), random.uniform(-0.42, 0.42)))
+        parts.append(T.se_blob(p, 0.028, 0.028, 0.036, 2.0, "drop", n=1))
     body.add(T.merge(*parts), "fx_choo", name="fx_choo", outline=1.3)
     # dazed stars: five chunky yellow vinyl stars on a 0.28 m ring (the clip spins the ring bone)
-    FS = rig.head("fx_stars")
+    # the ring rides above the bouffant (the bone is the ring's axis; the clip spins it): 1.86 m, radius 0.30 m
+    FS = rig.head("fx_stars") + Vector((0.0, 0.0, 1.86 - rig.head("fx_stars").z))
     parts = []
     for k in range(5):
         a = 2 * math.pi * k / 5
-        p = FS + Vector((math.cos(a) * 0.28, math.sin(a) * 0.28, 0.02 * math.sin(3 * a)))
-        parts.append(star_prism(p, 0.062, 0.028, 0.030, "star", rot=(0, math.degrees(a) * 0.3, math.degrees(a))))
+        p = FS + Vector((math.cos(a) * 0.30, math.sin(a) * 0.30, 0.03 * math.sin(3 * a)))
+        parts.append(star_prism(p, 0.088, 0.040, 0.040, "star", rot=(0, 0, math.degrees(a) + 90)))
     body.add(T.merge(*parts), "fx_stars", name="fx_stars")
     # orbiting notes: four navy vinyl music notes on a 0.32 m ring
-    FN = rig.head("fx_notes")
+    FN = rig.head("fx_notes") + Vector((0.0, 0.0, 1.90 - rig.head("fx_notes").z))
     parts = []
     for k in range(4):
         a = 2 * math.pi * (k + 0.5) / 4
-        p = FN + Vector((math.cos(a) * 0.32, math.sin(a) * 0.32, 0.03 * (k % 2)))
-        parts.append(T.se_blob(p, 0.040, 0.022, 0.030, 2.0, "note", n=2))
-        parts.append(box(p + Vector((0.034, 0, 0.075)), (0.012, 0.012, 0.15), "note"))
-        parts.append(box(p + Vector((0.052, 0, 0.135)), (0.040, 0.012, 0.022), "note", rot=(0, -25, 0)))
+        p = FN + Vector((math.cos(a) * 0.36, math.sin(a) * 0.36, 0.04 * (k % 2)))
+        rz = math.degrees(a) + 90
+        nb = [T.se_blob(p, 0.054, 0.030, 0.040, 2.0, "note", n=2),
+              box(p + Vector((0.046, 0, 0.100)), (0.016, 0.016, 0.20), "note"),
+              box(p + Vector((0.072, 0, 0.180)), (0.056, 0.016, 0.030), "note_hi", rot=(0, -25, 0))]
+        m = T.merge(*nb)
+        T.rot_about(m, p, (0, 0, rz))
+        parts.append(m)
     body.add(T.merge(*parts), "fx_notes", name="fx_notes")
 
 
@@ -442,7 +447,9 @@ def build_fx(body, rig, L):
 def _export_attachment(rig, bone, bms, path, mat):
     """One rigid mesh in the bone's local frame (Blender bone space; the glTF exporter converts to Y-up, and a
     BoneAttachment3D on that bone places it back at rest)."""
-    M = (rig.arm.matrix_world @ rig.B[bone].matrix_local).inverted()
+    # glTF export converts Blender axes (x, y, z) -> (x, z, -y), but a Godot bone's local frame equals the Blender bone
+    # frame (checked: rig3d.json socket offsets in Blender bone space land right in Godot), so pre-rotate +90 deg about X
+    M = Matrix.Rotation(math.radians(90.0), 4, "X") @ (rig.arm.matrix_world @ rig.B[bone].matrix_local).inverted()
     tmp = T.Body(rig, "att")
     for i, bm in enumerate(bms):
         bmesh.ops.transform(bm, matrix=M, verts=bm.verts[:])
@@ -481,13 +488,20 @@ def _export_attachment(rig, bone, bms, path, mat):
 
 
 def bouffant_flipped(HC):
-    """ACHOO-RIA! / BLINDED: the whole dandelion tipped forward over his eyes (a silver fringe down to the nose)."""
+    """ACHOO-RIA! / BLINDED: the dandelion flopped forward like a mop -- a silver fringe hangs over his eyes down to the
+    nose, a flattened cap over the crown, the side lobes drooping by the ears."""
     bms = []
-    piv = HC + Vector((0, 0.02, 0.10))
-    for bone, bm in bouffant_neat(HC, rings=(8, 7), segs=(30, 24)).items():
-        T.rot_about(bm, piv, (-58, 0, 0))
-        bmesh.ops.translate(bm, vec=Vector((0, -0.05, -0.02)), verts=bm.verts[:])
-        bms.append(bm)
+    fr = lobe(HC + Vector((0.0, -0.215, 0.105)), (0.285, 0.135, 0.175), (0.0, -1.0, -0.15), "bouffant", "bouffant_dk",
+              n_ridges=11, amp=0.12, rings=7, segs=26)
+    bms.append(fr)
+    cap = lobe(HC + Vector((0.0, 0.03, 0.215)), (0.285, 0.265, 0.115), (0.0, -0.3, 1.0), "bouffant", "bouffant_dk",
+               n_ridges=10, amp=0.06, rings=6, segs=22)
+    T.delete_faces(cap, lambda p, n: inside_lobe(p, HC + Vector((0.0, -0.215, 0.105)), (0.285, 0.135, 0.175), 0.92))
+    bms.append(cap)
+    for sx in (-1, 1):
+        sl = lobe(HC + Vector((sx * 0.262, 0.015, 0.02)), (0.125, 0.150, 0.190), (sx * 1.0, -0.3, -0.2), "bouffant",
+                  "bouffant_dk", n_ridges=8, amp=0.10, rings=5, segs=16)
+        bms.append(sl)
     return bms
 
 
@@ -497,7 +511,8 @@ def bouffant_frazzled(HC):
     for bone, (off, radii, pole, nr) in BOUFFANT_LOBES.items():
         c = HC + Vector(off) * 1.12 + Vector((0, 0, 0.02))
         rr = tuple(r * 1.18 for r in radii)
-        bm = lobe(c, rr, pole, "frazzle", "frazzle_dk", n_ridges=nr + 6, amp=0.22, rings=8, segs=36 if bone == "bouffant" else 26)
+        bm = lobe(c, rr, pole, "frazzle", "frazzle_dk", n_ridges=nr + (2 if bone == "bouffant" else 1), amp=0.22, rings=7,
+                  segs=28 if bone == "bouffant" else 20)
         bms.append(bm)
     return bms
 

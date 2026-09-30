@@ -494,9 +494,9 @@ def solve_arm(pose, side, target, pole, hand_world=None, effector=None, iters=8,
         T = S + dv * d
         u = (E - S).normalized()
         f = (T - E).normalized()
-        hinge = u.cross(f)
-        if hinge.length < 1e-6:
-            hinge = u.cross(pp)
+        # the elbow hinge = the normal of the (shoulder, wrist, pole) plane: equal to u x f for a bent arm and still
+        # defined for a straight one (u x f vanishes there and flipped the arm 180 degrees)
+        hinge = pp.cross(dv)
         hinge = hinge.normalized() * arm_hinge_sign(sk, side)
         pose.set_world_rot(up, _frame(u, hinge))
         pose.set_world_rot(lo, _frame(f, hinge))

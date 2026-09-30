@@ -4,14 +4,17 @@
 ## * `pause_back` — a synthetic NOTIFICATION_APPLICATION_FOCUS_OUT (root.propagate_notification): the
 ##   pause menu opens, the tick stops, the device log flushes; FOCUS_IN → still paused; Back closes the
 ##   menu (never quits), play resumes.
-## * `curtain_call` — N01 ended → the curtain call (first viewing ≤ 12.8 s unskipped, Next/Retry live
+## * `curtain_call` — (R3D) the Prologue ends → its call (≤ 10.4 s unskipped, Next live on frame 1) → Next ▶ → N01;
+##   N01 ended → the curtain call (first viewing ≤ 12.8 s unskipped, Next/Retry live
 ##   on frame 1) → Retry → ended again (repeat viewing ≤ 7.5 s) → Next Night ▶ → N02 → ended → Next ▶
-##   → "To be continued…" → the Playbill; then Gate 0 → g0_done → Again ▶ ≤ 1.5 s.
+##   → "To be continued…" → the Playbill; then Gate 0 → g0_done → Again ▶ ≤ 1.5 s (frame-quantised).
 ## * `touch_smoke` — synthetic InputEventScreenTouch taps on a real hotspot rect, an action-button hold,
 ##   a Clarence tap → the commands, the ripple and the feedback in the same frame.
-## * `tap_accuracy` — every hotspot on screen at zoom 1.0 and 0.5: 20 seeded taps jittered around its art
-##   centre (±40 / ±20 px) → TapAssist must pick it ≥ 19/20 and never a neighbour; drags of 25–200 px in
-##   8 directions never move Hush.
+## * `tap_accuracy` — 2D: every hotspot on screen at zoom 1.0 and 0.5, 20 seeded taps jittered around its art
+##   centre (±40 / ±20 px). **3D** (R3D index §6 row 18): for Gate 0, the Prologue (pass/fail) and N01/N02 (info), the
+##   camera peeks at each built room at the base framing and every live hotspot's PROJECTED hit box gets 20 seeded
+##   taps jittered ±40 px around its centre through NightInput.resolve (TapAssist on the projected rects) → ≥ 19/20
+##   and never a neighbour; drags of 25–200 px in 8 directions never move Hush.
 ## * `cold_<episode>` — boots into that Night's cold open + loading card, then stops.
 class_name E2eFlows
 extends Node
@@ -27,6 +30,10 @@ var _t: float = 0.0
 
 func _process(delta: float) -> void:
 	_t += delta
+	var now := Time.get_ticks_usec()
+	if _fr_last > 0 and _fr_ms.size() < 4000:
+		_fr_ms.append(float(now - _fr_last) / 1000.0)
+	_fr_last = now
 
 
 ## Begin the flow on the first NightScene.
@@ -58,6 +65,19 @@ func _run() -> void:
 
 
 # --- helpers -----------------------------------------------------------------------------------
+
+var _fr_last: int = 0
+var _fr_ms := PackedFloat32Array()
+
+
+## The measured frame time (s): the median wall time of the flow's recent frames (R11 quantisation).
+func frame_s() -> float:
+	if _fr_ms.is_empty():
+		return 1.0 / 60.0
+	var a := _fr_ms.duplicate()
+	a.sort()
+	return a[a.size() / 2] / 1000.0
+
 
 func _frames(n: int) -> void:
 	for i in n:
@@ -123,9 +143,10 @@ func _flow_retry() -> void:
 		await get_tree().process_frame
 	var wall := Time.get_ticks_msec() - t0
 	await _frames(10)
-	result = {"retry_ms": got[0], "retry_wall_ms": wall, "tick_before": before, "tick_after": _tick()}
-	if got[0] < 0 or got[0] > 1500:
-		failures.append("retry took %d ms (> 1500)" % got[0])
+	var fr := frame_s()
+	result = {"retry_ms": got[0], "retry_wall_ms": wall, "tick_before": before, "tick_after": _tick(), "frame_ms": snappedf(fr * 1000.0, 0.1)}
+	if got[0] < 0 or not E2eScenarios.within_quantised(float(got[0]) / 1000.0, 1.5, fr):
+		failures.append("retry took %d ms (> max(1500, one frame %.0f ms))" % [got[0], fr * 1000.0])
 	if _tick() >= before:
 		failures.append("the sim did not restart from tick 0 (tick %d → %d)" % [before, _tick()])
 
@@ -207,6 +228,30 @@ func _flow_curtain_call() -> void:
 	var out := {}
 	if not await _wait_phase("PLAY"):
 		return
+	# the Prologue's call → Next ▶ → N01 (the flow boots into P00)
+	if String(night.get("episode_id")) == "p00_curtain_up":
+		await _secs(0.5)
+		_force_end("prologue_done")
+		await _frames(1)
+		out["p00"] = await _measure_call("p00 curtain call", CurtainCall.total_s(CurtainCall.KIND_PROLOGUE, false))
+		var c0 := _cc()
+		if c0 != null:
+			c0.call("press", "next")
+		var tp := _t
+		while _t - tp < 20.0:
+			var n0 := get_tree().get_first_node_in_group("night_scene")
+			if n0 != null and n0 != night and is_instance_valid(n0) and String(n0.get("episode_id")) == "n01_throat_tea":
+				night = n0
+				break
+			await get_tree().process_frame
+		out["p00_next_to_n01"] = String(night.get("episode_id")) == "n01_throat_tea"
+		if not bool(out["p00_next_to_n01"]):
+			failures.append("Prologue → Next ▶ did not load N01")
+			result = out
+			return
+		if not await _wait_phase("PLAY", 30.0):
+			result = out
+			return
 	await _secs(0.5)
 	_force_end("bow")
 	await _frames(1)
@@ -289,8 +334,9 @@ func _flow_curtain_call() -> void:
 			await get_tree().process_frame
 		out["g0_again_ms"] = got[0]
 		out["g0_buttons_live"] = gate0_live
-		if got[0] < 0 or got[0] > 1500:
-			failures.append("g0 Again ▶ took %d ms" % got[0])
+		out["frame_ms"] = snappedf(frame_s() * 1000.0, 0.1)
+		if got[0] < 0 or not E2eScenarios.within_quantised(float(got[0]) / 1000.0, 1.5, frame_s()):
+			failures.append("g0 Again ▶ took %d ms (> max(1500, one frame))" % got[0])
 	result = out
 
 
@@ -402,6 +448,9 @@ func _flow_touch_smoke() -> void:
 func _flow_tap_accuracy() -> void:
 	if not await _wait_phase("PLAY", 30.0):
 		return
+	if String(night.get("view_mode")) == "3d":
+		await _flow_tap_accuracy_3d()
+		return
 	await _secs(0.5)
 	night.get("driver").call("set_paused", true)
 	var cam: Object = night.get("cam")
@@ -456,6 +505,118 @@ func _flow_tap_accuracy() -> void:
 	result = {"table": table, "drags_that_moved": moved}
 	if moved > 0:
 		failures.append("tap_accuracy: %d drags moved Hush" % moved)
+
+
+## 3D: every live hotspot of each episode's built rooms, at the base framing (the camera peeks at each room), on its
+## projected hit box: 20 seeded taps ±40 px around the box centre through NightInput.resolve → ≥ 19/20, no neighbour.
+## Gate 0 and the Prologue fail the flow; N01 / N02 are info (R9). Then the drags.
+func _flow_tap_accuracy_3d() -> void:
+	var table: Array = []
+	var info_misses: Array = []
+	var episodes := ["p00_curtain_up", "g0_sneeze", "n01_throat_tea", "n02_something_fishy"]
+	for ep in episodes:
+		if String(night.get("episode_id")) != ep:
+			var r := ViewKit.autoload("Router")
+			if r != null:
+				r.call("replace", "night", {"episode": ep, "from": "e2e", "skip_intro": true})
+			var t0 := _t
+			while _t - t0 < 30.0:
+				var n := get_tree().get_first_node_in_group("night_scene")
+				if n != null and n != night and is_instance_valid(n) and String(n.get("episode_id")) == ep:
+					night = n
+					break
+				await get_tree().process_frame
+			if not await _wait_phase("PLAY", 40.0):
+				continue
+		await _secs(0.3)
+		night.get("driver").call("set_paused", true)
+		var rows := await _tap_rooms_3d(ep)
+		var strict := E2eScenarios.STRICT_EPISODES.has(ep)
+		for row in rows:
+			var d: Dictionary = row
+			d["episode"] = ep
+			table.append(d)
+			if int(d["hits"]) < 19 or int(d["neighbour"]) > 0:
+				var msg := "tap_accuracy: %s/%s: %d/20, %d neighbour picks (box %s)" % [ep, d["id"], int(d["hits"]),
+					int(d["neighbour"]), str(d.get("box", []))]
+				if strict:
+					failures.append(msg)
+				else:
+					info_misses.append(msg)
+		night.get("driver").call("set_paused", false)
+	var moved := await _drags_never_move()
+	result = {"table": table, "drags_that_moved": moved, "info_misses": info_misses, "frame_ms": snappedf(frame_s() * 1000.0, 0.1)}
+	if moved > 0:
+		failures.append("tap_accuracy: %d drags moved Hush" % moved)
+
+
+func _tap_rooms_3d(ep: String) -> Array:
+	var out: Array = []
+	var wv: Object = night.get("world_view")
+	var cam: Object = night.get("cam")
+	var ni: Object = night.get("night_input")
+	var layout: HouseLayout = wv.get("layout")
+	var lit: PackedStringArray = wv.get("rooms_lit")
+	var done := {}
+	for room_id in lit:
+		var rr: HouseLayout.Room = layout.room(room_id)
+		if rr == null:
+			continue
+		cam.call("peek", Vector2((rr.x0 + rr.x1) * 0.5, layout.room_floor_y(room_id)), 3.0)
+		await _secs(0.9)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 60606
+		var cands: Array = ni.call("candidates")
+		for c in cands:
+			var d: Dictionary = c
+			var id := String(d.get("id", ""))
+			if String(d.get("kind", "")) == "floor" or not bool(d.get("enabled", true)) or done.has(id):
+				continue
+			if String(d.get("room", "")) != room_id:
+				continue
+			if String(d.get("kind", "")) in ["door", "stairs", "exit"]:
+				continue
+			done[id] = true
+			var box: Rect2 = d.get("rect", Rect2())
+			var centre := box.get_center()
+			var hits := 0
+			var neighbour := 0
+			for k in 20:
+				var p := centre + Vector2(rng.randf_range(-40.0, 40.0), rng.randf_range(-40.0, 40.0))
+				var r: Dictionary = ni.call("resolve", p)
+				var got := String(r.get("hotspot", ""))
+				if got == id or String(r.get("via", "")) == id:
+					hits += 1
+				elif got != "":
+					neighbour += 1
+			out.append({"id": id, "room": room_id, "hits": hits, "neighbour": neighbour,
+				"box": [roundi(box.position.x), roundi(box.position.y), roundi(box.size.x), roundi(box.size.y)]})
+	return out
+
+
+## Drags of 25–200 px in 8 directions: none may push a go / move.
+func _drags_never_move() -> int:
+	var ni: Object = night.get("night_input")
+	var cmds: Array = []
+	ni.connect("command", func(cm: Dictionary) -> void: cmds.append(cm))
+	var moved := 0
+	var dirs := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1),
+		Vector2(-1, -1)]
+	for dist in [25.0, 60.0, 120.0, 200.0]:
+		for dv in dirs:
+			var st := Vector2(1200, 540)
+			var n0 := cmds.size()
+			_touch(st, true, 3)
+			for s in 6:
+				var p: Vector2 = st + (dv as Vector2).normalized() * float(dist) * float(s + 1) / 6.0
+				_drag(p, (dv as Vector2).normalized() * float(dist) / 6.0, 3)
+				await get_tree().process_frame
+			_touch(st + (dv as Vector2).normalized() * float(dist), false, 3)
+			await _frames(2)
+			for i in range(n0, cmds.size()):
+				if String((cmds[i] as Dictionary).get("c", "")) in ["go", "move"]:
+					moved += 1
+	return moved
 
 
 # --- cold opens ------------------------------------------------------------------------------------

@@ -18,6 +18,11 @@
 ## | tray_drag(i, pos) | go to the hotspot under the release point (rigging stays a hold) |
 ## | pick(item) | `pick` |
 ## Feedback in the frame of every accepted tap: `fx.ripple`, `fx.path_dots`, an 8 ms `Haptics.tap()`.
+## **3D view** (`view3d = true`, index §7.8): world gestures arrive in logical SCREEN px; the candidates are
+## WorldView3D's projected hit boxes (`hotspot_rects_in_view()` → `rect`) + its floor bands, resolved by
+## `TapAssist.resolve(pos, rects, 1.0)`; a floor result's x is the lane-plane hit (`cam.screen_to_world(pos).x`,
+## clamped to the room); the tapped spot pops in the same frame (`world_view.tap_feedback(pos)`: the ripple + the
+## destination ring); a struck hotspot's `cmd_rejected` makes WorldView3D wobble "no" at the tap.
 ## Every collaborator is soft-typed (`call` / `has_method`), so tests drive it with stubs.
 class_name NightInput
 extends RefCounted
@@ -42,6 +47,8 @@ var haptics: Object = null           ## Haptics autoload (optional)
 var enabled: bool = true
 ## ctx provider: returns world.action_context() or {} (container of a missing item).
 var context_fn: Callable = Callable()
+## 3D view: taps are screen px resolved on the projected hit boxes (see the class doc).
+var view3d: bool = false
 
 ## Screen directions of off-screen targets to point at (HudModel.tray_arrows), and until when.
 var arrows := PackedVector2Array()
@@ -178,9 +185,11 @@ func on_clarence_up(held_ms: int) -> void:
 
 # --- world gestures -------------------------------------------------------------------------
 
-## World-space tap candidates for TapAssist: the hotspots in view (their world rects) + one floor
-## band per open room.
+## Tap candidates for TapAssist: 2D — the hotspots in view (their world rects) + one floor band per open room
+## (world px); 3D — the projected hit boxes and floor bands (logical screen px).
 func candidates() -> Array:
+	if view3d:
+		return screen_candidates()
 	var out: Array = []
 	if world_view == null:
 		return out
@@ -210,13 +219,53 @@ func candidates() -> Array:
 	return out
 
 
+var _screen_out: Array = []
+
+
+## 3D: the projected hit boxes (logical screen px) + the floor bands, one reused array.
+func screen_candidates() -> Array:
+	_screen_out.clear()
+	if world_view == null or not world_view.has_method("hotspot_rects_in_view"):
+		return _screen_out
+	for r in world_view.call("hotspot_rects_in_view"):
+		var d: Dictionary = r
+		var id := String(d.get("id", ""))
+		if _untappable.has(id):
+			continue
+		var c := {"id": id, "kind": String(d.get("kind", "hotspot")), "rect": d.get("rect", Rect2()),
+			"room": String(d.get("room", "")), "priority": int(d.get("priority", 2))}
+		if d.has("enabled"):
+			c["enabled"] = d["enabled"]
+		if d.has("stack"):
+			c["stack"] = d["stack"]
+		_screen_out.append(c)
+	return _screen_out
+
+
 func _zoom() -> float:
+	if view3d:
+		return 1.0
 	return float(cam.call("current_zoom")) if cam != null and cam.has_method("current_zoom") else 1.0
 
 
-## Resolve a world point to a command dictionary ({} = nothing there).
-func resolve(world_pos: Vector2) -> Dictionary:
-	return TapAssist.resolve(world_pos, candidates(), _zoom())
+## Resolve a tap (2D: world px; 3D: logical screen px) to a command dictionary ({} = nothing there).
+func resolve(pos: Vector2) -> Dictionary:
+	var r := TapAssist.resolve(pos, candidates(), _zoom())
+	if view3d and String(r.get("c", "")) == "move":
+		r["x"] = lane_x(pos, String(r.get("room", "")))
+	return r
+
+
+## 3D: the sim x (px) of the lane point under a screen point, clamped inside the room.
+func lane_x(screen_pos: Vector2, room: String) -> int:
+	var x := screen_pos.x
+	if cam != null and cam.has_method("screen_to_world"):
+		x = (cam.call("screen_to_world", screen_pos) as Vector2).x
+	var layout: HouseLayout = world_view.get("layout") if world_view != null else null
+	var rr: HouseLayout.Room = layout.room(room) if layout != null and room != "" else null
+	if rr != null:
+		x = clampf(x, rr.x0 + 30.0, rr.x1 - 30.0)
+	return int(round(x))
 
 
 func on_tapped(world_pos: Vector2, is_double: bool) -> void:
@@ -255,6 +304,9 @@ func _target_point(r: Dictionary) -> Vector2:
 
 
 func _feedback(world_pos: Vector2, target: Vector2, s: ViewSnapshot) -> void:
+	if view3d:
+		_feedback_3d(world_pos, target, s)
+		return
 	var fx: Object = world_view.get("fx") if world_view != null else null
 	if fx != null:
 		fx.call("ripple", world_pos)
@@ -267,6 +319,18 @@ func _feedback(world_pos: Vector2, target: Vector2, s: ViewSnapshot) -> void:
 	if haptics != null and haptics.has_method("tap"):
 		haptics.call("tap")
 	tap_feedback.emit(world_pos, target)
+
+
+## 3D: the tapped spot pops at the tap (≤ 1 frame) and the destination ring + dotted path go down on the floor.
+func _feedback_3d(screen_pos: Vector2, target: Vector2, s: ViewSnapshot) -> void:
+	if world_view != null and world_view.has_method("tap_feedback"):
+		world_view.call("tap_feedback", screen_pos)
+	var fx: Object = world_view.get("fx") if world_view != null else null
+	if fx != null and s != null and target != Vector2.ZERO:
+		fx.call("path_dots", PackedVector2Array([Vector2(s.hush.x, s.hush.y), target]))
+	if haptics != null and haptics.has_method("tap"):
+		haptics.call("tap")
+	tap_feedback.emit(screen_pos, target)
 
 
 func on_long_pressed(_world_pos: Vector2) -> void:
@@ -357,7 +421,7 @@ func on_tray_tap(i: int) -> void:
 func on_tray_drag(_i: int, screen_pos: Vector2) -> void:
 	if not enabled or cam == null:
 		return
-	var wp: Vector2 = cam.call("screen_to_world", screen_pos)
+	var wp: Vector2 = screen_pos if view3d else cam.call("screen_to_world", screen_pos)
 	var r := resolve(wp)
 	if r.is_empty() or String(r.get("c", "")) != "go":
 		return

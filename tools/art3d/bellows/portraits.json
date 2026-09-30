@@ -1,0 +1,12 @@
+{
+  "doc": "The HUD portraits (256x256 transparent head-and-bouffant crops, the edge badge's 112 px face and the Bellows window chip): name -> face preset, temper tier, props, face-slot overrides. Rendered through the game's RigPlayer3D + char_toon (face camera, cheat 62).",
+  "order": ["neutral", "pompous", "irked", "suspicious", "furious", "livid", "dazed", "sing", "hum", "smug", "laugh", "tut", "sniff", "yum", "yawn"],
+  "portraits": {
+    "neutral": {"face": "neutral"}, "pompous": {"face": "pompous"}, "irked": {"face": "irked", "tint": 1},
+    "suspicious": {"face": "suspicious", "tint": 1, "props": "specs:on"}, "furious": {"face": "furious", "tint": 3},
+    "livid": {"face": "livid", "tint": 4, "props": "specs:on"}, "dazed": {"face": "dazed"},
+    "sing": {"face": "sing_big"}, "hum": {"face": "hum"}, "smug": {"face": "smug"},
+    "laugh": {"face": "blissful", "slots": "mouth:open"}, "tut": {"face": "disdain", "slots": "mouth:closed"},
+    "sniff": {"face": "sniff"}, "yum": {"face": "blissful"}, "yawn": {"face": "sneeze_build3"}
+  }
+}

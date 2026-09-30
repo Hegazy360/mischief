@@ -298,3 +298,121 @@ func test_slice_clips_build3d_manifest() -> void:
 				rig_rows += 1
 	assert_gt(rig_rows, 0, "rig:<prank> rows present")
 	print("[test_view3d_rules] build3d rows %d (rig rows %d)" % [rows.size(), rig_rows])
+
+
+# --- caught / recorder ------------------------------------------------------------------------------------
+
+func test_caught_phases_and_the_braces_attach() -> void:
+	assert_eq(CaughtStager3D.phase_of("caught:lecture"), "lecture")
+	assert_eq(CaughtStager3D.phase_of("caught:doorstep"), "doorstep")
+	assert_eq(CaughtStager3D.phase_of("bump"), "")
+	# her braces socket lands on his grip: her origin moves by (grip − braces)
+	var o := CaughtStager3D.attach_origin(Vector3(10.4, 1.3, -1.0), Vector3(10.0, 0.9, -1.1), Vector3(10.0, 0.0, -1.0))
+	assert_almost_eq(o.x, 10.4, 1e-5)
+	assert_almost_eq(o.y, 0.4, 1e-5)
+	assert_almost_eq(o.z, -0.9, 1e-5)
+
+
+func test_moment_recorder_keeps_windows_without_allocating() -> void:
+	var r := MomentRecorder3D.new()
+	r.setup(null)
+	var snap := ViewSnapshot.new()
+	for t in 500:
+		snap.tick = t
+		r.record(snap)
+	assert_eq(r.count(), MomentRecorder3D.CAP, "the ring holds CAP frames")
+	assert_eq(r.last_tick(), 499)
+	assert_eq(r.ring_frame(0).tick, 100, "the oldest frame")
+	var id := r.keep(300, 360, "busted")
+	var m := r.moment(id)
+	assert_eq(m.count(), 61, "ticks 300…360")
+	assert_false(m.open)
+	var id2 := r.keep(490, 520, "gag:achoo_ria", 40)
+	var m2 := r.moment(id2)
+	assert_true(m2.open, "a window into the future stays open")
+	for t2 in range(500, 530):
+		snap.tick = t2
+		r.record(snap)
+	assert_false(m2.open)
+	assert_eq(m2.count(), 31)
+	assert_eq(m2.frame_at_tick(505).tick, 505)
+	for k in 10:
+		r.keep(0, 10, "x%d" % k, k)
+	assert_eq(r.kept(), MomentRecorder3D.POOL, "8 pooled Moments; the lowest applause is evicted")
+	r.clear()
+	assert_eq(r.count(), 0)
+	assert_eq(r.kept(), 0)
+
+
+func test_captions_sit_above_or_beside_the_head_never_over_the_face() -> void:
+	var screen := Rect2(40, 0, 2320, 1040)
+	var box := Vector2(620, 130)
+	# room above the head under the HUD band: centred above it
+	var head := Rect2(1100, 520, 180, 200)
+	var a := Overlays3D.caption_anchor(head, box, screen, 212.0)
+	assert_almost_eq(a.x, head.get_center().x, 0.5)
+	assert_le(a.y, head.position.y, "the text's bottom above the head")
+	assert_ge(a.y - box.y, 212.0, "below the HUD band")
+	# head up near the band (a punch-in): beside it, the text box clear of the head rect
+	for hx in [300.0, 1100.0, 2000.0]:
+		var hd := Rect2(hx, 260, 220, 260)
+		var b := Overlays3D.caption_anchor(hd, box, screen, 212.0)
+		var r := Rect2(b - Vector2(box.x * 0.5, box.y), box)
+		assert_false(r.intersects(hd), "beside the head at x %.0f, not over it" % hx)
+		assert_ge(r.position.y, 212.0 - 0.5, "below the HUD band")
+		assert_true(screen.encloses(r), "inside the screen at x %.0f" % hx)
+
+
+class FakeSet extends RefCounted:
+	var calls: PackedStringArray = PackedStringArray()
+
+	func lend(id: String, _to: Node3D, frames: int = 6) -> Node3D:
+		calls.append("lend %s %d" % [id, frames])
+		return null
+
+	func return_home(id: String, frames: int = 6) -> void:
+		calls.append("home %s %d" % [id, frames])
+
+
+func test_hand_offs_lend_and_a_clip_switch_returns_what_it_does_not_keep() -> void:
+	var wv := WorldView3D.new()
+	var bv := CharacterView3D.new()
+	var fs := FakeSet.new()
+	wv.set3d = fs
+	wv.bellows_view = bv
+	bv._clip = "bellows/act_tea"
+	wv._return_on_switch("bellows", bv)
+	wv._handoff("bellows", "lend", "kitchen_kettle", "grip_r", 6)
+	wv._handoff("bellows", "lend", "kitchen_honey", "grip_l", 4)
+	assert_eq(wv.lent_pieces("bellows").size(), 2)
+	wv._handoff("bellows", "return", "kitchen_kettle", "grip_r", 5)
+	assert_eq(wv.lent_pieces("bellows"), PackedStringArray(["kitchen_honey"]), "home on its named frame")
+	wv._handoff("bellows", "lend", "kitchen_kettle", "grip_r", 6)
+	# the next clip keeps the jar (sidecar `keeps`), so only the kettle goes home
+	CharacterView3D._stage_cache["bellows/act_tea_sip"] = {"keeps": PackedStringArray(["kitchen_honey"])}
+	bv._clip = "bellows/act_tea_sip"
+	wv._return_on_switch("bellows", bv)
+	assert_eq(wv.lent_pieces("bellows"), PackedStringArray(["kitchen_honey"]))
+	assert_has(fs.calls, "home kitchen_kettle 6")
+	# a switch to a clip that keeps nothing returns the rest
+	CharacterView3D._stage_cache["bellows/loco_walk"] = {"keeps": PackedStringArray()}
+	bv._clip = "bellows/loco_walk"
+	wv._return_on_switch("bellows", bv)
+	assert_eq(wv.lent_pieces("bellows").size(), 0)
+	assert_has(fs.calls, "home kitchen_honey 6")
+	bv.free()
+	wv.free()
+
+
+func test_a_caption_keeps_its_side_while_it_fits() -> void:
+	var screen := Rect2(40, 0, 2320, 1040)
+	var box := Vector2(620, 130)
+	# the head near the band, more room on the right: it goes right …
+	var r := Overlays3D.caption_place(Rect2(900, 260, 220, 260), box, screen, 212.0)
+	assert_eq(int(r.z), 3, "right (more room)")
+	# … and stays right as the head drifts right, even once the left has more room
+	r = Overlays3D.caption_place(Rect2(1400, 260, 220, 260), box, screen, 212.0, int(r.z))
+	assert_eq(int(r.z), 3, "kept right")
+	# only when the right no longer fits does it switch
+	r = Overlays3D.caption_place(Rect2(1900, 260, 220, 260), box, screen, 212.0, int(r.z))
+	assert_eq(int(r.z), 2, "switched left when the right ran out")

@@ -256,6 +256,20 @@ func test_every_2d_preset_exists_and_every_cell_resolves() -> void:
 		assert_true((cells["eyes"] as Dictionary).has(String(e)), "blinkable " + String(e))
 
 
+## Issues D7: look A's horizontal face-cell resolution (cells >= 256 px wide, A's are 340) and A's 4.8 px outline.
+func test_atlas_cells_keep_a_resolution_and_outline_follows_a() -> void:
+	var face: Dictionary = _rig["face"]
+	var grid: Array = face["grid"]
+	var size: Array = face["atlas_size"]
+	assert_ge(float(size[0]) / float(grid[0]), 256.0, "face cells >= 256 px wide")
+	var tex: Variant = load(String(face["atlas"]))
+	if assert_true(tex is Texture2D, "the face atlas loads as a texture"):
+		var t: Texture2D = tex
+		assert_eq(t.get_width(), int(size[0]), "atlas width = atlas_size")
+		assert_eq(t.get_height(), int(size[1]), "atlas height = atlas_size")
+	assert_almost_eq(float(_rig["material"]["outline_px"]), 4.8, 0.001, "character outline 4.8 px @1080 (D7)")
+
+
 func test_mirror_cells_resolve_and_statues_keep_their_eyes() -> void:
 	var cells: Dictionary = _rig["face"]["cells"]
 	var all := {}
@@ -359,6 +373,36 @@ func test_props_tag_beret_and_plinth_load() -> void:
 	if assert_true(sk != null, "the tag has a skeleton"):
 		assert_ge(sk.find_bone("string"), 0, "the tag's string bone (wiggle)")
 	t.free()
+
+
+## Every prop glb samples palette_hush.png at a used cell's centre (32 colours = the top 4 rows of the 8×8 grid in
+## glTF v-down UVs), never a primitive's 0/1 corner UVs (the palette's unused magenta half; r3d-rig's finding).
+func test_props_sample_used_palette_cells() -> void:
+	var paths := [TAG, PLINTH]
+	for a in _rig["attachments"]:
+		paths.append(String(_rig["attachments"][a]["scene"]))
+	for path in paths:
+		if not ResourceLoader.exists(path):
+			skip(path + " not built")
+			continue
+		var n := _instance(path)
+		if not assert_true(n != null, path + " instantiates"):
+			continue
+		var bad := 0
+		var total := 0
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var mesh: Mesh = (mi as MeshInstance3D).mesh
+			for s in mesh.get_surface_count():
+				var uvs: PackedVector2Array = mesh.surface_get_arrays(s)[Mesh.ARRAY_TEX_UV]
+				for uv in uvs:
+					total += 1
+					var cu := uv.x * 8.0
+					var cv := uv.y * 8.0
+					if absf(cu - floorf(cu) - 0.5) > 0.05 or absf(cv - floorf(cv) - 0.5) > 0.05 or uv.y > 0.5:
+						bad += 1
+		assert_gt(total, 0, path + " has UVs")
+		assert_eq(bad, 0, path + ": every UV at a used palette cell's centre")
+		n.free()
 
 
 func test_head_variant_shares_every_bone_name() -> void:

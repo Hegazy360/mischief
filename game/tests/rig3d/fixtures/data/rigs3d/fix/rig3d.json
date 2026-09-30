@@ -108,6 +108,16 @@
         0.0
       ],
       "default": false
+    },
+    "badge": {
+      "scene": "res://tests/rig3d/fixtures/stool.tscn",
+      "socket": "brace_r",
+      "pos": [
+        0.0,
+        0.0,
+        0.02
+      ],
+      "default": false
     }
   },
   "slots": {

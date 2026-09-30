@@ -497,9 +497,20 @@ func _perform(w: SimWorld) -> void:
 		var k := a.mg_due(activity_t)
 		if k >= 0:
 			_emit_beat(w, a.mg_ids[k], a.id, a.mg_len[k], a.mg_emote[k])
-	# a squeak bit plays over the activity clock; he doesn't leave before it is over
-	if activity_len >= 0 and activity_t >= activity_len and w.tick >= bit_until:
+	# a squeak bit plays over the activity clock; he doesn't leave before it is over; a held fix-up waits
+	if activity_len >= 0 and activity_t >= activity_len and w.tick >= bit_until and not _fixup_held(w):
 		_complete_task(w)
+
+
+## True while the current fix-up is held by the episode's `director.fixup_holds` (its `until` not met yet).
+func _fixup_held(w: SimWorld) -> bool:
+	if task_kind != T_FIXUP or w.episode.fixup_holds.is_empty():
+		return false
+	var k := _fixup_kind(w)
+	for fh in w.episode.fixup_holds:
+		if str(fh[0]) == k and not _gate_true(w, fh[1]):
+			return true
+	return false
 
 
 ## PERFORM tick at which hook `k` fires: its mark, counted from `base` (the gate-open tick for

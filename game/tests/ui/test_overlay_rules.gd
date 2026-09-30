@@ -292,3 +292,31 @@ func test_fill_allocates_nothing_steady_state() -> void:
 	for i in 200:
 		OverlayRules.fill(m, s, ctx)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before, "no objects created per frame")
+
+
+func test_suggest_next_useful_is_the_nearest_rig_point_she_can_rig_now() -> void:
+	var ctx := _ctx()
+	var s := _snap(ctx, "kitchen", float(ctx.hotspot_x.get("kitchen_honey", 3300.0)))
+	var pick := OverlayRules.suggest_next_useful(s, ctx)
+	assert_eq(pick, "kitchen_honey", "standing at the honey (needs nothing)")
+	# kettle drum needs the squeaker: never suggested without it
+	for hs in ctx.rigs_in("kitchen"):
+		if hs != "kitchen_kettle":
+			s.hotspots[hs]["rigged"] = true
+	s.hush.x = float(ctx.hotspot_x.get("kitchen_kettle", 3300.0))
+	assert_eq(OverlayRules.suggest_next_useful(s, ctx), "", "the kettle needs the squeaker she lacks")
+	s.hush.carrying = PackedStringArray(["squeaker"])
+	assert_eq(OverlayRules.suggest_next_useful(s, ctx), "kitchen_kettle")
+	assert_eq(OverlayRules.suggest_next_useful(null, ctx), "")
+
+
+func test_model_carries_the_rig_point_she_is_at() -> void:
+	var ctx := _ctx()
+	ctx.at_hotspot = "kitchen_honey"
+	var s := _snap(ctx, "kitchen", float(ctx.hotspot_x.get("kitchen_honey", 3300.0)))
+	var m := _fill(ctx, s)
+	assert_eq(m.at_hotspot, "kitchen_honey")
+	ctx.at_hotspot = ""
+	s.hush.x = 100.0
+	m = _fill(ctx, s)
+	assert_true(m.at_hotspot != "kitchen_honey" or s.hush.state == "RIGGING", "cleared once she walks off")

@@ -4,12 +4,21 @@
 ## once, hidden under the curtain), one hidden PiP frame (`PipView.warm()`, soft), the Night's audio
 ## (`Audio.warm(ids)`), the FX pool. `done` turns true when every step ran; `elapsed_ms` is the wall
 ## time from `start()` to done (the budget is ≤ 2.0 s).
+## **3D view** (`view3d`, REDESIGN §6.3 "every material is rendered once under the curtain"): `materials` — every
+## material the Night registered with MaterialWarm3D (`WorldView3D.warm_materials`: one quad per (shader, kind, pass
+## chain) + `RigPlayer3D.warm()`: every tint tier / stone / look / attachment state) **and** every other material in
+## the Night's tree, hidden ones included (tags, eye cards, plinth, looks), one quad each in front of the camera, plus
+## the instanced variant of every particle material (a one-instance MultiMesh) — drawn for WARM_FRAMES frames, then
+## freed; `clips` (every 3D clip into ClipLib3D's cache), `overlays` (every pictogram / icon raster), the Bellows
+## window (one render), fonts, audio, the lazy UI textures. `materials_drawn` / `instanced_drawn` count the quads.
 class_name NightWarmer
 extends Node
 
 signal finished(ms: int)
 
 const BUDGET_MS := 8
+## Frames the 3D warm quads stay drawn before they are freed.
+const WARM_FRAMES := 2
 
 var list: Dictionary = {}
 var done: bool = false
@@ -20,6 +29,15 @@ var world_view: Node = null
 var pip: Node = null
 ## Where the font primer draws (a CanvasLayer under the curtain).
 var primer_parent: Node = null
+## 3D: the view is WorldView3D; its camera, the world overlays and their context.
+var view3d: bool = false
+var cam: Camera3D = null
+var overlays: Object = null
+var octx: Object = null
+## 3D: quads drawn (MaterialWarm3D entries + the tree's other materials) and instanced variants.
+var materials_drawn: int = 0
+var instanced_drawn: int = 0
+var clips_warmed: int = 0
 
 var _steps: Array = []
 var _t0: int = 0
@@ -45,12 +63,20 @@ func start(p_list: Dictionary, wv: Node, p_pip: Node, p_primer_parent: Node) -> 
 	_steps = [["looks_bellows", _warm_looks.bind("bellows")], ["looks_hush", _warm_looks.bind("hush")],
 		["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
 		["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer]]
+	if view3d:
+		_steps = [["materials", _warm_materials_3d], ["clips", _warm_clips_3d], ["overlays", _warm_overlays_3d],
+			["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
+			["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer], ["materials_done", _free_warm_3d]]
 	set_process(true)
 
 
 func _process(_d: float) -> void:
+	if _free_pending and Engine.get_process_frames() - _rig_frames >= WARM_FRAMES:
+		_free_pending = false
+		_free_rigs()
 	if done:
-		set_process(false)
+		if not _free_pending:
+			set_process(false)
 		return
 	var t := Time.get_ticks_msec()
 	while not _steps.is_empty() and Time.get_ticks_msec() - t < BUDGET_MS:
@@ -82,14 +108,158 @@ func finish_now() -> void:
 		_steps.pop_front()
 		ran.append(String(s[0]))
 	# looks that started warming in the background: build the rest now
-	_warm_looks("bellows")
-	_warm_looks("hush")
+	if not view3d:
+		_warm_looks("bellows")
+		_warm_looks("hush")
 	_blocking = false
 	if not done:
 		done = true
 		elapsed_ms = Time.get_ticks_msec() - _t0
 		DeviceLog.note("warm_ms", elapsed_ms)
 		finished.emit(elapsed_ms)
+
+
+# --- 3D ----------------------------------------------------------------------------------------------------
+
+var _rig3d: Node3D = null
+var _rig_frames: int = -1
+var _free_pending: bool = false
+
+
+## Build both warm rigs (MaterialWarm3D's + the tree's other materials) in front of the camera; true when built
+## (they are drawn for WARM_FRAMES frames and freed by `materials_done`).
+func _warm_materials_3d() -> bool:
+	if world_view == null or cam == null:
+		return true
+	if _rig_frames < 0:
+		var reg: Variant = world_view.call("warm_materials", cam) if world_view.has_method("warm_materials") else null
+		materials_drawn = MaterialWarm3D.count()
+		_rig3d = build_scene_rig(get_parent() if get_parent() != null else world_view, cam, world_view)
+		_rig_frames = Engine.get_process_frames()
+		var _unused: Variant = reg
+	return true
+
+
+## The rest of the warm (fonts, audio, textures) runs while the rigs are drawn; they go after WARM_FRAMES frames.
+func _free_warm_3d() -> bool:
+	if _rig_frames >= 0 and Engine.get_process_frames() - _rig_frames < WARM_FRAMES:
+		if _blocking:
+			# finish_now (a forced rise / a CLI start): the quads still get their frames, then go
+			_free_pending = true
+			set_process(true)
+			return true
+		return false
+	_free_rigs()
+	return true
+
+
+func _free_rigs() -> void:
+	MaterialWarm3D.free_warm_rig()
+	if _rig3d != null and is_instance_valid(_rig3d):
+		_rig3d.queue_free()
+	_rig3d = null
+
+
+func _warm_clips_3d() -> void:
+	if world_view != null and world_view.has_method("warm_clips"):
+		clips_warmed = int(world_view.call("warm_clips"))
+
+
+func _warm_overlays_3d() -> void:
+	if overlays != null and octx != null and overlays.has_method("warm"):
+		overlays.call("warm", octx)
+
+
+## A warm rig for every material under `root` that MaterialWarm3D does not already draw (hidden instances too), and
+## a one-instance MultiMesh for every particle material (their instanced shader variant). Returns the rig (a child of
+## `parent`, placed 1.6 m in front of `camera`); counts in `materials_drawn` / `instanced_drawn`.
+func build_scene_rig(parent: Node, camera: Camera3D, root: Node) -> Node3D:
+	var reg := {}
+	var plain := {}
+	var inst := {}
+	for e in MaterialWarm3D.entries():
+		var d: Dictionary = e
+		var m: Material = d["material"]
+		# the particle materials also draw instanced (CPUParticles3D → MultiMesh): warm that variant too
+		if StringName(d["kind"]) == &"fx":
+			var ki := ShaderWatch.shader_key(m, true)
+			if ki != "" and not inst.has(ki):
+				inst[ki] = m
+		var guard := 0
+		while m != null and guard < 6:
+			reg[ShaderWatch.shader_key(m, false)] = true
+			m = m.next_pass
+			guard += 1
+	_collect(root, reg, plain, inst)
+	var rig := Node3D.new()
+	rig.name = "NightWarmRig"
+	parent.add_child(rig)
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.05, 0.05)
+	var fwd := -camera.global_basis.z
+	var right := camera.global_basis.x
+	var up := camera.global_basis.y
+	var origin := camera.global_position + fwd * 1.6
+	var i := 0
+	for k in plain:
+		var mi := MeshInstance3D.new()
+		mi.mesh = quad
+		mi.material_override = plain[k]
+		mi.layers = View3DConst.MASK_MAIN
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		rig.add_child(mi)
+		mi.global_position = origin + right * (-0.4 + 0.05 * float(i % 16)) + up * (0.1 + 0.05 * float(i / 16))
+		i += 1
+	materials_drawn += plain.size()
+	var j := 0
+	for k2 in inst:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = quad
+		mm.instance_count = 1
+		mm.set_instance_transform(0, Transform3D.IDENTITY)
+		mm.set_instance_color(0, Color.WHITE)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.material_override = inst[k2]
+		mmi.layers = View3DConst.MASK_MAIN
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		rig.add_child(mmi)
+		mmi.global_position = origin + right * (-0.4 + 0.05 * float(j % 16)) + up * (-0.3 - 0.05 * float(j / 16))
+		j += 1
+	instanced_drawn = inst.size()
+	return rig
+
+
+func _collect(n: Node, reg: Dictionary, plain: Dictionary, inst: Dictionary) -> void:
+	if n.name == "MaterialWarm3D" or n.name == "NightWarmRig":
+		return
+	if n is GeometryInstance3D:
+		var g := n as GeometryInstance3D
+		var is_inst := g is CPUParticles3D or g is MultiMeshInstance3D
+		if g.material_override != null:
+			_add_mat(g.material_override, is_inst, reg, plain, inst)
+		if g is MeshInstance3D and (g as MeshInstance3D).mesh != null:
+			var mi := g as MeshInstance3D
+			for s in mi.mesh.get_surface_count():
+				var m := mi.get_active_material(s)
+				if m != null:
+					_add_mat(m, false, reg, plain, inst)
+	for c in n.get_children():
+		_collect(c, reg, plain, inst)
+
+
+func _add_mat(m: Material, instanced: bool, reg: Dictionary, plain: Dictionary, inst: Dictionary) -> void:
+	var k := ShaderWatch.shader_key(m, false)
+	if k == "":
+		return
+	if instanced:
+		var ki := ShaderWatch.shader_key(m, true)
+		if not inst.has(ki):
+			inst[ki] = m
+	elif not reg.has(k) and not plain.has(k):
+		plain[k] = m
 
 
 func _warm_looks(actor: String) -> void:

@@ -1,0 +1,84 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/freeze_midjob",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/freeze_midjob.res",
+  "length": 600,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 3,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "hold_breath"
+    },
+    {
+      "f": 360,
+      "preset": "hold_breath"
+    },
+    {
+      "f": 480,
+      "preset": "hold_breath"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/freeze_midjob.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      360,
+      480,
+      600
+    ],
+    "freeze_holds": [
+      [
+        0,
+        359
+      ],
+      [
+        360,
+        479
+      ],
+      [
+        480,
+        599
+      ]
+    ],
+    "draft": false
+  },
+  "variants": {
+    "mid": [
+      0,
+      359
+    ],
+    "high": [
+      360,
+      479
+    ],
+    "low": [
+      480,
+      599
+    ]
+  },
+  "variant_default": "mid"
+}

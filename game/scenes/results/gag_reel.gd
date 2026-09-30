@@ -31,12 +31,15 @@ const DUCK_BUSES: PackedStringArray = ["SFX", "Voice"]
 const CLOSE_UP := 1.7
 
 
-## Per-Night recording of reel moments (pure data + world clones).
+## Per-Night recording of reel moments (pure data + world clones in 2D; in 3D the view's MomentRecorder3D windows).
 class Log:
 	extends RefCounted
 	var clone_every: int = 60
 	var ring_size: int = 4
 	var moments: Array = []
+	## 3D (NightScene sets it false): no world clones — each moment keeps a MomentRecorder3D window (`rec`) instead
+	## (`keep_3d`), re-staged by GagReel3D.
+	var record_clones: bool = true
 	var _ring: Array = []          # [[tick, clone], …] oldest first
 	var _open: int = -1
 
@@ -50,7 +53,7 @@ class Log:
 		if world == null or not world.has_method("clone"):
 			return
 		var t := int(world.get("tick"))
-		if _ring.is_empty() or t - int(_ring[_ring.size() - 1][0]) >= clone_every:
+		if record_clones and (_ring.is_empty() or t - int(_ring[_ring.size() - 1][0]) >= clone_every):
 			_ring.append([t, world.call("clone")])
 			while _ring.size() > ring_size:
 				_ring.pop_front()
@@ -90,15 +93,41 @@ class Log:
 				break
 		moments.append({"prank": prank, "chain": [prank], "keys": [key], "start": st, "accent": -1,
 			"end": st + int(d.get("len", 0)), "tier": int(d.get("tier", 1)), "variant": String(d.get("variant", "a")),
-			"applause": 0, "base": base, "base_tick": base_tick, "new": false})
+			"applause": 0, "base": base, "base_tick": base_tick, "new": false, "rec": -1})
 		_open = moments.size() - 1
+
+	## 3D (after `on_events` on the same tick): keep / extend the recorder window of the open moment
+	## ([start − PRE_TICKS, end]; a window that ends in the future fills as ticks arrive).
+	func keep_3d(events: Array, recorder: Object) -> void:
+		if recorder == null or _open < 0 or not recorder.has_method("keep"):
+			return
+		for ev in events:
+			var e := String((ev as Dictionary).get("e", ""))
+			if e != "reaction_start" and e != "applause":
+				continue
+			var m: Dictionary = moments[_open]
+			var from := int(m["start"]) - GagReel.PRE_TICKS
+			var want_to := int(m["end"])
+			var rec := int(m.get("rec", -1))
+			var mo: Variant = recorder.call("moment", rec) if rec >= 0 else null
+			if mo != null and int((mo as Object).get("to_tick")) == want_to:
+				(mo as Object).set("applause", int(m["applause"]))
+				continue
+			if mo != null and bool((mo as Object).get("open")):
+				# still filling (a knock-on merged into it): just move its end
+				(mo as Object).set("to_tick", want_to)
+				(mo as Object).set("applause", int(m["applause"]))
+				continue
+			if mo != null:
+				(mo as Object).set("used", false)
+			m["rec"] = int(recorder.call("keep", from, want_to, "gag:%s" % String(m["prank"]), int(m["applause"])))
 
 	## The moments to show: best `n` by Applause (ties: higher tier, then later), in Night order;
 	## `new_keys` marks "+NEW!" moments; `repeat` = best 1 + every new one.
 	func best(n: int, repeat: bool = false) -> Array:
 		var ok: Array = []
 		for m in moments:
-			if (m as Dictionary).get("base") != null:
+			if (m as Dictionary).get("base") != null or int((m as Dictionary).get("rec", -1)) >= 0:
 				ok.append(m)
 		ok.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			if int(a["applause"]) != int(b["applause"]):
@@ -136,6 +165,8 @@ var moments: Array = []
 var budget_s: float = 8.0
 var index: int = -1
 var playing: bool = false
+## (3D parity: GagReel3D renders its first frame early; the 2D reel never primes.)
+var primed: bool = false
 ## Ticks actually played per moment (tests / the report).
 var played: Array = []
 

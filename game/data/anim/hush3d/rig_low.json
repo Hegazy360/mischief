@@ -1,0 +1,135 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_low",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/rig_low.res",
+  "length": 144,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [
+    {
+      "f": 10,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "thud"
+    },
+    {
+      "f": 48,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 48,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 69,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 69,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 90,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 90,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 111,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 111,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 132,
+      "type": "sfx",
+      "id": "boing_small"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    },
+    {
+      "f": 10,
+      "preset": "determined"
+    },
+    {
+      "f": 40,
+      "preset": "frantic"
+    },
+    {
+      "f": 60,
+      "preset": "determined"
+    },
+    {
+      "f": 88,
+      "preset": "frantic"
+    },
+    {
+      "f": 106,
+      "preset": "determined"
+    },
+    {
+      "f": 124,
+      "preset": "grin"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/rig_low.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      9,
+      10,
+      11,
+      132
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 0.0,
+    "z": -1.5,
+    "facing": 1,
+    "cheat_deg": 10.0
+  }
+}

@@ -220,7 +220,7 @@ func test_decor_and_landings() -> void:
 	assert_true(sink.has_point(lp["pos"]), "the sink landing point is inside its box")
 	var rp := h.reach_pos("kitchen_honey")
 	assert_eq(String(rp["step"]), "stool:kitchen_stool")
-	assert_almost_eq(float(rp["x"]), 15.0, 0.001)
+	assert_true(absf(float(rp["x"]) - 15.0) <= 0.23, "Hush stands on the stool's seat (15.0 ± 0.23)")
 	assert_true(h.floor_band("kitchen").size.x > 5.0)
 	assert_gt(h.furniture_boxes().size(), 3, "furniture boxes")
 	h.free()
@@ -253,3 +253,52 @@ func test_one_material_per_room_set_when_glb() -> void:
 	if not any:
 		skip("room .glb sets not built yet (greybox) — r3d-sets P1")
 	h.free()
+
+
+func test_static_draws_per_room_within_budget() -> void:
+	# brief §7: ≤ 3 static draw calls per room (the arch + tonight's static pieces merged into one mesh)
+	var any := false
+	for ep_id in ["p00_curtain_up", "g0_sneeze", "n01_throat_tea", "n02_something_fishy"]:
+		var h := _build(ep_id)
+		for rid in h.rooms_built():
+			if not h.room_shell(rid).from_glb():
+				continue
+			any = true
+			assert_true(h.static_draws(rid) <= 3, "%s %s: %d static draws (≤ 3)" % [ep_id, rid, h.static_draws(rid)])
+		h.free()
+	if not any:
+		skip("room .glb sets not built yet (greybox)")
+
+
+func test_static_merge_keeps_piece_api() -> void:
+	var h := _build("n01_throat_tea")
+	if not h.room_shell("kitchen").from_glb():
+		skip("room .glb sets not built yet (greybox)")
+		h.free()
+		return
+	var merged := h.merged_pieces()
+	assert_has(merged, "kitchen_window", "a static dressing piece is merged")
+	assert_false(merged.has("kitchen_pans"), "a quake prop tonight stays its own mesh")
+	assert_false(merged.has("kitchen_stool"), "the stool wobbles: not merged")
+	assert_true(h.decor("kitchen_window") != null, "a merged piece keeps its node (API)")
+	assert_true(h.landing_box("parlour.log_basket").size.x > 0.2, "the merged log basket keeps its landing box")
+	# the merged mesh uses the room material, so the room light still drives it
+	assert_eq(h.room_material_count("kitchen"), 1)
+	h.free()
+	var h2 := House3D.new()
+	h2.merge_static = false
+	tree.root.add_child(h2)
+	var ep: EpisodeDef = db.episodes["n01_throat_tea"]
+	h2.build(SetList.for_episode(db, ep), {}, db)
+	assert_true(h2.merged_pieces().is_empty(), "merge_static = false keeps every piece")
+	h2.free()
+
+
+func test_lit_room_triangles_within_budget() -> void:
+	# brief §7: ≤ 25k triangles per lit room (ink + halo passes counted)
+	for ep_id in ["p00_curtain_up", "g0_sneeze", "n01_throat_tea", "n02_something_fishy"]:
+		var h := _build(ep_id)
+		for rid in h.result.rooms_lit:
+			var t := h.room_tris(rid)
+			assert_true(t > 0 and t <= 25000, "%s %s: %d tris (≤ 25k)" % [ep_id, rid, t])
+		h.free()

@@ -28,9 +28,9 @@ PUPIL = "#241A2E"
 LID_WASH = "#6E2E3A"      # drawn at ~0.30 alpha: darkens any skin tint
 
 EYE_Y = 423
-EYE_X = (334, 666)
+EYE_X = (348, 652)
 BROW_Y = 318
-MOUTH_Y = 760
+MOUTH_Y = 748
 
 # layer rects in face space (SVG x0, y0, x1, y1; y down)
 RECTS = {
@@ -38,7 +38,7 @@ RECTS = {
     "eyes": (150, 280, 850, 580),
     "pupils": (150, 280, 850, 580),
     "lids": (150, 280, 850, 580),
-    "mouth": (270, 620, 730, 940),
+    "mouth": (190, 610, 810, 990),
     "extra_a": (0, 60, 1000, 980),
     "extra_b": (0, 0, 1000, 1000),
 }
@@ -235,9 +235,10 @@ def _mouth(kind):
 
 
 def mouth(kind):
-    if kind == "smug_m":
-        return mirror_svg(_mouth("smug"))
-    return _mouth(kind)
+    """Every mouth drawn 1.7x about its centre (they sit under the big 3D nose and must read at 1x: an open mouth
+    >= 14 px wide on the 48 px face card, GDD 9.2's 40 px of a 140 px 2D head)."""
+    body = mirror_svg(_mouth("smug")) if kind == "smug_m" else _mouth(kind)
+    return f'<g transform="translate(500 {MOUTH_Y}) scale(1.7) translate(-500 -{MOUTH_Y})">{body}</g>' if body else ""
 
 
 # ---- extras ----------------------------------------------------------------------------------------------------------

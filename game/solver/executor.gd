@@ -143,6 +143,9 @@ func _init_log_facts() -> void:
 		var g: Variant = (e as Dictionary).get("gate", null)
 		if g is Dictionary and (g as Dictionary).get("max_s", null) == null:
 			gated.append(SolverData.sv(e.get("a", "")))
+	for aid in data.fixup_hold_activities(ep):
+		if not gated.has(aid):
+			gated.append(aid)
 	log.gated = gated
 	for id in data.hotspot_ids():
 		if data.hotspot_kind(id) == "hiding":
@@ -572,10 +575,15 @@ func _event_since(since: int, e: String, m: Dictionary) -> bool:
 
 
 func _rejected_since(since: int, c: String) -> String:
-	var ev: Variant = _find_event(since, "cmd_rejected", {"c": c})
-	if ev == null:
-		return ""
-	return "command '%s' rejected: %s" % [c, SolverData.sv((ev as Dictionary).get("why", "?"))]
+	for i in range(maxi(0, since), log.events.size()):
+		var ev: Dictionary = log.events[i]
+		if SolverData.sv(ev.get("e", "")) != "cmd_rejected" or SolverData.sv(ev.get("c", "")) != c:
+			continue
+		var why := SolverData.sv(ev.get("why", "?"))
+		if why == "here":
+			continue   # a go / pin on the spot she is already hiding in (or diving into): nothing to do, not a failure
+		return "command '%s' rejected: %s" % [c, why]
+	return ""
 
 
 ## Hush has arrived at `id` and stands there (the world's `at_hotspot` when it has one, else the

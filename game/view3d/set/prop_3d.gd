@@ -184,6 +184,22 @@ func _build_glb(path: String) -> bool:
 	return not _meshes.is_empty()
 
 
+## True when this piece came from a .glb with no skeleton and no animation player (a static-merge candidate).
+func is_static_glb() -> bool:
+	return not _meshes.is_empty() and _skel == null and _anim_player == null and SetGeo.s(entry.get("model", "")).begins_with("res://")
+
+
+## The piece's meshes (House3D's static merge reads them).
+func static_meshes() -> Array[MeshInstance3D]:
+	return _meshes
+
+
+## Hides the visual (the piece was merged into its room's static mesh); the node, boxes and API stay.
+func hide_visual() -> void:
+	if _visual != null:
+		_visual.visible = false
+
+
 func _build_primitive() -> void:
 	var fam := SetGeo.s(entry.get("silhouette", "box"))
 	var m := SetGeo.s(entry.get("model", ""))

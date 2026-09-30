@@ -11,8 +11,11 @@
 ##   process_start_to_boot_ms, boot_ms, curtain_up_ms, sim_start_ms, first_input_ms, first_squeak_ms,
 ##   first_player_laugh_ms, first_prank_ms, retry_ms: [..], laughs: [{ms, kind, tier}],
 ##   catches: [{ms, spot_fill_s, cause}], perf: [{t_s, fps_p50, fps_p95, frame_ms_p95, draw_calls_p95, tex_mb}],
-##   tex_mb_peak, values: {night_build_ms, warm_ms, tex_mb_by_kind: {room, house, rig, look, …}},
-##   marks: {name: ms}}` — every time in ms from **process start**: on Android (and Linux) from
+##   tex_mb_peak, values: {night_build_ms, warm_ms, night_view, tex_mb_by_kind: {room, house, rig, look, …},
+##   "perf3d:<episode>": {frames, frame_ms_p50/p95/max, draw_calls_p95/max, tris_max, emitters_max, tex_mb_max,
+##   vmem_mb_max, shader_compiles_play, hitches, hitch_max_ms, compile_method}},
+##   shader_first_use: [{ms, key, kind, tick}] (≤ 50; must stay empty), hitches: [{ms, frame_ms, median_ms, tick}]
+##   (≤ 50), hitch_count, marks: {name: ms}}` — every time in ms from **process start**: on Android (and Linux) from
 ## `/proc/self/stat` starttime vs `/proc/uptime`, so the activity start and splash the engine never
 ## sees are counted; elsewhere from engine start (`clock: "engine"`). −1 = not reached.
 class_name DeviceLog
@@ -156,6 +159,31 @@ static func catch(spot_fill_s: float, cause: String) -> void:
 	if not _started:
 		return
 	(_session["catches"] as Array).append({"ms": now_ms(), "spot_fill_s": snappedf(spot_fill_s, 0.01), "cause": cause})
+	_dirty = true
+
+
+## A shader first used after the curtain rose (it compiled during play; ShaderWatch).
+static func shader_first_use(key: String, kind: String, tick: int) -> void:
+	if not _started:
+		return
+	if not _session.has("shader_first_use"):
+		_session["shader_first_use"] = []
+	var l: Array = _session["shader_first_use"]
+	if l.size() < 50:
+		l.append({"ms": now_ms(), "key": key, "kind": kind, "tick": tick})
+	_dirty = true
+
+
+## A PLAY frame over the hitch limit (ShaderWatch: > max(50 ms, 2.5 × the median frame)).
+static func hitch(frame_ms: float, median_ms: float, tick: int) -> void:
+	if not _started:
+		return
+	_session["hitch_count"] = int(_session.get("hitch_count", 0)) + 1
+	if not _session.has("hitches"):
+		_session["hitches"] = []
+	var l: Array = _session["hitches"]
+	if l.size() < 50:
+		l.append({"ms": now_ms(), "frame_ms": snappedf(frame_ms, 0.1), "median_ms": snappedf(median_ms, 0.1), "tick": tick})
 	_dirty = true
 
 

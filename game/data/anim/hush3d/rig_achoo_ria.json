@@ -26,13 +26,13 @@
       "id": "stool_creak"
     },
     {
-      "f": 8,
+      "f": 7,
       "type": "prop",
       "op": "show",
       "prop": "pepper_pot"
     },
     {
-      "f": 8,
+      "f": 7,
       "type": "set_part",
       "hotspot": "kitchen_honey",
       "part": "pepper_pot",
@@ -82,13 +82,13 @@
       "visible": true
     },
     {
-      "f": 43,
+      "f": 44,
       "type": "decor",
       "id": "kitchen_stool",
       "anim": "wobble"
     },
     {
-      "f": 46,
+      "f": 47,
       "type": "sfx",
       "id": "step_pizz_up"
     }
@@ -103,7 +103,7 @@
       "preset": "grin"
     },
     {
-      "f": 12,
+      "f": 7,
       "preset": "sneak"
     },
     {
@@ -119,11 +119,11 @@
       "preset": "laugh"
     },
     {
-      "f": 41,
+      "f": 42,
       "preset": "smug"
     },
     {
-      "f": 46,
+      "f": 47,
       "preset": "happy"
     }
   ],
@@ -145,6 +145,8 @@
   "lint": {
     "skippable": false,
     "pop_frames": [
+      4,
+      7,
       16,
       26,
       36
@@ -166,14 +168,14 @@
         0.55
       ],
       [
-        44,
+        45,
         0.0
       ]
     ]
   },
   "stage": {
-    "x": 15.0,
-    "z": -1.4,
+    "x": 14.85,
+    "z": -1.42,
     "facing": -1,
     "cheat_deg": 10.0
   }

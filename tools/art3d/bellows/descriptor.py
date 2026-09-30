@@ -168,6 +168,11 @@ if __name__ == "__main__":
     rj = rig3d(meta, lay)
     if "--portraits" in a:
         rj["portraits"]["names"] = a[a.index("--portraits") + 1].split(",")
+    else:   # the portraits rendered so far (tools/art3d/bellows/portraits.json lists the set; the PNGs sit in the game)
+        pdir = os.path.join(ROOT, "game", "art3d", "chars", "bellows", "portraits")
+        order = json.load(open(os.path.join(HERE, "portraits.json")))["order"]
+        have = {f[len("bellows_"):-4] for f in os.listdir(pdir)} if os.path.isdir(pdir) else set()
+        rj["portraits"]["names"] = [n for n in order if n in have]
     with open(os.path.join(out, "faces.json"), "w") as f:
         json.dump(fj, f, indent=2)
     with open(os.path.join(out, "rig3d.json"), "w") as f:

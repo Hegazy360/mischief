@@ -1,7 +1,8 @@
 ## E2eScenarios — the e2e driver's scenario table (s2-night §4.6). Pure.
 ## * Route scenarios replay a solver route through the real Boot → NightScene path:
 ##   `g0_sneeze`, `prologue_{ideal,required,slow}`, `n01_{ideal,required,slow}`, `n02_…`, and the
-##   scenario routes `n01_caught`, `n01_chase`, `n01_meltdown`, `n02_face_to_face`, `n02_face_to_face_lost`.
+##   scenario routes `n01_caught`, `n01_chase`, `n01_meltdown` (R3D: N02's `face_to_face` / `face_to_face_lost` are
+##   retired with the clock case, r3d-content C2).
 ## * Flow scenarios drive the scene with synthetic input: `retry`, `pause_back`, `curtain_call`,
 ##   `touch_smoke`, `tap_accuracy`, `cold_<episode>`.
 ## * `slice_all` = every route + scenario route of P00/N01/N02 + g0_sneeze (e2e.sh runs one process each).
@@ -18,14 +19,16 @@ const ROUTE_SCENARIOS := {
 	"n02_ideal": ["n02_something_fishy", "ideal"], "n02_required": ["n02_something_fishy", "required"],
 	"n02_slow": ["n02_something_fishy", "slow"],
 	"n01_caught": ["n01_throat_tea", "caught"], "n01_chase": ["n01_throat_tea", "chase"],
-	"n01_meltdown": ["n01_throat_tea", "meltdown"], "n02_face_to_face": ["n02_something_fishy", "face_to_face"],
-	"n02_face_to_face_lost": ["n02_something_fishy", "face_to_face_lost"],
+	"n01_meltdown": ["n01_throat_tea", "meltdown"],
 }
-## Flow scenario → the episode it plays on.
-const FLOW_SCENARIOS := {"retry": "n01_throat_tea", "pause_back": "n01_throat_tea", "curtain_call": "n01_throat_tea",
-	"touch_smoke": "p00_curtain_up", "tap_accuracy": "n01_throat_tea"}
+## Flow scenario → the episode it boots into (R3D: the owner's slice first — Gate 0 and the Prologue; the flows that
+## visit other Nights load them themselves).
+const FLOW_SCENARIOS := {"retry": "g0_sneeze", "pause_back": "g0_sneeze", "curtain_call": "p00_curtain_up",
+	"touch_smoke": "p00_curtain_up", "tap_accuracy": "p00_curtain_up"}
 ## Route scenarios that are optional (missing from the solution file until s2-content adds them → SKIP).
-const OPTIONAL: PackedStringArray = ["n01_caught", "n01_chase", "n01_meltdown", "n02_face_to_face", "n02_face_to_face_lost"]
+const OPTIONAL: PackedStringArray = ["n01_caught", "n01_chase", "n01_meltdown"]
+## Episodes whose fallbacks fail `--strict` (R9: the Gate-0 + Prologue clip set; N01/N02 fallbacks are info).
+const STRICT_EPISODES: PackedStringArray = ["g0_sneeze", "p00_curtain_up"]
 
 
 static func is_route(s: String) -> bool:
@@ -83,8 +86,17 @@ static func thresholds(s: String) -> Dictionary:
 			t["draw_max"] = 250
 			t["pages_in_play_max"] = 0
 	if is_route(s):
-		t["fallbacks_max"] = 0
+		if STRICT_EPISODES.has(episode_of(s)):
+			t["fallbacks_max"] = 0
 		# texture memory over the whole Night (build → curtain call), RENDER_TEXTURE_MEM_USED: a 3 GB
 		# phone (s2-fix G #7; checked on rendered runs only — headless reports 0)
 		t["tex_mb_peak_max"] = 256
+		# REDESIGN §6.3 / index §6 row 16 (rendered runs; headless reports 0): no shader compiled during PLAY
+		t["shader_compiles_play_max"] = 0
 	return t
+
+
+## R11: a frame-quantised timing check passes when `value_s` ≤ max(`threshold_s`, one measured frame `frame_s`) —
+## on the CPU box one frame (≈ 85–125 ms) can exceed a sub-frame threshold.
+static func within_quantised(value_s: float, threshold_s: float, frame_s: float) -> bool:
+	return value_s <= maxf(threshold_s, frame_s) + 0.0005

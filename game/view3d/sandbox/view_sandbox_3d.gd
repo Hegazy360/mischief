@@ -97,6 +97,7 @@ func _ready() -> void:
 	build(world, flags.has("stand-ins"))
 	if opt.has("window"):
 		world_view.window_mode = str(opt["window"])
+	world_view.profile = run_s > 0.0
 	if cmds_path != "":
 		var j := JSON.new()
 		if FileAccess.file_exists(cmds_path) and j.parse(FileAccess.get_file_as_string(cmds_path)) == OK:
@@ -260,6 +261,11 @@ func _sample_perf(delta: float) -> void:
 	_t_real += DT if fixed_step else delta
 	if _t_real >= run_s:
 		print(perf_line())
+		if world_view.prof_frames > 0:
+			var n := float(world_view.prof_frames)
+			var pu := world_view.prof_us
+			print("[perf3d] view phases mean µs/frame: hush %.0f | bellows %.0f | caught+recorder %.0f | props+cues %.0f | decals+fx %.0f | overlays %.0f" % [
+				pu[0] / n, pu[1] / n, pu[2] / n, pu[3] / n, pu[4] / n, pu[5] / n])
 		if pip != null:
 			print("[ViewSandbox3D] window share %s" % JSON.stringify(pip.share()))
 		run_s = -1.0

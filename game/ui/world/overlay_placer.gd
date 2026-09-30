@@ -51,6 +51,8 @@ class Item:
 	var faded: bool = false
 	## Registered this frame (shared use); pure `place` treats every item as active.
 	var active: bool = true
+	## Was requested in the frame before the last begin_frame() (debug views / lints read the last solve).
+	var was_active: bool = false
 	var _placed: bool = false
 
 
@@ -64,7 +66,13 @@ var last_safe: Rect2 = Rect2()
 ## Start a frame: every pooled item becomes inactive until requested again.
 func begin_frame() -> void:
 	for it in _pool:
+		it.was_active = it.active
 		it.active = false
+
+
+## Every pooled item (read-only use: debug views, lints).
+func pool() -> Array[Item]:
+	return _pool
 
 
 ## Ask for a slot this frame. Returns the pooled Item for `id` (created once).

@@ -16,6 +16,10 @@
 ## Next ▶ never waits. A tap anywhere else skips the current step (the ResultsScreen's own skip
 ## during its count-up; a Gag Reel moment during the reel).
 ## `action(a)`: next | retry | playbill (night, prologue) · again | stage_door (gate0).
+## **3D view** (the NightScene's `view_mode == "3d"`): the 2D red curtain falls as before; the bows are 3D
+## (CurtainBows3D: a transparent SubViewport composited in front of the curtain, under the roses / title / valance);
+## the Gag Reel is GagReel3D (the recorded moments re-staged in a SubViewport), primed on the call's first frame so
+## its slot is never empty.
 class_name CurtainCall
 extends Node
 
@@ -88,7 +92,11 @@ var done: bool = false
 var layer: CanvasLayer = null
 var apron: CurtainApron = null
 var results: ResultsScreen = null
-var reel: GagReel = null
+## GagReel (2D) or GagReel3D.
+var reel: Node = null
+## 3D: the bows (null in 2D).
+var bows: CurtainBows3D = null
+var view3d: bool = false
 var proxy_next: UiButton = null
 var proxy_retry: UiButton = null
 ## Tests: the step never ends on its own (only skip()).
@@ -114,8 +122,16 @@ func start(p_night: Node, p_kind: String, p_result: Dictionary) -> void:
 	layer.layer = LAYER
 	layer.name = "CurtainCallLayer"
 	add_child(layer)
+	view3d = night != null and String(night.get("view_mode")) == "3d"
+	if view3d:
+		bows = CurtainBows3D.new()
+		layer.add_child(bows)
 	apron = CurtainApron.new()
+	apron.view3d = view3d
+	apron.bows = bows
 	layer.add_child(apron)
+	if view3d:
+		_prime_reel()
 	_catcher = _TapCatcher.new()
 	_catcher.call_ref = skip
 	layer.add_child(_catcher)
@@ -133,8 +149,8 @@ func skip() -> void:
 	if done or step_i < 0 or step_i >= table.size():
 		return
 	var id := step_id()
-	if id == "reel" and reel != null and reel.playing:
-		reel.skip()
+	if id == "reel" and reel != null and bool(reel.get("playing")):
+		reel.call("skip")
 		return
 	if id == "results" and results != null and not results.is_finished():
 		results.skip()
@@ -178,7 +194,7 @@ func _process(delta: float) -> void:
 				return
 		"reel":
 			apron.bellows_t = step_t / maxf(0.1, dur)
-			if reel != null and not reel.playing and step_t > 0.05:
+			if reel != null and not bool(reel.get("playing")) and step_t > 0.05:
 				_next_step()
 				return
 	if not hold_steps and step_t >= dur:
@@ -235,8 +251,8 @@ func _end_step(id: String) -> void:
 			if c is NightCurtain and (c as NightCurtain).is_animating():
 				(c as NightCurtain).set_down()
 		"reel":
-			if reel != null and reel.playing:
-				reel.stop()
+			if reel != null and bool(reel.get("playing")):
+				reel.call("stop")
 			apron.bonk()
 
 
@@ -294,6 +310,8 @@ func _show_results() -> void:
 	rs.position = Vector2.ZERO
 	rs.size = vs
 	rs.set_insets(SafeArea.insets(get_viewport()) if is_inside_tree() else Vector4.ZERO)
+	if reel != null and reel.has_method("get_texture"):
+		rs.set_gag_reel_texture(reel.call("get_texture"))
 	rs.closed.connect(_emit_action)
 	rs.skip_requested.connect(_on_results_skip)
 	results = rs
@@ -305,8 +323,8 @@ func _show_results() -> void:
 
 func _on_results_skip(st: int) -> void:
 	if st == ResultsScreen.Step.DONE:
-		if step_id() == "reel" and reel != null and reel.playing:
-			reel.skip()
+		if step_id() == "reel" and reel != null and bool(reel.get("playing")):
+			reel.call("skip")
 		elif step_id() == "results":
 			_next_step()
 
@@ -315,19 +333,31 @@ func _start_reel(budget: float) -> void:
 	var moments: Array = result.get("moments", [])
 	if night == null or moments.is_empty():
 		return
-	reel = GagReel.new()
-	add_child(reel)
-	reel.start(night, moments, budget, result.get("cmds", []))
+	if reel == null:
+		reel = GagReel3D.new() if view3d else GagReel.new()
+		add_child(reel)
+	reel.call("start", night, moments, budget, result.get("cmds", []))
 	if results != null:
-		results.set_gag_reel_texture(reel.get_texture())
+		results.set_gag_reel_texture(reel.call("get_texture"))
+
+
+## 3D: the reel's first frame is rendered on the call's first frame (no empty box when the slot appears).
+func _prime_reel() -> void:
+	var moments: Array = result.get("moments", [])
+	if moments.is_empty():
+		return
+	var r := GagReel3D.new()
+	add_child(r)
+	r.prime(night, moments)
+	reel = r
 
 
 func _emit_action(a: String) -> void:
 	if _acted:
 		return
 	_acted = true
-	if reel != null and reel.playing:
-		reel.stop()
+	if reel != null and (bool(reel.get("playing")) or bool(reel.get("primed"))):
+		reel.call("stop")
 	action.emit(a)
 
 

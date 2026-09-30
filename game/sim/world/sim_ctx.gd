@@ -209,9 +209,10 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 ## "take" | "hide" | "door" | "exit" | "stairs"}. A rig point is live iff a prank of tonight (Script lines,
 ## Double Acts, `nights` — not a knock-on target the sim only pulls in so a Double Act can land, e.g. TAP DANCE
 ## in the Prologue) rigs there; a container iff it holds an item one of those pranks needs; a hiding spot
-## iff it is in the episode's `hides` (absent: every hiding spot of the rooms Hush may enter); doors, exits and
-## stairs as today (tappable, in a room Hush may enter — the kitchen window stays untappable). Hotspots in
-## backstage rooms or rooms Hush may not enter are never live. Keys are in `house.json` order.
+## iff it is in the episode's `hides` (absent: every hiding spot of the rooms Hush may enter); exits as today
+## (tappable, in a room Hush may enter); doors and stairs only when they lead to a room she may enter tonight
+## (REDESIGN §3.4: the kitchen back door is closed and the stairs roped off in Act I; the kitchen window stays
+## untappable). Hotspots in backstage rooms or rooms Hush may not enter are never live. Keys in `house.json` order.
 static func live_hotspots(p_db: ContentDB, ep: EpisodeDef) -> Dictionary:
 	var out := {}
 	if p_db == null or ep == null:
@@ -271,8 +272,14 @@ static func _build_live(c: SimCtx, listed: PackedByteArray) -> void:
 				HotspotDef.HIDING:
 					if not c.episode.has_hides or hides.has(h.id):
 						k = h.kind
-				HotspotDef.EXIT, HotspotDef.STAIRS, HotspotDef.DOOR:
+				HotspotDef.EXIT:
 					k = h.kind
+				HotspotDef.STAIRS, HotspotDef.DOOR:
+					# live only when it leads somewhere she may go tonight (REDESIGN §3.4: the back door is closed and
+					# the stairs roped off in Act I — architecture, not tappable)
+					var far := house.links[h.link_idx].other(h.room_idx) if h.link_idx >= 0 else -1
+					if far >= 0 and c.hush_allowed(far) and not c.is_backstage(far):
+						k = h.kind
 		c.live_kind[h.idx] = k
 		c.live_mask[h.idx] = 1 if k >= 0 else 0
 

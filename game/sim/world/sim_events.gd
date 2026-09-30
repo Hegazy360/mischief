@@ -97,7 +97,8 @@ const DIRECTOR_CUE := "director_cue"        ## {id}
 const SAFETY_NET := "safety_net"            ## {on}
 const FIGGIS_HOOK := "figgis_hook"
 const NIGHT_END := "night_end"              ## {reason}
-## {c, why}; why "struck" (a hotspot not on stage tonight, REDESIGN_3D §6.2 C1) also carries `target` (the hotspot id).
+## {c, why}; why "struck" (a hotspot not on stage tonight, REDESIGN_3D §6.2 C1) and "here" (a go / pin on the hiding spot she
+## is in: it clears any pin) also carry `target` (the hotspot id).
 const CMD_REJECTED := "cmd_rejected"
 ## {c, why, target}: a command held behind a busy action — a go/move while busy, a FREEZE on the stairs / in a door /
 ## mid-rummage, a POP OUT mid-dive; why: "entering" (the climb-in) | "busy"; target: a hotspot id or "<room>:<x px>".

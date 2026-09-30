@@ -452,6 +452,14 @@ static func _episode(db: ContentDB, ep: EpisodeDef, e: PackedStringArray) -> voi
 		if not sn.is_empty() and ContentUtil.s(sn, "pulse") != "" and db.house.hotspot(ContentUtil.s(sn, "pulse")) == null:
 			e.append("%s: director.safety_net.pulse '%s' not in house.json" % [f, ContentUtil.s(sn, "pulse")])
 	_hides(db, ep, f, e)
+	for i in ep.fixup_holds.size():
+		var fh: Array = ep.fixup_holds[i]
+		if not SimConst.FIXUP_KINDS.has(str(fh[0])):
+			e.append("%s: director.fixup_holds[%d].kind '%s' not DRY|SINK|HONEY|MIRROR" % [f, i, fh[0]])
+		if fh[1] == null:
+			e.append("%s: director.fixup_holds[%d].until is missing" % [f, i])
+		else:
+			_gate(db, fh[1], "%s: director.fixup_holds[%d].until" % [f, i], e)
 
 
 ## `hides` (REDESIGN_3D §6.2 C1): a list of hiding hotspots in the Night's rooms, no repeats; with a list, the

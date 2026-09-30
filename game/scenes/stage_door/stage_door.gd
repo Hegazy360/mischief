@@ -1,8 +1,13 @@
 ## StageDoor — the debug-build dev menu (s2-night §4.1, ruling L8; Router key `stage_door`, debug only).
 ## Big buttons (≥ 144 px tall, 24 px gaps), every label from `stage_door.*` keys:
-## * *Prologue*, *Night 1*, *Night 2* — play that Night (`Router.goto("night", {episode, from})`);
-## * **Gate 0: the Sneeze** — the 3-icon card (Gate0Card, 2.5 s or a tap), then `g0_sneeze`;
-## * *Cast* — `cast.tscn`: live RigPlayers (Hush with a Hush/Pip toggle, Bellows, Figgis, the Stalls);
+## * **Gate 0: the Sneeze** — the 3-icon card (Gate0Card, 2.5 s or a tap), then `g0_sneeze`; *Prologue* — P00;
+## * **R3D (brief r3d-night §4.3):** only when `r3d-cast-hush` shipped the `head_b` variant
+##   (`data/rigs3d/hush/rig3d_head_b.json`): **Gate 0 · Hush, B's head** (Settings `hush_head` = "") and
+##   **Gate 0 · Hush, head ×<scale>** (`hush_head` = "head_b"; the scale read from that file) — never "head A / B";
+##   **Night 1 (preview)** / **Night 2 (preview)** are hidden unless boot_config.json `show_previews` (the debug
+##   setting's default) or Settings `show_previews` is on, and then open behind a "Work in progress" card first;
+##   the Hush / Pip toggle is gone from the 3D menu (Pip falls back to Hush, ruling R7);
+## * *Cast* — `cast.tscn`: Hush and Bellows in 3D on the lane at the base framing (Next / Turn);
 ## * *Voice A/B*, *Crowd A/B* — the pairs of `data/audio/ab.json` (Play A / Play B through
 ##   `Audio.preview(id, style)`, "Use this" → Settings `voice_style` / `crowd_style`);
 ## * **Gate 0 · voice A / B**, **Gate 0 · crowd A / B** — set the style and launch `g0_sneeze`, so the
@@ -19,14 +24,34 @@ const BTN_H := 144.0
 const GAP := 24.0
 const COLS := 3
 const G0 := "g0_sneeze"
-## Main menu: [id, string key].
+const HEAD_B_RIG := "res://data/rigs3d/hush/rig3d_head_b.json"
+## Main menu (2D view): [id, string key].
 const MENU := [
 	["gate0", "stage_door.gate0"], ["g0_voice_a", "stage_door.play_g0_voice_a"], ["g0_voice_b", "stage_door.play_g0_voice_b"],
 	["cast", "stage_door.cast"], ["g0_crowd_a", "stage_door.play_g0_crowd_a"], ["g0_crowd_b", "stage_door.play_g0_crowd_b"],
 	["prologue", "stage_door.prologue"], ["night1", "stage_door.night1"], ["night2", "stage_door.night2"],
 	["voice_ab", "stage_door.voice_ab"], ["crowd_ab", "stage_door.crowd_ab"], ["hush_pip", "stage_door.hush_pip"],
 	["device_log", "stage_door.device_log"], ["reset_save", "stage_door.reset_save"]]
-const EPISODES := {"prologue": "p00_curtain_up", "night1": "n01_throat_tea", "night2": "n02_something_fishy"}
+## Main menu (3D view, R3D): the head buttons and the N1/N2 previews are added by `menu3d()` when they apply.
+const MENU3D := [
+	["gate0", "stage_door.gate0"], ["prologue", "stage_door.prologue"], ["cast", "stage_door.cast"],
+	["g0_voice_a", "stage_door.play_g0_voice_a"], ["g0_voice_b", "stage_door.play_g0_voice_b"],
+	["g0_crowd_a", "stage_door.play_g0_crowd_a"], ["g0_crowd_b", "stage_door.play_g0_crowd_b"],
+	["voice_ab", "stage_door.voice_ab"], ["crowd_ab", "stage_door.crowd_ab"],
+	["device_log", "stage_door.device_log"], ["reset_save", "stage_door.reset_save"]]
+## Labels of keys `r3d-hud` has not added to strings.json yet (debug-only screen; UiStrings wins once they land).
+const FALLBACK_TEXT := {
+	"stage_door.g0_head_b": "Gate 0 · Hush, B's head",
+	"stage_door.g0_head_scaled": "Gate 0 · Hush, head ×{s}",
+	"stage_door.night1_preview": "Night 1 (preview)",
+	"stage_door.night2_preview": "Night 2 (preview)",
+	"stage_door.wip_title": "Work in progress",
+	"stage_door.wip_text": "Work in progress: Bellows' reactions in these Nights are not animated yet",
+	"stage_door.wip_play": "Play anyway",
+	"stage_door.cast_turn": "Turn",
+}
+const EPISODES := {"prologue": "p00_curtain_up", "night1": "n01_throat_tea", "night2": "n02_something_fishy",
+	"night1_preview": "n01_throat_tea", "night2_preview": "n02_something_fishy"}
 ## Style values per A/B side.
 const STYLES := {"voice": ["formant", "tuba"], "crowd": ["formant", "fallback"]}
 
@@ -43,6 +68,11 @@ var _content: Control = null
 var _title: String = ""
 var _log_text: String = ""
 var _card: Gate0Card = null
+## "3d" (the R3D menu) | "2d" (boot_config.json `view`).
+var view: String = "3d"
+## The WIP card over the menu (null when closed) and the episode it guards.
+var wip_card: Control = null
+var _wip_episode: String = ""
 
 
 func _init() -> void:
@@ -53,6 +83,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	view = BootConfig.view()
 	ab = _read_ab()
 	_title = UiStrings.t("stage_door.title")
 	var first := "main"
@@ -66,6 +97,9 @@ func _ready() -> void:
 ## Android back: a sub page → the menu; the menu → nothing (never quits).
 func handle_back() -> bool:
 	if _card != null:
+		return true
+	if wip_card != null:
+		close_wip()
 		return true
 	if page != "main":
 		show_page("main")
@@ -130,14 +164,65 @@ func _add_button(id: String, text: String, rect: Rect2, fill: Color = UiKit.CREA
 func _build_main() -> void:
 	var r := safe_rect()
 	var i := 0
-	for m in MENU:
+	var items: Array = MENU if view == "2d" else menu3d(head_b_scale(), previews_on())
+	var cols := COLS if items.size() <= 15 else 4
+	for m in items:
 		var id := String(m[0])
-		var text := UiStrings.t(String(m[1]))
+		var text := label(String(m[1]), m[2] if (m as Array).size() > 2 else {})
 		if id == "hush_pip":
 			text = "%s: %s" % [text, "Pip" if _skin() == "pip" else "Hush"]
 		var gold := id == "gate0" or id.begins_with("g0_")
-		_add_button(id, text, cell(r, i), UiKit.GOLD if gold else UiKit.CREAM, UiKit.GOLD_SHADE if gold else UiKit.CREAM_SHADE)
+		_add_button(id, text, cell(r, i, cols), UiKit.GOLD if gold else UiKit.CREAM, UiKit.GOLD_SHADE if gold else UiKit.CREAM_SHADE)
 		i += 1
+
+
+## The 3D menu (pure): MENU3D + the two head buttons right after Gate 0 when `head_scale` > 0 (the `head_b` variant
+## exists), + the N1/N2 previews when `previews`. Rows are [id, string key] or [id, key, args].
+static func menu3d(head_scale: float, previews: bool) -> Array:
+	var out: Array = []
+	for m in MENU3D:
+		out.append(m)
+		if String(m[0]) == "cast" and head_scale > 0.0:
+			out.append(["g0_head_b", "stage_door.g0_head_b"])
+			out.append(["g0_head_scaled", "stage_door.g0_head_scaled", {"s": head_label(head_scale)}])
+	if previews:
+		out.insert(3, ["night1_preview", "stage_door.night1_preview"])
+		out.insert(4, ["night2_preview", "stage_door.night2_preview"])
+	return out
+
+
+## "1.2" for 1.2, "1.25" for 1.25 (the label's scale).
+static func head_label(scale: float) -> String:
+	var t := "%.2f" % scale
+	while t.ends_with("0"):
+		t = t.substr(0, t.length() - 1)
+	return t.trim_suffix(".")
+
+
+## The `head_b` variant's head scale (0 when `r3d-cast-hush` has not shipped it).
+static func head_b_scale(path: String = HEAD_B_RIG) -> float:
+	if not FileAccess.file_exists(path):
+		return 0.0
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(path)) != OK or not (j.data is Dictionary):
+		return 0.0
+	return float((j.data as Dictionary).get("head_scale", 0.0))
+
+
+## The N1/N2 previews show: Settings `show_previews` (its default is boot_config.json's `show_previews`).
+static func previews_on() -> bool:
+	return bool(ViewKit.setting("show_previews", bool(BootConfig.read().get("show_previews", false))))
+
+
+## A label: UiStrings when the key exists, else FALLBACK_TEXT (debug-only screen), formatted with `args`.
+static func label(key: String, args: Variant = {}) -> String:
+	var a: Dictionary = args if args is Dictionary else {}
+	if UiStrings.has(key):
+		return UiStrings.t(key, a)
+	var t := String(FALLBACK_TEXT.get(key, key))
+	for k in a:
+		t = t.replace("{%s}" % k, String(a[k]))
+	return t
 
 
 func _build_ab(kind: String) -> void:
@@ -220,10 +305,24 @@ func press(id: String) -> void:
 
 
 func _on_press(id: String) -> void:
+	if wip_card != null and id != "wip_play" and id != "wip_back":
+		return
+	if id == "night1_preview" or id == "night2_preview":
+		open_wip(String(EPISODES[id]))
+		return
 	if EPISODES.has(id):
 		launch(String(EPISODES[id]))
 		return
 	match id:
+		"g0_head_b", "g0_head_scaled":
+			_set_setting("hush_head", "" if id == "g0_head_b" else "head_b")
+			launch(G0, {"card": "g0"})
+		"wip_play":
+			var ep := _wip_episode
+			close_wip()
+			launch(ep)
+		"wip_back":
+			close_wip()
 		"gate0":
 			launch(G0, {"card": "g0"})
 		"g0_voice_a", "g0_voice_b":
@@ -283,6 +382,63 @@ func _play_pair(id: String) -> void:
 	if au != null and au.has_method("preview"):
 		au.call("preview", String((side as Dictionary).get("id", "")), String((side as Dictionary).get("style", "")))
 	launched.emit("preview", side)
+
+
+## The "Work in progress" card in front of a Night 1 / Night 2 preview (Play anyway / Back).
+func open_wip(episode: String) -> void:
+	close_wip()
+	_wip_episode = episode
+	var c := _WipCard.new()
+	c.name = "WipCard"
+	c.text = label("stage_door.wip_text")
+	c.title = label("stage_door.wip_title")
+	add_child(c)
+	c.position = Vector2.ZERO
+	c.size = size if size.x > 0.0 else Vector2(1920, 1080)
+	var r := safe_rect()
+	var w := minf(1100.0, r.size.x - 96.0)
+	var bw := (w - GAP) * 0.5
+	var by := r.get_center().y + 120.0
+	var x0 := r.get_center().x - w * 0.5
+	for spec in [["wip_play", label("stage_door.wip_play"), UiKit.GOLD, UiKit.GOLD_SHADE, x0],
+			["wip_back", UiStrings.t("stage_door.back"), UiKit.CREAM, UiKit.CREAM_SHADE, x0 + bw + GAP]]:
+		var b := UiButton.make(String(spec[1]), Vector2(bw, BTN_H), spec[2], spec[3])
+		b.name = "Btn_" + String(spec[0])
+		b.position = Vector2(float(spec[4]), by)
+		b.font_size = UiKit.SIZE_PLAY
+		b.pressed.connect(_on_press.bind(String(spec[0])))
+		c.add_child(b)
+		buttons[String(spec[0])] = b
+	wip_card = c
+	launched.emit("wip", {"episode": episode})
+
+
+func close_wip() -> void:
+	if wip_card != null and is_instance_valid(wip_card):
+		wip_card.queue_free()
+	wip_card = null
+	buttons.erase("wip_play")
+	buttons.erase("wip_back")
+
+
+## The WIP card: a scrim + a cream card with the warning (the buttons are its children).
+class _WipCard:
+	extends Control
+	var text: String = ""
+	var title: String = ""
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(UiKit.NAVY, 0.72))
+		var w := minf(1180.0, size.x - 96.0)
+		var r := Rect2(size.x * 0.5 - w * 0.5, size.y * 0.5 - 260.0, w, 560.0)
+		UiKit.draw_chunky_rect(self, r, 36.0, UiKit.CREAM, UiKit.NAVY, 8.0, 12.0)
+		UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(r.get_center().x, r.position.y + 90.0), title,
+			UiKit.SIZE_TITLE, UiKit.CHERRY, 10)
+		draw_multiline_string(UiKit.ui_font(), Vector2(r.position.x + 60.0, r.position.y + 190.0), text, HORIZONTAL_ALIGNMENT_CENTER,
+			r.size.x - 120.0, UiKit.SIZE_PLAY, 3, UiKit.NAVY)
 
 
 ## Wipe the save (progress, seen keys) — Settings stay.

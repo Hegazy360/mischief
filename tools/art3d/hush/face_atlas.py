@@ -2,14 +2,16 @@
 
     python3 tools/art3d/hush/face_atlas.py <out_dir> [--json-dir <dir>] [--preview]
 
-Writes <out_dir>/face_hush.png (1024 x 1024 RGBA, an 8 x 8 grid of 128 px cells) and <json_dir>/face_hush.json (the cell
-table, layer rects, mirror cells, blink + pupil data write_rig.py puts into rig3d.json). rsvg-convert rasterises each cell.
+Writes <out_dir>/face_hush.png (2048 x 1024 RGBA, a 6 x 8 grid of 341 x 128 px cells) and <json_dir>/face_hush.json (the
+cell table, layer rects, mirror cells, blink + pupil data write_rig.py puts into rig3d.json). rsvg-convert rasterises each
+cell. The cells are wide because the layers are wide bands of the face (issues D7: keep look A's horizontal face-cell
+resolution, A's cells are 340 px wide; the eyes band then gets ~406 px per face width, A had 340).
 
 FACE SPACE. The head's front faces carry a planar FaceUV (glTF TEXCOORD_1): a square of D.FACE_W metres centred on
 the face; in the shader fuv = (UV2.x, 1 - UV2.y) is (u right as seen from the front = her LEFT, v up). Each LAYER owns
-a rect [u0, v0, u1, v1] of that square; its current cell (128 x 128 px) is stretched over the rect:
-    atlas_uv = ((col + lu) / 8, (row + 1 - lv) / 8),  lu = (u - u0) / (u1 - u0), lv = (v - v0) / (v1 - v0)
-(row 0 = the top row of the PNG; cell index = row * 8 + col). Cells are drawn in face units (1000 x 1000 = the face
+a rect [u0, v0, u1, v1] of that square; its current cell (341 x 128 px) is stretched over the rect:
+    atlas_uv = ((col + lu) / 6, (row + 1 - lv) / 8),  lu = (u - u0) / (u1 - u0), lv = (v - v0) / (v1 - v0)
+(row 0 = the top row of the PNG; cell index = row * 6 + col). Cells are drawn in face units (1000 x 1000 = the face
 square, SVG y down) inside the layer rect, so every layer lines up with every other.
 
 Readability at 1200 x 540 (brief 4.3 bar): eye whites 0.075 m tall (~10 px), pupils 0.036 m (~4.8 px), brows 0.026 m
@@ -28,7 +30,16 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-ATLAS, GRID, CELL = 1024, 8, 128
+ATLAS_W, ATLAS_H = 2048, 1024
+COLS, ROWS = 6, 8                 # char_toon face_grid = ivec2(COLS, ROWS); cells need not be square
+
+
+def cell_box(idx: int):
+    """Pixel box (x0, y0, x1, y1) of cell `idx` in the PNG (x edges rounded: 2048 / 6 is not whole)."""
+    col, row = idx % COLS, idx // COLS
+    x0, x1 = round(col * ATLAS_W / COLS), round((col + 1) * ATLAS_W / COLS)
+    h = ATLAS_H // ROWS
+    return x0, row * h, x1, row * h + h
 INK = "#2A2036"
 BROW = "#3A2230"
 IRIS = "#5A3424"
@@ -83,24 +94,25 @@ def path(d, fill="none", stroke=INK, sw=16, cap="round", join="round", extra="")
             f'stroke-linejoin="{join}" {extra}/>')
 
 
-def raster(body: str, rect) -> Image.Image:
-    """Rasterise face-unit SVG `body` over a layer rect into one 128 x 128 cell (drawn at 2x, downsampled)."""
+def raster(body: str, rect, w: int, h: int) -> Image.Image:
+    """Rasterise face-unit SVG `body` over a layer rect into one w x h cell (drawn at 2x, downsampled)."""
     u0, v0, u1, v1 = rect
     x0, x1 = u0 * 1000.0, u1 * 1000.0
     y0, y1 = (1.0 - v1) * 1000.0, (1.0 - v0) * 1000.0
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{CELL * 2}" height="{CELL * 2}" '
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w * 2}" height="{h * 2}" '
            f'viewBox="{x0:.2f} {y0:.2f} {x1 - x0:.2f} {y1 - y0:.2f}" preserveAspectRatio="none">{body}</svg>')
     png = subprocess.run(["rsvg-convert", "-f", "png"], input=svg.encode(), capture_output=True, check=True).stdout
     im = Image.open(io.BytesIO(png)).convert("RGBA")
-    return im.resize((CELL, CELL), Image.LANCZOS)
+    return im.resize((w, h), Image.LANCZOS)
 
 
-def raster_square(body: str) -> Image.Image:
-    """A standalone card (the hiding-spot eye card): a 1000 x 1000 viewBox straight into the cell."""
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{CELL * 2}" height="{CELL * 2}" viewBox="0 0 1000 1000">'
-           f'{body}</svg>')
+def raster_square(body: str, w: int, h: int) -> Image.Image:
+    """A standalone card (the hiding-spot eye card): a 1000 x 1000 viewBox stretched into the cell (the card's quad
+    stretches it back)."""
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w * 2}" height="{h * 2}" viewBox="0 0 1000 1000" '
+           f'preserveAspectRatio="none">{body}</svg>')
     png = subprocess.run(["rsvg-convert", "-f", "png"], input=svg.encode(), capture_output=True, check=True).stdout
-    return Image.open(io.BytesIO(png)).convert("RGBA").resize((CELL, CELL), Image.LANCZOS)
+    return Image.open(io.BytesIO(png)).convert("RGBA").resize((w, h), Image.LANCZOS)
 
 
 # -------------------------------------------------------------------------------------------------------------
@@ -186,12 +198,12 @@ def eyes(kind: str, mirror=False) -> str:
                 out.append(eye_white(cx, cy, EYE_RX, EYE_RY, side=side, baked=True))
         elif kind == "spiral":      # dizzy
             pts = []
-            for k in range(70):
-                a = k * 0.33 * (1 if i == 0 else -1)
-                r = 4 + k * 1.25
-                pts.append((cx + r * math.cos(a), cy + r * math.sin(a) * 1.18))
-            out.append(ell(cx, cy, EYE_RX, EYE_RY, WHITE, INK, 16))
-            out.append(path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts), sw=15))
+            for k in range(56):
+                a = k * 0.30 * (1 if i == 0 else -1)
+                r = 6 + k * 1.55
+                pts.append((cx + r * math.cos(a), cy + r * math.sin(a) * 1.15))
+            out.append(ell(cx, cy, EYE_RX, EYE_RY, WHITE, INK, 14))
+            out.append(path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts), sw=22))
     return "".join(out)
 
 
@@ -215,12 +227,13 @@ def brows(kind: str, mirror=False) -> str:
             d = f"M{cx + 84 * s},{y - 26} Q{cx + 8 * s},{y - 8} {cx - 70 * s},{y + 34}"
         elif kind == "worried":        # up in the middle
             d = f"M{cx + 84 * s},{y + 20} Q{cx},{y - 8} {cx - 70 * s},{y - 40}"
-        elif kind == "sly":            # one flat and low, the other arched high
+        elif kind == "sly":            # one pressed low and slanted in, the other arched high: the sneaky look
             high_i = 0 if mirror else 1
             if i == high_i:
-                d = f"M{cx - 80},{y - 8} Q{cx},{y - 84} {cx + 84},{y - 30}"
+                d = f"M{cx - 86},{y + 4} Q{cx - 10},{y - 104} {cx + 90},{y - 40}"
             else:
-                d = f"M{cx - 80},{y + 26} Q{cx},{y + 8} {cx + 80},{y + 30}"
+                inner = 1 if i == 0 else -1
+                d = f"M{cx - 84 * inner},{y + 8} L{cx + 76 * inner},{y + 44}"
         else:
             return ""
         out.append(path(d, stroke=BROW, sw=BROW_W))
@@ -254,7 +267,8 @@ def mouth(kind: str) -> str:
     if kind == "puffed":    # cheeks full of air, lips pressed small
         return (ell(500, y + 10, 64, 34, "#F4B8BE", INK, 20) + path(f"M462,{y + 10} L538,{y + 10}", sw=16))
     if kind == "shh":       # pursed little 'o' pushed to one side
-        return ell(462, y + 8, 52, 46, MOUTH, INK, 24) + ell(462, y + 24, 26, 14, TONGUE)
+        return (ell(420, y + 4, 46, 40, MOUTH, INK, 24) + ell(420, y + 18, 22, 12, TONGUE) +
+                path(f"M478,{y + 4} q40,-10 80,-26", sw=22))
     if kind == "tongue":    # concentration: tongue poking out of the corner
         return (path(f"M320,{y} Q500,{y + 46} 680,{y - 6}", sw=32) + ell(620, y + 40, 44, 40, TONGUE, INK, 16) +
                 path(f"M620,{y + 18} L620,{y + 60}", stroke="#D05A6E", sw=8))
@@ -344,19 +358,26 @@ def build(out_dir: str, preview: bool = False, json_dir: str = "") -> dict:
     os.makedirs(out_dir, exist_ok=True)
     json_dir = json_dir or out_dir
     os.makedirs(json_dir, exist_ok=True)
-    atlas = Image.new("RGBA", (ATLAS, ATLAS), (0, 0, 0, 0))
+    assert len(CELLS) <= COLS * ROWS, len(CELLS)
+    atlas = Image.new("RGBA", (ATLAS_W, ATLAS_H), (0, 0, 0, 0))
     cells = {ln: {} for ln in LAYERS}
     cells["card"] = {}
     for idx, (layer, name, fn) in enumerate(CELLS):
         body = fn()
-        im = raster_square(body) if layer == "card" else raster(body, RECTS[layer])
-        col, row = idx % GRID, idx // GRID
-        atlas.alpha_composite(im, (col * CELL, row * CELL))
+        x0, y0, x1, y1 = cell_box(idx)
+        im = raster_square(body, x1 - x0, y1 - y0) if layer == "card" else raster(body, RECTS[layer], x1 - x0, y1 - y0)
+        atlas.alpha_composite(im, (x0, y0))
         cells[layer][name] = idx
+    # alpha bleed (look A): fully transparent texels take the ink colour, so filtering never draws light fringes
+    import numpy as np
+    a = np.array(atlas)
+    a[a[:, :, 3] == 0] = (0x2A, 0x20, 0x36, 0)
+    atlas = Image.fromarray(a, "RGBA")
     path_png = os.path.join(out_dir, "face_hush.png")
     atlas.save(path_png)
     mirror = dict(MIRROR)
-    info = {"atlas": "face_hush.png", "atlas_px": ATLAS, "grid": [GRID, GRID], "cell_px": CELL,
+    info = {"atlas": "face_hush.png", "atlas_px": ATLAS_W, "atlas_size": [ATLAS_W, ATLAS_H], "grid": [COLS, ROWS],
+            "cell_px": [ATLAS_W / COLS, ATLAS_H / ROWS],
             "layers": LAYERS, "draw_order": DRAW_ORDER, "layer_rects": {k: list(v) for k, v in RECTS.items()},
             "cells": cells, "mirror_cells": mirror,
             "marks": {"eye_x": list(EYE_X), "eye_y": EYE_Y, "eye_rx": EYE_RX, "eye_ry": EYE_RY, "iris_r": IRIS_R,
@@ -375,17 +396,17 @@ def _preview(atlas, cells, path_out):
     from PIL import ImageDraw
     bg = Image.new("RGBA", atlas.size, (150, 140, 160, 255))
     d = ImageDraw.Draw(bg)
-    for y in range(0, ATLAS, 16):
-        for x in range(0, ATLAS, 16):
+    for y in range(0, ATLAS_H, 16):
+        for x in range(0, ATLAS_W, 16):
             if (x // 16 + y // 16) % 2:
                 d.rectangle([x, y, x + 15, y + 15], fill=(170, 160, 180, 255))
     bg.alpha_composite(atlas)
     d = ImageDraw.Draw(bg)
     for layer, names in cells.items():
         for name, idx in names.items():
-            col, row = idx % GRID, idx // GRID
-            d.rectangle([col * CELL, row * CELL, col * CELL + CELL - 1, row * CELL + CELL - 1], outline=(40, 30, 60, 255))
-            d.text((col * CELL + 3, row * CELL + 2), f"{layer[:5]}/{name}", fill=(0, 0, 0, 255))
+            x0, y0, x1, y1 = cell_box(idx)
+            d.rectangle([x0, y0, x1 - 1, y1 - 1], outline=(40, 30, 60, 255))
+            d.text((x0 + 3, y0 + 2), f"{layer[:5]}/{name}", fill=(0, 0, 0, 255))
     bg.save(path_out)
 
 

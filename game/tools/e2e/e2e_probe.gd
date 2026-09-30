@@ -8,6 +8,10 @@ extends Node
 
 const DOUBLE_S := 0.1
 const LAUNCH_OFFSET_S := 2.3
+## HUD / overlay samples every this many PLAY frames.
+const HUD_EVERY := 30
+const HUD_SAMPLES_MAX := 600
+const VIS_ROWS_MAX := 40000
 
 var night: Node = null
 var perf: bool = true
@@ -49,6 +53,19 @@ var _staged_early: Dictionary = {}
 var _tex_max: float = 0.0
 ## The same over every phase of the Night (build, curtain, PLAY, the curtain call and results).
 var _tex_peak: float = 0.0
+# --- 3D fields
+var _hud_samples: Array = []
+var _ov_samples: Array = []
+var _ov_max: int = 0
+var _ov_loud_max: int = 0
+var _vis_rows: Array = []
+var _pip_frames: int = 0
+var _pip_run: int = 0
+var _pip_longest: int = 0
+var _pip_windows: Array = []
+var _pip_open_tick: int = -1
+var _wall_ms := PackedFloat32Array()
+var _last_us: int = 0
 
 
 ## Hook a NightScene (its driver, view and audio director).
@@ -82,8 +99,12 @@ func _process(delta: float) -> void:
 	if _rise_t >= 0.0 and _live_t < 0.0 and bool(night.get("_live_input")):
 		_live_t = _t - _rise_t
 	var ph := String(night.call("phase_name"))
+	var now_us := Time.get_ticks_usec()
 	if ph == "PLAY" and not ended:
 		_play_frames += 1
+		if _last_us > 0:
+			_wall_ms.append(float(now_us - _last_us) / 1000.0)
+		_sample_3d()
 		if perf:
 			_draws.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 			_objects.append(Performance.get_monitor(Performance.OBJECT_COUNT))
@@ -95,6 +116,49 @@ func _process(delta: float) -> void:
 		_pages_now = pg
 	if _curtain_up_ms < 0 and ph == "PLAY":
 		_curtain_up_ms = DeviceLog.process_ms()
+	_last_us = now_us if ph == "PLAY" and not bool(night.call("is_paused")) else 0
+
+
+## Per PLAY frame (3D): the Bellows-window share; every HUD_EVERY frames the HUD pieces and the overlay counts.
+func _sample_3d() -> void:
+	var tick := _tick()
+	var pip: Variant = night.get("pip")
+	var shown := pip is Object and (pip as Object).has_method("is_shown") and bool((pip as Object).call("is_shown"))
+	if shown:
+		_pip_frames += 1
+		_pip_run += 1
+		if _pip_open_tick < 0:
+			_pip_open_tick = tick
+	else:
+		_pip_longest = maxi(_pip_longest, _pip_run)
+		_pip_run = 0
+		if _pip_open_tick >= 0:
+			_pip_windows.append([_pip_open_tick, tick])
+			_pip_open_tick = -1
+	if _play_frames % HUD_EVERY != 1 or _hud_samples.size() >= HUD_SAMPLES_MAX:
+		return
+	var hud: Variant = night.get("hud")
+	if hud is Object and (hud as Object).has_method("debug_pieces"):
+		var pieces: Array = []
+		for pc in (hud as Object).call("debug_pieces"):
+			var d: Dictionary = pc
+			var r: Rect2 = d.get("rect", Rect2())
+			pieces.append({"name": String(d.get("name", "")), "rect": [snappedf(r.position.x, 0.1), snappedf(r.position.y, 0.1),
+				snappedf(r.size.x, 0.1), snappedf(r.size.y, 0.1)], "always_on": bool(d.get("always_on", false)),
+				"persistent": bool(d.get("persistent", false))})
+		_hud_samples.append({"frame": _play_frames, "tick": tick, "pieces": pieces})
+	var ov: Variant = night.get("overlays")
+	if ov is Object:
+		var n := int((ov as Object).get("shown_count"))
+		var loud := int((ov as Object).get("loud_count"))
+		_ov_max = maxi(_ov_max, n)
+		_ov_loud_max = maxi(_ov_loud_max, loud)
+		_ov_samples.append([_play_frames, n, loud])
+
+
+func _tick() -> int:
+	var w: Variant = night.get("world") if night != null else null
+	return int((w as Object).get("tick")) if w is Object else -1
 
 
 func _on_rose() -> void:
@@ -121,6 +185,12 @@ func _on_ticked(events: Array) -> void:
 			hash_at_tick = int((w as Object).call("state_hash"))
 	if ended:
 		return
+	var wv: Variant = night.get("world_view") if night != null else null
+	if wv is Object and (wv as Object).has_method("visibility_sample") and _vis_rows.size() < VIS_ROWS_MAX:
+		var v: Dictionary = (wv as Object).call("visibility_sample")
+		_vis_rows.append([int(v.get("tick", -1)), String(v.get("sim", "")), String(v.get("reason", "")),
+			1 if bool(v.get("on_screen", false)) else 0, 1 if bool(v.get("window", false)) else 0,
+			1 if bool(v.get("badge", false)) else 0])
 	for ev in events:
 		var d: Dictionary = ev
 		var e := String(d.get("e", ""))
@@ -284,7 +354,38 @@ func summary() -> Dictionary:
 	out["tex_mb_untracked_end"] = (mr as Dictionary).get("untracked", -1.0) if mr is Dictionary else -1.0
 	var big: Variant = tex_stats_call_1("biggest", 80)
 	out["tex_biggest"] = big if big is Array else []
+	_summary_3d(out, fb)
 	return out
+
+
+## The 3D report fields (see the class doc).
+func _summary_3d(out: Dictionary, fb: Variant) -> void:
+	out["view"] = String(night.get("view_mode")) if night != null and is_instance_valid(night) and night.get("view_mode") != null else "2d"
+	out["fallback_counts"] = (fb as Dictionary).get("by_clip", {}) if fb is Dictionary else {}
+	out["hud_pieces"] = _hud_samples
+	out["overlays"] = {"max": _ov_max, "loud_max": _ov_loud_max, "samples": _ov_samples}
+	out["visibility"] = {"fields": ["tick", "sim", "reason", "on_screen", "window", "badge"], "rows": _vis_rows}
+	var longest := maxi(_pip_longest, _pip_run)
+	var wins := _pip_windows.duplicate()
+	if _pip_open_tick >= 0:
+		wins.append([_pip_open_tick, _tick()])
+	out["pip_on_share"] = snappedf(float(_pip_frames) / maxf(1.0, float(_play_frames)), 0.0001)
+	out["pip_longest_s"] = snappedf(float(longest) / 60.0, 0.01)
+	out["pip_windows"] = wins
+	out["frame_ms_p50"] = snappedf(_pct(_wall_ms, 0.5), 0.1)
+	out["frame_ms_p95"] = snappedf(_pct(_wall_ms, 0.95), 0.1)
+	var p3: Variant = night.get("perf3d") if night != null and is_instance_valid(night) else null
+	var sw: Variant = night.get("shader_watch") if night != null and is_instance_valid(night) else null
+	if p3 is Object and (p3 as Object).has_method("summary"):
+		out["perf3d"] = (p3 as Object).call("summary", sw)
+		if sw is Object:
+			(out["perf3d"] as Dictionary)["compile_detail"] = (sw as Object).call("summary")
+	out["cue_staged"] = out.get("laugh_cues", [])
+	var wr: Variant = night.get("warmer") if night != null and is_instance_valid(night) else null
+	if wr is Object and bool((wr as Object).get("view3d")):
+		out["warm3d"] = {"materials_drawn": int((wr as Object).get("materials_drawn")),
+			"instanced_drawn": int((wr as Object).get("instanced_drawn")), "clips_warmed": int((wr as Object).get("clips_warmed")),
+			"steps": (wr as Object).get("ran")}
 
 
 ## Call a static TexStats method with one argument softly (null when the class is missing).

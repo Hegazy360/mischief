@@ -112,7 +112,7 @@ def main():
         "anim": {"layers": []},
         "jiggle": JIGGLE,
         "face": {
-            "atlas": "res://art3d/chars/hush/face_hush.png", "atlas_px": face["atlas_px"], "grid": face["grid"],
+            "atlas": "res://art3d/chars/hush/face_hush.png", "atlas_px": face["atlas_px"], "atlas_size": face["atlas_size"], "grid": face["grid"],
             "uv": "TEXCOORD_1 (UV2): planar face square; fuv = (UV2.x, 1 - UV2.y) = (u right as seen from the front, v up); "
                   "layer cell uv = ((col + lu) / 8, (row + 1 - lv) / 8), lu/lv = fuv inside the layer rect",
             "layers": face["layers"], "draw_order": face["draw_order"], "layer_rects": face["layer_rects"],
@@ -127,7 +127,7 @@ def main():
             "mirror_pupil_x": True,
             "default": "neutral",
         },
-        "material": {"palette": "res://art3d/chars/hush/palette_hush.png", "outline_px": 3.5, "rim": 0.45},
+        "material": {"palette": "res://art3d/chars/hush/palette_hush.png", "outline_px": 4.8, "rim": 0.45},
         "vertex_color": {"r": "skin_tint", "g": "stone_keep", "b": "rim_damp", "a": "outline_scale"},
         "looks": {
             "TOMATO": {"show": ["tomato_splat"]},

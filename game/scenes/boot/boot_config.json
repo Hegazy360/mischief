@@ -1,1 +1,11 @@
-{"start": "stage_door"}
+{
+  "start": "stage_door",
+  "view": "3d",
+  "show_previews": false,
+  "bellows_window": "sim",
+  "render": {
+    "msaa_3d": true,
+    "render_scale": 1.0,
+    "outline": true
+  }
+}

@@ -234,9 +234,10 @@ def build_proof_poses(landmarks):
     # the cup hangs 0.081 m toward -X of the right grip at rest; turn the hand 180 deg about Z so the cup sits
     # between the hand and the face (fingers toward the centre), tilted 10 deg toward the lips
     # hand beside the cup (his right), fingers pointing in and a little toward the camera so the cup shows
-    R = Rx(-8) @ Rz(155)
+    # the cup in front of the mouth, the hand at his right cheek beside it (not in front of it)
+    R = Rx(-6) @ Rz(115)
     m = posed("Head", mouth)
-    cup_c = m + Vector((0.0, -0.100, -0.050))
+    cup_c = m + Vector((0.0, -0.130, -0.040))
     grip = cup_c + (R.to_matrix() @ Vector((0.081, 0.010, 0.0)))
     rep["a_mouth"] = reach_to("r", grip, R, (-0.9, 0.3, -0.5))
     rep["a_mouth_posed"] = [round(v, 3) for v in m]
@@ -283,10 +284,72 @@ def build_proof_poses(landmarks):
     set_pelvis_offset((0.0, 0.0, lift))
     fk({"thigh_l": [("x", -78), ("z", 6)], "thigh_r": [("x", -78), ("z", -6)], "calf_l": [("x", 62)], "calf_r": [("x", 62)]})
     R = Rx(-10) @ Rz(180)
-    R = Rx(-8) @ Rz(155)
-    cup_c = posed("Head", mouth) + Vector((0.0, -0.100, -0.050))
+    R = Rx(-6) @ Rz(115)
+    cup_c = posed("Head", mouth) + Vector((0.0, -0.130, -0.040))
     reach_to("r", cup_c + (R.to_matrix() @ Vector((0.081, 0.010, 0.0))), R, (-0.9, 0.3, -0.5))
     reach_to("l", Vector((0.10, -0.40, 0.96 + lift)), Rz(-15), (0.9, 0.3, -0.5))
     key_pose("tea_seat", scales_showing("prop_teacup", "prop_saucer"))
+
+    # ---- board poses (P2: props, looks, CHOO, stars / notes, silhouettes) ----
+    # the signature tea hold: saucer flat in the left glove at the chest, the cup lifted just above it, pinkie out
+    base_idle()
+    R = Rz(95)
+    cup_c = Vector((-0.02, belly_y - 0.20, 1.10))
+    rep["tea_hold"] = reach_to("r", cup_c + (R.to_matrix() @ Vector((0.081, 0.010, 0.0))), R, (-0.9, 0.3, -0.5))
+    reach_to("l", Vector((0.06, belly_y - 0.20, 0.99)), Rz(-40), (0.9, 0.3, -0.5))
+    fk({"pinky_01_r": [("z", -35)], "Head": [("x", -6)]})
+    key_pose("tea_hold", scales_showing("prop_teacup", "prop_saucer"))
+    SEAT = {"thigh_l": [("x", -78), ("z", 6)], "thigh_r": [("x", -78), ("z", -6)], "calf_l": [("x", 62)], "calf_r": [("x", 62)]}
+    # specs on (the Livid / suspicious look)
+    base_idle()
+    sc = scales_showing("specs_face")
+    sc["specs_chest"] = 0.0
+    key_pose("specs_on", sc)
+    # the strut (UAL Walk_Formal_Loop mid-stride, chin up)
+    reset_pose()
+    apply_action_frame("UAL_Walk_Formal_Loop", 9)
+    apply_layer(SK.ARM_OUT)
+    fk({"Head": [("x", -10)], "neck_01": [("x", -4)], "spine_03": [("x", -4)]})
+    key_pose("strut", scales_showing())
+    # conducting with the baton (right arm up, left fist on the belly)
+    base_idle()
+    fk({"clavicle_r": [("y", 12)], "spine_03": [("y", -3)], "Head": [("x", -8), ("z", -6)]})
+    rep["conduct"] = reach_to("r", Vector((-0.34, belly_y - 0.14, 1.40)), Vector((-1.0, 0.0, 0.0)).rotation_difference(
+        Vector((0.35, -0.55, 0.76)).normalized()), (-0.9, 0.2, -0.4))
+    reach_to("l", Vector((0.16, belly_y - 0.06, 0.86)), Rz(-60), (0.9, 0.3, -0.5))
+    key_pose("conduct", scales_showing("prop_baton"))
+    # the honey spoon, held up in front of the belly
+    base_idle()
+    rep["spoon"] = reach_to("r", Vector((-0.16, belly_y - 0.22, 1.02)), Rz(90), (-0.9, 0.3, -0.5))
+    key_pose("spoon", scales_showing("prop_spoon"))
+    # the CHOO (seated, the instant of the blast): head and chest snap forward, arms flung back, feet kick up
+    base_idle()
+    set_pelvis_offset((0.0, 0.03, lift))
+    fk(SEAT)
+    fk({"thigh_l": [("x", -18)], "thigh_r": [("x", -18)], "calf_l": [("x", -30)], "calf_r": [("x", -30)],
+        "spine_01": [("x", 6)], "spine_02": [("x", 8)], "spine_03": [("x", 8)], "Head": [("x", 16)],
+        "upperarm_l": [("y", -45), ("z", 40)], "upperarm_r": [("y", 45), ("z", -40)],
+        "lowerarm_l": [("z", 20)], "lowerarm_r": [("z", -20)]})
+    key_pose("choo", scales_showing("fx_choo"))
+    # dazed in the sink: bottom down, slippers up, arms flopped, stars round his head
+    base_idle()
+    set_pelvis_offset((0.0, 0.10, 0.10))
+    fk({"pelvis": [("x", -40)], "thigh_l": [("x", -70), ("z", 18)], "thigh_r": [("x", -70), ("z", -18)],
+        "calf_l": [("x", 10)], "calf_r": [("x", 10)], "spine_02": [("x", 10)], "Head": [("y", 16), ("x", 4)],
+        "upperarm_l": [("y", -35), ("z", 20)], "upperarm_r": [("y", 35), ("z", -20)],
+        "lowerarm_l": [("z", -30)], "lowerarm_r": [("z", 30)]})
+    key_pose("dazed_sink", scales_showing("fx_stars"))
+    # dizzy under orbiting notes (ALLEGRO-GO-GO!'s collapse): sat on the floor, head lolling
+    base_idle()
+    set_pelvis_offset((0.0, 0.0, -0.20))
+    fk({"thigh_l": [("x", -84), ("z", 24)], "thigh_r": [("x", -84), ("z", -24)], "calf_l": [("x", 30)], "calf_r": [("x", 30)],
+        "Head": [("y", -18), ("x", 8)], "spine_03": [("y", -6)],
+        "upperarm_l": [("y", 10)], "upperarm_r": [("y", -10)]})
+    key_pose("dizzy_notes", scales_showing("fx_notes"))
+    # blind shuffle: hair over the eyes (look), arms out groping
+    base_idle()
+    fk({"upperarm_l": [("y", -25), ("z", -55)], "upperarm_r": [("y", 25), ("z", 55)], "lowerarm_l": [("z", -15)],
+        "lowerarm_r": [("z", 15)], "Head": [("x", 6)], "spine_03": [("x", 4)]})
+    key_pose("grope", scales_showing())
     reset_pose()
     return rep

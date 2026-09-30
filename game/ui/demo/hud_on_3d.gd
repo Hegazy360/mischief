@@ -11,6 +11,7 @@
 ##                    way reach the presenter and the entry-warning tracker)
 ##   --idle-s=<s>     pretend the player has not touched the screen for this long (N4 loud previews at ≥ 6 s)
 ##   --no-overlays    the HUD alone     --no-hud    the overlays alone
+##   --pieces         print `[hudpieces]` (the HUD pieces showing, from Hud.debug_pieces()) at frame 12
 ##   --perf           print `[hudperf]` (Hud.apply + OverlayRules.fill + WorldOverlays.apply µs, median / p95)
 ##                    once 240 frames have been measured
 extends Node
@@ -36,6 +37,7 @@ var _us_prot := PackedFloat32Array()
 var _us_ph: Array[PackedFloat32Array] = [PackedFloat32Array(), PackedFloat32Array(), PackedFloat32Array(), PackedFloat32Array()]
 var _printed := false
 var _world: Object = null
+var _frame: int = 0
 ## The sim's "entry_warning" event into Hush's room: warning until this tick (eta + 0.3 s), -1 = none.
 var _entry_until: int = -1
 
@@ -112,17 +114,27 @@ func _process(_delta: float) -> void:
 	octx.next_useful = OverlayRules.suggest_next_useful(snap, octx) if idle_s >= OverlayRules.IDLE_HINT_S else ""
 	octx.hide_all = not want_overlays
 	OverlayRules.fill(omodel, snap, octx)
-	var t2 := Time.get_ticks_usec()
-	overlays.apply(omodel)
-	var t3 := Time.get_ticks_usec()
-	if perf and snap.tick > 0:
+	var t_rules := Time.get_ticks_usec() - t1
+	if perf:
+		# the view's own cost, first call in the frame (apply's second call runs warm)
 		var t4 := Time.get_ticks_usec()
 		wv.protected_rects()
 		_us_prot.append(float(Time.get_ticks_usec() - t4))
+	var t2 := Time.get_ticks_usec()
+	overlays.apply(omodel)
+	var t3 := Time.get_ticks_usec()
+	_frame += 1
+	if _frame == 12 and UiKit.has_flag("--pieces"):
+		var names := PackedStringArray()
+		for p in hud.debug_pieces():
+			names.append(str(p["name"]))
+		print("[hudpieces] %s" % JSON.stringify({"tick": snap.tick, "count": names.size(), "pieces": names,
+			"overlays": overlays.shown_count, "loud": overlays.loud_count}))
+	if perf and snap.tick > 0:
 		for i in 4:
 			_us_ph[i].append(float(overlays.phase_us[i]))
 		_us_hud.append(float(t1 - t0))
-		_us_rules.append(float(t2 - t1))
+		_us_rules.append(float(t_rules))
 		_us_ov.append(float(t3 - t2))
 		if _us_hud.size() >= 240 and not _printed:
 			_printed = true

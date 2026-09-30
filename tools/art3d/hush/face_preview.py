@@ -12,8 +12,8 @@ from PIL import Image, ImageDraw
 
 def compose(atlas, info, preset, px, mirror=False):
     face = Image.new("RGBA", (px, px), (255, 246, 234, 255))
-    grid = info["grid"][0]
-    cell = info["atlas_px"] // grid
+    cols, rows = info["grid"]
+    aw, ah = atlas.size
     mc = info.get("mirror_cells", {})
     for layer in info["draw_order"]:
         name = preset.get(layer)
@@ -22,8 +22,9 @@ def compose(atlas, info, preset, px, mirror=False):
         if mirror and name in mc:
             name = mc[name]
         idx = info["cells"][layer][name]
-        col, row = idx % grid, idx // grid
-        im = atlas.crop((col * cell, row * cell, col * cell + cell, row * cell + cell))
+        col, row = idx % cols, idx // cols
+        im = atlas.crop((round(col * aw / cols), round(row * ah / rows), round((col + 1) * aw / cols),
+                         round((row + 1) * ah / rows)))
         u0, v0, u1, v1 = info["layer_rects"][layer]
         w, h = max(1, round((u1 - u0) * px)), max(1, round((v1 - v0) * px))
         im = im.resize((w, h), Image.LANCZOS)

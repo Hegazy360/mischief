@@ -107,8 +107,13 @@ func test_real_prologue_lure_mid_tea_keeps_the_sneeze() -> void:
 		return
 	U.place_hush(w, "parlour", 2700)
 	log.append_array(U.run(w, 30))
-	log.append_array(U.step(w, [SimCmd.squeak()]))
-	assert_false(U.first(log, SimEvents.LURE).is_empty(), "the squeak lures him 0.5 s into the tea")
+	# three squeaks from next door fill his ear pips: the third is the lure (GDD §3.3), early in the tea
+	for i in SimConst.EAR_PIPS_MAX:
+		log.append_array(U.step(w, [SimCmd.squeak()]))
+		log.append_array(U.run(w, SimConst.SQUEAK_ARM_TICKS + 2))
+	var lure := U.first(log, SimEvents.LURE)
+	assert_false(lure.is_empty(), "the squeaks lure him early in the tea")
+	assert_lt(int(lure.get("t", 1 << 30)) - int(tea["t"]), 180, "within 3 s of the tea starting")
 	var rx := U.run_until(w, SimEvents.REACTION_START, {"prank": "achoo_ria"}, 60 * 60, log)
 	assert_false(rx.is_empty(), "the sneeze still lands")
 	var ended_early := false
@@ -116,4 +121,34 @@ func test_real_prologue_lure_mid_tea_keeps_the_sneeze() -> void:
 		if str(ev["e"]) == SimEvents.B_ACTIVITY_END and str(ev.get("id", "")) == "tea" and int(ev["t"]) < int(rx.get("t", 1 << 30)):
 			ended_early = true
 	assert_false(ended_early, "the lure mid-tea never ends the tea before its hook (the loop does not come round again)")
+
+
+## R3D (director.fixup_holds): after the sneeze the Prologue's mirror fix-up waits for the lever — his last warm-up
+## never starts with the gramophone unrigged (the spin would be lost for good in the non-repeating loop); once it is
+## rigged the fix-up ends and the loop goes on.
+func test_real_prologue_mirror_waits_for_the_lever() -> void:
+	var db := _db_or_skip()
+	if db == null:
+		return
+	var w := SimWorld.create(db, "p00_curtain_up", {"invariants": true})
+	var log: Array = []
+	assert_true(U.run_until_pred(w, func(x: SimWorld) -> bool: return x.tick >= x.ctx.hush_enter_ticks, 600, log))
+	log.append_array(U.step(w, [SimCmd.squeak()]))
+	U.force_rig(w, "achoo_ria")
+	assert_true(U.walk_to(w, "kitchen_pantry_curtain", 1200, log), "she hides in the pantry")
+	var fx := U.run_until(w, SimEvents.B_ACTIVITY, {"id": "fixup_mirror"}, 60 * 90, log)
+	if not assert_false(fx.is_empty(), "the sneeze sends him to the mirror"):
+		return
+	var t0 := int(fx["t"])
+	log.append_array(U.run(w, 60 * 20))
+	assert_true(U.first(log, SimEvents.B_ACTIVITY_END, {"id": "fixup_mirror"}).is_empty(), "20 s later he is still at the mirror (4 s authored)")
+	assert_eq(w.bellows.activity_id, "fixup_mirror")
+	U.force_rig(w, "allegro_go_go")
+	var end := U.run_until(w, SimEvents.B_ACTIVITY_END, {"id": "fixup_mirror"}, 10, log)
+	assert_false(end.is_empty(), "the lever set: the fix-up ends at once")
+	assert_gt(int(end.get("t", 0)) - t0, 60 * 20)
+	var rx := U.run_until(w, SimEvents.REACTION_START, {"prank": "allegro_go_go"}, 60 * 60, log)
+	assert_false(rx.is_empty(), "his warm-up then fires the spin")
+	for k in w.invariant_counters:
+		assert_eq(int(w.invariant_counters[k]), 0, k)
 

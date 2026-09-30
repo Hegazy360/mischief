@@ -134,3 +134,10 @@ func test_the_retired_routes_are_absent_and_the_baseline_names_them() -> void:
 	var cmp: Dictionary = solve.compare_baseline(base, [{"episode": "n02_something_fishy", "route": "ideal", "ok": true}])
 	assert_eq((cmp["new"] as Array).size(), 0, "a retired route is not a failure")
 	assert_has(cmp["absent"], "n02_something_fishy/face_to_face")
+
+
+func test_the_prologue_mirror_hold_is_a_player_led_wait() -> void:
+	assert_eq(_data.fixup_hold_activities("p00_curtain_up"), PackedStringArray(["fixup_mirror"]),
+		"the held mirror fix-up is exempt from rule 9's 60 s progress check, like an uncapped gate")
+	assert_eq(_data.fixup_hold_activities("n01_throat_tea"), PackedStringArray())
+

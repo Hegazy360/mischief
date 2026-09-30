@@ -86,6 +86,10 @@ func _enter(p: String, snap: ViewSnapshot) -> void:
 				_lecture_gag = cam.request_gag(mid, 1.25, 10, 120, 8, 90)
 		"wipe":
 			wv.end_busted_replay()
+			if wv.overlays != null and wv.cam != null and wv.hush_view != null:
+				var sp := wv.project(wv.hush_view.chest_world())
+				var vs := wv.cam.view_size()
+				wv.overlays.wipe(Vector2(sp.x / maxf(1.0, vs.x), sp.y / maxf(1.0, vs.y)))
 			if cam != null and _lecture_gag != 0:
 				cam.release_gag(_lecture_gag)
 				_lecture_gag = 0

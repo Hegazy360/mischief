@@ -69,11 +69,23 @@ if "no-attachments" not in opt:
 # sockets (armature space, Blender Z-up) -> bone-local (Blender bone space: +Y along the bone)
 HC, TC, FC = L["HC"], L["TC"], L["FC"]
 HB = P.HEAD_R[1]
+def head_front_y(z):
+    """The head surface's front y at height z (march the head shape along the mid-sagittal plane)."""
+    best, err = HC.y - HB, 9.0
+    for k in range(181):
+        th = math.radians(-90 + k)
+        q = P.head_q(Vector((0.0, -math.cos(th), math.sin(th))))
+        if abs(HC.z + q.z - z) < err:
+            err, best = abs(HC.z + q.z - z), HC.y + q.y
+    return best
+
+
+MOUTH_Z = FC.z + P.FACE_H * (0.5 - 0.748)
 SOCK_W = {
-    "mouth": ("Head", Vector((0.0, HC.y - HB * 0.96 - 0.01, FC.z + P.FACE_H * (0.5 - 0.760)))),
+    "mouth": ("Head", Vector((0.0, head_front_y(MOUTH_Z) - 0.005, MOUTH_Z))),
     "head_top": ("Head", Vector((0.0, HC.y + 0.085, SK.HEIGHT_M))),
-    "nose_tip": ("nose", HC + Vector((0, -HB - 0.034 - 0.066, -0.048))),
-    "face": ("Head", Vector((0.0, HC.y - HB, FC.z))),
+    "nose_tip": ("nose", HC + Vector((0, -HB - 0.026 - 0.052, -0.044))),
+    "face": ("Head", Vector((0.0, head_front_y(FC.z), FC.z))),
     "belly_front": ("spine_02", Vector((0.0, TC.y - P.BARREL_R[1] - 0.03, TC.z))),
     "seat": ("pelvis", Vector((0.0, TC.y, TC.z - P.BARREL_R[2] + 0.03))),
 }

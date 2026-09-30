@@ -204,6 +204,9 @@ func _cmd_go(w: SimWorld, c: Dictionary) -> void:
 		_reject_struck(w, SimCmd.GO, hid)
 		return
 	var want_run := bool(c.get("run", false))
+	if _is_own_spot(hi):
+		_clear_pin_here(w, SimCmd.GO, hid)
+		return
 	if state == HIDDEN or state == FROZEN or state == DIVING:
 		_set_pin_hotspot(w, hi)
 		return
@@ -496,6 +499,9 @@ func _cmd_pin(w: SimWorld, c: Dictionary) -> void:
 		if not w.ctx.is_live(hi):
 			_reject_struck(w, SimCmd.PIN, str(c["hotspot"]))
 			return
+		if _is_own_spot(hi):
+			_clear_pin_here(w, SimCmd.PIN, str(c["hotspot"]))
+			return
 		_set_pin_hotspot(w, hi)
 		return
 	var r := w.room_idx(str(c.get("room", "")))
@@ -507,6 +513,19 @@ func _cmd_pin(w: SimWorld, c: Dictionary) -> void:
 		return
 	var rd := w.db.house.rooms[r]
 	_set_pin(w, r, clampi(Fx.px(float(c.get("x", 0))), rd.x0_sub, rd.x1_sub))
+
+
+## True when `hi` is the hiding spot she is in (or diving into): a tap there pins nothing.
+func _is_own_spot(hi: int) -> bool:
+	return (state == HIDDEN or state == DIVING) and hi >= 0 and hi == at_hotspot
+
+
+## A tap on the spot she is hiding in means "stay": any pin is cleared (else POP OUT would dive straight back in)
+## and the tap is answered `cmd_rejected {c, why: "here", target}` (feedback, fairness rule 9).
+func _clear_pin_here(w: SimWorld, c: String, target: String) -> void:
+	pin_hs = -1
+	pin_room = -1
+	w.emit(SimEvents.CMD_REJECTED, {"c": c, "why": "here", "target": target})
 
 
 func _set_pin(w: SimWorld, r: int, tx: int) -> void:

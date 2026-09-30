@@ -6,6 +6,7 @@
 ##   presenter.setup(layout, world)            # once (the house, the episode)
 ##   presenter.on_events(events)               # every sim tick (SimDriver.ticked)
 ##   presenter.fill(model, snap, ctx, env)     # every frame; ctx = world.action_context() or {}
+##   presenter.fill_r3d(model, snap, ctx, env) # 3D view: the decluttered HUD's fields (REDESIGN §2, index §7.10)
 ## Without `action_context()` (the sim piece lands in parallel) the verb falls back to the snapshot:
 ## hidden → POP OUT (GO ▶ with a pin), RIGGING → RIG, standing at an available rig point → RIG
 ## (RIG dimmed when the needed item is missing), else FREEZE; the rim from room distance.
@@ -47,6 +48,14 @@ class HudEnv:
 	## Screen point above the rummaged container (pick strip anchor).
 	var pick_screen_pos: Vector2 = Vector2.ZERO
 	var tick: int = 0
+	## R3D: WorldView3D wants the edge badge instead of the Bellows window (`lean` mode, index R15).
+	var edge_lean: bool = false
+	## R3D: ★ earned on a Night that ends with a bow → the BOW chip.
+	var can_bow: bool = false
+	## R3D: his entry warning into Hush's room is running (FREEZE's amber rim before he is in).
+	var entry_warning: bool = false
+	## R3D: the Overview button (from Night 3, only while Bellows is on the other floor).
+	var overview_allowed: bool = false
 
 var _rig_points: Dictionary = {}          # room -> Array[HouseLayout.Hotspot]
 var _fuse_peak: int = 1
@@ -65,6 +74,7 @@ var _e_dir := Vector2.ZERO
 var _loop_current: int = -1
 var _fb_need: String = ""
 var _cur_activity: String = ""
+var _ring_peak: int = 1
 
 
 ## Bind the house (fallback verb, edge bubble distances) and the world (Script panel).
@@ -94,6 +104,7 @@ func reset() -> void:
 	_e_key = -99999
 	script_dirty = true
 	_loop_current = -1
+	_ring_peak = 1
 
 
 ## The container of the open pick strip ("" = closed).
@@ -346,6 +357,58 @@ func _fill_edge(m: HudModel, snap: ViewSnapshot, env: HudEnv) -> void:
 		m.edge_bubble_dir = _e_dir
 	if m.edge_bubble_label != _e_label:
 		m.edge_bubble_label = _e_label
+
+
+## The decluttered HUD's fields (REDESIGN §2.1–§2.4, r3d-hud §4.3): FREEZE danger and the LIVE face, the carried-item
+## chips, BOW, the Overview button, Clarence's lure ring, the edge badge (side, next-activity icon, the `lean`
+## stand-in) and the Bellows window's next-activity chip + countdown ring. Call after `fill` (it reads its output).
+## The meter's timing, Figgis and the Script pips are left to the Hud's own rules (−1 / false / empty = derive).
+func fill_r3d(m: HudModel, snap: ViewSnapshot, ctx: Dictionary, env: HudEnv) -> void:
+	var h := snap.hush
+	var b := snap.bellows
+	var hidden := h.state == "HIDDEN" or h.state == "DIVING" or h.hidden_spot != ""
+	var same_room := b.present and b.room == h.room
+	var fd := HudModel.FreezeDanger.NONE
+	if not hidden and same_room and b.spot_pct > 0.0:
+		fd = HudModel.FreezeDanger.FILLING
+	elif not hidden and b.present and (same_room or env.entry_warning):
+		fd = HudModel.FreezeDanger.EXPOSED
+	m.freeze_danger = fd
+	# MIRROR, MIRROR: FREEZE is the right move at the empty frame with him arriving (the sim's context says so)
+	m.verb_live = m.verb != HudModel.Verb.FREEZE or fd != HudModel.FreezeDanger.NONE \
+		or String(ctx.get("target_icon", "")).contains("mirror")
+	m.meter_until_s = -1.0
+	m.carrying = not h.carrying.is_empty()
+	m.bow_visible = env.can_bow and not hidden and not env.paused
+	m.figgis_visible = false
+	m.overview_visible = env.overview_allowed
+	# the lure ring: only when fatigue is close (a lure in the last 60 s), grey when fatigued
+	if m.lure_grey:
+		m.lure_ring = HudModel.LureRing.GREY
+	elif _lure_ticks[1] > -100000 and env.tick - _lure_ticks[1] < LURE_WINDOW_TICKS:
+		m.lure_ring = HudModel.LureRing.ON
+	else:
+		m.lure_ring = HudModel.LureRing.HIDDEN
+	# the edge badge (the presenter's edge-bubble fields say where he is)
+	var side := 0
+	if m.edge_bubble_dir != Vector2.ZERO:
+		side = 1 if m.edge_bubble_dir.x >= 0.0 else -1
+	m.edge_badge_side = side
+	m.edge_badge_arrow = Vector2.ZERO
+	if m.edge_badge_icon != snap.bubble_icon:
+		m.edge_badge_icon = snap.bubble_icon
+	m.edge_badge_lean = env.edge_lean and side != 0
+	# the Bellows window's chip: his next activity + the bubble's countdown ring
+	var nxt := snap.bubble_icon if m.pip_visible else ""
+	if m.pip_next_icon != nxt:
+		m.pip_next_icon = nxt
+	if snap.bubble_ring_ticks >= 0:
+		if snap.bubble_ring_ticks > _ring_peak:
+			_ring_peak = snap.bubble_ring_ticks
+		m.pip_ring_frac = clampf(float(snap.bubble_ring_ticks) / float(maxi(1, _ring_peak)), 0.0, 1.0)
+	else:
+		_ring_peak = 1
+		m.pip_ring_frac = -1.0
 
 
 ## Rebuild the Script panel rows and the loop strip from the world (allocates; on change only).

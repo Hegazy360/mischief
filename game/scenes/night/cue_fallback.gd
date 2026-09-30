@@ -11,12 +11,19 @@
 ## `figgis_tap()` shows the next line's cue card (`barks.json line_cards["<episode>:<line>"]`).
 ## The Gate-0 / Prologue cues it must present: `figgis_psst`, `ghost_squeak`, `ghost_honey`,
 ## `ghost_hold`, `ghost_hide`, `sparkle_lever`; `laugh_*` and `title_card` are not its business.
+## **3D view** (the world view has `prop_screen_rect`): the ghost finger's tip sits on the projected hit box of the spot,
+## on its half away from Hush (the glove approaches from the side away from her and never covers her);
+## `sparkle_lever` = `WorldView3D.sparkle` (the spotlight pool + the preview at full size).
+## **Danger is sacred** (REDESIGN §2.5 / V2): while `danger` holds (NightScene: an entry warning, a "?" on her, a
+## reaction) every ghost hides; a cue that arrives then is queued, and hints return DANGER_QUIET_S after it is safe.
 class_name CueFallback
 extends RefCounted
 
 const WIDGETS: PackedStringArray = ["clarence", "action", "tray", "figgis", "meter", "pip", "pause", "overview"]
 const CARD_SEC := 4.0
 const SPARKLE_SEC := 6.0
+## Hints come back this long after the last danger frame (REDESIGN §2.5).
+const DANGER_QUIET_S := 1.0
 
 var world: Object = null            ## SimWorld (Conditions.eval, episode, line_states)
 var hud: Object = null              ## Hud
@@ -26,6 +33,15 @@ var cam: Object = null              ## CameraDirector (world_to_screen)
 var active: Dictionary = {}
 ## Ids presented so far (tests).
 var shown: PackedStringArray = PackedStringArray()
+## Set by NightScene every frame: danger holds (hints hide, cues queue).
+var danger: bool = false
+## Seconds since the last input (NightScene; informational — N4 is the overlays' + the spotlight pool's).
+var idle_s: float = 0.0
+## Seconds since danger last held (hints wait DANGER_QUIET_S).
+var safe_s: float = 99.0
+## The spot a `sparkle` cue lit and for how long more (NightScene shows its preview at full size meanwhile).
+var sparkled: String = ""
+var sparkle_left: float = 0.0
 
 var _cues: Dictionary = {}
 var _cards: Dictionary = {}
@@ -63,6 +79,10 @@ func reset() -> void:
 	active = {}
 	shown = PackedStringArray()
 	_idle_s = 0.0
+	danger = false
+	safe_s = 99.0
+	sparkled = ""
+	sparkle_left = 0.0
 
 
 ## The cue definition for an id ({} when unknown).
@@ -94,13 +114,16 @@ func present(id: String) -> void:
 	if mode == "sparkle":
 		if world_view != null and world_view.has_method("sparkle"):
 			world_view.call("sparkle", target, SPARKLE_SEC)
+		sparkled = target
+		sparkle_left = SPARKLE_SEC
 		return
 	if _until_holds(c):
 		return
 	_hide_ghost()
 	active = c
 	_idle_s = 0.0
-	_show_ghost()
+	if not danger and safe_s >= DANGER_QUIET_S and not _suspended:
+		_show_ghost()
 
 
 func _show_card(key: String) -> void:
@@ -138,8 +161,28 @@ func hotspot_screen_point(id: String) -> Vector2:
 	var hs := layout.hotspot(id) if layout != null else null
 	if hs == null or cam == null:
 		return Vector2.INF
+	if world_view.has_method("prop_screen_rect"):
+		return ghost_tip_3d(world_view.call("prop_screen_rect", id), _hush_screen_x(),
+			cam.call("view_size") if cam.has_method("view_size") else Vector2(2400, 1080))
 	var p := Vector2(hs.rect.get_center().x, hs.rect.position.y + hs.rect.size.y * 0.35)
 	return cam.call("world_to_screen", p)
+
+
+## 3D (pure): the ghost tip on a projected hit box `r`, on its half away from Hush (screen x `hush_x`), 40 % down;
+## INF when the box is off screen.
+static func ghost_tip_3d(r: Rect2, hush_x: float, view: Vector2) -> Vector2:
+	if not r.has_area() or not r.intersects(Rect2(Vector2.ZERO, view)):
+		return Vector2.INF
+	var side := 1.0 if r.get_center().x >= hush_x else -1.0
+	return Vector2(r.get_center().x + side * r.size.x * 0.22, r.position.y + r.size.y * 0.4)
+
+
+func _hush_screen_x() -> float:
+	if world_view != null and world_view.has_method("actor_screen_rect"):
+		var hr: Rect2 = world_view.call("actor_screen_rect", &"hush")
+		if hr.has_area():
+			return hr.get_center().x
+	return 0.0
 
 
 func _place_world_ghost() -> void:
@@ -189,12 +232,27 @@ func suspend(on: bool) -> void:
 	_suspended = on
 	if on:
 		_hide_ghost()
-	elif not active.is_empty():
+	elif not active.is_empty() and not danger and safe_s >= DANGER_QUIET_S:
 		_show_ghost()
 
 
-## Per frame: dismiss the ghost once `until` holds; follow world targets; re-nudge when idle.
+## Per frame: dismiss the ghost once `until` holds; follow world targets; re-nudge when idle; hide in danger.
 func advance(dt: float) -> void:
+	if sparkle_left > 0.0:
+		sparkle_left -= dt
+		if sparkle_left <= 0.0:
+			sparkled = ""
+	if danger:
+		if safe_s > 0.0 and not active.is_empty():
+			_hide_ghost()
+		safe_s = 0.0
+		return
+	var was_quiet := safe_s < DANGER_QUIET_S
+	safe_s += dt
+	if was_quiet:
+		if safe_s >= DANGER_QUIET_S and not active.is_empty() and not _suspended:
+			_show_ghost()
+		return
 	if active.is_empty() or _suspended:
 		return
 	_check_t -= dt

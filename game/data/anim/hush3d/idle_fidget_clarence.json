@@ -1,0 +1,72 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/idle_fidget_clarence",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/idle_fidget_clarence.res",
+  "length": 80,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 12,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "clarence_smitten",
+      "vol_db": -6.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 12,
+      "preset": "curious"
+    },
+    {
+      "f": 26,
+      "preset": "shush"
+    },
+    {
+      "f": 54,
+      "preset": "happy"
+    },
+    {
+      "f": 68,
+      "preset": "neutral"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/idle_fidget_clarence.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_rummage",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_rummage.res",
+  "length": 36,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 5,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "rustle"
+    },
+    {
+      "f": 18,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 18,
+      "type": "sfx",
+      "id": "rustle"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "determined"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_rummage.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

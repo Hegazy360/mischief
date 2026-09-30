@@ -40,6 +40,6 @@ fi
 if [ "$PROPS" = 1 ] && [ -f "$H/props.py" ]; then
   "$ROOT/tools/art3d/blender.sh" --python "$H/props.py" -- --out "$OUT" --palette "$OUT/palette_hush.png" \
     2>&1 | grep -E "PROP|Error|Traceback|line [0-9]+" || true
-  for g in "$OUT"/tag_beret.glb "$OUT"/plinth.glb; do [ -f "$g" ] && python3 "$H/glb_strip.py" "$g"; done
+  for g in "$OUT"/tag_beret.glb "$OUT"/plinth.glb "$OUT"/tomato_splat.glb "$OUT"/carry_*.glb; do [ -f "$g" ] && python3 "$H/glb_strip.py" "$g"; done
 fi
 echo "[hush] built $NAME (head_scale $HS)"

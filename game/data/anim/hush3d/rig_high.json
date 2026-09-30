@@ -1,0 +1,167 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_high",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/rig_high.res",
+  "length": 120,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [
+    {
+      "f": 6,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 11,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 15,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 15,
+      "type": "sfx",
+      "id": "tiptoe"
+    },
+    {
+      "f": 18,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 27,
+      "type": "sfx",
+      "id": "slide_up_short"
+    },
+    {
+      "f": 59,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 59,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 77,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 77,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 95,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 95,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 110,
+      "type": "sfx",
+      "id": "land_soft"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    },
+    {
+      "f": 13,
+      "preset": "curious"
+    },
+    {
+      "f": 27,
+      "preset": "proud"
+    },
+    {
+      "f": 40,
+      "preset": "determined"
+    },
+    {
+      "f": 60,
+      "preset": "frantic"
+    },
+    {
+      "f": 70,
+      "preset": "determined"
+    },
+    {
+      "f": 96,
+      "preset": "frantic"
+    },
+    {
+      "f": 110,
+      "preset": "grin"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/rig_high.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      27,
+      28,
+      110,
+      111
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "step": {
+    "kind": "mime",
+    "h": 0.4,
+    "support": [
+      [
+        0,
+        0.0
+      ],
+      [
+        27,
+        0.4
+      ],
+      [
+        104,
+        0.0
+      ]
+    ]
+  },
+  "stage": {
+    "x": 0.0,
+    "z": -1.5,
+    "facing": 1,
+    "cheat_deg": 10.0
+  }
+}

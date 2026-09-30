@@ -51,8 +51,13 @@ var loop: Array[LoopEntry] = []
 ## residue kind or fix-up kind → station id
 var fixup_overrides: Dictionary = {}
 var script_lines: Array[LineDef] = []
-## Raw director block ({} = none): gates, cues, safety_net, cant_fail, end_when, launch_offset_s.
+## Raw director block ({} = none): gates, cues, safety_net, cant_fail, end_when, launch_offset_s, fixup_holds.
 var director: Dictionary = {}
+## `director.fixup_holds` [{kind, until}]: a fix-up of that kind (DRY | SINK | HONEY | MIRROR) does not end while
+## `until` (a gate condition: "rigged:<prank>" | "first_rig" | … | a Conditions dict) is false — the Prologue's
+## mirror waits for the lever (R3D: its last warm-up would otherwise start with the gramophone unrigged and the
+## line lost for good in a non-repeating loop). Parsed to [[kind: String, until: Variant], ...].
+var fixup_holds: Array = []
 var encores: Array = []
 ## Stars are awarded (rules.curtain_calls, default true; the Prologue sets false).
 var curtain_calls: bool = true
@@ -143,6 +148,9 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 			line.idx = e.script_lines.size()
 			e.script_lines.append(line)
 	e.director = ContentUtil.dict(d, "director")
+	for fh in ContentUtil.arr(e.director, "fixup_holds"):
+		if typeof(fh) == TYPE_DICTIONARY:
+			e.fixup_holds.append([ContentUtil.s(fh, "kind"), (fh as Dictionary).get("until", null)])
 	var ex := ContentUtil.dict(bd, "exit")
 	if ex.is_empty():
 		ex = ContentUtil.dict(e.director, "exit")

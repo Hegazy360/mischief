@@ -3,7 +3,13 @@
 ##   tools/scripts/shot.sh res://scenes/dev/set3d/SetPreview3D.tscn out.png 40 r3d-sets -- --episode=p00_curtain_up \
 ##     [--room=kitchen] [--x=<cam x m>] [--hit-rects] [--anchors] [--reach=hush] [--state=<hs>:<idle|armed|spent|rig@0.5>,…]
 ##     [--glow=<hs>|all] [--tag=<hs>|all|armed] [--occupied=<hide>] [--lit=<room>] [--chars] [--check] [--pass=id --legend=/abs.json]
-##     [--decor=<id>:<anim>] [--lend=<hs>] [--zoom=<k>] [--y=<aim y>]
+##     [--decor=<id>:<anim>] [--lend=<hs>] [--zoom=<k>] [--y=<aim y>] [--landings] [--rects-json=/abs.json] [--perf] [--counts]
+##
+## Characters (`--chars`): `--hush_x/_y/_z/_facing/_cheat/_clip/_frame` (same for `bellows_`), and
+## `--<who>_anim_glb=/abs.glb --<who>_anim_name=<action>` for a raw glb action (ClipLib3D.load_glb_action).
+## `--state=all:<state>` sets every live prop. `--landings` draws tonight's landing boxes + points. `--rects-json`
+## writes the projected screen rects (px) of every live prop's hit box and visual, the landings and the decor pieces
+## (the review boards crop from them).
 ##
 ## Base framing = CameraDirector3D (r3d-view3d) when present, else the §7.7 numbers directly (FOV 30°, KEEP_HEIGHT,
 ## camera z +6.5, y 1.9 aimed at 1.35 on the lane). `--check` prints SetCheck's JSON (reach distances, collisions)
@@ -25,10 +31,12 @@ var chars: Dictionary = {}
 var check: Dictionary = {}
 var _frame := 0
 var _id_regions: Array = []
+## Set by SetPreviewBatch3D before the node enters the tree: these user args replace the command line's.
+var preset_args: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
-	for a in OS.get_cmdline_user_args():
+	for a in (preset_args if not preset_args.is_empty() else OS.get_cmdline_user_args()):
 		var kv := a.trim_prefix("--").split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else "1"
 	var content := get_node_or_null("/root/Content")
@@ -41,10 +49,29 @@ func _ready() -> void:
 		return
 	result = SetList.for_episode(db, ep)
 	house = House3D.new()
+	# the ID pass colours every piece: keep them separate meshes
+	house.merge_static = SetGeo.s(args.get("pass", "")) != "id" and not args.has("no-merge")
 	add_child(house)
 	house.build(result, {}, db)
 	print("[SetPreview3D] %s built in %.1f ms: %s" % [ep_id, house.build_ms, JSON.stringify(house.stats())])
 	print("[SetPreview3D] set %s" % JSON.stringify(result.to_dict()))
+	if args.has("counts"):
+		# per built room: live props, dressing / decor / furniture pieces, triangles (shell passes included), draws
+		var counts := {}
+		for rid in house.rooms_built():
+			var live_n := result.live_props_in(rid).size()
+			var pieces := 0
+			for pid in result.dressing + result.decor + result.furniture_pieces:
+				var dp := house.decor(pid)
+				if dp is Prop3D and (dp as Prop3D).room == rid:
+					pieces += 1
+			var furn := 0
+			for pr in house.props():
+				if pr.room == rid and not pr.live:
+					furn += 1
+			counts[rid] = {"lit": result.rooms_lit.has(rid), "live": live_n, "pieces": pieces, "furniture_props": furn,
+				"tris": house.room_tris(rid), "static_draws": house.static_draws(rid), "prop_draws": live_n * 3 + furn}
+		print("[counts] " + JSON.stringify(counts))
 	if args.has("check"):
 		check = SetCheck.run(house)
 		print("[setcheck] " + JSON.stringify(check))
@@ -69,6 +96,51 @@ func _ready() -> void:
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cl.add_child(overlay)
+
+
+func _process(_dt: float) -> void:
+	_frame += 1
+	if _frame == 4 and args.has("rects-json") and cam != null:
+		_write_rects(SetGeo.s(args["rects-json"]))
+	if args.has("perf") and _frame > 0 and _frame % 10 == 0:
+		# the frame's render counters (the §7 budgets: ≤ 45 draws for a framed room + two dimmed strips)
+		print("[perf] frame %d draws %d objects %d primitives %d video_mem_mb %.1f texture_mem_mb %.1f" % [_frame,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TEXTURE_MEM_USED) / 1048576.0])
+
+
+## The screen rects (px, [x, y, w, h]) of the live props' hit boxes and visuals, the landings and the decor pieces.
+func _write_rects(path: String) -> void:
+	var vp := get_viewport().get_visible_rect().size
+	var live := {}
+	for pr in house.props():
+		if not pr.live:
+			continue
+		live[pr.hotspot_id] = {"room": pr.room, "verb": pr.verb, "hit": _rect_arr(_Overlay.proj_aabb(cam, house.hotspot_box(pr.hotspot_id))),
+			"visual": _rect_arr(_Overlay.proj_aabb(cam, pr.home_aabb()))}
+	var lands := {}
+	for lid in result.landings:
+		var lb := house.landing_box(lid)
+		if lb.size != Vector3.ZERO:
+			var lp := house.landing_point(lid)
+			var pt: Vector2 = cam.unproject_position(lp.get("pos", lb.get_center()))
+			lands[lid] = {"box": _rect_arr(_Overlay.proj_aabb(cam, lb)), "point": [pt.x, pt.y]}
+	var dec := {}
+	for pid in result.dressing + result.decor + result.furniture_pieces:
+		var d := house.decor(pid)
+		if d is Prop3D:
+			dec[pid] = {"visual": _rect_arr(_Overlay.proj_aabb(cam, (d as Prop3D).home_aabb()))}
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify({"size": [vp.x, vp.y], "live": live, "landings": lands, "decor": dec}, "  "))
+		f.close()
+
+
+static func _rect_arr(r: Rect2) -> Array:
+	return [snappedf(r.position.x, 0.1), snappedf(r.position.y, 0.1), snappedf(r.size.x, 0.1), snappedf(r.size.y, 0.1)]
 
 
 func _setup_env() -> void:
@@ -109,13 +181,18 @@ func _apply_states() -> void:
 		var kv := spec.split(":")
 		if kv.size() != 2:
 			continue
-		var pr := house.prop(kv[0])
-		if pr == null:
-			continue
-		if kv[1].begins_with("rig@"):
-			pr.set_rig_progress(float(kv[1].substr(4)))
-		else:
-			pr.set_state(StringName(kv[1]))
+		var targets: Array[Prop3D] = []
+		if kv[0] == "all":
+			for lp in house.props():
+				if lp.live:
+					targets.append(lp)
+		elif house.prop(kv[0]) != null:
+			targets.append(house.prop(kv[0]))
+		for pr in targets:
+			if kv[1].begins_with("rig@"):
+				pr.set_rig_progress(float(kv[1].substr(4)))
+			else:
+				pr.set_state(StringName(kv[1]))
 	var tag := SetGeo.s(args.get("tag", ""))
 	for p in house.props():
 		if tag == "all" or (tag == "armed" and p.state() == &"armed") or tag.split(",").has(p.hotspot_id):
@@ -212,8 +289,14 @@ func _place_chars() -> void:
 			rp.call("set_facing", int(args.get(who + "_facing", spec[2])), false)
 		if rp.has_method("set_cheat"):
 			rp.call("set_cheat", float(args.get(who + "_cheat", "35")), 0.0)
+		var clip_id := SetGeo.s(args.get(who + "_clip", spec[3]))
+		if args.has(who + "_anim_glb"):
+			# a raw glb action on the same skeleton (e.g. the vendored UAL Sitting_Idle_Loop as a stand-in pose)
+			var gid := ClipLib3D.load_glb_action(who, SetGeo.s(args[who + "_anim_glb"]), SetGeo.s(args.get(who + "_anim_name", "")))
+			if gid != "":
+				clip_id = gid
 		if rp.has_method("play"):
-			rp.call("play", SetGeo.s(args.get(who + "_clip", spec[3])))
+			rp.call("play", clip_id)
 		if args.has(who + "_frame") and rp.has_method("set_external_frame"):
 			rp.call("set_external_frame", float(args[who + "_frame"]))
 		chars[who] = rp
@@ -482,10 +565,10 @@ class _Overlay:
 				var r := _proj_aabb(cam, box)
 				var kind := SetGeo.s(res.live[id])
 				var c := Prop3D.verb_color(kind)
-				draw_rect(r, Color(c, 0.9), false, 2.0)
+				draw_rect(r, Color(c, 0.9), false, 3.0 * sc)
 				var logical := r.size / sc
-				draw_string(font, r.position + Vector2(3, 14), "%s %dx%d" % [id.replace("kitchen_", "").replace("parlour_", "").replace("hall_", ""),
-					int(logical.x), int(logical.y)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 1, 1))
+				draw_string(font, r.position + Vector2(4, 26 * sc), "%s %dx%d" % [id.replace("kitchen_", "").replace("parlour_", "").replace("hall_", ""),
+					int(logical.x), int(logical.y)], HORIZONTAL_ALIGNMENT_LEFT, -1, int(24 * sc), Color(1, 1, 1))
 		if a.has("anchors"):
 			for pr in house.props():
 				if not pr.live:
@@ -496,20 +579,37 @@ class _Overlay:
 						continue
 					var w := pr.anchor(k)
 					var s := cam.unproject_position(w)
-					draw_circle(s, 4.0, {&"preview": Color(1, 0.9, 0.2), &"tag": Color(1, 0.2, 0.3), &"ring": Color(0.3, 1, 0.4),
+					draw_circle(s, 7.0 * sc, {&"preview": Color(1, 0.9, 0.2), &"tag": Color(1, 0.2, 0.3), &"ring": Color(0.3, 1, 0.4),
 						&"item": Color(1, 1, 1), &"eyes": Color(0.4, 0.6, 1), &"reach": Color(1, 0.5, 0)}[k])
+		if a.has("landings"):
+			for lid in res.landings:
+				var lb := house.landing_box(lid)
+				if lb.size == Vector3.ZERO:
+					continue
+				var lr := _proj_aabb(cam, lb)
+				draw_rect(lr, Color(0.35, 0.85, 1.0, 0.18), true)
+				draw_rect(lr, Color(0.35, 0.85, 1.0, 0.95), false, 3.0 * sc)
+				var lp: Dictionary = house.landing_point(lid)
+				var pt := cam.unproject_position(lp.get("pos", lb.get_center()))
+				draw_circle(pt, 9.0 * sc, Color(1, 1, 1))
+				draw_circle(pt, 6.0 * sc, Color(0.1, 0.5, 0.9))
+				draw_string(font, lr.position + Vector2(6, 28 * sc), "landing %s" % lid, HORIZONTAL_ALIGNMENT_LEFT, -1, int(26 * sc), Color(1, 1, 1))
 		var chk: Dictionary = p.get("check")
 		if a.has("reach") and not chk.is_empty():
-			var y := 60.0
+			var y := 90.0 * sc
 			for row in chk["reach"]:
-				draw_string(font, Vector2(12, y), "%s  %.3f m  %s  %s" % [row["hotspot"], row["dist"], row["band"], "OK" if row["ok"] else "TOO FAR"],
-					HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.6, 1, 0.6) if row["ok"] else Color(1, 0.4, 0.4))
-				y += 16.0
+				draw_string(font, Vector2(24 * sc, y), "%s  %.3f m  %s  %s" % [row["hotspot"], row["dist"], row["band"], "OK" if row["ok"] else "TOO FAR"],
+					HORIZONTAL_ALIGNMENT_LEFT, -1, int(26 * sc), Color(0.6, 1, 0.6) if row["ok"] else Color(1, 0.4, 0.4))
+				y += 30.0 * sc
 			for c in chk["collisions"]:
-				draw_string(font, Vector2(12, y), "HIT %s → %s %.3f" % [c["who"], c["solid"], c["depth"]], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1, 0.3, 0.3))
-				y += 16.0
+				draw_string(font, Vector2(24 * sc, y), "HIT %s → %s %.3f" % [c["who"], c["solid"], c["depth"]], HORIZONTAL_ALIGNMENT_LEFT, -1, int(26 * sc), Color(1, 0.3, 0.3))
+				y += 30.0 * sc
 
 	func _proj_aabb(cam: Camera3D, b: AABB) -> Rect2:
+		return proj_aabb(cam, b)
+
+	## The screen rect of a world AABB (its 8 corners projected).
+	static func proj_aabb(cam: Camera3D, b: AABB) -> Rect2:
 		var lo := Vector2(INF, INF)
 		var hi := Vector2(-INF, -INF)
 		for i in 8:

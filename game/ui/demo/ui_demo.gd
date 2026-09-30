@@ -98,6 +98,14 @@ func _ready() -> void:
 	if UiKit.has_flag("--left-handed"):
 		hud.set_left_handed(true)
 	hud.set_pip_texture(_pip_vp.get_texture())
+	if UiKit.has_flag("--debug-rects"):
+		var dl := CanvasLayer.new()
+		dl.layer = 60
+		add_child(dl)
+		var rd := _RectDebug.new()
+		rd.demo = self
+		dl.add_child(rd)
+		_rects = rd
 	model = HudModel.new()
 	if _cycle:
 		state = STATES[0]
@@ -122,6 +130,8 @@ func _process(_delta: float) -> void:
 		omodel.clear()
 		omodel.hidden = true
 	overlays.apply(omodel)
+	if _rects != null:
+		_rects.queue_redraw()
 
 
 ## Configure the fake model (and panels) for `name`.
@@ -387,6 +397,7 @@ func _open_panel(name_: String) -> void:
 	match name_:
 		"script":
 			p.call("setup", model.script_lines, model.script_loop, 2, 3)
+			p.call("set_rule", "the kitchen table is struck")
 		"pause":
 			p.call("setup", true, {"applause": 87, "tomatoes_left": 2, "tomatoes_max": 3, "curtain_calls": 1})
 		"pause_nobow":
@@ -422,6 +433,7 @@ func _register_fx() -> void:
 var _bubble_rect := Rect2()
 var _caption_rect := Rect2()
 var _fx: Node2D = null
+var _rects: Node2D = null
 
 
 func _animate() -> void:
@@ -430,6 +442,9 @@ func _animate() -> void:
 		model.fuse_frac = maxf(0.0, 0.62 - t * 0.02)
 	elif state == "overlays_rigging" and osnap != null:
 		osnap.hush.rig_pm = mini(1000, 450 + int(float(_frame % CYCLE_FRAMES) * 6.0))
+	elif state == "tag_flight" and not hud.flights.is_empty() and not (hud.flights[0] as TagFlight).running:
+		# keep one tag in the air (a shot lands at any phase of the 0.6 s flight)
+		hud.fly_tag(Vector2(hud.viewport_size().x * 0.5, 560.0), 2)
 
 
 func _fake_script() -> Array:
@@ -459,6 +474,34 @@ func _fake_loop() -> Array:
 
 
 ## Stand-ins for the view's 2D FX in the placement demo: his thought bubble and a pun caption.
+## `--debug-rects`: the placer's last solve over the frame — protected rects (red), placed overlays (green;
+## faded previews yellow), the always-on HUD rects (navy) and the middle band y 250–880 (blue lines).
+class _RectDebug:
+	extends Node2D
+
+	var demo: Node = null
+
+	func _draw() -> void:
+		if demo == null:
+			return
+		var ov: WorldOverlays = demo.get("overlays")
+		var hud_: Hud = demo.get("hud")
+		var vs := get_viewport_rect().size
+		var band := HudLayout.middle_band(vs)
+		draw_line(Vector2(0, band.position.y), Vector2(vs.x, band.position.y), Color(0.3, 0.6, 1.0, 0.9), 3.0)
+		draw_line(Vector2(0, band.end.y), Vector2(vs.x, band.end.y), Color(0.3, 0.6, 1.0, 0.9), 3.0)
+		for r in hud_.always_on_rects():
+			draw_rect(r, Color(0.1, 0.15, 0.4, 0.9), false, 4.0)
+		for r in ov.protected_now():
+			draw_rect(r, Color(0.95, 0.2, 0.2, 0.9), false, 4.0)
+		for it in ov.placer.pool():
+			if it.was_active and it.visible:
+				draw_rect(it.rect, Color(1.0, 0.85, 0.2, 0.95) if it.faded else Color(0.2, 0.9, 0.3, 0.95), false, 4.0)
+				if it.rect != it.want:
+					draw_rect(it.want, Color(0.2, 0.9, 0.3, 0.45), false, 2.0)
+					draw_line(it.want.get_center(), it.rect.get_center(), Color(0.2, 0.9, 0.3, 0.8), 3.0)
+
+
 class _FxStandIn:
 	extends Node2D
 

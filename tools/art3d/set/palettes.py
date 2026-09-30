@@ -34,29 +34,29 @@ KITCHEN = {
 }
 
 PARLOUR = {
-    "wall": ("#C9A6A2", False), "wainscot": ("#AE8F8B", False), "rail": ("#9D8380", False),
+    "wall": ("#C9A6A2", False), "wainscot": ("#A48783", False), "rail": ("#9D8380", False),
     "floor_a": ("#8A6C54", False), "floor_b": ("#83644D", False), "skirt": ("#8A7270", False),
     "stone": ("#B7A9A5", False), "stone_dk": ("#9E918D", False), "mantel": ("#A08A86", False),
     "firebox": ("#2A2230", False), "ember": ("#E8743A", True), "flame": ("#FFB44A", True),
-    "window_frame": ("#DDCBC6", False), "pane": ("#B7D4E4", True),
+    "window_frame": ("#CEBDB9", False), "pane": ("#A9C6D2", True),
     "frame_gold": ("#B49A7E", False), "canvas": ("#A58E86", False), "canvas_face": ("#C4A89C", False),
     "vase": ("#B89F9C", False), "vase_band": ("#A08784", False), "basket": ("#A1886C", False), "log": ("#8C7458", False),
     "chandelier": ("#C2A56A", False), "candle": ("#EFE6D6", False),
 }
 
 HALL = {
-    "wall": ("#A5B298", False), "wainscot": ("#8F9A82", False), "rail": ("#838C78", False),
+    "wall": ("#A5B298", False), "wainscot": ("#86917A", False), "rail": ("#838C78", False),
     "floor_a": ("#8A6C54", False), "floor_b": ("#83644D", False), "skirt": ("#7A8270", False),
     "stair": ("#8E9580", False), "stair_dk": ("#7C836F", False), "stair_void": ("#1A1522", False),
     "door": ("#6A8E6E", False), "door_frame": ("#D9D2BE", False), "knocker": ("#C9A24A", False),
-    "window_frame": ("#CBD1BF", False), "pane": ("#B7D4E4", True),
+    "window_frame": ("#BEC3B3", False), "pane": ("#A9C6D2", True),
     "coat_stand": ("#838A73", False), "hat_a": ("#8F9A82", False), "hat_b": ("#9CA38E", False),
     "table": ("#8C8570", False), "table_dk": ("#777160", False),
 }
 
 PORCH = {
-    "wall": ("#8FC3D9", False), "wainscot": ("#82A9BA", False), "rail": ("#82A9BA", False),
-    "floor_a": ("#8A8378", False), "floor_b": ("#827B70", False), "skirt": ("#77706A", False),
+    "wall": ("#8FC3D9", False), "wainscot": ("#7CA1B1", False), "rail": ("#7CA1B1", False),
+    "floor_a": ("#767066", False), "floor_b": ("#6E695F", False), "skirt": ("#77706A", False),
     "hedge": ("#7E9C74", False), "hedge_dk": ("#6C8A63", False), "step": ("#9A9286", False),
     "no9_door": ("#6E6A7A", False), "no9_frame": ("#8A8594", False), "cloud": ("#A7D2E3", False),
 }

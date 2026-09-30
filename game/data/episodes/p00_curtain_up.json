@@ -62,6 +62,7 @@
     }
   ],
   "director": {
+    "fixup_holds": [{"kind": "MIRROR", "until": "rigged:allegro_go_go", "desc": "R3D: after the sneeze he primps at the hall mirror until the lever is set (the sparkle cue points at it) — his last warm-up never starts with the gramophone unrigged, so the spin can not be lost in the non-repeating loop."}],
     "launch_offset_s": 2.3,
     "gates": [
       {"loop": 0, "gate": {"until": "first_squeak", "plus_s": 1.0, "max_s": 15, "first_loop_only": true}},

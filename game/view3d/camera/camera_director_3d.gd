@@ -66,7 +66,9 @@ const SHAKE_DECAY := 1.5
 const KICK_K := 500.0
 const KICK_D := 22.0
 const KICK_V_PER_PX := 40.6
-const GAG_FOCUS_MID := 0.30          ## the focus stays within the middle 60 % of a punch-in frame
+const GAG_FOCUS_MID := 0.18          ## the focus stays within the middle 36 % of a punch-in frame (C2 yields)
+## A punch-in never shows more than this much below the floor at the lane (the aim rises instead of framing the pit).
+const GAG_BELOW_FLOOR_M := 0.35
 const APPROACH_HOLD_MAX_F := 600     ## a push waits this long past its frames for punch_gag, then punches anyway
 
 enum Pan { NONE, DRAG, FLING, HOLD, RETURN }
@@ -104,6 +106,8 @@ class Gag:
 	var out_aim: Vector3 = Vector3.ZERO
 	var out_dist: float = BASE_DIST
 	var out_yaw: float = 0.0
+	## A seek kept this gag: its start frame is re-based on the next advance (the old one is stale).
+	var rebase: bool = false
 
 
 ## Source of view-time deltas (a SimDriver: `view_delta()`); null = real time.
@@ -391,6 +395,8 @@ func clear_gags(keep_id: int = 0) -> void:
 			_queue.remove_at(i)
 	if _gag != null and (keep_id == 0 or _gag.id != keep_id):
 		_finish_gag()
+	elif _gag != null:
+		_gag.rebase = true
 
 
 func is_gag_active() -> bool:
@@ -987,11 +993,22 @@ func gag_frame(focus: Vector3, zoom: float) -> Array:
 	var V := visible_width_for(d)
 	var x := _c2_clamp(focus.x, fl, V)
 	x = clampf(x, focus.x - GAG_FOCUS_MID * V, focus.x + GAG_FOCUS_MID * V)
-	return [Vector3(x, focus.y, focus.z), d]
+	# the frame's lower edge at the lane stays within GAG_BELOW_FLOOR_M of the floor
+	var half_h := d * tan(deg_to_rad(fov) * 0.5)
+	var y := maxf(focus.y, View3DConst.floor_y(fl) + half_h - GAG_BELOW_FLOOR_M)
+	return [Vector3(x, y, focus.z), d]
 
 
 func _update_gag(vdt: float, rdt: float, aim: Vector3, dist: float, yaw: float) -> Array:
 	var g := _gag
+	if g.rebase:
+		g.rebase = false
+		g.from_aim = aim
+		g.from_dist = dist
+		g.from_yaw = yaw
+		g.out_aim = aim
+		g.out_dist = dist
+		g.out_yaw = yaw
 	var fp := _focus_point(g)
 	var gf := gag_frame(fp, g.zoom)
 	var g_aim: Vector3 = gf[0]

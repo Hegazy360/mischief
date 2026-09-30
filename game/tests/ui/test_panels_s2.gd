@@ -128,8 +128,7 @@ func test_debug_rows_write_the_gate0_keys() -> void:
 	for spec in [["voice_style", 1, "tuba"], ["crowd_style", 1, "fallback"], ["hush_skin", 1, "pip"],
 			["voice_style", 0, "formant"], ["hush_skin", 0, ""]]:
 		var row: TouchWidget = p.rows[spec[0]]
-		var cr: Rect2 = row.call("_ctrl_rect")
-		var pos := Vector2(cr.position.x + float(spec[1]) * 244.0 + 110.0, 72)
+		var pos: Vector2 = (row.call("_seg_rect", int(spec[1])) as Rect2).get_center()
 		row.touch(true, pos, 0)
 		row.touch(false, pos, 0)
 		assert_eq(fake.values.get(spec[0]), spec[2], "%s segment %d" % [spec[0], spec[1]])
@@ -137,6 +136,37 @@ func test_debug_rows_write_the_gate0_keys() -> void:
 		for lab in SettingsPanel.CHOICE_LABELS[k]:
 			assert_true(UiStrings.has(String(lab)), "label key " + String(lab))
 		assert_eq(SettingsPanel.choices_for(k).size(), (SettingsPanel.CHOICE_LABELS[k] as Array).size())
+
+
+func test_two_column_rows_stack_label_over_control() -> void:
+	var p := SettingsPanel.new()
+	p.show_debug = true
+	p.settings_node = _FakeSettings.new()
+	_made.append(p.settings_node)
+	_add(p)
+	p.select_tab("debug")
+	p.call("_layout", Rect2(0, 0, 2400, 1080))
+	var f := UiKit.ui_font()
+	for spec in SettingsPanel.tab_rows("debug"):
+		var row: Control = p.rows.get(String(spec[0]))
+		if row == null:
+			continue
+		assert_true(bool(row.get("stacked")), "%s stacked in the two-column debug tab" % spec[0])
+		assert_true(row.size.y >= SettingsPanel.ROW_H, "%s row tall enough" % spec[0])
+		if String(row.get("kind")) == "choice":
+			var cr: Rect2 = row.call("_ctrl_rect")
+			assert_true(cr.end.x <= row.size.x + 0.5, "%s: the segments fit the column" % spec[0])
+			assert_true(cr.size.y >= 96.0, "%s: segment targets ≥ 96 px tall" % spec[0])
+			# the label line sits above the segments
+			var ls := ScriptPanel.fit_size(f, String(row.get("label")), row.size.x - 64.0, UiKit.text_size(UiKit.SIZE_PLAY))
+			assert_true(f.get_string_size(String(row.get("label")), HORIZONTAL_ALIGNMENT_LEFT, -1, ls).x <= row.size.x - 64.0 + 0.5,
+				"%s: label fits" % spec[0])
+	p.select_tab("play")
+	p.call("_layout", Rect2(0, 0, 2400, 1080))
+	for spec in SettingsPanel.tab_rows("play"):
+		var row2: Control = p.rows.get(String(spec[0]))
+		if row2 != null:
+			assert_false(bool(row2.get("stacked")), "%s: single-column rows stay side by side" % spec[0])
 
 
 func test_debug_choices_match_the_settings_autoload() -> void:

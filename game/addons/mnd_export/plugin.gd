@@ -3,11 +3,12 @@ extends EditorPlugin
 ## MND Export: adds raw copies of every art SVG the game rasterises at runtime.
 ##
 ## Imported files (every .svg) are exported only as their `.import` remap + `.ctex`, and an
-## `include_filter` cannot change that for imported resources. But HiResTex / AtlasBuilder
-## re-rasterise every rig part, prop, room, FX and UI SVG at 2× from its source (TECH §5.3) and
-## read the SVG header for its 1× size; without the source they get nothing (rig atlases come out
-## empty on the phone). This plugin puts the source bytes into the pack at the same res:// path
-## (FileAccess sees them; `load()` still uses the remap). `_src` / dot folders are skipped.
+## `include_filter` cannot change that for imported resources. But HiResTex re-rasterises every UI, icon, pictogram
+## and FX SVG at 2× from its source (TECH §5.3) — and, while the 2D view exists, the 2D AtlasBuilder does the same
+## for rig parts, props and rooms — reading the SVG header for its 1× size; without the source they get nothing.
+## This plugin puts the source bytes into the pack at the same res:// path (FileAccess sees them; `load()` still
+## uses the remap). `_src` / dot folders are skipped. It walks directories only — it names no game class, so it
+## keeps working when `r3d-integrate` deletes AtlasBuilder and the 2D art (a missing folder is simply skipped).
 
 var _export_plugin: MndRawSvgExport
 

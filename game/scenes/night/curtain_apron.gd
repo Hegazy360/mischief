@@ -6,6 +6,8 @@
 ## The characters are driverless CharacterViews (`pose_replay`): real RigPlayer clips when they exist
 ## (`hush/act_bow`, `bellows/cc_wander_on`, `st_double_take`, `beat_slow_burn`, `st_bonk`), the view's
 ## stand-in puppet otherwise. Roses are a fixed pool drawn in one `_draw()` (no allocation per frame).
+## **3D view** (`view3d`, set before `_ready`): the actors are CurtainBows3D's 3D rigs (`bows`, composited under this
+## control — the roses, the title and the valance stay 2D, on top); no 2D rig is loaded.
 class_name CurtainApron
 extends Control
 
@@ -22,6 +24,9 @@ const BULBS := 22
 
 var hush: CharacterView = null
 var bellows: CharacterView = null
+## 3D view: the bows are 3D (CurtainBows3D under this control); set before `_ready`.
+var view3d: bool = false
+var bows: CurtainBows3D = null
 ## 0..1 progress of Bellows' band routine (CurtainCall drives it during the reel).
 var bellows_t: float = 0.0
 var hush_on: bool = false
@@ -59,6 +64,8 @@ func _ready() -> void:
 	_rose_tex = UiIcons.get_icon(&"rose")
 	if ResourceLoader.exists(VALANCE_ART):
 		_valance_tex = load(VALANCE_ART) as Texture2D
+	if view3d:
+		return
 	hush = CharacterView.new()
 	add_child(hush)
 	hush.setup("hush")
@@ -82,6 +89,8 @@ func show_hush(on: bool, sec: float) -> void:
 	_hush_len = maxf(0.2, sec)
 	if hush != null:
 		hush.visible = on
+	if bows != null and not on:
+		bows.hide_hush()
 
 
 ## Roses rain from the flies onto the apron.
@@ -135,6 +144,8 @@ func start_bellows(residues: Variant) -> void:
 	_bellows_on = true
 	bellows_t = 0.0
 	_bonk_t = -1.0
+	if bows != null and residues is PackedStringArray:
+		bows.set_residues(residues)
 	if bellows != null:
 		bellows.visible = true
 		if bellows.uses_rig and bellows.rig != null and residues is PackedStringArray:
@@ -163,7 +174,13 @@ func advance(dt: float) -> void:
 	_t += dt
 	_frame += dt * 60.0
 	var vs := _vs()
-	if hush_on and hush != null:
+	if hush_on and bows != null:
+		_hush_t += dt
+		var k3 := clampf(_hush_t / _hush_len, 0.0, 1.0)
+		var walking := k3 < 0.3
+		bows.pose_hush(lerpf(0.36, 0.5, clampf(k3 / 0.3, 0.0, 1.0)), "hush/loco_walk" if walking else "hush/act_bow", 1,
+			20.0 if walking else 85.0)
+	elif hush_on and hush != null:
 		_hush_t += dt
 		var k := clampf(_hush_t / _hush_len, 0.0, 1.0)
 		# she steps in from the wing to centre (first 30 %), then bows
@@ -173,7 +190,9 @@ func advance(dt: float) -> void:
 		if not hush.uses_rig and hush.puppet != null:
 			var bow := sin(clampf((k - 0.3) / 0.7, 0.0, 1.0) * PI)
 			hush.puppet.set_motion(Vector2(1.0 + 0.04 * bow, 1.0 - 0.1 * bow), 0.5 * bow, Vector2.ZERO, 1.0)
-	if _bellows_on and bellows != null:
+	if _bellows_on and bows != null:
+		_advance_bellows_3d()
+	elif _bellows_on and bellows != null:
 		_advance_bellows(dt, vs)
 	if _roses_live:
 		var any := false
@@ -233,6 +252,22 @@ func _advance_bellows(dt: float, vs: Vector2) -> void:
 				Vector2(sin(_t * 50.0) * 2.0 * burn, 0.0), 1.0)
 
 
+## 3D: the band routine on CurtainBows3D (wander on → double take → slow burn → the bonk).
+func _advance_bellows_3d() -> void:
+	var t := bellows_t
+	if t < 0.45:
+		var e := 1.0 - pow(1.0 - t / 0.45, 2.0)
+		bows.pose_bellows(lerpf(1.08, 0.56, e), "bellows/cc_wander_on", -1, 20.0)
+		return
+	if t < 0.55:
+		bows.pose_bellows(0.56, "bellows/st_double_take", 1 if fmod(_t * 6.0, 2.0) < 1.0 else -1, 35.0)
+	elif _bonk_t < 0.0:
+		bows.pose_bellows(0.56, "bellows/beat_slow_burn", 1, 60.0)
+		bows.set_bellows_tier(int(clampf((t - 0.55) / 0.3, 0.0, 1.0) * 3.0))
+	else:
+		bows.pose_bellows(0.56, "bellows/st_bonk", 1, 60.0)
+
+
 func _draw() -> void:
 	var vs := _vs()
 	# footlight glow along the apron edge while anyone is on
@@ -246,7 +281,7 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO)
 	if title_on:
 		_draw_title(vs)
-	if _bonk_t >= 0.0 and bellows != null:
+	if _bonk_t >= 0.0 and (bellows != null or bows != null):
 		_draw_valance(vs)
 
 
@@ -311,11 +346,13 @@ static func _perimeter(r: Rect2, u: float) -> Vector2:
 
 
 func _draw_valance(vs: Vector2) -> void:
-	var head_y := bellows.position.y - bellows.height_px() * BAND_SCALE
+	var head := bows.head_screen("bellows") if bows != null else Vector2(bellows.position.x,
+		bellows.position.y - bellows.height_px() * BAND_SCALE)
+	var head_y := head.y
 	var k := clampf(_bonk_t / 0.12, 0.0, 1.0)
 	var bottom := lerpf(-10.0, head_y + 30.0, k * k)
 	var w := 520.0
-	var r := Rect2(bellows.position.x - w * 0.5, bottom - 170.0, w, 170.0)
+	var r := Rect2(head.x - w * 0.5, bottom - 170.0, w, 170.0)
 	draw_rect(Rect2(r.position.x + 40.0, -10.0, 16.0, r.position.y + 10.0), UiKit.GOLD_SHADE)
 	draw_rect(Rect2(r.end.x - 56.0, -10.0, 16.0, r.position.y + 10.0), UiKit.GOLD_SHADE)
 	if _valance_tex != null:

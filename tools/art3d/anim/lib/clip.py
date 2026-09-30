@@ -16,7 +16,7 @@ Evaluation per frame (60 fps, frame 0 = clip start, frames 0..length): key inter
 key's ease; back/elastic overshoot) -> the rig's default pose layers (rig3d.json `anim.layers`, e.g. Bellows'
 `arm_out`) + the clip's own layers -> constraints in the order added (ground, steps, IK / reach, plants, look).
 """
-import json, math, os, time
+import inspect, json, math, os, time
 from mathutils import Vector, Quaternion, Matrix
 
 from . import ease as E
@@ -90,6 +90,24 @@ class _Key:
 
     def __init__(self, f, pose, ease, src):
         self.f, self.pose, self.ease, self.src = f, pose, ease, src
+
+
+def _call(fn, f, pose):
+    """A per-frame constraint callable: fn(frame) or fn(frame, pose) — the pose so far (keys + layers + the earlier
+    constraints), e.g. to start an IK path from the keyed hand."""
+    try:
+        n = len([p for p in inspect.signature(fn).parameters.values()
+                 if p.default is inspect.Parameter.empty and p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)])
+    except (TypeError, ValueError):
+        n = 1
+    return fn(f, pose) if n >= 2 else fn(f)
+
+
+def _blend(b):
+    """A constraint blend: frames (int) or (in, out) frames."""
+    if isinstance(b, (tuple, list)):
+        return (int(b[0]), int(b[1]))
+    return int(b)
 
 
 class Clip:
@@ -255,16 +273,88 @@ class Clip:
         self.constraints.append(("plant", side, int(f0), int(f1), at, part, travel))
         return self
 
-    def ik(self, side, target, f0=0, f1=None, pole=None, hand=None, effector="palm", blend=4, world=True):
+    def ik(self, side, target, f0=0, f1=None, pole=None, hand=None, effector="palm", blend=4, world=True, soft=0.06):
         """Arm IK over [f0, f1]: target = a world (Godot) point (x, y, z) if world else an armature-space point, or a
         callable(frame) -> point, or (bone, rest point) riding on a bone. pole = the elbow's direction (armature
         space; default down-and-out). hand = rotation list about armature axes for the glove (else keyed). effector:
-        "wrist" | "palm" | "tip" | a rig3d socket name. blend = frames to ease the IK weight in/out."""
+        "wrist" | "palm" | "tip" | a rig3d socket name. blend = frames to ease the IK weight in/out, or a pair
+        (in, out). target, pole and hand may be callables fn(frame) or fn(frame, pose) (the pose before this IK, so a
+        path can start from the keyed hand: see Clip.keyed_arm); hand may return a rotation list or a world Quaternion.
+        soft = the soft-IK zone (m) near full extension (no elbow snap; the reach falls short by <= soft/e at lmax)."""
         if pole is None:
             pole = (0.8 if side == "l" else -0.8, 0.3, -0.6)
-        self.constraints.append(("ik", side, target, int(f0), self.length if f1 is None else int(f1), Vector(pole),
-                                 hand, effector, int(blend), world))
+        if not callable(pole):
+            pole = Vector(pole)
+        self.constraints.append(("ik", side, target, int(f0), self.length if f1 is None else int(f1), pole,
+                                 hand, effector, _blend(blend), world, float(soft)))
         return self
+
+    def keyed_arm(self, pose, side, effector="palm"):
+        """(effector point, elbow pole, hand world Quaternion) of the KEYED arm in `pose` — the hand-off values for a
+        pose-aware IK path (start / end the path on the keyed hand and the IK takes over / gives back seamlessly)."""
+        sk = self.skel
+        up, lo, hd = "upperarm_" + side, "lowerarm_" + side, "hand_" + side
+        pose.solve()
+        eff = self._effector(side, effector)
+        pt = sk.carried(pose.world, hd, eff) if eff is not None else pose.pos(hd)
+        S, E, W = pose.pos(up), pose.pos(lo), pose.pos(hd)
+        axis = (W - S)
+        pole = (E - S) - axis.normalized() * (E - S).dot(axis.normalized()) if axis.length > 1e-6 else Vector((0, 0, -1))
+        hw = pose.world_rot(hd) @ sk.rest_q[hd].inverted()
+        return pt, pole.normalized() if pole.length > 1e-6 else Vector((0, 0, -1)), hw
+
+    def ik_handoff(self, side, path, f0, f1, pole, hand=None, effector="palm", ramp=6, ramp_out=None, soft=0.06,
+                   hand_ramp=None):
+        """Arm IK along `path` (fn(frame) -> armature point) that TAKES OVER from the keyed hand over [f0, f0 + ramp]
+        and GIVES IT BACK over [f1 - ramp_out, f1]: the target, the elbow swivel (rotated about the shoulder->hand
+        axis, never lerped through zero) and the glove orientation all ease from the keyed arm's own, so the arm
+        never flips configuration mid-move. hand: rotation list, or fn(frame) -> list, for the IK's glove (None =
+        keyed; or a world Quaternion). hand_ramp: a longer (in, out) or frames ramp for the glove's turn (default = the arm's).
+        Use it when the keyed arm and the IK arm differ a lot (a grab after a hop, a hand-back before a jump)."""
+        ro = ramp if ramp_out is None else ramp_out
+        hr = hand_ramp if hand_ramp is not None else (ramp, ro)
+        hr = (int(hr[0]), int(hr[1])) if isinstance(hr, (tuple, list)) else (int(hr), int(hr))
+        want = Vector(pole).normalized()
+        memo = {}
+
+        def k(f, r_in=ramp, r_out=ro):
+            a = min(1.0, max(0.0, (f - f0) / float(max(1, r_in))))
+            b = min(1.0, max(0.0, (f1 - f) / float(max(1, r_out))))
+            x = min(a, b)
+            return x * x * (3 - 2 * x)
+
+        def keyed(f, pose):
+            key = (f, id(pose))
+            if key not in memo:
+                memo.clear()
+                memo[key] = self.keyed_arm(pose, side, effector)
+            return memo[key]
+
+        def target(f, pose):
+            return keyed(f, pose)[0].lerp(Vector(path(f)), k(f))
+
+        def pole_fn(f, pose):
+            kp = keyed(f, pose)[1]
+            axis = Vector(target(f, pose)) - pose.pos("upperarm_" + side)
+            if axis.length < 1e-6:
+                return kp
+            ax = axis.normalized()
+            a = kp - ax * kp.dot(ax)
+            b = want - ax * want.dot(ax)
+            if a.length < 1e-6 or b.length < 1e-6:
+                return kp.lerp(want, k(f))
+            q = a.rotation_difference(b)
+            return Quaternion().slerp(q, k(f)) @ a
+
+        def hand_fn(f, pose):
+            kq = keyed(f, pose)[2]
+            hv = hand(f) if callable(hand) else hand
+            if hv is None:
+                return kq
+            return kq.slerp(hv if isinstance(hv, Quaternion) else P.rot_q(hv), k(f, hr[0], hr[1]))
+
+        return self.ik(side, target, f0, f1, pole=pole_fn, hand=hand_fn, effector=effector, blend=0, world=False,
+                       soft=soft)
 
     def reach(self, side, target, f0, f1, pole=None, hand=None, effector="palm", blend=5, look=True):
         """IK to a world target (a placed reach target) + the head turned to the camera so the face reads (R5d).
@@ -277,7 +367,7 @@ class Clip:
     def look(self, target, f0, f1, weight=1.0, blend=4, bones=("spine_03", "neck_01", "Head"), share=(0.15, 0.3, 0.55)):
         """Baked head + neck aim at a world point, ("camera",) or a callable(frame) -> armature point. Facing-specific:
         use it on staged clips (rigs); use look_camera() for glances that must work facing either way."""
-        self.constraints.append(("look", target, int(f0), int(f1), float(weight), int(blend), bones, share))
+        self.constraints.append(("look", target, int(f0), int(f1), float(weight), _blend(blend), bones, share))
         return self
 
     def auto_plant(self, speed_m_s=None, thr=0.02, min_run=3, release=6, sides=("l", "r")):
@@ -316,7 +406,8 @@ class Clip:
             spans[-1][1] = first[1] + n
         elif self.loop and len(spans) == 1 and spans[0] == [0, last]:
             spans = [[0, last]]
-        return [sp for sp in spans if sp[1] - sp[0] + 1 >= min_run]
+        # a short contact that ends a one-shot (a landing on the last frames) is still a plant: it would slide otherwise
+        return [sp for sp in spans if sp[1] - sp[0] + 1 >= min_run or (not self.loop and sp[1] == last and sp[1] > sp[0])]
 
     def _setup_auto(self):
         a = getattr(self, "_auto", None)
@@ -571,13 +662,12 @@ class Clip:
         return pose
 
     def _weight(self, f, f0, f1, blend):
-        if blend <= 0:
-            return 1.0
+        b_in, b_out = blend if isinstance(blend, tuple) else (blend, blend)
         w = 1.0
-        if f0 > 0 and f < f0 + blend:
-            w = min(w, (f - f0) / float(blend))
-        if f1 < self.length and f > f1 - blend:
-            w = min(w, (f1 - f) / float(blend))
+        if b_in > 0 and f0 > 0 and f < f0 + b_in:
+            w = min(w, (f - f0) / float(b_in))
+        if b_out > 0 and f1 < self.length and f > f1 - b_out:
+            w = min(w, (f1 - f) / float(b_out))
         w = max(0.0, min(1.0, w))
         return w * w * (3 - 2 * w)
 
@@ -590,7 +680,7 @@ class Clip:
 
     def _target(self, spec, f, pose, world):
         if callable(spec):
-            return Vector(spec(f))
+            return Vector(_call(spec, f, pose))
         if isinstance(spec, tuple) and len(spec) == 1 and spec[0] == "camera":
             return self.stage.camera()
         if isinstance(spec, tuple) and len(spec) == 2 and isinstance(spec[0], str):
@@ -636,7 +726,7 @@ class Clip:
             if kind in ("ground", "ground_clip", "air"):
                 self._vertical(pose, f, c)
             elif kind == "ik":
-                _, side, target, f0, f1, pole, hand, effector, blend, world = c
+                _, side, target, f0, f1, pole, hand, effector, blend, world, soft = c
                 ff = self._in_range(f, f0, f1)
                 if ff is None:
                     continue
@@ -645,9 +735,10 @@ class Clip:
                     continue
                 goal = self._target(target, f, pose, world)
                 ikp = pose.copy()
-                hand_v = hand(f) if callable(hand) else hand
-                hw = P.rot_q(hand_v) if hand_v is not None else None
-                err = P.solve_arm(ikp, side, goal, pole, hand_world=hw, effector=self._effector(side, effector))
+                hand_v = _call(hand, f, pose) if callable(hand) else hand
+                hw = hand_v if isinstance(hand_v, Quaternion) else (P.rot_q(hand_v) if hand_v is not None else None)
+                pv = Vector(_call(pole, f, pose)) if callable(pole) else pole
+                err = P.solve_arm(ikp, side, goal, pv, hand_world=hw, effector=self._effector(side, effector), soft=soft)
                 if w >= 0.99 and err > 0.01:
                     self.ik_misses[(f, side)] = round(err, 3)
                 for b in ("upperarm_" + side, "lowerarm_" + side, "hand_" + side):

@@ -14,7 +14,7 @@ extends Node3D
 const HOUSE_PATH := "res://data/house/house.json"
 const PX_PER_M := 200.0
 const LANE_Z := -1.0
-const PROP_Z := -1.75
+const PROP_Z := -1.7  # front face at -1.55: clear of the counter front (-1.6), no z-fighting
 const HIDE_Z := -2.1
 const BACK_Z := -2.4
 const ROOM_H := 3.2

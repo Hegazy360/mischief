@@ -278,6 +278,14 @@ func test_looks_toggle_attachments_bones_and_params() -> void:
 	var p := _player()
 	var stool: Node3D = p._att_nodes["stool"]
 	assert_false(stool.visible)
+	# An attachment on a socket (Hush's carry_1 / carry_2) hangs on that socket's node from setup.
+	if assert_true(p._att_nodes.has("badge"), "a socket attachment is built at setup"):
+		var badge: Node3D = p._att_nodes["badge"]
+		assert_true(badge.get_parent() == p.socket_node("brace_r"), "parented to the socket node")
+		p.advance(0.0)
+		await tree.process_frame
+		var want := p.socket_global("brace_r").origin
+		assert_true(badge.global_position.distance_to(want) < 0.03, "at the socket (%s vs %s)" % [badge.global_position, want])
 	p.set_look("RIDE", true)
 	assert_true(stool.visible)
 	p.set_look("RIDE", false)

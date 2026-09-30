@@ -1,0 +1,356 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/rx_sneeze_blast_a",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/rx_sneeze_blast_a.res",
+  "length": 165,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      74,
+      94
+    ],
+    "accent": [
+      94,
+      97
+    ],
+    "hold": [
+      97,
+      145
+    ],
+    "settle": [
+      145,
+      165
+    ],
+    "ah": [
+      0,
+      20
+    ],
+    "ahh": [
+      20,
+      44
+    ],
+    "ahhh": [
+      44,
+      74
+    ],
+    "false_stop": [
+      74,
+      94
+    ],
+    "hm": [
+      76,
+      88
+    ],
+    "choo": [
+      94,
+      97
+    ],
+    "in_the_sink": [
+      97,
+      145
+    ],
+    "dazed": [
+      145,
+      165
+    ],
+    "sits_up": [
+      154,
+      165
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "teacup"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "saucer"
+    },
+    {
+      "f": 0,
+      "type": "voice",
+      "id": "vo_bellows_sneeze_ah1"
+    },
+    {
+      "f": 4,
+      "type": "cam",
+      "op": "push",
+      "zoom": 1.15,
+      "frames": 70
+    },
+    {
+      "f": 20,
+      "type": "voice",
+      "id": "vo_bellows_sneeze_ah2"
+    },
+    {
+      "f": 44,
+      "type": "voice",
+      "id": "vo_bellows_sneeze_ah3"
+    },
+    {
+      "f": 76,
+      "type": "voice",
+      "id": "vo_bellows_sneeze_hm"
+    },
+    {
+      "f": 94,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 94,
+      "type": "hitstop",
+      "frames": 5
+    },
+    {
+      "f": 94,
+      "type": "cam",
+      "op": "punch",
+      "zoom": 1.4,
+      "in": 11,
+      "hold": 90,
+      "out": 21,
+      "yaw": 5
+    },
+    {
+      "f": 94,
+      "type": "shake",
+      "trauma": 0.55
+    },
+    {
+      "f": 94,
+      "type": "fx",
+      "id": "choo_puff"
+    },
+    {
+      "f": 94,
+      "type": "look",
+      "set": {
+        "bouffant": "flipped"
+      }
+    },
+    {
+      "f": 94,
+      "type": "prop",
+      "op": "launch",
+      "prop": "teacup",
+      "vel": [
+        -1.5,
+        3.5,
+        0.0
+      ],
+      "spin": 540
+    },
+    {
+      "f": 94,
+      "type": "prop",
+      "op": "launch",
+      "prop": "saucer",
+      "vel": [
+        0.9,
+        2.6,
+        0.6
+      ],
+      "spin": -420
+    },
+    {
+      "f": 94,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "tail_l",
+        "tail_r",
+        "belly"
+      ],
+      "kick": 0.9
+    },
+    {
+      "f": 94,
+      "type": "voice",
+      "id": "vo_bellows_sneeze_choo"
+    },
+    {
+      "f": 95,
+      "type": "decor",
+      "id": "kitchen_stool",
+      "visible": false
+    },
+    {
+      "f": 95,
+      "type": "prop",
+      "op": "show",
+      "prop": "stool"
+    },
+    {
+      "f": 95,
+      "type": "sfx",
+      "id": "stool_scrape"
+    },
+    {
+      "f": 96,
+      "type": "sfx",
+      "id": "slide_up_flight"
+    },
+    {
+      "f": 100,
+      "type": "laugh",
+      "tier": "auto"
+    },
+    {
+      "f": 112,
+      "type": "mark",
+      "name": "knock_on"
+    },
+    {
+      "f": 112,
+      "type": "shake",
+      "trauma": 0.6
+    },
+    {
+      "f": 112,
+      "type": "fx",
+      "id": "drops"
+    },
+    {
+      "f": 112,
+      "type": "jiggle",
+      "bones": [
+        "belly",
+        "tail_l",
+        "tail_r"
+      ],
+      "kick": 0.7
+    },
+    {
+      "f": 112,
+      "type": "sfx",
+      "id": "sink_crash"
+    },
+    {
+      "f": 128,
+      "type": "prop",
+      "op": "hide",
+      "prop": "stool"
+    },
+    {
+      "f": 154,
+      "type": "sfx",
+      "id": "ladle_spin"
+    },
+    {
+      "f": 158,
+      "type": "decor",
+      "id": "kitchen_stool",
+      "visible": true
+    },
+    {
+      "f": 165,
+      "type": "mark",
+      "name": "release"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sip"
+    },
+    {
+      "f": 8,
+      "preset": "sneeze_build"
+    },
+    {
+      "f": 40,
+      "preset": "sneeze_build2"
+    },
+    {
+      "f": 64,
+      "preset": "sneeze_build3"
+    },
+    {
+      "f": 82,
+      "preset": "relief"
+    },
+    {
+      "f": 88,
+      "preset": "smug"
+    },
+    {
+      "f": 93,
+      "preset": "sneeze_gasp"
+    },
+    {
+      "f": 94,
+      "preset": "sneeze_choo"
+    },
+    {
+      "f": 97,
+      "preset": "wild_take"
+    },
+    {
+      "f": 112,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 146,
+      "preset": "dazed"
+    },
+    {
+      "f": 151,
+      "preset": "dazed_open"
+    },
+    {
+      "f": 158,
+      "preset": "dazed"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/rx_sneeze_blast_a.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      94,
+      95,
+      112
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "reaction",
+    "take",
+    "sneeze"
+  ]
+}

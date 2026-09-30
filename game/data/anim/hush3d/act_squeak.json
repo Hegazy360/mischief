@@ -1,0 +1,79 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_squeak",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_squeak.res",
+  "length": 18,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 3,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 4,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "grip_r"
+    },
+    {
+      "f": 8,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 15,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "brace_r"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "determined"
+    },
+    {
+      "f": 4,
+      "preset": "grin"
+    },
+    {
+      "f": 8,
+      "preset": "laugh"
+    },
+    {
+      "f": 13,
+      "preset": "smug"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_squeak.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      4,
+      8
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

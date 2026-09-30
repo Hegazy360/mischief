@@ -1,0 +1,2 @@
+# r3d-anim-bellows-b — LANDED
+2026-09-30T19:21Z START (queue launch, priority 6). Time box 10 h (R19: cut line at 7.5 h active). List: FINAL bit_warmup, bit_tea, st_head_turn, st_double_take, st_specs_on; then st_suspicious, st_look, st_look_back, st_smirk, st_straighten_cravat, mg_hum, mg_trill, mg_conduct_air, mg_admire_reflection_horn, mg_pinkie_up, mg_admire_in_kettle, mg_comb_flourish, mg_cravat_tug, mg_walk_hum, mg_walk_scale.

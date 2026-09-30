@@ -17,7 +17,7 @@
   },
   "rooms": {
     "kitchen": {"wall": "#C5B187", "wainscot": "#A5926C", "wainscot_h_m": 0.9, "rail": "#9D8C6F", "rail_h_m": 2.2,
-                "floor": ["#8A6C54", "#83644D"], "arch": "res://art3d/set/kitchen_arch.glb",
+                "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/kitchen_arch.glb",
                 "palette": "res://art3d/set/palette_kitchen.png",
                 "built_ins": {
                   "kitchen_dresser_base": {"box": [14.12, 0.0, -2.05, 14.6, 0.75, -1.65], "color": "#A99570"},
@@ -28,7 +28,7 @@
                                         "basin": [18.45, 0.4, -2.3, 19.05, 0.75, -1.92]}
                 }},
     "parlour": {"wall": "#C9A6A2", "wainscot": "#A48783", "wainscot_h_m": 0.9, "rail": "#9D8380", "rail_h_m": 2.2,
-                "floor": ["#8A6C54", "#83644D"], "arch": "res://art3d/set/parlour_arch.glb",
+                "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/parlour_arch.glb",
                 "palette": "res://art3d/set/palette_parlour.png",
                 "built_ins": {
                   "parlour_fireplace": {"box": [10.95, 0.0, -2.4, 12.35, 1.4, -2.05], "color": "#B9A5A0",
@@ -36,7 +36,7 @@
                   "parlour_mantel": {"box": [10.9, 1.4, -2.4, 12.4, 1.46, -2.0], "color": "#9D8380"}
                 }},
     "hall": {"wall": "#A5B298", "wainscot": "#86917A", "wainscot_h_m": 0.9, "rail": "#838C78", "rail_h_m": 2.2,
-             "floor": ["#8A6C54", "#83644D"], "arch": "res://art3d/set/hall_arch.glb",
+             "floor": ["#966A4A", "#8E6344"], "arch": "res://art3d/set/hall_arch.glb",
              "palette": "res://art3d/set/palette_hall.png",
              "built_ins": {
                "hall_stairs": {"box": [6.95, 0.0, -2.4, 7.36, 0.54, -1.86], "color": "#838C78", "steps": 3},
@@ -80,8 +80,8 @@
     "kitchen_pickle_jar": {
       "model": "res://art3d/props/pickle_jar.glb", "primitive": "tall_jar", "z": -1.75, "yaw": 0, "scale": 1.5,
       "visual_offset": [0.25, -0.35], "hit_box": null,
-      "bounds": [-0.075, 0.0, -0.075, 0.1, 0.23, 0.075],
-      "reach": "high", "reach_target": [0.0, 0.215, 0.05],
+      "bounds": [-0.08, 0.0, -0.08, 0.1, 0.23, 0.08],
+      "reach": "high", "reach_target": [0.0, 0.21, 0.05],
       "reach_pos": {"dx": 0.25, "z": -1.45, "step": null, "step_h": 0.0},
       "silhouette": "tall_jar", "view_kind": "rig", "color": "#5FAE5B",
       "states": ["idle", "armed", "spent"], "anims": {"rig": "rig", "armed": "spanner_swing", "trigger": "lid_pop"},
@@ -102,26 +102,26 @@
       "why_offset": "on the sink unit counter (0.75 m) right of the basin, arching over it; the basin stays at the sneeze landing x 18.80", "hit_z_half": 0.12},
     "kitchen_fridge_shelf": {
       "model": "res://art3d/props/fridge.glb", "primitive": "tall_rounded_box", "merge": "fridge", "zone": "upper", "z": -2.13, "yaw": 0, "scale": 1.0,
-      "visual_offset": [0.0, -1.47], "hit_box": [16.04, 1.3, 16.76, 2.37],
-      "bounds": [-0.35, 0.0, -0.27, 0.35, 1.95, 0.37], "zone_bounds": [-0.35, 1.3, -0.27, 0.35, 1.95, 0.37],
-      "collide": [[-0.35, 0.0, -0.27, 0.35, 1.95, 0.27]],
-      "reach": "mid", "reach_target": [0.2, 1.36, 0.25],
+      "visual_offset": [0.0, -1.47], "hit_box": [16.0, 0.86, 16.8, 1.62],
+      "bounds": [-0.38, 0.0, -0.27, 0.38, 1.52, 0.37], "zone_bounds": [-0.38, 0.86, -0.27, 0.38, 1.52, 0.37],
+      "collide": [[-0.38, 0.0, -0.27, 0.38, 1.52, 0.27]],
+      "reach": "mid", "reach_target": [0.2, 0.95, 0.25],
       "reach_pos": {"dx": 0.2, "z": -1.55, "step": null, "step_h": 0.0},
       "silhouette": "tall_rounded_box", "view_kind": "rig", "color": "#9CC7C2",
       "states": ["idle", "armed", "spent"], "anims": {"rig": "rig", "armed": "door_strain", "trigger": "avalanche"},
-      "parts": ["sausage"], "tag_socket": [0.3, 1.5, 0.27], "preview_anchor": [0.0, 2.55, 0.0],
-      "ring_anchor": [0.0, 1.6, 0.1], "item_anchor": null, "eyes_anchor": null, "halo": "fresnel", "stack": "kitchen_fridge",
-      "why_offset": "one merged fridge model for both hotspots (REDESIGN §3.4); explicit zone hit boxes keep >= 24 px between the shelf and the door"
+      "parts": ["sausage"], "tag_socket": [0.3, 1.2, 0.27], "preview_anchor": [0.0, 2.07, 0.0],
+      "ring_anchor": [0.0, 1.1, 0.1], "item_anchor": null, "eyes_anchor": null, "halo": "fresnel", "stack": "kitchen_fridge",
+      "why_offset": "one merged SQUAT fridge for both hotspots (REDESIGN 3.4), down on the floor from the rect (y -1.47); 1.52 m tall so its 64 px silhouette is not the pantry alcove or the wardrobe (IoU < 0.8); explicit zone hit boxes keep a 0.10 m gap between the upper door and the lower"
     },
     "kitchen_fridge": {
       "model": "res://art3d/props/fridge.glb", "primitive": "tall_rounded_box", "merge": "fridge", "zone": "lower", "z": -2.13, "yaw": 0, "scale": 1.0,
-      "visual_offset": [0.0, 0.1], "hit_box": [16.04, 0.0, 16.76, 1.18],
-      "bounds": [-0.35, 0.0, -0.27, 0.35, 1.95, 0.37], "zone_bounds": [-0.35, 0.0, -0.27, 0.35, 1.18, 0.37],
-      "collide": [[-0.35, 0.0, -0.27, 0.35, 1.95, 0.27]],
+      "visual_offset": [0.0, 0.1], "hit_box": [16.0, 0.0, 16.8, 0.76],
+      "bounds": [-0.38, 0.0, -0.27, 0.38, 1.52, 0.37], "zone_bounds": [-0.38, 0.0, -0.27, 0.38, 0.76, 0.37],
+      "collide": [[-0.38, 0.0, -0.27, 0.38, 1.52, 0.27]],
       "silhouette": "tall_rounded_box", "view_kind": "take", "color": "#9CC7C2",
       "states": ["idle", "spent"], "anims": {"open": "door_open"},
       "parts": [], "tag_socket": null, "preview_anchor": null,
-      "ring_anchor": [0.0, 0.6, 0.1], "item_anchor": [0.0, 1.05, 0.35], "eyes_anchor": null, "halo": "fresnel", "stack": "kitchen_fridge_shelf", "why_offset": "on the floor (house.json rects sit 0.10 m below the floor line); the one fridge model shared with kitchen_fridge_shelf"},
+      "ring_anchor": [0.0, 0.45, 0.1], "item_anchor": [0.0, 0.62, 0.35], "eyes_anchor": null, "halo": "fresnel", "stack": "kitchen_fridge_shelf", "why_offset": "on the floor (house.json rects sit 0.10 m below the floor line); the one SQUAT retro fridge (1.52 m, domed, on legs) shared with kitchen_fridge_shelf: the lower door zone"},
     "kitchen_pantry_curtain": {
       "model": "res://art3d/props/pantry.glb", "primitive": "arched_alcove", "z": -2.15, "yaw": 0, "scale": 1.0,
       "visual_offset": [0.0, 0.1], "hit_box": [17.66, 0.0, 18.54, 2.45],
@@ -148,14 +148,14 @@
     },
     "parlour_piano_back": {
       "model": "res://art3d/props/piano.glb", "primitive": "upright_block", "z": -1.86, "yaw": 0, "scale": 1.0,
-      "visual_offset": [0.26, -0.87], "hit_box": [9.05, 0.0, 9.85, 1.3],
+      "visual_offset": [0.31, -0.87], "hit_box": [9.1, 0.0, 9.9, 1.3],
       "bounds": [-0.38, 0.0, -0.54, 0.38, 1.2, 0.34],
       "collide": [[-0.38, 0.0, -0.24, 0.38, 1.2, 0.34]],
       "silhouette": "upright_block", "view_kind": "hide", "color": "#2B2530",
       "states": ["idle"], "anims": {"close": "close", "wobble": "wobble", "breathe": "breathe", "burst": "burst"},
       "parts": [], "tag_socket": null, "preview_anchor": [0.0, 1.8, 0.0],
       "ring_anchor": [0.0, 0.6, 0.1], "item_anchor": null, "eyes_anchor": [0.2, 1.12, -0.4], "halo": "fresnel", "stack": "parlour_piano_wedge",
-      "why_offset": "0.26 m right so Bellows barrel at st_gramophone clears the piano and its hit box keeps >= 24 logical px from the recliner; Hush hides in the 0.30 m gap behind it and peeks over the top", "hit_z_half": 0.12},
+      "why_offset": "0.31 m right so Bellows barrel at st_gramophone (8.65) clears the piano; Hush hides in the 0.30 m gap behind it and peeks over the top; the hit box 0.12 m deep keeps >= 24 logical px from the recliner", "hit_z_half": 0.12},
     "parlour_piano_wedge": {"part_of": "parlour_piano_back", "view_kind": "rig", "silhouette": "upright_block"},
     "parlour_recliner": {
       "model": "res://art3d/props/recliner.glb", "primitive": "fat_armchair", "z": -1.95, "yaw": 0, "scale": 1.0,
@@ -201,21 +201,21 @@
     },
     "hall_coat_cupboard": {
       "model": "res://art3d/props/wardrobe.glb", "primitive": "tall_wardrobe", "z": -2.12, "yaw": 0, "scale": 1.0,
-      "visual_offset": [0.05, 0.1], "hit_box": null,
-      "bounds": [-0.36, 0.0, -0.26, 0.36, 2.05, 0.26],
+      "visual_offset": [0.04, 0.1], "hit_box": null,
+      "bounds": [-0.36, 0.0, -0.27, 0.36, 2.2, 0.27],
       "silhouette": "tall_wardrobe", "view_kind": "hide", "color": "#3F6FB0",
       "states": ["idle"], "anims": {"close": "close", "wobble": "wobble", "breathe": "breathe", "burst": "burst"},
-      "parts": [], "tag_socket": null, "preview_anchor": [0.0, 2.65, 0.0],
+      "parts": [], "tag_socket": null, "preview_anchor": [0.0, 2.8, 0.0],
       "ring_anchor": [0.0, 1.0, 0.2], "item_anchor": null, "eyes_anchor": [0.04, 1.4, 0.25], "halo": "fresnel", "stack": null,
-      "why_offset": "on the floor (+0.10 floor line); 0.05 m right so its hit box keeps >= 24 logical px from the front door and the CONFISCATED crate (hit boxes 0.12 m deep so the off-centre parallax stays small)", "hit_z_half": 0.12},
+      "why_offset": "on the floor (+0.10 floor line); 0.04 m right so its hit box keeps >= 24 logical px from the front door and the CONFISCATED crate (hit boxes 0.12 m deep so the off-centre parallax stays small)", "hit_z_half": 0.12},
     "hall_confiscated_box": {
-      "model": "res://art3d/props/crate.glb", "primitive": "banded_crate", "z": -2.105, "yaw": 0, "scale": 1.5,
-      "visual_offset": [0.07, 0.1], "hit_box": [3.6, 0.0, 4.3, 1.18],
+      "model": "res://art3d/props/crate.glb", "primitive": "banded_crate", "z": -2.105, "yaw": 0, "scale": 1.4,
+      "visual_offset": [0.07, 0.1], "hit_box": [3.62, 0.0, 4.3, 1.18],
       "bounds": [-0.23, 0.0, -0.17, 0.23, 0.41, 0.17],
       "silhouette": "banded_crate", "view_kind": "take", "color": "#C9A46A",
       "states": ["idle", "spent"], "anims": {"open": "lid_up"},
       "parts": [], "tag_socket": null, "preview_anchor": null,
-      "ring_anchor": [0.0, 0.2, 0.0], "item_anchor": [0.0, 0.62, 0.0], "eyes_anchor": null, "halo": "fresnel", "stack": null, "why_offset": "on the floor (+0.10 floor line); 0.07 m right so its hit box keeps >= 24 px from the coat cupboard's", "hit_z_half": 0.12},
+      "ring_anchor": [0.0, 0.2, 0.0], "item_anchor": [0.0, 0.62, 0.0], "eyes_anchor": null, "halo": "fresnel", "stack": null, "why_offset": "on the floor (+0.10 floor line); x1.4 (not 1.5) and 0.07 m right so its hit box keeps >= 24 logical px from the coat cupboard and its lid clears the coat stand base", "hit_z_half": 0.12},
     "hall_phone": {
       "model": "res://art3d/props/phone.glb", "primitive": "candlestick_phone", "z": -2.05, "yaw": 15, "scale": 1.5,
       "visual_offset": [0.17, -0.1], "hit_box": [4.5, 0.85, 5.18, 1.7],

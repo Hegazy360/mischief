@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "doc": "Thresholds of the 3D animation lint (game/tools/anim/lint3d_rules.gd; TECH §10.5 in 3D, GDD §9.3). Angles in degrees per frame of a bone's LOCAL rotation, distances in metres, frames at 60 fps.",
+  "doc": "Thresholds of the 3D animation lint (game/tools/anim/lint3d_rules.gd; TECH \u00a710.5 in 3D, GDD \u00a79.3). Angles in degrees per frame of a bone's LOCAL rotation, distances in metres, frames at 60 fps.",
   "seam_deg": 0.5,
   "seam_vel_deg": 1.0,
   "accent_max_f": 4,
@@ -28,11 +28,38 @@
   "cheat_max_deg": 40.0,
   "cheat_rig_max_deg": 10.0,
   "root_travel_m": 0.15,
-  "rig_tiers_f": {"q": 48, "s": 90, "b": 150},
+  "rig_tiers_f": {
+    "q": 48,
+    "s": 90,
+    "b": 150
+  },
   "band_min_f": 48,
   "step_end_m": 0.01,
   "overlay_min_blend_f": 4,
   "res_max_bytes": 256000,
-  "mark_names": ["accent", "release", "knock_on", "contact"],
-  "twin_pairs": [["upperarm_l", "upperarm_r"], ["lowerarm_l", "lowerarm_r"], ["thigh_l", "thigh_r"], ["calf_l", "calf_r"]]
+  "mark_names": [
+    "accent",
+    "release",
+    "knock_on",
+    "contact"
+  ],
+  "twin_pairs": [
+    [
+      "upperarm_l",
+      "upperarm_r"
+    ],
+    [
+      "lowerarm_l",
+      "lowerarm_r"
+    ],
+    [
+      "thigh_l",
+      "thigh_r"
+    ],
+    [
+      "calf_l",
+      "calf_r"
+    ]
+  ],
+  "plant_min_f": 3
 }

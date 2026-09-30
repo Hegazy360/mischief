@@ -28,7 +28,7 @@
       "door_lower",
       "armed"
     ],
-    "tris": 892
+    "tris": 1744
   },
   "props/gramophone.glb": {
     "parts": [
@@ -98,7 +98,7 @@
       "lid",
       "armed"
     ],
-    "tris": 684
+    "tris": 860
   },
   "props/recliner.glb": {
     "parts": [
@@ -122,7 +122,7 @@
       "body",
       "door"
     ],
-    "tris": 616
+    "tris": 914
   },
   "set/coat_stand.glb": {
     "parts": [],

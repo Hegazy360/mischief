@@ -15,12 +15,15 @@ def build(ctx):
     stand = merge(ARMS_DOWN, STAND, gloves(20, 14), head(x=-3))
     hunch = merge(STAND, CHIN, gloves(62, 40), {"clavicle_l": [("y", -18)], "clavicle_r": [("y", 18)]})
     c.key(0, stand)
-    c.key(3, merge(stand, {"clavicle_l": [("y", -10)], "clavicle_r": [("y", 10)]}, lean(fwd=-4), head(x=-10)), "out_quad")
-    c.key(7, merge(hunch, lean(fwd=16, turn=-6), head(x=16, z=-8)), "out_back")              # gloves to the chin
-    c.key(20, merge(hunch, lean(fwd=12, side=4, turn=-4), head(x=10, y=8, z=6)))
-    c.key(26, merge(hunch, lean(fwd=10, side=6, turn=4), head(x=4, y=10, z=10)), "in_out_sine")   # the sly look
-    c.key(36, merge(hunch, lean(fwd=10, side=6, turn=4), head(x=6, y=10, z=10)))
-    c.key(40, merge(hunch, lean(fwd=22, turn=-8), head(x=22, z=-6)), "out_quad")            # the snort
+    c.key(2, merge(stand, {"clavicle_l": [("y", -10)], "clavicle_r": [("y", 10)]}, lean(fwd=-4), head(x=-10)), "out_quad")
+    half = sym({"clavicle_l": [("y", -6)], "upperarm_l": [("y", 54), ("z", -48)], "lowerarm_l": [("y", -54), ("z", -12)],
+                "hand_l": [("x", -18), ("z", -10)]})
+    c.key(5, merge(stand, half, gloves(40, 24), lean(fwd=6), head(x=4)), "in_out_sine")
+    c.key(8, merge(hunch, lean(fwd=16, turn=-6), head(x=5, z=-4)), "out_sine")              # gloves to the chin
+    c.key(20, merge(hunch, lean(fwd=12, side=4, turn=-4), head(x=2, y=8, z=4)))
+    c.key(26, merge(hunch, lean(fwd=8, side=6, turn=4), head(x=-6, y=10, z=6)), "in_out_sine")   # the sly look
+    c.key(36, merge(hunch, lean(fwd=8, side=6, turn=4), head(x=-4, y=10, z=6)))
+    c.key(40, merge(hunch, lean(fwd=20, turn=-8), head(x=12, z=-4)), "out_quad")            # the snort
     c.key(48, merge(stand, lean(fwd=2), head(x=-4)), "in_out_cubic")                        # composure
     c.key(L, stand)
     # the giggle: shoulders and head shake in bursts (8 Hz), fading out by the snort
@@ -42,5 +45,5 @@ def build(ctx):
     c.face(24, "glance")
     c.face(38, "snicker")
     c.face(46, "smug")
-    c.mark(7, "accent")
+    c.mark(8, "accent")
     return c

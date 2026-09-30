@@ -20,6 +20,9 @@ var process_ms_max: float = 0.0
 var _proc := PackedFloat32Array()
 ## The scripts' time per PLAY frame (NightScene's _FrameStart → _FrameEnd: every node's _process, sim included), ms.
 var _script := PackedFloat32Array()
+## Its sim part (the SimDriver's _process: ticks + their `ticked` handlers) and the rest (view + HUD), ms.
+var _sim := PackedFloat32Array()
+var _view := PackedFloat32Array()
 var _sn: int = 0
 
 
@@ -28,11 +31,16 @@ func _init() -> void:
 	_dc.resize(CAP)
 	_proc.resize(CAP)
 	_script.resize(CAP)
+	_sim.resize(CAP)
+	_view.resize(CAP)
 
 
-## One PLAY frame's script time (ms).
-func add_script_ms(ms: float) -> void:
-	_script[_sn % CAP] = ms
+## One PLAY frame's script time (ms) and its sim part (ms; the rest is the view + HUD).
+func add_script_ms(ms: float, sim_ms: float = 0.0) -> void:
+	var i := _sn % CAP
+	_script[i] = ms
+	_sim[i] = clampf(sim_ms, 0.0, ms)
+	_view[i] = ms - _sim[i]
 	_sn += 1
 
 
@@ -98,7 +106,8 @@ static func pct(a: PackedFloat32Array, n: int, p: float) -> float:
 
 
 ## {frames, frame_ms_p50/p95/max, draw_calls_p95, draw_calls_max, tris_max, objects_max, emitters_max, tex_mb_max,
-## vmem_mb_max, process_ms_p95, shader_compiles_play, hitches, hitch_max_ms, compile_method}.
+## vmem_mb_max, process_ms_p95, script_ms_p50/p95, sim_ms_p95, view_ms_p50/p95 (view + HUD: the §6.3 4 ms row),
+## shader_compiles_play, hitches, hitch_max_ms, compile_method}.
 func summary(watch: ShaderWatch = null) -> Dictionary:
 	var n := mini(_n, CAP)
 	var out := {"frames": frames, "frame_ms_p50": snappedf(frame_ms(0.5), 0.1), "frame_ms_p95": snappedf(frame_ms(0.95), 0.1),
@@ -106,7 +115,10 @@ func summary(watch: ShaderWatch = null) -> Dictionary:
 		"tris_max": tris_max, "objects_max": objects_max, "emitters_max": emitters_max,
 		"tex_mb_max": snappedf(tex_mb_max, 0.1), "vmem_mb_max": snappedf(vmem_mb_max, 0.1),
 		"process_ms_p95": snappedf(Perf3D.pct(_proc, n, 0.95), 0.01), "script_ms_p95": snappedf(Perf3D.pct(_script, mini(_sn, CAP), 0.95), 0.01) if _sn > 0 else snappedf(Perf3D.pct(_proc, n, 0.95), 0.01),
-		"script_ms_p50": snappedf(Perf3D.pct(_script, mini(_sn, CAP), 0.5), 0.01)}
+		"script_ms_p50": snappedf(Perf3D.pct(_script, mini(_sn, CAP), 0.5), 0.01),
+		"sim_ms_p95": snappedf(Perf3D.pct(_sim, mini(_sn, CAP), 0.95), 0.01),
+		"view_ms_p95": snappedf(Perf3D.pct(_view, mini(_sn, CAP), 0.95), 0.01),
+		"view_ms_p50": snappedf(Perf3D.pct(_view, mini(_sn, CAP), 0.5), 0.01)}
 	if watch != null:
 		out["shader_compiles_play"] = watch.compiles_play()
 		out["hitches"] = watch.hitches.size()

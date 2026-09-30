@@ -24,6 +24,7 @@ var hash_tick: int = -1
 var hash_at_tick: int = 0
 
 var _t: float = 0.0
+var _proc_frame: int = -1
 var _frame: int = 0
 var _rise_t: float = -1.0
 var _rise_frame: int = -1
@@ -92,6 +93,7 @@ func attach(n: Node) -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	_frame += 1
+	_proc_frame = Engine.get_process_frames()
 	if night == null or not is_instance_valid(night):
 		return
 	_read_sounds()
@@ -206,19 +208,26 @@ func _on_ticked(events: Array) -> void:
 		if e == "director_cue" and String(d.get("id", "")).begins_with("laugh_"):
 			var cid := String(d.get("id", ""))
 			var st := -1.0
-			if _staged_early.has(cid) and absf(float(_staged_early[cid]) - _t) < 0.0005:
+			if _staged_early.has(cid) and absf(float(_staged_early[cid]) - _now_t()) < 0.0005:
 				st = float(_staged_early[cid])
 			_staged_early.erase(cid)
-			_cues.append({"id": cid, "tick": tk, "t": _t, "staged_t": st, "crowd_t": -1.0})
+			_cues.append({"id": cid, "tick": tk, "t": _now_t(), "staged_t": st, "crowd_t": -1.0})
 
 
 func _on_cue_staged(id: String, _kind: String) -> void:
 	for c in _cues:
 		if String(c["id"]) == id and float(c["staged_t"]) < 0.0:
-			c["staged_t"] = _t
+			c["staged_t"] = _now_t()
 			return
 	# Staged in this tick before the probe recorded the cue (see _staged_early).
-	_staged_early[id] = _t
+	_staged_early[id] = _now_t()
+
+
+## The probe clock at this moment of the frame: the sim's `ticked` (SimDriver, priority −100) and the stager fire
+## before this node's `_process` adds the frame's delta, so `_t` still holds the previous frame's time there — a cue
+## stamped with it read one whole frame early (a 0.16 s crowd delay on a 160 ms frame read as 0.32 s).
+func _now_t() -> float:
+	return _t + get_process_delta_time() if Engine.get_process_frames() != _proc_frame else _t
 
 
 func _read_sounds() -> void:

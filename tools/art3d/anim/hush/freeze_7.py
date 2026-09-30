@@ -6,8 +6,8 @@ from lib.hush_presets import glove, gloves, lean, head
 
 from freeze_5 import statue
 
-POSE = merge({"clavicle_r": [("y", -18)], "upperarm_r": [("y", -84), ("z", 6)], "lowerarm_r": [("z", 100)],
-              "hand_r": [("x", 70)]},                                                             # the lamp head
+POSE = merge({"clavicle_r": [("y", 26)], "upperarm_r": [("y", 88), ("z", 4)], "lowerarm_r": [("z", 62)],
+              "hand_r": [("x", 70)]},                                                             # the arm up, the lamp head
              {"upperarm_l": [("y", 84), ("z", 2)], "lowerarm_l": [("z", -4)], "hand_l": [("x", 4)]},   # clamped to her side
              glove("r", 12, 6), glove("l", 2, 2), lean(fwd=-2), head(x=-2, y=-6),
              {"thigh_l": [("x", 0), ("z", -2)], "calf_l": [("x", 0)], "foot_l": [("x", 0), ("z", -8)],

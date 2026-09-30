@@ -22,15 +22,19 @@ def build(ctx):
     c = Clip(ctx, "hush/act_dive", length=L, cheat_deg=20, audio="table", blend_in=2, blend_out=6)
     stand = merge(ARMS_DOWN, STAND, gloves(16, 10), head())
     c.key(0, merge(stand, CROUCH, ARMS_BACK, lean(fwd=26), head(x=-20)))                      # coiled
-    c.key(2, merge(stand, CROUCH, ARMS_BACK, lean(fwd=30), head(x=-24)), "in_quad")
-    c.key(5, merge(stand, FLAT, ARMS_FWD, gloves(4, 4, spread=10), lean(fwd=6), head(x=-40)), "out_quad")   # launch
-    c.key(9, merge(stand, FLAT, ARMS_FWD, gloves(4, 4, spread=10), lean(fwd=10), head(x=-36)))           # flying
-    c.key(13, merge(stand, BALL, ARMS_HUG, gloves(60, 30), lean(fwd=40), head(x=30)), "in_out_quad")    # tuck in
+    PUSH = {"pelvis": [("x", 30)], "thigh_l": [("x", -20)], "calf_l": [("x", 30)], "foot_l": [("x", 30)],
+            "thigh_r": [("x", -8)], "calf_r": [("x", 20)], "foot_r": [("x", 36)]}
+    ARMS_UP = sym({"clavicle_l": [("y", -10)], "upperarm_l": [("y", -20), ("z", -40)], "lowerarm_l": [("z", -10)]})
+    c.key(3, merge(stand, PUSH, ARMS_UP, gloves(8, 6), lean(fwd=16), head(x=-30)), "in_out_quad")       # the push
+    c.key(6, merge(stand, FLAT, ARMS_FWD, gloves(4, 4, spread=10), lean(fwd=6), head(x=-40)), "out_quad")   # flat out
+    c.key(10, merge(stand, FLAT, ARMS_FWD, gloves(4, 4, spread=10), lean(fwd=10), head(x=-36)))          # flying
+    c.key(13, merge(stand, BALL, ARMS_HUG, gloves(60, 30), lean(fwd=40), head(x=30)), "linear")         # tuck in
     c.key(L, merge(stand, BALL, ARMS_HUG, gloves(60, 30), lean(fwd=44), head(x=34)))
-    c.ground(0, 3)
-    c.jump(3, 14, arc=0.45)
+    c.ground(0, 2)
+    c.jump(2, 14, arc=0.45)
     c.ground(14, L)
     c.auto_plant(speed_m_s=0.0)
+    c.pop_frames.extend([2, 3, 4])                         # the launch: arms and legs fling (a smear)
     c.face(0, "determined")
     c.face(4, "frantic")
     c.face(12, "hold_breath")

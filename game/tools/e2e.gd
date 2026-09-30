@@ -299,10 +299,10 @@ func _print_summary() -> void:
 		print("%s fallbacks %s" % [E2E_TAG, JSON.stringify(report["fallbacks"])])
 	if report.has("perf3d"):
 		var p3: Dictionary = report["perf3d"]
-		print("%s perf3d view=%s frame_ms p50 %s p95 %s | draw p95 %s max %s | tris %s | emitters %s | tex %s MB | shader_compiles_play %s | hitches %s | script p95 %s ms" % [
+		print("%s perf3d view=%s frame_ms p50 %s p95 %s | draw p95 %s max %s | tris %s | emitters %s | tex %s MB | shader_compiles_play %s | hitches %s | script p95 %s ms (view + HUD %s, sim %s)" % [
 			E2E_TAG, report.get("view", "?"), report.get("frame_ms_p50"), report.get("frame_ms_p95"), p3.get("draw_calls_p95"),
 			p3.get("draw_calls_max"), p3.get("tris_max"), p3.get("emitters_max"), p3.get("tex_mb_max"),
-			p3.get("shader_compiles_play"), p3.get("hitches"), p3.get("script_ms_p95")])
+			p3.get("shader_compiles_play"), p3.get("hitches"), p3.get("script_ms_p95"), p3.get("view_ms_p95"), p3.get("sim_ms_p95")])
 	if report.has("pip_on_share"):
 		print("%s window pip_on_share %.3f pip_longest_s %.1f windows %d | overlays max %s loud %s | hud samples %d" % [E2E_TAG,
 			float(report["pip_on_share"]), float(report.get("pip_longest_s", 0.0)), (report.get("pip_windows", []) as Array).size(),

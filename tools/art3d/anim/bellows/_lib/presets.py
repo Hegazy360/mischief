@@ -102,11 +102,15 @@ LEGS_UP = {"thigh_l": [("x", -140), ("y", -18)], "calf_l": [("x", 18)], "foot_l"
            "thigh_r": [("x", -128), ("y", 18)], "calf_r": [("x", 26)], "foot_r": [("x", -24)]}
 
 
-def dangle(f, period=48.0, amp=7.0, phase=0.0):
-    """The seated feet swinging a little (motion layer): the left and right out of phase."""
+def dangle(f, period=48.0, amp=7.0, phase=0.0, feet=True):
+    """The seated feet swinging a little (motion layer): the left and right out of phase (feet=False: calves only,
+    fewer animated tracks for long loops — the .res size budget)."""
     a = 2 * math.pi * (f / period + phase)
-    return {"calf_l": [("x", amp * math.sin(a))], "calf_r": [("x", amp * math.sin(a + 2.1))],
-            "foot_l": [("x", 0.5 * amp * math.sin(a + 0.8))], "foot_r": [("x", 0.5 * amp * math.sin(a + 2.9))]}
+    out = {"calf_l": [("x", amp * math.sin(a))], "calf_r": [("x", amp * math.sin(a + 2.1))]}
+    if feet:
+        out["foot_l"] = [("x", 0.5 * amp * math.sin(a + 0.8))]
+        out["foot_r"] = [("x", 0.5 * amp * math.sin(a + 2.9))]
+    return out
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -259,6 +263,16 @@ def place_bone(pose, bone, M):
     pose.update_from(bone)
 
 
+def blend_place(pose, bone, M, w=1.0):
+    """place_bone(), blended with the bone's keyed placement by w (0..1)."""
+    loc0, rot0, sc0 = pose.get(bone)
+    place_bone(pose, bone, M)
+    if w < 1.0:
+        loc1, rot1, _ = pose.get(bone)
+        pose.basis[bone] = (loc0.lerp(loc1, w), P.qslerp(rot0, rot1, w), sc0)
+        pose.update_from(bone)
+
+
 def rigid(sk, bone, R, anchor_rest, anchor_to):
     """The armature matrix of `bone` rotated by R (a Quaternion about armature axes) about the rest point
     `anchor_rest`, then moved so that point lands on `anchor_to`."""
@@ -343,6 +357,12 @@ class TeaSet:
         b, p = self.mouth
         return pose.skel.carried(pose.world, b, p)
 
+    def palm_rest(self, side):
+        """The palm-centre rest point of a glove (an IK effector riding the hand)."""
+        sk = self.sk
+        hd, mid = "hand_" + side, "middle_01_" + side
+        return sk.head(hd) + (sk.head(mid) - sk.head(hd)).normalized() * 0.09
+
     def palm(self, pose, side):
         """The palm centre of a glove in `pose` (the IK 'palm' effector: 0.09 m past the wrist toward the fingers)."""
         sk = pose.skel
@@ -358,17 +378,24 @@ class TeaSet:
     def place_saucer(self, pose, centre, R=Quaternion()):
         place_bone(pose, "prop_saucer", rigid(self.sk, "prop_saucer", R, self.saucer_c, centre))
 
-    def place_spoon(self, pose, grip_at, direction):
-        """The spoon's handle end in the glove at `grip_at`, its bowl pointing along `direction`."""
+    def place_spoon(self, pose, grip_at, direction, w=1.0):
+        """The spoon's handle end in the glove at `grip_at`, its bowl pointing along `direction` (w < 1 blends from
+        its keyed placement: ease it in before it is shown)."""
         rest_dir = (self.spoon_bowl - self.spoon_grip).normalized()
         R = rest_dir.rotation_difference(Vector(direction).normalized())
-        place_bone(pose, "prop_spoon", rigid(self.sk, "prop_spoon", R, self.spoon_grip, grip_at))
+        blend_place(pose, "prop_spoon", rigid(self.sk, "prop_spoon", R, self.spoon_grip, grip_at), w)
 
 
-def place_prop(pose, sk, bone, R, base_at):
+def place_prop(pose, sk, bone, R, base_at, w=1.0):
     """A lent set piece rides `bone` (prop_r / prop_l) with its base on the bone's head and its up axis = the bone's
-    (rest: armature +z; model -x = his right). Put the piece's base at `base_at`, rotated R from upright."""
+    (rest: armature +z; model -x = his right). Put the piece's base at `base_at`, rotated R from upright; `w` < 1
+    blends from the bone's keyed (rest) placement — ease it in over the lend's slide frames (no > 45 deg/f pop)."""
+    loc0, rot0, sc0 = pose.get(bone)
     place_bone(pose, bone, rigid(sk, bone, R, sk.head(bone), base_at))
+    if w < 1.0:
+        loc1, rot1, _ = pose.get(bone)
+        pose.basis[bone] = (loc0.lerp(loc1, w), P.qslerp(rot0, rot1, w), sc0)
+        pose.update_from(bone)
 
 
 def qx(d):
@@ -394,12 +421,12 @@ JAR_L = qz(-90) @ qx(180)              # palm UP under the jar, fingers forward 
 # THE SIP — act_tea's trigger-frame pose (f 420 = ACHOO-RIA!'s mark_s 7.0) and rx_sneeze_blast_a's frame 0: both clips
 # build it from here, so the switch into the sneeze never pops.
 # ------------------------------------------------------------------------------------------------------------------
-SIP_BODY = merge(SIT, lean(fwd=-4, turn=4), head(x=-12, z=10), pinkie_up("r"), glove("l", 10, 6),
+SIP_BODY = merge(SIT, lean(fwd=-4, turn=4), head(x=-12, z=10), pinkie_up("r"), glove("l", 16, 10),
                  {"pelvis": [("x", -2)]})
 CHEST = "spine_03"
 # chest-carried rest points (they ride spine_03): where the cup / saucer sit when not at the lips
 CUP_BELLY = Vector((-0.10, -0.47, 0.99))      # the cup held low in front of the belly, over the saucer
-SAUCER_BELLY = Vector((-0.06, -0.46, 0.90))   # the saucer under it
+SAUCER_BELLY = CUP_BELLY - Vector((0.0, 0.0, 0.109))   # the saucer right under it (the cup sits on it)
 SAUCER_CHIN = Vector((0.04, -0.47, 0.99))     # the saucer under the chin while he sips
 
 

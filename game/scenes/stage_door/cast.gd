@@ -142,10 +142,23 @@ func _build3d() -> void:
 		if ps is PackedScene:
 			_plinth = (ps as PackedScene).instantiate() as Node3D
 			if _plinth != null:
+				CastPage.stone(_plinth)
 				(_pivots["hush"] as Node3D).add_child(_plinth)
 				_plinth.visible = false
 	_add_buttons([["next", "stage_door.cast_next", UiKit.GOLD, UiKit.GOLD_SHADE], ["turn", "stage_door.cast_turn",
 		UiKit.CREAM, UiKit.CREAM_SHADE], ["back", "stage_door.back", UiKit.CREAM, UiKit.CREAM_SHADE]])
+
+
+## The plinth glb carries a bare `hush_prop` StandardMaterial3D (no palette texture), which renders black in the
+## toon world (no lights): every mesh gets the set shader in stone, like CharacterView3D's stand-in plinth.
+static func stone(root: Node) -> void:
+	if root is MeshInstance3D:
+		var m := ShaderMaterial.new()
+		m.shader = load(View3DConst.SH_SET)
+		m.set_shader_parameter("albedo_color", View3DConst.STONE)
+		(root as MeshInstance3D).material_override = m
+	for c in root.get_children():
+		CastPage.stone(c)
 
 
 func _add_stage_mesh(pos: Vector3, size_m: Vector3, col: Color) -> void:

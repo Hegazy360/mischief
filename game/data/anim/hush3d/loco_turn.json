@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/loco_turn",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/loco_turn.res",
+  "length": 6,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 2,
+  "blend_out": 4,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/loco_turn.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

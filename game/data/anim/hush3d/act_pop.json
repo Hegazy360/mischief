@@ -1,0 +1,66 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_pop",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_pop.res",
+  "length": 15,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 8,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "pop_out"
+    },
+    {
+      "f": 3,
+      "type": "mark",
+      "name": "release"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "hold_breath"
+    },
+    {
+      "f": 3,
+      "preset": "grin"
+    },
+    {
+      "f": 8,
+      "preset": "happy"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_pop.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      3,
+      4
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

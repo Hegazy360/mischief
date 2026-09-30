@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/loco_strut",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/loco_strut.res",
+  "length": 32,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -2.0
+    },
+    {
+      "f": 16,
+      "type": "sfx",
+      "id": "bellows_step",
+      "vol_db": -2.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": 0.64,
+  "speed_m_s": 1.2,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/loco_strut.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

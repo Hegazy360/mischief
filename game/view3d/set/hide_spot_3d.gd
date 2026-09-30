@@ -7,8 +7,10 @@ class_name HideSpot3D
 extends Prop3D
 
 const FACE_ATLAS := "res://art3d/chars/hush/face_hush.png"
-const PUPIL_RANGE := 0.022
+const PUPIL_RANGE := 0.03
 const BLINK_S := 0.12
+const EYE_R := 0.046
+const EYE_DX := 0.058
 
 var _eyes: Node3D = null
 var _pupils: Array[Node3D] = []
@@ -33,10 +35,11 @@ func _build_eyes() -> void:
 	_eyes.rotation.y = -rotation.y
 	var white := mats.get_mat(Color(0.97, 0.97, 0.95, 0.4), &"set")
 	var dark := mats.get_mat(Color("#141018"), &"set")
+	# sized to read at phone scale (each eye ≈ 12 px tall at 1200×540 from the base framing)
 	for sx in [-1.0, 1.0]:
-		var w := SetPrims._ball(_eyes, 0.034, Vector3(0.045 * sx, 0.0, 0.0), white, Vector3(1.0, 1.25, 0.25), "eye_white")
+		var w := SetPrims._ball(_eyes, EYE_R, Vector3(EYE_DX * sx, 0.0, 0.0), white, Vector3(1.0, 1.25, 0.25), "eye_white")
 		_whites.append(w)
-		var p := SetPrims._ball(_eyes, 0.017, Vector3(0.045 * sx, 0.0, 0.012), dark, Vector3(1.0, 1.0, 0.3), "pupil")
+		var p := SetPrims._ball(_eyes, EYE_R * 0.5, Vector3(EYE_DX * sx, 0.0, 0.016), dark, Vector3(1.0, 1.0, 0.3), "pupil")
 		_pupils.append(p)
 	_eyes.visible = false
 
@@ -57,7 +60,7 @@ func set_occupied(on: bool) -> void:
 func eyes_look(dir: Vector2) -> void:
 	_look = dir.clamp(Vector2(-1, -1), Vector2(1, 1))
 	for i in _pupils.size():
-		var base := Vector3(0.045 * (-1.0 if i == 0 else 1.0), 0.0, 0.012)
+		var base := Vector3(EYE_DX * (-1.0 if i == 0 else 1.0), 0.0, 0.016)
 		_pupils[i].position = base + Vector3(_look.x * PUPIL_RANGE, _look.y * PUPIL_RANGE * 0.6, 0.0)
 
 

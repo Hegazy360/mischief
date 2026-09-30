@@ -837,8 +837,8 @@ class Clip:
             sup = self.support_at(fa)
             if abs(low - sup) < 0.03:
                 loc.z += sup - low
-            self._cache[key] = (loc, ap.world[ft].to_quaternion())
-        loc, q = self._cache[key]
+            self._cache[key] = (loc, ap.world[ft].to_quaternion(), ap.world[bl].to_quaternion())
+        loc, q, q_ball = self._cache[key]
         spd = self.speed_m_s if travel is None else travel
         target = loc.copy()
         if spd:
@@ -857,6 +857,9 @@ class Clip:
             v = sk.head(bl) - sk.head(ft)
             ankle = target - (fk_q @ sk.rest_q[ft].inverted()) @ v
             P.solve_leg(pose, side, ankle, foot_world=fk_q)
+            # the toes stay as they lie on the floor at the anchor frame (they would swing through it with the pitch)
+            pose.set_world_rot(bl, q_ball)
+            pose.solve()
 
     # --- output ---------------------------------------------------------------------------------
     def frames(self):

@@ -1,0 +1,262 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/act_tea",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/act_tea.res",
+  "length": 480,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 8,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {
+    "kettle": [
+      14,
+      86
+    ],
+    "pour": [
+      40,
+      72
+    ],
+    "honey": [
+      104,
+      156
+    ],
+    "stir": [
+      169,
+      243
+    ],
+    "stirring": [
+      182,
+      236
+    ],
+    "sniff": [
+      270,
+      300
+    ],
+    "sip": [
+      388,
+      455
+    ],
+    "put_down": [
+      462,
+      472
+    ],
+    "creak": [
+      472,
+      480
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "teacup"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "saucer"
+    },
+    {
+      "f": 14,
+      "type": "prop",
+      "op": "lend",
+      "prop": "set:kitchen_kettle",
+      "socket": "grip_r",
+      "frames": 6
+    },
+    {
+      "f": 40,
+      "type": "sfx",
+      "id": "kettle_pour"
+    },
+    {
+      "f": 78,
+      "type": "prop",
+      "op": "return",
+      "prop": "set:kitchen_kettle",
+      "frames": 8
+    },
+    {
+      "f": 104,
+      "type": "prop",
+      "op": "lend",
+      "prop": "set:kitchen_honey",
+      "socket": "grip_l",
+      "frames": 6
+    },
+    {
+      "f": 108,
+      "type": "prop",
+      "op": "show",
+      "prop": "spoon"
+    },
+    {
+      "f": 126,
+      "type": "set_anim",
+      "hotspot": "kitchen_honey",
+      "anim": "lid_flip"
+    },
+    {
+      "f": 148,
+      "type": "prop",
+      "op": "return",
+      "prop": "set:kitchen_honey",
+      "frames": 8
+    },
+    {
+      "f": 169,
+      "type": "sfx",
+      "id": "spoon_clink"
+    },
+    {
+      "f": 182,
+      "type": "sfx",
+      "id": "tea_stir"
+    },
+    {
+      "f": 243,
+      "type": "sfx",
+      "id": "spoon_clink",
+      "vol_db": -3.0
+    },
+    {
+      "f": 250,
+      "type": "prop",
+      "op": "hide",
+      "prop": "spoon"
+    },
+    {
+      "f": 270,
+      "type": "sfx",
+      "id": "tea_sniff"
+    },
+    {
+      "f": 388,
+      "type": "sfx",
+      "id": "tea_slurp"
+    },
+    {
+      "f": 462,
+      "type": "sfx",
+      "id": "teacup_clink"
+    },
+    {
+      "f": 472,
+      "type": "sfx",
+      "id": "stool_creak",
+      "vol_db": -2.0
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "pompous"
+    },
+    {
+      "f": 12,
+      "preset": "suspicious"
+    },
+    {
+      "f": 22,
+      "preset": "smug"
+    },
+    {
+      "f": 40,
+      "preset": "admiring"
+    },
+    {
+      "f": 80,
+      "preset": "pompous"
+    },
+    {
+      "f": 104,
+      "preset": "admiring"
+    },
+    {
+      "f": 126,
+      "preset": "huh"
+    },
+    {
+      "f": 134,
+      "preset": "smug"
+    },
+    {
+      "f": 169,
+      "preset": "hum"
+    },
+    {
+      "f": 243,
+      "preset": "smug"
+    },
+    {
+      "f": 262,
+      "preset": "pompous"
+    },
+    {
+      "f": 270,
+      "preset": "sniff"
+    },
+    {
+      "f": 300,
+      "preset": "blissful"
+    },
+    {
+      "f": 330,
+      "preset": "kiss"
+    },
+    {
+      "f": 360,
+      "preset": "smug"
+    },
+    {
+      "f": 388,
+      "preset": "sip"
+    },
+    {
+      "f": 446,
+      "preset": "blissful"
+    },
+    {
+      "f": 462,
+      "preset": "relief"
+    },
+    {
+      "f": 472,
+      "preset": "pompous"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/act_tea.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  }
+}

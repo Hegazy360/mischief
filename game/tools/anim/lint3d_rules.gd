@@ -19,7 +19,7 @@
 ## | L09_dead_hold | no > 20 f span where every body (UAL) bone moves < 0.3°/f (and the pelvis < 1 mm/f) unless `lint.freeze_holds` covers it or the clip is a freeze (jiggle / prop bones do not count: the view simulates them) |
 ## | L10_pop_jump | no bone jumps > 45°/f unless the frame is in `lint.pop_frames` |
 ## | L11_twinning | left / right limbs never mirror-equal (< 1° on every pair) for > 10 f |
-## | L12_feet_planted | a planted foot drifts ≤ 0.01 m over its contact (lane space for walks); walks: the planted foot's clip-space velocity = -speed_m_s ± 5 % |
+## | L12_feet_planted | a planted foot (≥ `plant_min_f` 3 contact frames, or a landing that ends a one-shot) drifts ≤ 0.01 m over its contact (lane space for walks); walks: the planted foot's clip-space velocity = -speed_m_s ± 5 % |
 ## | L13_floor | no sole point > 0.015 m below its support (the floor, or `step.support` while on a step) |
 ## | L14_sound_sync | every sound is within ±1 f of a beat boundary, a `mark`, a pop frame or a foot contact (`"sync": false` opts out) |
 ## | L15_face_accent | a clip with an accent swaps its face within ±1 f of the accent |
@@ -55,6 +55,8 @@ const HOUSE3D := "res://data/house/house3d.json"
 const SLICE_CLIPS := "res://view/world/slice_clips.gd"
 const RIG_SAMPLER := "res://view3d/char/rig_sampler_3d.gd"
 const FPS := 60.0
+## `rig_*` clips that are not reaches (no rig_pm lock, the normal cheat range): the hop off a released step.
+const RIG_NOT_REACH: PackedStringArray = ["rig_step_down"]
 const EVENT_TYPES: PackedStringArray = ["sfx", "voice", "laugh", "fx", "face", "cam", "shake", "hitstop", "slowmo",
 	"freeze", "prop", "mark", "decor", "set_anim", "set_part", "look", "jiggle"]
 const SOUND_TYPES: PackedStringArray = ["sfx", "voice"]
@@ -686,7 +688,7 @@ static func _timing(d: Dictionary, file: String, n: int, out: Array) -> void:
 		if int(d.get("blend_out", 0)) < mb:
 			out.append(finding("L23_overlay", file, n, "overlay blend_out %d f: blend over ≥ %d f" % [int(d.get("blend_out", 0)), mb]))
 	var cheat := float(d.get("cheat_deg", 0))
-	var rig_clip := short.begins_with("rig_")
+	var rig_clip := short.begins_with("rig_") and not RIG_NOT_REACH.has(short)
 	var cmax := float(lim("cheat_rig_max_deg", 10.0)) if rig_clip else float(lim("cheat_max_deg", 40.0))
 	if cheat < 0.0 or cheat > cmax:
 		out.append(finding("L26_cheat", file, -1, "cheat_deg %.0f outside [0, %.0f]%s" % [cheat, cmax, " (a rig clip reaches: ≤ 10, the head turns instead)" if rig_clip else ""]))
@@ -696,7 +698,8 @@ static func _timing(d: Dictionary, file: String, n: int, out: Array) -> void:
 
 static func _rig_rules(d: Dictionary, file: String, n: int, out: Array) -> void:
 	var short := String(d.get("clip", "")).get_slice("/", 1)
-	if String(d.get("lock", "")) != "rig_pm":
+	var lock_v: Variant = d.get("lock", null)
+	if lock_v == null or String(lock_v) != "rig_pm":
 		out.append(finding("L28_rig_clip", file, -1, "rig clips are sampled at rig progress: lock \"rig_pm\""))
 	if bool(d.get("loop", false)):
 		out.append(finding("L28_rig_clip", file, -1, "rig clips do not loop (release keeps the pose)"))
@@ -1150,6 +1153,7 @@ static func _feet(d: Dictionary, file: String, n: int, rig: Dictionary, s: Dicti
 	var drift_m := float(lim("drift_m", 0.01))
 	var tol := float(lim("stance_speed_tol", 0.05))
 	var min_f := int(lim("stance_min_f", 4))
+	var plant_min := int(lim("plant_min_f", 3))
 	var below_done := false
 	var names := ["heel", "ball", "toe"]
 	for side in soles:
@@ -1182,7 +1186,9 @@ static func _feet(d: Dictionary, file: String, n: int, rig: Dictionary, s: Dicti
 					run_lane.append(p + Vector3(0, 0, speed * float(f) / FPS))
 				elif run_f0 >= 0:
 					if not reported:
-						reported = _check_run(file, "%s %s" % [side, names[k]], run_f0, run_lane, run_clip, speed, drift_m, tol, min_f, out)
+						# a touch / lift-off (< plant_min_f frames of contact) is not a plant — the bake's planner agrees
+						if run_lane.size() >= plant_min or (f > n and run_f0 > 0 and not bool(d.get("loop", false)) and run_lane.size() >= 2):
+							reported = _check_run(file, "%s %s" % [side, names[k]], run_f0, run_lane, run_clip, speed, drift_m, tol, min_f, out)
 					run_f0 = -1
 	return contacts
 

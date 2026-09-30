@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/act_snicker",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/act_snicker.res",
+  "length": 60,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 4,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 0,
+      "type": "sfx",
+      "id": "hush_snicker"
+    },
+    {
+      "f": 8,
+      "type": "mark",
+      "name": "accent"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "grin"
+    },
+    {
+      "f": 6,
+      "preset": "snicker"
+    },
+    {
+      "f": 24,
+      "preset": "glance"
+    },
+    {
+      "f": 38,
+      "preset": "snicker"
+    },
+    {
+      "f": 46,
+      "preset": "smug"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/act_snicker.py",
+    "audio": "table"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 22,
+      "f1": 40,
+      "at": "camera",
+      "weight": 0.9,
+      "blend": 4
+    }
+  ]
+}

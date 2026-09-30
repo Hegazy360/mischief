@@ -43,7 +43,8 @@ def _spec(v):
     if v is None:
         return [], None, None
     if isinstance(v, dict):
-        return list(v.get("r", [])), v.get("s"), v.get("t")
+        r = v.get("r", [])
+        return (r if isinstance(r, Quaternion) else list(r)), v.get("s"), v.get("t")
     if isinstance(v, Quaternion):
         return v, None, None
     return list(v), None, None
@@ -97,6 +98,33 @@ def merge(*poses):
     for p in poses:
         if p:
             out.update(p)
+    return out
+
+
+def mix(a, b, k):
+    """The pose k of the way from pose dict a to b, bone by bone (rotations slerped as quaternions about armature
+    axes, offsets lerped; a bone missing on one side is its rest) — an in-between key."""
+    out = {}
+    for n in set(a) | set(b):
+        if n in ("_root", "_pelvis"):
+            va = a.get(n) or (0.0, 0.0, 0.0)
+            vb = b.get(n) or (0.0, 0.0, 0.0)
+            out[n] = tuple(x + (y - x) * k for x, y in zip(va, vb))
+            continue
+        if n.startswith("_"):
+            out[n] = b.get(n, a.get(n))
+            continue
+        ra, sa, ta = _spec(a.get(n))
+        rb, sb, tb = _spec(b.get(n))
+        qa = ra if isinstance(ra, Quaternion) else rot_q(ra)
+        qb = rb if isinstance(rb, Quaternion) else rot_q(rb)
+        q = qa.slerp(qb, k)
+        if sa is None and sb is None and ta is None and tb is None:
+            out[n] = q
+        else:
+            s0, s1 = Vector(sa or (1, 1, 1)), Vector(sb or (1, 1, 1))
+            t0, t1 = Vector(ta or (0, 0, 0)), Vector(tb or (0, 0, 0))
+            out[n] = {"r": q, "s": tuple(s0.lerp(s1, k)), "t": tuple(t0.lerp(t1, k))}
     return out
 
 

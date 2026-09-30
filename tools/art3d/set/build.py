@@ -342,15 +342,16 @@ def prop_kettle():
 
 def prop_pickle_jar():
     pb = PB("pickle_jar", "props")
-    pb.lathe([(0.066, 0.0), (0.072, 0.01), (0.072, 0.19), (0.062, 0.2)], (0, 0, 0), "pickle", seg=22,
-             bands=["pickle_dk", "pickle", "pickle_dk"])
-    for i, (x, y, z) in enumerate(((-0.03, 0.05, 0.045), (0.028, 0.08, 0.05), (-0.01, 0.12, 0.055), (0.03, 0.15, 0.04))):
+    # a pot-bellied jar with a narrow neck and a small gold lid (a waisted top at 64 px: not the piano's box)
+    pb.lathe([(0.05, 0.0), (0.068, 0.012), (0.08, 0.07), (0.078, 0.11), (0.062, 0.145), (0.042, 0.165), (0.04, 0.19)],
+             (0, 0, 0), "pickle", seg=22, bands=["pickle_dk", "pickle", "pickle", "pickle", "pickle_dk", "pickle_dk"])
+    for i, (x, y, z) in enumerate(((-0.03, 0.04, 0.052), (0.03, 0.07, 0.056), (-0.012, 0.1, 0.062), (0.028, 0.125, 0.046))):
         pb.sphere(0.022, (x, y, z), "onion", seg=10, rings=6)
-    pb.part("lid", pivot=(0.0, 0.2, 0.0))
-    pb.lathe([(0.0, 0.2), (0.07, 0.2), (0.07, 0.228), (0.0, 0.23)], (0, 0, 0), "gold_lid", seg=22)
-    pb.part("armed", pivot=(0.07, 0.215, 0.0))
-    pb.box((0.07, 0.2, -0.008), (0.095, 0.225, 0.008), "spanner")
-    pb.box((0.082, 0.07, -0.006), (0.094, 0.21, 0.006), "spanner", rot=(0, 0, -8), pivot=(0.088, 0.21, 0))
+    pb.part("lid", pivot=(0.0, 0.19, 0.0))
+    pb.lathe([(0.0, 0.19), (0.05, 0.19), (0.052, 0.2), (0.05, 0.222), (0.0, 0.225)], (0, 0, 0), "gold_lid", seg=22)
+    pb.part("armed", pivot=(0.05, 0.205, 0.0))
+    pb.box((0.05, 0.19, -0.008), (0.078, 0.215, 0.008), "spanner")
+    pb.box((0.066, 0.06, -0.006), (0.078, 0.2, 0.006), "spanner", rot=(0, 0, -8), pivot=(0.072, 0.2, 0))
     return pb
 
 
@@ -374,19 +375,22 @@ def prop_sink_tap():
 
 def prop_fridge():
     pb = PB("fridge", "props")
-    # a tall rounded retro fridge, a chrome bar handle per door, a split line between the two zones
-    pb.box((-0.35, 0.06, -0.27), (0.35, 1.95, 0.25), "fridge", bevel=0.09)
-    pb.box((-0.33, 0.0, -0.25), (0.33, 0.07, 0.2), "fridge_dk", bevel=0.02)
-    pb.box((-0.34, 1.22, 0.24), (0.34, 1.27, 0.262), "fridge_dk", bevel=0.01)
-    pb.part("door_upper", pivot=(-0.34, 1.6, 0.26))
-    pb.box((-0.33, 1.28, 0.25), (0.33, 1.9, 0.27), "fridge", bevel=0.03)
-    pb.box((0.22, 1.33, 0.27), (0.26, 1.6, 0.3), "fridge_bar", bevel=0.012)
-    pb.part("door_lower", pivot=(-0.34, 0.6, 0.26))
-    pb.box((-0.33, 0.1, 0.25), (0.33, 1.2, 0.27), "fridge", bevel=0.03)
-    pb.box((0.22, 0.75, 0.27), (0.26, 1.12, 0.3), "fridge_bar", bevel=0.012)
-    pb.part("armed", pivot=(0.3, 1.3, 0.27))
-    pb.cyl(0.035, 0.035, 0.1, (0.2, 1.245, 0.24), "sausage", seg=10, rot=(90, 0, 0))
-    pb.sphere(0.036, (0.2, 1.245, 0.335), "sausage", seg=10, rings=6)
+    # a SQUAT retro fridge (1.52 m: its 64 px silhouette must not read as the pantry alcove or the wardrobe):
+    # a domed top, four stubby legs, two doors split at 0.81 m, a chrome bar handle per door
+    for (x, z) in ((-0.3, -0.2), (0.3, -0.2), (-0.3, 0.17), (0.3, 0.17)):
+        pb.box((x - 0.035, 0.0, z - 0.035), (x + 0.035, 0.13, z + 0.035), "fridge_dk", bevel=0.01)
+    pb.box((-0.38, 0.12, -0.27), (0.38, 1.3, 0.25), "fridge", bevel=0.07)
+    pb.sphere(0.38, (0.0, 1.26, -0.01), "fridge", scale=(1.0, 0.68, 0.69), seg=24, rings=12)
+    pb.box((-0.37, 0.79, 0.24), (0.37, 0.83, 0.262), "fridge_dk", bevel=0.01)
+    pb.part("door_upper", pivot=(-0.37, 1.08, 0.26))
+    pb.box((-0.35, 0.85, 0.25), (0.35, 1.3, 0.27), "fridge", bevel=0.03)
+    pb.box((0.23, 0.9, 0.27), (0.27, 1.16, 0.3), "fridge_bar", bevel=0.012)
+    pb.part("door_lower", pivot=(-0.37, 0.45, 0.26))
+    pb.box((-0.35, 0.16, 0.25), (0.35, 0.77, 0.27), "fridge", bevel=0.03)
+    pb.box((0.23, 0.5, 0.27), (0.27, 0.72, 0.3), "fridge_bar", bevel=0.012)
+    pb.part("armed", pivot=(0.3, 0.82, 0.27))
+    pb.cyl(0.035, 0.035, 0.1, (0.2, 0.815, 0.24), "sausage", seg=10, rot=(90, 0, 0))
+    pb.sphere(0.036, (0.2, 0.815, 0.335), "sausage", seg=10, rings=6)
     return pb
 
 
@@ -493,14 +497,18 @@ def prop_chandelier():
 
 def prop_wardrobe():
     pb = PB("wardrobe", "props")
-    pb.box((-0.36, 0.06, -0.26), (0.36, 1.98, 0.24), "wardrobe", bevel=0.03)
-    pb.box((-0.36, 1.96, -0.26), (0.36, 2.05, 0.26), "wardrobe_dk", bevel=0.02)
-    pb.box((-0.34, 0.0, -0.24), (0.34, 0.08, 0.22), "wardrobe_dk", bevel=0.015)
-    pb.part("door", pivot=(-0.34, 1.0, 0.25))
-    pb.box((-0.33, 0.12, 0.23), (0.03, 1.9, 0.26), "wardrobe", bevel=0.015)
-    pb.box((0.03, 0.12, 0.244), (0.05, 1.9, 0.262), "gap_dark")
-    pb.sphere(0.022, (-0.03, 1.0, 0.27), "brass", seg=8, rings=5)
-    pb.box((0.05, 0.12, 0.23), (0.33, 1.9, 0.25), "wardrobe", bevel=0.015)
+    # a narrow tall wardrobe on bun feet with a broken-pediment crown (its silhouette: feet + a peaked top)
+    for x in (-0.28, 0.28):
+        for z in (-0.2, 0.18):
+            pb.sphere(0.05, (x, 0.05, z), "wardrobe_dk", seg=10, rings=6)
+    pb.box((-0.32, 0.1, -0.26), (0.32, 1.9, 0.24), "wardrobe", bevel=0.03)
+    pb.box((-0.36, 1.88, -0.27), (0.36, 1.96, 0.27), "wardrobe_dk", bevel=0.02)
+    pb.panel([(-0.34, 1.96), (0.34, 1.96), (0.0, 2.2)], -0.25, 0.5, "wardrobe_dk")
+    pb.part("door", pivot=(-0.31, 1.0, 0.25))
+    pb.box((-0.3, 0.16, 0.23), (0.0, 1.84, 0.26), "wardrobe", bevel=0.015)
+    pb.box((0.0, 0.16, 0.244), (0.02, 1.84, 0.262), "gap_dark")
+    pb.sphere(0.022, (-0.04, 1.0, 0.27), "brass", seg=8, rings=5)
+    pb.box((0.02, 0.16, 0.23), (0.3, 1.84, 0.25), "wardrobe", bevel=0.015)
     return pb
 
 

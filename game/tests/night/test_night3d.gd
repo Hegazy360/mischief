@@ -603,6 +603,17 @@ func test_a_frame_quantised_check() -> void:
 	assert_true(E2eScenarios.within_quantised(1.5, 1.5, 0.016))
 
 
+func test_perf3d_splits_the_scripts_into_sim_and_view() -> void:
+	var p := Perf3D.new()
+	for i in 40:
+		p.add_script_ms(5.0, 2.0)
+	p.add_script_ms(1.0, 3.0)   # a sim stamp past the frame's end is clamped to the frame
+	var s := p.summary()
+	assert_almost_eq(float(s["script_ms_p95"]), 5.0, 0.01)
+	assert_almost_eq(float(s["sim_ms_p95"]), 2.0, 0.01)
+	assert_almost_eq(float(s["view_ms_p95"]), 3.0, 0.01, "view + HUD = the frame's scripts minus the sim")
+
+
 func test_retired_n02_scenarios_are_gone_and_strict_scope() -> void:
 	assert_false(E2eScenarios.is_route("n02_face_to_face"))
 	assert_false(E2eScenarios.is_route("n02_face_to_face_lost"))
@@ -627,7 +638,7 @@ func test_the_probe_report_has_the_3d_fields() -> void:
 	assert_eq(String(s["view"]), "3d")
 	assert_gt((s["hud_pieces"] as Array).size(), 0, "HUD pieces sampled every 30 PLAY frames")
 	assert_gt(((s["visibility"] as Dictionary)["rows"] as Array).size(), 0, "a visibility row per tick")
-	for k2 in ["draw_calls_p95", "draw_calls_max", "tris_max", "emitters_max", "tex_mb_max", "shader_compiles_play", "script_ms_p95"]:
+	for k2 in ["draw_calls_p95", "draw_calls_max", "tris_max", "emitters_max", "tex_mb_max", "shader_compiles_play", "script_ms_p95", "view_ms_p95", "sim_ms_p95"]:
 		assert_true((s["perf3d"] as Dictionary).has(k2), "perf3d.%s" % k2)
 	assert_between(float(s["pip_on_share"]), 0.0, 1.0)
 	probe.queue_free()

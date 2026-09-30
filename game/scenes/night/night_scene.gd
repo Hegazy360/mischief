@@ -154,6 +154,8 @@ var _keep_buf: Array = []
 var _safe_set: Rect2 = Rect2()
 ## Frame start (µs) stamped by _FrameStart (the scripts' time, _FrameEnd).
 var _frame_t0_us: int = 0
+## Stamped by _AfterSim right after the SimDriver's _process (sim ticks + their `ticked` handlers).
+var _after_sim_us: int = 0
 var _retry_t0: int = -1
 var _retrying: bool = false
 var _flash_left: float = 0.0
@@ -246,6 +248,9 @@ func _build() -> void:
 	var probe := _FrameStart.new()
 	probe.night = self
 	add_child(probe)
+	var probe_sim := _AfterSim.new()
+	probe_sim.night = self
+	add_child(probe_sim)
 	var probe_end := _FrameEnd.new()
 	probe_end.night = self
 	add_child(probe_end)
@@ -1662,8 +1667,24 @@ class _FrameStart:
 			night.set("_frame_t0_us", now)
 
 
+## Runs right after the SimDriver (priority −100): splits the frame's script time into the sim part (the ticks and
+## their `ticked` handlers) and the view + HUD part (every later `_process`).
+class _AfterSim:
+	extends Node
+	var night: Node = null
+
+	func _init() -> void:
+		name = "AfterSim"
+		process_priority = -99
+
+	func _process(_d: float) -> void:
+		if night != null:
+			night.set("_after_sim_us", Time.get_ticks_usec())
+
+
 ## Runs after every other node's `_process` (the sim, the view, the HUD, the overlays): the frame's script time
-## (µs) for `perf3d.script_ms_p95` — REDESIGN §6.3's "view + HUD scripts ≤ 4 ms/frame p95" (the sim is included).
+## for `perf3d.script_ms_p95`, and its view + HUD part (`perf3d.view_ms_p95`, REDESIGN §6.3's "view + HUD scripts
+## ≤ 4 ms/frame p95").
 class _FrameEnd:
 	extends Node
 	var night: Node = null
@@ -1677,4 +1698,7 @@ class _FrameEnd:
 			return
 		var t0 := int(night.get("_frame_t0_us"))
 		if t0 > 0 and int(night.get("phase")) == 5:
-			(night.get("perf3d") as Perf3D).add_script_ms(float(Time.get_ticks_usec() - t0) / 1000.0)
+			var now := Time.get_ticks_usec()
+			var ts := int(night.get("_after_sim_us"))
+			var sim_ms := float(ts - t0) / 1000.0 if ts >= t0 else 0.0
+			(night.get("perf3d") as Perf3D).add_script_ms(float(now - t0) / 1000.0, sim_ms)

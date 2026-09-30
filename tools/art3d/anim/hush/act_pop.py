@@ -30,6 +30,7 @@ def build(ctx):
     c.jump(3, 12, arc=0.35)
     c.ground(12, L)
     c.auto_plant(speed_m_s=0.0)
+    c.pop_frames.extend([3, 4])                            # the launch: the arms fling (a 2-frame smear)
     c.face(0, "hold_breath")
     c.face(3, "grin")
     c.face(8, "happy")

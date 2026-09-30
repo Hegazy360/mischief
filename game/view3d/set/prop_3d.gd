@@ -10,6 +10,7 @@ class_name Prop3D
 extends Node3D
 
 const TAG_GLB := "res://art3d/chars/hush/tag_beret.glb"
+const TAG_PALETTE := "res://art3d/chars/hush/palette_hush.png"
 const TAG_SWING_S := 0.3
 const WIGGLE_S := 0.6
 const FPS := 60.0
@@ -454,8 +455,28 @@ func _make_tag() -> Node3D:
 			var inst := ps.instantiate() as Node3D
 			if inst != null:
 				root.add_child(inst)
+				# the cast's convention: palette UVs into Hush's own palette (r3d-cast-hush) — the glb carries no
+				# texture, so give it that palette (else its vertex colours render black) + the prop ink shell
+				var pal: Texture2D = load(TAG_PALETTE) as Texture2D if ResourceLoader.exists(TAG_PALETTE) else null
+				var ink := mats.ink_mat(false)
 				for n in inst.find_children("*", "MeshInstance3D", true, false):
-					SetMats.warm((n as MeshInstance3D).get_active_material(0), &"prop")
+					var mi := n as MeshInstance3D
+					if pal != null:
+						mi.material_override = mats.tex_mat(pal, &"prop")
+					else:
+						SetMats.warm(mi.get_active_material(0), &"prop")
+					if ink != null and mi.mesh != null:
+						var sh := MeshInstance3D.new()
+						sh.name = "%s_ink" % mi.name
+						sh.mesh = mi.mesh
+						sh.material_override = ink
+						sh.layers = 1 << 2
+						sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+						mi.add_child(sh)
+						if mi.skin != null and not mi.skeleton.is_empty():
+							# the shell is the mesh's child: its skeleton path is one level further up
+							sh.skin = mi.skin
+							sh.skeleton = NodePath("../" + String(mi.skeleton))
 				return root
 	var red := mats.get_mat(Color("#E23B4E"), &"prop")
 	SetPrims._ball(root, 0.14, Vector3(0.0, -0.2, 0.0), red, Vector3(1.0, 0.42, 1.0), "beret")

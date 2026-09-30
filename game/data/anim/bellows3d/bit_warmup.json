@@ -1,0 +1,175 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/bit_warmup",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/bit_warmup.res",
+  "length": 90,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 8,
+  "lock": "sim",
+  "beats": {
+    "anticipation": [
+      30,
+      35
+    ],
+    "accent": [
+      35,
+      38
+    ],
+    "hold": [
+      38,
+      70
+    ],
+    "settle": [
+      70,
+      90
+    ],
+    "crack": [
+      8,
+      11
+    ],
+    "yodel": [
+      11,
+      30
+    ],
+    "the_pipes": [
+      46,
+      62
+    ]
+  },
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "show",
+      "prop": "baton"
+    },
+    {
+      "f": 8,
+      "type": "voice",
+      "id": "vo_bellows_yodel"
+    },
+    {
+      "f": 36,
+      "type": "jiggle",
+      "bones": [
+        "bouffant",
+        "tail_l",
+        "tail_r",
+        "belly"
+      ],
+      "kick": 0.5
+    },
+    {
+      "f": 36,
+      "type": "mark",
+      "name": "accent"
+    },
+    {
+      "f": 46,
+      "type": "voice",
+      "id": "vo_bellows_the_pipes"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sing_big"
+    },
+    {
+      "f": 8,
+      "preset": "shock"
+    },
+    {
+      "f": 12,
+      "preset": "trill"
+    },
+    {
+      "f": 18,
+      "preset": "sing_mid"
+    },
+    {
+      "f": 24,
+      "preset": "trill"
+    },
+    {
+      "f": 30,
+      "preset": "terrified"
+    },
+    {
+      "f": 36,
+      "preset": "mortified"
+    },
+    {
+      "f": 46,
+      "preset": "pardon"
+    },
+    {
+      "f": 60,
+      "preset": "sulk"
+    },
+    {
+      "f": 72,
+      "preset": "pompous"
+    },
+    {
+      "f": 80,
+      "preset": "sing_small"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/bit_warmup.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      8,
+      36
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 4,
+      "f1": 32,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 6
+    },
+    {
+      "f0": 40,
+      "f1": 76,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 8
+    }
+  ],
+  "stage": {
+    "x": 8.65,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 35.0
+  },
+  "tags": [
+    "bit",
+    "squeak_bit"
+  ]
+}

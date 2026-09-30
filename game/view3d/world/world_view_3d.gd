@@ -60,6 +60,10 @@ var bellows_view: CharacterView3D = null
 var decals: Decals3D = null
 var fx3d: Fx3D = null
 var overlays: Overlays3D = null
+## The Prologue's director cues staged in the set (vase, doorframe, relief, picture).
+var cues: CueStager3D = null
+## N1/N2's caught sequence (Lecture attach, doorstep).
+var caught: CaughtStager3D = null
 var recorder: MomentRecorder = null
 ## Skip the rig system (tests / `--stand-ins`).
 var force_stand_ins: bool = false
@@ -95,6 +99,14 @@ var _edge_badge := false
 var _rects_out: Array = []
 var _protected: Array[Rect2] = []
 var _vis := {"tick": 0, "sim": "", "reason": &"", "on_screen": false, "window": false, "badge": false}
+
+## NightScene drop-in shims — the 2D WorldView members NightScene / NightInput / NightWarm read today, so the 3D
+## view runs in the current NightScene unchanged until `r3d-night` ports it: `warm_hint` (NightWarm's list; its
+## clip ids are warmed), `unlocked` (tonight's built rooms), `lit_x_range()` (sim px), `fx` (ripple / path_dots /
+## clear / avoid_screen_fn over the 3D decals and overlays).
+var warm_hint: Dictionary = {}
+var unlocked: PackedStringArray = PackedStringArray()
+var fx: FxShim = null
 var _empty_snap := ViewSnapshot.new()
 
 
@@ -152,6 +164,7 @@ func _resolve_set(db: Variant, ep: Variant) -> void:
 				rooms_lit.append(r.id)
 	if live.is_empty() and db is ContentDB and ep is EpisodeDef:
 		live = SimCtx.live_hotspots(db as ContentDB, ep as EpisodeDef)
+	unlocked = PackedStringArray(rooms_lit + rooms_backstage)
 
 
 static func _ids(v: Variant) -> PackedStringArray:
@@ -195,6 +208,11 @@ func _build() -> void:
 	overlays = Overlays3D.new()
 	add_child(overlays)
 	overlays.setup(self)
+	fx = FxShim.new(self)
+	cues = CueStager3D.new()
+	cues.setup(self)
+	caught = CaughtStager3D.new()
+	caught.setup(self)
 	var variant := str(ViewKit.setting("hush_head", ""))
 	hush_view = _make_char("hush", variant)
 	bellows_view = _make_char("bellows", "")
@@ -256,6 +274,10 @@ func reset() -> void:
 		fx3d.clear()
 	if overlays != null:
 		overlays.clear()
+	if cues != null:
+		cues.reset()
+	if caught != null:
+		caught.reset()
 	if set3d != null and set3d.has_method("return_all"):
 		set3d.call("return_all")
 	for id in _hotspot_ids:
@@ -405,6 +427,17 @@ func hotspot_rects_in_view() -> Array:
 	return _rects_out
 
 
+## World x range (sim px) covered by tonight's built rooms (the 2D CameraDirector.stage_x_range).
+func lit_x_range() -> Vector2:
+	var lo := INF
+	var hi := -INF
+	for r in layout.rooms:
+		if unlocked.has(r.id):
+			lo = minf(lo, r.x0)
+			hi = maxf(hi, r.x1)
+	return Vector2(lo, hi) if lo < hi else Vector2(-INF, INF)
+
+
 ## Load every clip the characters can play now into ClipLib3D's cache (soft) — no parsing during PLAY.
 func warm_clips(extra: PackedStringArray = PackedStringArray()) -> int:
 	var ids := {}
@@ -419,6 +452,10 @@ func warm_clips(extra: PackedStringArray = PackedStringArray()) -> int:
 		ids[str(row.get("clip", ""))] = true
 	for e in extra:
 		ids[e] = true
+	var hinted: Variant = warm_hint.get("clips", null)
+	if hinted is Array or hinted is PackedStringArray:
+		for e2 in hinted:
+			ids[str(e2)] = true
 	var n := 0
 	var lib: Variant = load("res://view3d/char/clip_lib_3d.gd") if ResourceLoader.exists("res://view3d/char/clip_lib_3d.gd") else null
 	for id in ids:
@@ -492,7 +529,11 @@ func advance(delta: float) -> void:
 		_update_gaze(snap, vdt)
 		hush_view.apply(prev.hush, snap.hush, alpha, vdt)
 		bellows_view.apply(prev.bellows, snap.bellows, alpha, vdt)
+	if caught != null:
+		caught.advance(snap, vdt, _replay_t >= 0.0)
 	_update_props(snap, vdt)
+	if cues != null:
+		cues.advance(snap, vdt)
 	_update_decals(snap, vdt)
 	if fx3d != null:
 		fx3d.advance(vdt)
@@ -804,16 +845,20 @@ func _update_visibility(snap: ViewSnapshot) -> void:
 	_vis["sim"] = sim
 	_vis["reason"] = reason
 	_vis["on_screen"] = bellows_on_screen()
-	var badge := window_mode == "lean" and reason == &"adjacent" and not snap.bellows.reacting and not bool(_vis["on_screen"])
+	var badge := window_mode == "lean" and reason == &"adjacent" and not PipView3D.is_busy(snap, bellows_view) \
+			and not bool(_vis["on_screen"])
 	_vis["badge"] = badge
 	if badge != _edge_badge:
 		_edge_badge = badge
 		edge_badge_wanted.emit(badge)
 
 
-## PipView3D reports whether the window is up this frame (after its C8 decision).
-func set_window_shown(on: bool) -> void:
+## PipView3D reports whether the window is up this frame (after its C8 decision) and the on-screen share it used
+## (after the camera moved this frame; −1 = keep this view's own sample).
+func set_window_shown(on: bool, on_screen: int = -1) -> void:
 	_vis["window"] = on
+	if on_screen >= 0:
+		_vis["on_screen"] = on_screen == 1
 
 
 ## {tick, sim, reason, on_screen, window, badge} of this frame (the C8 test and the visibility lint).
@@ -847,6 +892,10 @@ func on_ticked(events: Array) -> void:
 		var d: Dictionary = ev
 		hush_view.on_event(d)
 		bellows_view.on_event(d)
+		if cues != null:
+			cues.on_event(d, snap)
+		if caught != null:
+			caught.on_event(d, snap)
 		match str(d.get("e", "")):
 			"noise":
 				var kind := str(d.get("kind", ""))
@@ -978,6 +1027,8 @@ func end_busted_replay() -> void:
 func _on_clip_event(ev: Dictionary) -> void:
 	var t := str(ev.get("type", ""))
 	var actor := str(ev.get("actor", ""))
+	if cues != null:
+		cues.on_clip_event(ev)
 	match t:
 		"decor":
 			var id := str(ev.get("id", ""))
@@ -1016,3 +1067,41 @@ func _handoff(actor: String, op: String, piece: String, socket: String, frames: 
 		"return":
 			if set3d.has_method("return_home"):
 				set3d.call("return_home", piece, frames)
+
+
+## The 2D FxLayer calls NightScene / NightInput make (`world_view.fx`), mapped onto the 3D view: a tap ripple → the
+## tapped-spot pop, `path_dots` → the destination ring + dotted path, `clear()` → decals, particles and overlays off.
+## `avoid_screen_fn` (NightScene's caption avoid rects) is kept for Overlays3D's captions.
+class FxShim extends RefCounted:
+	var avoid_screen_fn: Callable = Callable()
+	var _wv: WeakRef = null
+
+	func _init(w: WorldView3D) -> void:
+		_wv = weakref(w)
+
+	func _w() -> WorldView3D:
+		return _wv.get_ref() as WorldView3D if _wv != null else null
+
+	## A tap at a sim-world point (px).
+	func ripple(world_px: Vector2) -> void:
+		var w := _w()
+		if w != null:
+			w.tap_feedback(View3DConst.px_to_world(world_px))
+
+	## Hush's path (sim px points): the ring at the last one, the dots from the first.
+	func path_dots(points: PackedVector2Array) -> void:
+		var w := _w()
+		if w == null or w.decals == null or points.size() < 2:
+			return
+		w.decals.destination(View3DConst.px_to_world(points[points.size() - 1]), View3DConst.px_to_world(points[0]))
+
+	func clear() -> void:
+		var w := _w()
+		if w == null:
+			return
+		if w.decals != null:
+			w.decals.clear()
+		if w.fx3d != null:
+			w.fx3d.clear()
+		if w.overlays != null:
+			w.overlays.clear()

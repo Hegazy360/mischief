@@ -31,8 +31,10 @@ sys.path.insert(0, HERE)
 ATLAS, GRID, CELL = 1024, 8, 128
 INK = "#2A2036"
 BROW = "#3A2230"
-IRIS = "#3E2A3C"
-IRIS_GLOW = "#8A5A5E"
+IRIS = "#5A3424"
+IRIS_GLOW = "#8C5A38"
+PUPIL = "#1E1216"
+RIM = "#7A5A60"
 MOUTH = "#6E1F34"
 TONGUE = "#F07A8A"
 CHEEK = "#FF9AA2"
@@ -54,10 +56,10 @@ LAYERS = ["brows", "eyes", "pupils", "mouth", "extra_a", "extra_b"]
 DRAW_ORDER = ["extra_a", "brows", "eyes", "pupils", "mouth", "extra_b"]
 
 EYE_Y = 473                   # face units (SVG y down): v 0.527 = z 1.360 m
-EYE_X = (310, 690)            # viewer's left (her right), viewer's right (her left)
-EYE_RX, EYE_RY = 92, 118
-IRIS_R = 72
-BROW_Y = 255                  # v 0.745 = z 1.425 m
+EYE_X = (298, 702)            # viewer's left (her right), viewer's right (her left)
+EYE_RX, EYE_RY = 104, 130
+IRIS_R = 84
+BROW_Y = 240                  # v 0.760 = z 1.430 m
 BROW_W = 86                   # stroke (0.026 m)
 MOUTH_Y = 772                 # v 0.228 = z 1.270 m
 
@@ -105,9 +107,11 @@ def raster_square(body: str) -> Image.Image:
 # eyes (whites + ink rim + lash flick; pupils are their own layer for open / wide, baked for the rest)
 # -------------------------------------------------------------------------------------------------------------
 def iris(cx, cy, r=IRIS_R, look=(0, 0)):
+    """Big warm brown iris, a dark pupil, two highlights (look B's warmth in look A's flat paint)."""
     x, y = cx + look[0], cy + look[1]
-    return (ell(x, y, r, r * 1.05, IRIS) + ell(x, y + r * 0.42, r * 0.62, r * 0.40, IRIS_GLOW, opacity=0.85) +
-            ell(x + r * 0.34, y - r * 0.40, r * 0.33, r * 0.36, WHITE) + ell(x - r * 0.36, y + r * 0.34, r * 0.15, r * 0.15, WHITE))
+    return (ell(x, y, r, r * 1.04, IRIS) + ell(x, y + r * 0.30, r * 0.72, r * 0.52, IRIS_GLOW, opacity=0.9) +
+            ell(x, y + r * 0.04, r * 0.50, r * 0.52, PUPIL) +
+            ell(x + r * 0.33, y - r * 0.36, r * 0.34, r * 0.36, WHITE) + ell(x - r * 0.36, y + r * 0.34, r * 0.16, r * 0.16, WHITE))
 
 
 def flick(cx, cy, rx, ry, side):
@@ -137,13 +141,14 @@ def eye_white(cx, cy, rx, ry, lid=None, low=None, side=1, look=(0, 0), baked=Fal
     g = f'<g clip-path="url(#{cid})"><g{low_clip}>' + ell(cx, cy, rx, ry, WHITE)
     if baked:
         g += iris(cx, cy + 8, iris_r, look)
-    g += ell(cx, cy, rx, ry, "none", INK, 7) + "</g></g>"
+    g += "</g></g>"
     out.append(g)
     if top_line is not None:
         top, sl = top_line
         out.append(path(f"M{cx - rx - 12},{top - sl * side * 1.1:.1f} Q{cx},{top - 14:.1f} {cx + rx + 12},{top + sl * side * 1.1:.1f}", sw=26))
     else:
-        out.append(path(f"M{cx - rx + 2},{cy - ry * 0.58:.1f} Q{cx},{cy - ry - 18:.1f} {cx + rx - 2},{cy - ry * 0.58:.1f}", sw=34))
+        out.append(path(f"M{cx - rx - 2},{cy - ry * 0.40:.1f} Q{cx},{cy - ry - 26:.1f} {cx + rx + 2},{cy - ry * 0.40:.1f}", sw=34))
+        out.append(path(f"M{cx - rx * 0.86:.1f},{cy + ry * 0.48:.1f} Q{cx},{cy + ry + 14:.1f} {cx + rx * 0.86:.1f},{cy + ry * 0.48:.1f}", stroke=RIM, sw=9))
         out.append(flick(cx, cy, rx, ry, side))
     if low is not None:
         by = cy + ry - low
@@ -228,7 +233,7 @@ def brows(kind: str, mirror=False) -> str:
 def mouth(kind: str) -> str:
     y = MOUTH_Y
     if kind == "smile":
-            return path(f"M{296},{y - 20} Q500,{y + 70} {704},{y - 20}", sw=34)
+            return path(f"M{268},{y - 24} Q500,{y + 78} {732},{y - 24}", sw=40)
     if kind == "grin":      # a sneaky open grin, teeth + tongue
         d = f"M290,{y - 40} Q500,{y - 6} 710,{y - 48} Q672,{y + 104} 500,{y + 110} Q328,{y + 104} 290,{y - 40} Z"
         return (path(d, fill=MOUTH, sw=26) + f'<clipPath id="gr"><path d="{d}"/></clipPath><g clip-path="url(#gr)">' +
@@ -249,7 +254,7 @@ def mouth(kind: str) -> str:
     if kind == "puffed":    # cheeks full of air, lips pressed small
         return (ell(500, y + 10, 64, 34, "#F4B8BE", INK, 20) + path(f"M462,{y + 10} L538,{y + 10}", sw=16))
     if kind == "shh":       # pursed little 'o' pushed to one side
-        return ell(470, y + 8, 38, 34, MOUTH, INK, 22)
+        return ell(462, y + 8, 52, 46, MOUTH, INK, 24) + ell(462, y + 24, 26, 14, TONGUE)
     if kind == "tongue":    # concentration: tongue poking out of the corner
         return (path(f"M320,{y} Q500,{y + 46} 680,{y - 6}", sw=32) + ell(620, y + 40, 44, 40, TONGUE, INK, 16) +
                 path(f"M620,{y + 18} L620,{y + 60}", stroke="#D05A6E", sw=8))
@@ -262,18 +267,18 @@ def mouth(kind: str) -> str:
 # extras: rosy cheeks + the navy teardrop mark (identity), blush, sweat, crying tears
 # -------------------------------------------------------------------------------------------------------------
 def tear_mark(x):
-    return path(f"M{x},{590} q-22,38 0,58 q22,-20 0,-58 Z", fill=TEAR_MARK, stroke=TEAR_MARK, sw=8)
+    return path(f"M{x},{632} q-24,40 0,62 q24,-22 0,-62 Z", fill=TEAR_MARK, stroke=TEAR_MARK, sw=8)
 
 
 def extra(kind: str) -> str:
     def cheeks(a, mark_x):
         return (ell(190, 648, 84, 50, CHEEK, opacity=a) + ell(810, 648, 84, 50, CHEEK, opacity=a) + tear_mark(mark_x))
     if kind == "cheeks":
-        return cheeks(0.85, EYE_X[1] + 40)
+        return cheeks(0.85, EYE_X[1] + 58)
     if kind == "cheeks_m":
-        return cheeks(0.85, EYE_X[0] - 40)
+        return cheeks(0.85, EYE_X[0] - 58)
     if kind in ("blush", "blush_m"):
-        mx = EYE_X[1] + 40 if kind == "blush" else EYE_X[0] - 40
+        mx = EYE_X[1] + 58 if kind == "blush" else EYE_X[0] - 58
         return (ell(190, 646, 96, 58, "#FF7F92", opacity=0.95) + ell(810, 646, 96, 58, "#FF7F92", opacity=0.95) +
                 "".join(path(f"M{x},{622} l-22,44", stroke="#D94A62", sw=12) for x in (160, 200, 240, 780, 820, 860)) +
                 tear_mark(mx))
@@ -315,6 +320,7 @@ CELLS = [
     ("eyes", "happy", lambda: eyes("happy")), ("eyes", "wink", lambda: eyes("wink")),
     ("eyes", "wink_m", lambda: eyes("wink", mirror=True)), ("eyes", "spiral", lambda: eyes("spiral")),
     ("pupils", "centre", lambda: pupils()),
+    ("pupils", "small", lambda: pupils(r=IRIS_R * 0.72)),
     ("brows", "neutral", lambda: brows("neutral")), ("brows", "up", lambda: brows("up")),
     ("brows", "determined", lambda: brows("determined")), ("brows", "worried", lambda: brows("worried")),
     ("brows", "sly", lambda: brows("sly")), ("brows", "sly_m", lambda: brows("sly", mirror=True)),
@@ -352,7 +358,10 @@ def build(out_dir: str, preview: bool = False, json_dir: str = "") -> dict:
     mirror = dict(MIRROR)
     info = {"atlas": "face_hush.png", "atlas_px": ATLAS, "grid": [GRID, GRID], "cell_px": CELL,
             "layers": LAYERS, "draw_order": DRAW_ORDER, "layer_rects": {k: list(v) for k, v in RECTS.items()},
-            "cells": cells, "mirror_cells": mirror}
+            "cells": cells, "mirror_cells": mirror,
+            "marks": {"eye_x": list(EYE_X), "eye_y": EYE_Y, "eye_rx": EYE_RX, "eye_ry": EYE_RY, "iris_r": IRIS_R,
+                      "mouth_x": [268, 732], "mouth_y": MOUTH_Y, "brow_y": BROW_Y, "brow_w": BROW_W,
+                      "units": "face units: 1000 = the face square (FACE_W m), y down"}}
     with open(os.path.join(json_dir, "face_hush.json"), "w") as f:
         json.dump(info, f, indent=1)
         f.write("\n")

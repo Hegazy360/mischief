@@ -35,10 +35,11 @@ CLIP_ID="$WHAT"
     --audio-driver Dummy --resolution 640x360 --path "$SB" -s res://tools/anim3d/sheet3d.gd -- \
     "--rig=$RIG" "${MODE[@]}" "--out=$RAW" "$@" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)|V-Sync|set_use_vsync" | tail -30
-  if [ "${MODE[0]}" = "--mode=clip" ] && grep -q 'format=3d' "$SB/tools/anim/lint_anim.gd" 2>/dev/null; then
+  if [ "${MODE[0]}" = "--mode=clip" ] && [[ " $* " != *" --anim-glb="* ]] && grep -q 'format=3d' "$SB/tools/anim/lint_anim.gd" 2>/dev/null; then
     STEM="${CLIP_ID##*/}"
-    NO_IMPORT=1 "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" -s res://tools/anim/lint_anim.gd -- --format=3d "--clip=$CLIP_ID" \
-      >"$OUT/${STEM}_lint.txt" 2>&1 || true
+    # The same sandbox (already imported), no re-sync: the cast glbs' .import files live only in the sandbox.
+    "$ROOT/tools/scripts/slot.sh" timeout 300 godot --headless --path "$SB" -s res://tools/anim/lint_anim.gd -- --format=3d \
+      "--clip=$CLIP_ID" >"$OUT/${STEM}_lint.txt" 2>&1 || true
   fi
 ) 9>"$BASE/$SB_NAME.lock"
 case "$WHAT" in

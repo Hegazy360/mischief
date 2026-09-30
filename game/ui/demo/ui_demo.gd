@@ -1,27 +1,29 @@
-## UiDemo — the whole HUD over a neutral stage backdrop, driven by a scripted fake HudModel, for
-## screenshots and frame sequences (TECH §5.9, ui brief §3.7).
+## UiDemo — the whole R3D HUD and the world overlays over a greybox 3D kitchen (FakeAnchors at the
+## REDESIGN §5.2 base framing, house.json's frozen rects), driven by a scripted fake HudModel and — for
+## the overlay states — by the REAL OverlayRules on a fake ViewSnapshot of the real content, for
+## screenshots and frame sequences (r3d-hud brief §6).
 ##
 ## User args (after `--`):
-##   --state=<name>   one of STATES (default "rig_50")
-##   --left-handed    mirror the clusters
+##   --state=<name>        one of STATES (default "play_quiet")
+##   --anchors=fake_kitchen  the 3D greybox anchor source (default); `--backdrop=2d` = the old 2D parlour
+##   --left-handed         mirror the clusters
 ##   --safe-area=L,T,R,B   fake notch insets (logical px; SafeArea reads it)
-##   --text-big       render with "Text +20 %" (the setting, not persisted)
-##   --cycle          step through every state (CYCLE_FRAMES apart) — pair with DevShot
-##                    `--shot-seq=/abs/dir --every=<CYCLE_FRAMES> --count=<n>`
-## The backdrop is a greybox parlour (or art-house's parlour art when it exists) with two
-## stand-in characters, so the HUD is judged over a busy world.
+##   --text-big            render with "Text +20 %" (the setting, not persisted)
+##   --cycle               step through every state (CYCLE_FRAMES apart) — pair with DevShot
+##                         `--shot-seq=/abs/dir --every=<CYCLE_FRAMES> --count=<n>`
 extends Node
 
 const STATES: PackedStringArray = [
-	"rig_0", "rig_50", "rig_100", "rig_dim", "freeze", "pop_green", "pop_amber", "pop_red", "go", "ff",
-	"lure_grey", "tray_highlight", "figgis_pulse", "figgis_card", "pip_steaming", "edge_bubble", "pick_strip",
-	"script", "pause", "settings", "loading", "results", "encore",
-	# Stage 2 (s2-ui §4.2)
-	"emote_sing", "emote_hum", "emote_smug", "emote_laugh", "emote_tut", "emote_sniff", "emote_yum", "emote_yawn",
-	"ghost_world", "ghost_world_hold", "ghost_follow", "figgis_arrow", "figgis_arrow_on", "figgis_proud", "dim",
-	"script_flash", "tray_arrows", "rig_dim_arrow", "pip_escalated", "results_reel", "results_prologue",
-	"results_gate0", "results_why_long", "settings_sound", "settings_comfort", "settings_debug", "loading_vignette",
-	"loading_n01", "pause_nobow",
+	# R3D play states (the four always-on pieces + what shows when)
+	"play_quiet", "rig_live", "rig_dim", "freeze_live", "freeze_filling", "hidden_green", "hidden_red", "go",
+	"carrying", "meter", "running_gag", "catch", "bellows_window", "window_escalated", "edge_badge", "edge_lean",
+	"emote_sing", "figgis_nudge", "figgis_card", "bow", "bow_window", "script_full", "tag_flight", "tray_arrows",
+	"pick_strip", "lure_ring", "lure_grey",
+	# world overlays (REDESIGN §4.1, §4.5)
+	"overlays_v4", "overlays_v1", "overlays_rigging", "overlays_v2", "overlays_v3", "overlays_n4", "overlays_needs",
+	"overlays_items", "overlays_his_ring", "overlays_combine", "placement",
+	# panels
+	"script", "pause", "pause_nobow", "settings", "settings_debug", "loading", "results", "encore",
 ]
 const CYCLE_FRAMES := 40
 const PANELS := {
@@ -29,30 +31,29 @@ const PANELS := {
 	"pause": "res://ui/panels/pause_menu.gd",
 	"pause_nobow": "res://ui/panels/pause_menu.gd",
 	"settings": "res://ui/panels/settings_panel.gd",
-	"settings_sound": "res://ui/panels/settings_panel.gd",
-	"settings_comfort": "res://ui/panels/settings_panel.gd",
 	"settings_debug": "res://ui/panels/settings_panel.gd",
 	"loading": "res://ui/panels/loading_card.gd",
-	"loading_vignette": "res://ui/panels/loading_card.gd",
-	"loading_n01": "res://ui/panels/loading_card.gd",
 	"results": "res://ui/panels/results_screen.gd",
-	"results_reel": "res://ui/panels/results_screen.gd",
-	"results_prologue": "res://ui/panels/results_screen.gd",
-	"results_gate0": "res://ui/panels/results_screen.gd",
-	"results_why_long": "res://ui/panels/results_screen.gd",
 }
-## A point on the backdrop's mantelpiece candles (fraction of the viewport): the demo's "hotspot".
-const WORLD_TARGET := Vector2(0.717, 0.42)
+## Where Hush and Bellows stand per state (metres on the lane; NAN = off stage).
+const KITCHEN := "kitchen"
 
 var hud: Hud
 var model: HudModel
-var state: String = "rig_50"
+var overlays: WorldOverlays
+var anchors: FakeAnchors
+var omodel: OverlayModel = OverlayModel.new()
+var octx: OverlayCtx = null
+var osnap: ViewSnapshot = null
+var db: ContentDB = null
+var state: String = "play_quiet"
 var _cycle: bool = false
 var _frame: int = 0
 var _cycle_i: int = 0
-var _backdrop: Node2D
+var _backdrop_2d: Node2D = null
 var _stalls: Control
 var _pip_vp: SubViewport
+var _overlay_state: bool = false
 
 
 func _ready() -> void:
@@ -63,21 +64,37 @@ func _ready() -> void:
 			_cycle = true
 		elif a == "--text-big":
 			UiKit.text_scale_override = 1.2   # Settings "Text +20 %" without touching the user's file
-	_backdrop = _Backdrop.new()
-	add_child(_backdrop)
+	if UiKit.flag_value("--backdrop") == "2d":
+		_backdrop_2d = _Backdrop.new()
+		add_child(_backdrop_2d)
+	else:
+		anchors = FakeAnchors.new()
+		anchors.name = "FakeKitchen"
+		add_child(anchors)
+		anchors.build_room(KITCHEN, 17.0, NAN)
 	var stalls_layer := CanvasLayer.new()
 	stalls_layer.layer = 9
 	add_child(stalls_layer)
 	_stalls = _StallsStandIn.new()
 	stalls_layer.add_child(_stalls)
 	_pip_vp = SubViewport.new()
-	_pip_vp.size = Vector2i(448, 252)
+	_pip_vp.size = Vector2i(400, 225)
 	_pip_vp.transparent_bg = false
 	_pip_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_pip_vp.add_child(_PipScene.new())
 	add_child(_pip_vp)
+	var fx_layer := CanvasLayer.new()
+	fx_layer.layer = WorldOverlays.LAYER
+	add_child(fx_layer)
+	_fx = _FxStandIn.new()
+	_fx.demo = self
+	fx_layer.add_child(_fx)
+	overlays = WorldOverlays.new()
+	add_child(overlays)
 	hud = Hud.new()
 	add_child(hud)
+	if anchors != null:
+		overlays.setup(anchors, hud)
 	if UiKit.has_flag("--left-handed"):
 		hud.set_left_handed(true)
 	hud.set_pip_texture(_pip_vp.get_texture())
@@ -96,6 +113,15 @@ func _process(_delta: float) -> void:
 		_enter(STATES[_cycle_i])
 	_animate()
 	hud.apply(model)
+	if _overlay_state and octx != null and osnap != null:
+		octx.now_s = float(UiKit.now_ms()) / 1000.0 + 100.0
+		OverlayRules.fill(omodel, osnap, octx)
+		if state == "placement" and anchors != null:
+			_register_fx()
+	elif not _overlay_state:
+		omodel.clear()
+		omodel.hidden = true
+	overlays.apply(omodel)
 
 
 ## Configure the fake model (and panels) for `name`.
@@ -105,152 +131,247 @@ func _enter(name_: String) -> void:
 	hud.ghost_finger(&"")
 	hud.hide_figgis_card()
 	hud.set_dim(false)
-	if hud.script_flash != null:
-		hud.script_flash.queue_free()
-		hud.script_flash = null
 	if hud.action.is_pressed:
 		hud.action.release_touch()
 	if hud.clarence.is_pressed:
 		hud.clarence.release_touch()
+	_overlay_state = name_.begins_with("overlays") or name_ == "placement"
 	var m := HudModel.new()
 	m.applause = 64
-	m.lines_done = 3
-	m.lines_total = 5
-	m.tomatoes_left = 2
-	m.tomatoes_max = 3
+	m.lines_done = 2
+	m.lines_total = 3
+	m.tomatoes_left = -1
+	m.tomatoes_max = -1
 	m.verb = HudModel.Verb.FREEZE
-	m.tray = PackedStringArray(["squeaker", "kipper", "flour"])
 	m.clarence_mode = HudModel.ClarenceMode.SQUEAK
 	m.pip_glyph = "specs_off"
 	m.script_lines = _fake_script()
 	m.script_loop = _fake_loop()
+	m.script_pips = PackedInt32Array([HudModel.Pip.REQ_DONE, HudModel.Pip.REQ_DONE, HudModel.Pip.REQ_OPEN,
+		HudModel.Pip.OPT_DONE, HudModel.Pip.OPT_OPEN, HudModel.Pip.BIG_SEALED])
+	var hush_x := 17.0
+	var bellows_x := NAN
 	match name_:
-		"rig_0", "rig_50", "rig_100":
+		"rig_live":
 			m.verb = HudModel.Verb.RIG
-			m.verb_item_icon = "squeaker"
+			m.verb_item_icon = ""
 			m.verb_target_icon = "tea"
-			m.tray_highlight = 0
-			m.ring_frac = {"rig_0": 0.0, "rig_50": 0.5, "rig_100": 0.62}[name_]
+			m.ring_frac = 0.5
+			hush_x = 15.0
 		"rig_dim":
 			m.verb = HudModel.Verb.RIG_DIM
-			m.verb_item_icon = "butter"
-		"freeze":
-			m.verb = HudModel.Verb.FREEZE
-		"pop_green", "pop_amber", "pop_red":
+			m.verb_item_icon = "squeaker"
+			m.tray_arrows = PackedVector2Array([Vector2(-1, -0.2)])
+			m.tray_arrows_item = "squeaker"
+			hush_x = 14.9
+		"freeze_live":
+			m.freeze_danger = HudModel.FreezeDanger.EXPOSED
+			bellows_x = 15.2
+		"freeze_filling":
+			m.freeze_danger = HudModel.FreezeDanger.FILLING
+			bellows_x = 16.0
+		"hidden_green", "hidden_red":
 			m.verb = HudModel.Verb.POP_OUT
 			m.clarence_mode = HudModel.ClarenceMode.FF
-			m.rim = {"pop_green": HudModel.Rim.GREEN, "pop_amber": HudModel.Rim.AMBER, "pop_red": HudModel.Rim.RED}[name_]
-			if name_ == "pop_red":
-				m.pip_visible = true
-				m.pip_frame_tier = 3
-				m.pip_glyph = "specs_on"
+			m.rim = HudModel.Rim.GREEN if name_ == "hidden_green" else HudModel.Rim.RED
+			hush_x = NAN
+			if name_ == "hidden_red":
+				bellows_x = 16.4
 		"go":
 			m.verb = HudModel.Verb.GO
 			m.rim = HudModel.Rim.AMBER
 			m.clarence_mode = HudModel.ClarenceMode.FF
-		"ff":
-			m.verb = HudModel.Verb.POP_OUT
-			m.rim = HudModel.Rim.GREEN
-			m.clarence_mode = HudModel.ClarenceMode.FF
-		"lure_grey":
-			m.lure_grey = true
-		"tray_highlight":
-			m.verb = HudModel.Verb.RIG
-			m.verb_item_icon = "kipper"
-			m.verb_target_icon = "phone"
-			m.tray_highlight = 1
-		"figgis_pulse":
-			m.figgis_pulse = true
-		"figgis_card":
-			m.figgis_pulse = false
-		"pip_steaming":
-			m.pip_visible = true
-			m.pip_frame_tier = 2
-			m.pip_glyph = "specs_on"
+			hush_x = NAN
+		"carrying":
+			m.tray = PackedStringArray(["squeaker", "kipper"])
+		"meter":
+			m.applause = 64
+		"running_gag":
 			m.link = 2
 			m.mult_pct = 150
 			m.fuse_frac = 0.62
-			m.temper_tier = 2
-			m.applause = 81
-		"edge_bubble":
-			m.edge_bubble_dir = Vector2(0, -1)
-			m.edge_bubble_label = UiStrings.t("hud.edge_upstairs")
+		"catch":
+			m.tomatoes_max = 3
+			m.tomatoes_left = 3
+		"bellows_window", "window_escalated":
+			m.pip_visible = true
+			m.pip_frame_tier = 1
+			m.pip_next_icon = "tea"
+			m.pip_ring_frac = 0.55
+			m.pip_escalated = name_ == "window_escalated"
+		"edge_badge":
+			m.edge_bubble_dir = Vector2(-1, 0)
+			m.edge_badge_icon = "warmup"
+		"edge_lean":
+			m.edge_badge_lean = true
+			m.edge_badge_side = 1
+			m.edge_bubble_dir = Vector2(1, 0)
+			m.edge_badge_icon = "tea"
+		"emote_sing":
+			m.edge_bubble_dir = Vector2(1, 0)
+			m.edge_badge_icon = "warmup"
+			m.edge_bubble_emote = "sing"
+		"figgis_nudge":
+			m.figgis_pulse = true
+		"bow":
+			m.bow_visible = true
+			m.script_pips = PackedInt32Array([HudModel.Pip.REQ_DONE, HudModel.Pip.REQ_DONE, HudModel.Pip.REQ_DONE,
+				HudModel.Pip.OPT_DONE, HudModel.Pip.OPT_OPEN, HudModel.Pip.BIG_OPEN])
+		"bow_window":
+			m.bow_visible = true
+			m.pip_visible = true
+			m.pip_next_icon = "paper"
+			m.pip_ring_frac = 0.3
+		"script_full":
+			var p := PackedInt32Array()
+			for i in 5:
+				p.append(HudModel.Pip.REQ_DONE if i < 3 else HudModel.Pip.REQ_OPEN)
+			for i in 3:
+				p.append(HudModel.Pip.OPT_OPEN)
+			p.append(HudModel.Pip.BIG_SEALED)
+			m.script_pips = p
+		"tray_arrows":
+			m.tray = PackedStringArray(["kipper"])
+			m.tray_arrows = PackedVector2Array([Vector2(1, -0.35), Vector2(-1, 0.1)])
+			m.tray_arrows_item = "kipper"
 		"pick_strip":
 			m.pick_strip_container = "kitchen_pantry_shelf"
 			m.pick_strip_items = PackedStringArray(["flour", "sherbet", "treacle"])
-			m.pick_strip_pos = Vector2(hud.viewport_size().x * 0.55, 560)
-		"emote_sing", "emote_hum", "emote_smug", "emote_laugh", "emote_tut", "emote_sniff", "emote_yum", "emote_yawn":
-			m.edge_bubble_dir = Vector2(1, 0)
-			m.edge_bubble_label = UiStrings.t("hud.edge_room_right")
-			m.edge_bubble_emote = name_.substr(6)
-		"tray_arrows":
-			m.tray_arrows = PackedVector2Array([Vector2(1, -0.35), Vector2(-1, 0.1)])
-			m.tray_arrows_item = "kipper"
-			m.tray_highlight = -1
-		"rig_dim_arrow":
-			m.verb = HudModel.Verb.RIG_DIM
-			m.verb_item_icon = "butter"
-			m.tray_arrows = PackedVector2Array([Vector2(0, -1)])
-			m.tray_arrows_item = "butter"
-		"pip_escalated":
-			m.pip_visible = true
-			m.pip_escalated = true
-			m.pip_frame_tier = 3
-			m.pip_glyph = "stars"
-			m.verb = HudModel.Verb.RIG
-			m.verb_item_icon = "squeaker"
-			m.verb_target_icon = "tea"
-			m.ring_frac = 0.4
-		"figgis_proud":
-			m.figgis_pulse = false
-		"dim":
-			m.paused = true
+			m.pick_strip_pos = Vector2(hud.viewport_size().x * 0.62, 520)
+		"lure_ring":
+			m.lure_ring = HudModel.LureRing.ON
+		"lure_grey":
+			m.lure_ring = HudModel.LureRing.GREY
 		"encore":
 			m.applause = 118
-			m.lines_done = 5
 			m.link = 3
 			m.mult_pct = 200
 			m.fuse_frac = 0.35
 		_:
 			if PANELS.has(name_):
 				m.paused = not name_.begins_with("loading")
+	if _overlay_state:
+		var pos := _overlay_setup(name_, m)
+		hush_x = pos.x
+		bellows_x = pos.y
+	if anchors != null:
+		_place_actors(hush_x, bellows_x)
 	model = m
 	hud.apply(model)
 	_after_enter(name_)
 
 
+func _place_actors(hush_x: float, bellows_x: float) -> void:
+	anchors.build_room(KITCHEN, hush_x, bellows_x)
+	anchors.hush_at = ""
+	if octx != null and _overlay_state:
+		anchors.hush_at = octx.at_hotspot
+
+
+## The overlay scenes: the real OverlayRules on a fake snapshot of the real content. Returns (Hush x m,
+## Bellows x m) for the greybox.
+func _overlay_setup(name_: String, m: HudModel) -> Vector2:
+	if db == null:
+		db = ContentDB.load_dir("res://data")
+	var ep_id := "n02_something_fishy" if name_ in ["overlays_items", "placement"] else "n01_throat_tea"
+	octx = OverlayCtx.new()
+	octx.prepare(db, db.episodes.get(ep_id), null, OverlayCtx.load_previews())
+	if octx.previews.is_empty():
+		var fx := "res://tests/ui/fixtures/previews.json"
+		if FileAccess.file_exists(fx):
+			var j := JSON.new()
+			if j.parse(FileAccess.get_file_as_string(fx)) == OK:
+				octx.prepare(db, db.episodes.get(ep_id), null, j.data)
+	var s := ViewSnapshot.new()
+	s.hush.present = true
+	s.hush.room = KITCHEN
+	s.hush.state = "IDLE"
+	s.bellows.present = true
+	s.bellows.room = "parlour"
+	s.bellows.state = "ROUTINE"
+	for hs in octx.rig_pranks:
+		s.hotspots[hs] = {"kind": "rig_point", "enabled": true, "rigged": false, "spent": false}
+	for r in octx.room_hides:
+		for hs in octx.room_hides[r]:
+			s.hotspots[hs] = {"kind": "hiding", "enabled": true, "occupant": false}
+	for r in octx.room_containers:
+		for c in octx.room_containers[r]:
+			var stock := []
+			for it in octx.item_source:
+				if octx.item_source[it] == c:
+					stock.append(it)
+			s.hotspots[c] = {"kind": "container", "enabled": true, "stock": stock}
+	var hush_x := 16.9
+	var bellows_x := NAN
+	match name_:
+		"overlays_v1", "overlays_rigging":
+			octx.at_hotspot = "kitchen_honey"
+			hush_x = 15.05
+			m.verb = HudModel.Verb.RIG
+			m.verb_target_icon = "tea"
+			if name_ == "overlays_rigging":
+				s.hush.state = "RIGGING"
+				s.hush.rig_pm = 550
+				m.ring_frac = 0.55
+		"overlays_v2":
+			octx.entry_warning = true
+			bellows_x = 13.2
+			m.freeze_danger = HudModel.FreezeDanger.NONE
+			m.pip_visible = true
+			m.pip_next_icon = "tea"
+			m.pip_ring_frac = 0.2
+		"overlays_v3":
+			s.hush.state = "HIDDEN"
+			s.hush.hidden_spot = "kitchen_pantry_curtain"
+			octx.prev_hidden = true
+			hush_x = NAN
+			m.verb = HudModel.Verb.POP_OUT
+			m.clarence_mode = HudModel.ClarenceMode.FF
+		"overlays_n4":
+			octx.idle_s = 7.0
+			octx.next_useful = "kitchen_pickle_jar"
+		"overlays_needs":
+			octx.seen_containers["hall_confiscated_box"] = true
+		"overlays_his_ring":
+			for a in octx.trig_hotspots:
+				if (octx.trig_hotspots[a] as PackedStringArray).has("kitchen_kettle"):
+					s.bubble_next = a
+			s.bubble_ring_ticks = 120
+			octx.ring_peak = 240
+		"overlays_combine":
+			s.hotspots["kitchen_honey"]["rigged"] = true
+			s.hotspots["kitchen_sink_tap"]["rigged"] = true
+		"placement":
+			# a crowded moment: Hush between the stacked kettle / honey and the fridge, the caption
+			# and his bubble registered by the view's FX in the same placer
+			octx.at_hotspot = "kitchen_fridge_shelf"
+			hush_x = 16.2
+			bellows_x = 17.3
+			m.verb = HudModel.Verb.RIG
+			m.verb_target_icon = "snack"
+	octx.prev_armed = 0
+	for hs in octx.rig_pranks:
+		if bool((s.hotspots[hs] as Dictionary).get("rigged", false)):
+			octx.prev_armed += 1
+	octx.prev_carry = 0
+	s.hush.x = (hush_x if not is_nan(hush_x) else 18.1) * 200.0
+	osnap = s
+	return Vector2(hush_x, bellows_x)
+
+
 func _after_enter(name_: String) -> void:
 	var c := hud.action.size * 0.5
 	match name_:
-		"rig_50", "rig_100":
+		"rig_live":
 			hud.action.touch(true, c, 7)
-		"freeze":
-			hud.action.touch(true, c, 7)
-		"ff":
-			hud.clarence.touch(true, hud.clarence.size * 0.5, 8)
+		"meter":
+			model.applause = 99
+		"catch":
+			model.tomatoes_left = 2
 		"figgis_card":
-			hud.show_figgis_card(UiIcons.card_set("figgis_psst"), 60.0)
-		"figgis_arrow":
-			# the cue card for a line whose rig point is off screen to the right
-			hud.show_figgis_card(UiIcons.card_set("ghost_honey"), 60.0, Vector2(hud.viewport_size().x + 600.0, 520.0))
-		"figgis_arrow_on":
-			hud.show_figgis_card(UiIcons.card_set("card_tray"), 60.0, _world_target())
-		"figgis_proud":
-			hud.figgis.react("proud", 60.0)
-		"rig_0":
-			hud.ghost_finger(&"action", GhostFinger.Mode.HOLD, 1.5)
-		"ghost_world":
-			hud.ghost_finger_at(_world_target(), GhostFinger.Mode.TAP)
-		"ghost_world_hold":
-			hud.ghost_finger_at(_world_target(), GhostFinger.Mode.HOLD, 0.8)
-		"ghost_follow":
-			hud.ghost_finger_follow(_moving_target, GhostFinger.Mode.TAP)
-		"dim":
-			var vs := hud.viewport_size()
-			hud.set_dim(true, Rect2(vs.x * 0.42 - 260.0, vs.y * 0.86 - 520.0, 520.0, 560.0))
-		"script_flash":
-			hud.flash_script(model.script_lines, model.script_loop, 60.0)
-	# the curtain call is staged over the fallen curtain: NightScene hides the play HUD under it
+			hud.show_figgis_card(UiIcons.card_set("card_tray"), 60.0)
+		"tag_flight":
+			hud.fly_tag(Vector2(hud.viewport_size().x * 0.5, 560.0), 2)
 	hud.root.visible = not name_.begins_with("results")
 	if PANELS.has(name_):
 		_open_panel(name_)
@@ -262,78 +383,66 @@ func _open_panel(name_: String) -> void:
 		return
 	var p: Control = (load(path) as GDScript).new()
 	if name_.begins_with("loading"):
-		p.set("auto_close", false)   # a slow software-GL capture can pass the 4 s auto-start
+		p.set("auto_close", false)
 	match name_:
 		"script":
-			p.call("setup", model.script_lines, model.script_loop, 3, 5)
+			p.call("setup", model.script_lines, model.script_loop, 2, 3)
 		"pause":
-			p.call("setup", true)
+			p.call("setup", true, {"applause": 87, "tomatoes_left": 2, "tomatoes_max": 3, "curtain_calls": 1})
 		"pause_nobow":
-			p.call("setup", false)
-		"settings_sound", "settings_comfort", "settings_debug":
-			p.set("tab", name_.substr(9))
+			p.call("setup", false, {"applause": 12})
+		"settings_debug":
+			p.set("tab", "debug")
 			p.set("show_debug", true)
 		"loading":
-			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 2}), "subtitle": "Something Fishy",
-				"text": "Hold FREEZE to be a statue. Specs off, he only spots what moves. Specs on, get out of sight.",
-				"icon": "freeze"})
-		"loading_n01":
 			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 1}), "subtitle": "Throat Tea",
-				"text": "Tap a cupboard to take what's inside. At the right spot the button shows item → target. Hold to rig.",
+				"text": "Tap a cupboard to take what's inside. At the right spot the button lights up. Hold to rig.",
 				"icon": "tray"})
-		"loading_vignette":
-			# a live texture stands in for s2-ftue's 3-s rule vignette
-			p.call("setup", {"title": UiStrings.t("loading.night", {"n": 2}), "subtitle": "Something Fishy",
-				"text": "Hold FREEZE to be a statue. Specs off, he only spots what moves.", "icon": _pip_vp.get_texture()})
 		"results":
 			p.call("setup", {"applause": 91, "stars": [true, true, false], "why": "Applause 91 — land one more prank inside a Running Gag",
 				"new": ["ACHOO-RIA!", "KETTLE DRUM"], "has_next": true, "night_title": "Night 1 · Throat Tea", "stage": true})
-		"results_reel", "results_why_long":
-			p.call("setup", {"applause": 128, "stars": [true, true, true], "new": ["ACHOO-RIA!"], "has_next": true,
-				"night_title": "Night 1 · Throat Tea", "repeat": name_ == "results_reel", "stage": true})
-			var why := "Standing ovation! Bravo!" if name_ == "results_reel" else \
-				"4/5 lines — Bellows still hasn't talked to a fish, and the Big Number is still sealed"
-			p.call("set_why", why)
-			p.call("set_gag_reel_texture", _pip_vp.get_texture())
-		"results_prologue":
-			p.call("setup", {"variant": "prologue", "applause": 42, "why": "", "new": ["ACHOO-RIA!"],
-				"night_title": UiStrings.t("loading.prologue"), "stage": true})
-		"results_gate0":
-			p.call("setup", {"variant": "gate0", "applause": 24, "night_title": UiStrings.t("stage_door.gate0"), "stage": true})
-			p.call("set_gag_reel_texture", _pip_vp.get_texture())
 	hud.show_panel(p)
 
 
-## The demo's world "hotspot" in screen px (the candles on the mantelpiece).
-func _world_target() -> Vector2:
-	return hud.viewport_size() * WORLD_TARGET
+## The view's 2D FX register in the SAME placer every frame (as WorldView3D's will): his thought
+## bubble over his head (fixed, the top priority) and a pun caption by it (the lowest).
+func _register_fx() -> void:
+	var head := anchors.project(anchors.actor_anchor(&"bellows", &"head"))
+	if not head.is_finite():
+		return
+	var it := overlays.placer.request(&"fx_bubble", OverlayPlacer.Pri.BUBBLE,
+		Rect2(head + Vector2(-100, -230), Vector2(200, 170)), head, true)
+	_bubble_rect = it.rect
+	var cap := overlays.placer.request(&"fx_caption", OverlayPlacer.Pri.CAPTION,
+		Rect2(head + Vector2(-60, -120), Vector2(420, 110)), head)
+	_caption_rect = cap.rect if cap.visible else Rect2()
+	_fx.queue_redraw()
 
 
-## A target that drifts (a hotspot while the camera pans) for ghost_finger_follow.
-func _moving_target() -> Vector2:
-	var t := float(_frame) / 60.0
-	return _world_target() + Vector2(sin(t * 1.3) * 420.0, cos(t * 0.9) * 80.0)
+var _bubble_rect := Rect2()
+var _caption_rect := Rect2()
+var _fx: Node2D = null
 
 
 func _animate() -> void:
 	var t := float(_frame) / 60.0
-	if state == "rig_100":
-		model.ring_frac = minf(1.0, 0.62 + t * 0.6)
-	elif state == "pip_steaming":
+	if state == "running_gag":
 		model.fuse_frac = maxf(0.0, 0.62 - t * 0.02)
+	elif state == "overlays_rigging" and osnap != null:
+		osnap.hush.rig_pm = mini(1000, 450 + int(float(_frame % CYCLE_FRAMES) * 6.0))
 
 
 func _fake_script() -> Array:
 	return [
 		{"id": "kettle", "text": "Bellows sings a duet with his kettle", "req": true, "done": true, "rigged": true,
 			"discovered": true, "icon": "tea"},
-		{"id": "sneeze", "text": "A sneeze worthy of the opera", "req": true, "done": true, "rigged": true,
-			"discovered": true, "icon": "tea", "candle": true},
-		{"id": "pickle", "text": "He gets himself in a pickle", "req": true, "done": false, "rigged": true,
+		{"id": "tap", "text": "The tap gives him a bath", "req": true, "done": true, "rigged": true,
+			"discovered": true, "icon": "rinse"},
+		{"id": "pickle", "text": "He gets himself in a pickle", "req": true, "done": false, "rigged": false,
 			"discovered": true, "icon": "pickles"},
-		{"id": "news", "text": "The news makes his eyes pop", "req": false, "done": true, "rigged": false,
+		{"id": "lift", "text": "Lift-off from the recliner", "req": false, "done": true, "rigged": false,
 			"discovered": true, "icon": "paper"},
-		{"id": "tap", "text": "", "req": false, "done": false, "rigged": false, "discovered": false},
+		{"id": "sneeze", "text": "", "req": false, "done": false, "rigged": false, "discovered": false},
 		{"id": "bn", "text": "HOT & COLD: sneeze him into the sink", "req": false, "done": false, "rigged": false,
 			"discovered": true, "big_number": true, "sealed": true},
 	]
@@ -343,67 +452,47 @@ func _fake_loop() -> Array:
 	return [
 		{"activity": "warmup", "rigged": false, "current": false},
 		{"activity": "tea", "rigged": true, "current": true},
-		{"activity": "pickles", "rigged": true, "current": false},
+		{"activity": "pickles", "rigged": false, "current": false},
 		{"activity": "paper", "rigged": false, "current": false},
-		{"activity": "rinse", "rigged": false, "current": false},
+		{"activity": "rinse", "rigged": true, "current": false},
 	]
 
 
-## A greybox parlour: wallpaper, dado, floorboards, a door, props and two stand-in characters.
-class _Backdrop:
+## Stand-ins for the view's 2D FX in the placement demo: his thought bubble and a pun caption.
+class _FxStandIn:
 	extends Node2D
 
-	var _art: Texture2D = null
+	var demo: Node = null
 
-	func _ready() -> void:
-		for p in ["res://art/house/rooms/parlour_bg.svg", "res://art/house/rooms/kitchen_bg.svg"]:
-			if ResourceLoader.exists(p) or FileAccess.file_exists(p):
-				_art = UiIcons.texture(p, 1.0)
-				if _art != null:
-					break
+	func _draw() -> void:
+		if demo == null or String(demo.get("state")) != "placement":
+			return
+		var b: Rect2 = demo.get("_bubble_rect")
+		if b.has_area():
+			UiKit.draw_chunky_rect(self, b, 40.0, UiKit.CREAM, UiKit.CREAM_SHADE, 5.0, 8.0)
+			UiShapes.begin()
+			UiShapes.arc(b.get_center(), 62.0, -PI * 0.5, PI * 0.9, 12.0, UiKit.RED, 40)
+			UiShapes.flush(self)
+			UiKit.draw_icon(self, UiIcons.activity("snack"), Rect2(b.get_center() - Vector2(56, 56), Vector2(112, 112)))
+		var c: Rect2 = demo.get("_caption_rect")
+		if c.has_area():
+			UiKit.draw_text_centered(self, UiKit.display_font(), c.get_center(), "COLD OPEN!", 88, UiKit.GOLD_LIGHT, 12)
+
+
+## The old 2D greybox parlour (`--backdrop=2d`).
+class _Backdrop:
+	extends Node2D
 
 	func _draw() -> void:
 		var vs := get_viewport_rect().size
 		var floor_y := vs.y * 0.86
-		if _art != null:
-			var ts := _art.get_size()
-			var k := maxf(vs.y / ts.y, vs.x / ts.x)
-			draw_texture_rect(_art, Rect2((vs - ts * k) * 0.5, ts * k), false)
-		else:
-			draw_rect(Rect2(Vector2.ZERO, vs), Color("#6E7F66"))
-			var x := 0.0
-			while x < vs.x:
-				draw_rect(Rect2(x, 0, 38, floor_y), Color("#7C8E73"))
-				x += 96.0
-			draw_rect(Rect2(0, floor_y - 170, vs.x, 170), Color("#5B3A2E"))
-			draw_rect(Rect2(0, floor_y - 180, vs.x, 14), Color("#8A5A3C"))
-			draw_rect(Rect2(0, floor_y, vs.x, vs.y - floor_y), Color("#8A5A3C"))
-			draw_rect(Rect2(0, floor_y, vs.x, 10), Color("#4A2E22"))
-			draw_rect(Rect2(vs.x * 0.08, floor_y - 520, 230, 520), Color("#4A2E22"))
-			draw_rect(Rect2(vs.x * 0.08 + 18, floor_y - 500, 194, 500), Color("#6B4430"))
-			draw_rect(Rect2(vs.x * 0.62, floor_y - 300, 360, 300), Color("#2B1E1A"))
-			draw_rect(Rect2(vs.x * 0.62 + 20, floor_y - 340, 320, 50), Color("#3A2A22"))
-			draw_circle(Vector2(vs.x * 0.4, floor_y - 560), 70, Color("#E8B33A"))
-			draw_rect(Rect2(vs.x * 0.36, floor_y - 620, 140, 12), Color("#4A2E22"))
-		# stand-ins: Hush (stripes, beret) and Bellows (plum barrel, silver bouffant)
-		var hx := vs.x * 0.42
-		draw_rect(Rect2(hx - 50, floor_y - 250, 100, 170), Color("#2B3566"))
-		for i in 5:
-			draw_rect(Rect2(hx - 50, floor_y - 240 + i * 34, 100, 14), Color("#FFF6EA"))
-		draw_circle(Vector2(hx, floor_y - 300), 64, Color("#FFF6EA"))
-		draw_circle(Vector2(hx - 10, floor_y - 360), 40, Color("#E23B4E"))
-		draw_rect(Rect2(hx - 40, floor_y - 80, 24, 80), Color("#1B2340"))
-		draw_rect(Rect2(hx + 16, floor_y - 80, 24, 80), Color("#1B2340"))
-		var bx := vs.x * 0.66
-		draw_circle(Vector2(bx, floor_y - 150), 110, Color("#7B3F8C"))
-		draw_circle(Vector2(bx, floor_y - 300), 72, Color("#F4C9A8"))
-		draw_circle(Vector2(bx - 40, floor_y - 360), 50, Color("#D9DCE6"))
-		draw_circle(Vector2(bx + 30, floor_y - 370), 56, Color("#D9DCE6"))
-		draw_rect(Rect2(bx - 50, floor_y - 50, 30, 50), Color("#1B2340"))
-		draw_rect(Rect2(bx + 20, floor_y - 50, 30, 50), Color("#1B2340"))
+		draw_rect(Rect2(Vector2.ZERO, vs), Color("#6E7F66"))
+		draw_rect(Rect2(0, floor_y - 170, vs.x, 170), Color("#5B3A2E"))
+		draw_rect(Rect2(0, floor_y, vs.x, vs.y - floor_y), Color("#8A5A3C"))
 
 
-## The Stalls band stand-in (StallsView is the view task's): silhouetted heads, never a target.
+## The Stalls band stand-in (StallsView is the view task's, hidden at rest in R3D): nothing drawn at
+## rest; kept so a laugh state can be staged later.
 class _StallsStandIn:
 	extends Control
 
@@ -413,31 +502,19 @@ class _StallsStandIn:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 
-	func _draw() -> void:
-		if band.size.x <= 0.0:
-			return
-		var n := 14
-		for i in n:
-			var x := band.position.x + (float(i) + 0.5) * band.size.x / float(n)
-			var r := 26.0 + float((i * 7) % 3) * 6.0
-			var y := band.end.y - r * 0.6
-			draw_circle(Vector2(x, y), r, Color(0.165, 0.118, 0.227, 0.6))
-			if i % 4 == 1:
-				draw_rect(Rect2(x - r * 0.8, y - r * 1.5, r * 1.6, r * 0.8), Color(0.165, 0.118, 0.227, 0.6))
 
-
-## What the fake Bellows-Cam sees: a kitchen corner and Bellows at the kettle.
+## What the fake Bellows window sees: a kitchen corner and Bellows at the kettle.
 class _PipScene:
 	extends Node2D
 
 	func _draw() -> void:
-		draw_rect(Rect2(0, 0, 448, 252), Color("#A9B79A"))
-		draw_rect(Rect2(0, 190, 448, 62), Color("#8A5A3C"))
-		draw_rect(Rect2(40, 110, 150, 80), Color("#E9E2D0"))
-		draw_circle(Vector2(110, 96), 22, Color("#B8BDC9"))
-		draw_circle(Vector2(290, 150), 58, Color("#7B3F8C"))
-		draw_circle(Vector2(290, 70), 38, Color("#F59A94"))
-		draw_circle(Vector2(268, 40), 26, Color("#D9DCE6"))
-		draw_circle(Vector2(308, 36), 28, Color("#D9DCE6"))
-		draw_circle(Vector2(278, 70), 5, Color("#1B2340"))
-		draw_circle(Vector2(302, 70), 5, Color("#1B2340"))
+		draw_rect(Rect2(0, 0, 400, 225), Color("#C7B684"))
+		draw_rect(Rect2(0, 170, 400, 55), Color("#8E6E52"))
+		draw_rect(Rect2(30, 100, 140, 70), Color("#E9E2D0"))
+		draw_circle(Vector2(100, 86), 20, Color("#4E9C9A"))
+		draw_circle(Vector2(260, 132), 52, Color("#7B3F8C"))
+		draw_circle(Vector2(260, 62), 34, Color("#F4C9A8"))
+		draw_circle(Vector2(240, 36), 24, Color("#D9DCE6"))
+		draw_circle(Vector2(278, 32), 26, Color("#D9DCE6"))
+		draw_circle(Vector2(250, 62), 4, Color("#1B2340"))
+		draw_circle(Vector2(272, 62), 4, Color("#1B2340"))

@@ -82,7 +82,15 @@ func test_descriptor_loads_through_rigdef3d() -> void:
 		return
 	var script: Script = load(path)
 	var def = script.call("load", "bellows")
-	assert_true(def != null, "RigDef3D.load(\"bellows\") returns a definition")
+	if not assert_true(def != null, "RigDef3D.load(\"bellows\") returns a definition"):
+		return
+	if def.has_method("is_valid"):
+		assert_true(def.is_valid(), "RigDef3D validates bellows: %s" % str(def.get("errors")))
+		var warn: PackedStringArray = def.get("warnings")
+		for w in warn:
+			# allowed: the soft ride-along stool until r3d-sets builds it; the attachment count (the four bouffant
+			# variants share one slot, so at most variant + stool = 2 are visible at once)
+			assert_true(String(w).contains("stool") or String(w).contains("visible at once"), "RigDef3D warning: " + String(w))
 
 
 func test_scene_instantiates_with_one_skinned_mesh() -> void:

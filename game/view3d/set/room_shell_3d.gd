@@ -17,6 +17,8 @@ var mats: SetMats = null
 ## Built-in id → OBB dictionary (SetGeo) for the collision test.
 var solids: Dictionary = {}
 var _from_glb: bool = false
+## The room palette texture (res://art3d/set/palette_<room>.png) — pieces of this room share it (one material).
+var palette: Texture2D = null
 
 
 ## Builds the shell of `p_room` spanning x0…x1 (metres) from its house3d.json room block. `built` = hotspot id →
@@ -38,11 +40,21 @@ func setup(p_room: String, p_x0: float, p_x1: float, p_def: Dictionary, stage: D
 		pal = load(pal_path) as Texture2D
 	mats = SetMats.new(p_room, null)
 	mats.room_color = SetGeo.color(def.get("wall", null))
+	palette = pal
 	var arch := SetGeo.s(def.get("arch", ""))
 	if arch != "" and ResourceLoader.exists(arch):
 		_from_glb = _build_glb(arch, pal)
 	if not _from_glb:
 		_build_greybox(stage)
+	else:
+		# conditional built-ins (a prop's own shelf) are separate .glbs, placed only when their prop is built
+		for bid in (def.get("built_ins", {}) as Dictionary).keys():
+			var bd: Dictionary = def["built_ins"][bid]
+			if SetGeo.s(bd.get("with", "")) == "":
+				continue
+			var gp := "res://art3d/set/%s.glb" % bid
+			if not (ResourceLoader.exists(gp) and _build_glb(gp, pal, bid)):
+				_build_builtin(String(bid), bd)
 	for bid in (def.get("built_ins", {}) as Dictionary).keys():
 		var bd: Dictionary = def["built_ins"][bid]
 		var b: Array = bd.get("box", [0, 0, 0, 0, 0, 0])
@@ -60,14 +72,14 @@ func from_glb() -> bool:
 	return _from_glb
 
 
-func _build_glb(path: String, pal: Texture2D) -> bool:
+func _build_glb(path: String, pal: Texture2D, node_name: String = "Arch") -> bool:
 	var ps := load(path) as PackedScene
 	if ps == null:
 		return false
 	var inst := ps.instantiate() as Node3D
 	if inst == null:
 		return false
-	inst.name = "Arch"
+	inst.name = node_name
 	add_child(inst)
 	var any := false
 	for n in inst.find_children("*", "MeshInstance3D", true, false):

@@ -1,0 +1,209 @@
+{
+  "props/chandelier.glb": {
+    "parts": [
+      "body"
+    ],
+    "tris": 548
+  },
+  "props/clock.glb": {
+    "parts": [
+      "body",
+      "hands",
+      "pendulum",
+      "armed"
+    ],
+    "tris": 1352
+  },
+  "props/crate.glb": {
+    "parts": [
+      "body",
+      "lid"
+    ],
+    "tris": 360
+  },
+  "props/fridge.glb": {
+    "parts": [
+      "body",
+      "door_upper",
+      "door_lower",
+      "armed"
+    ],
+    "tris": 892
+  },
+  "props/gramophone.glb": {
+    "parts": [
+      "body",
+      "horn",
+      "lever",
+      "armed"
+    ],
+    "tris": 1330
+  },
+  "props/honey_jar.glb": {
+    "parts": [
+      "body",
+      "lid",
+      "pepper_pot",
+      "armed"
+    ],
+    "tris": 1598
+  },
+  "props/kettle.glb": {
+    "parts": [
+      "body",
+      "lid",
+      "armed"
+    ],
+    "tris": 792
+  },
+  "props/mirror.glb": {
+    "parts": [
+      "body",
+      "pane",
+      "armed"
+    ],
+    "tris": 1340
+  },
+  "props/newspaper.glb": {
+    "parts": [
+      "body",
+      "armed"
+    ],
+    "tris": 268
+  },
+  "props/pantry.glb": {
+    "parts": [
+      "body",
+      "curtain"
+    ],
+    "tris": 1560
+  },
+  "props/phone.glb": {
+    "parts": [
+      "body",
+      "handset",
+      "armed"
+    ],
+    "tris": 530
+  },
+  "props/piano.glb": {
+    "parts": [
+      "body"
+    ],
+    "tris": 660
+  },
+  "props/pickle_jar.glb": {
+    "parts": [
+      "body",
+      "lid",
+      "armed"
+    ],
+    "tris": 684
+  },
+  "props/recliner.glb": {
+    "parts": [
+      "body",
+      "key",
+      "armed"
+    ],
+    "tris": 1240
+  },
+  "props/sink_tap.glb": {
+    "parts": [
+      "body",
+      "head",
+      "knob",
+      "armed"
+    ],
+    "tris": 750
+  },
+  "props/wardrobe.glb": {
+    "parts": [
+      "body",
+      "door"
+    ],
+    "tris": 616
+  },
+  "set/coat_stand.glb": {
+    "parts": [],
+    "tris": 256
+  },
+  "set/fire.glb": {
+    "parts": [],
+    "tris": 270
+  },
+  "set/hall_arch.glb": {
+    "parts": [
+      "leaf"
+    ],
+    "tris": 1516
+  },
+  "set/hall_hats.glb": {
+    "parts": [],
+    "tris": 444
+  },
+  "set/hall_window.glb": {
+    "parts": [],
+    "tris": 252
+  },
+  "set/kitchen_arch.glb": {
+    "parts": [],
+    "tris": 2120
+  },
+  "set/kitchen_lamp.glb": {
+    "parts": [],
+    "tris": 286
+  },
+  "set/kitchen_pans.glb": {
+    "parts": [],
+    "tris": 420
+  },
+  "set/kitchen_pickle_shelf.glb": {
+    "parts": [],
+    "tris": 324
+  },
+  "set/kitchen_window.glb": {
+    "parts": [],
+    "tris": 252
+  },
+  "set/log_basket.glb": {
+    "parts": [],
+    "tris": 382
+  },
+  "set/parlour_arch.glb": {
+    "parts": [],
+    "tris": 1080
+  },
+  "set/parlour_portrait.glb": {
+    "parts": [],
+    "tris": 568
+  },
+  "set/parlour_window.glb": {
+    "parts": [],
+    "tris": 252
+  },
+  "set/phone_table.glb": {
+    "parts": [],
+    "tris": 328
+  },
+  "set/picture_frame.glb": {
+    "parts": [],
+    "tris": 120
+  },
+  "set/porch_arch.glb": {
+    "parts": [],
+    "tris": 1552
+  },
+  "set/stool.glb": {
+    "parts": [],
+    "tris": 450
+  },
+  "set/vase.glb": {
+    "parts": [],
+    "tris": 218
+  },
+  "set/vase_smashed.glb": {
+    "parts": [],
+    "tris": 432
+  }
+}

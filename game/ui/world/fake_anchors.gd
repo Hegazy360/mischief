@@ -244,7 +244,7 @@ func protected_rects() -> Array[Rect2]:
 		if pr.has_area():
 			var pv := anchor_of(hush_at, &"preview")
 			if pv.is_finite():
-				pr = pr.expand(project(pv))
+				pr = pr.expand(project(pv) + Vector2(0.0, -60.0))  # = WorldView3D.protected_rects
 			out.append(pr)
 	out.append_array(extra_protected)
 	return out

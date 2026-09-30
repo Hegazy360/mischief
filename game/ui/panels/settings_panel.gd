@@ -4,10 +4,14 @@
 ##            Stare strip
 ##   Sound    Audience · Voices · Music · Sound effects (sliders) · Vibration
 ##   Comfort  Reduce motion · Reduce flashing · Bigger text (+20 %)
-##   Debug    (debug builds only — `show_debug`, default `OS.is_debug_build()`): the three Gate-0
-##            A/B keys — Bellows' voice (Baritone / Tuba = voice_style formant / tuba), Audience
-##            (Voices / Kazoo = crowd_style formant / fallback) and Hush (Mime / Pip = hush_skin
-##            "" / "pip"). The release build has no such tab.
+##   View     (R3D, GDD §3.11 amendments) Previews (Always / When idle = after 6 s idle / Off) · Room
+##            dimming · Outline +50 %
+##   Debug    (debug builds only — `show_debug`, default `OS.is_debug_build()`), two columns: the
+##            three Gate-0 A/B keys — Bellows' voice (voice_style), Audience (crowd_style), Hush's
+##            skin (hush_skin) — and the R3D debug keys: Hush's head (hush_head "" / "head_b", only
+##            when the head_b variant exists, R6), Bellows window (bellows_window sim / lean, R15),
+##            MSAA 3D, Render scale (1.0 / 0.85) and "Night 1/2 previews (work in progress)"
+##            (show_previews). The release build has no such tab.
 ## "Hotspot hints" is the view's hotspot outlines only (ruling L16); Figgis's ladder has no setting.
 ## Reads and writes the Settings autoload (or `settings_node` when injected; a local copy of the
 ## defaults when neither exists, e.g. in the UiDemo). Every change is live (Settings emits
@@ -26,9 +30,13 @@ const TABS := {
 	"sound": [["crowd_vol", "slider"], ["voice_vol", "slider"], ["music_vol", "slider"], ["sfx_vol", "slider"],
 		["haptics", "toggle"]],
 	"comfort": [["reduce_motion", "toggle"], ["reduce_flash", "toggle"], ["text_scale", "text_toggle"]],
-	"debug": [["voice_style", "choice"], ["crowd_style", "choice"], ["hush_skin", "choice"]],
+	"view": [["previews", "choice"], ["room_dimming", "toggle"], ["outline_boost", "toggle"]],
+	"debug": [["voice_style", "choice"], ["crowd_style", "choice"], ["hush_skin", "choice"], ["hush_head", "choice"],
+		["bellows_window", "choice"], ["msaa_3d", "toggle"], ["render_scale", "choice"], ["show_previews", "toggle"]],
 }
-const TAB_ORDER: PackedStringArray = ["play", "sound", "comfort"]
+const TAB_ORDER: PackedStringArray = ["play", "sound", "comfort", "view"]
+## The head_b variant's descriptor (R6): the debug row shows only when it exists.
+const HEAD_B_PATH := "res://data/rigs3d/hush/rig3d_head_b.json"
 const DEBUG_TAB := "debug"
 const HINT_CHOICES: PackedStringArray = ["always", "long_press", "off"]
 ## Values of every choice row, in segment order (Settings.CHOICES holds the same sets).
@@ -37,6 +45,10 @@ const CHOICES := {
 	"voice_style": ["formant", "tuba"],
 	"crowd_style": ["formant", "fallback"],
 	"hush_skin": ["", "pip"],
+	"previews": ["always", "idle_6s", "off"],
+	"hush_head": ["", "head_b"],
+	"bellows_window": ["sim", "lean"],
+	"render_scale": [1.0, 0.85],
 }
 ## String key of each choice segment's label.
 const CHOICE_LABELS := {
@@ -44,6 +56,10 @@ const CHOICE_LABELS := {
 	"voice_style": ["settings.voice_formant", "settings.voice_tuba"],
 	"crowd_style": ["settings.crowd_formant", "settings.crowd_fallback"],
 	"hush_skin": ["settings.skin_mime", "settings.skin_pip"],
+	"previews": ["settings.previews.always", "settings.previews.idle_6s", "settings.previews.off"],
+	"hush_head": ["settings.hush_head_b", "settings.hush_head_scaled"],
+	"bellows_window": ["settings.bellows_window_sim", "settings.bellows_window_lean"],
+	"render_scale": ["settings.render_scale_full", "settings.render_scale_085"],
 }
 const TAB_W := 250.0
 const TAB_W_MIN := 200.0
@@ -96,6 +112,32 @@ func tab_order() -> PackedStringArray:
 	return o
 
 
+## The rows of tab `t` ([key, kind]); the head_b row only when that variant exists (R6).
+static func tab_rows(t: String) -> Array:
+	var out: Array = []
+	for spec in TABS.get(t, []):
+		if String(spec[0]) == "hush_head" and not has_head_b():
+			continue
+		out.append(spec)
+	return out
+
+
+## True when Hush's head_b variant (R6) exists.
+static func has_head_b() -> bool:
+	return FileAccess.file_exists(HEAD_B_PATH) or ResourceLoader.exists(HEAD_B_PATH)
+
+
+## The head_b variant's scale for its label ("1.2"; "" when unknown).
+static func head_b_scale() -> String:
+	if not FileAccess.file_exists(HEAD_B_PATH):
+		return ""
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(HEAD_B_PATH)) != OK or not (j.data is Dictionary):
+		return ""
+	var v: Variant = (j.data as Dictionary).get("head_scale", null)
+	return String.num(float(v), 2) if v != null else ""
+
+
 ## The values a choice row cycles through (segment order).
 static func choices_for(key: String) -> Array:
 	return CHOICES.get(key, HINT_CHOICES) as Array
@@ -109,7 +151,7 @@ func select_tab(t: String) -> void:
 	for r in rows.values():
 		(r as Node).queue_free()
 	rows.clear()
-	for spec in TABS.get(t, []):
+	for spec in tab_rows(t):
 		var key := String(spec[0])
 		var kind := String(spec[1])
 		var row := _SettingRow.new()
@@ -186,13 +228,19 @@ func _layout(rect: Rect2) -> void:
 		b.position = Vector2(x, 8.0)
 		x -= 24.0
 	var y := HEADER_H + GAP
-	for spec in TABS.get(tab, []):
+	var specs := tab_rows(tab)
+	var two_cols := specs.size() > 5
+	var col_w := (w - 64.0 - 24.0) * 0.5 if two_cols else w - 64.0
+	var i := 0
+	for spec in specs:
 		var row: Control = rows.get(String(spec[0]))
 		if row == null:
 			continue
-		row.position = Vector2(32.0, y)
-		row.size = Vector2(w - 64.0, ROW_H)
-		y += ROW_H + GAP
+		var col := 0 if (not two_cols or i < int(ceil(float(specs.size()) / 2.0))) else 1
+		var ri := i if col == 0 else i - int(ceil(float(specs.size()) / 2.0))
+		row.position = Vector2(32.0 + float(col) * (col_w + 24.0), HEADER_H + GAP + float(ri) * (ROW_H + GAP))
+		row.size = Vector2(col_w, ROW_H)
+		i += 1
 
 
 func _draw_card(ci: Control) -> void:
@@ -310,20 +358,20 @@ class _SettingRow:
 				var pct := "%d" % int(round(v * 100.0))
 				UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(kx, ty), pct, UiKit.SIZE_MIN, UiKit.NAVY, 0)
 			"choice":
-				var cur := String(panel.value(key))
+				var cur := str(panel.value(key))
 				var vals := SettingsPanel.choices_for(key)
 				var labels: Array = SettingsPanel.CHOICE_LABELS.get(key, [])
 				for i in vals.size():
 					var sr := Rect2(cr.position.x + float(i) * 244.0, 24.0, 220.0, 96.0)
-					var on := String(vals[i]) == cur
+					var on := str(vals[i]) == cur
 					var pressed := is_pressed and _press_seg == i
 					var fill := UiKit.GOLD if on else UiKit.CREAM
 					if pressed:
 						fill = UiKit.pressed(fill)
 					UiKit.draw_chunky_rect(self, sr, 26.0, fill, UiKit.GOLD_SHADE if on else UiKit.CREAM_SHADE, 5.0, 8.0)
-					var t := UiStrings.t(String(labels[i])) if i < labels.size() else String(vals[i])
-					UiKit.draw_text_centered(self, UiKit.display_font(), sr.get_center() + Vector2(0, -3), t, UiKit.SIZE_MIN,
-						UiKit.NAVY, 0)
+					var t := UiStrings.t(String(labels[i]), {"s": SettingsPanel.head_b_scale()}) if i < labels.size() else str(vals[i])
+					var fs := ScriptPanel.fit_size(UiKit.display_font(), t, 200.0, UiKit.SIZE_MIN)
+					UiKit.draw_text_centered(self, UiKit.display_font(), sr.get_center() + Vector2(0, -3), t, fs, UiKit.NAVY, 0)
 			_:
 				var on := bool(panel.value(key)) if kind == "toggle" else float(panel.value(key)) > 1.05
 				var pr := Rect2(cr.end.x - 200.0, size.y * 0.5 - 44.0, 176.0, 88.0)

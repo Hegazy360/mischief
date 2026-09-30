@@ -1,0 +1,248 @@
+{
+ "version": 1,
+ "doc": "R6 head-readability check (r3d-cast-hush brief 4.3). px at 1200x540 (the render's 1080-logical values x 0.5), base framing (FOV 30, camera 7.5 m in front of the lane, y 1.9 aimed at 1.35), Hush on the lane z -1.0 in the kitchen, facing right. Orientations: cheat35 = body yaw 90-35 (the idle cheat-out, the face 55 deg off frontal), cheat20 = walking (70 deg off), face_to_camera = cheat 35 + a 25 deg head turn to the audience (the face 30 deg off frontal; R5d / look-at). pupil = the camera-side eye (min of width, height); mouth = the smile's corner-to-corner width; face_card = the face paint's projected width; head = chin to the beret top. Measured by projecting the mesh and the atlas marks (tools: the scratch HushStudio measure.gd), so the numbers are exact for the built glb.",
+ "bar": {
+  "head": 60,
+  "face_card": 40,
+  "eye_white_h": 9,
+  "pupil": 4,
+  "mouth": 16,
+  "brow": 3
+ },
+ "rows": [
+  {
+   "head_scale": 1.0,
+   "view": "cheat35",
+   "px": {
+    "head": 54.5,
+    "face_card": 24.6,
+    "eye_white_h": 10.4,
+    "pupil": 5.4,
+    "pupil_far_eye_w": 2.3,
+    "mouth": 10.6,
+    "brow": 3.5
+   },
+   "pass": false,
+   "fails": [
+    "head",
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.0,
+   "view": "cheat20",
+   "px": {
+    "head": 54.5,
+    "face_card": 17.6,
+    "eye_white_h": 10.4,
+    "pupil": 4.0,
+    "pupil_far_eye_w": 0.5,
+    "mouth": 6.2,
+    "brow": 3.4
+   },
+   "pass": false,
+   "fails": [
+    "head",
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.0,
+   "view": "face_to_camera",
+   "px": {
+    "head": 54.4,
+    "face_card": 33.7,
+    "eye_white_h": 10.5,
+    "pupil": 6.8,
+    "pupil_far_eye_w": 4.9,
+    "mouth": 16.2,
+    "brow": 3.5
+   },
+   "pass": false,
+   "fails": [
+    "head",
+    "face_card"
+   ]
+  },
+  {
+   "head_scale": 1.1,
+   "view": "cheat35",
+   "px": {
+    "head": 60.0,
+    "face_card": 27.1,
+    "eye_white_h": 11.5,
+    "pupil": 5.9,
+    "pupil_far_eye_w": 2.5,
+    "mouth": 11.7,
+    "brow": 3.8
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.1,
+   "view": "cheat20",
+   "px": {
+    "head": 60.0,
+    "face_card": 19.4,
+    "eye_white_h": 11.4,
+    "pupil": 4.4,
+    "pupil_far_eye_w": 0.6,
+    "mouth": 6.8,
+    "brow": 3.8
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.1,
+   "view": "face_to_camera",
+   "px": {
+    "head": 59.9,
+    "face_card": 37.1,
+    "eye_white_h": 11.6,
+    "pupil": 7.5,
+    "pupil_far_eye_w": 5.4,
+    "mouth": 17.9,
+    "brow": 3.8
+   },
+   "pass": false,
+   "fails": [
+    "head",
+    "face_card"
+   ]
+  },
+  {
+   "head_scale": 1.2,
+   "view": "cheat35",
+   "px": {
+    "head": 65.4,
+    "face_card": 29.6,
+    "eye_white_h": 12.5,
+    "pupil": 6.5,
+    "pupil_far_eye_w": 2.7,
+    "mouth": 12.7,
+    "brow": 4.2
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.2,
+   "view": "cheat20",
+   "px": {
+    "head": 65.4,
+    "face_card": 21.1,
+    "eye_white_h": 12.5,
+    "pupil": 4.8,
+    "pupil_far_eye_w": 0.6,
+    "mouth": 7.4,
+    "brow": 4.1
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.2,
+   "view": "face_to_camera",
+   "px": {
+    "head": 65.4,
+    "face_card": 40.5,
+    "eye_white_h": 12.7,
+    "pupil": 8.2,
+    "pupil_far_eye_w": 5.9,
+    "mouth": 19.5,
+    "brow": 4.2
+   },
+   "pass": true,
+   "fails": []
+  },
+  {
+   "head_scale": 1.3,
+   "view": "cheat35",
+   "px": {
+    "head": 70.9,
+    "face_card": 32.0,
+    "eye_white_h": 13.6,
+    "pupil": 7.0,
+    "pupil_far_eye_w": 3.0,
+    "mouth": 13.8,
+    "brow": 4.5
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.3,
+   "view": "cheat20",
+   "px": {
+    "head": 70.9,
+    "face_card": 22.9,
+    "eye_white_h": 13.5,
+    "pupil": 5.2,
+    "pupil_far_eye_w": 0.6,
+    "mouth": 8.0,
+    "brow": 4.5
+   },
+   "pass": false,
+   "fails": [
+    "face_card",
+    "mouth"
+   ]
+  },
+  {
+   "head_scale": 1.3,
+   "view": "face_to_camera",
+   "px": {
+    "head": 70.8,
+    "face_card": 43.9,
+    "eye_white_h": 13.7,
+    "pupil": 8.9,
+    "pupil_far_eye_w": 6.4,
+    "mouth": 21.2,
+    "brow": 4.6
+   },
+   "pass": true,
+   "fails": []
+  }
+ ],
+ "step1": {
+  "done": [
+   "face opening widened to x +-0.138 (the bob's sides thinned at the front, B's silhouette kept)",
+   "fringe raised to +0.094 over the head centre",
+   "eyes 0.062 x 0.078 m with a 0.050 m warm iris + 2 highlights",
+   "smile 0.139 m",
+   "brows 0.026 m"
+  ],
+  "verdict": "fails: head height 54.5 px < 60 in every view (B's head is 0.408 m chin-to-beret), face card <= 33.7 px < 40 even with the face turned to the camera"
+ },
+ "step2": {
+  "scales": [
+   1.1,
+   1.2,
+   1.3
+  ],
+  "pivot": "the Head joint (B's neck length kept, ruling R6)",
+  "smallest_passing": 1.2,
+  "condition": "passes every bar with the face given to the camera (cheat 35 + a 25 deg head turn); at the bare 35 deg body cheat the horizontal bars (face card, mouth, far-eye pupil) fail for every scale <= 1.3 because horizontal marks shrink by ~cos 55 deg",
+  "proposal": "head x1.2 (variant head_b: rig3d_head_b.json + hush_head_b.glb, standing 1.674 m)"
+ },
+ "read_test": "pending review (R17): docs/review/r3d-cast-hush/reviewer_prompt.md, packets faces_b_c35 / faces_b_face / faces_hb_c35 / faces_hb_face"
+}

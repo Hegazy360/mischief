@@ -320,7 +320,9 @@ class Skel:
                 leaf = "ball_leaf_" + s
                 toe = self.head(leaf) if self.has(leaf) else self.tail[ball]
                 heel = self.head(foot)
-                out[s] = [(foot, Vector((heel.x, heel.y + 0.02, 0.0))), (foot, Vector((self.head(ball).x, self.head(ball).y, 0.0))),
+                # heel rides on the foot; the ball pad and the toe tip ride on the toe segment (ball bone), so a foot
+                # pitched onto flat toes keeps its ball pad under the joint
+                out[s] = [(foot, Vector((heel.x, heel.y + 0.02, 0.0))), (ball, Vector((self.head(ball).x, self.head(ball).y, 0.0))),
                           (ball, Vector((toe.x, toe.y, 0.0)))]
             self._soles = out
         return self._soles
@@ -453,7 +455,16 @@ def _frame(y, x):
     return Matrix((x, y, z)).transposed().to_quaternion()
 
 
-def solve_arm(pose, side, target, pole, hand_world=None, effector=None, iters=8):
+def _soft(d, lmax, soft):
+    """Soft IK: the reach eases into full extension (no elbow snap when a target crosses the arm's length)."""
+    ds = lmax * (1.0 - soft)
+    if soft <= 0 or d <= ds:
+        return min(d, lmax * 0.9995)
+    s = lmax * soft
+    return ds + s * (1.0 - math.exp(-(d - ds) / s))
+
+
+def solve_arm(pose, side, target, pole, hand_world=None, effector=None, iters=8, soft=0.06):
     """Analytic 2-bone arm IK (look B's): the wrist (hand bone head) — or `effector`, a point in REST armature space
     riding on the hand (e.g. the palm centre) — to `target` (armature space); the elbow bends toward `pole` (a
     direction). `hand_world`: optional world rotation of the hand (a Quaternion about armature axes applied to its rest
@@ -470,7 +481,7 @@ def solve_arm(pose, side, target, pole, hand_world=None, effector=None, iters=8)
     for _ in range(max(1, iters)):
         S = pose.pos(up)
         D = wrist_goal - S
-        d = max(1e-4, min(D.length, (L1 + L2) * 0.9995))
+        d = max(1e-4, _soft(D.length, L1 + L2, soft))
         dv = D.normalized()
         a = (L1 * L1 - L2 * L2 + d * d) / (2 * d)
         h = math.sqrt(max(L1 * L1 - a * a, 0.0))

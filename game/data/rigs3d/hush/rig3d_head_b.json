@@ -1,0 +1,505 @@
+{
+  "version": 1,
+  "rig": "hush",
+  "doc": "Hush (R3D): look B's body dimensions in look A's Toy Box vinyl style. Built by tools/art3d/hush/build.sh (skeleton contract tools/art3d/hush/skeleton.json). Sockets: pos in the bone's local rest frame (Y along the bone), model_pos = the same point in model space at rest (Godot axes, for tests).",
+  "variant": "head_b",
+  "scene": "res://art3d/chars/hush/hush_head_b.glb",
+  "skeleton": "Armature/Skeleton3D",
+  "mesh": "Armature/Skeleton3D/hush_body",
+  "height_m": 1.674,
+  "head_scale": 1.2,
+  "tris": 9856,
+  "deform_bones": 48,
+  "bones": {
+    "root": "root",
+    "pelvis": "pelvis",
+    "spine_top": "spine_03",
+    "neck": "neck_01",
+    "head": "Head",
+    "hand_l": "hand_l",
+    "hand_r": "hand_r",
+    "foot_l": "foot_l",
+    "foot_r": "foot_r"
+  },
+  "sockets": {
+    "grip_r": {
+      "bone": "hand_r",
+      "pos": [
+        -0.03,
+        0.09,
+        0.004
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        -0.61295,
+        1.09709,
+        -0.04355
+      ]
+    },
+    "grip_l": {
+      "bone": "hand_l",
+      "pos": [
+        0.03,
+        0.09,
+        0.004
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.61295,
+        1.09709,
+        -0.04355
+      ]
+    },
+    "head_top": {
+      "bone": "Head",
+      "pos": [
+        -0.0,
+        0.44766,
+        0.03103
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.0,
+        1.6744,
+        -0.02041
+      ]
+    },
+    "brace_r": {
+      "bone": "spine_02",
+      "pos": [
+        -0.072,
+        -0.00268,
+        0.09945
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        -0.072,
+        0.95,
+        0.088
+      ]
+    },
+    "carry_1": {
+      "bone": "spine_02",
+      "pos": [
+        0.078,
+        0.04634,
+        0.13103
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.078,
+        1.0,
+        0.118
+      ]
+    },
+    "carry_2": {
+      "bone": "spine_02",
+      "pos": [
+        0.08,
+        -0.07334,
+        0.11921
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.08,
+        0.88,
+        0.11
+      ]
+    },
+    "feet": {
+      "bone": "root",
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "face": {
+      "bone": "Head",
+      "pos": [
+        -0.0,
+        0.15596,
+        0.21731
+      ],
+      "rot_deg": [
+        0,
+        0,
+        0
+      ],
+      "model_pos": [
+        0.0,
+        1.3768,
+        0.15629
+      ]
+    }
+  },
+  "props": {
+    "clarence": {
+      "bone": "prop_clarence",
+      "states": {
+        "brace": "brace_r",
+        "held": "grip_r",
+        "squeeze": "grip_r"
+      },
+      "default": "brace",
+      "squash_bone": "clarence_body"
+    },
+    "pepper_pot": {
+      "bone": "prop_r",
+      "states": {
+        "held": "grip_r",
+        "hidden": "hidden"
+      },
+      "default": "hidden",
+      "fx_bone": "fx_pepper"
+    }
+  },
+  "attachments": {
+    "tomato_splat": {
+      "scene": "res://art3d/chars/hush/tomato_splat.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "carry_squeaker": {
+      "scene": "res://art3d/chars/hush/carry_squeaker.glb",
+      "socket": "carry_1",
+      "default": false
+    },
+    "carry_magnifier": {
+      "scene": "res://art3d/chars/hush/carry_magnifier.glb",
+      "socket": "carry_1",
+      "default": false
+    },
+    "carry_kipper": {
+      "scene": "res://art3d/chars/hush/carry_kipper.glb",
+      "socket": "carry_2",
+      "default": false
+    }
+  },
+  "slots": {},
+  "anim": {
+    "layers": []
+  },
+  "jiggle": [
+    {
+      "bones": [
+        "beret",
+        "beret_stalk"
+      ],
+      "stiffness": 2.6,
+      "drag": 0.4,
+      "gravity": 0.25,
+      "radius": 0.05,
+      "clamp_deg": 26
+    },
+    {
+      "bones": [
+        "hair_l"
+      ],
+      "stiffness": 3.6,
+      "drag": 0.5,
+      "gravity": 0.35,
+      "radius": 0.03,
+      "clamp_deg": 16
+    },
+    {
+      "bones": [
+        "hair_r"
+      ],
+      "stiffness": 3.6,
+      "drag": 0.5,
+      "gravity": 0.35,
+      "radius": 0.03,
+      "clamp_deg": 16
+    },
+    {
+      "bones": [
+        "brace_l"
+      ],
+      "stiffness": 7.0,
+      "drag": 0.65,
+      "gravity": 0.1,
+      "radius": 0.02,
+      "clamp_deg": 8
+    },
+    {
+      "bones": [
+        "brace_r"
+      ],
+      "stiffness": 7.0,
+      "drag": 0.65,
+      "gravity": 0.1,
+      "radius": 0.02,
+      "clamp_deg": 8
+    },
+    {
+      "bones": [
+        "clarence_body"
+      ],
+      "stiffness": 2.6,
+      "drag": 0.3,
+      "gravity": 0.45,
+      "radius": 0.04,
+      "clamp_deg": 32
+    },
+    {
+      "bones": [
+        "clarence_comb"
+      ],
+      "stiffness": 5.0,
+      "drag": 0.3,
+      "gravity": 0.15,
+      "radius": 0.015,
+      "clamp_deg": 24
+    }
+  ],
+  "face": {
+    "atlas": "res://art3d/chars/hush/face_hush.png",
+    "atlas_px": 1024,
+    "grid": [
+      8,
+      8
+    ],
+    "uv": "TEXCOORD_1 (UV2): planar face square; fuv = (UV2.x, 1 - UV2.y) = (u right as seen from the front, v up); layer cell uv = ((col + lu) / 8, (row + 1 - lv) / 8), lu/lv = fuv inside the layer rect",
+    "layers": [
+      "brows",
+      "eyes",
+      "pupils",
+      "mouth",
+      "extra_a",
+      "extra_b"
+    ],
+    "draw_order": [
+      "extra_a",
+      "brows",
+      "eyes",
+      "pupils",
+      "mouth",
+      "extra_b"
+    ],
+    "layer_rects": {
+      "brows": [
+        0.08,
+        0.63,
+        0.92,
+        0.89
+      ],
+      "eyes": [
+        0.08,
+        0.33,
+        0.92,
+        0.73
+      ],
+      "pupils": [
+        0.08,
+        0.33,
+        0.92,
+        0.73
+      ],
+      "mouth": [
+        0.16,
+        0.06,
+        0.84,
+        0.37
+      ],
+      "extra_a": [
+        0.0,
+        0.16,
+        1.0,
+        0.62
+      ],
+      "extra_b": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    },
+    "cells": {
+      "brows": {
+        "neutral": 12,
+        "up": 13,
+        "determined": 14,
+        "worried": 15,
+        "sly": 16,
+        "sly_m": 17
+      },
+      "eyes": {
+        "open": 0,
+        "wide": 1,
+        "half": 2,
+        "squint": 3,
+        "worried": 4,
+        "closed": 5,
+        "happy": 6,
+        "wink": 7,
+        "wink_m": 8,
+        "spiral": 9
+      },
+      "pupils": {
+        "centre": 10,
+        "small": 11
+      },
+      "mouth": {
+        "smile": 18,
+        "grin": 19,
+        "laugh": 20,
+        "O": 21,
+        "grimace": 22,
+        "puffed": 23,
+        "shh": 24,
+        "tongue": 25,
+        "wavy": 26
+      },
+      "extra_a": {
+        "cheeks": 27,
+        "cheeks_m": 28,
+        "blush": 29,
+        "blush_m": 30
+      },
+      "extra_b": {
+        "sweat": 31,
+        "sweat_m": 32,
+        "tear": 33
+      }
+    },
+    "card_cells": {
+      "eyes_dark_open": 34,
+      "eyes_dark_blink": 35,
+      "pupils_dark": 36
+    },
+    "pupil_range": [
+      0.022,
+      0.035
+    ],
+    "presets": "res://data/rigs3d/hush/faces.json",
+    "blink": {
+      "every_s": [
+        2.0,
+        6.0
+      ],
+      "frames": 6,
+      "cell": "closed",
+      "half_cell": "half",
+      "blinkable": [
+        "open",
+        "wide",
+        "half",
+        "worried"
+      ]
+    },
+    "no_pupils": [
+      "closed",
+      "half",
+      "happy",
+      "wink",
+      "wink_m",
+      "squint",
+      "worried",
+      "spiral"
+    ],
+    "mirror_cells": {
+      "sly": "sly_m",
+      "wink": "wink_m",
+      "cheeks": "cheeks_m",
+      "blush": "blush_m",
+      "sweat": "sweat_m"
+    },
+    "mirror_pupil_x": true,
+    "default": "neutral"
+  },
+  "material": {
+    "palette": "res://art3d/chars/hush/palette_hush.png",
+    "outline_px": 3.5,
+    "rim": 0.45
+  },
+  "vertex_color": {
+    "r": "skin_tint",
+    "g": "stone_keep",
+    "b": "rim_damp",
+    "a": "outline_scale"
+  },
+  "looks": {
+    "TOMATO": {
+      "show": [
+        "tomato_splat"
+      ]
+    },
+    "CARRY_SQUEAKER": {
+      "show": [
+        "carry_squeaker"
+      ]
+    },
+    "CARRY_MAGNIFIER": {
+      "show": [
+        "carry_magnifier"
+      ]
+    },
+    "CARRY_KIPPER": {
+      "show": [
+        "carry_kipper"
+      ]
+    }
+  },
+  "tint": {
+    "tiers": [
+      "#FFFFFF",
+      "#FFFFFF",
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "livid": "#FFFFFF"
+  },
+  "stone": {
+    "color": "#E8E6E1",
+    "keep": [
+      "eyes",
+      "beret",
+      "braces"
+    ],
+    "plinth": "res://art3d/chars/hush/plinth.glb",
+    "tag": "res://art3d/chars/hush/tag_beret.glb"
+  },
+  "cheat": {
+    "idle": 35,
+    "walk": 20,
+    "perform": 35,
+    "face_to_face": 5
+  },
+  "blob_shadow_r": 0.34,
+  "skins": {}
+}

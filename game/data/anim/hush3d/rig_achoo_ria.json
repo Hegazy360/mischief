@@ -1,0 +1,180 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_achoo_ria",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/rig_achoo_ria.res",
+  "length": 48,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 6,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [
+    {
+      "f": 6,
+      "type": "decor",
+      "id": "kitchen_stool",
+      "anim": "wobble"
+    },
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "stool_creak"
+    },
+    {
+      "f": 8,
+      "type": "prop",
+      "op": "show",
+      "prop": "pepper_pot"
+    },
+    {
+      "f": 8,
+      "type": "set_part",
+      "hotspot": "kitchen_honey",
+      "part": "pepper_pot",
+      "visible": false
+    },
+    {
+      "f": 16,
+      "type": "sfx",
+      "id": "pepper_shake"
+    },
+    {
+      "f": 16,
+      "type": "fx",
+      "id": "pepper_stream"
+    },
+    {
+      "f": 26,
+      "type": "sfx",
+      "id": "pepper_shake"
+    },
+    {
+      "f": 26,
+      "type": "fx",
+      "id": "pepper_stream"
+    },
+    {
+      "f": 36,
+      "type": "sfx",
+      "id": "pepper_shake"
+    },
+    {
+      "f": 36,
+      "type": "fx",
+      "id": "pepper_stream"
+    },
+    {
+      "f": 42,
+      "type": "prop",
+      "op": "hide",
+      "prop": "pepper_pot"
+    },
+    {
+      "f": 42,
+      "type": "set_part",
+      "hotspot": "kitchen_honey",
+      "part": "pepper_pot",
+      "visible": true
+    },
+    {
+      "f": 43,
+      "type": "decor",
+      "id": "kitchen_stool",
+      "anim": "wobble"
+    },
+    {
+      "f": 46,
+      "type": "sfx",
+      "id": "step_pizz_up"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "determined"
+    },
+    {
+      "f": 6,
+      "preset": "grin"
+    },
+    {
+      "f": 12,
+      "preset": "sneak"
+    },
+    {
+      "f": 16,
+      "preset": "snicker"
+    },
+    {
+      "f": 26,
+      "preset": "grin"
+    },
+    {
+      "f": 36,
+      "preset": "laugh"
+    },
+    {
+      "f": 41,
+      "preset": "smug"
+    },
+    {
+      "f": 46,
+      "preset": "happy"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/rig_achoo_ria.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      16,
+      26,
+      36
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "step": {
+    "kind": "stool",
+    "h": 0.55,
+    "id": "kitchen_stool",
+    "support": [
+      [
+        0,
+        0.0
+      ],
+      [
+        6,
+        0.55
+      ],
+      [
+        44,
+        0.0
+      ]
+    ]
+  },
+  "stage": {
+    "x": 15.0,
+    "z": -1.4,
+    "facing": -1,
+    "cheat_deg": 10.0
+  }
+}

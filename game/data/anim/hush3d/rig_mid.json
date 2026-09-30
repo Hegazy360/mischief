@@ -1,0 +1,109 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/rig_mid",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/rig_mid.res",
+  "length": 96,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": "rig_pm",
+  "beats": {},
+  "events": [
+    {
+      "f": 28,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 28,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 52,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 52,
+      "type": "sfx",
+      "id": "tinker"
+    },
+    {
+      "f": 76,
+      "type": "mark",
+      "name": "contact"
+    },
+    {
+      "f": 76,
+      "type": "sfx",
+      "id": "tinker"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    },
+    {
+      "f": 12,
+      "preset": "determined"
+    },
+    {
+      "f": 28,
+      "preset": "frantic"
+    },
+    {
+      "f": 34,
+      "preset": "determined"
+    },
+    {
+      "f": 52,
+      "preset": "frantic"
+    },
+    {
+      "f": 58,
+      "preset": "determined"
+    },
+    {
+      "f": 76,
+      "preset": "frantic"
+    },
+    {
+      "f": 88,
+      "preset": "grin"
+    }
+  ],
+  "cheat_deg": 10.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/rig_mid.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "stage": {
+    "x": 0.0,
+    "z": -1.5,
+    "facing": 1,
+    "cheat_deg": 10.0
+  }
+}

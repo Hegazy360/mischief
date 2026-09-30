@@ -43,6 +43,7 @@ static func fill(model: OverlayModel, snap: ViewSnapshot, ctx: OverlayCtx) -> vo
 		model.hidden = true
 		return
 	var at := _at_hotspot(snap, ctx)
+	model.at_hotspot = at
 	var rigging := h.state == "RIGGING"
 	# the ring at the prop: while she holds, or partial after a release (W2)
 	if at != "" and rigging:
@@ -71,7 +72,7 @@ static func fill(model: OverlayModel, snap: ViewSnapshot, ctx: OverlayCtx) -> vo
 		or (ctx.previews_mode == OverlayCtx.MODE_IDLE and ctx.idle_s >= IDLE_HINT_S)
 	var n4 := ctx.idle_s >= IDLE_HINT_S and ctx.next_useful != "" and ctx.previews_mode != OverlayCtx.MODE_OFF
 	# V1: at a rig point — the thought, the other previews faded
-	var at_rig := at != "" and not hidden and not h.moving and _available(snap, at)
+	var at_rig := at != "" and not hidden and not h.moving and _available(snap, at) and _prank_at(snap, ctx, at) != ""
 	if at_rig:
 		var prank := _prank_at(snap, ctx, at)
 		model.thought.hotspot = at
@@ -184,6 +185,29 @@ static func _prank_at(snap: ViewSnapshot, ctx: OverlayCtx, hs: String) -> String
 		return snap.hush.rig_prank
 	var list: PackedStringArray = ctx.rig_pranks.get(hs, OverlayCtx._EMPTY)
 	return list[0] if not list.is_empty() else ""
+
+
+## A stand-in for the hint system's "next useful spot" (N4) until the Night supplies `ctx.next_useful`: the
+## nearest available rig point in Hush's room whose prank's item she carries (or needs none); "" = none.
+static func suggest_next_useful(snap: ViewSnapshot, ctx: OverlayCtx) -> String:
+	if snap == null or ctx == null:
+		return ""
+	var best := ""
+	var best_d := INF
+	for hs in ctx.rigs_in(snap.hush.room):
+		if not _available(snap, hs):
+			continue
+		var prank := _prank_at(snap, ctx, hs)
+		if prank == "":
+			continue
+		var need := String(ctx.prank_needs.get(prank, ""))
+		if need != "" and not snap.hush.carrying.has(need):
+			continue
+		var d := absf(float(ctx.hotspot_x.get(hs, snap.hush.x)) - snap.hush.x)
+		if d < best_d:
+			best_d = d
+			best = hs
+	return best
 
 
 ## Available = the sim lists it enabled, not rigged, not spent (N2).

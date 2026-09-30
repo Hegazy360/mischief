@@ -1,12 +1,14 @@
-## ScriptPanel — "Tonight's Script" (GDD §3.8, §6.2), opened from the Applause-o-Meter (the game
-## pauses while it is up). A 1000 × 680 playbill card:
+## ScriptPanel — "Tonight's Script" (GDD §3.8, §6.2), opened from the Script chip or the transient
+## Applause meter (the game pauses while it is up). A 1000 × 680 playbill card:
 ##   * a curtain-red header with the title;
 ##   * one 84 px row per line (44 px text, auto-shrunk to fit, never below 36): a 72 px status
 ##     stamp (tick = done, Hush's beret = rigged, open ring = to do, wax seal = the Big Number),
 ##     the punchline text ("???" while undiscovered), a candle when solved after a step-3 hint,
 ##     and a red ribbon on required lines. The sealed Big Number reads "Sealed until …";
 ##   * his loop as an activity-icon strip along the bottom, rigged stations stamped with the
-##     beret, the current one ringed.
+##     beret, the current one ringed;
+##   * (R3D, REDESIGN §2.3) tonight's rule as a one-line reminder above the strip (`set_rule`,
+##     the loading card's rule; "" = none).
 ## `setup(lines, loop, done, total)` — lines / loop exactly as HudModel.script_lines / script_loop.
 ## Tap anywhere (or Back) closes with "close".
 ##
@@ -25,6 +27,8 @@ const HEADER_H := 76.0
 const ROW_H := 84.0
 const STRIP_H := 84.0
 const STAMP := 72.0
+## The rule reminder's line.
+const RULE_H := 56.0
 const PAD := 28.0
 ## Flash-mode card scale (1.0: the rows keep their 44 px text — GDD §3.10).
 const FLASH_SCALE := 1.0
@@ -51,6 +55,8 @@ var _sealed: String = ""
 var _big: String = ""
 var _routine: String = ""
 var _loop_tex: Array[Texture2D] = []
+## Tonight's rule (one line; "" = none).
+var rule_text: String = ""
 
 
 ## Fill the panel (call before adding it to the tree, or any time after).
@@ -163,9 +169,17 @@ func _scrim_tap(_pos: Vector2) -> void:
 		close("close")
 
 
-## Row height for `n` lines (84 px, compressed only when 7 lines would overflow the card).
-static func row_height(n: int) -> float:
-	var avail := H - HEADER_H - STRIP_H - 16.0
+## Tonight's rule as the one-line reminder above the routine strip ("" hides it).
+func set_rule(text: String) -> void:
+	rule_text = text
+	if is_inside_tree():
+		card.queue_redraw()
+
+
+## Row height for `n` lines (84 px, compressed only when 7 lines would overflow the card; `rule`:
+## the rule line takes its room first).
+static func row_height(n: int, rule: bool = false) -> float:
+	var avail := H - HEADER_H - STRIP_H - 16.0 - (RULE_H if rule else 0.0)
 	return minf(ROW_H, avail / float(maxi(1, n)))
 
 
@@ -183,13 +197,19 @@ func _draw_card(ci: Control) -> void:
 	var cnt := "%d/%d" % [done_count, total_count]
 	UiKit.draw_text(ci, f, Vector2(W - PAD - 110.0, HEADER_H * 0.5 + 24.0), cnt, UiKit.SIZE_HUD_NUM_S, UiKit.GOLD_LIGHT, 10)
 	# rows
-	var rh := ROW_H if flash_mode else row_height(lines.size())
+	var rh := ROW_H if flash_mode else row_height(lines.size(), rule_text != "")
 	var y := HEADER_H + 8.0
 	for i in lines.size():
 		_draw_row(ci, lines[i], Rect2(PAD, y, W - PAD * 2.0, rh), i)
 		y += rh
 	# his loop (the panel only; the curtain-up flash is the punchlines)
 	if not flash_mode:
+		if rule_text != "":
+			var rt := UiStrings.t("script.rule", {"rule": rule_text}) if UiStrings.has("script.rule") else rule_text
+			var ry := H - STRIP_H - 8.0 - RULE_H
+			var fs := fit_size(UiKit.ui_font(), rt, W - PAD * 2.0, UiKit.SIZE_MIN)
+			ci.draw_string(UiKit.ui_font(), Vector2(PAD, ry + RULE_H * 0.5 + fs * 0.36),
+				clip_text(UiKit.ui_font(), rt, W - PAD * 2.0, fs), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UiKit.CURTAIN_SHADE)
 		_draw_loop(ci, Rect2(PAD, H - STRIP_H - 8.0, W - PAD * 2.0, STRIP_H))
 
 

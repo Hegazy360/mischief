@@ -121,7 +121,8 @@ static func register(def: ClipDef3D, anim: Animation) -> void:
 
 ## Loads an action from a raw glb (look-dev files, UAL libraries) with GLTFDocument (same UAL skeleton and an
 ## armature named `Armature`) and registers it as `<rig>/glb_<name>` (no sidecar: length from the action, loop from
-## its loop mode or a `_Loop` name). Returns the clip id ("" on failure). Dev tools only (AnimViewer3D, sheets).
+## its loop mode or a `_Loop` name; scale tracks dropped — look-dev actions hide their own props with them). Returns
+## the clip id ("" on failure). Dev tools only (AnimViewer3D, sheets, RigPerf3D).
 static func load_glb_action(rig: String, path: String, anim_name: String) -> String:
 	var doc := GLTFDocument.new()
 	var st := GLTFState.new()
@@ -151,6 +152,10 @@ static func load_glb_action(rig: String, path: String, anim_name: String) -> Str
 		return ""
 	var a := (ap.get_animation(pick) as Animation).duplicate() as Animation
 	scene.free()
+	# Look-dev actions hide their own props with scale keys; the rig's prop states rule visibility here.
+	for t in range(a.get_track_count() - 1, -1, -1):
+		if a.track_get_type(t) == Animation.TYPE_SCALE_3D:
+			a.remove_track(t)
 	var nm := "glb_" + pick.get_file().to_snake_case().replace(".", "_")
 	var id := "%s/%s" % [rig, nm]
 	var looped := a.loop_mode != Animation.LOOP_NONE or pick.ends_with("_Loop") or anim_name.ends_with("_Loop")

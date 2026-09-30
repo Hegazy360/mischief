@@ -209,11 +209,13 @@ func _place_chars() -> void:
 			continue
 		rp.position = Vector3(float(spec[0]), float(args.get(who + "_y", "0.0")), float(spec[1]))
 		if rp.has_method("set_facing"):
-			rp.call("set_facing", int(spec[2]), false)
+			rp.call("set_facing", int(args.get(who + "_facing", spec[2])), false)
 		if rp.has_method("set_cheat"):
-			rp.call("set_cheat", 35.0, 0.0)
+			rp.call("set_cheat", float(args.get(who + "_cheat", "35")), 0.0)
 		if rp.has_method("play"):
 			rp.call("play", SetGeo.s(args.get(who + "_clip", spec[3])))
+		if args.has(who + "_frame") and rp.has_method("set_external_frame"):
+			rp.call("set_external_frame", float(args[who + "_frame"]))
 		chars[who] = rp
 
 
@@ -335,41 +337,85 @@ func _id_pass() -> void:
 	var legend := []
 	var used := {}
 	var idx := 0
+	var names: Dictionary = {}
+	if FileAccess.file_exists("res://art3d/set/palettes.json"):
+		var pj: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://art3d/set/palettes.json"))
+		if typeof(pj) == TYPE_DICTIONARY:
+			names = (pj as Dictionary).get("palettes", {})
+	var lit_room := SetGeo.s(args.get("lit", args.get("room", "")))
 	for rid in house.rooms_built():
 		var shell := house.room_shell(rid)
-		var lit_room := SetGeo.s(args.get("lit", args.get("room", "")))
 		var lit := result.rooms_lit.has(rid) and (lit_room == "" or lit_room == rid)
+		var cells: Array = names.get(rid, [])
 		for mi in shell.find_children("*", "MeshInstance3D", true, false):
 			var n := String(mi.name)
-			var cls := "architecture"
-			var region := "%s_%s" % [rid, n]
+			if shell.from_glb() and not cells.is_empty():
+				# one merged arch mesh: an ID palette maps every cell to its region (wall / wainscot / floor / other)
+				var img := Image.create(256, 256, false, Image.FORMAT_RGBA8)
+				img.fill(Color.BLACK)
+				for ci in cells.size():
+					var cname := String(cells[ci])
+					var region := rid + "_arch"
+					var cls := "architecture"
+					if cname == "wall":
+						region = rid + "_wall"
+						cls = "wall"
+					elif cname == "wainscot":
+						region = rid + "_wainscot"
+						cls = "wainscot"
+					elif cname.begins_with("floor_"):
+						region = rid + "_floor"
+						cls = "floor"
+					var col := _id_region(region, cls, rid, lit, legend, used)
+					var cx := (ci % 16) * 16
+					var cy := int(ci / 16.0) * 16
+					img.fill_rect(Rect2i(cx, cy, 16, 16), col)
+				var m := StandardMaterial3D.new()
+				m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				m.albedo_texture = ImageTexture.create_from_image(img)
+				m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				mi.material_override = m
+				continue
+			var cls2 := "architecture"
+			var region2 := "%s_arch" % rid
 			if n == "back_wall":
-				cls = "wall"
-				region = rid + "_wall"
+				cls2 = "wall"
+				region2 = rid + "_wall"
 			elif n == "wainscot":
-				cls = "wainscot"
-				region = rid + "_wainscot"
+				cls2 = "wainscot"
+				region2 = rid + "_wainscot"
 			elif n.begins_with("floor_"):
-				cls = "floor"
-				region = rid + "_floor"
-			idx = _id_assign(mi, region, cls, rid, lit, legend, used, idx)
+				cls2 = "floor"
+				region2 = rid + "_floor"
+			_id_flat(mi, _id_region(region2, cls2, rid, lit, legend, used))
 	for p in house.props():
-		var cls2 := "live_prop" if p.live else "furniture"
+		var cls3 := "live_prop" if p.live else "furniture"
+		var col3 := _id_region(p.hotspot_id, cls3, p.room, true, legend, used, {"halo": true} if p.live else {})
 		for mi in p.find_children("*", "MeshInstance3D", true, false):
 			if String(mi.name).ends_with("_ink") or String(mi.name).ends_with("_halo"):
 				(mi as MeshInstance3D).visible = false
 				continue
-			idx = _id_assign(mi, p.hotspot_id, cls2, p.room, true, legend, used, idx)
+			_id_flat(mi, col3)
 	for pid in result.dressing + result.decor + result.furniture_pieces:
 		var d := house.decor(pid)
 		if d == null:
 			continue
-		var cls3 := "dressing" if (result.dressing.has(pid) or result.decor.has(pid)) else "furniture"
+		var is_dress := result.dressing.has(pid) or result.decor.has(pid)
+		var extra := {"wall": (d as Prop3D).room + "_wall"} if is_dress else {}
+		if pid == "kitchen_lamp":
+			extra["exempt"] = "the light source (REDESIGN §3.7)"
+		var col4 := _id_region(pid, "dressing" if is_dress else "furniture", (d as Prop3D).room, true, legend, used, extra)
 		for mi in d.find_children("*", "MeshInstance3D", true, false):
-			idx = _id_assign(mi, pid, cls3, String((d as Prop3D).room), true, legend, used, idx)
+			_id_flat(mi, col4)
+	var stage_col := _id_region("stage", "architecture", "", true, legend, used)
+	for n2 in house.get_children():
+		if String(n2.name) == "Stage":
+			for mi in n2.find_children("*", "MeshInstance3D", true, false):
+				_id_flat(mi, stage_col)
 	for who in chars.keys():
+		var colc := _id_region(who, "character", "", true, legend, used)
 		for mi in (chars[who] as Node3D).find_children("*", "MeshInstance3D", true, false):
-			idx = _id_assign(mi, who, "character", "", true, legend, used, idx)
+			_id_flat(mi, colc)
 	var path := SetGeo.s(args.get("legend", ""))
 	if path != "":
 		var f := FileAccess.open(path, FileAccess.WRITE)
@@ -379,20 +425,23 @@ func _id_pass() -> void:
 	print("[SetPreview3D] id pass: %d regions" % legend.size())
 
 
-func _id_assign(mi: MeshInstance3D, region: String, cls: String, room: String, lit: bool, legend: Array, used: Dictionary, idx: int) -> int:
-	var col: Color
+func _id_region(region: String, cls: String, room: String, lit: bool, legend: Array, used: Dictionary, extra: Dictionary = {}) -> Color:
 	if used.has(region):
-		col = used[region]
-	else:
-		idx += 1
-		col = _id_color(idx)
-		used[region] = col
-		var row := {"color": "#" + col.to_html(false).to_upper(), "name": region, "class": cls}
-		if room != "":
-			row["room"] = room
-		if cls == "wall" and not lit:
-			row["lit"] = false
-		legend.append(row)
+		return used[region]
+	var col := _id_color(used.size() + 1)
+	used[region] = col
+	var row := {"color": "#" + col.to_html(false).to_upper(), "name": region, "class": cls}
+	if room != "":
+		row["room"] = room
+	if (cls == "wall" or cls == "floor") and not lit:
+		row["lit"] = false
+	for k in extra.keys():
+		row[k] = extra[k]
+	legend.append(row)
+	return col
+
+
+func _id_flat(mi: MeshInstance3D, col: Color) -> void:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = col
@@ -400,15 +449,12 @@ func _id_assign(mi: MeshInstance3D, region: String, cls: String, room: String, l
 	for c in mi.get_children():
 		if c is MeshInstance3D:
 			(c as MeshInstance3D).visible = false
-	return idx
 
 
 static func _id_color(i: int) -> Color:
-	# well-separated 8-bit ids: 5 levels per channel, skipping black
-	var r := (i % 5) * 60 + 15
-	var g := int(i / 5.0) % 5 * 60 + 15
-	var b := int(i / 25.0) % 5 * 60 + 15
-	return Color8(r, g, b)
+	# well-separated 8-bit ids that survive the sRGB round trip: 5 levels per channel (50…250), never black
+	var lv := [50, 100, 150, 200, 250]
+	return Color8(lv[i % 5], lv[int(i / 5.0) % 5], lv[int(i / 25.0) % 5])
 
 
 # --- the 2D overlay (hit rects, anchors, reach table) --------------------------------------------

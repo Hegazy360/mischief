@@ -39,6 +39,9 @@ COLORS = [
     ("stone_dk", "#CFCBC3"),
     ("string", "#3A3050"),
     ("mouth", "#7A2336"),
+    ("red", "#D8344A"),          # the TOMATO splat, the squeaker bulb
+    ("kipper", "#C98A4A"),       # the kipper (smoked-fish gold)
+    ("wood", "#A86B3C"),         # the magnifier handle
 ]
 IDX = {c[0]: i for i, c in enumerate(COLORS)}
 GRID, CELL = 8, 32

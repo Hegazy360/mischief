@@ -6,7 +6,7 @@
   "mesh": "Armature/Skeleton3D/bellows_body",
   "height_m": 1.78,
   "head_scale": 1.0,
-  "tris": 9947,
+  "tris": 9907,
   "deform_bones": 49,
   "bones": {
     "root": "root",
@@ -65,9 +65,9 @@
     "nose_tip": {
       "bone": "nose",
       "pos": [
-        -0.0,
-        0.127,
-        -0.005
+        0.0,
+        0.112,
+        0.0
       ]
     },
     "face": {
@@ -217,6 +217,11 @@
       "bone": "ride",
       "default": false,
       "soft": true,
+      "pos": [
+        0.0,
+        -0.55,
+        0.0
+      ],
       "doc": "the ride-along kitchen stool (r3d-sets' mesh): shown by the sneeze (prop show stool) while the set's stool is hidden by the clip's decor event; missing scene = logged, not fatal"
     }
   },
@@ -359,12 +364,12 @@
     ],
     "order": [
       "extra_a",
-      "extra_b",
       "brows",
       "eyes",
       "pupils",
       "lids",
-      "mouth"
+      "mouth",
+      "extra_b"
     ],
     "layer_rects": {
       "extra_a": [
@@ -591,13 +596,20 @@
       "#F59A94"
     ],
     "livid": "#B8324B",
+    "skin": "#F0C2A0",
+    "mode": "multiply",
     "sideburn_scale": [
       1.0,
       1.15,
       1.15,
       1.35
     ],
-    "livid_specs": "on"
+    "scale_bones": [
+      "sideburn_l",
+      "sideburn_r"
+    ],
+    "livid_specs": "on",
+    "doc": "tiers multiply the skin albedo (2D modulate semantics; skin = the palette peach); char_toon mixes toward skin x tier at full amount; livid mixes toward #B8324B. Sideburn bone scale per tier (livid = tier 3)."
   },
   "stone": {
     "color": "#E8E6E1"

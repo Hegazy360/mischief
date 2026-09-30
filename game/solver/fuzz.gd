@@ -6,7 +6,7 @@
 ##
 ## Bots (each seeded, deterministic):
 ## - `random`: a random command (go / move / pick / rig on-off / freeze on-off / squeak / pin /
-##   pop_out) every 0.2–2 s;
+##   pop_out) every 0.2–2 s; go / pin targets are tonight's built hotspots, 1 in 4 a struck one (rule 13);
 ## - `reckless`: goes straight for every Script prank (picks, rigs, running) ignoring Bellows;
 ## - `hider`: hides in random spots, squeaks from inside, pops out, repeats;
 ## - `bait`: stands in front of him to get spotted on purpose, then runs over rigged STEP pranks
@@ -129,7 +129,9 @@ class Brain extends RefCounted:
 	var episode: String
 	var ex: Executor = null
 	var rooms: PackedStringArray = []
-	var spots: PackedStringArray = []       ## glowing hotspots in the episode's rooms
+	var spots: PackedStringArray = []       ## every hotspot in the episode's rooms
+	var live_spots: PackedStringArray = []  ## the ones the 3D stage builds tonight (live props + doors, exits, stairs)
+	var struck_spots: PackedStringArray = [] ## the rest (struck, REDESIGN_3D §6.2 C1): tapped 1 in 4 to prove rule 13
 	var hiding: PackedStringArray = []
 	var pranks: PackedStringArray = []
 	var _reckless_i: int = 0
@@ -145,11 +147,18 @@ class Brain extends RefCounted:
 			rooms = data.room_ids()
 		# `spots` keeps the struck hotspots too: random taps on them must be refused (invariant rule 13);
 		# the hider only uses tonight's hiding spots.
+		var struck := data.struck_hotspots(episode)
 		for id in data.hotspot_ids():
 			if rooms.has(data.hotspot_room(id)):
 				spots.append(id)
+				if struck.has(id):
+					struck_spots.append(id)
+				else:
+					live_spots.append(id)
 				if data.hotspot_kind(id) == "hiding" and data.is_live(episode, id):
 					hiding.append(id)
+		if live_spots.is_empty():
+			live_spots = spots
 		pranks = data.episode_pranks(episode)
 		# Shuffle the prank order for reckless.
 		for i in range(pranks.size() - 1, 0, -1):
@@ -160,6 +169,13 @@ class Brain extends RefCounted:
 
 	func _pick(arr: PackedStringArray) -> String:
 		return arr[rng.range_int(0, arr.size() - 1)] if not arr.is_empty() else ""
+
+	## A random tap target: mostly what the stage builds (a player can only tap what is there), 1 in 4 a struck
+	## hotspot (a stale tap / a mock-up target) — every one of those must be refused (`cmd_rejected struck`).
+	func _tap() -> String:
+		if not struck_spots.is_empty() and rng.range_int(0, 3) == 0:
+			return _pick(struck_spots)
+		return _pick(live_spots)
 
 	func _gap() -> Dictionary:
 		return {"do": "idle", "s": snappedf(rng.range_int(12, 120) / 60.0, 0.01)}
@@ -181,7 +197,7 @@ class Brain extends RefCounted:
 		var cmd := {}
 		match rng.range_int(0, 9):
 			0, 1, 2:
-				cmd = {"c": "go", "hotspot": _pick(spots), "run": rng.range_int(0, 3) == 0}
+				cmd = {"c": "go", "hotspot": _tap(), "run": rng.range_int(0, 3) == 0}
 			3:
 				var room := _pick(rooms)
 				var r := data.room(room)
@@ -200,7 +216,7 @@ class Brain extends RefCounted:
 				cmd = {"c": "squeak"}
 			8:
 				if p.hush_hidden():
-					cmd = {"c": "pin", "hotspot": _pick(spots)}
+					cmd = {"c": "pin", "hotspot": _tap()}
 				else:
 					cmd = {"c": "freeze", "on": false}
 			9:
@@ -248,7 +264,7 @@ class Brain extends RefCounted:
 		if step_spot == "":
 			var far := ""
 			var far_d := -1
-			for id in spots:
+			for id in live_spots:
 				var d := data.walk_px(room, x, data.hotspot_room(id), data.hotspot_x(id))
 				if d > far_d:
 					far_d = d

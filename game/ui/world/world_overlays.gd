@@ -42,11 +42,16 @@ var size_override: Vector2 = Vector2.ZERO
 var shown_count: int = 0
 var loud_count: int = 0
 var apply_count: int = 0
+## Last apply's phase costs in µs: [protected rects, requests, solve, nodes] (perf probes; always filled, 4 clock reads).
+var phase_us: PackedInt32Array = PackedInt32Array([0, 0, 0, 0])
 
 ## Protected rects of this frame: a fixed pool (unused slots hold FAR, which touches nothing).
 var _protected: Array[Rect2] = []
 var _item_tex: Dictionary = {}
 var _combine_tex: Dictionary = {}
+## The anchor source has a `hud_rects` property (WorldView3D) and a Hud is bound: its protected_rects() already
+## carries the HUD's always-on rects.
+var _src_takes_hud: bool = false
 
 ## Capacity of the protected-rect pool (the anchor source's ~5 + the Hud's 4 + spare).
 const MAX_PROTECTED := 16
@@ -97,6 +102,7 @@ func _init() -> void:
 func setup(p_anchor_src: Object, p_hud: Object = null) -> void:
 	anchor_src = p_anchor_src
 	hud = p_hud
+	_src_takes_hud = anchor_src != null and hud != null and "hud_rects" in anchor_src and hud.has_method("always_on_rects")
 
 
 ## Rasterise every pictogram, item icon and needs silhouette of the Night once (call under the
@@ -130,7 +136,9 @@ func apply(model: OverlayModel) -> void:
 	k = (vs.y / 1080.0) * UiScale.factor_for(vs)
 	shown_count = 0
 	loud_count = 0
+	var t0 := Time.get_ticks_usec()
 	_build_protected(vs)
+	var t1 := Time.get_ticks_usec()
 	var safe := _safe_rect(vs)
 	var src_ok := anchor_src != null and is_instance_valid(anchor_src)
 	var hidden := model.hidden or not src_ok
@@ -166,7 +174,9 @@ func apply(model: OverlayModel) -> void:
 		var want := Rect2(p - Vector2(sz.x * 0.5, sz.y), sz)
 		if kind == &"tag":
 			want = Rect2(p + Vector2(24.0 * k, -sz.y * 0.5), sz)
-		placer.request(_preview_id(i), OverlayPlacer.Pri.PREVIEW, want, p)
+		# the preview of the prop Hush is at: the view protects that prop + its preview FOR it
+		placer.request(_preview_id(i), OverlayPlacer.Pri.PREVIEW, want, p, false,
+			pv.hotspot == model.at_hotspot and pv.hotspot != "")
 	for i in OverlayModel.MAX_ITEMS:
 		if hidden or i >= model.item_count:
 			continue
@@ -179,7 +189,9 @@ func apply(model: OverlayModel) -> void:
 		items[i].set_data(_item_icon(ib.item), k)
 		var sz := items[i].box_size()
 		placer.request(_item_id(i), OverlayPlacer.Pri.ITEM, Rect2(p - Vector2(sz.x * 0.5, sz.y), sz), p)
+	var t2 := Time.get_ticks_usec()
 	placer.solve(_protected, safe)
+	var t3 := Time.get_ticks_usec()
 	# --- results → nodes
 	var th := placer.item(&"ov_thought")
 	if th != null and th.active and th.visible:
@@ -237,6 +249,10 @@ func apply(model: OverlayModel) -> void:
 		_start_flight(f.hotspot, f.line_index)
 	model.flight_count = 0
 	placer.begin_frame()
+	phase_us[0] = t1 - t0
+	phase_us[1] = t2 - t1
+	phase_us[2] = t3 - t2
+	phase_us[3] = Time.get_ticks_usec() - t3
 
 
 ## Start a tag flight from `hotspot`'s projected tag socket to Script pip `line_index` (the Hud's
@@ -328,7 +344,10 @@ func _build_protected(_vs: Vector2) -> void:
 				if r is Rect2 and n < MAX_PROTECTED:
 					_protected[n] = r
 					n += 1
-	if hud != null and is_instance_valid(hud) and hud.has_method("always_on_rects"):
+	# WorldView3D takes the HUD's rects itself (`hud_rects`, grown by its own pad): hand them over, don't add twice
+	if _src_takes_hud:
+		anchor_src.set("hud_rects", hud.call("always_on_rects"))
+	elif hud != null and is_instance_valid(hud) and hud.has_method("always_on_rects"):
 		var hr: Variant = hud.call("always_on_rects")
 		if hr is Array:
 			for r in hr:

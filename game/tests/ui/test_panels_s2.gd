@@ -101,16 +101,20 @@ func test_debug_tab_only_when_asked() -> void:
 	var p := SettingsPanel.new()
 	p.show_debug = false
 	_add(p)
-	assert_eq(p.tab_order(), PackedStringArray(["play", "sound", "comfort"]), "a release build has no Debug tab")
+	assert_eq(p.tab_order(), PackedStringArray(["play", "sound", "comfort", "view"]), "a release build has no Debug tab")
 	assert_false(p.tab_buttons.has("debug"))
 	p.select_tab("debug")
 	assert_eq(p.tab, "play", "and it cannot be selected")
 	var q := SettingsPanel.new()
 	q.show_debug = true
 	_add(q)
-	assert_eq(q.tab_order(), PackedStringArray(["play", "sound", "comfort", "debug"]))
+	assert_eq(q.tab_order(), PackedStringArray(["play", "sound", "comfort", "view", "debug"]))
 	q.select_tab("debug")
-	assert_eq(q.rows.keys(), ["voice_style", "crowd_style", "hush_skin"], "the three Gate-0 keys")
+	var want := ["voice_style", "crowd_style", "hush_skin"]
+	if SettingsPanel.has_head_b():
+		want.append("hush_head")
+	want.append_array(["bellows_window", "msaa_3d", "render_scale", "show_previews"])
+	assert_eq(q.rows.keys(), want, "the three Gate-0 keys + the R3D debug keys (hush_head only with the variant)")
 
 
 func test_debug_rows_write_the_gate0_keys() -> void:
@@ -138,11 +142,17 @@ func test_debug_rows_write_the_gate0_keys() -> void:
 func test_debug_choices_match_the_settings_autoload() -> void:
 	var s := load("res://autoload/settings.gd") as GDScript
 	var choices: Dictionary = s.get_script_constant_map()["CHOICES"]
+	var ranges: Dictionary = s.get_script_constant_map()["RANGES"]
 	for k in SettingsPanel.CHOICES:
-		assert_eq(Array(SettingsPanel.CHOICES[k]), Array(choices[k]), "same values as Settings.CHOICES." + k)
+		if choices.has(k):
+			assert_eq(Array(SettingsPanel.CHOICES[k]), Array(choices[k]), "same values as Settings.CHOICES." + k)
+		else:
+			assert_true(ranges.has(k), "%s: a numeric key the Settings clamp" % k)
+			for v in SettingsPanel.CHOICES[k]:
+				assert_between(float(v), float(ranges[k][0]), float(ranges[k][1]), "%s choice %s in range" % [k, v])
 
 
-func test_settings_header_fits_four_tabs_at_every_width() -> void:
+func test_settings_header_fits_five_tabs_at_every_width() -> void:
 	for w in [2400.0, 1920.0, 2076.0]:
 		var p := SettingsPanel.new()
 		p.show_debug = true
@@ -166,18 +176,16 @@ func test_settings_rows_on_every_tab_are_big_and_apart() -> void:
 	_add(p)
 	for t in p.tab_order():
 		p.select_tab(t)
-		var ys: Array[float] = []
+		var rs: Array[Rect2] = []
 		for k in p.rows:
 			var r: Control = p.rows[k]
 			assert_ge(r.size.y, 144.0, "%s/%s row ≥ 144" % [t, k])
-			ys.append(r.position.y)
-		ys.sort()
-		for i in ys.size() - 1:
-			assert_ge(ys[i + 1] - ys[i], 144.0 + 24.0 - 0.01, "24 px between rows on " + t)
-		var last: Control = null
-		for k in p.rows:
-			last = p.rows[k]
-		assert_le(last.position.y + last.size.y, p.card.size.y + 0.5, "the last row fits the card on " + t)
+			rs.append(Rect2(r.position, r.size))
+			assert_le(r.position.y + r.size.y, p.card.size.y + 0.5, "%s/%s fits the card" % [t, k])
+			assert_le(r.position.x + r.size.x, p.card.size.x + 0.5, "%s/%s fits the card width" % [t, k])
+		for i in rs.size():
+			for j in range(i + 1, rs.size()):
+				assert_false(rs[i].grow(11.99).intersects(rs[j].grow(11.99)), "24 px between rows on " + t)
 
 
 # --- LoadingCard / PauseMenu -------------------------------------------------------------------

@@ -87,3 +87,33 @@ func test_real_prologue_plays_to_the_curtain() -> void:
 	assert_eq(w.stars(), [false, false, false], "no Curtain Calls in the Prologue")
 	for k in w.invariant_counters:
 		assert_eq(int(w.invariant_counters[k]), 0, k)
+
+
+## TECH §3.7.1 (found by fuzz random seed 21 on p00 at Stage 2; pinned here as a scenario so it no longer depends on a
+## fuzz seed's trajectory): in the Prologue's non-repeating loop, a lure 0.5 s into the tea — ACHOO-RIA! rigged —
+## interrupts the tea but does not END it: he comes back and brews again, so the sneeze still lands.
+func test_real_prologue_lure_mid_tea_keeps_the_sneeze() -> void:
+	var db := _db_or_skip()
+	if db == null:
+		return
+	var w := SimWorld.create(db, "p00_curtain_up", {"invariants": true})
+	var log: Array = []
+	assert_true(U.run_until_pred(w, func(x: SimWorld) -> bool: return x.tick >= x.ctx.hush_enter_ticks, 600, log))
+	log.append_array(U.step(w, [SimCmd.squeak()]))
+	U.force_rig(w, "achoo_ria")
+	U.place_hush(w, "parlour", 2700)
+	var tea := U.run_until(w, SimEvents.B_ACTIVITY, {"id": "tea"}, 5000, log)
+	if not assert_false(tea.is_empty(), "he gets to the tea"):
+		return
+	U.place_hush(w, "parlour", 2700)
+	log.append_array(U.run(w, 30))
+	log.append_array(U.step(w, [SimCmd.squeak()]))
+	assert_false(U.first(log, SimEvents.LURE).is_empty(), "the squeak lures him 0.5 s into the tea")
+	var rx := U.run_until(w, SimEvents.REACTION_START, {"prank": "achoo_ria"}, 60 * 60, log)
+	assert_false(rx.is_empty(), "the sneeze still lands")
+	var ended_early := false
+	for ev in log:
+		if str(ev["e"]) == SimEvents.B_ACTIVITY_END and str(ev.get("id", "")) == "tea" and int(ev["t"]) < int(rx.get("t", 1 << 30)):
+			ended_early = true
+	assert_false(ended_early, "the lure mid-tea never ends the tea before its hook (the loop does not come round again)")
+

@@ -51,7 +51,7 @@ PAPER_S = "#DDD3BF"
 WOOD = "#A86B3C"
 WOOD_S = "#80502A"
 SILVER = "#D9DCE6"
-ONION = "#F3E6C8"
+ONION = "#E9B8E6"
 ONION_S = "#D8C49A"
 HAIR = "#4A2C3C"
 
@@ -105,21 +105,22 @@ def poly(pts, fill, w=W):
 # --- the eleven slice pranks -------------------------------------------------------------------
 
 def achoo_ria():
-    """A nose + a star burst: Bellows' big nose explodes into a sneeze."""
+    """A nose + a star burst: Bellows' big bulb nose explodes into a sneeze."""
     b = []
-    # the burst first (behind the nose tip), yellow star with an orange core
-    b.append(star(84, 58, 42, 20, 9, YELLOW, rot=-80))
-    b.append(star(84, 58, 22, 11, 9, ORANGE, rot=-60, w=0))
-    # spray dots
-    for (x, y, r) in ((118, 30, 4), (122, 70, 5), (106, 98, 4), (60, 22, 3.5)):
+    # the burst first (behind the nose tip), a big yellow star with an orange core
+    b.append(star(86, 56, 40, 19, 9, YELLOW, rot=-80))
+    b.append(star(86, 56, 21, 10, 9, ORANGE, rot=-60, w=0))
+    for (x, y, r) in ((122, 26, 4.5), (124, 74, 5), (110, 100, 4.5), (64, 18, 4)):
         b.append(c(x, y, r, WHITE, 3))
-    # the nose (profile, pointing right) on a sliver of face
-    b.append(p("M8 30 Q36 22 44 40 Q60 44 64 60 Q66 80 46 86 Q34 90 28 84 Q14 96 8 92 Z", PEACH))
-    b.append(p("M28 84 Q14 96 8 92 L8 70 Q20 80 28 84 Z", PEACH_S, 0))
-    b.append(p("M30 44 Q54 40 62 58 Q68 78 48 84 Q30 88 26 72 Q22 54 30 44 Z", NOSE))
-    b.append(p("M48 84 Q62 78 62 62 Q66 78 52 86 Q40 90 34 86 Q42 88 48 84 Z", NOSE_S, 0))
-    b.append(e(40, 54, 6, 4, WHITE, 0, rot=-30, op=0.55))
-    b.append(e(44, 76, 5, 3.5, INK, 0, rot=20))
+    # a slice of his face (peach) and the huge bulb nose pointing at the burst
+    b.append(p("M2 20 Q24 14 34 30 L30 116 Q14 122 2 118 Z", PEACH))
+    b.append(p("M2 96 Q16 104 30 100 L30 116 Q14 122 2 118 Z", PEACH_S, 0))
+    b.append(c(46, 72, 30, NOSE))
+    b.append(p("M46 102 Q72 98 76 72 Q74 92 60 100 Z", NOSE_S, 0))
+    b.append(e(36, 60, 8, 5, WHITE, 0, rot=-30, op=0.6))
+    b.append(e(52, 88, 7, 5, "#7A2336", 0, rot=-20))
+    # the "ah-" twitch lines above the nose
+    b.append(ln("M36 26 Q44 18 52 26 M58 30 Q64 24 70 30", 4))
     return svg(["nose", "star_burst"], b)
 
 
@@ -177,21 +178,21 @@ def tap_dance():
     """Tap -> water jet -> face: the spray rose blasts him in the face."""
     b = []
     # tap (top left)
-    b.append(rect(8, 16, 40, 16, STEEL, 6))
-    b.append(p("M40 22 L58 22 Q66 22 66 30 L66 42 L54 42 L54 34 L40 34 Z", STEEL))
-    b.append(c(24, 12, 7, RED, 4))
-    # the spray rose + the jet arcing to the face
-    b.append(e(60, 46, 11, 5, STEEL_S, 4))
-    b.append(p("M52 50 Q70 90 96 84 L100 96 Q62 104 46 54 Z", WATER, 4))
-    b.append(p("M66 52 Q84 80 104 72 L106 82 Q78 92 60 54 Z", WATER, 4))
-    # the face (Bellows, eyes squeezed)
-    b.append(c(104, 96, 20, PEACH, W))
-    b.append(p("M84 88 Q88 76 104 76 Q122 76 124 90 Q112 80 96 84 Z", SILVER, 4))
-    b.append(ln("M96 92 L102 96 L96 100 M114 92 L108 96 L114 100", 3.5))
-    b.append(e(105, 108, 5, 4, "#7A2336", 3))
+    b.append(rect(4, 12, 40, 16, STEEL, 6))
+    b.append(p("M36 18 L54 18 Q62 18 62 26 L62 38 L50 38 L50 30 L36 30 Z", STEEL))
+    b.append(c(18, 8, 7, RED, 4))
+    # the spray rose + a fat jet arcing down to the face
+    b.append(e(56, 42, 12, 6, STEEL_S, 4))
+    b.append(p("M46 46 Q56 92 84 92 L86 108 Q44 110 36 50 Z", WATER, 4))
+    b.append(p("M62 48 Q76 80 94 76 L96 90 Q70 96 54 50 Z", WATER, 4))
+    # the face (Bellows, eyes squeezed shut, mouth O), big
+    b.append(c(98, 98, 27, PEACH, W))
+    b.append(p("M72 90 Q76 70 98 70 Q122 70 126 88 Q110 78 90 80 Z", SILVER, 4))
+    b.append(ln("M86 94 L94 99 L86 104 M112 94 L104 99 L112 104", 4))
+    b.append(e(99, 114, 6, 5, "#7A2336", 3))
     # splash drops
-    for (x, y) in ((80, 110), (122, 112), (86, 70)):
-        b.append(e(x, y, 4, 6, WATER, 3))
+    for (x, y) in ((70, 120), (124, 122), (78, 64)):
+        b.append(e(x, y, 4.5, 7, WATER, 3))
     return svg(["tap", "water_jet", "face"], b)
 
 
@@ -210,12 +211,12 @@ def in_a_pickle():
     b.append(ln("M76 36 L84 40 M74 42 L82 46", 3))
     # strain marks
     b.append(ln("M104 12 L100 20 M114 10 L112 18", 3.5, RED))
-    # flying onions
-    b.append(c(100, 76, 9, ONION, 4))
-    b.append(ln("M100 67 L100 62", 3))
-    b.append(c(114, 100, 8, ONION, 4))
-    b.append(ln("M114 92 L116 87", 3))
-    b.append(ln("M84 70 L92 74 M96 108 L104 104", 3))
+    # flying pickled onions (fat, with a sprout) and speed lines
+    b.append(c(102, 76, 12, ONION, 4))
+    b.append(p("M100 64 Q102 56 108 58", "none", 3.5))
+    b.append(c(112, 106, 11, ONION, 4))
+    b.append(p("M111 95 Q114 88 119 91", "none", 3.5))
+    b.append(ln("M82 70 L90 74 M92 112 L100 110", 3.5))
     return svg(["jar", "straining_arm", "onions"], b)
 
 

@@ -157,7 +157,7 @@ BOUFFANT_LOBES = {
 }
 
 
-def bouffant_neat(HC, color="bouffant", groove="bouffant_dk", scale=1.0, rings=(9, 8), segs=(36, 28)):
+def bouffant_neat(HC, color="bouffant", groove="bouffant_dk", scale=1.0, rings=(9, 7), segs=(36, 24)):
     """The styled dandelion clock: crown + two side lobes; faces hidden inside a neighbour lobe or the head removed."""
     out = {}
     for bone, (off, radii, pole, nr) in BOUFFANT_LOBES.items():
@@ -167,8 +167,8 @@ def bouffant_neat(HC, color="bouffant", groove="bouffant_dk", scale=1.0, rings=(
         bm = lobe(c, rr, pole, color, groove, n_ridges=nr, amp=0.075,
                   rings=rings[0] if crown else rings[1], segs=segs[0] if crown else segs[1])
         others = [(HC + Vector(o) * scale, tuple(r * scale for r in rd)) for b2, (o, rd, _p, _n) in BOUFFANT_LOBES.items() if b2 != bone]
-        T.delete_faces(bm, lambda p, n: any(inside_lobe(p, oc, orr, 0.95) for oc, orr in others)
-                       or inside_lobe(p, HC, HEAD_R[:3], 0.97))
+        T.delete_faces(bm, lambda p, n: any(inside_lobe(p, oc, orr, 0.90) for oc, orr in others)
+                       or inside_lobe(p, HC, HEAD_R[:3], 0.88))
         out[bone] = bm
     return out
 
@@ -179,7 +179,7 @@ def build_body(body, rig, L):
     # ---- head (the face card lives on its front) ----
     lobes = [(HC + Vector(o), r) for o, r, _p, _n in BOUFFANT_LOBES.values()]
     bm = T.blob(lambda d: HC + head_q(d), "peach", n=10)
-    T.delete_faces(bm, lambda c, n: any(inside_lobe(c, lc, lr, 0.96) for lc, lr in lobes))
+    T.delete_faces(bm, lambda c, n: any(inside_lobe(c, lc, lr, 0.84) for lc, lr in lobes))
     body.add(bm, "Head", face_uv={"center": (0.0, FC.z), "w": FACE_W, "h": FACE_H, "front": -0.22, "ymax": HC.y - 0.06},
              name="head")
     # ---- the bulbous rosy nose ----

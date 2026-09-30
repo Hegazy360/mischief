@@ -83,6 +83,9 @@ var puppets: int = 0
 var fallback_by_clip: Dictionary = {}
 
 static var _logged: Dictionary = {}
+## clip id → the sidecar's optional "stage" block ({x, z, facing, cheat_deg}) or {} (r3d-anim: rig clips are
+## authored for one facing; the view plays them that way).
+static var _stage_cache: Dictionary = {}
 
 var _pick := ClipMap.Pick.new()
 var _clip := ""
@@ -905,6 +908,10 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 		cheat = 90.0 - absf(_station_yaw)
 	if _rx_key != "" and not _rx_land.is_empty() and _rx_land.has("yaw") and _landed:
 		cheat = View3DConst.CHEAT_PERFORM
+	if actor == "hush" and cur.state == "RIGGING":
+		var st := CharacterView3D.rig_stage(_clip, facing, cheat)
+		facing = st.x
+		cheat = st.y
 	if bool(_has.get("set_facing", false)):
 		rig.call("set_facing", facing, not (actor == "hush" and cur.entering))
 	if bool(_has.get("set_cheat", false)):
@@ -1073,6 +1080,37 @@ func _known_looks(list: PackedStringArray) -> PackedStringArray:
 
 ## The rig looks for a set of residues: each residue kind, `COSTUME:<look>`, `BLINDED` when blinded, and a
 ## formed combo's `COMBO:<id>` when all its residues are present (residues.json combos).
+## The sidecar "stage" block of a 3D clip ({} when none; cached).
+static func clip_stage(clip_id: String) -> Dictionary:
+	if clip_id == "" or clip_id == STATIC_CLIP:
+		return {}
+	if _stage_cache.has(clip_id):
+		return _stage_cache[clip_id]
+	var out := {}
+	var path := ClipMap.sidecar_path(clip_id)
+	if path != "" and FileAccess.file_exists(path):
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if d is Dictionary and (d as Dictionary).get("stage") is Dictionary:
+			out = (d as Dictionary)["stage"]
+	_stage_cache[clip_id] = out
+	return out
+
+
+## While a rig clip plays: its authored facing (the prop's side) and a cheat ≤ CHEAT_REACH_MAX (r3d-anim's
+## "stage" block); otherwise (`facing`, `cheat`) unchanged. Returns Vector2i(facing, cheat).
+static func rig_stage(clip_id: String, facing: int, cheat: float) -> Vector2i:
+	var st := CharacterView3D.clip_stage(clip_id)
+	if st.is_empty():
+		return Vector2i(facing, roundi(cheat))
+	var f := facing
+	if st.has("facing"):
+		f = 1 if float(st["facing"]) >= 0.0 else -1
+	var c := minf(cheat, View3DConst.CHEAT_REACH_MAX)
+	if st.has("cheat_deg"):
+		c = minf(float(st["cheat_deg"]), View3DConst.CHEAT_REACH_MAX)
+	return Vector2i(f, roundi(c))
+
+
 static func rig_looks(residues: PackedStringArray, formed: PackedStringArray, blinded: bool, costume: String) -> PackedStringArray:
 	var out := PackedStringArray()
 	for r in residues:

@@ -118,6 +118,9 @@ var tag_flights: Array[FlightEntry] = []
 var flight_count: int = 0
 ## Everything hides (WorldOverlays fades the lot out).
 var hidden: bool = false
+## The rig point Hush stands at ("" = none): its preview is exempt from the view's "prop Hush is at
+## (+ its preview)" protected rect (REDESIGN §2.5 protects it FOR that preview).
+var at_hotspot: String = ""
 
 
 func _init() -> void:
@@ -142,6 +145,7 @@ func clear() -> void:
 	rig_ring.active = false
 	safety_marker.hotspot = ""
 	hidden = false
+	at_hotspot = ""
 
 
 ## Next free preview slot (null when the pool is full). The caller fills every field it needs.

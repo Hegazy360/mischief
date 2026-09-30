@@ -139,19 +139,21 @@ class Clip:
         self.ual_basis = None            # [{bone: (loc, rot, scale)}] per frame for UAL clips
         self._cache = {}
         self._bcache = {}
+        self.ik_misses = {}              # (frame, side) -> metres the IK effector stays off its target (out of reach)
         self._key_poses = None
 
     # --- authoring ------------------------------------------------------------------------------
     def key(self, f, pose, ease="in_out_sine"):
-        """A key pose at frame f; `ease` is the curve INTO this key."""
+        """A key pose at frame f (any order; one key per frame); `ease` is the curve INTO this key."""
         if not E.valid(ease):
             raise BakeError("%s: unknown ease '%s'" % (self.id, ease))
         f = int(f)
         if f < 0 or f > self.length:
             raise BakeError("%s: key frame %d outside 0..%d" % (self.id, f, self.length))
-        if self._keys and f <= self._keys[-1].f:
-            raise BakeError("%s: key frames must increase (%d after %d)" % (self.id, f, self._keys[-1].f))
+        if any(k.f == f for k in self._keys):
+            raise BakeError("%s: two keys on frame %d" % (self.id, f))
         self._keys.append(_Key(f, dict(pose), ease, None))
+        self._keys.sort(key=lambda k: k.f)
         if ease == "pop" and f not in self.pop_frames:
             self.pop_frames.append(f)
         self._key_poses = None
@@ -265,10 +267,11 @@ class Clip:
         return self
 
     def reach(self, side, target, f0, f1, pole=None, hand=None, effector="palm", blend=5, look=True):
-        """IK to a world target (a placed reach target) + the head turned to the camera so the face reads (R5d)."""
-        self.ik(side, target, f0, f1, pole=pole, hand=hand, effector=effector, blend=blend, world=True)
+        """IK to a world target (a placed reach target) + the head turned to the camera so the face reads (R5d).
+        The look is added BEFORE the IK (it turns the upper spine, which would carry the hand off the target)."""
         if look:
             self.look(("camera",), f0, f1, weight=0.8, blend=blend)
+        self.ik(side, target, f0, f1, pole=pole, hand=hand, effector=effector, blend=blend, world=True)
         return self
 
     def look(self, target, f0, f1, weight=1.0, blend=4, bones=("spine_03", "neck_01", "Head"), share=(0.15, 0.3, 0.55)):
@@ -389,12 +392,22 @@ class Clip:
                 # release: ease from the pinned lift-off back to the keyed swing
                 ap1 = self._anchor_pose(mod(f1))
                 off = ankle - ap1.pos(ft)
-                for i in range(1, a["release"] + 1):
+                off.z = 0.0                      # the lift is the keyed one; only the horizontal pin eases out
+                i = 0
+                held = 0
+                while i < a["release"]:
+                    i += 1
                     f = f1 + i
                     if (side, mod(f)) in plan or (not self.loop and f > n):
                         break
-                    w = 1.0 - E.apply("in_out_sine", i / float(a["release"] + 1))
                     apf = self._anchor_pose(mod(f))
+                    low = min(p.z for p in sk.sole_points(apf.world, side)) - self.support_at(mod(f))
+                    if low < 0.016 and held < 12:
+                        held += 1                # still (almost) on the support: keep it put horizontally
+                        w = 1.0
+                        i -= 1
+                    else:
+                        w = 1.0 - E.apply("in_out_sine", i / float(a["release"] + 1))
                     plan[(side, mod(f))] = (apf.pos(ft) + off * w, apf.world_rot(ft))
         self._plan = plan
         self._auto_runs = runs
@@ -542,9 +555,11 @@ class Clip:
                     continue
                 if n.startswith("_") or not sk.has(n):
                     continue
-                rots, _, _ = P._spec(v)
+                rots, _, t = P._spec(v)
                 q = P.rot_q([(ax, deg * w) for ax, deg in rots])
                 loc, rot, sc = pose.get(n)
+                if t is not None:
+                    loc = loc + sk.basis_loc(n, Vector(t) * w)
                 pose.basis[n] = (loc, sk.basis_rot(n, q) @ rot, sc)
         for _, ld in self._dict_layers():
             for n, rots in ld.items():
@@ -630,8 +645,11 @@ class Clip:
                     continue
                 goal = self._target(target, f, pose, world)
                 ikp = pose.copy()
-                hw = P.rot_q(hand) if hand is not None else None
-                P.solve_arm(ikp, side, goal, pole, hand_world=hw, effector=self._effector(side, effector))
+                hand_v = hand(f) if callable(hand) else hand
+                hw = P.rot_q(hand_v) if hand_v is not None else None
+                err = P.solve_arm(ikp, side, goal, pole, hand_world=hw, effector=self._effector(side, effector))
+                if w >= 0.99 and err > 0.01:
+                    self.ik_misses[(f, side)] = round(err, 3)
                 for b in ("upperarm_" + side, "lowerarm_" + side, "hand_" + side):
                     pose.set_rot(b, P.qslerp(pose.get(b)[1], ikp.get(b)[1], w))
                 pose.solve()

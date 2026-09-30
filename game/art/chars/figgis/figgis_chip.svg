@@ -35,11 +35,13 @@
 <path d="M11 118 L117 118 L117 123 L11 123 Z" fill="#C99422" fill-opacity="1.00"/>
 <path d="M14 110 L114 110" fill="none" stroke="#FFE08A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 <g transform="rotate(-10 44 110)">
-<path d="M35 120 Q30 106 42 99 Q56 102 54 118 Q44 124 35 120 Z" fill="#FFFFFF" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M48 120 Q54 112 53 106" fill="#E9E6F0" fill-opacity="1.00"/>
+<ellipse cx="44" cy="114" rx="13" ry="10" fill="#FFFFFF" fill-opacity="1.00" stroke="#1B2340" stroke-width="4"/>
+<ellipse cx="48" cy="118" rx="7" ry="4" fill="#E9E6F0" fill-opacity="1.00"/>
+<path d="M40 106 L40 113 M48 106 L48 113" fill="none" stroke="#1B2340" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g transform="rotate(10 84 110)">
-<path d="M75 120 Q70 106 82 99 Q96 102 94 118 Q84 124 75 120 Z" fill="#FFFFFF" stroke="#1B2340" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M88 120 Q94 112 93 106" fill="#E9E6F0" fill-opacity="1.00"/>
+<ellipse cx="84" cy="114" rx="13" ry="10" fill="#FFFFFF" fill-opacity="1.00" stroke="#1B2340" stroke-width="4"/>
+<ellipse cx="88" cy="118" rx="7" ry="4" fill="#E9E6F0" fill-opacity="1.00"/>
+<path d="M80 106 L80 113 M88 106 L88 113" fill="none" stroke="#1B2340" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 </svg>

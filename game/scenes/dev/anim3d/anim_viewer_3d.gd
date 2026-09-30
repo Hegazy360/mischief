@@ -26,18 +26,21 @@ const USAGE := """AnimViewer3D — user args (after `--`):
   --facing=1|-1 --cheat=<deg>      sim facing / cheat-out toward the camera (default 35 on game cam)
   --look-at=x,y,z                  head + pupils toward a world point
   --room=<room> --x=<m> --z=<m>    the real room (house.json x range; RoomShell3D when built, else a greybox)
+  --episode=<id>                   with --room: tonight's whole set through House3D (props, furniture; r3d-sets)
   --rig2=<id> --clip2=<id> --x2=<m> --facing2=±1 --frame2=N   a second rig
   --then=<clip>|glb:<action> --then-at=<f> [--then-blend=<f>]   switch clips at view frame f (a stop: jiggle settles)
   --flip-every=<f>                 flip the facing every f view frames (the 6-frame turn)
   --launch=<prop>@<f>[:vx,vy,vz]   launch a bone prop at view frame f (default 1.5, 3.0, 0 m/s, spin 540°/s)
   --stone-at=<f>                   turn to marble at view frame f (0.1 s), back at f + 90
   --events                         print every crossed clip event
+  --sound                          play clip sfx / voice / laugh events through the game's Audio (capture sync checks)
   --data-root=res://…              an extra data root (the rig3d test fixtures: res://tests/rig3d/fixtures/data)
   --clean                          no label (strips, boards)
   --help                           this text"""
 const PASSTHROUGH: PackedStringArray = ["--shot=", "--frames=", "--shot-seq=", "--every=", "--count=", "--seq-from=",
 	"--perf-log", "--scene=", "--log=", "--e2e", "--tex-report"]
 const BG := Color("#2A2342")
+const LAUGH_KINDS := {"titter": "t0", "chuckle": "t1", "laugh": "t2", "big": "t3", "roar": "t4", "auto": "t2"}
 const ROOM_WALL := {"kitchen": Color("#C7B684"), "parlour": Color("#B9A6C9"), "hall": Color("#A9B79A"), "porch": Color("#9FD6F0")}
 
 var cfg: Dictionary = {}
@@ -94,6 +97,25 @@ func _ready() -> void:
 		cl.add_child(label)
 
 
+## Route a clip sound event to the game's Audio autoload (soft: silent without it).
+func _sound(e: Dictionary) -> void:
+	var au := get_node_or_null("/root/Audio")
+	if au == null:
+		return
+	match String(e.get("type", "")):
+		"sfx":
+			if au.has_method("play_sfx"):
+				au.call("play_sfx", String(e.get("id", "")))
+		"voice":
+			if au.has_method("play_voice"):
+				au.call("play_voice", String(e.get("bank", e.get("id", ""))))
+		"laugh":
+			var tv := str(e.get("tier", "auto"))
+			var kind := String(LAUGH_KINDS.get(tv, tv if tv.begins_with("t") else "t2"))
+			if au.has_method("crowd"):
+				au.call("crowd", kind)
+
+
 ## Adds a data root (fixtures: res://tests/rig3d/fixtures/data) to the rig, clip and reaction lookups.
 static func add_data_root(r: String) -> void:
 	if not RigDef3D.search_roots.has(r):
@@ -131,6 +153,8 @@ func _make_rig(rid: String, variant: String, nm: String) -> RigPlayer3D:
 	add_child(r)
 	if not r.setup(rid, variant):
 		push_warning("AnimViewer3D: rig '%s' failed — showing the stand-in" % rid)
+	if cfg.has("sound"):
+		r.clip_event.connect(_sound)
 	if cfg.has("events"):
 		r.clip_event.connect(func(e: Dictionary) -> void:
 			var line := "[anim3d] %s f=%d %s %s" % [nm, int(e.get("f", -1)), e.get("type", ""),
@@ -236,6 +260,8 @@ func _build_env() -> void:
 
 
 func _build_room(room: String) -> void:
+	if cfg.has("episode") and _build_house(String(cfg["episode"]), room):
+		return
 	var rr := _room_range(room)
 	var shell_s := RigPlayer3D._soft_class("RoomShell3D")
 	var geo_s := RigPlayer3D._soft_class("SetGeo")
@@ -260,6 +286,29 @@ func _build_room(room: String) -> void:
 	_box(Vector3(x0, 0.0, -2.5), Vector3(x1, 3.2, -2.4), wall)
 	_box(Vector3(x0, 0.0, -2.39), Vector3(x1, 0.9, -2.36), wall.darkened(0.12))
 	_box(Vector3(x0 - 4.0, 3.13, -2.5), Vector3(x1 + 4.0, 4.4, 0.4), Color("#1D1728"))
+
+
+## Tonight's set through House3D + SetList (soft: r3d-sets). False when either is missing or the episode is unknown.
+func _build_house(ep_id: String, room: String) -> bool:
+	var hs := RigPlayer3D._soft_class("House3D")
+	var sl := RigPlayer3D._soft_class("SetList")
+	var content := get_node_or_null("/root/Content")
+	if hs == null or sl == null or content == null:
+		return false
+	var db: Variant = content.get("db")
+	if db == null:
+		return false
+	var eps: Variant = (db as Object).get("episodes")
+	if not (eps is Dictionary) or not (eps as Dictionary).has(ep_id):
+		push_warning("AnimViewer3D: unknown episode %s" % ep_id)
+		return false
+	var result: Variant = sl.call("for_episode", db, (eps as Dictionary)[ep_id])
+	var house: Node3D = hs.new()
+	add_child(house)
+	house.call("build", result, {}, db)
+	if house.has_method("snap_room_light") and room != "":
+		house.call("snap_room_light", room, 1.0, 0.0)
+	return true
 
 
 func _build_studio() -> void:

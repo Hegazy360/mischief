@@ -70,7 +70,7 @@ def mirror_svg(body):
 
 # ---- eyes (the eyeballs; pupils and lids are their own layers) ---------------------------------------------------------
 ERX, ERY = 86, 100        # a bigger eye than look A's (72 x 76 of a 0.52 m face): >= 10 px tall at 1200 x 540
-LID_CUT = {"half": (0.50, -8), "angry": (0.40, 30)}     # lid line: fraction of the eye height from the top, slant (+ = down to the nose)
+LID_CUT = {"half": (0.42, -8), "angry": (0.36, 30)}     # lid line: fraction of the eye height from the top, slant (+ = down to the nose)
 
 
 def lid_line(kind, i):

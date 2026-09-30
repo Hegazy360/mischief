@@ -164,23 +164,20 @@ def mouth(kind):
 
 
 def glove(cx, cy, rot=0, kind="cup"):
-    """A white glove (cartoon mouse hand)."""
+    """A white cartoon glove: a round mitten with two finger creases (and a raised index finger for
+    "finger")."""
     t = 'transform="rotate(%s %s %s)"' % (rot, cx, cy)
+    g = ['<g %s>' % t]
     if kind == "finger":
-        g = ['<g %s>' % t,
-             ink("M%s %s Q%s %s %s %s Q%s %s %s %s Z" % (cx - 9, cy + 14, cx - 11, cy, cx - 2, cy - 2,
-                                                         cx + 11, cy, cx + 9, cy + 14), GLOVE, 4),
-             ink("M%s %s L%s %s Q%s %s %s %s L%s %s" % (cx - 3, cy + 1, cx - 3, cy - 20, cx, cy - 25, cx + 3, cy - 20,
-                                                        cx + 3, cy + 1), GLOVE, 4),
-             '</g>']
-        return g
-    if kind == "card":
-        return ['<g %s>' % t, ink("M%s %s Q%s %s %s %s Q%s %s %s %s Q%s %s %s %s Z" % (
-            cx - 10, cy + 8, cx - 12, cy - 8, cx, cy - 10, cx + 12, cy - 8, cx + 10, cy + 8, cx, cy + 12, cx - 10, cy + 8),
-            GLOVE, 4), '</g>']
-    return ['<g %s>' % t, ink("M%s %s Q%s %s %s %s Q%s %s %s %s Q%s %s %s %s Z" % (
-        cx - 9, cy + 10, cx - 14, cy - 4, cx - 2, cy - 11, cx + 12, cy - 8, cx + 10, cy + 8, cx, cy + 14, cx - 9, cy + 10),
-        GLOVE, 4), flat("M%s %s Q%s %s %s %s" % (cx + 4, cy + 10, cx + 10, cy + 2, cx + 9, cy - 4), GLOVE_S), '</g>']
+        g.append(ink("M%s %s L%s %s Q%s %s %s %s Q%s %s %s %s L%s %s Z" % (
+            cx - 4, cy - 2, cx - 4, cy - 22, cx - 4, cy - 28, cx, cy - 28, cx + 4, cy - 28, cx + 4, cy - 22, cx + 4, cy - 2),
+            GLOVE, 3.5))
+    g.append(ell(cx, cy + 4, 13, 10, GLOVE, w=4))
+    g.append(ell(cx + 4, cy + 8, 7, 4, GLOVE_S, False))
+    if kind != "finger":
+        g.append(line("M%s %s L%s %s M%s %s L%s %s" % (cx - 4, cy - 4, cx - 4, cy + 3, cx + 4, cy - 4, cx + 4, cy + 3), 2.5))
+    g.append('</g>')
+    return g
 
 
 def ledge():

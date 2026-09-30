@@ -330,11 +330,117 @@ def reach_pose(P, name, target_b, feet_y=0.0, pelvis_up=0.0, tiptoe=0.0, both=Fa
     return P.key(name, hide_props=() if pot else ("prop_r",))
 
 
+def arm_to(P, side, wrist, fingers, pole, curl=30.0, thumb=10.0):
+    P.arm_ik(side, Vector(wrist), Vector(pole))
+    P.aim("hand_" + side, Vector(fingers))
+    P.curl(side, curl, thumb)
+
+
+def pose_sneak(P):
+    """The cartoon sneak: knees high, elbows up, gloves like paws, leaning 15 deg forward, on tiptoe."""
+    P.reset()
+    P.move("pelvis", (0, 0.0, -0.07))
+    P.rot("pelvis", (1, 0, 0), 8)
+    P.rot("spine_01", (1, 0, 0), 5)
+    P.rot("spine_02", (1, 0, 0), 4)
+    # left knee lifted high, the toe pointed; right leg planted on its toes
+    P.leg_ik("l", Vector((0.10, -0.20, 0.30)), (0, -1, 0.1))
+    P.aim("foot_l", (0, -0.35, -1))
+    P.aim("ball_l", (0, -0.6, -0.8))
+    P.leg_ik("r", Vector((-0.10, 0.10, 0.14)), (0, -1, 0))
+    P.tiptoe_foot("r", 0.0)
+    for s_, sx in (("l", 1), ("r", -1)):
+        sh = P.head("upperarm_" + s_)
+        arm_to(P, s_, sh + Vector((sx * 0.13, -0.24, 0.02)), (sx * 0.05, -0.35, -0.95), (sx * 0.6, 0.3, 0.5), curl=55.0)
+    P.look((0.35, -1.0, 0.05), 0.9)
+    return P.key("Board_Sneak")
+
+
+def pose_run(P):
+    """The run: leaning 25 deg, arms pumping, a long stride."""
+    P.reset()
+    P.move("pelvis", (0, 0.0, -0.05))
+    P.rot("pelvis", (1, 0, 0), 12)
+    P.rot("spine_01", (1, 0, 0), 8)
+    P.rot("spine_02", (1, 0, 0), 5)
+    P.leg_ik("l", Vector((0.09, -0.34, 0.22)), (0, -1, 0))
+    P.aim("foot_l", (0, -1, -0.3))
+    P.leg_ik("r", Vector((-0.09, 0.38, 0.16)), (0, -1, 0.2))
+    P.aim("foot_r", (0, 0.5, -1))
+    shl, shr = P.head("upperarm_l"), P.head("upperarm_r")
+    arm_to(P, "l", shl + Vector((0.06, 0.24, -0.22)), (0.02, 0.6, -0.8), (0.3, 0.4, 0.8), curl=70.0)
+    arm_to(P, "r", shr + Vector((-0.06, -0.30, -0.08)), (0.0, -0.5, 0.85), (-0.3, 0.8, -0.4), curl=70.0)
+    return P.key("Board_Run")
+
+
+def pose_statue(P):
+    """A marble statue on the plinth (freeze): one arm raised in a flourish, a toe pointed, chin up."""
+    P.reset()
+    P.move("root", (0, 0, 0.12))
+    shl, shr = P.head("upperarm_l"), P.head("upperarm_r")
+    arm_to(P, "r", shr + Vector((-0.16, -0.08, 0.34)), (-0.3, -0.2, 0.9), (-0.8, 0.4, 0.0), curl=10.0)
+    arm_to(P, "l", shl + Vector((0.34, -0.06, -0.12)), (1.0, -0.1, 0.1), (0.2, 0.2, -1.0), curl=10.0)
+    P.leg_ik("l", Vector((0.20, -0.16, 0.16)), (0, -1, 0))
+    P.aim("foot_l", (0.3, -0.3, -1))
+    P.rot("Head", (1, 0, 0), 10)
+    return P.key("Board_Statue")
+
+
+def pose_squeak(P):
+    """Squeak: Clarence whipped out of the brace and squeezed in the right glove, his comb flaring."""
+    P.reset()
+    shr, shl = P.head("upperarm_r"), P.head("upperarm_l")
+    arm_to(P, "r", shr + Vector((-0.05, -0.30, -0.02)), (0.1, -0.7, 0.7), (-0.8, 0.2, -0.4), curl=60.0, thumb=30.0)
+    arm_to(P, "l", shl + Vector((0.18, -0.10, 0.22)), (0.2, -0.3, 0.9), (0.8, 0.2, -0.3), curl=0.0)
+    P.rot("spine_02", (1, 0, 0), 5)
+    B = P.arm.data.bones
+    g = P.M("hand_r") @ (B["hand_r"].matrix_local.inverted() @ Vector(B["prop_r"].head_local))
+    m = P.M("prop_clarence")
+    m.translation = g + Vector((0, 0, -0.05))
+    P.set_M("prop_clarence", m)
+    P.look((0.3, -1.0, 0.1), 0.8)
+    return P.key("Board_Squeak", extra_scale={"clarence_body": (1.35, 1.35, 0.55), "clarence_comb": (1.4, 1.4, 1.4)})
+
+
+def pose_snicker(P):
+    """The snicker glance at the audience: hunched, both gloves at her mouth, head turned to the Stalls."""
+    P.reset()
+    P.rot("spine_02", (1, 0, 0), 12)
+    P.rot("spine_03", (1, 0, 0), 6)
+    mouth = P.head("Head") + Vector((0.0, -0.17, 0.05))
+    for s_, sx in (("l", 1), ("r", -1)):
+        arm_to(P, s_, mouth + Vector((sx * 0.07, 0.02, -0.07)), (-sx * 0.3, -0.4, 0.85), (sx * 0.9, 0.2, -0.3), curl=45.0)
+    P.move("pelvis", (0, 0, -0.03))
+    for s_ in ("l", "r"):
+        P.rot("thigh_" + s_, (1, 0, 0), -6)
+    P.look((0.6, -1.0, 0.0), 1.0)
+    return P.key("Board_Snicker")
+
+
+def pose_bow(P):
+    """The curtain-call bow: bent 55 deg at the waist, one glove across the belly, the other out in a flourish."""
+    P.reset()
+    P.rot("pelvis", (1, 0, 0), 20, pivot=P.head("thigh_l") * 0.5 + P.head("thigh_r") * 0.5)
+    P.rot("spine_01", (1, 0, 0), 18)
+    P.rot("spine_02", (1, 0, 0), 12)
+    for s_ in ("l", "r"):
+        P.leg_ik(s_, Vector((0.10 * (1 if s_ == "l" else -1), 0.07 if s_ == "l" else -0.04, 0.082)), (0, -1, 0))
+        P.foot_flat(s_)
+    shl, shr = P.head("upperarm_l"), P.head("upperarm_r")
+    belly = P.head("spine_01") + Vector((0.0, -0.16, 0.0))
+    arm_to(P, "r", belly + Vector((0.04, 0.0, 0.0)), (1.0, -0.2, 0.0), (-0.5, 0.2, -0.8), curl=20.0)
+    arm_to(P, "l", shl + Vector((0.38, 0.05, -0.05)), (1.0, 0.1, -0.2), (0.0, 0.5, -0.8), curl=5.0)
+    P.rot("Head", (1, 0, 0), 12)
+    return P.key("Board_Bow")
+
+
 def build(arm, rig, reach_file=None):
     """Key every board pose into its own action."""
     P = Poser(arm)
     pose_tpose(P)
     pose_idle(P)
+    for fn in (pose_sneak, pose_run, pose_statue, pose_squeak, pose_snicker, pose_bow):
+        fn(P)
     rf = reach_file or os.path.join(HERE, "..", "..", "..", "build", "art3d", "hush", "reach_targets.json")
     if os.path.exists(rf):
         R = json.load(open(rf))

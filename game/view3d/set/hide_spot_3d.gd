@@ -19,8 +19,8 @@ var _breathe_t: float = 0.0
 
 
 func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_verb: String, p_live: bool,
-		room_color: Color = Color(0.78, 0.71, 0.52)) -> void:
-	super.setup(id, p_entry, xf, p_room, p_verb, p_live, room_color)
+		room_color: Color = Color(0.78, 0.71, 0.52), p_mats: SetMats = null, palette: Texture2D = null) -> void:
+	super.setup(id, p_entry, xf, p_room, p_verb, p_live, room_color, p_mats, palette)
 	_build_eyes()
 
 

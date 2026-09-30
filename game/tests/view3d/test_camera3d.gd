@@ -195,6 +195,9 @@ func test_neighbour_strips_per_room() -> void:
 				var allowed := maxf(lim, slack * 0.5) + 0.05
 				var edge := cam.aim().x
 				var c2_binds := absf(edge - (x0 + x1) * 0.5) > 0.05
+				print("[strips] %s %s %s room %.2f m visible %.2f m aim %.2f left %.2f right %.2f limit %.2f %s" % [
+					"N1" if night == N1_ROOMS else "P00", aspect, rd["id"], x1 - x0, V, edge, left, right, lim,
+					"C2 binds" if c2_binds else "C1"])
 				if not c2_binds:
 					assert_le(left, allowed, "%s %s left strip %.2f m" % [aspect, rd["id"], left])
 					assert_le(right, allowed, "%s %s right strip %.2f m" % [aspect, rd["id"], right])
@@ -403,3 +406,22 @@ func test_play_framings_keep_the_back_wall_within_10_m() -> void:
 	h.free()
 	b.free()
 	cam.free()
+
+
+func test_links_from_content_db_matches_house_json() -> void:
+	# r3d-sets: LinkDef carries sub-px `x_sub`, not `x` (a ContentDB used to crash links_from)
+	var db := ContentDB.load_dir()
+	if db == null or not db.ok():
+		skip("ContentDB.load_dir failed")
+		return
+	var from_db := CameraDirector3D.links_from(db)
+	var from_json := CameraDirector3D.links_from(load_json(HOUSE))
+	assert_gt(from_db.size(), 0, "links from the ContentDB")
+	assert_eq(from_db.size(), from_json.size())
+	var by_ab := {}
+	for l in from_json:
+		by_ab["%s|%s" % [l["a"], l["b"]]] = float(l["x_m"])
+	for l in from_db:
+		var k := "%s|%s" % [l["a"], l["b"]]
+		assert_true(by_ab.has(k), "link %s in house.json" % k)
+		assert_almost_eq(float(l["x_m"]), float(by_ab.get(k, -99.0)), 0.01, "x of %s in metres" % k)

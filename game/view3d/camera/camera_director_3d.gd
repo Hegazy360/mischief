@@ -1209,7 +1209,13 @@ static func links_from(house: Variant) -> Array:
 			var o2: Object = item
 			var a: Variant = o2.get("a") if "a" in o2 else o2.get("room_a")
 			var b: Variant = o2.get("b") if "b" in o2 else o2.get("room_b")
-			out.append({"a": str(a), "b": str(b), "x_m": float(o2.get("x")) / View3DConst.PX_PER_M})
+			# LinkDef keeps sub-px (`x_sub`, SimConst.SUB per px); plain objects may carry px `x`
+			var xpx := 0.0
+			if "x_sub" in o2:
+				xpx = float(o2.get("x_sub")) / float(SimConst.SUB)
+			elif "x" in o2:
+				xpx = float(o2.get("x"))
+			out.append({"a": str(a), "b": str(b), "x_m": xpx / View3DConst.PX_PER_M})
 	return out
 
 

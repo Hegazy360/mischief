@@ -79,6 +79,16 @@ var _last_clip: ClipDef3D = null
 var _entry_blink: bool = true
 var _blink_min: int = 120
 var _blink_max: int = 360
+## Inputs of the last resolve (an unchanged frame skips the work).
+var _version: int = 0
+var _sig_version: int = -1
+var _sig_clip: ClipDef3D = null
+var _sig_entry: int = -2
+var _sig_phase: int = -1
+var _sig_facing: int = 0
+var _sig_look: Vector2 = Vector2.INF
+var _sig_supp: bool = false
+var _sig_preset: String = ""
 
 
 ## Bind to a rig descriptor; `seed` fixes the blink schedule.
@@ -147,6 +157,7 @@ func reseed(seed: int) -> void:
 ## The view's preset (and a runtime override while a clip timeline plays, until its next entry).
 func set_face(preset: String) -> void:
 	view_preset = preset
+	_version += 1
 	_override.fill(UNSET)
 	if not _preset_cells.has(preset):
 		_miss("preset:" + preset)
@@ -163,6 +174,7 @@ func set_slot(layer: String, cell: String) -> void:
 		_miss("layer:" + layer)
 		return
 	var li: int = _layer_of[layer]
+	_version += 1
 	if cell == "":
 		_override[li] = UNSET
 	elif cell == "none":
@@ -178,6 +190,7 @@ func set_slot(layer: String, cell: String) -> void:
 
 ## Cells the active looks force ({layer: cell}; "none" hides the layer); {} clears them.
 func set_look_cells(cells: Dictionary) -> void:
+	_version += 1
 	_look.fill(UNSET)
 	for ln in cells:
 		if not _layer_of.has(String(ln)):
@@ -189,6 +202,7 @@ func set_look_cells(cells: Dictionary) -> void:
 
 ## Drop every runtime override.
 func clear() -> void:
+	_version += 1
 	_override.fill(UNSET)
 	changed = true
 
@@ -203,6 +217,19 @@ func update(frames: float) -> void:
 	if def == null:
 		return
 	_advance_blink(frames)
+	var entry_i := clip.face_index_at(clip_frame) if clip != null and not clip.face_entries.is_empty() else -1
+	var ph := blink_phase()
+	if _version == _sig_version and clip == _sig_clip and entry_i == _sig_entry and ph == _sig_phase \
+			and facing == _sig_facing and look == _sig_look and suppressed == _sig_supp and view_preset == _sig_preset:
+		return
+	_sig_version = _version
+	_sig_clip = clip
+	_sig_entry = entry_i
+	_sig_phase = ph
+	_sig_facing = facing
+	_sig_look = look
+	_sig_supp = suppressed
+	_sig_preset = view_preset
 	_resolve()
 
 

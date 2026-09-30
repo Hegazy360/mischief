@@ -97,7 +97,7 @@ def rig3d(meta, face_layout):
         "bouffant_frazzled": {"scene": "res://art3d/chars/bellows/bouffant_frazzled.glb", "bone": "Head", "default": False},
         "bouffant_wet": {"scene": "res://art3d/chars/bellows/bouffant_wet.glb", "bone": "Head", "default": False},
         "bouffant_floured": {"scene": "res://art3d/chars/bellows/bouffant_floured.glb", "bone": "Head", "default": False},
-        "stool": {"scene": "res://art3d/set/stool.glb", "bone": "ride", "default": False, "soft": True,
+        "stool": {"scene": "res://art3d/set/stool.glb", "bone": "ride", "default": False, "soft": True, "pos": [0.0, -0.55, 0.0],
                   "doc": "the ride-along kitchen stool (r3d-sets' mesh): shown by the sneeze (prop show stool) while the set's "
                          "stool is hidden by the clip's decor event; missing scene = logged, not fatal"},
     }
@@ -112,7 +112,7 @@ def rig3d(meta, face_layout):
     }
     faces_path = "res://data/rigs3d/bellows/faces.json"
     face = {"atlas": "res://art3d/chars/bellows/face_bellows.png", "atlas_px": face_layout["atlas_px"],
-            "grid": face_layout["grid"], "layers": LAYERS, "order": face_layout["order"],
+            "grid": face_layout["grid"], "layers": LAYERS, "order": ["extra_a", "brows", "eyes", "pupils", "lids", "mouth", "extra_b"],
             "layer_rects": face_layout["layer_rects"], "cells": face_layout["cells"],
             "pupil_range": [0.035, 0.025], "presets": faces_path, "default": "pompous",
             "mirror_cells": face_layout["mirror_cells"], "no_pupils": face_layout["no_pupils"],
@@ -145,8 +145,11 @@ def rig3d(meta, face_layout):
         "material": {"palette": "res://art3d/chars/bellows/palette_bellows.png", "outline_px": 3.5, "rim": 0.45},
         "vertex_color": {"r": "skin_tint", "g": "stone_keep", "b": "rim_damp", "a": "outline_scale"},
         "looks": looks,
-        "tint": {"tiers": ["#FFFFFF", "#FFE0DC", "#FFC2B8", "#F59A94"], "livid": "#B8324B",
-                 "sideburn_scale": [1.0, 1.15, 1.15, 1.35], "livid_specs": "on"},
+        "tint": {"tiers": ["#FFFFFF", "#FFE0DC", "#FFC2B8", "#F59A94"], "livid": "#B8324B", "skin": "#F0C2A0",
+                 "mode": "multiply", "sideburn_scale": [1.0, 1.15, 1.15, 1.35], "scale_bones": ["sideburn_l", "sideburn_r"],
+                 "livid_specs": "on",
+                 "doc": "tiers multiply the skin albedo (2D modulate semantics; skin = the palette peach); char_toon mixes toward "
+                        "skin x tier at full amount; livid mixes toward #B8324B. Sideburn bone scale per tier (livid = tier 3)."},
         "stone": {"color": "#E8E6E1"}, "cheat": {"idle": 35, "walk": 20, "perform": 35, "face_to_face": 5},
         "blob_shadow_r": 0.48, "skins": {},
         "portraits": {"dir": "res://art3d/chars/bellows/portraits", "names": []},

@@ -613,6 +613,11 @@ func _region(i: int) -> Rect2:
 	return _rest[i]
 
 
+## True while nothing of the Stalls shows (hidden at rest, faded out) — the HUD lint and tests.
+func is_hidden() -> bool:
+	return hidden_at_rest and _alpha <= 0.01
+
+
 func _draw() -> void:
 	if _atlas == null:
 		return
@@ -624,7 +629,7 @@ func _draw() -> void:
 			if _row[i] != pass_row:
 				continue
 			var sc := 0.62 if pass_row == 1 else 0.8
-			var rise := REST_PX + (-_y[i])
+			var rise := REST_PX + (-_y[i]) - _sink * HIDE_SINK_PX
 			var col := Color(FILL.lightened(0.12 if pass_row == 1 else 0.0), _alpha * (0.8 if pass_row == 1 else 1.0))
 			var tf := tumble_frame() if i == _tumble else -1
 			if tf >= 0 and not _tumble_r.is_empty():

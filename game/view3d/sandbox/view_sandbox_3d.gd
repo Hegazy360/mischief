@@ -13,6 +13,8 @@
 ##   --aspect-debug             print the camera numbers once
 ##   --fallbacks                print WorldView3D.fallback_counts() every 60 frames and at exit
 ##   --share                    print the Bellows-window share (pip_on_share, pip_longest_s) at exit
+##   --run-s=<s>                quit after this many seconds of (real or fixed-step) time, printing `[perf3d]`:
+##                              frame ms p50/p95, draw calls p95/max, primitives max, texture MB, script ms p95
 ##   --studio --fig=… [--cam=… --bg=… --floor=… --outline=… --face-dir=…]   the look-dev shading stage
 ## Frame sequences / perf logs come from DevShot (`--shot-seq=…`, `--perf-log`).
 extends Node
@@ -35,8 +37,19 @@ var cmds_path: String = ""
 var seek_tick: int = -1
 var print_fallbacks: bool = false
 var print_share: bool = false
+var run_s: float = -1.0
 var _vt := 0.0
 var _frame := 0
+var _t_real := 0.0
+var _ms := PackedFloat32Array()
+var _dc := PackedFloat32Array()
+var _script_ms := PackedFloat32Array()
+var _sim_us := PackedFloat32Array()
+var _view_us := PackedFloat32Array()
+var _first_us := 0
+var _prim_max := 0.0
+var _tex_max := 0.0
+var _last_us := 0
 var _hud: CanvasLayer = null
 var _pip_frame: PipView3D.SimpleFrame = null
 
@@ -66,6 +79,7 @@ func _ready() -> void:
 	scenario = str(opt.get("scenario", scenario))
 	cmds_path = str(opt.get("cmds", ""))
 	seek_tick = int(opt.get("seek", "-1"))
+	run_s = float(opt.get("run-s", "-1"))
 	var msaa := str(opt.get("msaa", "2"))
 	get_viewport().msaa_3d = Viewport.MSAA_DISABLED if msaa == "0" else (Viewport.MSAA_4X if msaa == "4" else Viewport.MSAA_2X)
 	get_viewport().scaling_3d_scale = clampf(float(opt.get("scale", "1.0")), 0.5, 1.0)
@@ -147,6 +161,7 @@ func build(w: RefCounted, stand_ins: bool = false) -> void:
 	sl.name = "StallsLayer"
 	add_child(sl)
 	stalls = StallsView.new()
+	stalls.hidden_at_rest = true
 	sl.add_child(stalls)
 	audio.laugh.connect(stalls.react)
 	audio.crowd_special.connect(stalls.special)
@@ -158,9 +173,9 @@ func build(w: RefCounted, stand_ins: bool = false) -> void:
 	_hud.add_child(_pip_frame)
 	_pip_frame.bind(pip)
 	driver.ticked.connect(_on_ticked)
+	for n in [driver, driver.juice, world_view, cam, stager, audio, pip, stalls]:
+		(n as Node).set_process(false)
 	if fixed_step:
-		for n in [driver, driver.juice, world_view, cam, stager, audio, pip, stalls]:
-			(n as Node).set_process(false)
 		driver.juice.test_now_us = 0
 
 
@@ -213,14 +228,64 @@ func _process(delta: float) -> void:
 		return
 	var dt := DT if fixed_step else delta
 	_frame += 1
+	if run_s > 0.0:
+		_sample_perf(delta)
 	if print_fallbacks and _frame % 60 == 0:
 		print("[ViewSandbox3D] frame %d tick %d fallbacks %s" % [_frame, driver.snapshot().tick, JSON.stringify(world_view.fallback_counts())])
+	# the sandbox drives every node itself (both modes) so the view's script cost can be timed per frame
 	if fixed_step:
 		_vt += dt
 		driver.juice.test_now_us = int(_vt * 1000000.0)
-		driver.juice.advance()
-		driver.advance(dt)
-		_step_views(dt)
+	driver.juice.advance()
+	var t0 := Time.get_ticks_usec()
+	driver.advance(dt)
+	var t1 := Time.get_ticks_usec()
+	_step_views(dt)
+	if run_s > 0.0 and _frame > 10:
+		_sim_us.append(float(t1 - t0))
+		_view_us.append(float(Time.get_ticks_usec() - t1))
+
+
+func _sample_perf(delta: float) -> void:
+	var now := Time.get_ticks_usec()
+	if _frame == 11:
+		_first_us = now
+	if _last_us > 0 and _frame > 10:
+		_ms.append(float(now - _last_us) / 1000.0)
+		_dc.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+		_script_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+		_prim_max = maxf(_prim_max, Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+		_tex_max = maxf(_tex_max, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0)
+	_last_us = now
+	_t_real += DT if fixed_step else delta
+	if _t_real >= run_s:
+		print(perf_line())
+		if pip != null:
+			print("[ViewSandbox3D] window share %s" % JSON.stringify(pip.share()))
+		run_s = -1.0
+		get_tree().quit()
+
+
+static func _pct(a: PackedFloat32Array, q: float) -> float:
+	if a.is_empty():
+		return 0.0
+	var b := a.duplicate()
+	b.sort()
+	return b[clampi(int(round(q * float(b.size() - 1))), 0, b.size() - 1)]
+
+
+## `[perf3d] …` from the samples so far.
+func perf_line() -> String:
+	var mx := 0.0
+	for v in _dc:
+		mx = maxf(mx, v)
+	var wall := float(Time.get_ticks_usec() - _first_us) / 1000000.0 if _first_us > 0 else 0.0
+	var msaa_names := ["off", "2x", "4x", "8x"]
+	return "[perf3d] frames %d wall_s %.1f fps %.1f sim_tick %d frame_ms p50 %.1f p95 %.1f | view script ms p50 %.2f p95 %.2f | sim ms p95 %.2f | draw calls p95 %.0f max %.0f | primitives max %.0f | tex MB %.1f | process ms p95 %.2f | msaa %s | %s" % [
+		_ms.size(), wall, float(_ms.size()) / maxf(0.001, wall), driver.snapshot().tick, _pct(_ms, 0.5), _pct(_ms, 0.95),
+		_pct(_view_us, 0.5) / 1000.0, _pct(_view_us, 0.95) / 1000.0, _pct(_sim_us, 0.95) / 1000.0, _pct(_dc, 0.95), mx,
+		_prim_max, _tex_max, _pct(_script_ms, 0.95), msaa_names[clampi(get_viewport().msaa_3d, 0, 3)],
+		"fixed-step" if fixed_step else "realtime"]
 
 
 func _step_views(dt: float) -> void:

@@ -157,6 +157,69 @@ static func cadence(id: String, a: Dictionary, gated: bool) -> PackedStringArray
 	return e
 
 
+## (c3d, R3D ruling R9) The 3D clip coverage: every clip of `SliceClips.build3d(["g0_sneeze", "p00_curtain_up"])` + the
+## band fallbacks `hush/rig_high|mid|low` must exist as a v2 sidecar (`data/anim/<rig>3d/<clip>.json`, `"version": 2`) —
+## `missing` (WARN; an error under `--strict`); the N01/N02-only rows of `build3d(["n01_throat_tea",
+## "n02_something_fishy"])` are reported as `info_missing` (never failing). Soft: `source` "none" (no rows) until
+## `r3d-view3d`'s build3d exists. {missing, rows, source, info_missing, info_rows}.
+static func coverage3d(data_root: String = "res://data") -> Dictionary:
+	var out := {"missing": PackedStringArray(), "rows": 0, "source": "none", "info_missing": PackedStringArray(), "info_rows": 0}
+	if data_root != "res://data" or not ResourceLoader.exists(SLICE_CLIPS):
+		return out
+	var s: Script = load(SLICE_CLIPS) as Script
+	if s == null or not s.can_instantiate() or not (s as GDScript).has_method("build3d"):
+		return out
+	var gate := {}
+	var rows: Variant = s.call("build3d", PackedStringArray(["g0_sneeze", "p00_curtain_up"]))
+	if not (rows is Array):
+		return out
+	for r in rows:
+		var c := SolverData.sv((r as Dictionary).get("clip", "")) if r is Dictionary else ""
+		if c != "":
+			gate[c] = true
+	for b in BAND_CLIPS:
+		gate[b] = true
+	out["source"] = "SliceClips.build3d"
+	out["rows"] = gate.size()
+	var miss := PackedStringArray()
+	for c in gate:
+		if not sidecar3d_ok(String(c), data_root):
+			miss.append(String(c))
+	miss.sort()
+	out["missing"] = miss
+	var info := {}
+	var rows2: Variant = s.call("build3d", PackedStringArray(["n01_throat_tea", "n02_something_fishy"]))
+	if rows2 is Array:
+		for r in rows2:
+			var c2 := SolverData.sv((r as Dictionary).get("clip", "")) if r is Dictionary else ""
+			if c2 != "" and not gate.has(c2):
+				info[c2] = true
+	var im := PackedStringArray()
+	for c in info:
+		if not sidecar3d_ok(String(c), data_root):
+			im.append(String(c))
+	im.sort()
+	out["info_missing"] = im
+	out["info_rows"] = info.size()
+	return out
+
+
+## The band fallback clips (normalised ‰, `rig_actions.json` bands) — in the R9 lint scope beyond build3d(g0, p00).
+const BAND_CLIPS: PackedStringArray = ["hush/rig_high", "hush/rig_low", "hush/rig_mid"]
+
+
+## True when `rig/clip` has a v2 3D sidecar (`data/anim/<rig>3d/<clip>.json` with `"version": 2`).
+static func sidecar3d_ok(clip: String, data_root: String = "res://data") -> bool:
+	var parts := clip.split("/", false, 1)
+	if parts.size() != 2:
+		return false
+	var path := "%s/anim/%s3d/%s.json" % [data_root, parts[0], parts[1]]
+	if not FileAccess.file_exists(path):
+		return false
+	var v: Variant = SolverData.read_json(path)
+	return v is Dictionary and int((v as Dictionary).get("version", 0)) == 2
+
+
 ## (c) {missing: PackedStringArray (clip ids), source: "SliceClips" | "fallback", rows: int}.
 static func coverage(parts: Dictionary, data_root: String = "res://data", use_manifest: bool = true) -> Dictionary:
 	var clips := PackedStringArray()

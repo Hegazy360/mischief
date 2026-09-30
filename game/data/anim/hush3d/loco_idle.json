@@ -1,0 +1,68 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/loco_idle",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/loco_idle.res",
+  "length": 240,
+  "fps": 60,
+  "loop": true,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 0,
+  "blend_out": 10,
+  "lock": null,
+  "beats": {},
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "neutral"
+    },
+    {
+      "f": 62,
+      "preset": "curious"
+    },
+    {
+      "f": 100,
+      "preset": "happy"
+    },
+    {
+      "f": 122,
+      "preset": "neutral"
+    },
+    {
+      "f": 160,
+      "preset": "proud"
+    },
+    {
+      "f": 196,
+      "preset": "smug"
+    },
+    {
+      "f": 222,
+      "preset": "neutral"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/loco_idle.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

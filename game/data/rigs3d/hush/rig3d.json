@@ -8,7 +8,7 @@
   "mesh": "Armature/Skeleton3D/hush_body",
   "height_m": 1.6,
   "head_scale": 1.0,
-  "tris": 9760,
+  "tris": 9838,
   "deform_bones": 48,
   "bones": {
     "root": "root",
@@ -188,7 +188,28 @@
       "fx_bone": "fx_pepper"
     }
   },
-  "attachments": {},
+  "attachments": {
+    "tomato_splat": {
+      "scene": "res://art3d/chars/hush/tomato_splat.glb",
+      "bone": "Head",
+      "default": false
+    },
+    "carry_squeaker": {
+      "scene": "res://art3d/chars/hush/carry_squeaker.glb",
+      "socket": "carry_1",
+      "default": false
+    },
+    "carry_magnifier": {
+      "scene": "res://art3d/chars/hush/carry_magnifier.glb",
+      "socket": "carry_1",
+      "default": false
+    },
+    "carry_kipper": {
+      "scene": "res://art3d/chars/hush/carry_kipper.glb",
+      "socket": "carry_2",
+      "default": false
+    }
+  },
   "slots": {},
   "anim": {
     "layers": []
@@ -199,31 +220,31 @@
         "beret",
         "beret_stalk"
       ],
-      "stiffness": 3.2,
-      "drag": 0.45,
+      "stiffness": 2.6,
+      "drag": 0.4,
       "gravity": 0.25,
       "radius": 0.05,
-      "clamp_deg": 28
+      "clamp_deg": 26
     },
     {
       "bones": [
         "hair_l"
       ],
-      "stiffness": 4.5,
-      "drag": 0.55,
+      "stiffness": 3.6,
+      "drag": 0.5,
       "gravity": 0.35,
       "radius": 0.03,
-      "clamp_deg": 18
+      "clamp_deg": 16
     },
     {
       "bones": [
         "hair_r"
       ],
-      "stiffness": 4.5,
-      "drag": 0.55,
+      "stiffness": 3.6,
+      "drag": 0.5,
       "gravity": 0.35,
       "radius": 0.03,
-      "clamp_deg": 18
+      "clamp_deg": 16
     },
     {
       "bones": [
@@ -330,12 +351,12 @@
     },
     "cells": {
       "brows": {
-        "neutral": 11,
-        "up": 12,
-        "determined": 13,
-        "worried": 14,
-        "sly": 15,
-        "sly_m": 16
+        "neutral": 12,
+        "up": 13,
+        "determined": 14,
+        "worried": 15,
+        "sly": 16,
+        "sly_m": 17
       },
       "eyes": {
         "open": 0,
@@ -350,35 +371,36 @@
         "spiral": 9
       },
       "pupils": {
-        "centre": 10
+        "centre": 10,
+        "small": 11
       },
       "mouth": {
-        "smile": 17,
-        "grin": 18,
-        "laugh": 19,
-        "O": 20,
-        "grimace": 21,
-        "puffed": 22,
-        "shh": 23,
-        "tongue": 24,
-        "wavy": 25
+        "smile": 18,
+        "grin": 19,
+        "laugh": 20,
+        "O": 21,
+        "grimace": 22,
+        "puffed": 23,
+        "shh": 24,
+        "tongue": 25,
+        "wavy": 26
       },
       "extra_a": {
-        "cheeks": 26,
-        "cheeks_m": 27,
-        "blush": 28,
-        "blush_m": 29
+        "cheeks": 27,
+        "cheeks_m": 28,
+        "blush": 29,
+        "blush_m": 30
       },
       "extra_b": {
-        "sweat": 30,
-        "sweat_m": 31,
-        "tear": 32
+        "sweat": 31,
+        "sweat_m": 32,
+        "tear": 33
       }
     },
     "card_cells": {
-      "eyes_dark_open": 33,
-      "eyes_dark_blink": 34,
-      "pupils_dark": 35
+      "eyes_dark_open": 34,
+      "eyes_dark_blink": 35,
+      "pupils_dark": 36
     },
     "pupil_range": [
       0.022,
@@ -431,7 +453,28 @@
     "b": "rim_damp",
     "a": "outline_scale"
   },
-  "looks": {},
+  "looks": {
+    "TOMATO": {
+      "show": [
+        "tomato_splat"
+      ]
+    },
+    "CARRY_SQUEAKER": {
+      "show": [
+        "carry_squeaker"
+      ]
+    },
+    "CARRY_MAGNIFIER": {
+      "show": [
+        "carry_magnifier"
+      ]
+    },
+    "CARRY_KIPPER": {
+      "show": [
+        "carry_kipper"
+      ]
+    }
+  },
   "tint": {
     "tiers": [
       "#FFFFFF",
@@ -448,7 +491,8 @@
       "beret",
       "braces"
     ],
-    "plinth": "res://art3d/chars/hush/plinth.glb"
+    "plinth": "res://art3d/chars/hush/plinth.glb",
+    "tag": "res://art3d/chars/hush/tag_beret.glb"
   },
   "cheat": {
     "idle": 35,

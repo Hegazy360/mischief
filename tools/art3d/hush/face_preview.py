@@ -40,7 +40,8 @@ def main():
     face_dir, faces_path, out = sys.argv[1], sys.argv[2], sys.argv[3]
     px = int(sys.argv[sys.argv.index("--px") + 1]) if "--px" in sys.argv else 160
     info = json.load(open(face_dir + "/face_hush.json"))
-    atlas = Image.open(face_dir + "/face_hush.png").convert("RGBA")
+    ap = sys.argv[sys.argv.index("--atlas") + 1] if "--atlas" in sys.argv else face_dir + "/face_hush.png"
+    atlas = Image.open(ap).convert("RGBA")
     presets = json.load(open(faces_path))["presets"]
     names = list(presets)
     cols = 7

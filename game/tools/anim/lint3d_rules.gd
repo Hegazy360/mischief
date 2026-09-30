@@ -221,7 +221,8 @@ static func _parent_first(parent: PackedInt32Array) -> PackedInt32Array:
 
 
 ## Per side "l"/"r": [[bone index, local point]] for heel, ball, toe — the floor points under the ankle (2 cm back),
-## the ball joint and the toe tip at rest, carried by foot / foot / ball (the Blender pipeline uses the same points).
+## the ball joint and the toe tip at rest, carried by foot / ball / ball (the ball pad rides on the toe segment; the
+## Blender pipeline uses the same points).
 static func _soles(index: Dictionary, rest_g: Array[Transform3D]) -> Dictionary:
 	var out := {}
 	for s in ["l", "r"]:
@@ -234,7 +235,7 @@ static func _soles(index: Dictionary, rest_g: Array[Transform3D]) -> Dictionary:
 		var bh := rest_g[ball].origin
 		var th := rest_g[leaf].origin if leaf >= 0 else bh + (bh - fh).normalized() * 0.06
 		var pts := [Vector3(fh.x, 0.0, fh.z - 0.02), Vector3(bh.x, 0.0, bh.z), Vector3(th.x, 0.0, th.z)]
-		var bones := [foot, foot, ball]
+		var bones := [foot, ball, ball]
 		var arr: Array = []
 		for k in 3:
 			var b: int = bones[k]

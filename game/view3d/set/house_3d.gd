@@ -159,7 +159,7 @@ func _build_stage(stage: Dictionary) -> void:
 		var en := SetPrims._box(_stage, Vector3(et, ey, 2.4 + lip_z), Vector3(ex, ey * 0.5, (lip_z - 2.4) * 0.5), _stage_mats.get_mat(ecol, &"set"), 0.0, "end_flat_%s" % ("l" if sgn < 0 else "r"))
 		if _link_door_at(end) != "":
 			SetPrims._box(en, Vector3(0.06, 2.1, 0.9), Vector3(-sgn * (et * 0.5 + 0.02), -ey * 0.5 + 1.05, -1.0 - (lip_z - 2.4) * 0.5),
-				_stage_mats.get_mat(Color("#5E7A5C"), &"set"), 0.0, "door_leaf")
+				_stage_mats.get_mat(Color("#6B7466"), &"set"), 0.0, "door_leaf")
 		_solids.append({"id": "end_flat_%s" % ("l" if sgn < 0 else "r"), "kind": "flat", "room": "",
 			"obb": SetGeo.obb_from_box([ex - et * 0.5, 0.0, -2.4, ex + et * 0.5, ey, lip_z])})
 
@@ -293,14 +293,14 @@ func _build_pieces() -> void:
 				Vector3(float(d.get("x_m", 0.0)), float(d.get("y_m", 0.0)), float(d.get("z", -2.2))))
 			var p := Prop3D.new()
 			var room_col := SetGeo.color((rooms3.get(room, {}) as Dictionary).get("wall", null))
-			p.setup(String(pid), piece_entry, xf, room, "", false, room_col)
+			var shell: RoomShell3D = _rooms[room]
+			p.setup(String(pid), piece_entry, xf, room, "", false, room_col, shell.mats, shell.palette)
 			if bool(d.get("hidden", false)):
 				p.visible = false
 			add_child(p)
 			_pieces[String(pid)] = p
 			_by_decor[SetGeo.s(d.get("decor_id", pid))] = p
 			_by_decor[String(pid)] = p
-			_add_room_node(room, p)
 			if SetGeo.s(g[0]) == "furniture":
 				_solids.append({"id": String(pid), "kind": "furniture", "room": room, "obb": SetGeo.world_obb(xf, piece_entry)})
 

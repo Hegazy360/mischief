@@ -60,6 +60,10 @@ func _draw() -> void:
 	draw_set_transform(size * 0.5, 0.0, Vector2(k, k))
 	var r := Rect2(-W * 0.5, -VIS_H * 0.5, W, VIS_H)
 	UiKit.draw_chunky_rect(self, r, VIS_H * 0.5, UiKit.CHERRY, UiKit.CHERRY_SHADE, UiKit.BUTTON_OUTLINE, 10.0)
-	UiKit.draw_icon(self, _rose, Rect2(r.position + Vector2(18, 16), Vector2(60, 60)))
-	UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(34, -4), _text, UiKit.SIZE_PLAY, UiKit.CREAM, 10)
+	var f := UiKit.display_font()
+	var tw := f.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.SIZE_PLAY).x
+	var icon := 52.0
+	var x0 := -(icon + 8.0 + tw) * 0.5
+	UiKit.draw_icon(self, _rose, Rect2(Vector2(x0, -icon * 0.5 - 2.0), Vector2(icon, icon)))
+	UiKit.draw_text_centered(self, f, Vector2(x0 + icon + 8.0 + tw * 0.5, -3), _text, UiKit.SIZE_PLAY, UiKit.CREAM, 10)
 	draw_set_transform(Vector2.ZERO)

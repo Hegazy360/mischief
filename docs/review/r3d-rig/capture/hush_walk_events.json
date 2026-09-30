@@ -1,0 +1,141 @@
+{
+ "events": [
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 1,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 27,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 54,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 81,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 108,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 135,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 162,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 189,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 216,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 243,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 270,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 297,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 0,
+   "engine_frame": 324,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/loco_walk",
+   "clip_frame": 27,
+   "engine_frame": 351,
+   "id": "step_pizz_up",
+   "player": "Rig1",
+   "rig": "hush",
+   "type": "sfx"
+  }
+ ],
+ "fps": 60,
+ "frames": 360,
+ "hooked_players": [
+  "Rig1"
+ ],
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/anim3d/AnimViewer3D.tscn"
+  }
+ ]
+}

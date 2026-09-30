@@ -405,3 +405,48 @@ func test_overlay_masks_the_upper_body() -> void:
 	for i in 60:
 		p.advance(1.0 / 60.0)
 	assert_true(p._ov_clip == null, "a one-shot overlay ends and fades out")
+
+
+func test_tier3_appends_the_last_beat_and_suppressed_plays_the_tail() -> void:
+	var p := _player()
+	var done: Array = []
+	p.clip_finished.connect(func(id: String) -> void: done.append(id))
+	p.play("fix/rx_take", {"tier": 3, "seed": 1})
+	assert_eq(p.plan().length, 108)
+	for i in 112:
+		p.advance(1.0 / 60.0)
+	assert_eq(done, ["fix/rx_take"])
+	assert_eq(p.current_clip(), "fix/beat_slow_burn", "the T3 last beat follows the reaction")
+	p.play("fix/rx_take", {"suppressed": true})
+	p.set_external_frame(100.0)
+	assert_eq(p.plan().clip_at(100.0).id, "fix/beat_suppressed")
+	var want := _track_rot("fix/beat_suppressed", "Head", 31.0)
+	for i in 12:
+		p.set_external_frame(100.0)
+		p.advance(1.0 / 60.0)
+	assert_true(_qeq(_pose_rot("Head"), want, 0.001), "the suppressed tail's own frame (31) after its cross-fade")
+
+
+func test_variant_warm_speed_and_face_overlay() -> void:
+	var hb := RigPlayer3D.new()
+	hb.auto_advance = false
+	tree.root.add_child(hb)
+	assert_true(hb.setup("fix", "head_b"), "the head_b variant sets up")
+	assert_eq(hb.variant, "head_b")
+	hb.get_parent().remove_child(hb)
+	hb.free()
+	var p := _player()
+	p.warm()
+	p.advance(1.0 / 60.0)
+	assert_true((p._att_nodes["stool"] as Node3D).visible, "warm() shows every attachment for its frames")
+	for i in 3:
+		p.advance(1.0 / 60.0)
+	assert_false((p._att_nodes["stool"] as Node3D).visible, "then restores them")
+	p.play("fix/loco_walk")
+	p.set_speed(2.4)
+	var f0 := p.current_frame()
+	p.advance(1.0)
+	assert_almost_eq(fmod(p.current_frame() - f0 + 80.0, 80.0), fmod(120.0, 80.0), 0.01, "rate = 2.4 / 1.2 m/s")
+	p.play_overlay("fix/mg_wave", "face", 0)
+	p.advance(1.0 / 60.0)
+	assert_eq(p.face.active_preset, "happy", "a face-mask overlay drives the face from its timeline")

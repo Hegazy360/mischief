@@ -234,7 +234,7 @@ def build_proof_poses(landmarks):
     # the cup hangs 0.081 m toward -X of the right grip at rest; turn the hand 180 deg about Z so the cup sits
     # between the hand and the face (fingers toward the centre), tilted 10 deg toward the lips
     # hand beside the cup (his right), fingers pointing in and a little toward the camera so the cup shows
-    R = Rx(-8) @ Rz(200)
+    R = Rx(-8) @ Rz(155)
     m = posed("Head", mouth)
     cup_c = m + Vector((0.0, -0.100, -0.050))
     grip = cup_c + (R.to_matrix() @ Vector((0.081, 0.010, 0.0)))
@@ -283,7 +283,7 @@ def build_proof_poses(landmarks):
     set_pelvis_offset((0.0, 0.0, lift))
     fk({"thigh_l": [("x", -78), ("z", 6)], "thigh_r": [("x", -78), ("z", -6)], "calf_l": [("x", 62)], "calf_r": [("x", 62)]})
     R = Rx(-10) @ Rz(180)
-    R = Rx(-8) @ Rz(200)
+    R = Rx(-8) @ Rz(155)
     cup_c = posed("Head", mouth) + Vector((0.0, -0.100, -0.050))
     reach_to("r", cup_c + (R.to_matrix() @ Vector((0.081, 0.010, 0.0))), R, (-0.9, 0.3, -0.5))
     reach_to("l", Vector((0.10, -0.40, 0.96 + lift)), Rz(-15), (0.9, 0.3, -0.5))

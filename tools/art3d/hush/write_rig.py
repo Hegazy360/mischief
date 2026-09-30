@@ -23,9 +23,9 @@ OVERRIDES = {
 }
 
 JIGGLE = [
-    {"bones": ["beret", "beret_stalk"], "stiffness": 3.2, "drag": 0.45, "gravity": 0.25, "radius": 0.05, "clamp_deg": 28},
-    {"bones": ["hair_l"], "stiffness": 4.5, "drag": 0.55, "gravity": 0.35, "radius": 0.03, "clamp_deg": 18},
-    {"bones": ["hair_r"], "stiffness": 4.5, "drag": 0.55, "gravity": 0.35, "radius": 0.03, "clamp_deg": 18},
+    {"bones": ["beret", "beret_stalk"], "stiffness": 2.6, "drag": 0.40, "gravity": 0.25, "radius": 0.05, "clamp_deg": 26},
+    {"bones": ["hair_l"], "stiffness": 3.6, "drag": 0.50, "gravity": 0.35, "radius": 0.03, "clamp_deg": 16},
+    {"bones": ["hair_r"], "stiffness": 3.6, "drag": 0.50, "gravity": 0.35, "radius": 0.03, "clamp_deg": 16},
     {"bones": ["brace_l"], "stiffness": 7.0, "drag": 0.65, "gravity": 0.10, "radius": 0.02, "clamp_deg": 8},
     {"bones": ["brace_r"], "stiffness": 7.0, "drag": 0.65, "gravity": 0.10, "radius": 0.02, "clamp_deg": 8},
     {"bones": ["clarence_body"], "stiffness": 2.6, "drag": 0.30, "gravity": 0.45, "radius": 0.04, "clamp_deg": 32},
@@ -48,7 +48,7 @@ def presets_3d(cells: dict) -> dict:
         e = {
             "eyes": p["eyes"],
             "brows": p["brows"],
-            "pupils": None if p.get("pupils", "none") == "none" else "centre",
+            "pupils": None if p.get("pupils", "none") == "none" else ("small" if p["eyes"] == "wide" else "centre"),
             "gaze": PUPIL_DIR.get(p.get("pupils", "centre"), [0.0, 0.0]),
             "mouth": p["mouth"],
             "extra_a": "blush" if p.get("blush") == "on" else "cheeks",
@@ -102,7 +102,12 @@ def main():
             "pepper_pot": {"bone": "prop_r", "states": {"held": "grip_r", "hidden": "hidden"}, "default": "hidden",
                            "fx_bone": "fx_pepper"},
         },
-        "attachments": {},
+        "attachments": {
+            "tomato_splat": {"scene": "res://art3d/chars/hush/tomato_splat.glb", "bone": "Head", "default": False},
+            "carry_squeaker": {"scene": "res://art3d/chars/hush/carry_squeaker.glb", "socket": "carry_1", "default": False},
+            "carry_magnifier": {"scene": "res://art3d/chars/hush/carry_magnifier.glb", "socket": "carry_1", "default": False},
+            "carry_kipper": {"scene": "res://art3d/chars/hush/carry_kipper.glb", "socket": "carry_2", "default": False},
+        },
         "slots": {},
         "anim": {"layers": []},
         "jiggle": JIGGLE,
@@ -124,9 +129,15 @@ def main():
         },
         "material": {"palette": "res://art3d/chars/hush/palette_hush.png", "outline_px": 3.5, "rim": 0.45},
         "vertex_color": {"r": "skin_tint", "g": "stone_keep", "b": "rim_damp", "a": "outline_scale"},
-        "looks": {},
+        "looks": {
+            "TOMATO": {"show": ["tomato_splat"]},
+            "CARRY_SQUEAKER": {"show": ["carry_squeaker"]},
+            "CARRY_MAGNIFIER": {"show": ["carry_magnifier"]},
+            "CARRY_KIPPER": {"show": ["carry_kipper"]},
+        },
         "tint": {"tiers": ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"], "livid": "#FFFFFF"},
-        "stone": {"color": "#E8E6E1", "keep": ["eyes", "beret", "braces"], "plinth": "res://art3d/chars/hush/plinth.glb"},
+        "stone": {"color": "#E8E6E1", "keep": ["eyes", "beret", "braces"], "plinth": "res://art3d/chars/hush/plinth.glb",
+                  "tag": "res://art3d/chars/hush/tag_beret.glb"},
         "cheat": {"idle": 35, "walk": 20, "perform": 35, "face_to_face": 5},
         "blob_shadow_r": 0.34,
         "skins": {},

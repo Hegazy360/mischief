@@ -1,7 +1,7 @@
 """HORACE BELLOWS in 3D -- look A (Toy Box) with the board's fixes (r3d-cast-bellows).
 
     tools/art3d/blender.sh --python tools/art3d/bellows/build.py -- --out game/art3d/chars/bellows
-        [--meta <json>] [--preview <dir>] [--no-atlas] [--no-attachments]
+        [--meta <json>] [--rig-out <dir>] [--no-descriptor] [--poses <scratch.glb>] [--no-atlas] [--no-attachments]
 
 61, retired bass-baritone: a dandelion clock on a barrel. A styled three-lobe silver bouffant pushed up and back so the
 painted face (a bigger card than look A's) reads inside it; mutton chops framing the jaw; a bulbous rosy nose; a plum
@@ -106,8 +106,13 @@ if POSES:
             bpy.data.actions.remove(act)
     T.export_glb(arm, bodyob, os.path.abspath(opt["poses"]), animations=True)
     print("POSES_OK", json.dumps(meta["reach"]))
-if "meta" in opt:
-    with open(opt["meta"], "w") as f:
-        json.dump(meta, f, indent=1)
+META = opt.get("meta", os.path.join(OUT, ".build_meta.json"))
+with open(META, "w") as f:
+    json.dump(meta, f, indent=1)
+# the rig descriptor + presets follow the build (game/data/rigs3d/bellows unless --rig-out)
+RIG_OUT = opt.get("rig-out", os.path.join(SK.ROOT, "game", "data", "rigs3d", "bellows"))
+if "no-descriptor" not in opt:
+    subprocess.run(["python3", os.path.join(HERE, "descriptor.py"), "--meta", META, "--face",
+                    os.path.join(OUT, "face_bellows.json"), "--out", RIG_OUT], check=True)
 print("BELLOWS_META", json.dumps({k: meta[k] for k in ("tris", "bones", "deform_bones", "height_m")}))
 print("BELLOWS_OK", GLB)

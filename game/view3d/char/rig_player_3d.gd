@@ -134,6 +134,7 @@ var _flying := PackedInt32Array()            ## indices of props in flight
 
 # material state
 var _tier: int = 0
+var _livid_specs: bool = false
 var _stone: float = 0.0
 var _stone_from: float = 0.0
 var _stone_to: float = 0.0
@@ -614,7 +615,7 @@ func _build_jiggle() -> void:
 	jiggle_clamp.name = "JiggleClamp"
 	skeleton.add_child(jiggle_clamp)
 	jiggle_clamp.setup(cb, cd)
-	mods.clamp = jiggle_clamp
+	mods.jiggle_clamp = jiggle_clamp
 
 
 # --- playback ---------------------------------------------------------------------------------------------------
@@ -660,8 +661,7 @@ func play(clip_id: String, opts := {}) -> void:
 	var blend := float(opts.get("blend_in", c.blend_in if c.has_blend_in else ClipDef3D.DEFAULT_BLEND))
 	_start_base(anim_name if anim_name != &"" else REST_ANIM, prev, prev_t, blend if prev != null else 0.0)
 	_prop_on_clip_switch()
-	if not def.default_hidden_bones.is_empty():
-		_refresh_looks()
+	_refresh_looks()
 
 
 ## Plays `clip_id` as the masked overlay (micro-gags over walks): mask `upper` | `head` | `arms` | `face`.
@@ -717,6 +717,12 @@ func set_external_frame(frame: float) -> void:
 	_ev_from = f
 	_t = f
 	_check_release()
+	if not _finished and f >= float(_plan.length) and not _plan.loop:
+		# The locked clip reached its end: finished once; a T3 last beat follows on the view clock.
+		_finished = true
+		_finished_id = _clip_id
+		if _plan.last_beat != "" and ClipLib3D.exists(_plan.last_beat):
+			_pending_last_beat = _plan.last_beat
 	_apply_pose(0.0)
 	_flush_events()
 
@@ -1382,6 +1388,8 @@ func _refresh_looks_now() -> void:
 		if bi >= 0:
 			hb.append(bi)
 	var animated := _scale_animated()
+	for pi in mods.prop_bone.size():
+		mods.prop_fix_scale[pi] = 1 if animated.has(mods.prop_bone[pi]) and mods.prop_mode[pi] == RigMods3D.MODE_HOME else 0
 	for b3 in def.default_hidden_bones:
 		var bi3 := skeleton.find_bone(b3)
 		if bi3 >= 0 and not animated.has(bi3) and not hb.has(bi3) and not _prop_bone_shown(bi3):
@@ -1482,10 +1490,14 @@ func set_tint_tier(tier: int) -> void:
 		m.set_shader_parameter("tint_color", tc)
 	if mods != null:
 		mods.scale_factor = def.tint_bone_scale[_tier] if _tier < def.tint_bone_scale.size() else 1.0
-	if _tier >= 4 and def.props.has("specs"):
+	if def.props.has("specs"):
 		var pr: RigDef3D.Prop = def.props["specs"]
-		if pr.states.has(def.tint_livid_specs):
+		if _tier >= 4 and pr.states.has(def.tint_livid_specs) and prop_state("specs") != def.tint_livid_specs:
 			set_prop("specs", def.tint_livid_specs)
+			_livid_specs = true
+		elif _tier < 4 and _livid_specs:
+			_livid_specs = false
+			set_prop("specs", pr.default_state)
 
 
 ## The `tint_color` uniform for temper `tier` of `d`: tiers 1–3 = the reference skin × the tier's multiply colour,
@@ -1662,8 +1674,6 @@ func _rides(bi: int, sock_bone: int) -> bool:
 
 ## Recomputes only the bone-hiding list (a prop's visibility changed).
 func _refresh_hidden_only() -> void:
-	if def.default_hidden_bones.is_empty():
-		return
 	_refresh_looks()
 
 
@@ -1680,6 +1690,8 @@ func launch_prop(prop: String, vel: Vector3, spin_deg: float, at_f := -1.0) -> v
 	if mods.prop_mode[i] == RigMods3D.MODE_SOCKET and mods.prop_sock_bone[i] >= 0:
 		g = skeleton.get_bone_global_pose(mods.prop_sock_bone[i]) * mods.prop_sock_xf[i]
 	var start := _skel_to_world() * g
+	# A prop keyed at scale 0 by the clip (a hidden extra) still leaves with a unit basis.
+	start.basis = start.basis.orthonormalized() if absf(start.basis.determinant()) > 1e-9 else _skel_to_world().basis.orthonormalized()
 	_fly_start[i] = start
 	_fly_vel[i] = Vector3(vel.x * float(facing), vel.y, vel.z)
 	_fly_spin[i] = spin_deg * float(facing)
@@ -1699,7 +1711,8 @@ func _update_flying(dt: float) -> void:
 	var floor_y := global_position.y if is_inside_tree() else 0.0
 	for i in _flying:
 		var t: float
-		if _fly_clip[i] == _clip_id and _plan != null:
+		if _external and _fly_clip[i] == _clip_id and _plan != null and not _plan.loop:
+			# Frame-locked (a sim reaction): closed form in the clip's frames, so a seek or a replay lands identically.
 			t = maxf(0.0, (_t - _fly_launch_f[i]) / 60.0)
 			_fly_t[i] = t
 		else:

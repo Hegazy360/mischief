@@ -90,8 +90,8 @@ def head_q(d):
     return q
 
 
-FRINGE_Z = 0.086        # fringe line above the head centre (brows sit just below it)
-FACE_SIDE = 0.128       # half width of the face opening between the bob's sides
+FRINGE_Z = 0.094        # fringe line above the head centre (brows sit just below it)
+FACE_SIDE = 0.138       # half width of the face opening between the bob's sides (R6 step 1: as wide as B's head allows)
 
 
 def face_amount(q):
@@ -113,7 +113,7 @@ body.add(bm, "Head", face_uv=FACE_UV, name="head")
 # button nose (tiny, a touch pink)
 NOSE_C = HC + Vector((0.0, -HBy * 0.99, -0.034))
 bm = T.se_blob(hs(NOSE_C), 0.016 * HS, 0.011 * HS, 0.013 * HS, 2.0, "nose_h", n=3)
-body.add(bm, "Head", name="nose", outline=0.4)
+body.add(bm, "Head", name="nose", outline=0.0)
 
 
 # =====================================================================================================

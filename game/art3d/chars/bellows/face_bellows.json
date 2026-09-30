@@ -1,0 +1,168 @@
+{
+ "atlas_px": 1024,
+ "grid": [
+  8,
+  8
+ ],
+ "layers": [
+  "extra_a",
+  "extra_b",
+  "brows",
+  "eyes",
+  "pupils",
+  "lids",
+  "mouth"
+ ],
+ "order": [
+  "extra_a",
+  "extra_b",
+  "brows",
+  "eyes",
+  "pupils",
+  "lids",
+  "mouth"
+ ],
+ "layer_rects": {
+  "extra_a": [
+   0.0,
+   0.02,
+   1.0,
+   0.94
+  ],
+  "extra_b": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "brows": [
+   0.11,
+   0.57,
+   0.89,
+   0.83
+  ],
+  "eyes": [
+   0.15,
+   0.42,
+   0.85,
+   0.72
+  ],
+  "pupils": [
+   0.15,
+   0.42,
+   0.85,
+   0.72
+  ],
+  "lids": [
+   0.15,
+   0.42,
+   0.85,
+   0.72
+  ],
+  "mouth": [
+   0.27,
+   0.06,
+   0.73,
+   0.38
+  ]
+ },
+ "cells": {
+  "extra_a": {
+   "blush": 36,
+   "vein": 37,
+   "vein_m": 38,
+   "singe": 39,
+   "pinch": 40
+  },
+  "extra_b": {
+   "sweat": 41,
+   "sweat_m": 42,
+   "steam_l": 43,
+   "steam_r": 44,
+   "steam": 45,
+   "hiccup": 46,
+   "tears": 47
+  },
+  "brows": {
+   "neutral": 16,
+   "up": 17,
+   "angry": 18,
+   "worried": 19,
+   "one_up": 20,
+   "one_up_m": 21,
+   "sly": 22,
+   "sly_m": 23
+  },
+  "eyes": {
+   "open": 0,
+   "half": 1,
+   "angry": 2,
+   "balloon": 3,
+   "closed": 4,
+   "pinpoint": 5,
+   "spiral": 6,
+   "squint": 7,
+   "teary": 8,
+   "wide": 9
+  },
+  "pupils": {
+   "default": 10,
+   "half": 11,
+   "angry": 12,
+   "small": 13
+  },
+  "lids": {
+   "half": 14,
+   "angry": 15
+  },
+  "mouth": {
+   "closed": 24,
+   "smug": 25,
+   "smug_m": 26,
+   "smile": 27,
+   "open": 28,
+   "O_small": 29,
+   "O_mid": 30,
+   "O_big": 31,
+   "grit": 32,
+   "scream": 33,
+   "wavy": 34
+  }
+ },
+ "mirror_cells": {
+  "brows": {
+   "one_up": "one_up_m",
+   "one_up_m": "one_up",
+   "sly": "sly_m",
+   "sly_m": "sly"
+  },
+  "mouth": {
+   "smug": "smug_m",
+   "smug_m": "smug"
+  },
+  "extra_a": {
+   "vein": "vein_m",
+   "vein_m": "vein"
+  },
+  "extra_b": {
+   "sweat": "sweat_m",
+   "sweat_m": "sweat",
+   "steam_l": "steam_r",
+   "steam_r": "steam_l"
+  }
+ },
+ "blinkable": [
+  "open",
+  "half",
+  "angry",
+  "wide",
+  "teary"
+ ],
+ "no_pupils": [
+  "closed",
+  "pinpoint",
+  "spiral",
+  "balloon",
+  "squint"
+ ]
+}

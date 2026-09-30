@@ -93,9 +93,10 @@ func test_settings_panel_covers_every_setting_with_big_rows() -> void:
 		for spec in SettingsPanel.TABS[t]:
 			keys.append(String(spec[0]))
 	keys.sort()
-	var want := ["crowd_vol", "haptics", "hints", "left_handed", "music_vol", "reduce_flash", "reduce_motion",
-		"relaxed", "sfx_vol", "stare_strip", "tap_to_rig", "text_scale", "voice_vol"]
-	assert_eq(keys, want, "every GDD §3.11 setting")
+	var want := ["crowd_vol", "haptics", "hints", "left_handed", "music_vol", "outline_boost", "previews",
+		"reduce_flash", "reduce_motion", "relaxed", "room_dimming", "sfx_vol", "stare_strip", "tap_to_rig", "text_scale",
+		"voice_vol"]
+	assert_eq(keys, want, "every GDD §3.11 setting (+ the v1.2 Previews, Room dimming, Outline +50 %)")
 	assert_ge(SettingsPanel.ROW_H, 144.0, "rows ≥ 144 px hit")
 	var p := SettingsPanel.new()
 	_add(p)

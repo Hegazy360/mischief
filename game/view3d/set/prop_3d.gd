@@ -14,6 +14,31 @@ const TAG_SWING_S := 0.3
 const WIGGLE_S := 0.6
 const FPS := 60.0
 const STATES: Array[StringName] = [&"idle", &"armed", &"spent", &"open"]
+const PROPS_PALETTE := "res://art3d/props/palette_props.png"
+## Per silhouette family: the part the rig scrubs [part, axis (prop frame), degrees at 100 %, offset at 100 %].
+const RIG_POSE := {
+	"squat_jar": ["lid", Vector3(0, 0, 1), 38.0, Vector3(0.0, 0.025, 0.0)],
+	"round_kettle": ["lid", Vector3(0, 0, 1), 55.0, Vector3(0.0, 0.03, 0.0)],
+	"tall_jar": ["lid", Vector3(0, 1, 0), 540.0, Vector3.ZERO],
+	"gooseneck_tap": ["head", Vector3(0, 1, 0), 180.0, Vector3.ZERO],
+	"tall_rounded_box": ["door_upper", Vector3(0, 1, 0), -75.0, Vector3.ZERO],
+	"big_horn": ["lever", Vector3(1, 0, 0), -55.0, Vector3.ZERO],
+	"fat_armchair": ["key", Vector3(0, 0, 1), 720.0, Vector3.ZERO],
+	"candlestick_phone": ["handset", Vector3(0, 0, 1), 25.0, Vector3(0.02, 0.06, 0.0)],
+	"oval_on_stand": ["pane", Vector3(0, 0, 1), 0.0, Vector3(0.0, 0.25, 0.12)],
+	"tall_case_clock": ["hands", Vector3(0, 0, 1), -1080.0, Vector3.ZERO],
+	"banded_crate": ["lid", Vector3(1, 0, 0), -70.0, Vector3.ZERO],
+}
+## Per family: the armed look beyond the "armed" marks part [part, axis, degrees, offset, scale].
+const ARMED_POSE := {
+	"squat_jar": [["lid", Vector3(0, 0, 1), 16.0, Vector3(0.012, 0.01, 0.0), 1.0]],
+	"tall_jar": [["lid", Vector3(0, 1, 0), 25.0, Vector3.ZERO, 1.0]],
+	"big_horn": [["lever", Vector3(1, 0, 0), -55.0, Vector3.ZERO, 1.0]],
+	"tall_rounded_box": [["door_upper", Vector3(0, 1, 0), -4.0, Vector3.ZERO, 1.0]],
+	"oval_on_stand": [["pane", Vector3(0, 0, 1), 0.0, Vector3.ZERO, 0.0]],
+	"candlestick_phone": [["handset", Vector3(0, 0, 1), 0.0, Vector3.ZERO, 0.0]],
+	"tall_case_clock": [["pendulum", Vector3(0, 0, 1), 12.0, Vector3.ZERO, 1.0]],
+}
 
 ## The hotspot id (house.json).
 var hotspot_id: String = ""
@@ -33,6 +58,11 @@ var _shells: Array[MeshInstance3D] = []
 var _parts: Dictionary = {}
 var _part_rest: Dictionary = {}
 var _anim_player: AnimationPlayer = null
+var _skel: Skeleton3D = null
+var _bones: Dictionary = {}
+var _family: String = ""
+var _palette: Texture2D = null
+var _hidden_parts: Dictionary = {}
 var _state: StringName = &"idle"
 var _progress: float = 0.0
 var _glow_color: Color = Color("#FFC838")
@@ -57,8 +87,11 @@ var _occupied: bool = false
 
 
 ## Builds the piece. `xf` = the prop frame (SetGeo.prop_xform); `p_live` = interactive tonight.
+## `p_mats`: share a material group (a room's: furniture and dressing are one material per room); null = own
+## group (live props: each has its own glow). `palette`: the palette texture of a .glb model (default: the props
+## palette for hotspot props).
 func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_verb: String, p_live: bool,
-		room_color: Color = Color(0.78, 0.71, 0.52)) -> void:
+		room_color: Color = Color(0.78, 0.71, 0.52), p_mats: SetMats = null, palette: Texture2D = null) -> void:
 	hotspot_id = id
 	name = id
 	entry = p_entry
@@ -66,8 +99,11 @@ func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_v
 	verb = p_verb
 	live = p_live
 	transform = xf
-	mats = SetMats.new(id)
-	mats.room_color = room_color
+	mats = p_mats if p_mats != null else SetMats.new(id)
+	if p_mats == null:
+		mats.room_color = room_color
+	_palette = palette
+	_family = SetGeo.s(entry.get("silhouette", ""))
 	_glow_color = verb_color(verb)
 	_visual = Node3D.new()
 	_visual.name = "Visual"
@@ -82,9 +118,17 @@ func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_v
 		_build_primitive()
 	if live:
 		_build_shells()
-	_build_armed_marks()
+	if _skel == null:
+		_build_armed_marks()
 	set_process(false)
 	_apply_state()
+
+
+## Skeleton3D ignores bone poses set before it is inside the tree (no update is queued): re-apply the look once the
+## piece is on stage.
+func _enter_tree() -> void:
+	if _skel != null:
+		_apply_state.call_deferred()
 
 
 ## The verb colour (REDESIGN §3.7): rig gold, hide blue, take / exit cream.
@@ -109,14 +153,17 @@ func _build_glb(path: String) -> bool:
 		return false
 	inst.name = "Model"
 	_visual.add_child(inst)
+	var tex := _palette
+	if tex == null and ResourceLoader.exists(PROPS_PALETTE):
+		tex = load(PROPS_PALETTE) as Texture2D
 	for n in inst.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		var tex: Texture2D = null
-		if mi.mesh != null and mi.mesh.get_surface_count() > 0:
+		var t := tex
+		if t == null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
 			var sm := mi.mesh.surface_get_material(0)
 			if sm is BaseMaterial3D:
-				tex = (sm as BaseMaterial3D).albedo_texture
-		mi.material_override = mats.tex_mat(tex, &"prop" if live else &"set")
+				t = (sm as BaseMaterial3D).albedo_texture
+		mi.material_override = mats.tex_mat(t, &"prop" if live else &"set")
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_meshes.append(mi)
 		_parts[String(mi.name)] = mi
@@ -129,6 +176,11 @@ func _build_glb(path: String) -> bool:
 	var aps := inst.find_children("*", "AnimationPlayer", true, false)
 	if not aps.is_empty():
 		_anim_player = aps[0] as AnimationPlayer
+	var sks := inst.find_children("*", "Skeleton3D", true, false)
+	if not sks.is_empty():
+		_skel = sks[0] as Skeleton3D
+		for i in _skel.get_bone_count():
+			_bones[_skel.get_bone_name(i)] = i
 	return not _meshes.is_empty()
 
 
@@ -166,9 +218,10 @@ func _build_shells() -> void:
 			sh.material_override = mat
 			sh.layers = 1 << 2
 			sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			sh.skeleton = mi.skeleton
-			sh.skin = mi.skin
 			mi.add_child(sh)
+			if _skel != null:
+				sh.skin = mi.skin
+				sh.skeleton = sh.get_path_to(_skel)
 			_shells.append(sh)
 
 
@@ -176,7 +229,7 @@ func _build_shells() -> void:
 ## jar rim, the squeaker's yellow tail, a blue spray rose, a spanner, a spring, a sausage, a magnifier handle, a
 ## kipper, a spring on the clock, footprints in the empty frame. Hidden unless armed.
 func _build_armed_marks() -> void:
-	if not _parts.is_empty() and _anim_player != null:
+	if verb == "" or (not _parts.is_empty() and _anim_player != null):
 		return
 	var fam := SetGeo.s(entry.get("silhouette", ""))
 	var lb := SetGeo.local_bounds(entry)
@@ -233,7 +286,7 @@ func state() -> StringName:
 
 func _apply_state() -> void:
 	for n in _armed_nodes:
-		n.visible = _state == &"armed"
+		n.visible = _state == &"armed" or _state == &"spent"
 	for k in _parts.keys():
 		var p: Node3D = _parts[k]
 		var ks := String(k)
@@ -243,18 +296,23 @@ func _apply_state() -> void:
 			p.visible = _state == &"spent"
 		elif ks.begins_with("state_idle") or ks.ends_with("_idle"):
 			p.visible = _state == &"idle"
-	var lid: Node3D = _parts.get("lid", null)
-	if lid != null and _part_rest.has("lid"):
-		var rest: Transform3D = _part_rest["lid"]
-		lid.transform = rest
-		if _state == &"armed":
-			lid.transform = Transform3D(rest.basis.rotated(Vector3(0, 0, 1), deg_to_rad(14.0)), rest.origin + Vector3(0.01, 0.008, 0.0))
+	_reset_parts()
+	var shown := _state == &"armed" or _state == &"spent"
+	_pose_part("armed", Vector3.UP, 0.0, Vector3.ZERO, 1.0 if shown else 0.0)
+	if shown:
+		for pose in ARMED_POSE.get(_family, []):
+			_pose_part(String(pose[0]), pose[1], float(pose[2]), pose[3], float(pose[4]))
+	elif _progress > 0.0:
+		_apply_rig_pose()
+	for h in _hidden_parts.keys():
+		_pose_part(String(h), Vector3.UP, 0.0, Vector3.ZERO, 0.0)
 	mats.set_spent(_state == &"spent")
 	if _state == &"spent":
 		set_glow(_glow_color, 0.0)
 
 
-## Scrubs the prop's `rig` animation while Hush works (0…1): the lid lifting, the lever travelling to ×3.
+## Scrubs the prop's `rig` animation while Hush works (0…1): the lid lifting, the lever travelling to ×3, the key
+## winding (RIG_POSE per silhouette family; a .glb AnimationPlayer "rig" clip wins when present).
 func set_rig_progress(frac: float) -> void:
 	_progress = clampf(frac, 0.0, 1.0)
 	if _anim_player != null and _anim_player.has_animation("rig"):
@@ -264,14 +322,55 @@ func set_rig_progress(frac: float) -> void:
 			_anim_player.pause()
 		_anim_player.seek(_progress * a.length, true)
 		return
-	var lid: Node3D = _parts.get("lid", null)
-	if lid != null and _part_rest.has("lid") and _state != &"armed":
-		var r: Transform3D = _part_rest["lid"]
-		lid.transform = Transform3D(r.basis.rotated(Vector3(0, 0, 1), deg_to_rad(25.0 * _progress)), r.origin + Vector3(0, 0.04 * _progress, 0))
-	var lever: Node3D = _parts.get("lever", null)
-	if lever != null and _part_rest.has("lever"):
-		var r2: Transform3D = _part_rest["lever"]
-		lever.transform = Transform3D(r2.basis.rotated(Vector3(0, 0, 1), deg_to_rad(-60.0 * _progress)), r2.origin)
+	if _state == &"idle":
+		_apply_rig_pose()
+
+
+func _apply_rig_pose() -> void:
+	var rp: Array = RIG_POSE.get(_family, [])
+	if rp.is_empty():
+		return
+	_pose_part(String(rp[0]), rp[1], float(rp[2]) * _progress, (rp[3] as Vector3) * _progress, 1.0)
+
+
+# --- parts (bones of a skinned .glb, or the greybox's part meshes) -------------------------------------
+
+## Poses a part relative to its rest: a rotation of `deg` about `axis` (prop frame) at its pivot, an offset and a
+## uniform scale (0 hides it). Returns false when the prop has no such part.
+func _pose_part(part: String, axis: Vector3, deg: float, offset: Vector3 = Vector3.ZERO, s: float = 1.0) -> bool:
+	var r := Basis(axis.normalized(), deg_to_rad(deg)) if absf(deg) > 1e-5 else Basis()
+	if _skel != null and _bones.has(part):
+		var i: int = _bones[part]
+		var g_rest := _skel.get_bone_global_rest(i)
+		var g := Transform3D(r * g_rest.basis * Basis.from_scale(Vector3.ONE * maxf(s, 0.0001)), g_rest.origin + offset)
+		var par := _skel.get_bone_parent(i)
+		var local := g if par < 0 else _skel.get_bone_global_pose(par).affine_inverse() * g
+		_skel.set_bone_pose_position(i, local.origin)
+		_skel.set_bone_pose_rotation(i, local.basis.orthonormalized().get_rotation_quaternion())
+		_skel.set_bone_pose_scale(i, Vector3.ONE * maxf(s, 0.0001))
+		return true
+	var n: Node3D = _parts.get(part, null)
+	if n == null or not _part_rest.has(part):
+		return false
+	var rest: Transform3D = _part_rest[part]
+	n.transform = Transform3D(r * rest.basis, rest.origin + offset)
+	n.visible = s > 0.001
+	return true
+
+
+func _reset_parts() -> void:
+	if _skel != null:
+		_skel.reset_bone_poses()
+		return
+	for k in _part_rest.keys():
+		var n: Node3D = _parts.get(k, null)
+		if n != null:
+			n.transform = _part_rest[k]
+
+
+## True when the prop has this part (a bone or a greybox part mesh).
+func has_part(part: String) -> bool:
+	return (_skel != null and _bones.has(part)) or _parts.has(part)
 
 
 func rig_progress() -> float:
@@ -370,15 +469,23 @@ func playing() -> String:
 
 ## Shows / hides a named part (the pepper pot while Hush holds hers). Unknown parts are ignored.
 func set_part(part: String, on: bool) -> void:
+	if on:
+		_hidden_parts.erase(part)
+	else:
+		_hidden_parts[part] = true
+	if _skel != null and _bones.has(part):
+		_apply_state()
+		return
 	for k in _parts.keys():
-		if String(k) == part or String(k).begins_with(part + "_") or String(k).begins_with(part):
+		if String(k) == part or String(k).begins_with(part + "_"):
 			(_parts[k] as Node3D).visible = on
 
 
 ## True when a part is visible (tests).
 func part_visible(part: String) -> bool:
-	var p: Node3D = _parts.get(part, null)
-	return p != null and p.visible
+	if not has_part(part):
+		return false
+	return not _hidden_parts.has(part)
 
 
 ## Hiding spots override (HideSpot3D); a plain prop has no occupant.
@@ -538,16 +645,14 @@ func _occupied_busy() -> bool:
 	return false
 
 
-## A procedural stand-in for the named animation at phase k (0…1).
+## A procedural stand-in for the named animation at phase k (0…1): bones / part meshes when the prop has the part,
+## else the whole visual.
 func _run_anim(k: float) -> void:
 	var v := _visual
+	var a := sin(k * PI)
 	match _anim:
-		"lid_flip", "lid_pop":
-			var lid: Node3D = _parts.get("lid", null)
-			if lid != null and _part_rest.has("lid"):
-				var r: Transform3D = _part_rest["lid"]
-				var a := sin(k * PI)
-				lid.transform = Transform3D(r.basis.rotated(Vector3(0, 0, 1), deg_to_rad(120.0) * a), r.origin + Vector3(0, 0.08 * a, 0))
+		"lid_flip", "lid_pop", "lid_up":
+			_pose_part("lid", Vector3(0, 0, 1) if _anim != "lid_up" else Vector3(1, 0, 0), 120.0 * a, Vector3(0, 0.06 * a, 0))
 		"wobble", "shake":
 			v.rotation.z = deg_to_rad(6.0) * sin(k * TAU * 3.0) * (1.0 - k)
 		"nudge":
@@ -558,11 +663,29 @@ func _run_anim(k: float) -> void:
 		"smash":
 			v.visible = k < 0.2
 		"play":
-			var horn: Node3D = _parts.get("horn", null)
-			if horn != null:
-				horn.rotation.y = TAU * k * 2.0
+			_pose_part("horn", Vector3(0, 1, 0), 8.0 * sin(k * TAU * 4.0))
+		"spray":
+			_pose_part("head", Vector3(0, 0, 1), 25.0 * sin(k * TAU * 5.0) * (1.0 - k))
+		"ring":
+			_pose_part("handset", Vector3(0, 0, 1), 12.0 * sin(k * TAU * 8.0), Vector3(0, 0.02 * a, 0))
+		"avalanche", "door_open", "door_strain":
+			_pose_part("door_upper" if _anim != "door_open" else "door_lower", Vector3(0, 1, 0), -95.0 * a)
+		"close":
+			if not _pose_part("curtain", Vector3(1, 0, 0), 18.0 * sin(k * TAU * 1.5) * (1.0 - k)):
+				_pose_part("door", Vector3(0, 1, 0), -70.0 * (1.0 - k))
+		"burst":
+			if not _pose_part("curtain", Vector3(1, 0, 0), -55.0 * a):
+				_pose_part("door", Vector3(0, 1, 0), -100.0 * a)
+		"breathe":
+			_pose_part("curtain", Vector3(0, 1, 0), 0.0, Vector3(0, 0, 0.012 * sin(k * TAU)), 1.0)
+		"launch", "pogo":
+			v.position.y = 0.25 * a
+		"swing":
+			v.rotation.z = deg_to_rad(10.0) * sin(k * TAU * 2.0) * (1.0 - k)
+		"shatter":
+			_pose_part("pane", Vector3.UP, 0.0, Vector3.ZERO, 1.0 - k)
 		_:
-			v.scale = Vector3.ONE * float(entry.get("scale", 1.0)) * (1.0 + 0.04 * sin(k * TAU))
+			v.scale = Vector3.ONE * float(entry.get("scale", 1.0)) * (1.0 + 0.04 * a)
 
 
 func _finish_anim() -> void:
@@ -570,15 +693,16 @@ func _finish_anim() -> void:
 	_anim = ""
 	_anim_t = 0.0
 	var s := float(entry.get("scale", 1.0))
-	if done in ["wobble", "shake", "breathe", "close", "burst"]:
-		_visual.rotation = Vector3.ZERO
-		_visual.scale = Vector3(s, s, s)
-	if done in ["lid_flip", "lid_pop"]:
-		_apply_state()
+	_visual.rotation = Vector3.ZERO
+	_visual.scale = Vector3(s, s, s)
+	if done in ["launch", "pogo"]:
+		_visual.position.y = 0.0
 	if done == "nudge":
 		_visual.position.x = 0.0
 		position.x -= 0.05
 		_home_local.origin.x -= 0.05
+	if done != "fall" and done != "smash":
+		_apply_state()
 
 
 ## Counts for the perf budget: {meshes, shells}.

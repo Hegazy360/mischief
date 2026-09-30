@@ -32,6 +32,8 @@ var main_cam: CameraDirector3D = null
 var half_rate: bool = true
 ## Tests: the sim's C8 inputs instead of the world's ({sim_pip: bool, reason: StringName}).
 var override_sim: Dictionary = {}
+## The perf probe (no world view): always shown, following this node.
+var forced_target: Node3D = null
 
 var shown: bool = false
 var _want := false
@@ -161,6 +163,11 @@ func _process(delta: float) -> void:
 	advance(delta)
 
 
+## A reaction / payoff or an emote-less micro-gag is running (the lean mode opens the window for those).
+static func is_busy(snap: ViewSnapshot, bv: CharacterView3D) -> bool:
+	return snap.bellows.reacting or (bv != null and bv.ctx.mg != "" and bv.ctx.mg_emote == "")
+
+
 ## Pure C8 decision: show the window? (`on_screen` = he is on the main screen; `sim_pip` = SimVisibility.pip_shows;
 ## `reason` = pip_reason; `lean` = the lean mode; `busy` = a reaction / payoff / emote-less micro-gag runs.)
 static func want_window(on_screen: bool, sim_pip: bool, reason: StringName, lean: bool, busy: bool) -> bool:
@@ -172,6 +179,15 @@ static func want_window(on_screen: bool, sim_pip: bool, reason: StringName, lean
 
 
 func advance(delta: float) -> void:
+	if forced_target != null:
+		if not shown:
+			_set_shown(true)
+		_follow_node(forced_target, delta)
+		_frame += 1
+		if not half_rate or _frame % 2 == 0:
+			render_target_update_mode = SubViewport.UPDATE_ONCE
+			_renders += 1
+		return
 	if wv == null:
 		return
 	var snap: ViewSnapshot = wv._snap()
@@ -190,8 +206,7 @@ func advance(delta: float) -> void:
 		sim_pip = PipView.rule(snap, main_cam.visible_world_rect() if main_cam != null else Rect2(), wv.layout, wv.entry_warning_active()) \
 				or (snap.bellows.present and snap.bellows.room == snap.hush.room)
 		reason = &"room" if snap.bellows.room == snap.hush.room else &"adjacent"
-	var bv := wv.bellows_view
-	var busy := snap.bellows.reacting or (bv != null and bv.ctx.mg != "" and bv.ctx.mg_emote == "")
+	var busy := PipView3D.is_busy(snap, wv.bellows_view)
 	var lean := wv.window_mode == "lean"
 	var want := PipView3D.want_window(on_screen, sim_pip, reason, lean, busy)
 	if on_screen and not _escalated:
@@ -212,7 +227,7 @@ func advance(delta: float) -> void:
 	else:
 		_longest = maxi(_longest, _run)
 		_run = 0
-	wv.set_window_shown(shown)
+	wv.set_window_shown(shown, 1 if on_screen else 0)
 	if not shown:
 		return
 	_follow(delta)
@@ -226,7 +241,14 @@ func _follow(delta: float) -> void:
 	var bv := wv.bellows_view
 	if bv == null:
 		return
-	var feet := bv.feet_world()
+	_frame_on(bv.feet_world(), delta)
+
+
+func _follow_node(n: Node3D, delta: float) -> void:
+	_frame_on(n.global_position if n.is_inside_tree() else n.position, delta)
+
+
+func _frame_on(feet: Vector3, delta: float) -> void:
 	var h := FRAME_H_ESCALATED_M if _escalated else FRAME_H_M
 	var target := feet + Vector3(0.0, h * 0.5 - 0.15, 0.0)
 	if _snap:
@@ -237,7 +259,11 @@ func _follow(delta: float) -> void:
 	# distance so `h` metres fill the window height at 30° vertical FOV
 	var d := h * 0.5 / tan(deg_to_rad(cam.fov) * 0.5)
 	var eye := _pos + Vector3(0.0, d * 0.06, d)
-	cam.global_transform = Transform3D(Basis.looking_at(_pos - eye, Vector3.UP), eye) if cam.is_inside_tree() else Transform3D(Basis.looking_at(_pos - eye, Vector3.UP), eye)
+	var xf := Transform3D(Basis.looking_at(_pos - eye, Vector3.UP), eye)
+	if cam.is_inside_tree():
+		cam.global_transform = xf
+	else:
+		cam.transform = xf
 
 
 ## A minimal HUD frame for sandboxes / probes (the real one is r3d-hud's PipFrame): the texture in a navy frame.

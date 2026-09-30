@@ -224,7 +224,10 @@ func _phone_pass(cid: String, opts: Dictionary, n: int) -> Array:
 	_cam.far = 60.0
 	_cam.position = Vector3(x, 1.9, 6.5)
 	_cam.look_at(Vector3(x, 1.35, -1.0), Vector3.UP)
-	# The crop: the character's projected bounds over the whole clip (+ 24 px), at true phone scale.
+	# The crop: the character's projected bounds over the whole clip (+ 24 px), at true phone scale (after the resized
+	# viewport has drawn once, so the camera projects at 1200×540).
+	await process_frame
+	await RenderingServer.frame_post_draw
 	var r := Rect2()
 	for f0 in range(0, n + 1, 2):
 		_rig.set_external_frame(float(f0))

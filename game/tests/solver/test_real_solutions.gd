@@ -191,7 +191,8 @@ func test_real_fuzz_regressions_p00() -> void:
 ## More p00 seeds past CI's 20 (found by `fuzz.sh p00_curtain_up --runs=100 --seed=21`):
 ## - random seed 21 (rule 6): a lure 0.5 s into the tea, ACHOO-RIA! rigged, ended the tea before its
 ##   7 s hook; the Prologue's loop never comes back, so the sneeze was lost → in a non-repeating loop an
-##   interruption restarts an activity whose rigged prank is still to come (TECH §3.7.1);
+##   interruption restarts an activity whose rigged prank is still to come (TECH §3.7.1; since R3D pinned as a
+##   scenario in tests/sim/test_real_data.gd — the seed is kept as a plain fairness run);
 ## - hider seed 53 (rule 6, a solver false alarm): the run ends mid-dive, the probe's first go was
 ##   pinned (not queued) and the executor never popped her out → it waits out a dive first.
 func test_real_fuzz_regressions_p00_tea_and_dive() -> void:
@@ -208,10 +209,9 @@ func test_real_fuzz_regressions_p00_tea_and_dive() -> void:
 	print("  %s" % Fuzz.summary_line(r21))
 	assert_false(bool((r21["softlock"] as Dictionary).get("skipped", true)), "random 21: the probe ran")
 	assert_true(bool(r21["ok"]), "random 21: %s" % "\n".join(PackedStringArray(r21["invariants"])))
-	var lg: SolverLog = r21["log"]
-	assert_false(lg.events_named("rigged", {"prank": "achoo_ria"}).is_empty(), "random 21 rigs the honey")
-	assert_true(lg.events_named("b_activity_end", {"id": "tea"}).is_empty(),
-		"the lure mid-tea no longer ends the tea (ACHOO-RIA! still to come)")
+	# R3D: the live mask changed every random trajectory (struck taps are refused), so seed 21 no longer replays the
+	# lure-mid-tea moment; that scenario is pinned seed-free in tests/sim/test_real_data.gd
+	# (test_real_prologue_lure_mid_tea_keeps_the_sneeze). The seed stays as a fairness run.
 	var r53 := Fuzz.run_bot(fac, _data, ep, "hider", 53, {"probe": true})
 	print("  %s" % Fuzz.summary_line(r53))
 	assert_false(bool((r53["softlock"] as Dictionary).get("skipped", true)), "hider 53: the probe ran")

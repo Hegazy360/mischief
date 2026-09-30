@@ -97,6 +97,9 @@ def main():
             if exp and exp["expect"] > 0 and exp["expect"] != clip.length and abs(exp["expect"] - clip.length) > exp["tol"] and not (clip.loop and exp["loop"]):
                 warns.append("manifest expects %d f (± %d), the clip has %d" % (exp["expect"], exp["tol"], clip.length))
             frames = clip.frames()
+            if clip.ik_misses:
+                worst = max(clip.ik_misses.items(), key=lambda kv: kv[1])
+                warns.append("IK out of reach on %d frame(s), worst %.3f m at f%d (%s arm)" % (len(clip.ik_misses), worst[1], worst[0][0], worst[0][1]))
             glb = os.path.join(out_dir, clip.short + ".glb")
             X.write_action(arm, skel, clip, frames)
             X.export(arm, glb)

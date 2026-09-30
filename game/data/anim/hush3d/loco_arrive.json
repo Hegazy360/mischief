@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "hush/loco_arrive",
+  "rig": "hush",
+  "anim": "res://art3d/anim/hush/loco_arrive.res",
+  "length": 8,
+  "fps": 60,
+  "loop": false,
+  "layer": "base",
+  "mask": null,
+  "blend_in": 3,
+  "blend_out": 6,
+  "lock": null,
+  "beats": {},
+  "events": [
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "land_soft"
+    }
+  ],
+  "face": [
+    {
+      "f": 0,
+      "preset": "sneak"
+    },
+    {
+      "f": 4,
+      "preset": "grin"
+    },
+    {
+      "f": 6,
+      "preset": "curious"
+    }
+  ],
+  "cheat_deg": 35.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/hush/loco_arrive.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      6
+    ],
+    "freeze_holds": [],
+    "draft": false
+  }
+}

@@ -4,6 +4,112 @@ Branch `r3d` at `5b5a135` plus the r3d-qa working-tree changes (the orchestrator
 `910d23a982ac1d19`. Box: 4 CPU cores, llvmpipe (software GL), 1200×540, MSAA off; the timing rows ran with no other Godot or
 Blender process on the box.
 
+## R3. QA round 2, phase 3: row 19 scored, row 19 re-run, the owner pack refreshed (2026-10-01, 16:47–17:10Z)
+
+**Verdict: FAIL** on rows 9, 16 and 19. Every other row passes (§R2).
+
+**Row 19, round 2** ([`readability.md`](readability.md), section "Round 2"): three new fresh reviewers answered the
+rebuilt packets `set_f` / `set_g` / `set_h`. Every answer is pasted verbatim with its key.
+
+| test | round 2 | bar | |
+|---|---|---|---|
+| spot (`set_f`) | 6/8 | ≥ 6 | PASS (the sneeze preview now reads; pickle jar → "vase"; needs-kettle → "honk") |
+| crowding (`set_g`) | 2/8 yes | ≤ 1 | **FAIL** (P00 t2190: two countdown rings for one target, badge far from its prop; N1 t6768, a borderline frame that round 1 called "no") |
+| gags (`set_h`) | 1 of 9 at bar | sneezes / dizzy ≥ 4/4, rest ≥ 3/3, fresh ≥ 3 | **FAIL** (picture 3/4/3 passes; sneezes 3/3/3 with an unchanged clip; dizzy 3/4/3; vase 2/3/2; bonk 2/3/1; curtain call 2/2/2; relief 1/2/2; squeak bit 1/2/1) |
+| verb, 2D vs 3D | 7/8, 8/8 | | carried from round 1 |
+
+- **Scoring:** `packets.py score` with the round-2 keys (`<SP>/work/r3d-qa/p4/verdict_*.md`), then the gist by hand
+  after looking at every packet image and strip page. The requests are Q2-C1/C2, Q2-G1…G8 and Q2-S1/S2
+  (`readability.md` §R2.5).
+- **The pre-gate:** `tools/scripts/pregate3d.sh --rows=19` re-ran alone at 17:03Z → FAIL; the record is archived as
+  [`pregate_r2.json`](pregate_r2.json), with a `qa_note`.
+  - The record's table marks rows 1–4, 9–18 and 20a STALE. That is only because the tree hash moved
+    (`bd0fb2503d06829a` → `d55aea4ce348f930`) when phase 1 fixed `pregate3d.sh` after its run.
+  - No file under `game/`, `tools/ci`, `tools/art3d/review` or `tools/audio` changed after 13:58Z (mtime scan), so their
+    results stand.
+  - Rows 9 and 16 had no fix since phase 1, so they were not re-run.
+- **Perf charts** [`perf/budgets.png`](perf/budgets.png) and [`perf/rigs.png`](perf/rigs.png) are regenerated from
+  this run's record.
+- **Owner pack** (`docs/review/r3d/index.md`, still held): re-shot from this build at the 2D-reference ticks, captions
+  off, live, in sandbox `r3d-qa-shot`:
+  - `hud_2d_vs_3d.jpg` (P00 slow t415), `tinker_2d_vs_pepper_rig.jpg` (P00 ideal t400) and `pip_2d_vs_window.jpg`
+    (P00 ideal t445);
+  - `kitchen_before_after.jpg` (r3d-sets' board, with its 3D panel replaced by the t415 frame from this build);
+  - `rig_ring_g0_t192.jpg` (round 1's crowded frame, fixed) and `still_crowded_r2.jpg` (the two round-2 "yes" frames).
+
+## R2. QA round 2, phase 1: the full pre-gate and three rebuilt row-19 packets (2026-10-01, 13:58–16:30Z)
+
+Tree: `5f0092b` (fix round 1) plus r3d-fix-hud2's uncommitted changes. Pre-gate content hash `bd0fb2503d06829a`,
+sim tree `838f39fc9f4d1a85`. `tools/scripts/pregate3d.sh --rows=1-7,9-18,20a` ran alone (no other Godot or Blender
+process), then `--rows=8 --force`, which is sim-only, beside the packet shots. Row 16 now implements D17 (§R2.2). The
+record is [`pregate_r2.json`](pregate_r2.json).
+
+**Verdict: FAIL** on rows 9 and 16. Row 19 was not scored in this phase: its packets were rebuilt (§R2.3) and wait
+for new fresh reviewers.
+
+| # | Row | Result | Key numbers |
+|---|---|---|---|
+| 1 | Import metadata | PASS | 1010 .import, 412 .uid |
+| 2 | Full suite | PASS | 1312/1312, 0 skipped, 138 files incl. 2 `tests/slice`; 336 s |
+| 3 | Lints --strict | PASS | 72 clips strict, 0 errors / 0 warnings / 0 missing; coverage 72; 0 lints failed |
+| 4 | Validators | PASS | 5 |
+| 5 | Every route | PASS | 13 routes, every expect OK |
+| 6 | Dead air (D1) | PASS | worst ⏩ ideal 8.1 % / required 4.8 % / slow 5.9 %; gap 5.47 s; edge 0.221 |
+| 7 | Planner proofs + g0 | PASS | 143 s |
+| 8 | Fuzz | PASS | 2400 runs (12 episode × bot groups × 200), 0 invariants, 0 soft-locks, 0 struck-hotspot commands; 6045 s in 3 parallel processes |
+| 9 | Set lint | **FAIL** | 2 errors, new: P00 parlour `parlour_vase` [dressing] C* 42.7 (> 30) and \|ΔL*\| 20.8 vs the wall (> 15). r3d-fix-gags Q-G4 made the vase ×1.5 blue-and-white but left `"dressing": true` on it in `house3d.json`. 1 warning (N02 hall negative space 0.68 m, D13) |
+| 10 | Screen-rect lint | PASS | 0 errors, 1 warning (N02 hall clock at 16:9) |
+| 11 | HUD lint | PASS | 0 errors, 2 warnings: middle band `pip` 0.0 s on p00_ideal / p00_slow (the escalated window punch, within D9/D10's 5 s) |
+| 12 | C8 | PASS | 26 route × mode runs, 0 violations; sim window share max 35.0 % (was 39.0 %) |
+| 13 | Gate 0 in 3D | PASS | g0_done; accent f94; zoom 1.14 / 1.59 max; hit-stop 83 ms; ACHOO-RIA!; flipped; sink; tag 1/1; C8 0; Again ▶ 272 ms |
+| 14 | Prologue in 3D | PASS | ideal 7 laughs by 60 s, 4 cues, crowd ≤ 0.268 s, 0 doubles, C8 0; slow first laugh 6.63 s / first prank 27.58 s launch-relative |
+| 15 | Other routes in 3D | PASS | 13/13; g0 + P00 0 fallbacks; N01 / N02 14–60 (info) |
+| 16 | Frame budget | **FAIL** (D17) | counts PASS: draws p95 ≤ 82 / max ≤ 101, tris ≤ 101,162, emitters ≤ 8, tex ≤ 110.7 MB, 0 compiles in PLAY; view + HUD p50 2.91–3.16 / p95 4.28–4.72 ms (bars 3.5 / 8.0). D17: 11 call sites > 1 ms at the same tick in ≥ 2 of 3 rendered runs, and 20 headless hits repeated in another run |
+| 17 | Per character | PASS | Hush 0.159 ms, 2 draws, 9812 tris, 48 bones; Bellows 0.198 ms (177–223 µs), 4 draws, 9495 tris, 50 bones, + stool 1 / 450 apart (D16) |
+| 18 | Flow / touch | PASS | retry 632 ms; tap feedback 1 f; pause / back OK; tap accuracy min 20/20 on 5 slice hotspots, 0 neighbours; g0 Again ▶ 260 ms; P00 Next ▶ live frame 1 |
+| 20a | APK (local) | PASS | 73.47 MB (73,468,995 B), sha256 `9478f00dc5dec2dca1c17a38beb8dc00652091b5997d089dac81c237e6446316`, 3277 entries, 77 clip .res, 80 sidecars, excluded paths absent, boot_config stage_door / 3d / previews off / sim / render defaults, VIBRATE only, minSdk 24; **exported pack: 197 scripts, 0 failures, Night OK (view 3d, world_view Node3D)** |
+
+### R2.1 Row 8, and the record's summary
+- **Row 8** ran `--force` beside the packet shots (sim-only, seeded, no timing): PASS, 200/200 OK in every group.
+- **The record's own `summary.pass: true` is wrong.** It came from the final `--rows=8` invocation, whose old rule
+  counted only the rows it ran. `pregate3d.sh` now fails the summary on any failing row. The archive adds a
+  `qa_note` with the true status: FAIL on rows 9, 16 and 19.
+
+### R2.2 Row 16 under D17: how it is judged now, and what it found
+- **The runs:** 3 rendered + 2 `--headless` `prologue_ideal --perf-log --view3d-prof` runs (`build/r3d/prof/`). Each
+  e2e report maps every profiler frame to its sim tick (`prof_frame_ticks`).
+- **Call sites:** the profiler leaves row 16 always read (our nodes; WorldView3D's phases).
+- **"Same tick (±2 f)":** a profiler frame simulates ticks (t[f−1], t[f]]; two frames match when those spans, widened
+  by 2 ticks, overlap.
+- **Headless:** a hit counts when it repeats at the same tick in another run. Headless one-offs are listed: box
+  preemption hits headless runs too, which r3d-fix-hud saw as well.
+- **Info:** the fixers' looser window (±2 profiler frames) gives 12 clusters. A chance baseline (the same matching
+  with the other runs shifted −120 / +120 ticks) gives **9 / 18 clusters, against 11 unshifted**. So most 2-of-3
+  rendered matches are coincidence on this box; a lead ruling is requested.
+- **The sites that look truly deterministic** (3 of 3 rendered, both headless, or rendered + headless):
+
+| ticks (P00 ideal) | site | evidence | where (route step) | owner |
+|---|---|---|---|---|
+| t255–263 | NightScene `ov_apply` = WorldOverlays.apply | 0.88 / 1.09 / 1.11 ms rendered (3 of 3) + 4.37 / 0.77 headless | she walks to the honey rig (step 3) | r3d-hud |
+| t995–996 (r1 at t977) | Hush CharacterView3D.apply, phase `mine` | 3.91 (r2), 2.33 (h2), 2.36 (r1 t977) | hidden in the pantry (step 5) | r3d-view3d |
+| t2846–2847 | Hush CharacterView3D.apply (ctx 1.66 + mine 1.74) | 1.98 (r3), 1.98 (h1); NightScene `ov_apply` 3.15 h2 t2842 | behind the piano, the near miss (step 10) | r3d-view3d / r3d-fix-gags |
+| t1572–1574 | NightScene `ov_apply` | 4.68 (h2), 1.22 (h1) | before the doorframe bonk | r3d-hud |
+
+### R2.3 Row 19: three rebuilt packets (not scored here)
+Each packet was rebuilt from this tree with `tools/art3d/review/packets.py`, from the real game at 1200×540 with
+`--no-captions` and MSAA off. Each has a new shuffle seed and a new key. The keys are outside the repo:
+`keys/r2_<packet>_key.json` in the r3d-qa scratch dir. Round 1's keys and answers are untouched. The moments and ticks
+are round 1's, checked side by side.
+
+| packet | test | items | seed | bar |
+|---|---|---|---|---|
+| [`packets/set_f`](packets/set_f/prompt.md) | spot: "what will happen if the neighbour uses the circled object?" | 8 frames (round 1's set_b moments; the pickle and sneeze pictograms were redrawn since) | 89 | ≥ 6/8 the gist |
+| [`packets/set_g`](packets/set_g/prompt.md) | crowding: "is this screen crowded or confusing?" | 8 frames (round 1's set_c moments and ticks) | 97 | ≤ 1/8 yes |
+| [`packets/set_h`](packets/set_h/prompt.md) | gags: one sentence + funny / readable / fresh 1–5, with the TECH §11 rubric | 9 strips: every Prologue gag + the g0 sneeze, at round 1's set_e windows | 113 | the sneezes and the dizzy spin ≥ 4 on funny and readable, the rest ≥ 3, fresh ≥ 3 |
+
+Round 1's verb result (7/8 PASS, set_a) and its 2D-vs-3D preference (8/8 PASS, set_d) stand. Those packets were not
+rebuilt.
+
 ## 0. Phase 3 — the final pre-gate run and row 19 (2026-10-01, 09:43–10:36Z, alone)
 
 **Verdict: FAIL.** `tools/scripts/pregate3d.sh --rows=1-7,9-18,20a`, then `--rows=19`, run alone under content hash

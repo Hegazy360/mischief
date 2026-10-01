@@ -38,3 +38,17 @@ verdict gag <gag id> funny=<n> readable=<n> fresh=<n>
 One `verdict gag` line per strip, named by the gag's id from the key (the sneeze and dizzy-spin ids carry those words);
 medians when several reviewers answered the same packet. A failing test becomes a request: what the reviewer misread,
 which frame, which task can fix it.
+
+## Round 2 (2026-10-01, QA round 2): three rebuilt packets, each for a NEW fresh reviewer
+These packets were rebuilt from the fix-round-1 tree (5f0092b + r3d-fix-hud2) at the same moments and ticks as round
+1, with new seeds and new keys (`keys/r2_<packet>_key.json` in the r3d-qa scratch dir). The reviewers must not have
+seen any round-1 packet. Give each one only the packet's `prompt.md` and its images.
+
+| packet | prompt | images |
+|---|---|---|
+| spot | `docs/review/r3d-qa/packets/set_f/prompt.md` | `set_f/pkt_01.jpg` … `pkt_08.jpg` |
+| crowding | `docs/review/r3d-qa/packets/set_g/prompt.md` | `set_g/pkt_01.jpg` … `pkt_08.jpg` |
+| gags | `docs/review/r3d-qa/packets/set_h/prompt.md` | `set_h/pkt_01/page_1.jpg` … `pkt_09/page_3.jpg` (9 strips × 3 pages) |
+
+Score with `python3 tools/art3d/review/packets.py score <key> <answers.md>` and record the verdict lines in
+`readability.md` (round 2 section). Round 1's verb (set_a, 7/8) and 2D-vs-3D (set_d, 8/8) results stand.

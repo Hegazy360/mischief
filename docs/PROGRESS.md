@@ -101,28 +101,38 @@ the view to 3D (look A, Hush in B's dimensions) for g0 + the Prologue, with Nigh
 - [x] r3d-integrate: request table, g0 + every Prologue route in 3D, `slice_all` N01/N02, the 2D view deleted (§3.5)
 - [x] r3d-qa Phase 1: `tools/scripts/pregate3d.sh`, `game/tests/slice/` (8 tests, ≈ 2.1 min), CI (`lint.sh --strict`,
   headless `lint3d --screen/--set`), TECH as built, the row-19 packets built (`docs/review/r3d-qa/`)
-- [x] Pre-gate rows 1–15, 17, 18 green alone on the CPU box (2026-10-01, re-run 09:43–10:36Z under hash eee8a789f5e192c7;
-  numbers in `docs/review/r3d-qa/index.md` §0)
-- [ ] Row 16: D14's spike clause — 14 of our nodes / WorldView3D phases over 1 ms in the profiler's 60 slowest Prologue
-  frames (NightScene 4.3 ms, AudioDirector 2.8, `hush_apply` 2.6 …; phase 1's run: 20, worst 10.2 ms); every count and
-  the p50 / p95 rule pass
-- [ ] **20a: the exported APK boots the 3D game** — FAIL: `world_view_3d.gd` names `ScriptProf3D` from the
-  export-excluded `view3d/probe/` (fix verified in a scratch export; request to r3d-view3d / integrate)
-- [ ] 19: readability verdicts from fresh reviewers — scored, **FAIL** (`docs/review/r3d-qa/readability.md`): verb 7/8,
-  spot 6/8, 3D preferred 8/8 pass; crowded 2/8 (bar ≤ 1) and the gags (dizzy spin 3/3 vs 4/4; picture, bonk, vase,
-  squeak bit, relief under 3) fail — requests Q-C1/Q-C2, Q-G1…Q-G6
+- [x] Fix round 1 (5f0092b: r3d-fix-hud / -gags / -perf) + r3d-fix-hud2 (the Hud first-show warm, the overlay solve
+  dirty flag)
+- [x] QA round 2 pre-gate, alone, on 5f0092b + r3d-fix-hud2 (hash bd0fb2503d06829a, sim tree 838f39fc9f4d1a85;
+  13:58–16:40Z): rows 1–8, 10–15, 17, 18, 20a PASS (numbers in `docs/review/r3d-qa/index.md` §R2; record
+  `docs/review/r3d-qa/pregate_r2.json`)
+- [x] **20a: the exported APK boots the 3D game** — PASS since 33759c4: 197 scripts, 0 failures, Night OK; APK 73.47 MB,
+  sha256 9478f00d…6316
+- [ ] Row 9: the P00 parlour vase (×1.5 blue-and-white since fix round 1) is still `"dressing": true` in `house3d.json`,
+  so the dressing colour rule fails it (C* 42.7, |ΔL*| 20.8) — request to r3d-sets / integrate
+- [ ] Row 16 (D17): every count and the p50 / p95 rule pass; 11 call sites > 1 ms at the same tick in ≥ 2 of 3 rendered
+  runs (chance baseline 9–18) + 20 repeated headless hits; the repeatable sites: WorldOverlays.apply t255–263, Hush's
+  CharacterView3D t995 / t2846, NightScene t1572 — requests (a)–(c) + a D17 ruling request
+- [ ] 19: round 2 (new reviewers, rebuilt packets) — **FAIL** (`docs/review/r3d-qa/readability.md`, Round 2): spot 6/8
+  PASS, verb 7/8 and 3D preferred 8/8 carried; crowded 2/8 (bar ≤ 1) and the gags 1 of 9 at their bar (picture 3/4/3
+  passes; sneezes 3/3/3, dizzy spin 3/4/3, vase 2/3/2, bonk 2/3/1, curtain call 2/2/2, relief 1/2/2, squeak bit 1/2/1)
+  — requests Q2-C1/C2, Q2-G1…G8, Q2-S1/S2
 - [ ] 20b: the CI android-preview APK of the pushed head matches 20a
-- [ ] Owner check: R1 / R2 verdict on the owner pack (`docs/review/r3d/index.md` — drafted, held until 16 / 19 / 20a pass)
+- [ ] Owner check: R1 / R2 verdict on the owner pack (`docs/review/r3d/index.md` — refreshed for round 2, held until
+  9 / 16 / 19 pass)
 
-| Exit row (index §6) | Result | Numbers |
+| Exit row (index §6) | Result | Numbers (QA round 2) |
 |---|---|---|
-| 1 import metadata · 2 suite · 3 lints --strict · 4 validators | PASS | 1010 .import / 409 .uid; 1270/1270 tests, 0 skips; 72 clips strict 0 errors; 5 validators |
-| 5 routes · 6 dead air · 7 planner | PASS | 13 routes; N01 ★★★ 116, N02 ★★★ 118; worst ⏩ 8.1 / 4.8 / 5.9 %, gap 5.5 s, edge 0.22, N02 first prank 19.4 s |
-| 8 fuzz | PASS | 2400 runs (200 × 4 bots × 3 Nights), 0 invariants, 0 soft-locks |
-| 9 set · 10 screen · 11 HUD · 12 C8 | PASS | 0 errors; C8 0 violations on 13 routes × 2 modes; Bellows window ≤ 39 % (P00 required, WARNING > 35 %) |
+| 1 import metadata · 2 suite · 3 lints --strict · 4 validators | PASS | 1010 .import / 412 .uid; 1312/1312 tests, 0 skips; 72 clips strict 0 errors; 5 validators |
+| 5 routes · 6 dead air · 7 planner | PASS | 13 routes, every expect OK; worst ⏩ 8.1 / 4.8 / 5.9 %, gap 5.5 s, edge 0.22 |
+| 8 fuzz | PASS | 2400 runs, 0 invariants, 0 soft-locks, 0 struck-hotspot commands |
+| 9 set lint | **FAIL** | 2 errors: P00 parlour vase flagged dressing (C* 42.7 > 30, \|ΔL*\| 20.8 > 15); 1 warning (N02 hall, D13) |
+| 10 screen · 11 HUD · 12 C8 | PASS | 0 errors; C8 0 violations on 13 routes × 2 modes; Bellows window ≤ 35.0 % (was 39 %) |
 | 13 g0 · 14 Prologue · 15 other routes | PASS | CHOO accent f 94, hit-stop 83 ms; 7 laughs by 60 s; slow first laugh 6.6 s / prank 27.6 s; 13/13 scenarios |
-| 16 frame budget | **FAIL** (D14 spikes) | draws p95 ≤ 82 (max 98), tris ≤ 101k, tex ≤ 103 MB, 0 compiles in PLAY, view + HUD p50 ≤ 3.12 / p95 ≤ 4.61 ms; 14 nodes > 1 ms (worst 4.3 ms) |
-| 17 per character · 18 flows | PASS | Hush 0.195 ms / 2 draws / 9.8k tris / 48 bones; Bellows 0.240 ms / 4 / 9.5k / 50 (+ stool apart, D16); retry 621 ms, tap 20/20, feedback 1 frame |
+| 16 frame budget | **FAIL** (D17) | draws p95 ≤ 82 (max 101), tris ≤ 101k, tex ≤ 110.7 MB, 0 compiles in PLAY, view + HUD p50 ≤ 3.16 / p95 ≤ 4.72 ms; D17 repeatable spikes at t255, t995, t2846, t1572 |
+| 17 per character · 18 flows | PASS | Hush 0.159 ms / 2 draws / 9.8k tris / 48 bones; Bellows 0.198 ms / 4 / 9.5k / 50 (+ stool apart, D16); retry 632 ms, tap 20/20, feedback 1 frame |
+| 19 readability | **FAIL** | spot 6/8, crowded 2/8, gags 1 of 9 at bar (verb 7/8, 3D preferred 8/8 carried from round 1) |
+| 20a APK | PASS | 73.47 MB, 3277 entries, exported pack 197 scripts / 0 failures / Night OK |
 | 19 readability | **FAIL** | verb 7/8 · spot 6/8 · crowded 2/8 (≤ 1) · 3D preferred 8/8; sneezes 4/4/3, dizzy spin 3/3/4 (≥ 4/4), 5 small gags < 3 |
 | 20a APK | **FAIL** | 73.4 MB, VIBRATE only, minSdk 24, contents OK — the exported pack does not compile `WorldView3D` |
 
@@ -196,3 +206,9 @@ the view to 3D (look A, Hush in B's dimensions) for g0 + the Prologue, with Nigh
   gags FAIL (requests Q-C1/2, Q-G1–6, Q-S1/2, Q-V1/2). Full pre-gate re-run alone (hash eee8a789f5e192c7): 1–15, 17, 18
   PASS (8 kept), 16 FAIL (14 spikes, worst 4.3 ms), 19 FAIL, 20a FAIL (the P0 `ScriptProf3D` fix is not applied; APK
   73.42 MB, sha256 e60c5e7a…ff19). Owner pack `docs/review/r3d/index.md` drafted (held: "not ready to send").
+- 2026-10-01 — r3d-qa round 2 (5f0092b + r3d-fix-hud2): phase 1 ran the full pre-gate alone (row 16 now D17: 3 rendered
+  + 2 headless profiler runs) and rebuilt the spot / crowding / gag packets; new fresh reviewers answered them; phase 3
+  scored row 19 (`readability.md` Round 2: spot 6/8 PASS, crowded 2/8 FAIL, gags 1 of 9 at bar FAIL — the picture now
+  passes 3/4/3, the sneezes fell to 3/3/3 with an unchanged clip) and re-ran row 19. Verdict FAIL on rows 9 (vase still
+  flagged dressing), 16 (D17) and 19; 20a PASS (APK 73,468,995 B, sha256 9478f00d…6316). Owner pack refreshed (boards
+  re-shot from this build, round-2 verdicts, rough edges), still held.

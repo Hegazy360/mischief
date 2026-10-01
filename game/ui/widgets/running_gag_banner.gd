@@ -57,6 +57,25 @@ func set_values(p_link: int, p_mult_pct: int, p_fuse: float) -> void:
 		set_process(true)
 
 
+## Show the fuse with its text for a warm frame (Hud.warm_contextual, under the curtain): its strings are built
+## and drawn once; `end_warm()` puts the model's state back.
+func warm() -> void:
+	if link > 0:
+		return
+	_text = "%s %s" % [UiStrings.t("hud.running_gag"), mult_text(150)]
+	_show_k = 1.0
+	visible = true
+	queue_redraw()
+
+
+func end_warm() -> void:
+	if link > 0:
+		return
+	_show_k = 0.0
+	_text = ""
+	visible = false
+
+
 func _process(delta: float) -> void:
 	_show_k = move_toward(_show_k, 1.0 if link > 0 else 0.0, delta / 0.18)
 	visible = _show_k > 0.0

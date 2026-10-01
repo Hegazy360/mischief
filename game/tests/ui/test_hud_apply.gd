@@ -229,3 +229,53 @@ func test_non_targets_ignore_touches() -> void:
 	assert_eq(hud.ghost.mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	for w in [hud.action, hud.clarence, hud.tray, hud.meter, hud.pip, hud.pause_button, hud.overview, hud.figgis]:
 		assert_eq((w as Control).mouse_filter, Control.MOUSE_FILTER_STOP, "%s is a STOP target" % w.name)
+
+
+# --- D17 / r3d-fix-perf RQ1: the contextual pieces' first show is primed under the curtain ------------------
+
+func test_warm_contextual_shows_then_restores() -> void:
+	var m := HudModel.new()
+	hud.apply(m)
+	assert_false(hud.meter.visible)
+	assert_false(hud.banner.visible)
+	assert_false(hud.edge_bubble.visible)
+	hud.warm_contextual()
+	assert_eq(hud.warm_left, Hud.WARM_FRAMES)
+	assert_true(hud.meter.visible, "the meter is shown for the warm frames")
+	assert_true(hud.banner.visible, "the Running Gag fuse too")
+	assert_ne(hud.banner._text, "", "with its real string")
+	assert_true(hud.edge_bubble.visible, "and the edge badge")
+	assert_true(hud.get_node_or_null(^"Root/WarmPrimer") != null, "the glyph primer draws the pieces' glyph sets")
+	hud._process(0.016)
+	hud.apply(m)
+	assert_true(hud.meter.visible, "apply() keeps the meter up while warming")
+	for f in Hud.WARM_FRAMES:
+		hud._process(0.016)
+	assert_eq(hud.warm_left, 0)
+	assert_false(hud.meter.visible, "then everything is back to the model")
+	assert_false(hud.banner.visible)
+	assert_eq(hud.banner._text, "")
+	assert_false(hud.edge_bubble.visible)
+	hud.apply(m)
+	assert_eq(hud.last_changes, 0, "the warm-up changed no model state")
+
+
+func test_warm_contextual_leaves_a_live_running_gag_alone() -> void:
+	var m := _model()
+	hud.apply(m)
+	var txt: String = hud.banner._text
+	hud.warm_contextual()
+	for f in Hud.WARM_FRAMES:
+		hud._process(0.016)
+	assert_true(hud.banner.visible, "a live Running Gag keeps its fuse")
+	assert_eq(hud.banner._text, txt)
+	assert_true(hud.meter.visible, "and its meter")
+
+
+func test_warm_activity_icons_rasterise_before_play() -> void:
+	var ids := PackedStringArray(["exit", "fixup_mirror", ""])
+	assert_eq(Hud.warm_activity_icons(ids), 2, "the empty id is skipped")
+	assert_true(UiIcons._cache.has("res://art/icons/activities/exit.svg@%s" % UiIcons.RASTER_SCALE))
+	var t0 := Time.get_ticks_usec()
+	Hud._activity_icon("res://art/icons/activities/fixup_mirror.svg")
+	assert_lt(Time.get_ticks_usec() - t0, 300, "the edge badge's later lookup is a cache hit")

@@ -239,3 +239,92 @@ func test_shared_solve_keeps_its_inputs_and_hard_rects_allocate_nothing() -> voi
 			pl.request(ids[i], P.PREVIEW, Rect2(200 + i * 300, 200, 146, 128))
 		pl.solve(prot, Rect2(0, 0, 2400, 1080), hard, Vector2(1040, 380))
 	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before)
+
+
+# --- the dirty flag (r3d-fix-perf RQ2): re-solve only when an input changed ----------------------------------
+
+func _frame(pl: OverlayPlacer, prot: Array[Rect2], want_x: float, extra: bool = false) -> void:
+	pl.begin_frame()
+	pl.request(&"fx_bubble", P.BUBBLE, Rect2(100, 260, 270, 173), Vector2.INF, true)
+	pl.request(&"p0", P.PREVIEW, Rect2(want_x, 420, 112, 90), Vector2(want_x + 56.0, 520))
+	pl.request(&"p1", P.PREVIEW, Rect2(1000, 420, 112, 90), Vector2(1056, 520))
+	if extra:
+		pl.request(&"p2", P.ITEM, Rect2(1500, 420, 116, 132))
+	pl.solve(prot, SAFE)
+
+
+func test_clean_frames_keep_the_last_solve() -> void:
+	var pl := OverlayPlacer.new()
+	var prot: Array[Rect2] = [Rect2(1040, 400, 100, 120)]
+	_frame(pl, prot, 400.0)
+	var r1 := pl.item(&"p1").rect
+	assert_ne(r1, pl.item(&"p1").want, "p1 slides off the protected rect")
+	for f in 5:
+		_frame(pl, prot, 400.0)
+	assert_eq(pl.solves, 6)
+	assert_eq(pl.placed, 1, "identical inputs: one real solve, five clean frames")
+	assert_eq(pl.item(&"p1").rect, r1, "the clean frames keep the solved spot")
+	assert_true(pl.item(&"p1").visible)
+
+
+func test_sub_pixel_drift_follows_the_anchor_without_a_solve() -> void:
+	var pl := OverlayPlacer.new()
+	var prot: Array[Rect2] = [Rect2(1040, 400, 100, 120)]
+	_frame(pl, prot, 400.0)
+	_frame(pl, prot, 400.6)
+	assert_eq(pl.placed, 1, "0.6 px is inside EPS: no re-solve")
+	assert_almost_eq(pl.item(&"p0").rect.position.x, 400.6, 0.001, "but the item follows its own drift")
+	_frame(pl, prot, 400.0)
+	assert_almost_eq(pl.item(&"p0").rect.position.x, 400.0, 0.001, "and back")
+	_frame(pl, prot, 402.5)
+	assert_eq(pl.placed, 2, "a move > EPS re-solves")
+	assert_eq(pl.item(&"p0").rect.position.x, 402.5)
+
+
+func test_any_changed_input_re_solves() -> void:
+	var pl := OverlayPlacer.new()
+	var prot: Array[Rect2] = [Rect2(1040, 400, 100, 120)]
+	_frame(pl, prot, 400.0)
+	var before := pl.item(&"p1").rect
+	# a blocker moved in place (the same pooled array, as WorldOverlays reuses it)
+	prot[0] = Rect2(700, 400, 100, 120)
+	_frame(pl, prot, 400.0)
+	assert_eq(pl.placed, 2, "a protected rect moved > EPS")
+	assert_eq(pl.item(&"p1").rect, pl.item(&"p1").want, "p1 is free again at once")
+	assert_ne(pl.item(&"p1").rect, before)
+	# the set changed (a new item, then the same item gone)
+	_frame(pl, prot, 400.0, true)
+	assert_eq(pl.placed, 3, "a new request")
+	_frame(pl, prot, 400.0, true)
+	assert_eq(pl.placed, 3)
+	_frame(pl, prot, 400.0)
+	assert_eq(pl.placed, 4, "an item not requested any more")
+	# hard rects, focus, the safe rect
+	pl.begin_frame()
+	pl.request(&"fx_bubble", P.BUBBLE, Rect2(100, 260, 270, 173), Vector2.INF, true)
+	pl.request(&"p0", P.PREVIEW, Rect2(400, 420, 112, 90), Vector2(456, 520))
+	pl.request(&"p1", P.PREVIEW, Rect2(1000, 420, 112, 90), Vector2(1056, 520))
+	var hard: Array[Rect2] = [Rect2(380, 400, 200, 200)]
+	pl.solve(prot, SAFE, hard)
+	assert_eq(pl.placed, 5, "a hard rect appeared")
+	assert_false(pl.item(&"p0").rect.intersects(hard[0]), "and is kept out")
+	pl.invalidate()
+	pl.begin_frame()
+	pl.request(&"fx_bubble", P.BUBBLE, Rect2(100, 260, 270, 173), Vector2.INF, true)
+	pl.request(&"p0", P.PREVIEW, Rect2(400, 420, 112, 90), Vector2(456, 520))
+	pl.request(&"p1", P.PREVIEW, Rect2(1000, 420, 112, 90), Vector2(1056, 520))
+	pl.solve(prot, SAFE, hard)
+	assert_eq(pl.placed, 6, "invalidate() forces the next solve")
+
+
+func test_a_fixed_item_is_clamped_on_clean_frames_too() -> void:
+	var pl := OverlayPlacer.new()
+	var none: Array[Rect2] = []
+	pl.begin_frame()
+	pl.request(&"fx_bubble", P.BUBBLE, Rect2(-40.0, 260, 270, 173), Vector2.INF, true)
+	pl.solve(none, SAFE)
+	pl.begin_frame()
+	pl.request(&"fx_bubble", P.BUBBLE, Rect2(-40.5, 260, 270, 173), Vector2.INF, true)
+	pl.solve(none, SAFE)
+	assert_eq(pl.placed, 1)
+	assert_eq(pl.item(&"fx_bubble").rect.position.x, 0.0, "still inside the safe rect")

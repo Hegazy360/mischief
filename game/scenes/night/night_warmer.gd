@@ -45,6 +45,8 @@ var hud_icons_warmed: int = 0
 var hud: Node = null
 ## Edge-badge faces loaded (tier faces + emotes, D17).
 var edge_faces_warmed: int = 0
+## His next-activity icons beyond the routine (every detour of activities.json) rasterised (D17, RQ1).
+var activity_icons_warmed: int = 0
 ## Scenes the view builds lazily in PLAY (CharacterView3D's freeze plinth at the first freeze): their materials join
 ## the warm rig, so their shaders compile under the curtain.
 const LAZY_SCENES: PackedStringArray = ["res://art3d/chars/hush/plinth.glb"]
@@ -392,6 +394,31 @@ func _warm_ui_icons() -> void:
 			(eb as EdgeBubble).face_for(em)
 			UiIcons.get_icon(StringName("puff_" + em))
 			edge_faces_warmed += 1
+	# D17 (r3d-fix-perf RQ1): the edge badge / Bellows window show his NEXT activity's icon. Tonight's routine is
+	# warmed with the overlays; his detours were not — the knock-on's fix-up (fixup_mirror, t1447) and his exit
+	# (t3237) rasterised an SVG inside Hud.apply on first sight, 1.0–1.7 ms at the same tick in every run.
+	activity_icons_warmed = Hud.warm_activity_icons(detour_ids(String(list.get("data_root", "res://data"))))
+	# ...and the contextual pieces' first show (meter, Running Gag fuse, edge badge: their glyphs at their sizes) is
+	# drawn once here, under the curtain, then hidden again (Hud.warm_contextual)
+	if hud != null and is_instance_valid(hud) and hud.has_method("warm_contextual"):
+		hud.call("warm_contextual")
+
+
+## Every detour id of the data (`activities.json` "detours": the fix-ups, the "?" look, search, herding, exit) —
+## what his next-activity icon can show beyond the routine.
+static func detour_ids(data_root: String = "res://data") -> PackedStringArray:
+	var out := PackedStringArray()
+	var path := data_root + "/activities.json"
+	if not FileAccess.file_exists(path):
+		return out
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(path)) != OK or not (j.data is Dictionary):
+		return out
+	var d: Variant = (j.data as Dictionary).get("detours", {})
+	if d is Dictionary:
+		for k in d:
+			out.append(String(k))
+	return out
 
 
 func _warm_audio() -> void:

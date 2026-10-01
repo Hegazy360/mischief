@@ -16,6 +16,10 @@
 ## solves once, and every producer reads its placed `rect` / `visible` afterwards (their results are
 ## the ones of the latest apply, one frame behind at most).
 ##
+## Perf (D17 / r3d-fix-perf RQ2): the placer re-solves only when an input moved > 1 px (OverlayPlacer's dirty flag);
+## the face boxes gate on the character being shown (WorldView3D.character) instead of projecting its AABB again.
+## `phase_us` keeps the per-phase split.
+##
 ## Crowding rules (r3d QA Q-C1 / Q-C2, on top of §2.5):
 ##   * FACE BOXES — each character's head on screen (`face_box`) is a hard keep-out: no cloud, bubble,
 ##     marker or item covers a face, and the rig ring stays ON the prop but passes behind a face next to
@@ -81,6 +85,9 @@ var _combine_tex: Dictionary = {}
 ## The anchor source has a `hud_rects` property (WorldView3D) and a Hud is bound: its protected_rects() already
 ## carries the HUD's always-on rects.
 var _src_takes_hud: bool = false
+## The anchor source hands out its CharacterView3Ds (`character(id)`, WorldView3D): a face box is gated on the
+## character being shown instead of on actor_screen_rect (8 corner projections per actor per frame — RQ2).
+var _src_has_character: bool = false
 
 ## Capacity of the protected-rect pool (the anchor source's ~5 + the Hud's 4 + spare) and of the hard pool
 ## (two faces + the meter + the fuse + spare).
@@ -136,6 +143,7 @@ func setup(p_anchor_src: Object, p_hud: Object = null) -> void:
 	anchor_src = p_anchor_src
 	hud = p_hud
 	_src_takes_hud = anchor_src != null and hud != null and "hud_rects" in anchor_src and hud.has_method("always_on_rects")
+	_src_has_character = anchor_src != null and anchor_src.has_method("character") and "cam" in anchor_src
 
 
 ## Rasterise every pictogram, item icon and needs silhouette of the Night once (call under the
@@ -420,15 +428,27 @@ func _build_protected(_vs: Vector2) -> void:
 func face_box(actor: StringName) -> Rect2:
 	if anchor_src == null or not is_instance_valid(anchor_src):
 		return Rect2()
-	if anchor_src.has_method("actor_screen_rect"):
-		var ar: Variant = anchor_src.call("actor_screen_rect", actor)
-		if not (ar is Rect2) or not (ar as Rect2).has_area():
-			return Rect2()
+	if not _actor_shown(actor):
+		return Rect2()
 	var hs := _actor_screen(actor, &"head")
 	var ts := _actor_screen(actor, &"top")
 	if not hs.is_finite() or not ts.is_finite():
 		return Rect2()
 	return face_rect(hs, ts, FACE_PAD * k)
+
+
+## `actor` is on stage: WorldView3D — its CharacterView3D is shown and a camera projects (exactly when its
+## actor_screen_rect is not empty, without projecting the AABB's 8 corners); other sources — actor_screen_rect has area.
+func _actor_shown(actor: StringName) -> bool:
+	if _src_has_character:
+		if anchor_src.get("cam") == null:
+			return false
+		var cv: Variant = anchor_src.call("character", String(actor))
+		return cv is Node3D and (cv as Node3D).visible
+	if anchor_src.has_method("actor_screen_rect"):
+		var ar: Variant = anchor_src.call("actor_screen_rect", actor)
+		return ar is Rect2 and (ar as Rect2).has_area()
+	return true
 
 
 ## A face box from the projected head anchor `hs` and head top `ts` (pure; tests).

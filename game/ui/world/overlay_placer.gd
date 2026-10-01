@@ -26,6 +26,14 @@
 ##     A producer that draws a FIXED item reads its placed `rect` (the safe-rect clamp) and `visible`
 ##     (the one-cloud rule) back from the latest solve.
 ## Allocation-free once the pool is warm (no arrays are built while placing).
+##
+## DIRTY FLAG (r3d-fix-perf RQ2): `solve()` re-places only when an input changed since the last real
+## solve — the set of active items or one's priority / fixed / exempt flag, an active item's `want` or
+## `anchor` moved more than EPS px, a protected / hard rect or the safe rect moved more than EPS px, or the
+## focus did. Placement is a pure function of those inputs (no history), so on a clean frame the last results
+## stand; an item whose own `want` drifted (≤ EPS) follows it by that drift (re-clamped into the safe rect), so
+## a slow camera pan never shows a 1 px step. `invalidate()` forces the next solve; `solves` / `placed` count
+## the calls and the real solves (perf probes, tests).
 class_name OverlayPlacer
 extends RefCounted
 
@@ -39,6 +47,8 @@ const UP_STEPS: PackedFloat32Array = [50.0, 100.0, 150.0]
 const SIGNS: PackedFloat32Array = [1.0, -1.0]
 ## Clearance kept from a blocker when sliding.
 const GAP := 8.0
+## Dirty-flag tolerance (px): inputs that moved no more than this since the last real solve keep its results.
+const EPS := 1.0
 
 
 ## One placeable rect.
@@ -62,6 +72,14 @@ class Item:
 	## Was requested in the frame before the last begin_frame() (debug views / lints read the last solve).
 	var was_active: bool = false
 	var _placed: bool = false
+	## The inputs of the last real solve (the dirty flag) and the rect it placed.
+	var _s_active: bool = false
+	var _s_priority: int = -1
+	var _s_want: Rect2 = Rect2()
+	var _s_anchor: Vector2 = Vector2.INF
+	var _s_fixed: bool = false
+	var _s_exempt: bool = false
+	var _s_rect: Rect2 = Rect2()
 
 
 var _pool: Array[Item] = []
@@ -71,6 +89,15 @@ var last_protected: Array[Rect2] = []
 var last_hard: Array[Rect2] = []
 var last_safe: Rect2 = Rect2()
 var last_focus: Vector2 = Vector2.INF
+## solve() calls and the ones that placed (the rest found every input unchanged — the dirty flag).
+var solves: int = 0
+var placed: int = 0
+## Copies of the last real solve's protected / hard rects, safe rect and focus (sized once; no per-frame allocation).
+var _s_protected: Array[Rect2] = []
+var _s_hard: Array[Rect2] = []
+var _s_safe: Rect2 = Rect2()
+var _s_focus: Vector2 = Vector2.INF
+var _dirty: bool = true
 
 
 ## Start a frame: every pooled item becomes inactive until requested again.
@@ -94,6 +121,7 @@ func request(id: StringName, priority: int, want: Rect2, anchor: Vector2 = Vecto
 		it.id = id
 		_by_id[id] = it
 		_pool.append(it)
+		_dirty = true
 	it.priority = priority
 	it.want = want
 	it.anchor = anchor
@@ -104,13 +132,92 @@ func request(id: StringName, priority: int, want: Rect2, anchor: Vector2 = Vecto
 
 
 ## Place every active pooled item (`hard`: the keep-outs nothing may cover; `focus`: the one-cloud
-## rule's point, INF = by priority).
+## rule's point, INF = by priority). Skipped when nothing changed since the last real solve (the dirty flag,
+## see the class doc).
 func solve(protected: Array[Rect2], safe: Rect2, hard: Array[Rect2] = [], focus: Vector2 = Vector2.INF) -> void:
 	last_protected = protected
 	last_hard = hard
 	last_safe = safe
 	last_focus = focus
+	solves += 1
+	if not _dirty and not _inputs_changed(protected, safe, hard, focus):
+		# clean: the last results stand; items follow their own sub-EPS drift
+		for it in _pool:
+			if it.active and it.visible and not it.fixed:
+				it.rect = clamp_into(Rect2(it._s_rect.position + (it.want.position - it._s_want.position), it._s_rect.size),
+					safe)
+			elif it.active and it.fixed:
+				it.rect = clamp_into(it.want, safe)
+		return
+	_dirty = false
+	placed += 1
 	place(_pool, protected, safe, hard, focus)
+	_keep_inputs(protected, safe, hard, focus)
+
+
+## Force the next solve() to place (a producer whose results must be fresh, tests).
+func invalidate() -> void:
+	_dirty = true
+
+
+## True when any input of solve() differs from the last real solve's by more than EPS (see the class doc).
+func _inputs_changed(protected: Array[Rect2], safe: Rect2, hard: Array[Rect2], focus: Vector2) -> bool:
+	if protected.size() != _s_protected.size() or hard.size() != _s_hard.size():
+		return true
+	if not _near_rect(safe, _s_safe) or not _near_point(focus, _s_focus):
+		return true
+	for j in protected.size():
+		if not _near_rect(protected[j], _s_protected[j]):
+			return true
+	for j in hard.size():
+		if not _near_rect(hard[j], _s_hard[j]):
+			return true
+	for it in _pool:
+		if it.active != it._s_active:
+			return true
+		if not it.active:
+			continue
+		if it.priority != it._s_priority or it.fixed != it._s_fixed or it.exempt_anchor != it._s_exempt:
+			return true
+		if not _near_rect(it.want, it._s_want) or not _near_point(it.anchor, it._s_anchor):
+			return true
+	return false
+
+
+func _keep_inputs(protected: Array[Rect2], safe: Rect2, hard: Array[Rect2], focus: Vector2) -> void:
+	if _s_protected.size() != protected.size():
+		_s_protected.resize(protected.size())
+	for j in protected.size():
+		_s_protected[j] = protected[j]
+	if _s_hard.size() != hard.size():
+		_s_hard.resize(hard.size())
+	for j in hard.size():
+		_s_hard[j] = hard[j]
+	_s_safe = safe
+	_s_focus = focus
+	for it in _pool:
+		it._s_active = it.active
+		if not it.active:
+			continue
+		it._s_priority = it.priority
+		it._s_want = it.want
+		it._s_anchor = it.anchor
+		it._s_fixed = it.fixed
+		it._s_exempt = it.exempt_anchor
+		it._s_rect = it.rect
+
+
+## Within EPS on every edge (pure).
+static func _near_rect(a: Rect2, b: Rect2) -> bool:
+	return absf(a.position.x - b.position.x) <= EPS and absf(a.position.y - b.position.y) <= EPS \
+		and absf(a.size.x - b.size.x) <= EPS and absf(a.size.y - b.size.y) <= EPS
+
+
+## Within EPS (pure); INF (no point) only matches INF.
+static func _near_point(a: Vector2, b: Vector2) -> bool:
+	if not a.is_finite() or not b.is_finite():
+		return a.is_finite() == b.is_finite()
+	return absf(a.x - b.x) <= EPS and absf(a.y - b.y) <= EPS
 
 
 ## The pooled item for `id` (null when never requested).

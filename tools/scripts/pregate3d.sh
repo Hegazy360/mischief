@@ -34,7 +34,8 @@
 #   13   e2e g0_sneeze --strict --perf-log      ~2.5 min (fixed 60, 1414 frames × ~100 ms)    600 s
 #   14   e2e prologue ideal / required / slow   ~1.5 min each (real time, ~60–90 s game)       450 / 450 / 450 s
 #   15   e2e slice_all (headless, 13 routes)    ~10 min (r3d-night: 576 s)                      1800 s per route
-#   16   e2e n01_ideal --perf-log (rendered) + prologue_ideal --view3d-prof + perf3d   ~15 + 1.5 min  2700 / 450 s
+#   16   e2e n01_ideal --perf-log (rendered) + 5 × prologue_ideal --perf-log --view3d-prof (3 rendered + 2
+#        --headless, the D17 spike rule) + perf3d   ~15 + 5 × 1.6 min (r3d-fix-hud2: 83–102 s a run)  2700 / 450 s
 #   17   RigPerf3D 5 × 2 rigs                   ~3 min (18 s each)                              SHOT_TIMEOUT 300 s
 #   18   flows retry/pause_back/touch_smoke/tap_accuracy/curtain_call  ~15/20/15/50/80 s     300/300/300/400/600 s
 #   19   readability verdicts (docs/review/r3d-qa/readability.md)   0 s
@@ -483,27 +484,134 @@ elif row == "16":
              "%s: view + HUD p50 %s / p95 %s ms (D14: ≤ 3.5 / ≤ 8.0)" % (k, v["view_ms_p50"], v["view_ms_p95"]))
         v["device_target_4ms_p95"] = "met" if float(v["view_ms_p95"] or 99) <= 4.0 else "device-judged (D14)"
     nums["reports"] = per
-    prof = load(os.path.join(OUT, "view3d_prof.json"), None)
-    if need(prof is not None, "no --view3d-prof JSON (the D14 spike check needs it)"):
-        # ScriptProf3D "spikes" = the 60 slowest frames: [total_ms, frame, {node class | "other" | "wv": {phase: ms}}].
-        # D14: no single node / phase of OUR code over 1 ms there ("WorldView3D" is the sum of its "wv" phases,
-        # "other" is time outside our nodes).
-        leaf = {}
-        for sp in prof.get("spikes") or []:
+    # D17 (lead 11:05Z, replaces D14's spike sentence): a spike counts against us only if DETERMINISTIC — the same call
+    # site > 1 ms at the same tick (±2 f) in ≥ 2 of 3 rendered runs, OR > 1 ms in a headless run (dummy renderer) of the
+    # same route. Call sites = the profiler leaves row 16 always read (our nodes; WorldView3D's phases; "other" excluded).
+    # "Same tick (±2 f)": a profiler frame simulated ticks (t[f-1], t[f]] (e2e prof_frame_ticks); two frames match when
+    # those spans, widened by 2 ticks, overlap. A headless hit counts when the same site repeats at the same tick in
+    # another run (the other headless run or a rendered one); headless one-offs are listed (box preemption also hits
+    # headless runs: r3d-fix-hud) with the evidence. Info for the lead: the fixers' looser window (±2 PROFILER frames),
+    # a chance baseline (the same matching with the other runs shifted ±120 ticks) and NightScene's own phase split.
+    THR_MS, SLACK = 1.0, 2
+
+    def _leaves(split):
+        out = {}
+        for k, v in split.items():
+            if k == "wv" and isinstance(v, dict):
+                for kk, vv in v.items():
+                    out["WorldView3D." + kk] = float(vv)
+            elif k not in ("WorldView3D", "other"):
+                out[k] = float(v)
+        return out
+
+    def _events(pr, rp):
+        ticks = (rp or {}).get("prof_frame_ticks") or []
+        n = len(ticks)
+        ev = []
+        for sp in (pr or {}).get("spikes") or []:
             if not (isinstance(sp, list) and len(sp) >= 3 and isinstance(sp[2], dict)):
                 continue
-            for k, v in sp[2].items():
-                if k == "wv" and isinstance(v, dict):
-                    for kk, vv in v.items():
-                        leaf["WorldView3D." + kk] = max(leaf.get("WorldView3D." + kk, 0.0), float(vv))
-                elif k not in ("WorldView3D", "other"):
-                    leaf[k] = max(leaf.get(k, 0.0), float(v))
-        spikes = {c: round(v, 2) for c, v in sorted(leaf.items(), key=lambda x: -x[1]) if v > 1.0}
-        nums["profiler"] = {"frames": prof.get("frames"), "total": prof.get("total"),
-                            "spike_frames": len(prof.get("spikes") or []), "spikes_over_1ms": spikes}
-        need(bool(prof.get("spikes")), "the profiler JSON has no 'spikes' (its 60 slowest frames)")
-        need(not spikes, "D14 spike rule: %d of our nodes / phases over 1 ms in the 60 slowest frames, worst %s"
-             % (len(spikes), dict(list(spikes.items())[:6])))
+            f = int(sp[1])
+            if not (0 <= f < n) or ticks[f] < 0:
+                continue
+            t = int(ticks[f])
+            prev = int(ticks[f - 1]) if f > 0 and ticks[f - 1] >= 0 else t - 1
+            lo2 = int(ticks[max(0, f - 2)]) if ticks[max(0, f - 2)] >= 0 else t
+            lv = _leaves(sp[2])
+            over = [c for c, ms in lv.items() if ms > THR_MS]
+            for c in over:
+                ev.append({"site": c, "ms": round(lv[c], 2), "tick": t, "span": (prev + 1 - SLACK, t + SLACK),
+                           "win2": (lo2, int(ticks[min(n - 1, f + 2)])), "frame_ms": round(float(sp[0]), 2),
+                           "sites_over_in_frame": len(over)})
+        return ev
+
+    def _near(a, b, mode="span", shift=0):
+        if mode == "span":
+            return a["span"][0] <= b["span"][1] + shift and b["span"][0] + shift <= a["span"][1]
+        bt = b["tick"] + shift
+        return (a["win2"][0] <= bt <= a["win2"][1]) or (b["win2"][0] + shift <= a["tick"] <= b["win2"][1] + shift)
+
+    def _clusters(R, mode="span", shift=0):
+        out, first = [], (R[0][0] if R else None)
+        for site in sorted({e["site"] for _, ev in R for e in ev}):
+            evs = [(t, e) for t, ev in R for e in ev if e["site"] == site]
+            used = set()
+            for i, (ta, ea) in enumerate(evs):
+                if i in used:
+                    continue
+                grp = [(ta, ea)]
+                used.add(i)
+                for j, (tb, eb) in enumerate(evs):
+                    if j in used or tb in [g[0] for g in grp]:
+                        continue
+                    shf = lambda tx: 0 if tx == first else shift
+                    if any(_near(g[1], eb, mode, shf(tb) - shf(g[0])) for g in grp):
+                        grp.append((tb, eb))
+                        used.add(j)
+                if len({g[0] for g in grp}) >= 2:
+                    out.append({"site": site, "ticks": sorted(g[1]["tick"] for g in grp), "runs": {g[0]: g[1]["ms"] for g in grp}})
+        return out
+
+    runs = []
+    for tag in ("r1", "r2", "r3", "h1", "h2"):
+        pr = load(os.path.join(OUT, "prof", "p00_%s.prof.json" % tag), None)
+        rp = load(os.path.join(OUT, "prof", "p00_%s.e2e.json" % tag), None)
+        if pr is not None and rp is not None:
+            runs.append((tag, tag.startswith("h"), pr, rp))
+    R = [(tg, _events(pr, rp)) for tg, h, pr, rp in runs if not h]
+    H = [(tg, _events(pr, rp)) for tg, h, pr, rp in runs if h]
+    need(len(R) == 3, "D17 needs 3 rendered --view3d-prof runs of prologue_ideal (have %d)" % len(R))
+    need(len(H) >= 1, "D17 needs a headless --view3d-prof run of prologue_ideal")
+    for tg, h, pr, rp in runs:
+        need(bool((rp or {}).get("prof_frame_ticks")), "p00_%s: no prof_frame_ticks in the e2e report" % tg)
+        need(bool((pr or {}).get("spikes")), "p00_%s: the profiler JSON has no 'spikes'" % tg)
+    det = _clusters(R, "span")
+    hl_lit, hl_det = [], []
+    for th, ev in H:
+        for e in ev:
+            rep_ = [(t2, e2["tick"], e2["ms"]) for t2, ev2 in R + H if t2 != th for e2 in ev2
+                    if e2["site"] == e["site"] and _near(e, e2, "span")]
+            row_ = {"run": th, "site": e["site"], "tick": e["tick"], "ms": e["ms"], "frame_ms": e["frame_ms"],
+                    "sites_over_in_frame": e["sites_over_in_frame"]}
+            hl_lit.append(row_)
+            if rep_:
+                hl_det.append(dict(row_, repeats=rep_[:4]))
+    np_ev = {}
+    for c in det:
+        if c["site"] != "NightScene":
+            continue
+        ph = []
+        for tg, h, pr, rp in runs:
+            if tg not in c["runs"]:
+                continue
+            for fr in (rp or {}).get("night_phase_frames") or []:
+                if isinstance(fr, list) and len(fr) >= 3 and fr[2] and min(c["ticks"]) - 6 <= int(fr[1]) <= max(c["ticks"]) + 6:
+                    k = max(fr[2], key=lambda x: fr[2][x])
+                    ph.append("%s@t%s %s %.2f" % (tg, fr[1], k, fr[2][k]))
+        np_ev["t%d-%d" % (min(c["ticks"]), max(c["ticks"]))] = ph[:6]
+    per_run = {}
+    for tg, h, pr, rp in runs:
+        mx = {}
+        for e in _events(pr, rp):
+            mx[e["site"]] = max(mx.get(e["site"], 0.0), e["ms"])
+        pf = (rp or {}).get("perf3d") or {}
+        per_run[tg] = {"headless": h, "ok": (rp or {}).get("ok"), "frames": pr.get("frames"), "total": pr.get("total"),
+                      "view_ms_p50": pf.get("view_ms_p50"), "view_ms_p95": pf.get("view_ms_p95"),
+                      "sites_over_1ms": dict(sorted(((k, round(v, 2)) for k, v in mx.items()), key=lambda x: -x[1])[:8])}
+        if pf.get("view_ms_p50") is not None:
+            need(float(pf["view_ms_p50"]) <= 3.5 and float(pf["view_ms_p95"]) <= 8.0,
+                 "p00_%s: view + HUD p50 %s / p95 %s ms (≤ 3.5 / ≤ 8.0)" % (tg, pf["view_ms_p50"], pf["view_ms_p95"]))
+    nums["d17"] = {"deterministic_rendered": det, "deterministic_headless": hl_det,
+                   "headless_literal_count": len(hl_lit), "headless_literal": hl_lit[:40],
+                   "info_clusters_pm2_profiler_frames": len(_clusters(R, "win2")),
+                   "info_chance_baseline_shift_m120_p120": [len(_clusters(R, "span", -120)), len(_clusters(R, "span", 120))],
+                   "nightscene_phase_evidence": np_ev, "runs": per_run}
+    nums["d17_deterministic"] = len(det) + len(hl_det)
+    nums["d17_chance_baseline"] = "%s at ±120 ticks vs %d at 0" % (nums["d17"]["info_chance_baseline_shift_m120_p120"], len(det))
+    need(not det, "D17: %d call sites > 1 ms at the same tick in ≥ 2 of 3 rendered runs: %s"
+         % (len(det), ["%s t%s %s" % (c["site"], c["ticks"][0], c["runs"]) for c in det[:6]]))
+    need(not hl_det, "D17: %d headless hits > 1 ms repeated at the same tick in another run: %s"
+         % (len(hl_det), ["%s %s t%s %.2f" % (c["run"], c["site"], c["tick"], c["ms"]) for c in hl_det[:6]]))
     pj_rc = re.search(r"\[lint3d\] perf: (OK|FAIL) — (\d+) error", t)
     nums["perf3d_tool"] = pj_rc.group(0) if pj_rc else "?"
 
@@ -768,13 +876,19 @@ MERGE
     15) CMD_OF[15]="E2E_SANDBOX=r3d-qa tools/scripts/e2e.sh slice_all --report=\$PWD/build/r3d/e2e/slice_all.json"
        rm -rf "$OUT/e2e/slice_all"
        run 15 row15.log tools/scripts/e2e.sh slice_all "--report=$OUT/e2e/slice_all.json" || rc=$? ;;
-    16) CMD_OF[16]="E2E_TIMEOUT=2700 e2e.sh n01_ideal --perf-log --report=…/e2e/n01_ideal_perf.json; E2E_TIMEOUT=450 e2e.sh prologue_ideal --perf-log -- --view3d-prof=…/view3d_prof.json; perf3d.sh build/r3d/e2e/{g0,p00_ideal,n01_ideal_perf}.json"
+    16) CMD_OF[16]="E2E_TIMEOUT=2700 e2e.sh n01_ideal --perf-log --report=…/e2e/n01_ideal_perf.json; 3 × E2E_TIMEOUT=450 e2e.sh prologue_ideal --perf-log --report=…/prof/p00_r<n>.e2e.json -- --view3d-prof=…/prof/p00_r<n>.prof.json and 2 × the same --headless (p00_h<n>; D17); perf3d.sh build/r3d/e2e/{g0,p00_ideal,n01_ideal_perf}.json"
        if [ -n "$NO_RENDER" ]; then skip_row 16 "--no-render"; return 0; fi
        E2E_TIMEOUT=2700 run 16 row16.log tools/scripts/e2e.sh n01_ideal --perf-log "--report=$OUT/e2e/n01_ideal_perf.json" || true
-       rm -f "$OUT/view3d_prof.json"
-       E2E_TIMEOUT=450 run 16 row16.log tools/scripts/e2e.sh prologue_ideal --perf-log "--report=$OUT/prof_p00_ideal.json" -- "--view3d-prof=$OUT/view3d_prof.json" || true
+       rm -rf "$OUT/prof"; mkdir -p "$OUT/prof"; rm -f "$OUT/view3d_prof.json" "$OUT/prof_p00_ideal.json"
+       local pt hl
+       for pt in r1 r2 r3 h1 h2; do
+         hl=(); [[ "$pt" == h* ]] && hl=(--headless)
+         E2E_TIMEOUT=450 run 16 row16.log tools/scripts/e2e.sh prologue_ideal --perf-log ${hl[@]+"${hl[@]}"} \
+           "--report=$OUT/prof/p00_$pt.e2e.json" -- "--view3d-prof=$OUT/prof/p00_$pt.prof.json" || true
+       done
+       [ -f "$OUT/prof/p00_r1.prof.json" ] && cp "$OUT/prof/p00_r1.prof.json" "$OUT/view3d_prof.json"
        run 16 row16_perf3d.log tools/scripts/perf3d.sh "$OUT/e2e/g0.json" "$OUT/e2e/p00_ideal.json" "$OUT/e2e/n01_ideal_perf.json" "--json=$OUT/perf3d.json" || true
-       rc=0 ;;  # perf3d's own 4.0 ms p95 line is judged by D14 in the evaluator
+       rc=0 ;;  # perf3d's own 4.0 ms p95 line is judged by D14/D17 in the evaluator
     17) CMD_OF[17]="tools/scripts/shot.sh res://scenes/dev/anim3d/RigPerf3D.tscn build/r3d/perf_<rig>_<n>.png 600 r3d-qa -- --rig=<rig> --clip=<clip> --perf-log (5 × hush/loco_run, 5 × bellows/rx_sneeze_blast_a; medians)"
        if [ -n "$NO_RENDER" ]; then skip_row 17 "--no-render"; return 0; fi
        local rig clip n
@@ -891,8 +1005,8 @@ for r in order:
         flat.append("%s %s" % (k, v))
     fl = ("; FAIL: " + "; ".join(e.get("failures", [])[:3])) if e.get("failures") else ""
     print("| %s | %s | %ss | %s%s |" % (r, res, e.get("wall_s", ""), ", ".join(flat)[:300], fl[:300]))
-    if r in ran and not e.get("pass"):
-        ok_all = False
+    if not e.get("pass"):
+        ok_all = False  # a failing row fails the summary whether it ran now or earlier (row 19 included)
     if stale:
         ok_all = False
 pj["summary"] = {"tree": tree, "sim_tree": sim_tree, "rows_run": sorted(ran), "pass": ok_all}

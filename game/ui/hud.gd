@@ -25,6 +25,10 @@
 ## * While a hold is in progress (`model.holding`, a press, the ring rising) a teaching glove on the
 ##   action button steps away (r3d QA Q-C1: ring + glove + icon stacked on the button) and comes back
 ##   if she lets go before the ring completes.
+## * `warm_contextual()` (NightWarmer's HUD step, under the curtain — D17 / r3d-fix-perf RQ1): the contextual pieces'
+##   first show is primed — the meter, the Running Gag fuse and the edge badge are shown and drawn for WARM_FRAMES
+##   frames (their own strings and every glyph they will draw, at their sizes and outlines), then hidden again;
+##   `warm_activity_icons(ids)` rasterises his next-activity icons (the edge badge / Bellows window) before PLAY.
 ## * Left-handed mode (Settings.left_handed or `set_left_handed`) mirrors every rect but the centred
 ##   meter. Tap-to-rig (Settings.tap_to_rig) turns holds into toggles. Tablets ×0.8 (UiScale).
 ## * Panels (ScriptPanel, PauseMenu, SettingsPanel, LoadingCard, ResultsScreen) are shown on top with
@@ -73,6 +77,12 @@ const GHOST_WORLD := &"@world"
 const METER_MS := 2500
 const FIGGIS_MS := 4000
 const MAX_FLIGHTS := 4
+## Frames the contextual pieces stay shown (and drawn) by warm_contextual().
+const WARM_FRAMES := 2
+## The glyph sets the contextual pieces draw, at their sizes and outlines ([text, px, outline]; ApplauseMeter /
+## RunningGagBanner / the meter's ENCORE stamp): primed once by warm_contextual().
+const WARM_GLYPHS := [["APPLAUSE", 36, 0], ["0123456789", 60, 10], ["+0123456789", 56, 12], ["ENCORE!", 48, 10],
+	["RUNNING GAG ×0123456789.", 44, 12]]
 
 var root: Control
 var pause_button: PauseButton
@@ -185,6 +195,9 @@ var _c_holding := -1
 var _always_on: Array[Rect2] = []
 ## [meter (+ its "+n" stamp), fuse]: Rect2() while hidden (transient_rects).
 var _transient: Array[Rect2] = [Rect2(), Rect2()]
+## warm_contextual(): frames left to keep the contextual pieces shown (0 = not warming) and the glyph primer.
+var warm_left: int = 0
+var _warm_primer: Node2D = null
 ## The meter's "+n" stamp reaches this far right of the pill (ApplauseMeter draws it at W + 64, 56 px).
 const METER_STAMP_W := 130.0
 
@@ -278,7 +291,67 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _ghost_target != &"":
 		_place_ghost()
+	if warm_left > 0:
+		warm_left -= 1
+		if warm_left == 0:
+			_end_warm()
 	_tick_contextual()
+
+
+# --- the warm-up (D17) ------------------------------------------------------------------------------
+
+## Prime the contextual pieces' first show under the curtain (see the class doc): shown + drawn for WARM_FRAMES
+## frames, then back to what the model says. Idempotent while warming.
+func warm_contextual() -> void:
+	if warm_left > 0:
+		return
+	warm_left = WARM_FRAMES
+	banner.warm()
+	meter.visible = true
+	meter.queue_redraw()
+	edge_bubble.visible = true
+	edge_bubble.queue_redraw()
+	if _warm_primer == null:
+		_warm_primer = _GlyphPrimer.new()
+		_warm_primer.name = "WarmPrimer"
+		root.add_child(_warm_primer)
+
+
+## Rasterise his next-activity icons (`ids`: activity / detour ids or res:// paths) the edge badge and the Bellows
+## window will show — under the curtain, not on first sight in apply() (D17: a cold SVG ~0.9 ms).
+static func warm_activity_icons(ids: PackedStringArray) -> int:
+	var n := 0
+	for id in ids:
+		if _activity_icon(id) != null:
+			n += 1
+	return n
+
+
+func _end_warm() -> void:
+	banner.end_warm()
+	if _warm_primer != null and is_instance_valid(_warm_primer):
+		_warm_primer.queue_free()
+	_warm_primer = null
+	_place_edge_bubble()
+	if layout.is_empty():
+		edge_bubble.visible = false
+
+
+## Draws WARM_GLYPHS once (off-screen, nearly transparent) in the HUD's display font.
+class _GlyphPrimer:
+	extends Node2D
+
+	func _ready() -> void:
+		position = Vector2(-4000, -4000)
+		modulate = Color(1, 1, 1, 0.004)
+		queue_redraw()
+
+	func _draw() -> void:
+		var f := UiKit.display_font()
+		var y := 0.0
+		for g in Hud.WARM_GLYPHS:
+			UiKit.draw_text_centered(self, f, Vector2(0, y), String(g[0]), int(g[1]), UiKit.CREAM, int(g[2]))
+			y += float(g[1]) * 1.3
 
 
 func _wire() -> void:
@@ -553,7 +626,8 @@ static func is_live(m: HudModel) -> bool:
 ## The contextual pieces' visibility for now (called from apply and every frame).
 func _tick_contextual() -> void:
 	var now := UiKit.now_ms()
-	var meter_on := now < _meter_until_ms or now < _meter_model_until_ms or _m_link > 0 or meter.tomatoes_showing()
+	var meter_on := now < _meter_until_ms or now < _meter_model_until_ms or _m_link > 0 or meter.tomatoes_showing() \
+		or warm_left > 0
 	if meter.visible != meter_on:
 		meter.visible = meter_on
 		if meter_on:

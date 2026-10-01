@@ -83,6 +83,23 @@ func test_edge_badge_faces_are_warmed() -> void:
 	h.free()
 
 
+func test_detour_icons_and_the_hud_first_show_are_warmed() -> void:
+	var h := Hud.new()
+	var w := NightWarmer.new()
+	w.list = {}
+	w.hud = h
+	var ids := NightWarmer.detour_ids()
+	assert_has(ids, "exit", "his exit (t3237) is a detour of the data")
+	assert_has(ids, "fixup_mirror", "the knock-on's fix-up (t1447) too")
+	w._warm_ui_icons()
+	assert_eq(w.activity_icons_warmed, ids.size(), "every detour icon rasterised under the curtain")
+	for id in ids:
+		assert_true(UiIcons._cache.has("res://art/icons/activities/%s.svg@%s" % [id, UiIcons.RASTER_SCALE]), id)
+	assert_eq(h.warm_left, Hud.WARM_FRAMES, "the HUD's contextual pieces are shown for the warm frames")
+	w.free()
+	h.free()
+
+
 func test_unknown_episode_is_empty() -> void:
 	assert_true(NightWarm.list("nope").is_empty())
 

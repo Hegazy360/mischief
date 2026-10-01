@@ -459,6 +459,19 @@ func set_gag_focus(id: int, p: Variant) -> void:
 			g.focus = p
 
 
+## Hold the active gag `id` for at least `frames` more view frames from now (a cue shot already framing the moment
+## keeps framing it through the payoff — no re-request, so no second push-in, r3d-fix-gags2 Q2-G6). False when `id`
+## is not the active gag or it is already easing out.
+func extend_gag(id: int, frames: int) -> bool:
+	if _gag == null or _gag.id != id or _gag.phase == GagPhase.OUT or _gag.released:
+		return false
+	if _gag.phase == GagPhase.HOLD:
+		_gag.hold_f = maxi(_gag.hold_f, int(_gag.t) + frames)
+	else:
+		_gag.hold_f = maxi(_gag.hold_f, frames)
+	return true
+
+
 ## Start easing a gag out now; a queued one is dropped.
 func release_gag(id: int) -> void:
 	if _gag != null and _gag.id == id:

@@ -535,6 +535,9 @@ func warm_clips(extra: PackedStringArray = PackedStringArray()) -> int:
 		ids[str(row.get("clip", ""))] = true
 	for e in extra:
 		ids[e] = true
+	# the cue stager's staged clips (the vase ovation, the bonk wind-up, the near-miss double take: r3d-fix-gags2)
+	for e3 in CueStager3D.STAGED_CLIPS:
+		ids[str(e3)] = true
 	var hinted: Variant = warm_hint.get("clips", null)
 	if hinted is Array or hinted is PackedStringArray:
 		for e2 in hinted:

@@ -5,6 +5,10 @@ vinyl puff, hit-stop 5, the 1.4 punch-in, the bouffant flipped over his eyes, th
 rockets backwards on his own stool (the view carries him 94 -> 112 along the travel arc into the sink), arms
 windmilling, slippers up; in the sink at 112 (knock_on) with the slippers kicking and the stool tumbling away; then
 dazed under a ring of vinyl stars, sitting up groggy (145-165).
+Fix round 2 (Q2-G1): in the sink (112-165) his head is UP and turned to the Stalls (D8), the splash frizzes the flipped
+bouffant up above his brows (f113), the chin is off the jabot, the gloves grip the basin rims (never across his face)
+and the star ring circles from f117: a 46-frame dazed face hold that reads at phone size; at f160, as he
+sits up, the hair flops back down over his eyes (the CHOO's flipped bouffant again, blind for what follows).
 
 Staged at the stool (x 15.0, z -1.4, facing -1, cheat 35: his left side and face toward the audience). Frame 0 is
 act_tea's sip (both clips build it from _lib.presets SIP_BODY + sip_arms). Sounds: the audio table (R3)."""
@@ -96,7 +100,8 @@ def build(ctx):
     for f, k, ph, pf in ((100, 0.2, 60, 0.34), (103, 0.4, 150, 0.0), (106, 0.6, 240, 0.0), (109, 0.8, 330, 0.0)):
         c.key(f, fly(k, ph, pf), "linear")
     # SPLASH (112, knock_on): into the basin — squashed, slippers straight up out of the sink
-    SINK_ARMS = sym({"clavicle_l": [("y", 6)], "upperarm_l": [("y", 36), ("z", 24)], "lowerarm_l": [("z", -10)],
+    # Q2-G1: the gloves grip the basin's rims, low and out to the sides — never up across his face in the hold
+    SINK_ARMS = sym({"clavicle_l": [("y", 8)], "upperarm_l": [("y", 64), ("z", 10)], "lowerarm_l": [("z", -18)],
                      "hand_l": [("x", 10), ("y", 20)]})
 
     def sink(sq=0.0, kick=0.0, loll=0.0, sit=0.0, star=0.0):
@@ -107,18 +112,18 @@ def build(ctx):
                 "foot_l": [("x", 18 - 10 * sit)],
                 "thigh_r": [("x", -112 + 18 * sit + 10 * kick), ("y", 38 - 20 * sit)], "calf_r": [("x", 10 + 40 * sit - 14 * kick)],
                 "foot_r": [("x", 16 - 10 * sit)]}
-        arms = merge(SINK_ARMS, {"upperarm_l": [("y", 36 + 30 * sit), ("z", 24 - 6 * sit)],
-                                 "upperarm_r": [("y", -36 - 30 * sit), ("z", -24 + 6 * sit)]})
+        arms = merge(SINK_ARMS, {"upperarm_l": [("y", 64 + 10 * sit), ("z", 10 - 4 * sit)],
+                                 "upperarm_r": [("y", -64 - 10 * sit), ("z", -10 + 4 * sit)]})
         return body(arms, legs, glove("l", 30, 16), glove("r", 30, 16),
-                    lean(fwd=22 + 10 * sq - 6 * sit, side=4 * loll), head(x=26 + 6 * sq - 10 * sit, y=10 * loll, z=10),
+                    lean(fwd=14 + 8 * sq - 4 * sit, side=4 * loll), head(x=-5 + 6 * sq - 6 * sit, y=10 * loll, z=10),
                     {"pelvis": [("x", -40 + 22 * sit)], "fx_stars": {"r": [], "s": star}}, belly=1.0 - 0.06 * sq)
     c.key(112, sink(sq=1.0), "pop")
     c.key(115, sink(sq=-0.3, kick=0.6), "out_quad")
-    c.key(119, sink(sq=0.1, kick=-0.8, loll=0.4), "in_out_sine")
-    c.key(125, sink(kick=0.9, loll=-0.5), "in_out_sine")
-    c.key(131, sink(kick=-0.7, loll=0.6), "in_out_sine")
-    c.key(138, sink(kick=0.6, loll=-0.4), "in_out_sine")
-    c.key(145, sink(kick=-0.3, loll=0.3), "in_out_sine")
+    c.key(119, sink(sq=0.1, kick=-0.8, loll=0.4, star=1.2), "out_back")
+    c.key(125, sink(kick=0.9, loll=-0.5, star=1.0), "in_out_sine")
+    c.key(131, sink(kick=-0.7, loll=0.6, star=1.0), "in_out_sine")
+    c.key(138, sink(kick=0.6, loll=-0.4, star=1.0), "in_out_sine")
+    c.key(145, sink(kick=-0.3, loll=0.3, star=1.0), "in_out_sine")
     # dazed (145-165): sits up groggy, head circling under the stars
     c.key(149, sink(kick=0.1, loll=-0.3, sit=0.2, star=1.25), "out_back")
     c.key(152, sink(kick=0.2, loll=-0.6, sit=0.45, star=1.0), "in_out_sine")
@@ -132,7 +137,7 @@ def build(ctx):
     c.motion(lambda f: breath(f, 70.0, 0.6), 0, 44)
     c.motion(lambda f: {"Head": [("y", 6 * math.cos(2 * math.pi * (f - 145) / 20.0))]}, 145, L,
              weight=lambda f: ramp(f, 145, 150))       # the roll half of the dazed circle (the yaw half: after D8)
-    c.motion(lambda f: {"fx_stars": [("z", 12.0 * (f - 145))]}, 145, L)
+    c.motion(lambda f: {"fx_stars": [("z", 12.0 * (f - 117))]}, 117, L)     # the star ring circles from the splash on
     # the stool rides under him from 95; at 112 it is knocked away backwards, tumbling
     c.motion(lambda f: {"ride": {"r": [("x", -38 * ramp(f, 112, 128) - 220 * ramp(f, 113, 128) ** 1.4)],
                                  "t": (0.12 * ramp(f, 112, 128), 0.55 * ramp(f, 112, 128), -0.25 * ramp(f, 118, 128))}},
@@ -213,6 +218,8 @@ def build(ctx):
     c.event(95, "decor", id="kitchen_stool", visible=False)
     c.event(95, "prop", op="show", prop="stool")
     c.mark(112, "knock_on")
+    c.event(113, "look", set={"bouffant": "frazzled"})    # Q2-G1: the splash frizzes it UP off his eyes for the hold
+    c.event(160, "look", set={"bouffant": "flipped"})     # ... and as he sits up it flops back over them (blind again)
     c.event(112, "shake", trauma=0.6)
     c.event(112, "fx", id="drops")
     c.event(112, "jiggle", bones=["belly", "tail_l", "tail_r"], kick=0.7)

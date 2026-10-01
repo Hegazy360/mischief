@@ -4,10 +4,10 @@
 ##
 ## | Cue | What the player sees |
 ## |---|---|
-## | `laugh_vase` | the curtain-up shot: until Hush starts her climb-in the camera frames HIM singing and the vase (a cue shot); from tick 0 `parlour_vase` (×1.5, blue-and-white, inked) creeps along the mantel (House3D `nudge`) on every `voice` / `sfx` event of his warm-up clip — each note flies from his head toward it (fallback every 45 f while he warms up, never in pre-roll), at most `VASE_MAX_NUDGES`; from the 3rd nudge it teeters (a growing rock); on the cue it tips (4 f) and drops (8 f): hidden, `parlour_vase_smashed` shown + dust and sparkles |
-## | `laugh_doorframe` | a 1.3 punch on his head at the `parlour_kitchen` door frame; he stops dead at the frame (view pin, `BONK_PIN_F`) and buckles into `st_bonk` (face to camera, dazed, D8) under his `cue:laugh_doorframe` overlay (head snaps back); on its accent (f4) a shake + kick, a dust puff off the frame edge and stars at his head; then he shuffles on |
-## | `laugh_relief` | the near miss: while he hunts within `RELIEF_NEAR_M` of Hush's hiding spot the camera holds a 1.3 two-shot of him and her eyes in the gap; on the cue the Stalls exhale (AudioDirector), a sweat-drop burst over Hush and his smug `st_smirk` to the camera ("nothing here") |
-## | `laugh_picture` | a 1.2 cue shot on him at the doorway; `parlour_picture_frame` (gilt, inked) drops 12 f onto his head (lent to his `head_top` socket, facing the camera, askew on the bouffant), rides there 60 f (his head's position, never its turns) while he stands stunned (`st_bonk`, never walking on the spot), then slides down beside his feet (20 f) and is gone in a puff of dust + his `cue:laugh_picture` overlay |
+## | `laugh_vase` | the curtain-up shot: until Hush starts her climb-in the camera frames HIM singing and the vase (a cue shot); from tick 0 `parlour_vase` (×1.5, blue-and-white, inked) creeps along the mantel (House3D `nudge`) on every `voice` / `sfx` event of his warm-up clip — each note flies from his head toward it (fallback every 45 f while he warms up, never in pre-roll), at most `VASE_MAX_NUDGES`; from the 3rd nudge it teeters (a growing rock); on the cue it tips (4 f) and drops (8 f): hidden, `parlour_vase_smashed` shown + dust and sparkles; then (fix round 2, Q2-G5) the shot pushes in on HIM: the crash lands on his top note like a cymbal and he takes it as his ovation — `st_straighten_cravat` (the tug, the lapels, the haughty sniff to the Stalls) held `VASE_REACT_F` with the shot on him until it ends |
+## | `laugh_doorframe` | (fix round 2, Q2-G6) the anticipation the other way: `WINDUP_F` frames before he reaches the `parlour_kitchen` door frame (blind, FRAZZLED) he draws himself up and back (`cue_doorframe_windup`, nose in the air) while the 1.3 bonk shot pushes in slowly — no camera move starts within 30 f of the hit; on the cue he stops dead at the frame (view pin, `BONK_PIN_F`) and buckles into `st_bonk` (face to camera, dazed, D8) under his `cue:laugh_doorframe` overlay (head snaps back, face to camera from f7); on its accent (f4) a shake + kick, a dust puff off the frame edge, stars at his head — and the jolt knocks the parlour picture askew (a damped swing to `PIC_ASKEW_DEG`: the picture gag's set-up); the shot holds `BONK_HOLD_TAIL_F` past the pin; then he shuffles on |
+## | `laugh_relief` | the near miss: while he hunts within `RELIEF_NEAR_M` of Hush's hiding spot the camera holds a 1.3 two-shot of him and her eyes in the gap (his bubble quiet); (fix round 2, Q2-G3) `RELIEF_GAZE_LEFT` ticks before his hunt runs out he glances at the gap, at `RELIEF_TAKE_LEFT` the DOUBLE TAKE (`st_double_take`: he looks away — her eyes duck — and snaps back to an empty gap) held to the cue with his face to camera (≥ 30 f); on the cue her eyes pop up and squeeze shut and a "phew" puff rises from the gap (+ sweat drops; the Stalls exhale, AudioDirector) |
+## | `laugh_picture` | a 1.2 cue shot on him at the doorway; `parlour_picture_frame` (gilt, inked; askew since the bonk) drops 12 f onto his head (lent to his `head_top` socket, facing the camera, askew on the bouffant), rides there 60 f (his head's position, never its turns) while he stands stunned (`st_bonk`, never walking on the spot), then (fix round 2, Q2-G8) SLIDES off his head down past his shoulder onto the floor beside his feet (`PIC_OFF_F`, accelerating, tipping onto its side) and lands with a dust puff — it stays there + his `cue:laugh_picture` overlay |
 ## | `sparkle_lever`, `ghost_*`, `figgis_psst`, `card_*` | FTUE (`WorldView3D.sparkle`) — "fx" |
 ## | `title_card` | nothing during PLAY — "none" |
 class_name CueStager3D
@@ -22,7 +22,7 @@ const TIP_F := 4.0
 const FALL_F := 8.0
 const PIC_DROP_F := 12.0
 const PIC_HANG_F := 60.0
-const PIC_OFF_F := 20.0
+const PIC_OFF_F := 26.0
 ## The frame on his head: tilted about the view axis, its bottom edge sunk into the bouffant below `head_top`, a
 ## little toward the camera (it reads as a picture stuck on his head, face-on, not edge-on along his facing).
 const PIC_TILT_DEG := 14.0
@@ -54,7 +54,7 @@ const RELIEF_CLIP := "bellows/st_smirk"
 const RELIEF_GAZE_W := 0.85
 ## Ticks before his hunt runs out (the relief cue) when he turns to peer at her gap / when her eyes duck.
 const RELIEF_GAZE_LEFT := 46
-const RELIEF_DUCK_LEFT := 22
+const RELIEF_DUCK_LEFT := 36
 ## The vase teeters from this many nudges on (amplitude per nudge past it, degrees; rate Hz).
 const TEETER_FROM := 3
 const TEETER_DEG := 4.5
@@ -63,6 +63,40 @@ const TEETER_HZ := 2.6
 const WING_DEG := 2.2
 const WING_HZ := 7.0
 const WING_F := 30.0
+## Fix round 2 (Q2-G6): the bonk's anticipation the other way — he draws himself up and back in the last WINDUP_F
+## frames before the frame (his walk's ETA), while the bonk shot pushes in over WINDUP_PUSH_F (a dolly, no cut near
+## the hit); the shot holds BONK_HOLD_TAIL_F past the pin (his dazed face, ≥ 30 f).
+const WINDUP_CLIP := "bellows/cue_doorframe_windup"
+const WINDUP_F := 40.0
+## The bonk shot leads the hit: it starts BONK_SHOT_LEAD_F frames before he reaches the frame and its push is done
+## WINDUP_PUSH_F later — ≥ 30 f before the hit, so the camera is still from then through the dazed hold.
+const BONK_SHOT_LEAD_F := 64.0
+const WINDUP_PUSH_F := 24
+const BONK_HOLD_TAIL_F := 36
+## The bonk knocks the parlour picture askew (the picture gag's set-up): a damped swing about its hook that settles
+## at PIC_ASKEW_DEG.
+const PIC_ASKEW_DEG := 9.0
+const PIC_SWING_DEG := 12.0
+const PIC_SWING_HZ := 1.4
+const PIC_SWING_S := 3.0
+## Fix round 2 (Q2-G5): the vase crash is his ovation — a push-in on him for his haughty cravat straighten.
+const VASE_REACT_CLIP := "bellows/st_straighten_cravat"
+const VASE_REACT_DELAY_F := 6.0
+const VASE_REACT_F := 46
+## ... and the clip plays on past the shot (the haughty sniff 46-70) while the camera eases back to Hush.
+const VASE_REACT_CLIP_F := 64.0
+const VASE_REACT_ZOOM := 1.15
+## Fix round 2 (Q2-G3): the double take at her gap (ticks of his hunt left), held to the cue.
+const RELIEF_TAKE_CLIP := "bellows/st_double_take"
+const RELIEF_TAKE_LEFT := 40
+const RELIEF_PHEW_DELAY_S := 0.12
+const RELIEF_PHEW2_S := 0.2
+## The look point of a cue close-up's face beat, above his head (m, at 4 m toward the camera): the chin up ≈ 7°.
+const CLOSEUP_GAZE_UP_M := 0.5
+## Every clip this stager plays itself (WorldView3D.warm_clips warms them under the curtain: no clip or sidecar is
+## first read in PLAY, D17).
+const STAGED_CLIPS := ["bellows/st_bonk", "bellows/st_smirk", "bellows/cue_doorframe_windup",
+	"bellows/st_straighten_cravat", "bellows/st_double_take"]
 
 var wv: WorldView3D = null
 var nudges: int = 0
@@ -91,6 +125,20 @@ var _relief_spot := ""
 var _wing_home := Transform3D.IDENTITY
 var _wing_t := 0.0
 var _wing_dir := -1.0
+var _windup_done := false
+var _bonk_lead_done := false
+var _pic_wall := Transform3D.IDENTITY
+var _pic_has_wall := false
+var _pic_swing_t := -1.0
+var _pic_tilt := 0.0
+var _pic_from := Vector3.ZERO
+var _pic_to := Vector3.ZERO
+var _pic_tilt_from := 0.0
+var _vase_react_wait := -1.0
+var _relief_take := false
+var _phew_t := -1.0
+var _phew_spot := ""
+var _phew_n := 0
 
 
 func setup(w: WorldView3D) -> void:
@@ -98,6 +146,10 @@ func setup(w: WorldView3D) -> void:
 	var v := _decor(VASE)
 	if v != null:
 		_vase_home = v.transform
+	var pic := _decor(PICTURE)
+	if pic != null:
+		_pic_wall = pic.transform
+		_pic_has_wall = true
 
 
 func reset() -> void:
@@ -115,6 +167,19 @@ func reset() -> void:
 	_relief_done = false
 	_gaze_eyes = Vector3.INF
 	_relief_spot = ""
+	_windup_done = false
+	_bonk_lead_done = false
+	_pic_swing_t = -1.0
+	_pic_tilt = 0.0
+	_vase_react_wait = -1.0
+	_relief_take = false
+	_phew_t = -1.0
+	_phew_spot = ""
+	var pic := _decor(PICTURE)
+	if pic != null and _pic_has_wall:
+		if wv != null and wv.set3d != null and wv.set3d.has_method("release_here"):
+			wv.set3d.call("release_here", PICTURE)
+		pic.transform = _pic_wall
 	var v := _decor(VASE)
 	if v != null:
 		v.transform = _vase_home
@@ -162,21 +227,25 @@ func on_event(ev: Dictionary, snap: ViewSnapshot) -> void:
 			# off it), buckles dazed, face to camera, while the camera punches in on his head
 			var face := float(snap.bellows.facing if snap.bellows.facing != 0 else -1)
 			if wv.bellows_view != null:
+				# the wind-up gives way to the bonk's own overlay on the hit
+				wv.bellows_view.stage_overlay("", 0.0)
 				wv.bellows_view.stage_pin(BONK_PIN_F, x - face * (FLAT_HALF_M + 0.30 + BONK_RECOIL_M))
 				# the dazed base clip starts 2 f after the cue overlay (two clip starts never share a frame, D17)
 				wv.bellows_view.stage_hold(BONK_HOLD_CLIP, BONK_PIN_F, BONK_HOLD_DELAY_F)
-			_start_shot("bonk", _bellows_head(), BONK_ZOOM, 8, int(BONK_PIN_F) + 6, 24, 5.0 * face)
+			# the shot already framing his approach (the wind-up push) holds through the payoff: no second move
+			# within 30 f of the hit (Q2-G6); without it, a gentler push than a punch
+			var held := _shot == "bonk" and _shot_id != 0 and wv.cam != null and wv.cam.has_method("extend_gag") \
+					and bool(wv.cam.call("extend_gag", _shot_id, int(BONK_PIN_F) + BONK_HOLD_TAIL_F))
+			if not held:
+				_start_shot("bonk", _bellows_head(), BONK_ZOOM, 14, int(BONK_PIN_F) + BONK_HOLD_TAIL_F, 24, 5.0 * face)
 			_bonk_t = 0.0
 			wv.cue_staged.emit(id, "clip" if played else "fx")
 		"laugh_relief":
-			if wv.fx3d != null and wv.hush_view != null:
-				var eyes := _hidden_eyes(snap)
-				var at := eyes if eyes != Vector3.INF else wv.hush_view.head_world()
-				# phew: big sweat drops fly off her brow in the gap, both sides
-				wv.fx3d.burst("sweat", at + Vector3(0.12, 0.15, 0.25), Vector3(0.5, 1.0, 0.2))
-				wv.fx3d.burst("sweat", at + Vector3(-0.12, 0.15, 0.25), Vector3(-0.5, 1.0, 0.2))
-			_duck_spot(_relief_spot if _relief_spot != "" else snap.hush.hidden_spot, false)
-			if wv.bellows_view != null:
+			# the payoff is HERS: her eyes pop back up in the gap and squeeze shut, a "phew" puff rises from the
+			# gap and sweat drops fly off her brow (Q2-G3: the laugh lands on the puff, not on his walk-off)
+			var spot := _relief_spot if _relief_spot != "" else snap.hush.hidden_spot
+			_phew(spot, snap)
+			if wv.bellows_view != null and not _relief_take:
 				wv.bellows_view.stage_overlay(RELIEF_CLIP, 34.0)
 			if _shot == "relief" and wv.cam != null:
 				# hold the two-shot through his smirk, then let it go
@@ -259,9 +328,16 @@ func advance(snap: ViewSnapshot, dt: float) -> void:
 			_creep()
 	_advance_vase(f)
 	_advance_picture(f)
+	_advance_windup(snap)
 	_advance_shot(snap, f)
 	_advance_bonk(f)
 	_advance_wing(f)
+	_advance_pic_swing(f)
+	_advance_vase_react(f)
+	if _phew_t >= 0.0:
+		_phew_t -= dt
+		if _phew_t < 0.0:
+			_phew_puff(_phew_spot)
 
 
 func _advance_vase(f: float) -> void:
@@ -297,6 +373,10 @@ func _advance_vase(f: float) -> void:
 			if wv.cam != null:
 				wv.cam.shake(0.3)
 				wv.cam.kick(Vector2.DOWN, 8.0)
+			# ... and it lands on his top note like a cymbal: he takes it as his ovation (Q2-G5), while the curtain-up
+			# shot is still on him
+			if _shot == "establish":
+				_vase_react_wait = VASE_REACT_DELAY_F
 
 
 func _advance_picture(f: float) -> void:
@@ -319,17 +399,25 @@ func _advance_picture(f: float) -> void:
 			if _pic_t >= PIC_HANG_F:
 				_pic_phase = "off"
 				_pic_t = 0.0
-				var feet: Node3D = wv.bellows_view.socket_node("feet") if wv.bellows_view != null else null
-				if wv.set3d != null and wv.set3d.has_method("lend") and feet != null and feet.is_inside_tree():
-					var at := CueStager3D.picture_pose(feet.global_transform, feet.global_position + PIC_FLOOR_OFFSET,
-							PIC_FLOOR_TILT_DEG, _pic_basis)
-					wv.set3d.call("lend", PICTURE, feet, int(PIC_OFF_F), at)
+				# it slides off (Q2-G8: it popped out of sight before): let it go where it sits on his head and slide
+				# it down past his shoulder onto the floor beside his feet, behind his facing
+				var pic := _decor(PICTURE)
+				if pic != null and pic.is_inside_tree() and wv.bellows_view != null:
+					if wv.set3d != null and wv.set3d.has_method("release_here"):
+						wv.set3d.call("release_here", PICTURE)
+					_pic_from = pic.global_position
+					var side := -float(wv.bellows_view.get_facing()) if wv.bellows_view.get_facing() != 0 else 1.0
+					var fw := wv.bellows_view.feet_world()
+					_pic_to = Vector3(fw.x + side * PIC_FLOOR_OFFSET.x, fw.y + 0.02, fw.z + PIC_FLOOR_OFFSET.z)
+					_pic_tilt_from = PIC_TILT_DEG
 		"off":
+			_slide_picture_off(clampf(_pic_t / PIC_OFF_F, 0.0, 1.0))
 			if _pic_t >= PIC_OFF_F:
 				_pic_phase = "gone"
-				_set_visible(PICTURE, false)
-				if wv.fx3d != null and wv.bellows_view != null:
-					wv.fx3d.burst("dust", wv.bellows_view.feet_world() + Vector3(0.3, 0.1, 0.0))
+				if wv.fx3d != null:
+					wv.fx3d.burst("dust", _pic_to + Vector3(0.0, 0.1, 0.1))
+				if wv.cam != null:
+					wv.cam.shake(0.15)
 
 
 ## The socket-space pose (for `lend`) that puts a set piece at `world_pos` with its wall orientation `home_basis`
@@ -350,6 +438,64 @@ func _hold_picture_on_head() -> void:
 		return
 	pic.global_transform = Transform3D(Basis(Vector3(0.0, 0.0, 1.0), deg_to_rad(PIC_TILT_DEG)) * _pic_basis,
 			top.global_position + Vector3(0.0, -PIC_SINK_M, PIC_FRONT_M))
+
+
+## The picture sliding off his head (u 0…1 of PIC_OFF_F): out and down along an accelerating arc to the floor beside
+## his feet, tipping from its askew hang onto its side, face-on to the camera.
+func _slide_picture_off(u: float) -> void:
+	var pic := _decor(PICTURE)
+	if pic == null or not pic.is_inside_tree():
+		return
+	var ux := u * (2.0 - u)
+	var at := Vector3(lerpf(_pic_from.x, _pic_to.x, ux), lerpf(_pic_from.y, _pic_to.y, u * u),
+			lerpf(_pic_from.z, _pic_to.z, ux))
+	var away := signf(_pic_to.x - _pic_from.x) if _pic_to.x != _pic_from.x else 1.0
+	var tilt := lerpf(_pic_tilt_from, absf(PIC_FLOOR_TILT_DEG) * -away, u * u)
+	pic.global_transform = Transform3D(Basis(Vector3(0.0, 0.0, 1.0), deg_to_rad(tilt)) * _pic_basis, at)
+
+
+## The bonk's jolt swings the parlour picture on its hook (about its top edge) and leaves it askew: a damped
+## swing (PIC_SWING_DEG at PIC_SWING_HZ) settling on PIC_ASKEW_DEG over PIC_SWING_S.
+func _advance_pic_swing(f: float) -> void:
+	if _pic_swing_t < 0.0:
+		return
+	var pic := _decor(PICTURE)
+	if pic == null or _pic_phase != "" or not _pic_has_wall:
+		_pic_swing_t = -1.0
+		return
+	_pic_swing_t += f / 60.0
+	_pic_tilt = CueStager3D.picture_swing(_pic_swing_t)
+	pic.transform = CueStager3D.hang_tilted(_pic_wall, _pic_tilt, _pic_hook_h())
+	if _pic_swing_t >= PIC_SWING_S:
+		_pic_swing_t = -1.0
+
+
+## The picture's tilt (radians) `t` s after the bonk: 0 at the hit, a damped swing, settled askew.
+static func picture_swing(t: float) -> float:
+	if t <= 0.0:
+		return 0.0
+	var settle := deg_to_rad(PIC_ASKEW_DEG) * (1.0 - exp(-t * 2.5))
+	return settle + deg_to_rad(PIC_SWING_DEG) * exp(-t * 1.6) * sin(t * TAU * PIC_SWING_HZ)
+
+
+## `wall` (the piece's local transform, origin = its bottom centre) turned `tilt` about the view axis round its hook,
+## `hook_h` m above the origin.
+static func hang_tilted(wall: Transform3D, tilt: float, hook_h: float) -> Transform3D:
+	var hook := wall.origin + wall.basis.y.normalized() * hook_h
+	var r := Basis(Vector3(0.0, 0.0, 1.0), tilt)
+	return Transform3D(r * wall.basis, hook + r * (wall.origin - hook))
+
+
+func _pic_hook_h() -> float:
+	var h3: Variant = wv.set3d.get("house3d") if wv != null and wv.set3d != null else null
+	var d: Dictionary = ((h3 as Dictionary).get("decor", {}) as Dictionary).get(PICTURE, {}) if h3 is Dictionary else {}
+	var b: Array = d.get("box", [])
+	return float(b[4]) * float(d.get("scale", 1.0)) if b.size() >= 6 else 0.56
+
+
+## The picture's tilt now (radians; tests / the review).
+func picture_tilt() -> float:
+	return _pic_tilt
 
 
 ## The picture frame's world basis on the wall (identity when it is not built).
@@ -433,7 +579,7 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 	if pre and _shot == "" and not _est_done:
 		_est_done = true
 		_start_shot("establish", _establish_focus(snap), 1.0, 1, 100000, EST_OUT_F)
-	elif _shot == "establish" and not pre:
+	elif _shot == "establish" and not pre and _vase_react_wait < 0.0:
 		_end_shot()
 	# the near miss: he hunts right past her hiding spot
 	if _shot == "" and not _relief_done and snap.bellows.activity == "hunt" and (snap.hush.state == "HIDDEN" or snap.hush.hidden_spot != ""):
@@ -456,7 +602,7 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 	match _shot:
 		"establish":
 			c.set_gag_focus(_shot_id, _establish_focus(snap))
-		"bonk", "picture":
+		"bonk", "picture", "vase_react":
 			var h := _bellows_head()
 			if h != Vector3.INF:
 				c.set_gag_focus(_shot_id, h)
@@ -466,7 +612,13 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 			# the beat before the cue (his hunt runs out — it fires laugh_relief): he turns to peer at her gap, her
 			# eyes sink out of sight as he does, then pop up when he turns away (the cue)
 			var left := CueStager3D.hunt_left(snap.bellows)
-			_gaze_eyes = eyes2 if left <= RELIEF_GAZE_LEFT else Vector3.INF
+			# Q2-G3: he glances at the gap (her eyes are there) ... looks away — her eyes duck — and SNAPS back: the
+			# double take, held on an empty gap to the cue with his face to the Stalls
+			_gaze_eyes = eyes2 if left <= RELIEF_GAZE_LEFT and left > RELIEF_TAKE_LEFT else Vector3.INF
+			if not _relief_done and not _relief_take and left <= RELIEF_TAKE_LEFT and wv.bellows_view != null \
+					and not snap.bellows.reacting:
+				_relief_take = true
+				wv.bellows_view.stage_hold(RELIEF_TAKE_CLIP, float(left) + 8.0)
 			if not _relief_done and left <= RELIEF_DUCK_LEFT:
 				_duck_spot(snap.hush.hidden_spot, true)
 			if eyes2 != Vector3.INF and head2 != Vector3.INF:
@@ -533,6 +685,8 @@ func _advance_bonk(f: float) -> void:
 		wv.fx3d.burst("bonk_dust", Vector3(edge, head.y, View3DConst.LANE_Z - 0.2), Vector3(-fdir, 0.4, 0.3))
 		wv.fx3d.burst("plaster", Vector3(edge, head.y + 0.65, View3DConst.LANE_Z - 0.3), Vector3.DOWN)
 		wv.fx3d.burst("bonk_stars", head + Vector3(0.0, 0.3, 0.0))
+	# the jolt runs along the wall: the parlour picture swings on its hook and stays askew (it falls on him later)
+	_pic_swing_t = 0.0 if _pic_phase == "" else -1.0
 	# the frame itself takes the hit: the wing flat rocks on its base, away from him
 	if _wing != null and is_instance_valid(_wing):
 		_wing.transform = _wing_home
@@ -574,6 +728,87 @@ static func wing_angle(t: float, dir: float) -> float:
 	return deg_to_rad(WING_DEG) * decay * sin(t / 60.0 * TAU * WING_HZ) * signf(-dir if dir != 0.0 else 1.0)
 
 
+## Q2-G6: the anticipation the other way. Blind (FRAZZLED) and walking at the parlour|kitchen door frame, WINDUP_F
+## frames before he reaches it (his walk's ETA) he draws himself up and back (the staged wind-up overlay) while the
+## bonk shot pushes in slowly; the cue keeps that shot (extend_gag), so no camera move starts near the hit.
+func _advance_windup(snap: ViewSnapshot) -> void:
+	if _windup_done or _bonk_t >= 0.0 or wv.bellows_view == null or wv.layout == null:
+		return
+	var b := snap.bellows
+	if not b.present or not b.moving or b.reacting or not b.residues.has("FRAZZLED") or b.room != "kitchen":
+		return
+	var l := wv.layout.link_between("parlour", "kitchen")
+	if l == null:
+		return
+	var eta := CueStager3D.eta_frames(b.x / View3DConst.PX_PER_M, float(l.x) / View3DConst.PX_PER_M, float(b.facing),
+			b.speed_px_s / View3DConst.PX_PER_M)
+	if eta < 0.0:
+		return
+	if not _bonk_lead_done and eta <= BONK_SHOT_LEAD_F:
+		_bonk_lead_done = true
+		_start_shot("bonk", _bellows_head(), BONK_ZOOM, WINDUP_PUSH_F, int(eta) + int(BONK_PIN_F) + BONK_HOLD_TAIL_F, 24,
+				5.0 * float(b.facing if b.facing != 0 else -1))
+	if eta <= WINDUP_F:
+		_windup_done = true
+		wv.bellows_view.stage_overlay(WINDUP_CLIP, eta + 6.0)
+
+
+## Frames until a walker at `x` (m) heading `dir` at `v` m/s reaches `target_x` (-1 when moving away or still).
+static func eta_frames(x: float, target_x: float, dir: float, v: float) -> float:
+	var d := (target_x - x) * signf(dir)
+	if d < 0.0 or v <= 0.01:
+		return -1.0
+	return d / v * 60.0
+
+
+## Q2-G5: the vase ovation, VASE_REACT_DELAY_F after the crash — the shot pushes in on him and he straightens his
+## cravat with a haughty sniff to the Stalls (st_straighten_cravat, face to camera from its f14), held VASE_REACT_F.
+func _advance_vase_react(f: float) -> void:
+	if _vase_react_wait < 0.0:
+		return
+	_vase_react_wait -= f
+	if _vase_react_wait >= 0.0:
+		return
+	_vase_react_wait = -1.0
+	var bv := wv.bellows_view
+	if bv == null or not bv.visible:
+		return
+	bv.stage_hold(VASE_REACT_CLIP, VASE_REACT_CLIP_F)
+	_start_shot("vase_react", _bellows_head(), VASE_REACT_ZOOM, 16, VASE_REACT_F - 16, 22)
+
+
+## Her relief on the near-miss cue: the eyes pop up and squeeze shut, sweat flies, and (RELIEF_PHEW_DELAY_S later)
+## the "phew" puff rises from the gap.
+func _phew(spot: String, snap: ViewSnapshot) -> void:
+	var p: Object = wv.prop(spot) if spot != "" and wv.has_method("prop") else null
+	if p != null and p.has_method("eyes_phew"):
+		p.call("eyes_phew")
+	else:
+		_duck_spot(spot, false)
+	if wv.fx3d != null and wv.hush_view != null:
+		var eyes := _hidden_eyes(snap)
+		var at := eyes if eyes != Vector3.INF else wv.hush_view.head_world()
+		wv.fx3d.burst("sweat", at + Vector3(0.12, 0.15, 0.25), Vector3(0.5, 1.0, 0.2))
+		wv.fx3d.burst("sweat", at + Vector3(-0.12, 0.15, 0.25), Vector3(-0.5, 1.0, 0.2))
+	_phew_spot = spot
+	_phew_n = 0
+	_phew_t = RELIEF_PHEW_DELAY_S
+
+
+func _phew_puff(spot: String) -> void:
+	if wv.fx3d == null:
+		return
+	var p: Object = wv.prop(spot) if spot != "" and wv.has_method("prop") else null
+	if p == null or not p.has_method("eyes_world"):
+		return
+	var at: Vector3 = p.call("eyes_world")
+	wv.fx3d.burst("phew", at + Vector3(0.0, 0.2, 0.2), Vector3(0.15, 1.0, 0.25))
+	if _phew_n == 0:
+		# a second, bigger breath out (the "phew" reads as a puff, not a speck)
+		_phew_n = 1
+		_phew_t = RELIEF_PHEW2_S
+
+
 ## Ticks left of his hunt (999999 when he is not hunting): the relief cue fires as it runs out.
 static func hunt_left(b: ViewSnapshot.Actor) -> int:
 	if b.activity != "hunt" or b.activity_len <= 0:
@@ -593,14 +828,23 @@ func _duck_spot(spot: String, on: bool) -> void:
 ## Where he looks during a cue shot (INF = his own gaze): her eyes in the gap while the near-miss two-shot holds,
 ## until the cue (then his smirk is to the camera).
 func gaze_target() -> Vector3:
-	if _shot != "relief" or _relief_done or _gaze_eyes == Vector3.INF:
+	if _shot_live and (_shot == "bonk" or _shot == "picture" or _shot == "vase_react") and wv != null \
+			and wv.bellows_view != null:
+		# a cue shot's close-up is a face beat: his face to the Stalls (D8), over any noise glance — the chin a little
+		# UP (the frazzled bouffant of the bonk covers his eyes when the head is level or dips)
+		return wv.bellows_view.head_world() + Vector3(0.0, CLOSEUP_GAZE_UP_M, 4.0)
+	if _shot != "relief" or _relief_done:
 		return Vector3.INF
+	if _relief_take and wv != null and wv.bellows_view != null:
+		# the double take is a face beat: to the Stalls (D8)
+		return wv.bellows_view.head_world() + Vector3(0.0, -0.8, 4.0)
 	return _gaze_eyes
 
 
-## True while a cue shot holds a close-up on his face (the bonk, the picture): his thought bubble steps out of it.
+## True while a cue shot holds a close-up on his face (the bonk, the picture, the vase ovation, the near-miss two-shot):
+## his thought bubble steps out of it.
 func wants_quiet_bubble() -> bool:
-	return (_shot == "bonk" or _shot == "picture") and _shot_live
+	return (_shot == "bonk" or _shot == "picture" or _shot == "vase_react" or _shot == "relief") and _shot_live
 
 
 ## Debug / tests: the vase / picture phases.

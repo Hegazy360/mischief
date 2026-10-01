@@ -77,6 +77,10 @@ const GHOST_WORLD := &"@world"
 const METER_MS := 2500
 const FIGGIS_MS := 4000
 const MAX_FLIGHTS := 4
+## True while a prop's preview badge on screen carries his countdown ring (WorldOverlays, every apply): the Bellows
+## window's next-activity chip then drops its own ring — one ring per target (r3d QA round 2, Q2-C1).
+var his_ring_on_prop: bool = false
+
 ## Frames the contextual pieces stay shown (and drawn) by warm_contextual().
 const WARM_FRAMES := 2
 ## The glyph sets the contextual pieces draw, at their sizes and outlines ([text, px, outline]; ApplauseMeter /
@@ -317,6 +321,11 @@ func warm_contextual() -> void:
 		root.add_child(_warm_primer)
 
 
+## WorldOverlays: a preview badge on screen carries his countdown ring now (applied on the next `apply`).
+func set_his_ring_on_prop(on: bool) -> void:
+	his_ring_on_prop = on
+
+
 ## Rasterise his next-activity icons (`ids`: activity / detour ids or res:// paths) the edge badge and the Bellows
 ## window will show — under the curtain, not on first sight in apply() (D17: a cold SVG ~0.9 ms).
 static func warm_activity_icons(ids: PackedStringArray) -> int:
@@ -512,10 +521,13 @@ func apply(m: HudModel) -> void:
 		_c_pipglyph = m.pip_glyph
 		pip.set_glyph(m.pip_glyph)
 		n += 1
-	if m.pip_next_icon != _c_pipnext or not is_equal_approx(m.pip_ring_frac, _c_pipring):
+	# ONE countdown ring per target (r3d QA round 2, Q2-C1): while a prop's preview badge carries his ring, the
+	# Bellows window's next-activity chip shows the icon only
+	var pipring := -1.0 if his_ring_on_prop else m.pip_ring_frac
+	if m.pip_next_icon != _c_pipnext or not is_equal_approx(pipring, _c_pipring):
 		_c_pipnext = m.pip_next_icon
-		_c_pipring = m.pip_ring_frac
-		pip.set_next(_activity_icon(m.pip_next_icon), m.pip_ring_frac)
+		_c_pipring = pipring
+		pip.set_next(_activity_icon(m.pip_next_icon), pipring)
 		n += 1
 	var pip_moved := false
 	if pip_view == null and int(m.pip_escalated) != _c_pipesc:

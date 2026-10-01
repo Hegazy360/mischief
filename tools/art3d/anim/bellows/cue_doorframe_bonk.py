@@ -41,8 +41,10 @@ REEL = merge({"clavicle_l": [("y", -10)], "upperarm_l": [("y", -8), ("z", -20)],
 # way the Prologue's blind walk from the sink to the hall mirror goes), the right arm groping again, a woozy tilt
 RUB_L = {"clavicle_l": [("y", -8)], "upperarm_l": [("y", 18), ("z", -58)], "lowerarm_l": [("z", -118)], "hand_l": [("x", 10)]}
 RUB_R = {"clavicle_r": [("z", 8)], "upperarm_r": [("y", -44), ("z", 60)], "lowerarm_r": [("z", 14)], "hand_r": [("x", -8)]}
-RUB = merge(RUB_L, RUB_R, glove("l", 16, 10), open_hand("r", 18), lean(fwd=-4, side=-4), head(x=-6, y=-10, z=-4))
-RUB_B = merge(RUB, lean(fwd=-2, side=-3), head(x=-2, y=-6, z=-4))
+# fix round 2 (Q2-G6): the chin UP through the rub (the frazzled bouffant falls over his eyes when the head dips), so
+# the dazed face holds to the camera
+RUB = merge(RUB_L, RUB_R, glove("l", 16, 10), open_hand("r", 18), lean(fwd=-6, side=-4), head(x=-18, y=-10, z=-4))
+RUB_B = merge(RUB, lean(fwd=-4, side=-3), head(x=-14, y=-6, z=-4))
 
 
 
@@ -69,7 +71,9 @@ def build(ctx):
     c.key(L, GROPE, "in_out_sine")
     # the rub: the left palm on his forehead (it rides the Head bone, so it follows the wobble)
     face_b, face_p = ctx.socket("face")
-    brow = face_p + Vector((0.0, -0.10, 0.10))
+    # fix round 2 (Q2-G6): the glove rubs the bump on his CROWN (high on the brow, above the eyes), so the dazed face
+    # stays open to the Stalls through the hold — it covered his eyes before
+    brow = face_p + Vector((0.0, -0.08, 0.20))
 
     def brow_pt(f, pose):
         wob = 0.025 * math.sin(2 * math.pi * (f - 16) / 7.0)
@@ -80,11 +84,18 @@ def build(ctx):
     c.motion(lambda f: {"Head": [("y", 5 * math.sin(2 * math.pi * (f - 14) / 18.0))],
                         "spine_03": [("y", 2 * math.sin(2 * math.pi * (f - 14) / 18.0 + 1.0))]}, 14, 34,
              weight=lambda f: window(f, 14, 18, 30, 34))
+    # D8 (fix round 2, Q2-G6): the dazed face to the Stalls from the recoil on (runtime gaze, either facing); the view
+    # holds him dazed in st_bonk (face to camera) after this overlay: >= 30 f of face
+    c.look_camera(7, L, weight=1.0, blend=4)
     # the accent beat opens on the lean-in frame (3) so the pop (4) and the recoil after it both sit inside it
     c.beats(anticipation=(0, 3), accent=(3, 7), hold=(7, 31), settle=(31, 36))
     c.mark(4, "accent")
     c.event(4, "jiggle", bones=["bouffant", "bouffant_l", "bouffant_r", "belly"], kick=0.8)
     c.event(4, "shake", trauma=0.2)
+    # fix round 2 (Q2-G6, the fresher twist): the BONK knocks his frazzled hair back up off his eyes — the dazed face
+    # reads to the Stalls — and at f32 it flops back down over them (clip-owned slot; the FRAZZLED look's own hair)
+    c.event(4, "look", set={"bouffant": "neat"})
+    c.event(32, "look", set={"bouffant": "frazzled"})
     for f, p in ((0, "huh"), (4, "shock"), (11, "dazed_open"), (18, "dazed"), (31, "huh")):
         c.face(f, p)
     hide_fx(c)

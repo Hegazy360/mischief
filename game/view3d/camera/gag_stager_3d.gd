@@ -103,6 +103,9 @@ func settle_gags() -> void:
 
 func reset() -> void:
 	_jets_left = 0
+	_pepper_f = -1.0
+	_squeak_shot = 0
+	_crack_f = -1.0
 	_spin_f = -1.0
 	_spin_next = 0.0
 	_window_punched = false
@@ -161,6 +164,8 @@ func on_ticked(events: Array) -> void:
 				_start_reaction(d)
 				if str(d.get("archetype", "")) == "dizzy_spin":
 					_record_runs_away(str(d.get("prank", "")))
+				elif str(d.get("archetype", "")) == "sneeze_blast":
+					_pepper_starts(str(d.get("prank", "")))
 			"reaction_accent":
 				_accent(d)
 			"reaction_end":
@@ -199,7 +204,7 @@ func on_ticked(events: Array) -> void:
 			"face_to_face":
 				_small_gag(ViewKit.word("fx.boo", "BOO!"), 0.3)
 			"squeak_bit", "head_turn":
-				_punch_window()
+				_squeak_answer(str(d.get("e", "")) == "squeak_bit")
 			"squeak":
 				_squeak_puff()
 			"near_miss":
@@ -462,6 +467,124 @@ func _beak() -> Vector3:
 	return at + Vector3(0.0, 0.12, 0.08)
 
 
+## Q2-G1: the CAUSE of the sneeze on screen. Through the build-up (reaction frames PEPPER_F0…PEPPER_F1) the rigged pot
+## on the shelf above him shakes (its `pepper_puff` anim, every PEPPER_SHAKE_F) and big dark pepper flecks stream out
+## of it down onto his nose (every PEPPER_DF); on each "ah" (PEPPER_AH) a dark sniff-puff at his nose.
+const PEPPER_F0 := 0.0
+const PEPPER_F1 := 78.0
+const PEPPER_DF := 7.0
+const PEPPER_SHAKE_F := 24.0
+const PEPPER_AH := [18.0, 42.0, 66.0]
+## The pepper pot from the honey's ring anchor (house3d kitchen_honey why_offset: the pot stands 0.23 m left of the
+## jar's axis, its spout at ≈ 2.04 m).
+const POT_FROM_RING := Vector3(-0.2, 0.32, 0.0)
+var _pepper_f := -1.0
+var _pepper_next := 0.0
+var _pepper_shake := 0.0
+var _pepper_ah := 0
+var _pot_at := Vector3.INF
+var _pot_prop: Object = null
+
+
+func _pepper_starts(prank: String) -> void:
+	_pepper_f = -1.0
+	if world_view == null or info == null:
+		return
+	var rp := str(info.prank(prank).get("rig_point", ""))
+	var ring := world_view.anchor_of(rp, &"ring") if rp != "" else Vector3.ZERO
+	if ring == Vector3.ZERO:
+		return
+	_pot_at = ring + POT_FROM_RING
+	_pot_prop = world_view.prop(rp) if world_view.has_method("prop") else null
+	_pepper_f = 0.0
+	_pepper_next = PEPPER_F0
+	_pepper_shake = 0.0
+	_pepper_ah = 0
+
+
+## His nose (world): his head, a little forward on his facing and toward the camera.
+func _nose() -> Vector3:
+	var face := float(driver.snapshot().bellows.facing) if driver != null else -1.0
+	return _head() + Vector3(0.12 * face, -0.04, 0.16)
+
+
+func _advance_pepper(df: float) -> void:
+	if _pepper_f < 0.0:
+		return
+	_pepper_f += df
+	if _pepper_f > PEPPER_F1:
+		_pepper_f = -1.0
+		return
+	if _pepper_f >= _pepper_shake:
+		_pepper_shake = _pepper_f + PEPPER_SHAKE_F
+		if _pot_prop != null and is_instance_valid(_pot_prop) and _pot_prop.has_method("play"):
+			_pot_prop.call("play", "pepper_puff")
+	if _pepper_f >= _pepper_next:
+		_pepper_next = _pepper_f + PEPPER_DF
+		var nose := _nose()
+		_burst("pepper_fall", _pot_at, (nose - _pot_at).normalized())
+	if _pepper_ah < PEPPER_AH.size() and _pepper_f >= float(PEPPER_AH[_pepper_ah]):
+		_pepper_ah += 1
+		_burst("pepper_nose", _nose(), Vector3(0.0, 0.6, 0.4))
+
+
+## Q2-G4: his answer to the squeak goes on the MAIN screen. When he is in another room than Hush, SQUEAK_SHOT_DELAY_S
+## after the bit starts (her squeeze and Clarence's ring read on screen first) a cue shot whips to him and holds
+## through the bit — the yodel, the throat clutch, "...the pipes." with his face to camera — then goes back
+## (CameraDirector3D plays it in the escalated window instead while Hush is busy). On the shot's arrival his voice
+## CRACKS on screen: limp notes tumbling out of his mouth + the squeak's own yellow ring out of HIS mouth (the visual
+## rhyme with Clarence's beak).
+const SQUEAK_SHOT_DELAY_S := 0.2
+const SQUEAK_SHOT_ZOOM := 1.25
+const SQUEAK_SHOT_IN := 12
+const SQUEAK_SHOT_HOLD := 66
+const SQUEAK_SHOT_OUT := 18
+const SQUEAK_SHOT_PRIORITY := 5
+const CRACK_F := 24.0
+var _squeak_shot := 0
+var _squeak_bit := false
+var _crack_f := -1.0
+
+
+func _squeak_answer(bit: bool) -> void:
+	if camera == null or world_view == null or world_view.bellows_view == null or not world_view.bellows_view.visible \
+			or driver == null:
+		_punch_window()
+		return
+	var s := driver.snapshot()
+	if s.bellows.room != s.hush.room:
+		_squeak_bit = bit
+		_schedule(SQUEAK_SHOT_DELAY_S, "squeak_shot", null)
+	if bit:
+		_crack_f = 0.0
+
+
+## The squeak cue shot itself (a reaction's punch-in keeps the screen: the window punch then).
+func _squeak_shot_now() -> void:
+	if camera == null:
+		return
+	if _gag_id != 0 and camera.active_gag_id() == _gag_id:
+		_punch_window()
+		return
+	if _squeak_shot != 0:
+		camera.release_gag(_squeak_shot)
+	_squeak_shot = camera.request_gag(_head(), SQUEAK_SHOT_ZOOM, SQUEAK_SHOT_IN,
+			SQUEAK_SHOT_HOLD if _squeak_bit else SQUEAK_SHOT_HOLD - 24, SQUEAK_SHOT_OUT, SQUEAK_SHOT_PRIORITY)
+	window_punches += 1
+
+
+func _advance_squeak(df: float) -> void:
+	if _crack_f < 0.0:
+		return
+	_crack_f += df
+	if _crack_f >= CRACK_F:
+		_crack_f = -1.0
+		var face := float(driver.snapshot().bellows.facing) if driver != null else -1.0
+		var mouth := _head() + Vector3(0.14 * face, -0.12, 0.18)
+		_burst("note_crack", mouth + Vector3(0.0, 0.1, 0.0), Vector3(0.4 * face, 0.6, 0.3))
+		_burst("squeak_ring", mouth + Vector3(0.0, 0.0, 0.1))
+
+
 func _small_gag(text: String, trauma: float) -> void:
 	if camera != null:
 		camera.shake(trauma)
@@ -499,6 +622,8 @@ func advance(delta: float) -> void:
 				var hv2 := world_view.hush_view if world_view != null else null
 				if hv2 != null and hv2.visible:
 					_burst("squeak_ring", _beak() + Vector3(0.0, 0.0, 0.15))
+			elif str(t[1]) == "squeak_shot":
+				_squeak_shot_now()
 			elif str(t[1]) == "window_down" and _window_punched:
 				_window_punched = false
 				if pip != null and not (camera != null and camera.gag_in_pip()):
@@ -512,10 +637,16 @@ func advance(delta: float) -> void:
 			if _spin_n % 2 == 1:
 				_burst("spin_dust", _feet() + Vector3(0.0, 0.04, 0.0), Vector3.UP)
 			else:
-				_burst("spin_lines", _chest() + Vector3(0.0, -0.15, 0.0), Vector3.UP)
+				# Q2-G2: the record's music whips round him — notes swept on a waist ring, fed by a jet from
+				# the horn straight at him (he is spun BY the record, not dancing)
+				_burst("note_whirl", _chest() + Vector3(0.0, -0.1, 0.0), Vector3.UP)
+				if _jet_at != Vector3.INF:
+					_burst("note_jet", _jet_at, (_chest() - _jet_at).normalized() + Vector3(0.0, 0.15, 0.0))
 		if _spin_f > SPIN_DUST_F1:
 			_spin_f = -1.0
 			_spin_next = 0.0
+	_advance_pepper(maxf(vdt, delta * 0.05) * 60.0)
+	_advance_squeak(maxf(vdt, delta * 0.05) * 60.0)
 	if _jets_left > 0:
 		_jet_t += maxf(vdt, delta * 0.05) * 60.0
 		if _jet_t >= JET_F:
@@ -526,6 +657,8 @@ func advance(delta: float) -> void:
 				_burst("disc_whirl", _disc_at)
 	if camera != null and _gag_id != 0 and camera.active_gag_id() == _gag_id:
 		camera.set_gag_focus(_gag_id, _chest())
+	if camera != null and _squeak_shot != 0 and camera.active_gag_id() == _squeak_shot:
+		camera.set_gag_focus(_squeak_shot, _head())
 
 
 func _approach_slowmo() -> void:

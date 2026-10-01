@@ -312,3 +312,61 @@ func test_the_sip_is_continuous_into_the_sneeze() -> void:
 			worst = d
 			worst_b = b
 	assert_le(worst, 1.5, "act_tea f%d = rx_sneeze_blast_a f0 (worst %s %.2f°)" % [TRIGGER_F, worst_b, worst])
+
+
+
+func _gaze_covers(sc: Dictionary, f0: int, f1: int) -> bool:
+	for g in (sc.get("gaze", []) as Array):
+		var d: Dictionary = g
+		if String(d.get("at", "")) == "camera" and int(d.get("f0", 999)) <= f0 and int(d.get("f1", -1)) >= f1 \
+				and float(d.get("weight", 0.0)) >= 0.8:
+			return true
+	return false
+
+
+## r3d-fix-gags2 Q2-G1: the sink hold reads — the splash frizzes the flipped bouffant UP off his eyes (f113), and his
+## face is on the camera (runtime gaze, D8) through ≥ 30 f of the dazed hold.
+func test_the_sneeze_sink_hold_shows_his_face() -> void:
+	var v: Variant = _sidecar("rx_sneeze_blast_a")
+	if v == null:
+		skip("rx_sneeze_blast_a not made yet")
+		return
+	var sc: Dictionary = v
+	var up := false
+	for e in _events(sc, "look"):
+		var st: Dictionary = (e as Dictionary).get("set", {})
+		up = up or (int((e as Dictionary)["f"]) in [112, 113, 114] and String(st.get("bouffant", "")) == "frazzled")
+	assert_true(up, "the splash swaps the flipped bouffant for the frazzled one (above the brows)")
+	var last := ""
+	var last_f := -1
+	for e2 in _events(sc, "look"):
+		var st2: Dictionary = (e2 as Dictionary).get("set", {})
+		if int((e2 as Dictionary)["f"]) > last_f and st2.has("bouffant"):
+			last_f = int((e2 as Dictionary)["f"])
+			last = String(st2["bouffant"])
+	assert_eq(last, "flipped", "it ends flipped over his eyes again (the CHOO's look; the e2e sneeze probe)")
+	assert_ge(last_f - 114, 30, "after ≥ 30 f of his face")
+	assert_true(_gaze_covers(sc, 120, 150), "his face to the camera through the dazed hold (≥ 30 f)")
+
+
+## r3d-fix-gags2 Q2-G6: the bonk's wind-up (the anticipation the other way) is an upper-body overlay over his walk,
+## and the bonk overlay keeps his dazed face on the camera from the recoil on.
+func test_the_bonk_windup_and_face() -> void:
+	var w: Variant = _sidecar("cue_doorframe_windup")
+	if w == null:
+		skip("cue_doorframe_windup not made yet")
+		return
+	var sw: Dictionary = w
+	assert_eq(String(sw.get("layer", "")), "overlay", "an overlay")
+	assert_eq(String(sw.get("mask", "")), "upper", "upper body over the walk")
+	assert_le(int(sw["length"]), 45, "fits the last 40 f of his approach")
+	var b: Variant = _sidecar("cue_doorframe_bonk")
+	assert_true(b != null and _gaze_covers(b, 8, 34), "the bonk overlay: face to camera from the recoil")
+	# the staged clip is not on the 42-clip manifest (CueStager3D plays it): its own load + strict lint here
+	var a := load(String(sw.get("anim", ""))) as Animation
+	assert_true(a != null and is_equal_approx(a.length * 60.0, float(sw["length"])), "its .res loads, length = sidecar's")
+	var errs := PackedStringArray()
+	for f in L.make_strict(L.lint_clip_id("bellows/cue_doorframe_windup")):
+		if String((f as Dictionary)["severity"]) == "error":
+			errs.append(L.format(f))
+	assert_eq(errs.size(), 0, "lints --strict clean: %s" % "\n".join(errs))

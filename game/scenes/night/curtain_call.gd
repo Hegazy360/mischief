@@ -20,6 +20,9 @@
 ## (CurtainBows3D: a transparent SubViewport composited in front of the curtain, under the roses / title / valance);
 ## the Gag Reel is GagReel3D (the recorded moments re-staged in a SubViewport), primed on the call's first frame so
 ## its slot is never empty.
+## **Bellows' bit (r3d QA2 Q2-G7):** centre-left, clear of the reel inset and the buttons; the pelmet wobbles, drops
+## in 4 f onto his head and his dazed face holds to the camera ≥ 1 s — the reel step never ends before that hold
+## (`CurtainApron.bit_plan` / `bit_done`); the pelmet is drawn above the ResultsScreen (`apron.top`).
 class_name CurtainCall
 extends Node
 
@@ -40,7 +43,7 @@ const APRON_SCALE := 0.8
 const BAND_SCALE := 0.55
 const HUSH_BOW := "hush/act_bow"
 const BELLOWS_CLIPS: PackedStringArray = ["bellows/cc_wander_on", "bellows/st_double_take", "bellows/beat_slow_burn",
-	"bellows/st_bonk"]
+	"bellows/st_bonk", "bellows/beat_dignity_fail"]
 
 ## Pure step table: [{id, s}] for a kind (+ repeat viewing).
 static func steps(kind: String, repeat: bool = false) -> Array:
@@ -126,6 +129,8 @@ func start(p_night: Node, p_kind: String, p_result: Dictionary) -> void:
 	apron = CurtainApron.new()
 	apron.bows = bows
 	layer.add_child(apron)
+	# the pelmet is drawn above the ResultsScreen (re-raised when it shows): its navy wash never mutes the drop
+	layer.add_child(apron.top)
 	_prime_reel()
 	_catcher = _TapCatcher.new()
 	_catcher.call_ref = skip
@@ -189,7 +194,8 @@ func _process(delta: float) -> void:
 				return
 		"reel":
 			apron.bellows_t = step_t / maxf(0.1, dur)
-			if reel != null and not bool(reel.get("playing")) and step_t > 0.05:
+			# a reel that ends early still waits for Bellows' bit: the bonk and his face hold (Q2-G7)
+			if reel != null and not bool(reel.get("playing")) and step_t > 0.05 and apron.bit_done():
 				_next_step()
 				return
 	if not hold_steps and step_t >= dur:
@@ -230,12 +236,14 @@ func _begin_step(id: String) -> void:
 			UiKit.haptic(&"stomp")
 		"results":
 			apron.show_hush(false, 0.0)
+			# the title card leaves with Hush (right of centre it would sit under the Gag Reel slot)
+			apron.show_title(false)
 			_show_results()
 		"reel":
 			apron.show_hush(false, 0.0)
 			apron.show_title(false)
 			if kind != KIND_GATE0:
-				apron.start_bellows(result.get("residues", PackedStringArray()))
+				apron.start_bellows(result.get("residues", PackedStringArray()), float((table[step_i] as Dictionary)["s"]))
 			_start_reel(float((table[step_i] as Dictionary)["s"]))
 
 
@@ -301,6 +309,8 @@ func _show_results() -> void:
 		"new": result.get("new", []), "has_next": bool(result.get("has_next", true)),
 		"night_title": String(result.get("title", "")), "repeat": repeat})
 	layer.add_child(rs)
+	if apron != null and apron.top != null and apron.top.get_parent() == layer:
+		layer.move_child(apron.top, -1)
 	var vs := _view_size()
 	rs.position = Vector2.ZERO
 	rs.size = vs
@@ -332,6 +342,7 @@ func _start_reel(budget: float) -> void:
 		reel = GagReel3D.new()
 		add_child(reel)
 	reel.call("start", night, moments, budget, result.get("cmds", []))
+	_quiet_reel_caption()
 	if results != null:
 		results.set_gag_reel_texture(reel.call("get_texture"))
 
@@ -345,6 +356,16 @@ func _prime_reel() -> void:
 	add_child(r)
 	r.prime(night, moments)
 	reel = r
+	_quiet_reel_caption()
+
+
+## `--no-captions` (review shots): the Gag Reel's pun caption is a caption too — it stays invisible in the slot.
+func _quiet_reel_caption() -> void:
+	if reel == null or night == null or not bool(night.get("no_captions")):
+		return
+	var c: Variant = reel.get("caption")
+	if c is CanvasItem:
+		(c as CanvasItem).self_modulate.a = 0.0
 
 
 func _emit_action(a: String) -> void:

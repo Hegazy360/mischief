@@ -217,3 +217,98 @@ func test_warm_sidecar_fills_the_shared_json_cache() -> void:
 	CharacterView3D.warm_sidecar(cid)
 	assert_true(ViewKit._json_cache.has(path), "parsed once into ViewKit's cache")
 	assert_true(CharacterView3D._stage_cache.has(cid), "and its stage / keeps bits cached")
+
+
+# --- r3d-fix-gags2 (QA round 2: Q2-G1..G6, G8, Q2-C1) ----------------------------------------------------------
+
+## Q2-G6: the bonk's wind-up starts on his walk's ETA to the door frame (frames), never when he walks away.
+func test_the_bonk_windup_is_timed_off_his_eta_to_the_frame() -> void:
+	assert_almost_eq(CueStager3D.eta_frames(14.5, 13.9, -1.0, 0.8), 45.0, 0.01, "0.6 m at 0.8 m/s = 45 f")
+	assert_eq(CueStager3D.eta_frames(13.5, 13.9, -1.0, 0.8), -1.0, "past it (walking away): none")
+	assert_eq(CueStager3D.eta_frames(14.5, 13.9, -1.0, 0.0), -1.0, "standing still: none")
+	assert_le(CueStager3D.WINDUP_F, 45.0, "the wind-up fits the last ≤ 45 f before the hit")
+	assert_ge(CueStager3D.WINDUP_PUSH_F, 24, "the bonk shot arrives as a slow push, not a punch")
+	assert_ge(CueStager3D.BONK_SHOT_LEAD_F - float(CueStager3D.WINDUP_PUSH_F), 30.0,
+		"and the camera is still ≥ 30 f before the hit")
+	assert_ge(CueStager3D.BONK_HOLD_TAIL_F, 30, "the shot holds ≥ 30 f past the pin (his dazed face)")
+
+
+## Q2-G6: the bonk's jolt swings the parlour picture on its hook and leaves it askew (the picture gag's set-up).
+func test_the_bonk_leaves_the_picture_askew_on_its_hook() -> void:
+	assert_eq(CueStager3D.picture_swing(0.0), 0.0, "straight at the hit")
+	var peak := 0.0
+	for i in 181:
+		peak = maxf(peak, absf(CueStager3D.picture_swing(float(i) / 60.0)))
+	assert_le(peak, deg_to_rad(CueStager3D.PIC_ASKEW_DEG + CueStager3D.PIC_SWING_DEG), "a bounded swing")
+	assert_gt(peak, deg_to_rad(CueStager3D.PIC_ASKEW_DEG), "it swings past its rest")
+	assert_almost_eq(CueStager3D.picture_swing(CueStager3D.PIC_SWING_S), deg_to_rad(CueStager3D.PIC_ASKEW_DEG),
+		deg_to_rad(1.5), "settled askew")
+	var wall := Transform3D(Basis.IDENTITY, Vector3(7.8, 2.55, -2.36))
+	var t := CueStager3D.hang_tilted(wall, deg_to_rad(9.0), 0.56)
+	var hook := wall.origin + Vector3(0.0, 0.56, 0.0)
+	assert_true((t * Vector3(0.0, 0.56, 0.0)).is_equal_approx(hook), "it turns about its hook (the top edge)")
+	assert_false(t.origin.is_equal_approx(wall.origin), "its bottom swings")
+
+
+## Q2-G6: a cue shot already framing the approach keeps framing through the payoff (no second push near the hit).
+func test_extend_gag_holds_the_shot_through_the_payoff() -> void:
+	var cam := _cam()
+	var t := _target(13.0)
+	cam.follow(t, func() -> float: return 0.0)
+	for i in 30:
+		cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	var id := cam.request_gag(Vector3(13.2, 1.6, -1.0), 1.3, 10, 20, 10, CueStager3D.SHOT_PRIORITY)
+	for i in 16:
+		cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	assert_eq(cam.gag_phase(), CameraDirector3D.GagPhase.HOLD, "holding")
+	assert_false(cam.extend_gag(id + 99, 60), "another id: no")
+	assert_true(cam.extend_gag(id, 60), "extended")
+	for i in 50:
+		cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	assert_eq(cam.gag_phase(), CameraDirector3D.GagPhase.HOLD, "still holding 50 f later (it would have eased out)")
+	assert_eq(cam.active_gag_id(), id, "the same shot (no re-request)")
+	for i in 40:
+		cam.advance(1.0 / 60.0, 1.0 / 60.0)
+	assert_ne(cam.gag_phase(), CameraDirector3D.GagPhase.HOLD, "then it lets go")
+	t.free()
+	cam.free()
+
+
+## Q2-G1 / G2 / G3 / G4: the new FX read at phone size (textured, big) and the stager's own clips exist (warmed
+## under the curtain by WorldView3D.warm_clips).
+func test_the_round_2_fx_and_staged_clips() -> void:
+	for k in ["pepper_fall", "pepper_nose", "note_whirl", "note_crack", "phew"]:
+		assert_true(Fx3D.KINDS.has(k), "%s kind" % k)
+		var row: Array = Fx3D.KINDS[k]
+		assert_gt(row.size(), 8, "%s textured (an inked glyph, not a disc)" % k)
+		assert_ge(float(row[4]), 0.07, "%s big enough to read at phone size" % k)
+	assert_true(Fx3D.SHAPES.has("note_whirl"), "the note whirl sweeps round him (a ring)")
+	for c in CueStager3D.STAGED_CLIPS:
+		assert_true(ClipMap.clip_exists3d(str(c)), "%s baked" % c)
+
+
+## Q2-C1: his bubble keeps clear of the APPLAUSE / RUNNING GAG band: the lowest edge of the shown band rects that
+## overlap its span (+ the pad); hidden pieces (empty rects) and pieces beside it do not count.
+func test_his_bubble_band_keep_out_bottom() -> void:
+	var meter := Rect2(Vector2(1000, 20), Vector2(400, 70))
+	var fuse := Rect2(Vector2(1050, 100), Vector2(300, 60))
+	assert_almost_eq(Overlays3D.band_bottom_of([meter, fuse], 900.0, 1100.0, 24.0), 184.0, 0.01, "under the fuse + pad")
+	assert_eq(Overlays3D.band_bottom_of([meter, fuse], 100.0, 500.0, 24.0), -1.0, "beside the band: free")
+	assert_eq(Overlays3D.band_bottom_of([Rect2(), Rect2()], 900.0, 1100.0, 24.0), -1.0, "band hidden: free")
+	assert_almost_eq(Overlays3D.band_bottom_of([meter, Rect2()], 1390.0, 1600.0, 24.0), 114.0, 0.01, "the meter alone")
+
+
+## Q2-G3: the near miss has a shape — the glance at her gap, the double take (its snap-back at the clip's f8) held to
+## the cue for ≥ 30 f, her eyes ducked while he looks away; the payoff (her "phew") lands on the cue.
+func test_the_near_miss_double_take_is_held_to_the_cue() -> void:
+	assert_gt(CueStager3D.RELIEF_GAZE_LEFT, CueStager3D.RELIEF_TAKE_LEFT, "the glance first")
+	assert_gt(CueStager3D.RELIEF_TAKE_LEFT, CueStager3D.RELIEF_DUCK_LEFT, "her eyes duck while he looks away")
+	assert_ge(CueStager3D.RELIEF_TAKE_LEFT - 8, 30, "the snap-back (take f8) is held ≥ 30 f to the cue")
+	assert_le(CueStager3D.RELIEF_PHEW_DELAY_S, 0.2, "the phew puff right on the cue")
+	assert_true(CueStager3D.STAGED_CLIPS.has(CueStager3D.RELIEF_TAKE_CLIP), "the take is warmed")
+	assert_true(CueStager3D.STAGED_CLIPS.has(CueStager3D.VASE_REACT_CLIP), "the vase ovation is warmed")
+	assert_true(CueStager3D.STAGED_CLIPS.has(CueStager3D.WINDUP_CLIP), "the bonk wind-up is warmed")
+	assert_ge(CueStager3D.VASE_REACT_F - 16, 30, "the vase ovation: the push-in then ≥ 30 f held on his face")
+	assert_le(CueStager3D.VASE_REACT_F, 50, "and back on Hush before the squeak (P00 ≈ t226)")
+	assert_ge(GagStager3D.SQUEAK_SHOT_HOLD, 60, "the squeak cut-away holds through his throat clutch")
+	assert_le(GagStager3D.SQUEAK_SHOT_DELAY_S, 0.3, "and leaves her squeeze on screen first")

@@ -54,6 +54,13 @@
     },
     {
       "f": 4,
+      "type": "look",
+      "set": {
+        "bouffant": "neat"
+      }
+    },
+    {
+      "f": 4,
       "type": "sfx",
       "id": "woodblock_bonk"
     },
@@ -62,6 +69,13 @@
       "type": "voice",
       "id": "vo_bellows_oof",
       "vol_db": -2.0
+    },
+    {
+      "f": 32,
+      "type": "look",
+      "set": {
+        "bouffant": "frazzled"
+      }
     }
   ],
   "face": [
@@ -109,6 +123,15 @@
     "freeze_holds": [],
     "draft": false
   },
+  "gaze": [
+    {
+      "f0": 7,
+      "f1": 36,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 4
+    }
+  ],
   "tags": [
     "cue",
     "overlay",

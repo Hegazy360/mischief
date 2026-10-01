@@ -25,6 +25,9 @@ const DUCK_S := 0.09
 var _duck := false
 var _duck_k := 0.0
 var _eyes_y := 0.0
+## The relieved squeeze after the near miss (eyes_phew): shut for SQUEEZE_S, a 0.08 s ease each way.
+const SQUEEZE_S := 0.5
+var _squeeze_t := -1.0
 
 
 func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_verb: String, p_live: bool,
@@ -62,6 +65,7 @@ func set_occupied(on: bool) -> void:
 	_occupied = on
 	if not on:
 		_duck = false
+		_squeeze_t = -1.0
 	if _eyes != null:
 		_eyes.visible = on
 	if on:
@@ -99,6 +103,28 @@ func ducking() -> bool:
 	return _duck
 
 
+## Her "phew" after the near miss (r3d-fix-gags2 Q2-G3): the eyes pop back up and squeeze shut in relief for
+## SQUEEZE_S (whites and pupils pressed to a happy lid line), then open. The caller puffs the "phew" cloud from
+## `eyes_world()`.
+func eyes_phew() -> void:
+	if not _occupied:
+		return
+	_duck = false
+	_squeeze_t = 0.0
+	_wake()
+
+
+func squeezing() -> bool:
+	return _squeeze_t >= 0.0
+
+
+## The eye card's world position (the gap); the prop's origin when it has no card.
+func eyes_world() -> Vector3:
+	if _eyes != null and _eyes.is_inside_tree():
+		return _eyes.global_position
+	return global_position if is_inside_tree() else position
+
+
 func look_dir() -> Vector2:
 	return _look
 
@@ -120,6 +146,22 @@ func _occupied_busy() -> bool:
 			p.scale.y = sy
 		if k >= 1.0:
 			_blink_t = -1.0
+		else:
+			busy = true
+	if _squeeze_t >= 0.0 and _blink_t < 0.0:
+		_squeeze_t += dt
+		var ks := clampf(minf(_squeeze_t, SQUEEZE_S - _squeeze_t) / 0.08, 0.0, 1.0)
+		var sq := 1.0 - 0.85 * ks
+		for w in _whites:
+			w.scale.y = 1.25 * sq
+		for p in _pupils:
+			p.scale.y = sq
+		if _squeeze_t >= SQUEEZE_S:
+			_squeeze_t = -1.0
+			for w in _whites:
+				w.scale.y = 1.25
+			for p in _pupils:
+				p.scale.y = 1.0
 		else:
 			busy = true
 	var dk := 1.0 if (_duck and _occupied) else 0.0

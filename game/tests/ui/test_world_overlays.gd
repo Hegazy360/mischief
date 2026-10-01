@@ -129,7 +129,9 @@ func test_the_preview_of_the_prop_she_is_at_is_exempt_from_its_protected_rect() 
 	# not at the prop: the same rect pushes it too
 	m.at_hotspot = ""
 	wo.apply(m)
-	assert_ne(wo.placer.item(&"ov_preview_0").rect, wo.placer.item(&"ov_preview_0").want)
+	var pa := wo.placer.item(&"ov_preview_0")
+	assert_true(not pa.visible or pa.rect != pa.want, "pushed (or waiting): never left on the protected rect")
+	assert_false(pa.visible and pa.rect.intersects(fa.extra_protected[0]))
 
 
 func test_the_view_takes_the_hud_rects_itself() -> void:

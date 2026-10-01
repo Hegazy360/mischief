@@ -63,6 +63,8 @@ var phase: int = Phase.BUILD
 ## True when the scene runs as the main scene with CLI flags (debug shots).
 var cli: bool = false
 var cli_args: Dictionary = {}
+## `--no-captions` (review shots): the pun captions and stamps are hidden — the curtain call's Gag Reel too.
+var no_captions: bool = false
 
 var db: Object = null
 var world: Object = null
@@ -428,6 +430,10 @@ func _strip_ink(n: Node) -> void:
 ## The world overlays, their rules' context (the Night's tables) and the tag-flight line table.
 func _setup_overlays() -> void:
 	overlays.setup(world_view, hud)
+	# r3d-fix-hud3 R2 (share the WorldOverlays placer with Overlays3D: his bubble in the one-cloud rule) is NOT wired
+	# yet: with it, a pun caption that the placer cannot place WAITS — hidden (Overlays3D._place_shared) — and the
+	# camera's punch-in face box blocked ALLEGRO-GO-GO! for ~60 of its 72 ticks (r3d-fix-night2, captions-on P00 run,
+	# t2672–2732). Wire it (`world_view.overlays.placer = overlays.placer`) once a blocked caption keeps showing.
 	var ep: Variant = world.get("episode")
 	if db is ContentDB and ep is EpisodeDef:
 		octx.prepare(db as ContentDB, ep as EpisodeDef, world_view.set_result, OverlayCtx.load_previews())
@@ -445,7 +451,8 @@ func _setup_overlays() -> void:
 ## `--no-captions` (captions and stamps hidden) and `--hud=off` (the world only) for review shots.
 func _apply_cli_view_flags() -> void:
 	var a := cli_args if cli else NightArgs.parse(OS.get_cmdline_user_args())
-	if bool(a.get("no_captions", false)) and world_view.overlays != null:
+	no_captions = bool(a.get("no_captions", false))
+	if no_captions and world_view.overlays != null:
 		world_view.overlays.screen.visible = false
 	if not bool(a.get("hud", true)):
 		hud.visible = false

@@ -486,6 +486,24 @@ func test_the_detector_fires_on_an_unwarmed_material() -> void:
 	await tree.process_frame
 
 
+## QA2 Q2-C1 in a real Night: his bubble draws no awareness glyph beside its thought and carries WorldOverlays'
+## one-ring flag; the WorldOverlays placer is not shared with Overlays3D yet (r3d-fix-hud3 R2 held: a blocked pun
+## caption would wait hidden — see NightScene._setup_overlays).
+func test_his_bubble_in_a_night_is_one_thing_per_head() -> void:
+	allow_errors()
+	var n := _make({"episode": "p00_curtain_up", "from": "test", "skip_intro": true, "view": "3d"})
+	await _wait_phase(n, NightScene.Phase.PLAY)
+	await _frames(10)
+	var ov: Variant = n.world_view.overlays
+	if assert_true(ov != null, "the 3D view's 2D FX"):
+		assert_true(ov.placer == null, "captions keep their own placement (no shared placer yet)")
+		var bub: FxThoughtBubble = ov.bubble
+		assert_true("ring_hidden" in bub, "the one-ring flag WorldOverlays sets")
+		if bub.visible and bub.thought_on():
+			assert_false(bub.glyph_shown, "no glyph disc beside his thought")
+	await _free(n)
+
+
 # --- curtain call, Gag Reel ------------------------------------------------------------------------------------
 
 func test_g0_curtain_call_has_3d_bows_and_again() -> void:

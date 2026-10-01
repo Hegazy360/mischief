@@ -1,12 +1,25 @@
 ## CurtainApron — what happens in front of the fallen curtain during the curtain call (GDD §6.2):
 ## Hush on the apron bowing under a rain of roses, the Prologue's title card slamming down (0.3 s drop,
-## a squash on landing, the bulbs chasing round its frame), and during the Gag Reel Bellows wandering
-## on along the lower stage band in his residue → double take → slow burn → the curtain valance
-## drops on his head (bonk).
+## a squash on landing, the bulbs chasing round its frame), and during the Gag Reel Bellows' bit: he wanders on in
+## his residue, double-takes at the audience, slow-burns, and the stage pelmet drops on his head (bonk).
 ## The actors are CurtainBows3D's 3D rigs (`bows`, composited under this control: `hush/act_bow`,
-## `bellows/cc_wander_on`, `st_double_take`, `beat_slow_burn`, `st_bonk`); the roses, the title and the valance stay
-## 2D, on top. Roses are a fixed pool drawn in one `_draw()` (no allocation per frame). (The 2D CharacterView actors
-## were removed with the 2D view, r3d-integrate.)
+## `bellows/cc_wander_on`, `st_double_take`, `beat_slow_burn`, `st_bonk`); the roses and the title stay 2D, on top.
+## Roses are a fixed pool drawn in one `_draw()` (no allocation per frame).
+##
+## **Staging (r3d QA2 Q2-G7 — the bonk was small beside the buttons, the menu covered it):**
+##   * Hush bows at HUSH_MARK_X (left of centre) and the title card lands at TITLE_X (right of centre), so the card
+##     never covers her during its hold;
+##   * Bellows' bit runs centre-left (BIT_MARK_X), on CurtainBows3D.BIT_Z (≈ 46 % of the height, his face reads),
+##     clear of the Gag Reel inset (right) and the buttons (bottom corners), his head under the results' text;
+##   * the pelmet is drawn on `top` — a control CurtainCall keeps ABOVE the ResultsScreen — so the results' navy wash
+##     never mutes it: it lurches into view at the top (6 f), WOBBLES on its ropes for BIT_WOBBLE_S (the set-up: one
+##     rope slips, dust sifts — he is still fuming at the audience, he never looks up), the ropes snap and it DROPS in
+##     BIT_DROP_F frames onto his head (contact: an impact star, he is squashed into his knees, the pelmet squashes),
+##     then his dazed face holds to the camera (`st_bonk`, its gaze window; body cheat 70°) with stars circling for
+##     ≥ BIT_HOLD_S before the reel step may end — no cut, nothing else moves on the stage; then the topper: the
+##     stars go and he gathers his dignity, the pelmet still on his head like a crown (BIT_TOPPER_CLIP: he
+##     straightens and tugs his cravat), then glares at the audience under it (BIT_END_CLIP) while the call waits.
+## `bit_plan(dur)` is the pure schedule (seconds into the reel step) the tests check.
 class_name CurtainApron
 extends Control
 
@@ -18,13 +31,45 @@ const VALANCE_ART := "res://art/house/stage/curtain_valance.svg"
 const TITLE_SIZE := Vector2(1120, 460)
 const TITLE_DROP_S := 0.3
 const BULBS := 22
+## Hush's walk-in (screen x fractions) and the title card's centre: she bows left of centre, the card lands right of
+## it (the card was centred over her for its 1.2 s hold — r3d QA2 known edge).
+const HUSH_FROM_X := 0.12
+const HUSH_MARK_X := 0.30
+const TITLE_X := 0.60
+## Bellows' bit (Q2-G7): from the left wing to his mark, centre-left (x 0.28 = 336 px at 1200 wide).
+const BIT_WING_X := -0.10
+const BIT_MARK_X := 0.28
+const BIT_TAKE_S := 0.35
+const BIT_WOBBLE_S := 0.6
+const BIT_DROP_F := 4
+const BIT_HOLD_S := 1.0
+## The topper after his dazed hold: he gathers his dignity with the pelmet still on his head like a crown — the
+## cravat tug, the look round, the "ahem" to the audience, the cravat pings (`beat_dignity_fail`, face to camera).
+const BIT_TOPPER_S := 1.25
+const BIT_TOPPER_CLIP := "bellows/beat_dignity_fail"
+## ...for its straighten-and-tug (30 f: its look-round spreads his arms like a T, which read wrong at strip size), then
+## he glares at the audience, the pelmet still on (`beat_slow_burn`, looping: the end picture while the call waits).
+const BIT_TOPPER_LEN_S := 0.5
+const BIT_END_CLIP := "bellows/beat_slow_burn"
+## The pelmet (logical px at the 1080 base): size, the bottom edge while it hangs at the top, how far it sits down
+## over his head top (the bouffant) once it lands, its lurch into view (frames).
+const PELMET_SIZE := Vector2(500, 150)
+const PELMET_HANG_Y := 150.0
+const PELMET_SINK := 30.0
+const PELMET_LURCH_F := 6
+const ORBIT_STARS := 4
 
 ## The 3D bows (CurtainBows3D under this control); set before `_ready`.
 var bows: CurtainBows3D = null
-## 0..1 progress of Bellows' band routine (CurtainCall drives it during the reel).
+## The pelmet's control, drawn above the ResultsScreen (CurtainCall adds it to the layer and keeps it on top).
+var top: Control = null
+## 0..1 progress of the reel step (CurtainCall drives it; kept for callers — the bit runs on `bit_t`).
 var bellows_t: float = 0.0
 var hush_on: bool = false
 var title_on: bool = false
+## Seconds since Bellows' bit started (the reel step) and its schedule (`bit_plan`).
+var bit_t: float = 0.0
+var bit: Dictionary = {}
 
 var _rose_tex: Texture2D = null
 var _title_tex: Texture2D = null
@@ -40,8 +85,11 @@ var _hush_t: float = 0.0
 var _hush_len: float = 1.6
 var _title_t: float = 0.0
 var _bellows_on: bool = false
+## Seconds since the pelmet hit his head (−1 before).
 var _bonk_t: float = -1.0
 var _frame: float = 0.0
+var _star := PackedVector2Array()
+var _burst := PackedVector2Array()
 
 
 func _init() -> void:
@@ -52,6 +100,10 @@ func _init() -> void:
 	_rv.resize(ROSES)
 	_rr.resize(ROSES)
 	_rs.resize(ROSES)
+	_star.resize(10)
+	_burst.resize(20)
+	top = _Top.new()
+	(top as _Top).apron = self
 
 
 func _ready() -> void:
@@ -64,6 +116,21 @@ func _vs() -> Vector2:
 	return size if size.x > 0.0 else Vector2(1920, 1080)
 
 
+## Bellows' bit, seconds into a reel step of `dur` s (pure): `walk` (he reaches his mark), `take` (the double take
+## ends), `wobble` (the pelmet lurches into view and wobbles), `drop` (the ropes snap), `hit` (it lands on his head:
+## the accent, BIT_DROP_F frames after `drop`) and `end` (his face hold is done: ≥ BIT_HOLD_S after the hit). The
+## walk-on and the slow burn stretch to fill the step; the set-up, the drop and the hold do not.
+static func bit_plan(dur: float) -> Dictionary:
+	var drop_s := float(BIT_DROP_F) / 60.0
+	var avail := maxf(0.0, dur - BIT_HOLD_S - BIT_WOBBLE_S - drop_s)
+	var walk := clampf(avail * 0.48, 0.9, 2.2)
+	var burn := clampf(avail - walk - BIT_TAKE_S, 0.5, 2.0)
+	var wob := walk + BIT_TAKE_S + burn
+	var hit := wob + BIT_WOBBLE_S + drop_s
+	return {"walk": walk, "take": walk + BIT_TAKE_S, "wobble": wob, "drop": wob + BIT_WOBBLE_S, "hit": hit,
+		"end": hit + BIT_HOLD_S}
+
+
 ## Hush steps out on the apron and bows for `sec` (false = she leaves).
 func show_hush(on: bool, sec: float) -> void:
 	hush_on = on
@@ -73,7 +140,7 @@ func show_hush(on: bool, sec: float) -> void:
 		bows.hide_hush()
 
 
-## Roses rain from the flies onto the apron.
+## Roses rain from the flies onto the apron, round where Hush bows.
 func rain_roses() -> void:
 	var vs := _vs()
 	var seed_v := 7
@@ -82,7 +149,7 @@ func rain_roses() -> void:
 		var fx := float(seed_v % 1000) / 1000.0
 		seed_v = (seed_v * 1103515245 + 12345) & 0x7fffffff
 		var fy := float(seed_v % 1000) / 1000.0
-		_rp[i] = Vector2(vs.x * (0.2 + 0.6 * fx), -80.0 - 700.0 * fy)
+		_rp[i] = Vector2(vs.x * (HUSH_MARK_X - 0.22 + 0.5 * fx), -80.0 - 700.0 * fy)
 		_rv[i] = Vector2((fx - 0.5) * 120.0, 520.0 + 380.0 * fy)
 		_rr[i] = fx * TAU
 		_rs[i] = (fy - 0.5) * 8.0
@@ -119,24 +186,38 @@ func _load_title() -> void:
 				_bulbs.append(t)
 
 
-## Bellows wanders on (the reel); `residues` = the looks he ended the Night in.
-func start_bellows(residues: Variant) -> void:
+## Bellows' bit starts (the reel step, `dur` s long); `residues` = the looks he ended the Night in.
+func start_bellows(residues: Variant, dur: float = 5.0) -> void:
 	_bellows_on = true
 	bellows_t = 0.0
+	bit_t = 0.0
+	bit = bit_plan(dur)
 	_bonk_t = -1.0
 	if bows != null and residues is PackedStringArray:
 		bows.set_residues(residues)
 
 
-## The valance drops on his head.
+## The pelmet drops on his head now (a tap / the end of the reel step before the bit got there): no wobble, the
+## ropes snap at once and it lands BIT_DROP_F frames later.
 func bonk() -> void:
-	if not _bellows_on or _bonk_t >= 0.0:
+	if not _bellows_on or _bonk_t >= 0.0 or bit.is_empty():
 		return
-	_bonk_t = 0.0
-	var au := ViewKit.autoload("Audio")
-	if au != null and au.has_method("play_sfx"):
-		au.call("play_sfx", "bonk")
-	UiKit.haptic(&"stomp")
+	if bit_t < float(bit["drop"]):
+		var drop_s := float(BIT_DROP_F) / 60.0
+		bit["wobble"] = bit_t
+		bit["drop"] = bit_t
+		bit["hit"] = bit_t + drop_s
+		bit["end"] = bit_t + drop_s + BIT_HOLD_S
+
+
+## True once his face hold after the bonk is done (or no bit runs): the reel step may end.
+func bit_done() -> bool:
+	return not _bellows_on or (_bonk_t >= BIT_HOLD_S)
+
+
+## True from the hit on (the pelmet is on his head).
+func bonked() -> bool:
+	return _bonk_t >= 0.0
 
 
 ## Clip id when its 3D sidecar exists, else "" (the current clip carries on).
@@ -153,10 +234,19 @@ func advance(dt: float) -> void:
 		_hush_t += dt
 		var k3 := clampf(_hush_t / _hush_len, 0.0, 1.0)
 		var walking := k3 < 0.3
-		bows.pose_hush(lerpf(0.36, 0.5, clampf(k3 / 0.3, 0.0, 1.0)), "hush/loco_walk" if walking else "hush/act_bow", 1,
-			20.0 if walking else 85.0)
-	if _bellows_on and bows != null:
-		_advance_bellows_3d()
+		bows.pose_hush(lerpf(HUSH_FROM_X, HUSH_MARK_X, clampf(k3 / 0.3, 0.0, 1.0)), "hush/loco_walk" if walking else "hush/act_bow",
+			1, 20.0 if walking else 85.0)
+	if _bellows_on:
+		var was := bit_t
+		bit_t += dt
+		if not bit.is_empty() and was < float(bit["wobble"]) and bit_t >= float(bit["wobble"]) and _bonk_t < 0.0:
+			_sfx("bow_creak")
+		if _bonk_t < 0.0 and not bit.is_empty() and bit_t >= float(bit["hit"]):
+			_on_hit()
+		elif _bonk_t >= 0.0:
+			_bonk_t += dt
+		if bows != null:
+			_advance_bellows_3d()
 	if _roses_live:
 		var any := false
 		var floor_y := vs.y - 30.0
@@ -171,26 +261,64 @@ func advance(dt: float) -> void:
 		_roses_live = any
 	if title_on:
 		_title_t += dt
-	if _bonk_t >= 0.0:
-		_bonk_t += dt
 	queue_redraw()
+	if top != null:
+		top.queue_redraw()
 
 
+## The accent: the pelmet lands on his head.
+func _on_hit() -> void:
+	_bonk_t = 0.0
+	_sfx("bonk")
+	UiKit.haptic(&"stomp")
 
-## 3D: the band routine on CurtainBows3D (wander on → double take → slow burn → the bonk).
+
+func _sfx(id: String) -> void:
+	var au := ViewKit.autoload("Audio")
+	if au != null and au.has_method("play_sfx"):
+		au.call("play_sfx", id)
+
+
+## His squash from the hit (1 = none): driven into his knees on contact, one overshoot, settled by 18 f.
+static func squash_at(bonk_f: float) -> float:
+	if bonk_f < 0.0:
+		return 1.0
+	if bonk_f < 4.0:
+		return 0.82
+	if bonk_f < 10.0:
+		return lerpf(0.82, 1.05, (bonk_f - 4.0) / 6.0)
+	if bonk_f < 18.0:
+		return lerpf(1.05, 1.0, (bonk_f - 10.0) / 8.0)
+	return 1.0
+
+
+## 3D: the bit on CurtainBows3D (wander on → double take → slow burn under the wobbling pelmet → the bonk + hold).
 func _advance_bellows_3d() -> void:
-	var t := bellows_t
-	if t < 0.45:
-		var e := 1.0 - pow(1.0 - t / 0.45, 2.0)
-		bows.pose_bellows(lerpf(1.08, 0.56, e), "bellows/cc_wander_on", -1, 20.0)
+	if bit.is_empty():
 		return
-	if t < 0.55:
-		bows.pose_bellows(0.56, "bellows/st_double_take", 1 if fmod(_t * 6.0, 2.0) < 1.0 else -1, 35.0)
-	elif _bonk_t < 0.0:
-		bows.pose_bellows(0.56, "bellows/beat_slow_burn", 1, 60.0)
-		bows.set_bellows_tier(int(clampf((t - 0.55) / 0.3, 0.0, 1.0) * 3.0))
-	else:
-		bows.pose_bellows(0.56, "bellows/st_bonk", 1, 60.0)
+	var t := bit_t
+	if _bonk_t >= BIT_TOPPER_S + BIT_TOPPER_LEN_S:
+		bows.pose_bellows(BIT_MARK_X, BIT_END_CLIP, 1, 60.0, true, 10)
+		return
+	if _bonk_t >= BIT_TOPPER_S:
+		bows.pose_bellows(BIT_MARK_X, BIT_TOPPER_CLIP, 1, 60.0, false, 8)
+		bows.set_bellows_squash(1.0)
+		return
+	if _bonk_t >= 0.0:
+		bows.pose_bellows(BIT_MARK_X, "bellows/st_bonk", 1, 70.0, false, 0)
+		bows.set_bellows_squash(squash_at(_bonk_t * 60.0))
+		return
+	var walk := float(bit["walk"])
+	if t < walk:
+		var e := 1.0 - pow(1.0 - clampf(t / walk, 0.0, 1.0), 2.0)
+		bows.pose_bellows(lerpf(BIT_WING_X, BIT_MARK_X, e), "bellows/cc_wander_on", 1, 20.0)
+		return
+	if t < float(bit["take"]):
+		bows.pose_bellows(BIT_MARK_X, "bellows/st_double_take", 1, 35.0, false)
+		return
+	bows.pose_bellows(BIT_MARK_X, "bellows/beat_slow_burn", 1, 60.0)
+	var take := float(bit["take"])
+	bows.set_bellows_tier(int(clampf((t - take) / maxf(0.1, float(bit["wobble"]) - take), 0.0, 1.0) * 3.0))
 
 
 func _draw() -> void:
@@ -206,8 +334,6 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO)
 	if title_on:
 		_draw_title(vs)
-	if _bonk_t >= 0.0 and bows != null:
-		_draw_valance(vs)
 
 
 func _draw_title(vs: Vector2) -> void:
@@ -216,7 +342,7 @@ func _draw_title(vs: Vector2) -> void:
 	if _title_tex != null:
 		var ts := _title_tex.get_size()
 		tsize = Vector2(TITLE_SIZE.x, TITLE_SIZE.x * ts.y / maxf(1.0, ts.x))
-	# the card lands with its centre at 40 % of the height (its crest clear of the top edge)
+	# the card lands with its centre at 40 % of the height (its crest clear of the top edge), right of Hush
 	var land_y := vs.y * 0.40 - tsize.y * 0.5
 	var y := lerpf(-tsize.y - 40.0, land_y, k * k)
 	var sq := Vector2.ONE
@@ -224,8 +350,9 @@ func _draw_title(vs: Vector2) -> void:
 	if since >= 0.0 and since < 0.25:
 		var s := sin(since / 0.25 * PI)
 		sq = Vector2(1.0 + 0.12 * s, 1.0 - 0.16 * s)
+	var cx := clampf(vs.x * TITLE_X, tsize.x * 0.5 + 24.0, vs.x - tsize.x * 0.5 - 24.0)
 	# squash about the card's bottom edge (it lands on it)
-	draw_set_transform(Vector2(vs.x * 0.5, y + tsize.y), 0.0, sq)
+	draw_set_transform(Vector2(cx, y + tsize.y), 0.0, sq)
 	var r := Rect2(-tsize.x * 0.5, -tsize.y, tsize.x, tsize.y)
 	if _title_tex != null:
 		draw_texture_rect(_title_tex, r, false)
@@ -241,10 +368,8 @@ func _draw_title(vs: Vector2) -> void:
 			UiKit.draw_text_centered(self, UiKit.display_font(), r.get_center(), UiStrings.t("curtain.title"),
 				UiKit.SIZE_BIG_TITLE, UiKit.GOLD_LIGHT, 18)
 		else:
-			var star := PackedVector2Array()
-			star.resize(10)
-			UiKit.star_points(star, r.get_center(), 120.0, 52.0)
-			draw_colored_polygon(star, UiKit.GOLD_LIGHT)
+			UiKit.star_points(_star, r.get_center(), 120.0, 52.0)
+			draw_colored_polygon(_star, UiKit.GOLD_LIGHT)
 	# the bulbs chase round the frame
 	var chase := int(_title_t * 14.0)
 	for i in BULBS:
@@ -270,17 +395,124 @@ static func _perimeter(r: Rect2, u: float) -> Vector2:
 	return Vector2(r.position.x, r.end.y - d)
 
 
-func _draw_valance(vs: Vector2) -> void:
+## The pelmet's state now (pure on `bit_t` / `_bonk_t`): {on, bottom (its bottom edge y), rot (rad, about its top
+## centre), ropes (true while it hangs), x}. `head` = his head top on screen.
+func pelmet_state(head: Vector2) -> Dictionary:
+	var out := {"on": false, "bottom": -PELMET_SIZE.y - 20.0, "rot": 0.0, "ropes": false, "x": head.x}
+	if not _bellows_on or bit.is_empty():
+		return out
+	var rest := head.y + PELMET_SINK
+	var wob := float(bit["wobble"])
+	var drop := float(bit["drop"])
+	var hit := float(bit["hit"])
+	if _bonk_t >= 0.0:
+		out["on"] = true
+		out["bottom"] = rest
+		return out
+	if bit_t < wob:
+		return out
+	out["on"] = true
+	if bit_t < drop:
+		# the lurch into view, then the wobble on its ropes (growing; one rope slips at 60 %)
+		var w := bit_t - wob
+		var lurch := clampf(w * 60.0 / float(PELMET_LURCH_F), 0.0, 1.0)
+		var dip := 0.0 if w < BIT_WOBBLE_S * 0.6 else 18.0
+		out["bottom"] = lerpf(-20.0, PELMET_HANG_Y, lurch * lurch) + dip
+		var grow := 0.5 + w / BIT_WOBBLE_S
+		out["rot"] = 0.07 * sin(w * TAU * 4.5) * grow + (0.05 if dip > 0.0 else 0.0)
+		out["ropes"] = true
+		return out
+	# the drop: ease-in from where it hung to his head in BIT_DROP_F frames
+	var k := clampf((bit_t - drop) / maxf(0.001, hit - drop), 0.0, 1.0)
+	out["bottom"] = lerpf(PELMET_HANG_Y, rest, k * k)
+	return out
+
+
+## The pelmet, the snapped ropes, the impact star and the dizzy stars (on `top`, above the ResultsScreen).
+func _draw_top(ci: Control) -> void:
+	if not _bellows_on or bows == null:
+		return
 	var head: Vector2 = bows.head_screen("bellows")
-	var head_y := head.y
-	var k := clampf(_bonk_t / 0.12, 0.0, 1.0)
-	var bottom := lerpf(-10.0, head_y + 30.0, k * k)
-	var w := 520.0
-	var r := Rect2(head.x - w * 0.5, bottom - 170.0, w, 170.0)
-	draw_rect(Rect2(r.position.x + 40.0, -10.0, 16.0, r.position.y + 10.0), UiKit.GOLD_SHADE)
-	draw_rect(Rect2(r.end.x - 56.0, -10.0, 16.0, r.position.y + 10.0), UiKit.GOLD_SHADE)
+	var st := pelmet_state(head)
+	if not bool(st["on"]):
+		return
+	var bottom := float(st["bottom"])
+	var rot := float(st["rot"])
+	var w := PELMET_SIZE.x
+	var h := PELMET_SIZE.y
+	var sq := Vector2.ONE
+	if _bonk_t >= 0.0:
+		var bf := _bonk_t * 60.0
+		var s := clampf(1.0 - bf / 12.0, 0.0, 1.0)
+		sq = Vector2(1.0 + 0.10 * s, 1.0 - 0.22 * s)
+	var pivot := Vector2(float(st["x"]), bottom - h)
+	if bool(st["ropes"]):
+		# two gold ropes from the flies to its top corners (they swing with it)
+		for side: float in [-1.0, 1.0]:
+			var corner := pivot + Vector2(side * (w * 0.5 - 48.0), 0.0).rotated(rot)
+			ci.draw_line(Vector2(corner.x, -12.0), corner, UiKit.GOLD_SHADE, 9.0)
+			ci.draw_line(Vector2(corner.x, -12.0), corner, UiKit.GOLD_LIGHT, 3.0)
+		# dust sifts from the slipping rope
+		var w0 := bit_t - float(bit["wobble"])
+		for i in 4:
+			var ph := fposmod(w0 * 1.6 + float(i) * 0.27, 1.0)
+			var dp := pivot + Vector2(-w * 0.5 + 40.0 + float(i) * 14.0, ph * 160.0)
+			ci.draw_rect(Rect2(dp, Vector2(7, 7)), Color(UiKit.CREAM, 0.85 * (1.0 - ph)))
+	elif _bonk_t < 0.4:
+		# the snapped rope ends, flicking up at the flies
+		for side: float in [-1.0, 1.0]:
+			var x := pivot.x + side * (w * 0.5 - 48.0)
+			ci.draw_line(Vector2(x, -12.0), Vector2(x + side * 14.0, 52.0), UiKit.GOLD_SHADE, 9.0)
+	ci.draw_set_transform(pivot + Vector2(0.0, h), rot, sq)
+	var r := Rect2(-w * 0.5, -h, w, h)
 	if _valance_tex != null:
-		draw_texture_rect(_valance_tex, r, false)
+		ci.draw_texture_rect(_valance_tex, r, false)
 	else:
-		draw_rect(r, UiKit.CURTAIN)
-		draw_rect(Rect2(r.position.x, r.end.y - 30.0, r.size.x, 30.0), UiKit.GOLD)
+		ci.draw_rect(r, UiKit.CURTAIN)
+		ci.draw_rect(Rect2(r.position.x, r.end.y - 30.0, r.size.x, 30.0), UiKit.GOLD)
+	ci.draw_set_transform(Vector2.ZERO)
+	if _bonk_t >= 0.0:
+		_draw_hit(ci, Vector2(float(st["x"]), bottom))
+
+
+## The contact: a jagged impact star at his head (8 f), then four stars circling under the pelmet's fringe.
+func _draw_hit(ci: Control, at: Vector2) -> void:
+	var bf := _bonk_t * 60.0
+	if bf < 8.0:
+		var k := bf / 8.0
+		var ro := lerpf(110.0, 170.0, k)
+		for i in 20:
+			var a := -PI * 0.5 + float(i) * TAU / 20.0
+			var rr := ro if i % 2 == 0 else ro * 0.5
+			_burst[i] = at + Vector2(cos(a), sin(a) * 0.62) * rr
+		var a2 := clampf(1.6 - k * 1.6, 0.0, 1.0)
+		ci.draw_colored_polygon(_burst, Color(ViewKit.INK, a2))
+		for i in 20:
+			_burst[i] = at + (_burst[i] - at) * 0.84
+		ci.draw_colored_polygon(_burst, Color(1.0, 0.97, 0.82, a2))
+	if bf >= 3.0 and _bonk_t < BIT_TOPPER_S:
+		var c := at + Vector2(0.0, 12.0)
+		for i in ORBIT_STARS:
+			var a := _t * TAU * 0.9 + float(i) * TAU / float(ORBIT_STARS)
+			var depth := 0.5 + 0.5 * sin(a)
+			var p := c + Vector2(cos(a) * 150.0, sin(a) * 30.0)
+			var ro := lerpf(16.0, 26.0, depth)
+			UiKit.star_points(_star, p, ro + 5.0, (ro + 5.0) * 0.45, a)
+			ci.draw_colored_polygon(_star, ViewKit.INK)
+			UiKit.star_points(_star, p, ro, ro * 0.45, a)
+			ci.draw_colored_polygon(_star, UiKit.GOLD_LIGHT)
+
+
+## The pelmet's control: above the ResultsScreen (CurtainCall raises it), full rect, never takes input.
+class _Top:
+	extends Control
+	var apron: CurtainApron = null
+
+	func _init() -> void:
+		name = "CurtainPelmet"
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	func _draw() -> void:
+		if apron != null:
+			apron._draw_top(self)

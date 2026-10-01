@@ -1,14 +1,14 @@
 """bellows/rx_dizzy_spin_a — ALLEGRO-GO-GO!'s payoff (the Prologue's second prank; 169 f, lock "sim"; reactions.json
 dizzy_spin_a): at the gramophone, mid-warm-up with his baton, the record screeches to triple speed — a flinch (the
 needle screech, 0-12); he babbles his scales as a chipmunk, conducting at ×3 with a jerky head bob and the mouth
-flapping (12-40); winds up, springs onto ONE TOE and spins like a top, three full turns and a bit, arms out, coat
-tails flying (40-70 — the 3D spin); the top wobbles round its toe as it slows (70-86, rising onto the point: the
+flapping (12-40); winds up, springs onto ONE TOE and spins like a top, two full turns and a bit (fix round 2: slower, so every
+quarter turn reads — he is spun BY the record), arms out, coat tails flying (40-70 — the 3D spin); the top wobbles round its toe as it slows (70-86, rising onto the point: the
 anticipation); COLLAPSE (86, the pop: the legs shoot out and he lands on his bottom, hit-stop 5, punch-in 1.4); dizzy
 on the floor with his legs in a V and the vinyl notes orbiting his bouffant, the torso and head lolling in circles
 (89-149); then he shakes the notes off, spins back round on his bottom, springs to his feet and glares (149-169).
 
 Staged at the gramophone (st_gramophone: stand_x 1730 px = 8.65 m, z -1.4, facing -1, cheat 35). The spin turns him
-1112 deg to his LEFT (3 turns + 32 deg), so the collapse and the dizzy hold face the audience (cheat 35 + 32 = 67 deg;
+752 deg to his LEFT (2 turns + 32 deg), so the collapse and the dizzy hold face the audience (cheat 35 + 32 = 67 deg;
 facing -1: his left side is the camera side) with the legs in a V seen three-quarter; he spins back 32 deg on his bottom before he gets up, so the clip ends on the station
 yaw. The spin pivots on the tip of his left slipper: the toe is pinned to the root's origin (the pelvis moves over it,
 the root turns about it), so the foot never slides and the root never travels. Face beats carry a runtime gaze to the
@@ -23,10 +23,10 @@ from _lib.presets import *
 L = 169
 GRAMO_X, GRAMO_Z, GRAMO_FACING, GRAMO_CHEAT = 8.65, -1.4, -1, 35.0
 
-# the spin: the root yaw (deg, + = to his left) — takes off at 36, lands on the toe at 39, 3 turns + 48 by 80
+# the spin: the root yaw (deg, + = to his left) — takes off at 36, lands on the toe at 39, 2 turns + 32 by 80
 SPIN_F0, SPIN_F1 = 36, 80
 SPIN_UP, SPIN_DOWN = 5, 16
-SPIN_TOTAL = 1080.0 + 32.0
+SPIN_TOTAL = 720.0 + 32.0           # fix round 2 (Q2-G2): TWO turns in the same 36-80 window (was 3: a blur at strip size)
 BACK_F0, BACK_F1 = 150, 155          # spins back 48 deg on his bottom (the feet up in the air)
 
 

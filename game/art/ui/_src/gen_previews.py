@@ -102,7 +102,110 @@ def poly(pts, fill, w=W):
     return p("M" + " L".join("%.1f %.1f" % q for q in pts) + " Z", fill, w)
 
 
-# --- the eleven slice pranks -------------------------------------------------------------------
+# --- r3d QA round 2 (Q2-S1 / Q2-S2, r3d-fix-hud3): the pickle jar and the kettle duet, redrawn ---------------
+
+WIG = "#ECEEF5"
+FACE_RED = "#E9695A"
+GLASS = "#DDF2E4"
+GLASS_S = "#B9DEC6"
+PICKLE = "#5DAE3A"
+PICKLE_D = "#3F8A2C"
+PICKLE_L = "#9BD86E"
+MOUTH = "#7A2336"
+
+
+def pickle(cx, cy, rx, ry, rot):
+    b = [e(cx, cy, rx, ry, PICKLE, 4.5, rot=rot)]
+    # bumps (darker dots) + one light highlight stroke, rotated with the gherkin
+    import math
+    a = math.radians(rot)
+    def at(dx, dy):
+        return cx + dx * math.cos(a) - dy * math.sin(a), cy + dx * math.sin(a) + dy * math.cos(a)
+    for (dx, dy) in ((-rx * 0.35, -ry * 0.55), (rx * 0.3, -ry * 0.15), (-rx * 0.3, ry * 0.25), (rx * 0.25, ry * 0.6)):
+        x, y = at(dx, dy)
+        b.append(c(x, y, 2.8, PICKLE_D, 0))
+    x0, y0 = at(-rx * 0.55, -ry * 0.3)
+    x1, y1 = at(-rx * 0.55, ry * 0.35)
+    b.append(ln("M%.1f %.1f L%.1f %.1f" % (x0, y0, x1, y1), 3.2, PICKLE_L))
+    return b
+
+
+def in_a_pickle():
+    """A big glass PICKLE jar (two fat bumpy gherkins + pickled onions behind the glass, a red screw lid) that will
+    not open: his red, straining face over it, both hands wrenching the lid, a twist arrow and sweat."""
+    b = []
+    # the jar: tall clear glass, the hero of the icon
+    b.append(rect(6, 44, 78, 80, GLASS, 16))
+    b.append(p("M66 48 L70 48 Q80 48 80 60 L80 108 Q80 120 68 120 L62 120 Q72 108 72 84 Z", GLASS_S, 0))
+    # brine line
+    b.append(ln("M12 58 Q28 54 44 58 Q60 62 78 57", 3, "#8CC9A4"))
+    # two fat gherkins + two pickled onions
+    b += pickle(30, 90, 13, 27, -12)
+    b += pickle(56, 88, 12, 26, 10)
+    b.append(c(22, 114, 6.5, ONION, 3.5))
+    b.append(c(66, 115, 6.0, ONION, 3.5))
+    # the glass highlight over the contents
+    b.append(rect(13, 54, 6, 50, WHITE, 3, 0).replace('fill="#FFFFFF"', 'fill="#FFFFFF" fill-opacity="0.75"'))
+    # the red screw lid (ridges)
+    b.append(rect(0, 28, 90, 20, RED, 6))
+    b.append(ln("M12 32 L12 44 M24 32 L24 44 M36 32 L36 44 M48 32 L48 44 M60 32 L60 44 M72 32 L72 44", 3))
+    # the twist arrow over the lid (it will not turn)
+    b.append(ln("M6 18 Q40 2 76 14", 5))
+    b.append(ln("M66 6 L77 14 L66 22", 5))
+    # him: red-faced, gritting his teeth, wig puffs, sweat — peering over the jar's right shoulder
+    b.append(c(90, 54, 10, WIG, 4.5))
+    b.append(c(119, 54, 8, WIG, 4.5))
+    b.append(c(104, 60, 18, FACE_RED, 5))
+    b.append(p("M89 44 Q104 32 119 44 Q114 49 104 47 Q94 49 89 44 Z", WIG, 4.5))
+    b.append(ln("M94 55 L100 58 L94 61 M114 55 L108 58 L114 61", 3.5))
+    b.append(rect(95, 64, 18, 8, WHITE, 3, 3))
+    b.append(ln("M100 64 L100 72 M104 64 L104 72 M108 64 L108 72", 2))
+    b.append(p("M124 32 Q119 41 123 44 Q127 41 124 32 Z", "#8FC8F0", 2.5))
+    b.append(p("M86 26 Q82 34 86 37 Q90 34 86 26 Z", "#8FC8F0", 2.5))
+    # his arms (plum sleeves) + hands wrenching the lid end and the jar
+    b.append(p("M128 86 Q114 82 98 78 L94 90 Q110 96 128 102 Z", PLUM))
+    b.append(e(87, 39, 9, 10, PEACH, 4.5))
+    b.append(p("M128 108 L100 104 L96 116 L128 122 Z", PLUM))
+    b.append(e(90, 106, 9, 10, PEACH, 4.5))
+    b.append(p("M98 80 Q94 64 90 48", "none", 5))
+    # strain marks
+    b.append(ln("M98 14 L101 22 M108 10 L108 20 M118 14 L115 22", 3.5, RED))
+    return svg(["jar", "straining_arm", "onions"], b)
+
+
+def kettle_drum():
+    """A DUET: the kettle whistles one note out of its spout, he sings the other with his eyes shut and his mouth wide
+    open — the two notes beamed together over them — and his note cracks (the red zig-zag)."""
+    b = []
+    # the kettle (bottom left)
+    b.append(p("M2 124 Q-2 94 16 86 L44 86 Q60 94 56 124 Z", TEAL))
+    b.append(p("M44 86 Q60 94 56 124 L47 124 Q51 98 40 88 Z", TEAL_S, 0))
+    b.append(e(12, 104, 3.5, 7, WHITE, 0, rot=20, op=0.5))
+    b.append(p("M10 88 Q29 76 50 88 Z", TEAL))
+    b.append(c(30, 79, 4.5, GOLD, 4))
+    b.append(p("M54 110 L68 94 L74 99 L62 118 Z", TEAL))
+    # whistle puff at the spout
+    b.append(c(74, 88, 4, WHITE, 3))
+    # him singing (bottom right, big): eyes shut, mouth wide open
+    b.append(c(82, 96, 9, WIG, 4))
+    b.append(c(119, 96, 8.5, WIG, 4))
+    b.append(c(101, 102, 21, PEACH, 5))
+    b.append(p("M83 90 Q101 75 119 90 Q112 96 101 94 Q90 96 83 90 Z", WIG, 4))
+    b.append(ln("M89 100 Q94 95 99 100 M103 100 Q108 95 113 100", 3.5))
+    b.append(c(101, 107, 5, NOSE, 3.5))
+    b.append(e(101, 117, 7, 6.5, MOUTH, 4))
+    # the duet: two notes beamed together — the kettle's (left) and his (right)
+    b.append(e(34, 56, 9, 7, INK, 0, rot=-20))
+    b.append(e(86, 46, 9, 7, INK, 0, rot=-20))
+    b.append(ln("M41 54 L41 20", 5))
+    b.append(ln("M93 44 L93 10", 5))
+    b.append(p("M39 14 L95 4 L95 14 L39 25 Z", INK, 0))
+    # his note cracks
+    b.append(ln("M100 16 L94 24 L103 30 L96 40", 4, RED))
+    # "sung" lines: from the spout up to its note, from his mouth up to his
+    b.append(ln("M64 84 Q58 74 48 68", 3.5))
+    b.append(ln("M124 80 Q126 66 112 58", 3.5))
+    return svg(["kettle", "notes", "crack"], b)
 
 def achoo_ria():
     """A nose + a star burst: Bellows' big bulb nose explodes into a sneeze."""
@@ -150,30 +253,6 @@ def allegro_go_go():
     return svg(["record", "x3", "spiral"], b)
 
 
-def kettle_drum():
-    """A kettle + music notes + a red crack: the whistle turns into a song, then it cracks."""
-    b = []
-    # body
-    b.append(p("M22 110 Q14 70 40 56 L76 56 Q100 68 94 110 Z", TEAL))
-    b.append(p("M76 56 Q100 68 94 110 L80 110 Q86 72 70 58 Z", TEAL_S, 0))
-    b.append(e(36, 76, 5, 9, WHITE, 0, rot=20, op=0.45))
-    # lid + knob
-    b.append(p("M34 58 Q58 40 82 58 Z", TEAL))
-    b.append(c(58, 44, 6, GOLD, 4))
-    # spout
-    b.append(p("M92 84 L118 62 L122 70 L100 96 Z", TEAL))
-    # handle
-    b.append(ln("M34 58 Q58 20 82 58", 6, INK))
-    # the red crack
-    b.append(ln("M48 70 L56 82 L50 90 L60 104", 6, RED))
-    # notes from the spout
-    b.append(c(108, 40, 6, INK, 0))
-    b.append(ln("M113 40 L113 18 L122 22", 4))
-    b.append(c(88, 26, 5, INK, 0))
-    b.append(ln("M92 26 L92 8", 4))
-    return svg(["kettle", "notes", "crack"], b)
-
-
 def tap_dance():
     """Tap -> water jet -> face: the spray rose blasts him in the face."""
     b = []
@@ -194,30 +273,6 @@ def tap_dance():
     for (x, y) in ((70, 120), (124, 122), (78, 64)):
         b.append(e(x, y, 4.5, 7, WATER, 3))
     return svg(["tap", "water_jet", "face"], b)
-
-
-def in_a_pickle():
-    """A jar + a straining arm + flying onions: the lid is on too tight."""
-    b = []
-    # jar
-    b.append(rect(20, 50, 58, 70, "#CFE8D8", 12))
-    b.append(p("M62 54 L74 54 Q78 54 78 60 L78 110 Q78 118 70 118 L60 118 Q68 110 68 84 Z", "#A9CFB6", 0))
-    for (x, y) in ((36, 80), (52, 96), (40, 104), (58, 72)):
-        b.append(e(x, y, 7, 11, GREEN, 3, rot=20))
-    b.append(rect(16, 38, 66, 16, RED, 5))
-    # the straining arm (plum sleeve, peach hand gripping the lid)
-    b.append(p("M126 22 L96 30 L92 46 L126 40 Z", PLUM))
-    b.append(p("M94 30 Q74 26 70 38 Q70 50 86 50 Q96 48 96 40 Z", PEACH))
-    b.append(ln("M76 36 L84 40 M74 42 L82 46", 3))
-    # strain marks
-    b.append(ln("M104 12 L100 20 M114 10 L112 18", 3.5, RED))
-    # flying pickled onions (fat, with a sprout) and speed lines
-    b.append(c(102, 76, 12, ONION, 4))
-    b.append(p("M100 64 Q102 56 108 58", "none", 3.5))
-    b.append(c(112, 106, 11, ONION, 4))
-    b.append(p("M111 95 Q114 88 119 91", "none", 3.5))
-    b.append(ln("M82 70 L90 74 M92 112 L100 110", 3.5))
-    return svg(["jar", "straining_arm", "onions"], b)
 
 
 def lift_off():
@@ -362,9 +417,18 @@ PRANKS = {
 
 
 def main():
+    """`--only=a,b` writes just those pranks: achoo_ria.svg and the pre-round-2 in_a_pickle were hand-edited by
+    r3d-fix-hud (round 1) — a full run rewrites achoo_ria from the older function below."""
     os.makedirs(OUT, exist_ok=True)
     paths = []
+    only = None
+    for a in list(sys.argv[1:]):
+        if a.startswith("--only="):
+            only = set(a[7:].split(","))
+            sys.argv.remove(a)
     for name, fn in PRANKS.items():
+        if only is not None and name not in only:
+            continue
         path = os.path.join(OUT, name + ".svg")
         with open(path, "w") as f:
             f.write(fn())

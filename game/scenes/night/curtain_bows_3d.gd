@@ -7,7 +7,8 @@
 ## (Own World3D rather than the Night's shared one: the Gag Reel re-stages the house's characters at the same time.)
 ##
 ## Screen placement uses fractions of the screen: x 0..1, feet at FEET_Y; Hush at the apron's full size (≈ 54 % of
-## the height), Bellows on the lower stage band further back (≈ 33 %).
+## the height), Bellows for his curtain-call bit nearer the lip than the old far band (BIT_Z: ≈ 46 % of the height,
+## so his face reads at phone size while his head stays under the results' upper block — r3d QA2 Q2-G7).
 class_name CurtainBows3D
 extends TextureRect
 
@@ -16,6 +17,8 @@ const FOV := 30.0
 const FEET_Y := 0.92
 const BAND_Z := -4.5
 const BAND_FEET_Y := 0.95
+## Bellows' bit plane (Q2-G7): 1.4 m behind the lip — ≈ 46 % of the screen height (the far band was ≈ 32 %).
+const BIT_Z := -1.4
 const FALLBACK := {"hush": ["hush/loco_idle", "hush/loco_walk"], "bellows": ["bellows/loco_idle", "bellows/loco_strut"]}
 
 var vp: SubViewport = null
@@ -94,8 +97,9 @@ func lip_point(x_frac: float, feet_frac: float, z: float) -> Vector3:
 	return Vector3(x, y, z)
 
 
-## Play `clip` (its fallback when it does not exist) on actor `id`.
-func _play(id: String, rig: Node3D, clip: String) -> void:
+## Play `clip` (its fallback when it does not exist) on actor `id`; `loop` false holds its last frame, `blend` frames
+## (0 = a cut: the bonk's contact frame).
+func _play(id: String, rig: Node3D, clip: String, loop: bool = true, blend: int = 6) -> void:
 	if rig == null or _clip[id] == clip:
 		return
 	_clip[id] = clip
@@ -106,7 +110,7 @@ func _play(id: String, rig: Node3D, clip: String) -> void:
 		if not ClipMap.clip_exists3d(c):
 			c = String((FALLBACK[id] as Array)[0])
 	if rig.has_method("play") and ClipMap.clip_exists3d(c):
-		rig.call("play", c, {"loop": true, "blend_in": 6})
+		rig.call("play", c, {"loop": loop, "blend_in": blend})
 
 
 ## The clip actor `id` ("hush" / "bellows") plays now ("" while hidden) — the e2e clip coverage (r3d-integrate).
@@ -135,16 +139,25 @@ func hide_hush() -> void:
 	_update_render()
 
 
-## Bellows on the lower band: x fraction, clip, facing, cheat; `residues` (the looks he ended the Night in) once.
-func pose_bellows(x_frac: float, clip: String, facing: int, cheat: float) -> void:
+## Bellows on his bit plane (BIT_Z): x fraction, clip, facing, cheat (`loop` / `blend` as `_play`).
+func pose_bellows(x_frac: float, clip: String, facing: int, cheat: float, loop: bool = true, blend: int = 6) -> void:
 	bellows_on = true
 	if bellows != null:
 		bellows.visible = true
-		bellows.position = lip_point(x_frac, BAND_FEET_Y, BAND_Z)
-		_play("bellows", bellows, clip)
+		bellows.position = lip_point(x_frac, BAND_FEET_Y, BIT_Z)
+		_play("bellows", bellows, clip, loop, blend)
 		bellows.call("set_facing", facing, true)
 		bellows.call("set_cheat", cheat, 0.2)
 	_update_render()
+
+
+## Squash Bellows about his feet (the pelmet's hit drives him down): `sy` < 1 squashes, > 1 stretches; the width
+## keeps his volume (1 / √sy).
+func set_bellows_squash(sy: float) -> void:
+	if bellows == null:
+		return
+	var y := maxf(0.2, sy)
+	bellows.scale = Vector3(1.0 / sqrt(y), y, 1.0 / sqrt(y))
 
 
 ## Put his residue looks on (the end-of-Night looks, CharacterView3D's rules).
@@ -162,6 +175,7 @@ func hide_bellows() -> void:
 	bellows_on = false
 	if bellows != null:
 		bellows.visible = false
+		bellows.scale = Vector3.ONE
 	_update_render()
 
 
@@ -186,7 +200,7 @@ func head_screen(id: String) -> Vector2:
 	elif rig != null:
 		top = rig.position + Vector3(0.0, 1.7, 0.0)
 	else:
-		top = lip_point(0.5, BAND_FEET_Y, BAND_Z) + Vector3(0.0, 1.78, 0.0)
+		top = lip_point(0.5, BAND_FEET_Y, BIT_Z) + Vector3(0.0, 1.78, 0.0)
 	var p := cam.unproject_position(top) if cam.is_inside_tree() else Vector2(vp.size) * 0.5
 	var sz := size if size.x > 0.0 else Vector2(1920, 1080)
 	return p * sz / Vector2(vp.size)

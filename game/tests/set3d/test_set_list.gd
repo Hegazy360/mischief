@@ -49,7 +49,7 @@ const ROOMS := {
 }
 ## Dressing per Night per room (REDESIGN §3.4 dressing rows, as built: quake props = pans, hats, portrait).
 const DRESSING := {
-	"p00_curtain_up": {"kitchen": ["kitchen_window", "kitchen_lamp"], "parlour": ["parlour_window", "parlour_portrait", "parlour_vase", "parlour_picture_frame"], "hall": []},
+	"p00_curtain_up": {"kitchen": ["kitchen_window", "kitchen_lamp"], "parlour": ["parlour_window", "parlour_portrait", "parlour_picture_frame"], "hall": []},
 	"n01_throat_tea": {"kitchen": ["kitchen_window", "kitchen_lamp", "kitchen_pans"], "parlour": ["parlour_window", "parlour_portrait", "parlour_log_basket"],
 		"hall": ["hall_window", "hall_coat_stand", "hall_hats"]},
 	"n02_something_fishy": {"kitchen": ["kitchen_window", "kitchen_lamp", "kitchen_pans"], "parlour": ["parlour_window", "parlour_portrait"],

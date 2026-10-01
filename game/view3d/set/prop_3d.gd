@@ -621,6 +621,24 @@ func is_lent() -> bool:
 	return _lent_to != null
 
 
+## Lets a lent piece go where it is: back under its home parent with its current global transform, no slide (the
+## caller animates it from there — the picture sliding off his head onto the floor, r3d-fix-gags2 Q2-G8).
+func release_here() -> void:
+	if _lent_to == null or _home_parent == null:
+		return
+	if is_inside_tree() and (_home_parent as Node).is_inside_tree():
+		reparent(_home_parent, true)
+	else:
+		var g := global_transform if is_inside_tree() else transform
+		if get_parent() != null:
+			get_parent().remove_child(self)
+		_home_parent.add_child(self)
+		transform = g
+	_lent_to = null
+	_returning = false
+	_slide_t = -1.0
+
+
 func _start_slide(frames: int) -> void:
 	_slide_dur = maxf(1.0, float(frames)) / FPS
 	_slide_t = 0.0

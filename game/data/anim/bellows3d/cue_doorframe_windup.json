@@ -1,0 +1,97 @@
+{
+  "version": 2,
+  "format": "anim3d",
+  "clip": "bellows/cue_doorframe_windup",
+  "rig": "bellows",
+  "anim": "res://art3d/anim/bellows/cue_doorframe_windup.res",
+  "length": 40,
+  "fps": 60,
+  "loop": false,
+  "layer": "overlay",
+  "mask": "upper",
+  "blend_in": 6,
+  "blend_out": 4,
+  "lock": null,
+  "beats": {
+    "anticipation": [
+      0,
+      9
+    ],
+    "accent": [
+      9,
+      12
+    ],
+    "hold": [
+      12,
+      34
+    ],
+    "settle": [
+      34,
+      40
+    ],
+    "draw_up": [
+      9,
+      22
+    ],
+    "sniff": [
+      22,
+      34
+    ],
+    "tip": [
+      34,
+      40
+    ]
+  },
+  "events": [],
+  "face": [
+    {
+      "f": 0,
+      "preset": "huh"
+    },
+    {
+      "f": 9,
+      "preset": "smug"
+    },
+    {
+      "f": 34,
+      "preset": "huh"
+    }
+  ],
+  "cheat_deg": 20.0,
+  "root": {
+    "travel": "sim"
+  },
+  "stride_m": null,
+  "speed_m_s": null,
+  "variation": {
+    "time_jitter": 0,
+    "rot_jitter_deg": 0
+  },
+  "source": {
+    "kind": "custom",
+    "script": "tools/art3d/anim/bellows/cue_doorframe_windup.py",
+    "audio": "own"
+  },
+  "lint": {
+    "skippable": false,
+    "pop_frames": [
+      10
+    ],
+    "freeze_holds": [],
+    "draft": false
+  },
+  "gaze": [
+    {
+      "f0": 14,
+      "f1": 34,
+      "at": "camera",
+      "weight": 0.8,
+      "blend": 5
+    }
+  ],
+  "tags": [
+    "cue",
+    "overlay",
+    "anticipation"
+  ]
+}

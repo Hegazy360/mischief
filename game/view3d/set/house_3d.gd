@@ -634,6 +634,16 @@ func return_home(id: String, frames: int = 6) -> void:
 	_lent.erase(pid)
 
 
+## Lets a lent piece go where it is (Prop3D.release_here): no longer lent, no slide.
+func release_here(id: String) -> void:
+	var pid := id.substr(4) if id.begins_with("set:") else id
+	var p: Prop3D = _lent.get(pid, null)
+	if p == null:
+		return
+	p.release_here()
+	_lent.erase(pid)
+
+
 ## Returns every lent piece (a clip switch without `keeps`, a retry).
 func return_all(frames: int = 6) -> void:
 	for pid in _lent.keys():

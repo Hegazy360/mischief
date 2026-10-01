@@ -236,6 +236,13 @@
       "id": "sink_crash"
     },
     {
+      "f": 113,
+      "type": "look",
+      "set": {
+        "bouffant": "frazzled"
+      }
+    },
+    {
       "f": 128,
       "type": "prop",
       "op": "hide",
@@ -251,6 +258,13 @@
       "type": "decor",
       "id": "kitchen_stool",
       "visible": true
+    },
+    {
+      "f": 160,
+      "type": "look",
+      "set": {
+        "bouffant": "flipped"
+      }
     },
     {
       "f": 165,

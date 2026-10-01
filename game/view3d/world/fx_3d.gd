@@ -18,6 +18,7 @@ const SHAPES := {
 	"spin_dust": ["whirl", 0.38, 4.0, 9.0],
 	"disc_whirl": ["whirl", 0.16, 0.0, 7.0],
 	"spin_lines": ["whirl", 0.58, 1.5, 11.0],
+	"note_whirl": ["whirl", 0.62, 1.0, 10.0],
 }
 ## id → [colour, amount, lifetime, speed, size, gravity y, spread deg, emissive, (texture path)]
 const KINDS := {
@@ -58,6 +59,16 @@ const KINDS := {
 	"bonk_stars": [Color("#FFD23F"), 7, 1.3, 0.9, 0.17, 0.0, 180.0, 1.0, SPARKLE_TEX],
 	## r3d-fix-gags: the picture lands on his head (Q-G3): a few big inked stars
 	"thunk_stars": [Color("#FFD23F"), 5, 0.7, 1.4, 0.18, 0.0, 70.0, 1.0, SPARKLE_TEX],
+	## r3d-fix-gags2 Q2-G1: the cause of the sneeze — big dark pepper flecks shaken out of the rigged pot, drifting
+	## down onto his nose, and the dark sniff-puff at his nose on every "ah"
+	"pepper_fall": [Color("#2E2420"), 14, 0.7, 1.1, 0.07, -0.9, 14.0, 0.0, DUST_TEX],
+	"pepper_nose": [Color("#3B2F2A"), 9, 0.45, 0.5, 0.11, 0.3, 60.0, 0.0, DUST_TEX],
+	## r3d-fix-gags2 Q2-G2: the record's music whips round him while he spins — notes swept on a waist-high ring
+	"note_whirl": [Color.WHITE, 10, 0.4, 0.2, 0.17, 0.0, 20.0, 0.0, NOTE_TEX],
+	## r3d-fix-gags2 Q2-G4: his top note CRACKS — notes tumbling limp out of his mouth
+	"note_crack": [Color.WHITE, 4, 0.9, 1.0, 0.17, -5.0, 35.0, 0.0, NOTE_TEX],
+	## r3d-fix-gags2 Q2-G3: her "phew" in the gap — a white puff rising off the piano top
+	"phew": [Color("#F7F4EE"), 12, 1.0, 1.1, 0.27, 0.9, 24.0, 0.0, DUST_TEX],
 }
 
 const _NO_SHAPE: Array = []

@@ -23,6 +23,10 @@ const EDGE_PX := 8.0
 const BUBBLE_FLIP_LEFT_PX := 73.0
 const BUBBLE_FLIP_RIGHT_PX := 207.0
 const HUD_BAND_Y := 212.0
+## Q2-C1: the clearance of his bubble from the APPLAUSE / RUNNING GAG band (px at the 1080 base; WorldOverlays'
+## TRANSIENT_PAD) and how often a missing Hud is looked up again (frames).
+const BAND_PAD_PX := 24.0
+const BAND_LOOKUP_F := 30
 const CAPTIONS := 3
 const STAMPS := 2
 
@@ -43,6 +47,8 @@ var wiper: FxWipe = null
 var _safe := false
 var _unit := 1.0
 var _bubble_rect := Rect2()
+var _hud: Object = null
+var _hud_wait := 0
 var _bubble_has_wait := false
 var _bubble_can_flip := false
 var _cap_i := 0
@@ -197,6 +203,18 @@ func advance(snap: ViewSnapshot, dt: float) -> void:
 			bubble.position = to_lane(Vector2(sx, sy))
 		var l_px := BUBBLE_FLIP_LEFT_PX if flip else BUBBLE_LEFT_PX
 		var r_px := BUBBLE_FLIP_RIGHT_PX if flip else BUBBLE_RIGHT_PX
+		# Q2-C1 (r3d-fix-gags2): the APPLAUSE / RUNNING GAG band (the Hud's transient rects + BAND_PAD_PX) is a
+		# keep-out while it shows — beside his head when that side is clear of it, else below the band
+		var pad := BAND_PAD_PX * vs.y / 1080.0
+		var tb := _band_bottom(sx - l_px - pad, sx + r_px + pad, pad)
+		if tb > sy - h:
+			var side2 := -float(b.facing) if b.facing != 0 else 1.0
+			var alt := clampf(s.x + side2 * (w * 0.5 + 70.0), lo, maxf(lo, hi))
+			if _band_bottom(alt - l_px - pad, alt + r_px + pad, pad) <= sy - h:
+				sx = alt
+			else:
+				sy = tb + h
+			bubble.position = to_lane(Vector2(sx, sy))
 		_bubble_rect = Rect2(Vector2(sx - l_px, sy - h), Vector2(l_px + r_px, h))
 	else:
 		_bubble_rect = Rect2()
@@ -232,6 +250,49 @@ func advance(snap: ViewSnapshot, dt: float) -> void:
 		tint.color.a = move_toward(tint.color.a, 0.18 if _busted else 0.0, dt * 1.5)
 	if vignette != null:
 		vignette.modulate.a = move_toward(vignette.modulate.a, 1.0 if _safe else 0.0, dt / 0.4)
+
+
+## The lowest edge (+ `pad`) of the Hud's transient top-band rects that overlap the span [x0, x1] (screen px); -1
+## when none shows there (or no Hud).
+func _band_bottom(x0: float, x1: float, pad: float) -> float:
+	var hud := _band_hud()
+	if hud == null:
+		return -1.0
+	return Overlays3D.band_bottom_of(hud.call("transient_rects"), x0, x1, pad)
+
+
+## The lowest edge (+ `pad`) of the shown rects in `rects` that overlap [x0, x1] horizontally (within `pad`); -1 when
+## none. Pure.
+static func band_bottom_of(rects: Variant, x0: float, x1: float, pad: float) -> float:
+	var out := -1.0
+	if rects is Array:
+		for r in rects:
+			if r is Rect2 and (r as Rect2).has_area():
+				var rr: Rect2 = r
+				if rr.position.x - pad < x1 and rr.end.x + pad > x0:
+					out = maxf(out, rr.end.y + pad)
+	return out
+
+
+## The Night's Hud (NightScene's `hud`, up the tree) for its transient band rects; null in a sandbox without one.
+## Looked up again every BAND_LOOKUP_F frames until found (the scene wires the Hud after the world view).
+func _band_hud() -> Object:
+	if _hud != null and is_instance_valid(_hud):
+		return _hud
+	_hud = null
+	_hud_wait -= 1
+	if _hud_wait > 0:
+		return null
+	_hud_wait = BAND_LOOKUP_F
+	var n: Node = get_parent()
+	while n != null:
+		if "hud" in n:
+			var h: Variant = n.get("hud")
+			if h is Object and is_instance_valid(h) and (h as Object).has_method("transient_rects"):
+				_hud = h
+				return _hud
+		n = n.get_parent()
+	return null
 
 
 ## His bubble's screen rect (the protected set; empty when hidden).

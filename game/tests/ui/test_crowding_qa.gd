@@ -241,8 +241,11 @@ func test_previews_keep_out_of_the_shown_meter_and_fuse_at_every_aspect() -> voi
 		else:
 			assert_true(it.visible, "it slides clear rather than vanishing (%s)" % vs)
 			assert_true(Rect2(Vector2.ZERO, vs).encloses(it.rect), "inside the screen (%s)" % vs)
-			var tail := (it.anchor - it.rect.get_center()).normalized()
-			assert_true(wo.previews[0].tail_dir.is_equal_approx(tail), "its tail still points at the gramophone")
+			# round 2 (Q2-C1): it stays attached to its stalk and its tail runs to the gramophone itself
+			assert_le(it.detach, WorldOverlays.DETACH_MAX * wo.k + 0.01, "attached to its prop (%s)" % vs)
+			var tgt := it.rect.get_center() + wo.previews[0].tail_to
+			var pr := fa.prop_screen_rect("parlour_gramophone")
+			assert_true(pr.grow(1.0).has_point(tgt), "its tail ends on the gramophone (%s)" % vs)
 		hud.free()
 		_made.erase(hud)
 

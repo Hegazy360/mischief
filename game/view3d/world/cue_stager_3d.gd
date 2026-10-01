@@ -7,7 +7,7 @@
 ## | `laugh_vase` | from tick 0 `parlour_vase` creeps along the mantel (House3D `nudge`, 5 cm) on every `voice` / `sfx` event of his warm-up clip (fallback every 45 f while he warms up, never in pre-roll), at most `VASE_MAX_NUDGES` so it teeters on the edge; on the cue it tips (4 f) and drops behind him (8 f): hidden, `parlour_vase_smashed` shown + dust and sparkles |
 ## | `laugh_doorframe` | stars at the `parlour_kitchen` door frame at his head height + his `cue:laugh_doorframe` overlay (head snaps back) over the blind shuffle |
 ## | `laugh_relief` | the Stalls exhale (their `relief` special comes from AudioDirector) — a small sweat-drop burst over Hush |
-## | `laugh_picture` | `parlour_picture_frame` drops 12 f onto his head (lent to his head socket), hangs round his neck 60 f, then falls away + his `cue:laugh_picture` overlay |
+## | `laugh_picture` | `parlour_picture_frame` drops 12 f onto his head (lent to his `head_top` socket, facing the camera, askew on the bouffant), rides there 60 f (his head's position, never its turns), then slides down beside his feet (20 f) and is gone in a puff of dust + his `cue:laugh_picture` overlay |
 ## | `sparkle_lever`, `ghost_*`, `figgis_psst`, `card_*` | FTUE (`WorldView3D.sparkle`) — "fx" |
 ## | `title_card` | nothing during PLAY — "none" |
 class_name CueStager3D
@@ -23,6 +23,14 @@ const FALL_F := 8.0
 const PIC_DROP_F := 12.0
 const PIC_HANG_F := 60.0
 const PIC_OFF_F := 20.0
+## The frame on his head: tilted about the view axis, its bottom edge sunk into the bouffant below `head_top`, a
+## little toward the camera (it reads as a picture stuck on his head, face-on, not edge-on along his facing).
+const PIC_TILT_DEG := 14.0
+const PIC_SINK_M := 0.22
+const PIC_FRONT_M := 0.14
+## Where it falls: beside his feet, toppled onto its side.
+const PIC_FLOOR_OFFSET := Vector3(0.42, 0.0, 0.2)
+const PIC_FLOOR_TILT_DEG := -80.0
 const DOORFRAME_HEAD_Y := 2.05
 
 var wv: WorldView3D = null
@@ -34,6 +42,7 @@ var _vase_home := Transform3D.IDENTITY
 var _tip_from := Vector3.ZERO
 var _pic_phase := ""    ## "" | "drop" | "hang" | "off" | "gone"
 var _pic_t := 0.0
+var _pic_basis := Basis.IDENTITY   ## the frame's world basis on the wall (face-on to the camera)
 
 
 func setup(w: WorldView3D) -> void:
@@ -101,8 +110,12 @@ func on_event(ev: Dictionary, snap: ViewSnapshot) -> void:
 		"laugh_picture":
 			_pic_phase = "drop"
 			_pic_t = 0.0
-			if wv.set3d != null and wv.set3d.has_method("lend") and wv.bellows_view != null:
-				wv.set3d.call("lend", PICTURE, wv.bellows_view.socket_node("head"), int(PIC_DROP_F))
+			var top: Node3D = wv.bellows_view.socket_node("head_top") if wv.bellows_view != null else null
+			_pic_basis = _pic_home_basis()
+			if wv.set3d != null and wv.set3d.has_method("lend") and top != null and top.is_inside_tree():
+				var at := CueStager3D.picture_pose(top.global_transform,
+						top.global_position + Vector3(0.0, -PIC_SINK_M, PIC_FRONT_M), PIC_TILT_DEG, _pic_basis)
+				wv.set3d.call("lend", PICTURE, top, int(PIC_DROP_F), at)
 			_cue_clip(id)
 			wv.cue_staged.emit(id, "prop" if _decor(PICTURE) != null else "none")
 		"title_card":
@@ -202,15 +215,49 @@ func _advance_picture(f: float) -> void:
 				if wv.fx3d != null and wv.bellows_view != null:
 					wv.fx3d.burst("stars", wv.bellows_view.head_world() + Vector3(0.0, 0.25, 0.0))
 		"hang":
+			_hold_picture_on_head()
 			if _pic_t >= PIC_HANG_F:
 				_pic_phase = "off"
 				_pic_t = 0.0
+				var feet: Node3D = wv.bellows_view.socket_node("feet") if wv.bellows_view != null else null
+				if wv.set3d != null and wv.set3d.has_method("lend") and feet != null and feet.is_inside_tree():
+					var at := CueStager3D.picture_pose(feet.global_transform, feet.global_position + PIC_FLOOR_OFFSET,
+							PIC_FLOOR_TILT_DEG, _pic_basis)
+					wv.set3d.call("lend", PICTURE, feet, int(PIC_OFF_F), at)
 		"off":
 			if _pic_t >= PIC_OFF_F:
 				_pic_phase = "gone"
 				_set_visible(PICTURE, false)
 				if wv.fx3d != null and wv.bellows_view != null:
 					wv.fx3d.burst("dust", wv.bellows_view.feet_world() + Vector3(0.3, 0.1, 0.0))
+
+
+## The socket-space pose (for `lend`) that puts a set piece at `world_pos` with its wall orientation `home_basis`
+## (its world basis as it hung, face-on to the camera, its own size) turned `tilt_deg` about the view axis (+z) —
+## whatever the socket's bone orientation (Bellows faces ±x: an identity pose on his head socket shows the frame
+## edge-on).
+static func picture_pose(sock: Transform3D, world_pos: Vector3, tilt_deg: float, home_basis: Basis) -> Transform3D:
+	var world := Transform3D(Basis(Vector3(0.0, 0.0, 1.0), deg_to_rad(tilt_deg)) * home_basis, world_pos)
+	return sock.affine_inverse() * world
+
+
+## While it hangs, the frame follows his head's position but never its turns (lent to the head bone it would turn
+## with it: a profile-to-camera turn shows it edge-on).
+func _hold_picture_on_head() -> void:
+	var pic := _decor(PICTURE)
+	var top: Node3D = wv.bellows_view.socket_node("head_top") if wv.bellows_view != null else null
+	if pic == null or top == null or not pic.is_inside_tree() or not top.is_inside_tree():
+		return
+	pic.global_transform = Transform3D(Basis(Vector3(0.0, 0.0, 1.0), deg_to_rad(PIC_TILT_DEG)) * _pic_basis,
+			top.global_position + Vector3(0.0, -PIC_SINK_M, PIC_FRONT_M))
+
+
+## The picture frame's world basis on the wall (identity when it is not built).
+func _pic_home_basis() -> Basis:
+	var pic := _decor(PICTURE)
+	if pic == null or not pic.is_inside_tree():
+		return Basis.IDENTITY
+	return pic.global_transform.basis
 
 
 ## Debug / tests: the vase / picture phases.

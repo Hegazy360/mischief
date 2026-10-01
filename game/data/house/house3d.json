@@ -280,7 +280,7 @@
                          "box": [-0.25, 0.0, -0.2, 0.25, 0.85, 0.2], "color": "#8C7A66", "anims": [], "with": ["hall_phone"]}
   },
   "landings": {
-    "kitchen": {"sink": {"z": -2.1, "y": 0.58, "yaw": 20, "box": [18.4, 0.3, -2.35, 19.1, 1.05, -1.85], "host": "kitchen_sink_tap"}},
+    "kitchen": {"sink": {"z": -2.1, "y": 0.68, "yaw": 20, "box": [18.4, 0.3, -2.35, 19.1, 1.05, -1.85], "host": "kitchen_sink_tap"}},
     "parlour": {"log_basket": {"z": -1.83, "y": 0.3, "yaw": 0, "box": [10.9, 0.05, -2.08, 11.5, 0.8, -1.58], "host": "parlour_log_basket"},
                 "chandelier": {"z": -1.7, "y": 2.2, "yaw": 0, "box": [11.25, 1.9, -2.0, 12.05, 3.1, -1.4], "host": "parlour_chandelier"}},
     "hall": {"coat_stand": {"z": -1.85, "y": 0.75, "yaw": -20, "box": [4.0, 0.3, -2.4, 4.8, 1.6, -1.55], "host": "hall_coat_stand"}}

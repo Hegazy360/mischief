@@ -39,10 +39,11 @@ class StubCam:
 		return zoom
 	func visible_world_rect() -> Rect2:
 		return Rect2(2400, -1100, 2400, 1200)
+	## Screen px = sim px in this stub (the 3D NightInput resolves taps in screen px on the projected boxes).
 	func world_to_screen(p: Vector2) -> Vector2:
-		return p - Vector2(2400, -1100)
+		return p
 	func screen_to_world(p: Vector2) -> Vector2:
-		return p + Vector2(2400, -1100)
+		return p
 	func view_size() -> Vector2:
 		return Vector2(2400, 1080)
 
@@ -66,12 +67,21 @@ class StubView:
 	var unlocked := PackedStringArray(["hall", "parlour", "kitchen"])
 	var sparkled: Array = []
 	var revealed: Array = []
+	## As WorldView3D: the hit boxes in screen px (this stub's camera maps screen = sim px) + a floor band per room.
 	func hotspot_rects_in_view() -> Array:
 		var out: Array = []
 		for hs in layout.hotspots:
 			if unlocked.has(hs.room):
-				out.append({"id": hs.id, "kind": hs.kind, "rect": hs.rect, "world_rect": hs.rect, "priority": 2})
+				out.append({"id": hs.id, "kind": hs.kind, "rect": hs.rect, "world_rect": hs.rect, "room": hs.room,
+					"priority": 2})
+		for room in layout.rooms:
+			if unlocked.has(room.id):
+				var fy := layout.floor_y(room.floor)
+				out.append({"id": "floor:" + room.id, "kind": "floor", "room": room.id, "priority": 0,
+					"rect": Rect2(room.x0, fy - layout.interior_h, room.x1 - room.x0, layout.interior_h + layout.slab_h)})
 		return out
+	func tap_feedback(_p: Variant) -> void:
+		fx.ripple(Vector2.ZERO)
 	func sparkle(id: String, _s: float) -> void:
 		sparkled.append(id)
 	func reveal_badges(on: bool) -> void:

@@ -225,58 +225,53 @@ func test_no_sound_id_twice_within_100_ms() -> void:
 	assert_eq(n, 2, "after 100 ms it may play again")
 
 
+## A stand-in CharacterView3D: the clip it plays (AudioDirector reads current_clip / overlay_clip, duck-typed).
+class _StubCV:
+	extends RefCounted
+	var clip: String = ""
+	func current_clip() -> String:
+		return clip
+	func overlay_clip() -> String:
+		return ""
+
+
+class _StubWV:
+	extends RefCounted
+	var bellows_view := _StubCV.new()
+	var hush_view := _StubCV.new()
+
+
+## L12 in 3D: an event-level cue whose sound the playing 3D clip already carries (its sidecar) is skipped.
 func test_event_cue_repeating_a_clip_sound_is_skipped() -> void:
-	var fix := preload("res://tests/view/view_fixtures.gd")
-	fix.install(true)
-	var sb := ViewSandbox.new()
-	tree.root.add_child(sb)
-	await tree.process_frame
-	sb.set_process(false)
-	var ad := sb.audio
-	ad.record = true
-	ad.events = {"reaction_accent": {"sfx": "sneeze_choo"}}
-	var bv := sb.world_view.bellows_view
-	bv._clip = "bellows/rx_fx_take_a"
-	assert_has(AudioDirector.clip_sounds("bellows/rx_fx_take_a"), "sneeze_choo")
+	var wv := _StubWV.new()
+	_a.world_view = wv
+	AudioDirector.prefer3d = true
+	_a.events = {"reaction_accent": {"voice": "vo_bellows_sneeze_choo"}}
+	wv.bellows_view.clip = "bellows/rx_sneeze_blast_a"
+	assert_has(AudioDirector.clip_sounds("bellows/rx_sneeze_blast_a"), "vo_bellows_sneeze_choo")
 	allow_errors()
-	ad.on_ticked([{"e": "reaction_accent", "prank": "achoo_ria", "t": 1}])
+	_a.on_ticked([{"e": "reaction_accent", "prank": "achoo_ria", "t": 1}])
 	var n := 0
-	for c in ad.calls:
-		if c[0] == "play_sfx" and c[1] == "sneeze_choo":
+	for c in _a.calls:
+		if c[0] == "play_voice" and c[1] == "vo_bellows_sneeze_choo":
 			n += 1
 	assert_eq(n, 0, "the clip owns the CHOO: the event-level cue never doubles it")
-	assert_eq(ad.skipped_dups, 1)
-	sb.queue_free()
-	fix.uninstall()
+	assert_eq(_a.skipped_dups, 1)
+	_a.world_view = null
 
 
-func test_record_mode_sneeze_plays_no_sound_twice_within_100_ms() -> void:
-	var fix := preload("res://tests/view/view_fixtures.gd")
-	fix.install(true)
-	var sb := ViewSandbox.new()
-	tree.root.add_child(sb)
-	await tree.process_frame
-	sb.set_process(false)
-	sb._seek(640)
-	sb.audio.record = true
-	sb.audio.calls.clear()
-	sb.audio.call_times.clear()
+## One mouth (R3D): a new voice line of his cuts the one still sounding (counted), a repeat within 100 ms does not.
+func test_one_mouth_a_new_line_cuts_the_last() -> void:
+	_a.on_clip_event({"type": "voice", "id": "vo_bellows_yodel", "actor": "bellows"})
+	assert_eq(_a.voice_cuts, 0, "nothing to cut")
+	_frames(30)
+	_a.on_clip_event({"type": "voice", "id": "vo_bellows_the_pipes", "actor": "bellows"})
+	assert_eq(_a.voice_cuts, 1, "the pipes cut the yodel")
 	var n := 0
-	while sb.driver.snapshot().tick < 900 and n < 900:
-		sb._process(1.0 / 60.0)
-		n += 1
-	var last: Dictionary = {}
-	var doubles := 0
-	for i in sb.audio.calls.size():
-		var c: Array = sb.audio.calls[i]
-		if c[0] != "play_sfx" and c[0] != "play_voice":
-			continue
-		var id := String(c[1])
-		var t := sb.audio.call_times[i]
-		if last.has(id) and t - float(last[id]) < 0.1 - 0.0001:
-			doubles += 1
-		last[id] = t
-	assert_eq(doubles, 0, "no sound id twice within 100 ms over the sneeze")
-	assert_gt(sb.audio.calls.size(), 0)
-	sb.queue_free()
-	fix.uninstall()
+	for c in _a.calls:
+		if c[0] == "play_voice":
+			n += 1
+	assert_eq(n, 2, "both lines started")
+	_frames(200)
+	_a.on_clip_event({"type": "voice", "id": "vo_bellows_hum", "actor": "bellows"})
+	assert_eq(_a.voice_cuts, 1, "a line 3 s later is not a cut")

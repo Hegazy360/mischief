@@ -1,32 +1,21 @@
 ## Cast — the stage door's live cast sheet (Gate 0 G3; s2-night §4.1; R3D brief r3d-night §4.3).
-## **3D** (boot_config.json `view: "3d"`, the default): Hush and Bellows as the game's own RigPlayer3D on the lane at
+## Hush and Bellows as the game's own RigPlayer3D on the lane at
 ## the base framing (REDESIGN §5.2: FOV 30°, 7.5 m in front of the lane, y 1.9 aimed at 1.35), on a plain lit stage.
 ## "Next" cycles both through idle → snicker → freeze (Hush turns to marble on her stone plinth) → take (Bellows'
 ## CHOO frame of the sneeze, held); "Turn" rotates both by 45° (a turntable); "Back" returns to the stage door. A
 ## clip that has not landed yet shows the rig's idle (the label says which clip is missing).
-## **2D** (`view: "2d"`): the Stage-2 sheet — the 2D RigPlayers (Hush with a Hush / Pip toggle, Bellows, Figgis) and
-## the Stalls.
+## (The Stage-2 2D sheet was removed with the 2D view, r3d-integrate.)
 class_name CastPage
 extends Control
 
 const BEATS: PackedStringArray = ["idle", "snicker", "freeze", "take"]
-## rig → the clip per beat (2D).
-const CLIPS := {
-	"hush": ["hush/loco_idle", "hush/act_snicker", "hush/freeze_1", "hush/st_near_miss"],
-	"bellows": ["bellows/loco_idle", "bellows/act_tea", "bellows/st_spotted", "bellows/rx_sneeze_blast_a"],
-	"figgis": ["figgis/f_idle", "figgis/f_psst", "figgis/f_shh", "figgis/f_proud"],
-}
 ## rig → [clip, frame (−1 = play it looped)] per beat (3D). The take holds Bellows on the CHOO (the sneeze's accent).
 const CLIPS3D := {
 	"hush": [["hush/loco_idle", -1], ["hush/act_snicker", -1], ["hush/freeze_1", 40], ["hush/loco_idle", -1]],
 	"bellows": [["bellows/loco_idle", -1], ["bellows/st_smirk", -1], ["bellows/st_suspicious", -1],
 		["bellows/rx_sneeze_blast_a", 94]],
 }
-const RIGS: PackedStringArray = ["hush", "bellows", "figgis"]
 const RIGS3D: PackedStringArray = ["hush", "bellows"]
-const STALL_TIERS := [0, 1, 3, 4]
-## The cast at a size that reads on a phone (world px × this).
-const ACTOR_SCALE := 1.45
 ## 3D: lane x (m) of each actor and the camera (REDESIGN §5.2 base framing).
 const LANE_X := {"hush": -1.25, "bellows": 1.35}
 const CAM_POS := Vector3(0.0, 1.9, 6.5)
@@ -35,16 +24,14 @@ const PLINTH := "res://art3d/chars/hush/plinth.glb"
 
 var beat: int = 0
 var skin: String = ""
-var players: Dictionary = {}          ## rig → RigPlayer / RigPlayer3D (or a FallbackPuppet)
-var stalls: StallsView = null
+var players: Dictionary = {}          ## rig → RigPlayer3D
 var buttons: Dictionary = {}
-## True on the 3D page.
+## Always true (the 2D page was removed; kept for callers).
 var view3d: bool = true
 ## 3D: the turntable yaw (degrees) and the clips of this beat that have not landed.
 var yaw: float = 0.0
 var missing: PackedStringArray = PackedStringArray()
 var _labels: Dictionary = {}
-var _stalls_layer: CanvasLayer = null
 var _pivots: Dictionary = {}
 var _plinth: Node3D = null
 var _cam: Camera3D = null
@@ -58,12 +45,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	view3d = BootConfig.view() != "2d"
 	skin = String(ViewKit.setting("hush_skin", ""))
-	if view3d:
-		_build3d()
-	else:
-		_build()
+	_build3d()
 	resized.connect(_layout)
 	_layout()
 	set_beat(0)
@@ -71,37 +54,11 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--beat="):
 			set_beat(clampi(int(a.substr(7)), 0, BEATS.size() - 1))
-		elif a.begins_with("--turn=") and view3d:
+		elif a.begins_with("--turn="):
 			turn(float(a.substr(7)))
 
 
-func _build() -> void:
-	for id in RIGS:
-		var n: Node2D = null
-		if FileAccess.file_exists("res://data/rigs/%s/rig.json" % id) or ResourceLoader.exists("res://data/rigs/%s/rig.json" % id):
-			var rp := RigPlayer.new()
-			rp.name = "Rig_" + id
-			add_child(rp)
-			rp.setup(id, skin if id == "hush" else "")
-			n = rp
-		else:
-			var fp := FallbackPuppet.new()
-			fp.kind = id
-			add_child(fp)
-			n = fp
-		players[id] = n
-		_add_label(id)
-	_stalls_layer = CanvasLayer.new()
-	_stalls_layer.layer = 1
-	add_child(_stalls_layer)
-	stalls = StallsView.new()
-	_stalls_layer.add_child(stalls)
-	_add_buttons([["next", "stage_door.cast_next", UiKit.GOLD, UiKit.GOLD_SHADE], ["skin", "stage_door.cast_skin",
-		UiKit.CREAM, UiKit.CREAM_SHADE], ["back", "stage_door.back", UiKit.CREAM, UiKit.CREAM_SHADE]])
 
-
-## 3D: a plain lit stage (floor, wainscot, back wall; the stage lighting's globals), the camera at the base framing and
-## the two rigs on the lane (z −1.0), each under a turntable pivot.
 func _build3d() -> void:
 	var env := WorldEnvironment.new()
 	var e := Environment.new()
@@ -199,26 +156,16 @@ func _add_buttons(specs: Array) -> void:
 func _layout() -> void:
 	var vs := size if size.x > 0.0 else Vector2(1920, 1080)
 	var floor_y := vs.y * 0.74
-	if view3d:
-		for id in RIGS3D:
-			var l: Label = _labels[id]
-			var p := Vector2(vs.x * (0.35 if id == "hush" else 0.65), floor_y)
-			if _cam != null and _cam.is_inside_tree():
-				p = _cam.unproject_position(Vector3(float(LANE_X[id]), 0.0, View3DConst.LANE_Z))
-			l.position = Vector2(p.x - 300.0, minf(p.y + 24.0, vs.y - 90.0))
-			l.size = Vector2(600, 60)
-	else:
-		var xs := [0.2, 0.48, 0.76]
-		for i in RIGS.size():
-			var n: Node2D = players[RIGS[i]]
-			n.position = Vector2(vs.x * float(xs[i]), floor_y)
-			n.scale = Vector2.ONE * (ACTOR_SCALE * (1.6 if RIGS[i] == "figgis" else 1.0))
-			var l: Label = _labels[RIGS[i]]
-			l.position = Vector2(vs.x * float(xs[i]) - 300.0, floor_y + 20.0)
-			l.size = Vector2(600, 60)
+	for id in RIGS3D:
+		var l: Label = _labels[id]
+		var p := Vector2(vs.x * (0.35 if id == "hush" else 0.65), floor_y)
+		if _cam != null and _cam.is_inside_tree():
+			p = _cam.unproject_position(Vector3(float(LANE_X[id]), 0.0, View3DConst.LANE_Z))
+		l.position = Vector2(p.x - 300.0, minf(p.y + 24.0, vs.y - 90.0))
+		l.size = Vector2(600, 60)
 	var by := 40.0
 	var bx := vs.x - 48.0
-	for id in ["next", "turn", "skin", "back"]:
+	for id in ["next", "turn", "back"]:
 		if not buttons.has(id):
 			continue
 		var b: UiButton = buttons[id]
@@ -227,22 +174,13 @@ func _layout() -> void:
 		bx -= 24.0
 
 
-## next | turn (3D) | skin (2D) | back
+## next | turn | back
 func press(id: String) -> void:
 	match id:
 		"next":
 			set_beat((beat + 1) % BEATS.size())
 		"turn":
 			turn(45.0)
-		"skin":
-			skin = "" if skin == "pip" else "pip"
-			var s := ViewKit.autoload("Settings")
-			if s != null and s.has_method("set_value"):
-				s.call("set_value", "hush_skin", skin)
-			var h: Variant = players.get("hush")
-			if h is RigPlayer:
-				(h as RigPlayer).setup("hush", skin)
-			set_beat(beat)
 		"back":
 			get_tree().change_scene_to_file(StageDoor.SCENE)
 
@@ -257,20 +195,7 @@ func turn(deg: float) -> void:
 ## Show beat `i` on every actor.
 func set_beat(i: int) -> void:
 	beat = i
-	if view3d:
-		_set_beat3d(i)
-		return
-	for id in RIGS:
-		var clip := String((CLIPS[id] as Array)[i])
-		var n: Variant = players[id]
-		var ok := ClipMap.clip_exists(clip)
-		if n is RigPlayer and ok:
-			(n as RigPlayer).play(clip, {"loop": true, "blend_in": 4})
-		elif n is FallbackPuppet:
-			(n as FallbackPuppet).pose = ["stand", "step", "freeze", "shock"][i]
-		(_labels[id] as Label).text = "%s · %s%s" % [id, BEATS[i], "" if ok else " (%s)" % clip.get_file()]
-	if stalls != null:
-		stalls.react(int(STALL_TIERS[i]))
+	_set_beat3d(i)
 
 
 func _set_beat3d(i: int) -> void:
@@ -304,9 +229,5 @@ func handle_back() -> bool:
 
 func _draw() -> void:
 	var vs := size if size.x > 0.0 else Vector2(1920, 1080)
-	if not view3d:
-		draw_rect(Rect2(Vector2.ZERO, vs), Color("#3A2A4A"))
-		draw_rect(Rect2(0, vs.y * 0.74, vs.x, vs.y * 0.26), Color("#5A3A2A"))
-		draw_rect(Rect2(0, vs.y * 0.74, vs.x, 8), UiKit.GOLD_SHADE)
 	UiKit.draw_text_centered(self, UiKit.display_font(), Vector2(260.0, 110.0), UiStrings.t("stage_door.cast"),
 		UiKit.SIZE_TITLE, UiKit.GOLD_LIGHT, 16)

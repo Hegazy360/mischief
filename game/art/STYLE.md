@@ -3,7 +3,8 @@
 This file is the **binding** art rulebook for every SVG in `game/art/` — house, props, icons, the stage
 **and the characters** (`chars/**` follow it too). It ports the Booby rules (same owner) to this game's
 landscape stage-farce look (GDD §9.1). Generators live outside the game: `tools/art/house/` (house, props,
-icons, stage), `tools/art/hush/`, `tools/art/bellows/`; `_src/` folders under `game/art/` carry a
+icons, stage), `tools/art/hush/` (Figgis + the Stalls; the 2D Hush / Bellows rig art and `tools/art/bellows/` were
+deleted with the 2D view in R3D — the 3D cast is built by `tools/art3d/**`); `_src/` folders under `game/art/` carry a
 `.gdignore`. Regenerate the house with `python3 tools/art/house/build_all.py` and check with
 `python3 tools/art/house/validate_svg.py && python3 tools/art/house/lint_rects.py`.
 

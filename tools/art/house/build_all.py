@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """build_all - regenerate every house SVG + game/data/house/house.json (deterministic).
 
+R3D: the 2D room backdrops (rooms_final / rooms_grey / rooms_upper, game/art/house/rooms/**) were deleted with the 2D
+path (docs/review/r3d-integrate/reachability.md); the 3D rooms are built from game/data/house/house3d.json. The props
+(hotspot icons), items, stage, activity icons and cold-open sets this builds still ship.
+
     python3 tools/art/house/build_all.py            # everything
     python3 tools/art/house/build_all.py --report   # + per-room prop atlas budget
 
@@ -14,7 +18,6 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import geo  # noqa: E402
 import house_json  # noqa: E402
 import props_base  # noqa: E402
 from svgk import write  # noqa: E402
@@ -24,7 +27,6 @@ ART = os.path.join(REPO, "game", "art", "house")
 DATA = os.path.join(REPO, "game", "data", "house", "house.json")
 
 PROP_MODULES = ["props_kitchen", "props_hall", "props_parlour", "props_edge", "props_grey"]
-ROOM_MODULES = ["rooms_final", "rooms_grey", "rooms_upper"]   # later modules replace earlier ones
 
 
 def clean(sub):
@@ -39,24 +41,7 @@ def clean(sub):
 
 def build(report=False):
     reg = house_json.Registry()
-    for sub in ("props", "rooms"):
-        clean(sub)
-    # rooms
-    done = set()
-    for mod in ROOM_MODULES:
-        try:
-            m = importlib.import_module(mod)
-        except ModuleNotFoundError as e:
-            if e.name != mod:
-                raise
-            continue
-        for rid, fn in m.ROOMS.items():
-            rm = fn()
-            p = write(os.path.join(ART, "rooms", rid + "_bg.svg"), rm.svg_bg())
-            props_base.WRITTEN.append((p, "rooms"))
-            p = write(os.path.join(ART, "rooms", rid + "_fg.svg"), rm.svg_fg())
-            props_base.WRITTEN.append((p, "rooms_fg"))
-            done.add(rid)
+    clean("props")
     # props
     for mod in PROP_MODULES:
         try:
@@ -77,10 +62,7 @@ def build(report=False):
         m.build(reg)
     house = house_json.build(reg)
     house_json.dump(house, DATA)
-    missing = [r[0] for r in geo.ROOMS if r[0] not in done]
-    print("build_all: %d files, rooms %d/%d%s, house.json %d hotspots" % (
-        len(props_base.WRITTEN), len(done), len(geo.ROOMS), (" (missing %s)" % ", ".join(missing)) if missing else "",
-        len(house["hotspots"])))
+    print("build_all: %d files, house.json %d hotspots" % (len(props_base.WRITTEN), len(house["hotspots"])))
     if report:
         for room, area in sorted(props_base.AREAS.items()):
             page = 2048 * 2048

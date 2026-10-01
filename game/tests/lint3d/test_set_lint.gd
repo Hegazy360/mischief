@@ -90,6 +90,23 @@ func test_no_negative_space_fails() -> void:
 	assert_almost_eq(float(fs["len"]), 3.3, 0.01, "11.9 … 15.2 between the kettle and the pantry")
 
 
+## D13: the N02 hall at the five-live-prop cap warns on negative space (with the measured value); any other room
+## — or the hall below the cap — still fails.
+func test_negative_space_d13_warns_only_for_the_n02_hall_at_the_cap() -> void:
+	var rm := _room()
+	(rm["built_ins"] as Array).append({"id": "shelf_wall", "box": _box(11.9, 1.2, -2.4, 15.5, 1.4, -2.2)})
+	while (rm["live"] as Array).size() < SetLint3D.MAX_LIVE:
+		(rm["live"] as Array).append(_live("cap%d" % (rm["live"] as Array).size(), 12.2 + 0.4 * float((rm["live"] as Array).size())))
+	var hall := {"night": "n02_something_fishy", "act": 1, "rooms": {"hall": rm}}
+	var issues := SetLint3D.check_facts(hall)
+	assert_false(_rules(issues).has("negative_space"), "the D13 room is not an error")
+	assert_has(_rules(issues, Lint3D.WARNING), "negative_space")
+	var other := {"night": "n01_throat_tea", "act": 1, "rooms": {"hall": rm}}
+	assert_has(_rules(SetLint3D.check_facts(other)), "negative_space", "D13 names the N02 hall only")
+	assert_true(SetLint3D.neg_space_exempt("n02_something_fishy", "hall", 5))
+	assert_false(SetLint3D.neg_space_exempt("n02_something_fishy", "hall", 4), "below the cap: no exemption")
+
+
 func test_shared_silhouette_family_fails_merged_zones_pass() -> void:
 	var rm := _room()
 	(rm["live"] as Array).append(_live("e_jar2", 13.5, "rig", "a_jar"))

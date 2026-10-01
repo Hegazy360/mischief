@@ -6,7 +6,7 @@
 ##   `figgis`, `meter`, `pip`, `pause`, `overview`) through `Hud.ghost_finger`, a world hotspot through
 ##   `Hud.ghost_finger_at` (following the hotspot while the camera moves) — until the cue's `until`
 ##   holds (`Conditions.eval`), with a re-pulse after `renudge_idle_s` of no input;
-## * `mode: sparkle` → `WorldView.sparkle(target)` only (no ghost finger);
+## * `mode: sparkle` → `WorldView3D.sparkle(target)` only (no ghost finger);
 ## * `card` → `Hud.show_figgis_card(icons)` from `barks.json figgis_cards`.
 ## `figgis_tap()` shows the next line's cue card (`barks.json line_cards["<episode>:<line>"]`).
 ## The Gate-0 / Prologue cues it must present: `figgis_psst`, `ghost_squeak`, `ghost_honey`,
@@ -27,8 +27,8 @@ const DANGER_QUIET_S := 1.0
 
 var world: Object = null            ## SimWorld (Conditions.eval, episode, line_states)
 var hud: Object = null              ## Hud
-var world_view: Object = null       ## WorldView (layout, sparkle)
-var cam: Object = null              ## CameraDirector (world_to_screen)
+var world_view: Object = null       ## WorldView3D (layout, sparkle)
+var cam: Object = null              ## CameraDirector3D (world_to_screen)
 ## The active ghost cue ({} = none).
 var active: Dictionary = {}
 ## Ids presented so far (tests).

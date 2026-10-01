@@ -4,7 +4,8 @@
 # a flow with synthetic input.
 #
 # Usage: tools/scripts/e2e.sh <scenario> [--report=/abs.json] [--perf-log] [--strict] [--headless] [--max-s=N]
-#                             [--shot-seq=/abs/dir --every=N --count=K] [--realtime] [-- extra godot user args]
+#                             [--shot-seq=/abs/dir --every=N --count=K] [--realtime] [--fixed] [-- extra godot user args]
+#   --fixed     a launch-clock scenario (prologue_*) at a fixed 60 fps as well (frame strips; its launch timings mean nothing)
 #   --headless  no renderer (no draw-call numbers; slice_all always runs headless)
 #   --max-s=N   stop a route replay after N sim seconds (a perf sample of a long Night)
 #   route scenarios: g0_sneeze prologue_{ideal,required,slow} n01_{ideal,required,slow} n02_{…}
@@ -44,13 +45,14 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCEN="${1:?scenario}"; shift
-REPORT=""; PERF=""; STRICT=""; REALTIME=""; HEADLESS=""; MAXS=""; SEQ=(); EXTRA=()
+REPORT=""; PERF=""; STRICT=""; REALTIME=""; FIXED=""; HEADLESS=""; MAXS=""; SEQ=(); EXTRA=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --report=*) REPORT="$(realpath -m "${1#--report=}")" ;;
     --perf-log) PERF="--perf-log" ;;
     --strict) STRICT="--e2e-strict" ;;
     --realtime) REALTIME=1 ;;
+    --fixed) FIXED=1 ;;
     --headless) HEADLESS=1 ;;
     --max-s=*) MAXS="${1#--max-s=}" ;;
     --shot-seq=*) SEQ+=("--shot-seq=$(realpath -m "${1#--shot-seq=}")") ;;
@@ -104,6 +106,8 @@ run_one() {
   # route replays run at a fixed 60 fps (as fast as the machine allows); the launch clock (prologue_*)
   # and the flows (their wall-clock budgets: retry ≤ 1.5 s, curtain-call lengths) run in real time
   if [ -z "$REALTIME" ] && [ -n "$(route_of "$scen")" ] && [[ "$scen" != prologue_* ]]; then fps=(--fixed-fps 60); fi
+  # --fixed: a launch-clock scenario at a fixed 60 fps too (frame sequences / strips; its launch timings then mean nothing)
+  if [ -n "$FIXED" ] && [ -z "$REALTIME" ]; then fps=(--fixed-fps 60); fi
   if [ "${#SEQ[@]}" -gt 0 ]; then args+=("${SEQ[@]}"); fi
   if [ "${#EXTRA[@]}" -gt 0 ]; then args+=("${EXTRA[@]}"); fi
   local runner=(xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 --audio-driver Dummy --resolution "$SIZE")

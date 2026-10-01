@@ -25,13 +25,6 @@ const GAP := 24.0
 const COLS := 3
 const G0 := "g0_sneeze"
 const HEAD_B_RIG := "res://data/rigs3d/hush/rig3d_head_b.json"
-## Main menu (2D view): [id, string key].
-const MENU := [
-	["gate0", "stage_door.gate0"], ["g0_voice_a", "stage_door.play_g0_voice_a"], ["g0_voice_b", "stage_door.play_g0_voice_b"],
-	["cast", "stage_door.cast"], ["g0_crowd_a", "stage_door.play_g0_crowd_a"], ["g0_crowd_b", "stage_door.play_g0_crowd_b"],
-	["prologue", "stage_door.prologue"], ["night1", "stage_door.night1"], ["night2", "stage_door.night2"],
-	["voice_ab", "stage_door.voice_ab"], ["crowd_ab", "stage_door.crowd_ab"], ["hush_pip", "stage_door.hush_pip"],
-	["device_log", "stage_door.device_log"], ["reset_save", "stage_door.reset_save"]]
 ## Main menu (3D view, R3D): the head buttons and the N1/N2 previews are added by `menu3d()` when they apply.
 const MENU3D := [
 	["gate0", "stage_door.gate0"], ["prologue", "stage_door.prologue"], ["cast", "stage_door.cast"],
@@ -68,7 +61,7 @@ var _content: Control = null
 var _title: String = ""
 var _log_text: String = ""
 var _card: Gate0Card = null
-## "3d" (the R3D menu) | "2d" (boot_config.json `view`).
+## Always "3d" (the 2D menu went with the 2D view, r3d-integrate).
 var view: String = "3d"
 ## The WIP card over the menu (null when closed) and the episode it guards.
 var wip_card: Control = null
@@ -83,7 +76,6 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	view = BootConfig.view()
 	ab = _read_ab()
 	_title = UiStrings.t("stage_door.title")
 	var first := "main"
@@ -164,7 +156,7 @@ func _add_button(id: String, text: String, rect: Rect2, fill: Color = UiKit.CREA
 func _build_main() -> void:
 	var r := safe_rect()
 	var i := 0
-	var items: Array = MENU if view == "2d" else menu3d(head_b_scale(), previews_on())
+	var items: Array = menu3d(head_b_scale(), previews_on())
 	var cols := COLS if items.size() <= 15 else 4
 	for m in items:
 		var id := String(m[0])

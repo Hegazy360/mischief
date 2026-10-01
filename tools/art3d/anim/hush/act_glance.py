@@ -30,6 +30,9 @@ def build(ctx):
     c.motion(lambda f: {"Head": [("x", 1.2 * math.sin(2 * math.pi * f / 15.0))]})
     c.ground()
     c.auto_plant(speed_m_s=0.0)
+    # the audience snap is baked for facing +1 (every band rig); as flavour:glance at facing -1 the runtime gaze turns
+    # it to the house (D8; the gaze is absolute, so at facing +1 it adds ~0 — r3d-rig fix-pass request)
+    c.look_camera(5, 15, weight=1.0, blend=3)
     c.face(0, "glance")
     c.face(6, "sneak")
     c.face(20, "worried")

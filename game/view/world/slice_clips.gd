@@ -201,11 +201,14 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 		if a != "" and not acts.has(a):
 			acts.append(a)
 	var temper := 0
+	var min_gain := 0
 	var blind := false
 	var residues := PackedStringArray()
 	for p in pranks:
 		var pd: Dictionary = pranks_db.get(p, {})
-		temper += int(TEMPER_GAIN.get(ViewKit.s(pd.get("size", "M")), 35))
+		var g := int(TEMPER_GAIN.get(ViewKit.s(pd.get("size", "M")), 35))
+		temper += g
+		min_gain = g if min_gain == 0 else mini(min_gain, g)
 		for r in pd.get("residue", []):
 			if r is Dictionary:
 				var kind := ViewKit.s((r as Dictionary).get("kind", ""))
@@ -223,6 +226,10 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 	if det_db.has("curious") and not acts.has("curious"):
 		acts.append("curious")
 	var livid := temper >= 70
+	# A reaction's tier is set before its own prank's gain lands: a T3 reaction (and so the T3 last-beat pool) needs
+	# the OTHER pranks to reach Livid first — the total minus the smallest gain. Squeak bits (+5) are left out: the
+	# 2 points/s decay outruns them. (P00: 55 + 45 reaches Livid after both pranks — walk@tier3 — but never at one.)
+	var t3 := pranks.size() >= 2 and temper - min_gain >= 70
 	var melt := temper >= 100 and not cant_fail
 	# Bellows: loco + states
 	var bw := "%s: bellows" % tag
@@ -265,6 +272,8 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 		if not ok:
 			continue
 		var key := "bit:%s" % bit_id
+		if not SliceClips._rule_episode_ok(db, key, ep_id):
+			continue
 		var clip := ClipMap.clip_of(ClipMap.entry(bm, key, skin))
 		if clip == "":
 			clip = ViewKit.s(bd.get("clip", ""))
@@ -325,7 +334,7 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 	var ct: Dictionary = rx.get("clip_timings", {}) if rx.get("clip_timings", {}) is Dictionary else {}
 	var pool: Array = rx.get("t3_last_beats", []) if rx.get("t3_last_beats", []) is Array else []
 	var beats := PackedStringArray()
-	if livid:
+	if t3:
 		for b in pool:
 			beats.append(ViewKit.s(b))
 	if not beats.has("bellows/beat_slow_burn") and pranks.size() >= 1:
@@ -378,6 +387,16 @@ static func _episode(acc: Dictionary, db: Dictionary, ep_id: String, ep: Diction
 			continue
 		SliceClips._rule(acc, db, r, ep_id, tag, maps, skin, {"can_catch": can_catch, "melt": melt, "cant_fail": cant_fail,
 			"acts": acts})
+
+
+## False when clip_rules.json has a row for exactly `key` (e.g. `bit:bit_livid`, over the `bit:*` row) whose
+## `episodes` list leaves `ep_id` out: a clip that cannot occur in that Night leaves its manifest.
+static func _rule_episode_ok(db: Dictionary, key: String, ep_id: String) -> bool:
+	for r in db.get("rules", []):
+		if r is Dictionary and ViewKit.s((r as Dictionary).get("key", "")) == key:
+			var eps: Variant = (r as Dictionary).get("episodes", "all")
+			return not (eps is Array) or (eps as Array).has(ep_id)
+	return true
 
 
 static func _rule(acc: Dictionary, db: Dictionary, r: Dictionary, ep_id: String, tag: String, maps: Dictionary, skin: String,

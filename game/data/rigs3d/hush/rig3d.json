@@ -8,7 +8,7 @@
   "mesh": "Armature/Skeleton3D/hush_body",
   "height_m": 1.6,
   "head_scale": 1.0,
-  "tris": 9830,
+  "tris": 9812,
   "deform_bones": 48,
   "bones": {
     "root": "root",

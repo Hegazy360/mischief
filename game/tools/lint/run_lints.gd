@@ -6,10 +6,8 @@
 ##
 ## Prints one line per lint (`[lint] content: OK …` / `FAIL n error(s)` + each error) and a summary;
 ## exits 1 when any lint fails. A lint whose inputs don't exist yet is SKIPPED with a clear line
-## (exit 0) unless `--strict`. The content lint includes the D1 micro-gag cadence + emote rules; its clip
-## coverage (every clip of `SliceClips.build()` exists under data/anim/, BeatLint) prints WARNINGs, which
-## `--strict` (the pre-gate) turns into errors. `--json` also lists the coverage (`coverage {missing, source}`).
-## R3D (ruling R9): the 3D coverage (`BeatLint.coverage3d`: every clip of `SliceClips.build3d(g0, p00)` + the band
+## (exit 0) unless `--strict`. The content lint includes the D1 micro-gag cadence + emote rules and (R3D, ruling R9)
+## the 3D clip coverage (`BeatLint.coverage3d`: every clip of `SliceClips.build3d(g0, p00)` + the band
 ## fallbacks as a v2 sidecar — WARN, errors under `--strict`; N01/N02 as info) and, inside the content lint, the
 ## `hides` rules and the view data (`ViewDataLint`: previews.json, rig_actions.json vs house3d.json).
 extends SceneTree
@@ -54,11 +52,6 @@ func _initialize() -> void:
 				if strict:
 					for m in missing:
 						errs.append("%s/%s: missing" % [data_root, m])
-			var cov := BeatLint.coverage(parts, data_root)
-			var cmiss: PackedStringArray = cov["missing"]
-			if strict:
-				for c in cmiss:
-					errs.append("anim coverage: %s is in the slice manifest (%s) but data/anim/%s.json does not exist" % [c, cov["source"], c])
 			# R3D ruling R9: the 3D coverage of the Gate-0 + Prologue scope (errors under --strict), N01/N02 info
 			var c3 := BeatLint.coverage3d(data_root)
 			var m3: PackedStringArray = c3["missing"]
@@ -77,16 +70,7 @@ func _initialize() -> void:
 				print("[lint] content coverage 3d (info): N01/N02-only clips %d of %d missing" % [(c3["info_missing"] as PackedStringArray).size(), int(c3["info_rows"])])
 			failed += _print("content", errs, "%d episodes, %d pranks" % [(parts["episodes"] as Dictionary).size(),
 				((parts["pranks"] as Dictionary).get("pranks", {}) as Dictionary).size()])
-			if not strict:
-				if cmiss.is_empty():
-					print("[lint] content coverage: OK (%d clips from %s)" % [int(cov["rows"]), cov["source"]])
-				else:
-					print("[lint] content coverage: WARN %d of %d clip(s) from %s missing under %s/anim (errors with --strict)" % [
-						cmiss.size(), int(cov["rows"]), cov["source"], data_root])
-					for c in cmiss:
-						print("  - WARN missing clip %s" % c)
-			report["content"] = {"errors": Array(errs), "coverage": {"missing": Array(cmiss), "source": cov["source"],
-				"rows": cov["rows"]}, "coverage3d": {"missing": Array(m3), "rows": c3["rows"], "source": c3["source"],
+			report["content"] = {"errors": Array(errs), "coverage3d": {"missing": Array(m3), "rows": c3["rows"], "source": c3["source"],
 				"info_missing": Array(c3["info_missing"]), "info_rows": c3["info_rows"]}}
 	if "hotspot" in want:
 		var hp := "%s/house/house.json" % data_root

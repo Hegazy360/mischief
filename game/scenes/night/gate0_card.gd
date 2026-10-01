@@ -42,7 +42,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	icons3d = BootConfig.view() != "2d" and ResourceLoader.exists("res://view3d/set/prop_3d.gd")
+	icons3d = ResourceLoader.exists("res://view3d/set/prop_3d.gd")
 	for s in STEPS:
 		_icons.append(UiIcons.card(String(s[0])))
 		_labels.append(UiStrings.t(String(s[1])))

@@ -1,21 +1,12 @@
-## Animation + rig lint CLI (TECH §10.5) — CI entry point (tools/scripts/lint.sh calls it):
-##   godot --headless --path <sandbox> -s res://tools/anim/lint_anim.gd -- --all
-##   … -- --rig=_mannequin            (that rig + its clips)
-##   … -- --clip=_mannequin/rx_take   (one clip)
-##   … -- --file=res://tests/rig/fixtures/bad_pop.json   (a clip file outside data/anim)
-##   … -- --no-rigs                   (clips only)
-##   … -- --strict                    (the pre-gate: every WARNING counts as an ERROR)
-## Expected lengths (A24 / A25 / A29) come from SliceClips.build() when it exists, else from
-## activities.json (the summary line says which).
-## **3D clips (R3D, `--format=3d`)** — the rules of `lint3d_rules.gd` (AnimLint3D) on the sidecars under
-## `data/anim/<rig>3d/` and their baked `.res` on the rig's skeleton:
-##   … -- --format=3d [--rig=hush] [--clip=hush/loco_walk] [--file=/abs/or/res/sidecar.json]
-##        [--scope=g0,p00] [--strict] [--json=/abs/report.json]
-## `--scope=g0,p00` lints the ruling-R9 set (SliceClips.build3d(g0_sneeze, p00_curtain_up) + rig_high/mid/low; until
-## r3d-view3d lands build3d, the 2D manifest's g0/p00 rows with the 3D swaps); clips of the scope not baked yet are
-## listed as MISSING (info). Without `--scope` every sidecar of the rig(s) is linted.
+## The 3D animation lint CLI (TECH §10.5; R3D — the rules of `lint3d_rules.gd` (AnimLint3D) on the sidecars under
+## `data/anim/<rig>3d/` and their baked `.res` on the rig's skeleton; tools/scripts/lint.sh calls it):
+##   godot --headless --path <sandbox> -s res://tools/anim/lint_anim.gd -- [--format=3d] [--rig=hush]
+##        [--clip=hush/loco_walk] [--file=/abs/or/res/sidecar.json] [--scope=g0,p00] [--strict] [--json=/abs/report.json]
+## `--scope=g0,p00` lints the ruling-R9 set (SliceClips.build3d(g0_sneeze, p00_curtain_up) + rig_high/mid/low); clips of
+## the scope not baked yet are listed as MISSING (info). Without `--scope` every sidecar of the rig(s) is linted;
+## `--all` / `--no-rigs` are accepted for old callers. `--strict` (the pre-gate) makes every WARNING an ERROR.
 ## Prints one line per finding ("ERROR <rule> <file>:f<frame> <message>") and a summary;
-## exit code 1 when any error-severity finding exists, else 0.
+## exit code 1 when any error-severity finding exists, else 0. (The 2D clip / rig lint was removed with the 2D path.)
 extends SceneTree
 
 const Lint3D := preload("res://tools/anim/lint3d_rules.gd")
@@ -26,17 +17,13 @@ func _initialize() -> void:
 	var rig_id := ""
 	var clip_id := ""
 	var file := ""
-	var all := false
-	var rigs := true
 	var strict := false
-	var fmt := "2d"
+	var fmt := "3d"
 	var scope := PackedStringArray()
 	var json_out := ""
 	for a in args:
-		if a == "--all":
-			all = true
-		elif a == "--no-rigs":
-			rigs = false
+		if a == "--all" or a == "--no-rigs":
+			continue          # old callers: every 3D clip is the default
 		elif a == "--strict":
 			strict = true
 		elif a.begins_with("--rig="):
@@ -51,41 +38,11 @@ func _initialize() -> void:
 			scope = a.substr(8).split(",", false)
 		elif a.begins_with("--json="):
 			json_out = a.substr(7)
-	if fmt == "3d":
-		quit(_lint_3d(rig_id, clip_id, file, scope, strict, json_out))
+	if fmt != "3d":
+		printerr("lint_anim: only --format=3d exists (the 2D clips and their lint were removed, r3d-integrate)")
+		quit(2)
 		return
-	var findings: Array = []
-	var clips := 0
-	if file != "":
-		var c := ClipLib.load_file(file)
-		findings.append_array(AnimLint.lint_clip(c))
-		clips = 1
-	elif clip_id != "":
-		var c2 := ClipLib.get_clip(clip_id)
-		if c2 == null:
-			printerr("lint_anim: clip '%s' not found" % clip_id)
-			quit(2)
-			return
-		findings.append_array(AnimLint.lint_clip(c2))
-		clips = 1
-	else:
-		if not all and rig_id == "":
-			all = true
-		if rigs:
-			findings.append_array(RigLint.lint_all(rig_id))
-		var rig_ids := PackedStringArray([rig_id]) if rig_id != "" else ClipLib.rigs_with_clips()
-		for r in rig_ids:
-			for cid in ClipLib.list(r):
-				findings.append_array(AnimLint.lint_clip(ClipLib.get_clip(cid)))
-				clips += 1
-	if strict:
-		AnimLint.make_strict(findings)
-	for f in findings:
-		print(AnimLint.format(f))
-	var errors := AnimLint.error_count(findings)
-	print("lint_anim: %d clip(s), %d error(s), %d warning(s)%s; expected lengths from %s" % [clips, errors,
-		findings.size() - errors, " [strict]" if strict else "", AnimLint.expectations_source()])
-	quit(1 if errors > 0 else 0)
+	quit(_lint_3d(rig_id, clip_id, file, scope, strict, json_out))
 
 
 ## The 3D lint (see the header); returns the exit code.

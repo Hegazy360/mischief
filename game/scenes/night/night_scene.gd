@@ -7,18 +7,16 @@
 ##   → CURTAIN CALL (bow, roses, results, Gag Reel) → Next Night ▶ / Retry / Playbill (Again ▶ / Stage door
 ##   for Gate 0).
 ##
-## Scene tree (built in `_build`, TECH §5.1). **3D view** (the default, ruling R1; `view_mode == "3d"`):
+## Scene tree (built in `_build`, TECH §5.1), the 3D view (the 2D view was removed, index §5.4):
 ## SimDriver · WorldEnvironment · CameraDirector3D (current camera) · World (WorldView3D: House3D set, the two
 ## CharacterView3D, decals, 3D FX, Overlays3D) · InputRouter (screen space) · PipView3D (the Bellows window) ·
 ## GagStager3D · AudioDirector · WorldOverlays (CanvasLayer 8: previews, thought, rig ring, tags) · Stalls (layer 9,
 ## hidden at rest) · Hud (layer 10) · HapticsDirector · Curtain (layer 20).
-## **2D view** (`--view=2d` / boot_config `view: "2d"`, kept until `r3d-integrate` removes it): SimDriver · World
-## (WorldView) · CameraDirector · InputRouter · AudioDirector · PipView · GagStager · Stalls · Hud · Curtain.
 ##
 ## Hooks: `setup(params)` before `_ready` — `{episode, relaxed, from, rise_at_ms, card, skip_intro, cmds, view}`;
 ## `handle_back() -> bool` (closes the Map / the top panel, else opens the pause menu; never quits).
 ## As the main scene (debug) it reads the NightArgs flags: `--episode --cmds --seek-tick --paused
-## --relaxed --no-curtain --view --msaa --no-captions --hud=off --window`.
+## --relaxed --no-curtain --msaa --no-captions --hud=off --window`.
 ## Every material of the Night is drawn once under the curtain (NightWarmer + MaterialWarm3D) and `shader_watch`
 ## counts every shader first used after the rise (`perf3d.shader_compiles_play`, REDESIGN §6.3); `perf3d` samples
 ## the frame budget during PLAY (both land in the device log and the e2e report).
@@ -45,7 +43,6 @@ const HAPTICS_DIRECTOR := "res://view/haptics_director.gd"
 const CONDITIONS := "res://sim/systems/conditions.gd"
 const G0_EPISODE := "g0_sneeze"
 const PROLOGUE := "p00_curtain_up"
-const VIEW_2D := "2d"
 const VIEW_3D := "3d"
 ## The Map's peek hold (s) on a tapped room.
 const MAP_PEEK_S := 2.4
@@ -70,17 +67,17 @@ var cli_args: Dictionary = {}
 var db: Object = null
 var world: Object = null
 var driver: SimDriver = null
-## "3d" (WorldView3D, the default) | "2d" (the Gate-0 view; ruling R1).
+## Always "3d" (the 2D view was removed by r3d-integrate, index §5.4; kept for the e2e report and the device log).
 var view_mode: String = VIEW_3D
-## WorldView3D (3d) | WorldView (2d): the same NightScene-facing names (layout, fx, hotspot_rects_in_view, …).
+## WorldView3D (duck-typed: layout, fx, hotspot_rects_in_view, … — the NightScene-facing names).
 var world_view: Variant = null
-## CameraDirector3D (3d) | CameraDirector (2d).
+## CameraDirector3D.
 var cam: Variant = null
 var input_router: InputRouter = null
 var audio_dir: AudioDirector = null
-## PipView3D (3d) | PipView (2d).
+## PipView3D (the Bellows window).
 var pip: Variant = null
-## GagStager3D (3d) | GagStager (2d).
+## GagStager3D.
 var stager: Variant = null
 ## 3D: the world overlays (CanvasLayer 8) and their per-frame model / context (index §7.8).
 var overlays: WorldOverlays = null
@@ -135,6 +132,9 @@ var _tick_t0: int = 0
 var _has_ctx: bool = false
 var _ctx: Dictionary = {}
 var _empty_ctx: Dictionary = {}
+var _ctx_tick := -1
+var _ctx_cache: Dictionary = {}
+var _ctx_world := 0
 var _warm_since: float = 0.0
 var _card: Control = null
 var _cold: Node = null
@@ -197,7 +197,6 @@ func _ready() -> void:
 	from = String(params.get("from", "router"))
 	rise_at_ms = int(params.get("rise_at_ms", 0))
 	rise_cap_ms = int(params.get("rise_cap_ms", 0))
-	view_mode = _pick_view()
 	var t0 := Time.get_ticks_msec()
 	_build()
 	build_ms = Time.get_ticks_msec() - t0
@@ -254,6 +253,9 @@ func _build() -> void:
 	var probe_end := _FrameEnd.new()
 	probe_end.night = self
 	add_child(probe_end)
+	var probe_perf := _PerfSample.new()
+	probe_perf.night = self
+	add_child(probe_perf)
 	driver = SimDriver.new()
 	add_child(driver)
 	# Our tick handler runs first: it swallows `title_card` before the views see it.
@@ -261,31 +263,29 @@ func _build() -> void:
 	driver.setup(world)
 	driver.set_paused(true)
 	_warm_list = NightWarm.list(episode_id)
-	var ok := _build_view_3d() if view_mode == VIEW_3D else _build_view_2d()
+	var ok := _build_view_3d()
 	if not ok:
 		world = null
 		return
 	input_router = InputRouter.new()
 	input_router.name = "InputRouter"
 	input_router.enabled = false
-	if view_mode == VIEW_3D:
-		# taps stay in logical screen px: NightInput resolves them on the projected hit boxes (index §7.8)
-		input_router.screen_to_world = func(p: Vector2) -> Vector2: return p
+	# taps stay in logical screen px: NightInput resolves them on the projected hit boxes (index §7.8)
+	input_router.screen_to_world = func(p: Vector2) -> Vector2: return p
 	add_child(input_router)
 	audio_dir = AudioDirector.new()
 	add_child(audio_dir)
 	audio_dir.setup(driver, cam, world_view)
 	audio_dir.muted = true
 	audio_dir.set_process(false)
-	if view_mode == VIEW_3D:
-		overlays = WorldOverlays.new()
-		add_child(overlays)
+	overlays = WorldOverlays.new()
+	add_child(overlays)
 	stalls_layer = CanvasLayer.new()
 	stalls_layer.layer = 9
 	stalls_layer.name = "StallsLayer"
 	add_child(stalls_layer)
 	stalls = StallsView.new()
-	stalls.hidden_at_rest = view_mode == VIEW_3D
+	stalls.hidden_at_rest = true
 	stalls_layer.add_child(stalls)
 	audio_dir.laugh.connect(_on_audio_laugh)
 	audio_dir.crowd_special.connect(stalls.special)
@@ -304,8 +304,7 @@ func _build() -> void:
 		if haptics_dir.has_method("setup"):
 			haptics_dir.call("setup", driver)
 	presenter.setup(world_view.layout, world)
-	if view_mode == VIEW_3D:
-		_setup_overlays()
+	_setup_overlays()
 	_wire_input()
 	_setup_ftue()
 	curtain_layer = CanvasLayer.new()
@@ -319,46 +318,17 @@ func _build() -> void:
 	curtain.risen.connect(_on_curtain_risen)
 	warmer = NightWarmer.new()
 	warmer.name = "NightWarmer"
-	warmer.view3d = view_mode == VIEW_3D
-	warmer.cam = cam if view_mode == VIEW_3D else null
+	warmer.view3d = true
+	warmer.cam = cam
 	warmer.overlays = overlays
 	warmer.octx = octx
 	add_child(warmer)
 	reel_log.clone_every = CLONE_EVERY
-	reel_log.record_clones = view_mode != VIEW_3D
-	if view_mode == VIEW_3D:
-		_apply_cli_view_flags()
+	reel_log.record_clones = false
+	_apply_cli_view_flags()
 	_set_phase(Phase.BUILD)
 
 
-## The Gate-0 2D view (kept behind `--view=2d` until `r3d-integrate` removes it).
-func _build_view_2d() -> bool:
-	var c2 := CameraDirector.new()
-	c2.time_source = driver
-	cam = c2
-	var wv := WorldView.new()
-	if wv == null:
-		push_error("NightScene: WorldView did not compile")
-		return false
-	world_view = wv
-	wv.cam = c2
-	add_child(wv)
-	wv.warm_hint = _warm_list
-	wv.setup(db, world.get("episode"), driver)
-	add_child(c2)
-	c2.setup(wv.layout)
-	c2.stage_x_range = wv.lit_x_range()
-	c2.make_current()
-	c2.follow(wv.hush_view, _hush_lead)
-	var p2 := PipView.new()
-	add_child(p2)
-	p2.target = wv.bellows_view
-	pip = p2
-	var st := GagStager.new()
-	add_child(st)
-	st.setup(driver, c2, wv, p2)
-	stager = st
-	return true
 
 
 ## The 3D view (r3d-view3d P0b's wiring, index §7.7–§7.9): the camera first (WorldView3D projects through it
@@ -405,19 +375,6 @@ func _build_view_3d() -> bool:
 	if not bool(render_cfg.get("outline", true)):
 		_set_outlines(wv, false)
 	return true
-
-
-## The view this Night runs on: setup params `view` > `--view=` > boot_config.json `view` (ruling R1).
-func _pick_view() -> String:
-	var v := String(params.get("view", ""))
-	if v == "" and cli:
-		v = String(cli_args.get("view", ""))
-	if v == "":
-		var a := NightArgs.parse(OS.get_cmdline_user_args())
-		v = String(a.get("view", ""))
-	if v == "":
-		v = BootConfig.view()
-	return VIEW_2D if v == VIEW_2D else VIEW_3D
 
 
 ## 3D MSAA / render scale / outlines: NightArgs `--msaa` > Settings `msaa_3d` / `render_scale` (their defaults come
@@ -534,7 +491,7 @@ func _wire_input() -> void:
 	night_input.hud = hud
 	night_input.haptics = ViewKit.autoload("Haptics")
 	night_input.context_fn = _context
-	night_input.view3d = view_mode == VIEW_3D
+	night_input.view3d = true
 	night_input.enabled = false
 	night_input.command.connect(_on_player_command)
 	hud.action_down.connect(func(v: int) -> void: _intent(&"action_down", [v]))
@@ -579,16 +536,31 @@ func _setup_ftue() -> void:
 
 func _hush_lead() -> Vector2:
 	var h := driver.snapshot().hush
-	if view_mode == VIEW_3D:
-		return Vector2(float(h.facing) if h.moving else 0.0, 1.0 if h.running else 0.0)
-	return Vector2(float(h.facing), 1.0 if h.running else 0.0)
+	return Vector2(float(h.facing) if h.moving else 0.0, 1.0 if h.running else 0.0)
 
 
 func _context() -> Dictionary:
 	if _has_ctx and world != null:
+		# once per sim tick (the HUD, the presenter and the input read it every frame; r3d-view3d perf note)
+		var tk := int(world.get("tick"))
+		var wid := world.get_instance_id()
+		if tk == _ctx_tick and wid == _ctx_world and not _ctx_cache.is_empty():
+			return _ctx_cache
 		var c: Variant = world.call("action_context")
-		return c if c is Dictionary else _empty_ctx
+		_ctx_tick = tk
+		_ctx_world = wid
+		_ctx_cache = c if c is Dictionary else _empty_ctx
+		return _ctx_cache
 	return _empty_ctx
+
+
+## The PLAY frame's measurement (ShaderWatch first uses, Perf3D monitors) — called by `_PerfSample` after
+## `_FrameEnd`, so it is not counted in the view + HUD script time it measures (index §6 row 16).
+func _perf_sample(delta: float) -> void:
+	if world == null or phase != Phase.PLAY or not _paused_why.is_empty():
+		return
+	shader_watch.frame(delta, int(world.get("tick")))
+	perf3d.frame(delta, world_view)
 
 
 # --- flow ---------------------------------------------------------------------------------------
@@ -740,7 +712,7 @@ func start_rise(rise_s: float = NightCurtain.RISE_S) -> void:
 		if a.has_method("music_state"):
 			a.call("music_state", "curtain")
 	curtain.rise(rise_s)
-	if view_mode == VIEW_3D and not shader_watch.armed:
+	if not shader_watch.armed:
 		shader_watch.arm(self, warmer.warmed_keys if warmer != null else {})
 	DeviceLog.mark("sim_start")
 	if DeviceLog.active() and not _retrying:
@@ -791,7 +763,7 @@ func _start_cli_now() -> void:
 	warmer.finish_now()
 	curtain.set_up()
 	rise_frame = frame_n
-	if view_mode == VIEW_3D and not shader_watch.armed:
+	if not shader_watch.armed:
 		shader_watch.arm(self, warmer.warmed_keys if warmer != null else {})
 	var seek := int(cli_args.get("seek_tick", -1))
 	if seek > 0:
@@ -860,9 +832,6 @@ func _process(delta: float) -> void:
 			_play_s += delta if _paused_why.is_empty() else 0.0
 			if _paused_why.is_empty():
 				idle_s += delta
-	if phase == Phase.PLAY and view_mode == VIEW_3D and _paused_why.is_empty():
-		shader_watch.frame(delta, int(world.get("tick")))
-		perf3d.frame(delta, world_view)
 	if phase <= Phase.WARM and world_view.has_method("preroll"):
 		world_view.call("preroll", delta)
 	if phase == Phase.RISING or phase == Phase.PLAY or phase == Phase.WARM or phase == Phase.LOADING or phase == Phase.COLD_OPEN:
@@ -884,13 +853,9 @@ func _update_hud(delta: float) -> void:
 	env.pip_escalated = pip.is_escalated()
 	env.view_size = cam.view_size()
 	var b := snap.bellows
-	if view_mode == VIEW_3D:
-		env.bellows_screen = world_view.project(world_view.actor_anchor(&"bellows", &"feet"))
-		env.bellows_on_screen = world_view.bellows_on_screen()
-		env.edge_lean = world_view.edge_badge_active()
-	else:
-		env.bellows_screen = cam.world_to_screen(Vector2(b.x, b.y - 190.0))
-		env.bellows_on_screen = cam.visible_world_rect().intersects(Rect2(b.x - 90.0, b.y - 390.0, 180.0, 390.0))
+	env.bellows_screen = world_view.project(world_view.actor_anchor(&"bellows", &"feet"))
+	env.bellows_on_screen = world_view.bellows_on_screen()
+	env.edge_lean = world_view.edge_badge_active()
 	env.paused = _paused_why.has("menu") or _paused_why.has("panel")
 	env.figgis_pulse = bool(ftue.call("figgis_pulse")) if ftue != null and ftue.has_method("figgis_pulse") else false
 	env.can_bow = _can_bow()
@@ -899,18 +864,13 @@ func _update_hud(delta: float) -> void:
 	if pc != "":
 		var hs: HouseLayout.Hotspot = world_view.layout.hotspot(pc)
 		if hs != null:
-			if view_mode == VIEW_3D:
-				env.pick_screen_pos = world_view.project(world_view.anchor_of(pc, &"item"))
-			else:
-				env.pick_screen_pos = cam.world_to_screen(Vector2(hs.rect.get_center().x, hs.rect.position.y))
+			env.pick_screen_pos = world_view.project(world_view.anchor_of(pc, &"item"))
 	presenter.fill(model, snap, ctx, env)
-	if view_mode == VIEW_3D:
-		presenter.fill_r3d(model, snap, ctx, env)
+	presenter.fill_r3d(model, snap, ctx, env)
 	if "tray_arrows" in model:
 		model.set("tray_arrows", night_input.arrows)
 	hud.apply(model)
-	if view_mode == VIEW_3D:
-		_update_overlays(snap, ctx, delta)
+	_update_overlays(snap, ctx, delta)
 	night_input.advance(delta)
 	if cues != null:
 		cues.suspend(cam.is_gag_active() or not _paused_why.is_empty() or map_open)
@@ -1046,8 +1006,7 @@ func _on_ticked(events: Array) -> void:
 	elif cues != null:
 		cues.on_events(events)
 	reel_log.on_events(events, world)
-	if view_mode == VIEW_3D:
-		_on_ticked_3d(events)
+	_on_ticked_3d(events)
 	for ev in events:
 		var d: Dictionary = ev
 		var e := String(d.get("e", ""))
@@ -1345,11 +1304,8 @@ func hint() -> void:
 
 
 ## The Map (3D; the pause panel's Map): the sim stays paused, the camera dollies back to 15 m (the Overview); a tap
-## on a built room peeks at it, a tap outside or Back returns to the play framing. 2D: the old overview toggle.
+## on a built room peeks at it, a tap outside or Back returns to the play framing.
 func open_map() -> void:
-	if view_mode != VIEW_3D:
-		night_input.on_overview_tap()
-		return
 	if map_open:
 		return
 	map_open = true
@@ -1469,11 +1425,10 @@ func reset_night() -> void:
 	idle_s = 0.0
 	_entry_until = -1
 	_pending_flights.clear()
-	if view_mode == VIEW_3D:
-		map_open = false
-		octx.reset()
-		omodel.clear()
-		world_view.set_process(true)
+	map_open = false
+	octx.reset()
+	omodel.clear()
+	world_view.set_process(true)
 
 
 ## Take a Bow (after ★; from the pause menu or on arrival at the front door, which the sim does).
@@ -1493,11 +1448,10 @@ func _on_night_end(reason: String) -> void:
 	night_input.release_holds()
 	hud.close_panels()
 	DeviceLog.mark("night_end:%s" % reason)
-	if view_mode == VIEW_3D:
-		DeviceLog.note("perf3d:%s" % episode_id, perf3d.summary(shader_watch))
-		if overlays != null:
-			overlays.visible = false
-		pip.hide_now()
+	DeviceLog.note("perf3d:%s" % episode_id, perf3d.summary(shader_watch))
+	if overlays != null:
+		overlays.visible = false
+	pip.hide_now()
 	night_ended.emit(reason)
 	var result := collect_result()
 	_save_result(result)
@@ -1680,6 +1634,20 @@ class _AfterSim:
 	func _process(_d: float) -> void:
 		if night != null:
 			night.set("_after_sim_us", Time.get_ticks_usec())
+
+
+## Runs after `_FrameEnd` (priority 901): the measurement code (ShaderWatch, Perf3D) stays out of the window it measures.
+class _PerfSample:
+	extends Node
+	var night: Node = null
+
+	func _init() -> void:
+		name = "PerfSample"
+		process_priority = 901
+
+	func _process(d: float) -> void:
+		if night != null:
+			night.call("_perf_sample", d)
 
 
 ## Runs after every other node's `_process` (the sim, the view, the HUD, the overlays): the frame's script time

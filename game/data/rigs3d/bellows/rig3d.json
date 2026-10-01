@@ -544,7 +544,7 @@
   },
   "material": {
     "palette": "res://art3d/chars/bellows/palette_bellows.png",
-    "outline_px": 3.5,
+    "outline_px": 4.8,
     "rim": 0.45
   },
   "vertex_color": {

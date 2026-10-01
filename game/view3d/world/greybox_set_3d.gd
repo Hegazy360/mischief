@@ -279,7 +279,7 @@ func landing_box(id: String) -> AABB:
 
 
 ## Slides a set piece into a socket node over `frames` (the greybox snaps).
-func lend(id: String, to: Node3D, _frames: int = 6) -> Node3D:
+func lend(id: String, to: Node3D, _frames: int = 6, at: Transform3D = Transform3D.IDENTITY) -> Node3D:
 	var p: GreyProp = props.get(id, null)
 	if p == null or to == null:
 		return null
@@ -290,6 +290,8 @@ func lend(id: String, to: Node3D, _frames: int = 6) -> Node3D:
 	to.add_child(p)
 	p.global_transform = gt
 	p.position = Vector3.ZERO
+	if at != Transform3D.IDENTITY:
+		p.transform = at
 	return p
 
 

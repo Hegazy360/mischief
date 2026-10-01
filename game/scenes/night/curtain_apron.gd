@@ -3,11 +3,10 @@
 ## a squash on landing, the bulbs chasing round its frame), and during the Gag Reel Bellows wandering
 ## on along the lower stage band in his residue → double take → slow burn → the curtain valance
 ## drops on his head (bonk).
-## The characters are driverless CharacterViews (`pose_replay`): real RigPlayer clips when they exist
-## (`hush/act_bow`, `bellows/cc_wander_on`, `st_double_take`, `beat_slow_burn`, `st_bonk`), the view's
-## stand-in puppet otherwise. Roses are a fixed pool drawn in one `_draw()` (no allocation per frame).
-## **3D view** (`view3d`, set before `_ready`): the actors are CurtainBows3D's 3D rigs (`bows`, composited under this
-## control — the roses, the title and the valance stay 2D, on top); no 2D rig is loaded.
+## The actors are CurtainBows3D's 3D rigs (`bows`, composited under this control: `hush/act_bow`,
+## `bellows/cc_wander_on`, `st_double_take`, `beat_slow_burn`, `st_bonk`); the roses, the title and the valance stay
+## 2D, on top. Roses are a fixed pool drawn in one `_draw()` (no allocation per frame). (The 2D CharacterView actors
+## were removed with the 2D view, r3d-integrate.)
 class_name CurtainApron
 extends Control
 
@@ -16,16 +15,11 @@ const TITLE_ART := "res://art/house/stage/title_card.svg"
 const BULBS_A := "res://art/house/stage/title_card_bulbs_a.svg"
 const BULBS_B := "res://art/house/stage/title_card_bulbs_b.svg"
 const VALANCE_ART := "res://art/house/stage/curtain_valance.svg"
-const APRON_SCALE := 0.95
-const BAND_SCALE := 0.55
 const TITLE_SIZE := Vector2(1120, 460)
 const TITLE_DROP_S := 0.3
 const BULBS := 22
 
-var hush: CharacterView = null
-var bellows: CharacterView = null
-## 3D view: the bows are 3D (CurtainBows3D under this control); set before `_ready`.
-var view3d: bool = false
+## The 3D bows (CurtainBows3D under this control); set before `_ready`.
 var bows: CurtainBows3D = null
 ## 0..1 progress of Bellows' band routine (CurtainCall drives it during the reel).
 var bellows_t: float = 0.0
@@ -64,18 +58,6 @@ func _ready() -> void:
 	_rose_tex = UiIcons.get_icon(&"rose")
 	if ResourceLoader.exists(VALANCE_ART):
 		_valance_tex = load(VALANCE_ART) as Texture2D
-	if view3d:
-		return
-	hush = CharacterView.new()
-	add_child(hush)
-	hush.setup("hush")
-	hush.scale = Vector2.ONE * APRON_SCALE
-	hush.visible = false
-	bellows = CharacterView.new()
-	add_child(bellows)
-	bellows.setup("bellows")
-	bellows.scale = Vector2.ONE * BAND_SCALE
-	bellows.visible = false
 
 
 func _vs() -> Vector2:
@@ -87,8 +69,6 @@ func show_hush(on: bool, sec: float) -> void:
 	hush_on = on
 	_hush_t = 0.0
 	_hush_len = maxf(0.2, sec)
-	if hush != null:
-		hush.visible = on
 	if bows != null and not on:
 		bows.hide_hush()
 
@@ -146,11 +126,6 @@ func start_bellows(residues: Variant) -> void:
 	_bonk_t = -1.0
 	if bows != null and residues is PackedStringArray:
 		bows.set_residues(residues)
-	if bellows != null:
-		bellows.visible = true
-		if bellows.uses_rig and bellows.rig != null and residues is PackedStringArray:
-			for r in residues:
-				bellows.rig.call("set_residue", String(r), true)
 
 
 ## The valance drops on his head.
@@ -164,9 +139,9 @@ func bonk() -> void:
 	UiKit.haptic(&"stomp")
 
 
-## Clip id when it exists, else "" (the puppet / the current clip carries on).
+## Clip id when its 3D sidecar exists, else "" (the current clip carries on).
 static func clip_or_empty(id: String) -> String:
-	return id if ClipMap.clip_exists(id) else ""
+	return id if ClipMap.clip_exists3d(id) else ""
 
 
 ## Per frame (CurtainCall._process).
@@ -180,20 +155,8 @@ func advance(dt: float) -> void:
 		var walking := k3 < 0.3
 		bows.pose_hush(lerpf(0.36, 0.5, clampf(k3 / 0.3, 0.0, 1.0)), "hush/loco_walk" if walking else "hush/act_bow", 1,
 			20.0 if walking else 85.0)
-	elif hush_on and hush != null:
-		_hush_t += dt
-		var k := clampf(_hush_t / _hush_len, 0.0, 1.0)
-		# she steps in from the wing to centre (first 30 %), then bows
-		var x := lerpf(vs.x * 0.36, vs.x * 0.5, clampf(k / 0.3, 0.0, 1.0))
-		var clip := clip_or_empty("hush/act_bow")
-		hush.pose_replay(Vector2(x, vs.y - 60.0), 1, clip, _hush_t * 60.0, "WALK" if k < 0.3 else "IDLE", dt)
-		if not hush.uses_rig and hush.puppet != null:
-			var bow := sin(clampf((k - 0.3) / 0.7, 0.0, 1.0) * PI)
-			hush.puppet.set_motion(Vector2(1.0 + 0.04 * bow, 1.0 - 0.1 * bow), 0.5 * bow, Vector2.ZERO, 1.0)
 	if _bellows_on and bows != null:
 		_advance_bellows_3d()
-	elif _bellows_on and bellows != null:
-		_advance_bellows(dt, vs)
 	if _roses_live:
 		var any := false
 		var floor_y := vs.y - 30.0
@@ -212,44 +175,6 @@ func advance(dt: float) -> void:
 		_bonk_t += dt
 	queue_redraw()
 
-
-func _advance_bellows(dt: float, vs: Vector2) -> void:
-	var t := bellows_t
-	var band_y := vs.y - 70.0
-	var x0 := vs.x + 160.0
-	var x1 := vs.x * 0.56
-	var clip := ""
-	var state := "ROUTINE"
-	var facing := -1
-	var frame := _frame
-	if t < 0.45:
-		var k := t / 0.45
-		var e := 1.0 - pow(1.0 - k, 2.0)
-		bellows.pose_replay(Vector2(lerpf(x0, x1, e), band_y), -1, clip_or_empty("bellows/cc_wander_on"), frame, "ROUTINE", dt)
-		return
-	if t < 0.55:
-		clip = clip_or_empty("bellows/st_double_take")
-		state = "SPOTTED"
-		facing = 1 if fmod(_t * 6.0, 2.0) < 1.0 else -1
-	elif _bonk_t < 0.0:
-		clip = clip_or_empty("bellows/beat_slow_burn")
-		state = "IDLE"
-		facing = 1
-	else:
-		clip = clip_or_empty("bellows/st_bonk")
-		state = "CAUGHT_HOLD"
-		facing = 1
-	bellows.pose_replay(Vector2(x1, band_y), facing, clip, frame, state, dt)
-	if not bellows.uses_rig and bellows.puppet != null:
-		if _bonk_t >= 0.0:
-			var sq := clampf(_bonk_t / 0.12, 0.0, 1.0)
-			bellows.puppet.set_motion(Vector2(1.0 + 0.25 * sq, 1.0 - 0.35 * sq), 0.0, Vector2.ZERO, 1.0)
-		elif t >= 0.55:
-			# the slow burn: he swells and reddens
-			var burn := clampf((t - 0.55) / 0.3, 0.0, 1.0)
-			bellows.puppet.tier = int(burn * 3.0)
-			bellows.puppet.set_motion(Vector2(1.0 + 0.05 * burn, 1.0 + 0.05 * burn), 0.0,
-				Vector2(sin(_t * 50.0) * 2.0 * burn, 0.0), 1.0)
 
 
 ## 3D: the band routine on CurtainBows3D (wander on → double take → slow burn → the bonk).
@@ -281,7 +206,7 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO)
 	if title_on:
 		_draw_title(vs)
-	if _bonk_t >= 0.0 and (bellows != null or bows != null):
+	if _bonk_t >= 0.0 and bows != null:
 		_draw_valance(vs)
 
 
@@ -346,8 +271,7 @@ static func _perimeter(r: Rect2, u: float) -> Vector2:
 
 
 func _draw_valance(vs: Vector2) -> void:
-	var head := bows.head_screen("bellows") if bows != null else Vector2(bellows.position.x,
-		bellows.position.y - bellows.height_px() * BAND_SCALE)
+	var head: Vector2 = bows.head_screen("bellows")
 	var head_y := head.y
 	var k := clampf(_bonk_t / 0.12, 0.0, 1.0)
 	var bottom := lerpf(-10.0, head_y + 30.0, k * k)

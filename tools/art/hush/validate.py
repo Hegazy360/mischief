@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""validate — checks every art-hush deliverable. Exit code 1 on any error (warnings don't fail).
+"""validate — the 2D character art the 3D build still ships: Old Figgis and the Stalls (R3D: the 2D Hush / Pip rig
+art was removed with the 2D view, r3d-integrate). Exit code 1 on any error (warnings don't fail).
 
     python3 tools/art/hush/validate.py [--no-raster]
 
 * SVG rules (GDD 9.1): root <svg> with width/height = viewBox, allowed elements only, presentation attributes
   only (no style/class), no text/image/use/filter/mask/clipPath/gradients, <= 10 colours, 1-decimal numbers,
   3 px clear margin (rasterised; the Stalls may touch the bottom edge), size warning above 12 KB.
-* rig.json / poses.json / faces.json schema (TECH 4.7) for `hush` and `figgis`; every referenced file exists;
-  binding part/texture/socket/slot/preset/pose names; mirror pairs resolve; every pose's parts/channels exist.
-* Pip skin parity: every skin file exists and has the same canvas size as the file it replaces.
+* The R7 vinyl busts (`art/chars/figgis/figgis_*.svg`, FiggisChip's SVG level in look A's palette, r3d-hud): the
+  same structure rules, a `<desc>` allowed, <= 24 colours (base + one lilac shadow + one sheen per form) and the bust
+  may touch the bottom edge (the chip frame cuts it), the 3 px margin elsewhere.
+* rig.json / poses.json / faces.json schema (TECH 4.7) for `figgis` (kept for R3's 3D-style sprite, index §5.4).
 * stalls.json: 24 heads x rest/laugh/lean(/point), 40-110 px tall, one flat fill, 4 tumble frames.
 """
 import json
@@ -28,26 +30,9 @@ BANNED_ATTR = {"style", "class", "filter", "mask", "clip-path"}
 NUM_ATTRS = {"d", "x", "y", "width", "height", "cx", "cy", "r", "rx", "ry", "x1", "y1", "x2", "y2", "points",
 			 "transform", "stroke-width"}
 INK = "#1B2340"
-
-HUSH_PARTS = ["pelvis", "torso", "head", "beret", "hand_l", "hand_r", "foot_l", "foot_r", "arm_upper_l", "arm_upper_r",
-			  "arm_lower_l", "arm_lower_r", "leg_upper_l", "leg_upper_r", "leg_lower_l", "leg_lower_r"]
-HAND_TEX = ["wall", "point", "pinch", "fist", "open", "thumbs_up", "shush", "wave"]
-EYES = ["open", "half", "closed", "wide", "happy", "worried", "squint", "wink"]
-BROWS = ["neutral", "up", "worried", "sly", "determined"]
-MOUTHS = ["smile", "grin", "O", "shh", "grimace", "wavy", "laugh", "puffed"]
-OVERLAYS = ["blush", "sweat", "tear"]
-PRESETS = ["neutral", "grin", "snicker", "shock", "fear", "hold_breath", "smug", "wince", "determined", "sad", "busted",
-		   "wink", "statue"]
-POSES = ["h_stand", "h_breath_in", "h_breath_out", "h_fidget_look", "h_tip_contact_l", "h_tip_pass_l",
-		 "h_tip_contact_r", "h_tip_pass_r", "h_run_contact_l", "h_run_pass_l", "h_run_contact_r", "h_run_pass_r",
-		 "h_turn_mid", "h_door_reach", "h_stairs_a", "h_stairs_b", "h_rummage_a", "h_rummage_b", "h_pickup",
-		 "h_tinker_q_a", "h_tinker_q_b", "h_tinker_s_a", "h_tinker_s_b", "h_tinker_b_a", "h_tinker_b_b", "h_brow_wipe",
-		 "h_snicker_a", "h_snicker_b", "h_glance_stalls", "h_dive_antic", "h_dive", "h_pop_out"] + \
-		["h_freeze_%d" % i for i in range(1, 9)] + \
-		["h_squeak", "h_climb_a", "h_climb_b", "h_busted", "h_dangled_a", "h_dangled_b", "h_doorstep_sit",
-		 "h_tomato_splat", "h_bow_a", "h_bow_b", "h_wink", "h_victory"]
 CHANNELS = {"rot", "x", "y", "sx", "sy", "z", "tex", "vis", "alpha"}
 ROOT_CH = {"x", "y", "rot", "sx", "sy"}
+
 
 
 def err(m):
@@ -87,7 +72,7 @@ def svg_size(path):
 	return int(float(root.get("width"))), int(float(root.get("height")))
 
 
-def check_svg(path, raster=True, bottom_ok=False, single_fill=None):
+def check_svg(path, raster=True, bottom_ok=False, single_fill=None, bust=False):
 	rel = os.path.relpath(path, GAME)
 	try:
 		root = ET.parse(path).getroot()
@@ -109,7 +94,7 @@ def check_svg(path, raster=True, bottom_ok=False, single_fill=None):
 	colours = set()
 	for el in root.iter():
 		t = el.tag.split("}")[-1]
-		if t not in ALLOWED:
+		if t not in ALLOWED and not (bust and t == "desc"):
 			err("%s: element <%s> not allowed" % (rel, t))
 		for k, v in el.attrib.items():
 			if k in BANNED_ATTR:
@@ -123,8 +108,9 @@ def check_svg(path, raster=True, bottom_ok=False, single_fill=None):
 					err("%s: %s has more than 1 decimal (%s)" % (rel, k, v[:40]))
 			if k == "transform" and re.search(r"matrix|skew", v):
 				err("%s: use translate/rotate/scale transforms only" % rel)
-	if len(colours) > 10:
-		err("%s: %d colours (max 10)" % (rel, len(colours)))
+	max_colours = BUST_MAX_COLOURS if bust else 10
+	if len(colours) > max_colours:
+		err("%s: %d colours (max %d)" % (rel, len(colours), max_colours))
 	if single_fill:
 		if colours - {single_fill.upper()}:
 			err("%s: must use the single fill %s (found %s)" % (rel, single_fill, sorted(colours)))
@@ -134,7 +120,7 @@ def check_svg(path, raster=True, bottom_ok=False, single_fill=None):
 	if size > 12 * 1024:
 		warn("%s: %.1f KB (> 12 KB typical)" % (rel, size / 1024.0))
 	if raster:
-		check_margin(path, rel, wi, hi, bottom_ok)
+		check_margin(path, rel, wi, hi, bottom_ok or bust)
 
 
 def check_margin(path, rel, w, h, bottom_ok):
@@ -338,84 +324,6 @@ def check_faces(faces, rig, rid, need=()):
 	return len(pr)
 
 
-def check_hush(raster):
-	rig = load("res://data/rigs/hush/rig.json")
-	poses = load("res://data/rigs/hush/poses.json")
-	faces = load("res://data/rigs/hush/faces.json")
-	if not (rig and poses and faces):
-		return
-	parts = check_rig(rig, "hush", HUSH_PARTS)
-	if len(parts) < 18:
-		err("hush: %d parts (need >= 18)" % len(parts))
-	for side in ("l", "r"):
-		tex = parts.get("hand_" + side, {}).get("tex", {})
-		if sorted(tex) != sorted(HAND_TEX):
-			err("hush hand_%s: textures %s != the 8 binding shapes" % (side, sorted(tex)))
-		if sorted(parts.get("foot_" + side, {}).get("tex", {})) != ["flat", "tiptoe"]:
-			err("hush foot_%s: textures must be flat, tiptoe" % side)
-		for n in ("arm_upper_", "arm_lower_", "leg_upper_", "leg_lower_"):
-			if not str(parts.get(n + side, {}).get("draw", "")).startswith("limb:"):
-				err("hush %s%s must be a limb bone" % (n, side))
-	sp = parts.get("beret", {}).get("spring", {})
-	if (sp.get("channel"), sp.get("k"), sp.get("c"), sp.get("clamp")) != ("rot", 180, 9, 25):
-		err("hush beret spring must be rot k180 c9 clamp25 (got %s)" % sp)
-	for sock in ("hand_r:grip", "hand_l:grip", "torso:braces", "head:hat"):
-		pn, _, sn = sock.partition(":")
-		if sn not in parts.get(pn, {}).get("sockets", {}):
-			err("hush: socket %s missing" % sock)
-	for lid in ("arm_l", "arm_r", "leg_l", "leg_r"):
-		L = rig.get("limbs", {}).get(lid, {})
-		if not (22 <= L.get("width", 0) + 2 <= 28) or L.get("outline") != 6:
-			err("hush limbs.%s: width 20-26 and outline 6 expected (got %s/%s)" % (lid, L.get("width"), L.get("outline")))
-	sl = rig["face"]["slots"]
-	for sn, need in (("eyes", EYES), ("brows", BROWS), ("mouth", MOUTHS)):
-		have = sl.get(sn, {}).get("variants", {})
-		for v in need:
-			if v not in have:
-				err("hush face.%s: variant %s missing" % (sn, v))
-	if sl.get("pupils", {}).get("range") != [6, 4]:
-		err("hush face.pupils: range must be [6, 4]")
-	for o in OVERLAYS:
-		if "on" not in sl.get(o, {}).get("variants", {}) or sl.get(o, {}).get("default") != "none":
-			err("hush face: overlay slot %s (variant on, default none) missing" % o)
-	cl = rig.get("props", {}).get("clarence")
-	if not cl or sorted(cl.get("states", [])) != sorted(["limp", "squeezed", "stretched", "smitten"]):
-		err("hush: prop clarence with states limp/squeezed/stretched/smitten required")
-	elif sorted(cl.get("sockets", [])) != sorted(["torso:braces", "hand_r:grip"]):
-		err("hush clarence: sockets torso:braces + hand_r:grip")
-	hid = rig.get("hidden", {})
-	for k in ("file", "whites", "blink", "pupils"):
-		if k in hid:
-			exists(hid[k], "hush hidden.%s" % k)
-	if "file" not in hid or not hid["file"].endswith("hidden_eyes.svg"):
-		err("hush: hidden look hidden_eyes.svg required")
-	nf = check_faces(faces, rig, "hush", PRESETS)
-	if nf < 12:
-		err("hush faces: %d presets (need >= 12)" % nf)
-	npz = check_poses(poses, rig, faces, "hush", POSES)
-	if npz < 40:
-		err("hush poses: %d (need >= 40)" % npz)
-	freeze = [n for n, p in poses["poses"].items() if "freeze" in p.get("tags", [])]
-	if len([n for n in freeze if n.startswith("h_freeze_")]) < 8:
-		err("hush: 8 freeze statues h_freeze_1..8 required")
-	# Pip skin parity
-	pip = rig.get("skins", {}).get("pip")
-	if not pip:
-		err("hush: skins.pip missing")
-	else:
-		for base, sk in pip.get("files", {}).items():
-			if not (exists(base, "pip base") and exists(sk, "pip skin")):
-				continue
-			if svg_size(local(base)) != svg_size(local(sk)):
-				err("pip: canvas of %s differs from %s" % (sk, base))
-		for need in ("head.svg", "torso.svg", "beret.svg", "pelvis.svg", "hand_r_point.svg", "foot_r_flat.svg"):
-			if not any(k.endswith("/" + need) for k in pip.get("files", {})):
-				err("pip: skin must redraw %s" % need)
-		for lid in ("arm_l", "arm_r", "leg_l", "leg_r"):
-			if lid not in pip.get("limbs", {}):
-				err("pip: limb colour %s missing" % lid)
-	return nf, npz, len(parts)
-
 
 def check_figgis():
 	rig = load("res://data/rigs/figgis/rig.json")
@@ -468,29 +376,28 @@ def check_stalls():
 		err("stalls: layout must list every head id once")
 
 
+BUST_MAX_COLOURS = 24
+
+
 def main():
 	raster = "--no-raster" not in sys.argv
-	for folder, bottom_ok in (("art/chars/hush", False), ("art/chars/hush/pip", False), ("art/chars/figgis", False),
-							  ("art/chars/stalls", True)):
+	for folder, bottom_ok in (("art/chars/figgis", False), ("art/chars/stalls", True)):
 		d = os.path.join(GAME, folder)
 		if not os.path.isdir(d):
 			err("missing folder %s" % folder)
 			continue
 		for fn in sorted(os.listdir(d)):
 			if fn.endswith(".svg"):
-				check_svg(os.path.join(d, fn), raster=raster, bottom_ok=bottom_ok)
-	stats = check_hush(raster)
+				check_svg(os.path.join(d, fn), raster=raster, bottom_ok=bottom_ok,
+						  bust=folder == "art/chars/figgis" and fn.startswith("figgis_"))
 	check_figgis()
 	check_stalls()
 	for w in WARN:
 		print("WARN  " + w)
 	for e in ERR:
 		print("ERROR " + e)
-	if stats:
-		print("hush: %d parts, %d face presets, %d poses" % (stats[2], stats[0], stats[1]))
-	print("validate: %d error(s), %d warning(s)" % (len(ERR), len(WARN)))
+	print("validate (figgis + stalls): %d error(s), %d warning(s)" % (len(ERR), len(WARN)))
 	sys.exit(1 if ERR else 0)
-
 
 if __name__ == "__main__":
 	main()

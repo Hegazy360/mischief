@@ -5,7 +5,7 @@
 ## | key | default | read by |
 ## |---|---|---|
 ## | `start` | `"auto"` | Boot (`BootRouting.read_config`): `auto` \| `stage_door` \| an episode id |
-## | `view` | `"3d"` | NightScene: `"2d"` (the Gate-0 2D view, until `r3d-integrate` removes it) \| `"3d"` |
+## | `view` | `"3d"` | the APK check (row 20a); the only view since `r3d-integrate` removed the 2D one |
 ## | `show_previews` | `false` | the stage door's Night 1 / Night 2 (preview) entries (Settings debug default) |
 ## | `bellows_window` | `"sim"` | WorldView3D / PipView3D through Settings (`"sim"` \| `"lean"`, ruling R15) |
 ## | `render.msaa_3d` | `true` | NightScene: 3D MSAA 2× (Settings debug default; NightArgs `--msaa` overrides) |
@@ -17,7 +17,8 @@ class_name BootConfig
 extends RefCounted
 
 const PATH := "res://scenes/boot/boot_config.json"
-const VIEWS: PackedStringArray = ["2d", "3d"]
+## The views a build can run (the 2D view was removed, r3d-integrate: "2d" is read as the default "3d").
+const VIEWS: PackedStringArray = ["3d"]
 const WINDOWS: PackedStringArray = ["sim", "lean"]
 const DEFAULTS := {"start": "auto", "view": "3d", "show_previews": false, "bellows_window": "sim",
 	"render": {"msaa_3d": true, "render_scale": 1.0, "outline": true}}
@@ -61,7 +62,7 @@ static func merged(raw: Dictionary) -> Dictionary:
 	return out
 
 
-## `view` of the file ("2d" | "3d").
+## `view` of the file (always "3d" since the 2D view was removed).
 static func view(path: String = PATH) -> String:
 	return String(read(path)["view"])
 

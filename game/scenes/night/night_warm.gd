@@ -6,15 +6,16 @@
 ##   "hush": [...]}, combos: [...], fx: [...], captions: [...], fonts: [{font, size}], audio: [ids], pip: true}`
 ## * rooms = the Night's rooms + backstage; props = every hotspot in them (their atlases are built with
 ##   the WorldView, the list is the record TexStats checks);
-## * looks = every residue look the Night's pranks can leave (`KIND`, `KIND:<look>`, `KIND:blind`),
-##   plus `COMBO:<id>` for each combo whose two residues can both happen **and** that `rules.combos`
-##   allows (`[]` = none, absent = all), plus `COSTUME:<look>`;
+## * looks = every residue look the Night's pranks can leave (`KIND`, `KIND:<look>`) and the 3D descriptors' looks
+##   (rig3d.json: BLINDED, TOMATO, CARRY_*), plus `COMBO:<id>` for each combo whose two residues can both happen
+##   **and** that `rules.combos` allows (`[]` = none, absent = all), plus `COSTUME:<look>`;
 ## * fx = the particle kinds the Night can emit (the pool's kinds + the curtain call's roses);
 ## * fonts = captions 88 px, stamps 64 px, HUD numbers 48 px (display / ui faces), each glyph set drawn
 ##   once off-screen;
 ## * audio = the cue ids of the Night's pranks and archetypes (`cues.json`).
-## `NightWarmer` (a Node) executes it: `RigPlayer.warm_looks` (soft), the font primer, `PipView.warm()`
-## (soft), `Audio.warm(ids)` — one step per frame under an 8 ms budget; `done` when finished.
+## `NightWarmer` (a Node) executes it in 3D: the materials / instanced meshes / clips of the Night's tree (hidden
+## looks included), the font primer, `PipView3D` (soft), `Audio.warm(ids)` — one step per frame under an 8 ms
+## budget; `done` when finished.
 class_name NightWarm
 extends RefCounted
 
@@ -150,9 +151,9 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	# The title card (+ bulbs) only for the Night whose curtain call slams it (the Prologue): 72 MB
 	# at 2× on every other Night otherwise (s2-fix G #7).
 	var textures := lazy_textures(data_root, CurtainCall.kind_for(episode_id, "") == CurtainCall.KIND_PROLOGUE)
-	# Per rig: every look page its rig.json defines that tonight can show — basic residues (+ their
-	# `blind` variant), the Night's costumes, the combos `rules.combos` allows (a rig look the rules
-	# forbid is not warmed: it must not appear, TECH L4).
+	# Per rig: every look its 3D descriptor (rigs3d/<rig>/rig3d.json `looks`, R3D) defines that tonight can show —
+	# basic residues, BLINDED, the carries, the Night's costumes, the combos `rules.combos` allows (a rig look the
+	# rules forbid is not warmed: it must not appear, TECH L4). (The 2D rig.json pages went with the 2D view.)
 	var costumes := PackedStringArray()
 	for k in looks:
 		if String(k).begins_with("COSTUME:"):
@@ -160,8 +161,8 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	var rig_looks := {}
 	for rig in ["bellows", "hush"]:
 		var rl := PackedStringArray()
-		var rjd: Variant = _read("%s/rigs/%s/rig.json" % [data_root, rig])
-		var rres: Dictionary = (rjd as Dictionary).get("residues", {}) if rjd is Dictionary else {}
+		var rjd: Variant = _read("%s/rigs3d/%s/rig3d.json" % [data_root, rig])
+		var rres: Dictionary = (rjd as Dictionary).get("looks", {}) if rjd is Dictionary else {}
 		for k in rres:
 			var ks := String(k)
 			if ks.begins_with("COMBO:"):
@@ -172,8 +173,6 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 					_add(rl, ks)
 			else:
 				_add(rl, ks)
-				if rres[k] is Dictionary and (rres[k] as Dictionary).has("blind"):
-					_add(rl, "%s:blind" % ks)
 		if rig == "bellows":
 			for k in looks:
 				_add(rl, String(k))

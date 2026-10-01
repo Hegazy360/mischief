@@ -109,6 +109,13 @@ func _play(id: String, rig: Node3D, clip: String) -> void:
 		rig.call("play", c, {"loop": true, "blend_in": 6})
 
 
+## The clip actor `id` ("hush" / "bellows") plays now ("" while hidden) — the e2e clip coverage (r3d-integrate).
+func current_clip(id: String) -> String:
+	if (id == "hush" and not hush_on) or (id == "bellows" and not bellows_on):
+		return ""
+	return String(_clip.get(id, ""))
+
+
 ## Hush on the apron: x fraction, the clip (the walk-in or the bow), facing ±1 and cheat toward the camera.
 func pose_hush(x_frac: float, clip: String, facing: int, cheat: float) -> void:
 	hush_on = true

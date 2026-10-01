@@ -34,6 +34,8 @@ JSON_PATH = ROOT / "game" / "data" / "audio" / "clip_events.json"
 FPS = 60.0
 # Voice lines of one clip may overlap the next voice line by at most this many frames (a reverb tail).
 VOICE_OVERLAP_F = 3
+# R3D one mouth (AudioDirector): a line cut by the next must have sounded at least this long (a near-double otherwise).
+VOICE_CUT_MIN_F = 8
 
 
 def _warmup_note_frames(line_id: str, start_f: int) -> list[int]:
@@ -260,7 +262,55 @@ def _build_spec() -> list[dict]:
     clip("hush/act_squeak", 18, "G", [],
          "**No sound in this clip.** Clarence's squeak stays event-level (`squeak` → `clarence_squeak`): a tap must "
          "answer at once, including when the arm is an overlay or a fallback.")
+    _sidecar_rows(S)
     return S
+
+
+# The 2D-only rows that have no 3D clip (R3D: `act_tinker_q` left the 3D manifest — `rigging@*` resolves through the
+# `rig:<prank>` rig clips and the band clips, whose tinker sounds are their own rows below).
+RETIRED_2D = ("hush/act_tinker_q", "hush/act_tinker_s", "hush/act_tinker_b")
+SIDECAR_DIRS = ("bellows3d", "hush3d")
+
+
+def _sidecar_rows(S: list[dict]) -> None:
+    """R3D (index R3, r3d-integrate): the rows of every 3D clip that times its own sounds (sidecar `source.audio`
+    "own" — the retimed loops and locomotion, and the clips the 2D table never had) come from the 3D sidecars
+    (`game/data/anim/<rig>3d/<clip>.json`, written by the bake). A 2D row of such a clip (act_warmup's 1200 f
+    phrases, loco_walk's 80 f steps) is replaced; "table" clips keep their hand-placed rows (the sim times them);
+    the retired 2D tinker rows go."""
+    S[:] = [c for c in S if c["clip"] not in RETIRED_2D]
+    by = {c["clip"]: i for i, c in enumerate(S)}
+    for sub in SIDECAR_DIRS:
+        d = ROOT / "game" / "data" / "anim" / sub
+        if not d.is_dir():
+            continue
+        for f in sorted(d.glob("*.json")):
+            try:
+                sc = json.loads(f.read_text())
+            except ValueError:
+                continue
+            if not isinstance(sc, dict) or sc.get("format") != "anim3d":
+                continue
+            src = sc.get("source") or {}
+            if str(src.get("audio", "")) != "own":
+                continue
+            rows = []
+            for e in sc.get("events", []):
+                if e.get("type") in ("sfx", "voice") and (e.get("id") or e.get("bank")):
+                    rows.append((int(e.get("f", 0)), str(e["type"]), str(e.get("id", e.get("bank"))),
+                                 float(e.get("vol_db", 0.0) or 0.0), "3D contact frame (sidecar event)"))
+            if not rows:
+                continue
+            cid = str(sc.get("clip", ""))
+            ent = {"clip": cid, "len_f": int(sc.get("length", 0)) or None, "phase": "R3D", "rows": rows,
+                   "note": f"R3D: timed by the 3D clip itself (`{'loop' if sc.get('loop') else 'one-shot'}`, "
+                           f"{sc.get('length')} f; `source.audio` own) — regenerated from "
+                           f"`game/data/anim/{sub}/{f.name}` by r3d-integrate (index R3)."}
+            if cid in by:
+                S[by[cid]] = ent
+            else:
+                by[cid] = len(S)
+                S.append(ent)
 
 
 def clip_rows(clip_id: str) -> list[dict]:
@@ -289,12 +339,14 @@ EVENT_CLIPS: list[tuple[str, str, list[str]]] = [
     ("director_cue", "id=laugh_picture", ["bellows/cue_picture_bonk"]),
     ("door_slam", "", ["bellows/st_bonk"]),
     ("hush_go", "", ["hush/loco_walk", "hush/loco_run"]),
-    ("rig_start", "", ["hush/act_tinker_q", "hush/act_tinker_s", "hush/act_tinker_b"]),
-    ("rig_step_done", "", ["hush/act_tinker_q", "hush/act_tinker_s", "hush/act_tinker_b"]),
+    ("rig_start", "", ["hush/rig_achoo_ria", "hush/rig_allegro_go_go", "hush/rig_mid", "hush/rig_high", "hush/rig_low"]),
+    ("rig_step_done", "", ["hush/rig_achoo_ria", "hush/rig_allegro_go_go", "hush/rig_mid", "hush/rig_high",
+                           "hush/rig_low"]),
     ("rigged", "", ["hush/act_snicker"]),
     ("hide", "", ["hush/act_dive"]),
     ("pop_out", "", ["hush/act_pop"]),
-    ("freeze", "", ["hush/freeze_1", "hush/freeze_2", "hush/freeze_3", "hush/freeze_4"]),
+    ("freeze", "", ["hush/freeze_1", "hush/freeze_2", "hush/freeze_3", "hush/freeze_4", "hush/freeze_5", "hush/freeze_6",
+                    "hush/freeze_7", "hush/freeze_8"]),
     ("squeak", "", ["hush/act_squeak"]),
 ]
 
@@ -378,7 +430,12 @@ def validate() -> list[str]:
         voice = [r for r in rows if r[1] == "voice"]
         for a, b in zip(voice, voice[1:]):
             end = a[0] + lens.get(a[2], 0)
-            if end > b[0] + VOICE_OVERLAP_F:
+            if c["phase"] == "R3D":
+                # one mouth (AudioDirector, R3D): the next line cuts the one still sounding — only a near-double
+                # (the earlier line cut before it is heard) is an error
+                if end > b[0] + VOICE_OVERLAP_F and b[0] - a[0] < VOICE_CUT_MIN_F:
+                    errs.append(f"{c['clip']}: {b[2]} (f{b[0]}) cuts {a[2]} (f{a[0]}) after < {VOICE_CUT_MIN_F} f")
+            elif end > b[0] + VOICE_OVERLAP_F:
                 errs.append(f"{c['clip']}: {a[2]} (f{a[0]}, {lens.get(a[2])} f) still sounds at f{b[0]} ({b[2]})")
     errs += _overlay_voice_clashes(lens)
     return errs
@@ -409,7 +466,7 @@ def _overlay_voice_clashes(lens: dict) -> list[str]:
         for r in base["rows"]:
             if r[1] == "voice":
                 for k in range(0, horizon // loop + 1):
-                    wins.append((r[0] + k * loop, r[0] + k * loop + lens.get(r[2], 0), f"{base['clip']} {r[2]}"))
+                    wins.append((r[0] + k * loop, r[0] + k * loop + lens.get(r[2], 0), f"{base['clip']} {r[2]}", "base"))
         for mg in act["micro_gags"]:
             ov = by_clip.get(f"bellows/mg_{mg.get('id')}")
             if ov is None:
@@ -420,10 +477,15 @@ def _overlay_voice_clashes(lens: dict) -> list[str]:
                     continue
                 for k in range(0, horizon // span + 1):
                     s0 = at + r[0] + k * span
-                    wins.append((s0, s0 + lens.get(r[2], 0), f"{ov['clip']} {r[2]}"))
+                    wins.append((s0, s0 + lens.get(r[2], 0), f"{ov['clip']} {r[2]}", "overlay"))
         wins.sort()
+        one_mouth = base["phase"] == "R3D"
         for a, b in zip(wins, wins[1:]):
             if a[1] > b[0] + VOICE_OVERLAP_F and a[2] != b[2]:
+                # R3D one mouth: a micro-gag line may cut the loop's phrase (the gag wins); the loop's phrase must
+                # never start inside a micro-gag line (it would cut the gag)
+                if one_mouth and not (a[3] == "overlay" and b[3] == "base"):
+                    continue
                 errs.append(f"{aid}: {a[2]} (f{a[0]}–{a[1]}) still sounds when {b[2]} starts (f{b[0]})")
                 break
     return errs
@@ -440,8 +502,9 @@ def render_md() -> str:
            "`len_f` = the sound's length in frames (the longest take of a bank), to check it fits the beat. Ids resolve "
            "through `game/audio/sfx_map.json`; a voice id plays in the Settings `voice_style` automatically. "
            "Machine-readable copy (same rows, the one the tests parse): `game/data/audio/clip_events.json`.", "",
-           "Rows are sorted by phase: **G** = land now (Gate 0), **M** = batch 2.", ""]
-    for phase in ("G", "M"):
+           "Rows are sorted by phase: **G** = land now (Gate 0), **M** = batch 2, **R3D** = timed by the 3D clip "
+           "itself (generated from its sidecar).", ""]
+    for phase in ("G", "M", "R3D"):
         clips = [c for c in spec() if c["phase"] == phase]
         if not clips:
             continue

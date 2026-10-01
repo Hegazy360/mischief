@@ -201,10 +201,11 @@ def bust(mood):
     elif mood == "point":
         b += specs("open") + brows("up") + nose() + mouth("smile")
         # the blank cue card held up beside him (the HUD draws the real card)
-        b += [ink("M84 64 L120 58 L124 90 L88 96 Z", CARD, 4), flat("M88 90 L123 85 L124 90 L88 96 Z", CARD_S),
-              line("M94 74 L114 71 M96 82 L110 80", 3, "#C9B38A")]
+        # (3 px inside the right edge: the 3 px clear margin of the art validator; the bust may touch the bottom)
+        b += [ink("M81 64 L117 58 L121 90 L85 96 Z", CARD, 4), flat("M85 90 L120 85 L121 90 L85 96 Z", CARD_S),
+              line("M91 74 L111 71 M93 82 L107 80", 3, "#C9B38A")]
         b += ledge()
-        b += glove(44, 110, -10, "cup") + glove(92, 94, 12, "card")
+        b += glove(44, 110, -10, "cup") + glove(89, 94, 12, "card")
     elif mood == "shh":
         b += specs("half") + brows("sly") + nose() + mouth("shh")
         b += ledge()

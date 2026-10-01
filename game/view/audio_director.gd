@@ -38,6 +38,8 @@ const H_STEP_F := 10.0
 const TIER_KINDS: PackedStringArray = ["t0", "t1", "t2", "t3", "t4"]
 ## No sound id twice within this long (real seconds).
 const REPEAT_GUARD_S := 0.1
+## A voice line started less than this long ago (real s; his longest line is ~2 s) is cut by the next one (one mouth).
+const VOICE_CUT_S := 2.5
 const BELLOWS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_next", "b_detour", "b_room", "entry_warning",
 	"doorway_pause", "specs", "glyph", "look_back", "ear_pip", "squeak_bit", "head_turn", "lure", "lure_fatigue",
 	"door_slam", "wheeze", "meltdown_stomp", "bump", "prank_fire", "reaction_start", "reaction_accent", "reaction_end",
@@ -128,6 +130,9 @@ var _dup_warned: Dictionary = {}
 var skipped_dups: int = 0
 ## Sound ids suppressed by the 100 ms repeat guard (tests / debug).
 var skipped_repeats: int = 0
+## Voice lines cut by a newer line of the same mouth (one-mouth rule; tests / e2e).
+var voice_cuts: int = 0
+var _last_voice_t: float = -1.0
 
 
 func _init() -> void:
@@ -364,7 +369,7 @@ func _do(act: Dictionary, ev: Dictionary, snap: ViewSnapshot) -> void:
 			if not _clip_owns(ViewKit.s(x), ev):
 				_play("play_sfx", ViewKit.s(x), [ViewKit.s(x), pan, vol, 1.0])
 	if act.has("voice") and not _clip_owns(ViewKit.s(act["voice"]), ev):
-		_play("play_voice", ViewKit.s(act["voice"]), [ViewKit.s(act["voice"]), vol, pan])
+		_voice(ViewKit.s(act["voice"]), [ViewKit.s(act["voice"]), vol, pan])
 	if act.has("sting"):
 		_call("sting", [ViewKit.s(act["sting"])])
 	if act.has("crowd"):
@@ -465,7 +470,7 @@ func on_clip_event(ev: Dictionary) -> void:
 			_play("play_sfx", id, [id, pan, vol + float(ev.get("vol_db", 0.0)), float(ev.get("pitch", 1.0))])
 		"voice":
 			var vid := ViewKit.s(ev.get("id", ev.get("bank", "")))
-			_play("play_voice", vid, [vid, vol + float(ev.get("vol_db", 0.0)), pan])
+			_voice(vid, [vid, vol + float(ev.get("vol_db", 0.0)), pan])
 		"laugh":
 			var tier := ViewKit.s(ev.get("tier", "auto"))
 			if tier != "auto":
@@ -540,6 +545,23 @@ func _fallback_steps(snap: ViewSnapshot, vdt: float) -> void:
 
 
 ## Play a sound unless the same id played < 100 ms ago (the repeat guard).
+## One mouth (R3D, r3d-integrate): every voice line is Bellows' (Hush is a mime), so a new line cuts the one still
+## sounding — the yodel cut by "the pipes!", a sung phrase's tail by a micro-gag's "mm-HM" — instead of two of his
+## voices at once (the 3D clips retimed their lines; the audio table lists the cut, `tools/audio/clip_events.py`).
+func _voice(vid: String, args: Array) -> void:
+	if vid == "":
+		return
+	var last := float(_last_played.get(vid, -1.0))
+	var repeat := last >= 0.0 and _now - last < REPEAT_GUARD_S
+	if not repeat and _last_voice_t >= 0.0 and _now - _last_voice_t < VOICE_CUT_S:
+		voice_cuts += 1
+		if not muted and _audio != null and _audio.has_method("stop_voice"):
+			_audio.call("stop_voice")
+	if not repeat:
+		_last_voice_t = _now
+	_play("play_voice", vid, args)
+
+
 func _play(method: String, id: String, args: Array) -> void:
 	if id != "":
 		var last := float(_last_played.get(id, -1.0))
@@ -580,24 +602,13 @@ static func clip_sounds(clip_id: String) -> PackedStringArray:
 	if _sounds_cache.has(clip_id):
 		return _sounds_cache[clip_id]
 	var out := PackedStringArray()
-	if AudioDirector.prefer3d:
-		var sd: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id)) if ClipMap.clip_exists3d(clip_id) else null
-		if sd is Dictionary:
-			for e3 in (sd as Dictionary).get("events", []):
-				if e3 is Dictionary:
-					var t3 := ViewKit.s((e3 as Dictionary).get("type", ""))
-					if t3 == "sfx" or t3 == "voice":
-						out.append(ViewKit.s((e3 as Dictionary).get("id", (e3 as Dictionary).get("bank", ""))))
-		_sounds_cache[clip_id] = out
-		return out
-	if ClipMap.clip_exists(clip_id):
-		var c: Variant = ClipLib.get_clip(clip_id)
-		if c != null:
-			for e in (c as Object).get("events"):
-				if e is Dictionary:
-					var t := ViewKit.s((e as Dictionary).get("type", ""))
-					if t == "sfx" or t == "voice":
-						out.append(ViewKit.s((e as Dictionary).get("id", (e as Dictionary).get("bank", ""))))
+	var sd: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id)) if ClipMap.clip_exists3d(clip_id) else null
+	if sd is Dictionary:
+		for e3 in (sd as Dictionary).get("events", []):
+			if e3 is Dictionary:
+				var t3 := ViewKit.s((e3 as Dictionary).get("type", ""))
+				if t3 == "sfx" or t3 == "voice":
+					out.append(ViewKit.s((e3 as Dictionary).get("id", (e3 as Dictionary).get("bank", ""))))
 	_sounds_cache[clip_id] = out
 	return out
 

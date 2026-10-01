@@ -142,7 +142,7 @@ def rig3d(meta, face_layout):
             {"bones": ["cravat"], "stiffness": 2.5, "drag": 0.4, "gravity": 0.4, "radius": 0.05, "clamp_deg": 25},
             {"bones": ["tail_l", "tail_r"], "stiffness": 2.0, "drag": 0.3, "gravity": 0.5, "radius": 0.06, "clamp_deg": 35}],
         "face": face,
-        "material": {"palette": "res://art3d/chars/bellows/palette_bellows.png", "outline_px": 3.5, "rim": 0.45},
+        "material": {"palette": "res://art3d/chars/bellows/palette_bellows.png", "outline_px": 4.8, "rim": 0.45},
         "vertex_color": {"r": "skin_tint", "g": "stone_keep", "b": "rim_damp", "a": "outline_scale"},
         "looks": looks,
         "tint": {"tiers": ["#FFFFFF", "#FFE0DC", "#FFC2B8", "#F59A94"], "livid": "#B8324B", "skin": "#F0C2A0",

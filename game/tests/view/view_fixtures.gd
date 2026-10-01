@@ -1,6 +1,6 @@
-## Test helper (not a test): installs the s2-view static-pose fixture clips
-## (`tests/view/fixtures/anim/<rig>/*.json`, generated from the real Bellows / Hush poses) into
-## ClipLib's cache and ClipMap's registry, and the fixture `map.json` files as the rigs' maps,
+## Test helper (not a test): installs the s2-view fixture clips (`tests/view/fixtures/anim/<rig>/*.json`; their ids
+## and lengths) into ClipMap's registry, and the fixture `map.json` files as the rigs' maps (the 2D ClipLib the
+## RigPlayer read them through was removed with the 2D view),
 ## so the one-shot table, overlays, frame locks and fallbacks are testable before the animation
 ## tasks deliver real clips. `uninstall()` puts everything back (the real clips win again).
 extends RefCounted
@@ -32,11 +32,10 @@ static func install(maps: bool = true) -> PackedStringArray:
 						ClipMap.map_override[rig] = j.data
 				continue
 			var id := "%s/%s" % [rig, f.get_basename()]
-			var c := ClipLib.load_file(path, id)
-			if c == null:
+			var n := length_of(path)
+			if n <= 0:
 				continue
-			_register(id, c)
-			ClipMap.fixture_clips[id] = c.length
+			ClipMap.fixture_clips[id] = n
 			_installed.append(id)
 	ClipMap.clear_cache()
 	return _installed
@@ -44,14 +43,15 @@ static func install(maps: bool = true) -> PackedStringArray:
 
 ## Forget the fixtures (clips, maps, caches).
 static func uninstall() -> void:
-	for id in _installed:
-		ClipLib.invalidate(id)
 	_installed.clear()
 	ClipMap.fixture_clips.clear()
 	ClipMap.map_override.clear()
 	ClipMap.clear_cache()
 
 
-static func _register(id: String, c: ClipDef) -> void:
-	# ClipLib (owner rig) caches by id; tests seed that cache so RigPlayer.play(id) finds them.
-	ClipLib._cache[id] = c
+## A fixture clip file's `length` (frames; 0 when it does not parse).
+static func length_of(path: String) -> int:
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(path)) != OK or not (j.data is Dictionary):
+		return 0
+	return int((j.data as Dictionary).get("length", 0))

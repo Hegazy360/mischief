@@ -44,8 +44,9 @@ static var hidden_raw: PackedStringArray = PackedStringArray()
 ## foreground layers are 0–5 % ink (door jambs, the slab lip) on a full-room canvas, 138 MB at 2×
 ## untrimmed. get_texture() then returns an AtlasTexture of the full 1× size whose `margin` places
 ## the trimmed pixels, so every consumer (Sprite2D, draw_texture*, get_size()) is unchanged. Trim
-## paths are always rasterised (also at 1×), so the imported full canvas is never used for them.
-static var trim_globs: PackedStringArray = PackedStringArray(["res://art/house/rooms/*_fg.svg"])
+## paths are always rasterised (also at 1×), so the imported full canvas is never used for them. Empty since R3D:
+## the 2D room layers it was made for were deleted with the 2D path (r3d-integrate); callers may still set it.
+static var trim_globs: PackedStringArray = PackedStringArray()
 ## Trim only when it saves at least this share of the pixels.
 const TRIM_MIN_SAVING := 0.3
 

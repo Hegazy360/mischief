@@ -430,24 +430,17 @@ func test_barks() -> void:
 	assert_eq((barks.get("cold_opens", {}) as Dictionary).size(), 11, "cold opens (none for the Prologue)")
 
 
-func test_soft_cross_checks_with_rig_and_audio() -> void:
-	var rig: Variant = C.read("rigs/bellows/rig.json")
+## (R3D: the 2D Bellows rig.json this also cross-checked was deleted with the 2D path; the 3D residue looks
+## (rig3d.json `looks`) are checked by tests/cast3d/test_bellows3d.gd.)
+func test_soft_cross_checks_with_audio() -> void:
 	var smap: Variant = null
 	if FileAccess.file_exists("res://audio/sfx_map.json"):
 		var j := JSON.new()
 		if j.parse(FileAccess.get_file_as_string("res://audio/sfx_map.json")) == OK:
 			smap = j.data
-	if not rig is Dictionary and not smap is Dictionary:
-		skip("bellows rig and audio sfx_map not present yet")
+	if not smap is Dictionary:
+		skip("audio sfx_map not present yet")
 		return
-	if rig is Dictionary:
-		var keys: Dictionary = rig.get("residues", {})
-		for k in residues:
-			assert_true(keys.has(residues[k]["overlay"]), "bellows rig has residue key %s" % residues[k]["overlay"])
-		for look in residues.get("COSTUME", {}).get("looks", {}).values():
-			assert_true(keys.has(look), "bellows rig has costume key %s" % look)
-		for c in combos:
-			assert_true(keys.has(combos[c]["overlay"]), "bellows rig has combo key %s" % combos[c]["overlay"])
 	if smap is Dictionary:
 		var names := {}
 		for sect in ["files", "banks", "aliases"]:

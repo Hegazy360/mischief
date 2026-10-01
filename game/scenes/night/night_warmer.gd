@@ -1,10 +1,9 @@
 ## NightWarmer — works through a `NightWarm.list()` under the curtain, one step per frame, each
-## step capped by BUDGET_MS of work (s2-night §4.2): residue / combo looks on the rigs
-## (`RigPlayer.warm_looks`, soft), the fonts at their play sizes (a primer that draws every glyph set
-## once, hidden under the curtain), one hidden PiP frame (`PipView.warm()`, soft), the Night's audio
-## (`Audio.warm(ids)`), the FX pool. `done` turns true when every step ran; `elapsed_ms` is the wall
+## step capped by BUDGET_MS of work (s2-night §4.2): the fonts at their play sizes (a primer that draws every
+## glyph set once, hidden under the curtain), one hidden Bellows-window frame (`PipView3D.warm()`, soft), the Night's
+## audio (`Audio.warm(ids)`), the textures. `done` turns true when every step ran; `elapsed_ms` is the wall
 ## time from `start()` to done (the budget is ≤ 2.0 s).
-## **3D view** (`view3d`, REDESIGN §6.3 "every material is rendered once under the curtain"): `materials` — every
+## The 3D view (REDESIGN §6.3 "every material is rendered once under the curtain"): `materials` — every
 ## material the Night registered with MaterialWarm3D (`WorldView3D.warm_materials`: one quad per (shader, kind, pass
 ## chain) + `RigPlayer3D.warm()`: every tint tier / stone / look / attachment state) **and** every other material in
 ## the Night's tree, hidden ones included (tags, eye cards, plinth, looks), one quad each in front of the camera, plus
@@ -29,8 +28,8 @@ var world_view: Node = null
 var pip: Node = null
 ## Where the font primer draws (a CanvasLayer under the curtain).
 var primer_parent: Node = null
-## 3D: the view is WorldView3D; its camera, the world overlays and their context.
-var view3d: bool = false
+## Always true (the 2D warm steps went with the 2D view, r3d-integrate); the camera, the overlays and their context.
+var view3d: bool = true
 var cam: Camera3D = null
 var overlays: Object = null
 var octx: Object = null
@@ -66,13 +65,9 @@ func start(p_list: Dictionary, wv: Node, p_pip: Node, p_primer_parent: Node) -> 
 	_t0 = Time.get_ticks_msec()
 	_tex_i = 0
 	_tex_items = []
-	_steps = [["looks_bellows", _warm_looks.bind("bellows")], ["looks_hush", _warm_looks.bind("hush")],
+	_steps = [["materials", _warm_materials_3d], ["clips", _warm_clips_3d], ["overlays", _warm_overlays_3d],
 		["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
-		["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer]]
-	if view3d:
-		_steps = [["materials", _warm_materials_3d], ["clips", _warm_clips_3d], ["overlays", _warm_overlays_3d],
-			["fonts", _warm_fonts], ["pip", _warm_pip], ["audio", _warm_audio], ["textures", _warm_textures],
-			["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer], ["materials_done", _free_warm_3d]]
+		["ui_icons", _warm_ui_icons], ["fonts_done", _free_primer], ["materials_done", _free_warm_3d]]
 	set_process(true)
 
 
@@ -113,10 +108,6 @@ func finish_now() -> void:
 			continue   # resumable: call again until done
 		_steps.pop_front()
 		ran.append(String(s[0]))
-	# looks that started warming in the background: build the rest now
-	if not view3d:
-		_warm_looks("bellows")
-		_warm_looks("hush")
 	_blocking = false
 	if not done:
 		done = true
@@ -312,20 +303,6 @@ func _add_mat(m: Material, instanced: bool, reg: Dictionary, plain: Dictionary, 
 	elif not reg.has(k) and not plain.has(k):
 		plain[k] = m
 
-
-func _warm_looks(actor: String) -> void:
-	if world_view == null or not world_view.has_method("character"):
-		return
-	var cv: Variant = world_view.call("character", actor)
-	if not (cv is Node):
-		return
-	var rig: Variant = (cv as Node).get("rig")
-	var looks: Variant = (list.get("looks", {}) as Dictionary).get(actor, PackedStringArray())
-	if rig is Node and (rig as Node).has_method("warm_looks") and looks is PackedStringArray and not (looks as PackedStringArray).is_empty():
-		var ok := bool((rig as Node).call("warm_looks", looks))
-		var t0 := Time.get_ticks_msec()
-		while _blocking and not ok and Time.get_ticks_msec() - t0 < 1500:
-			ok = bool((rig as Node).call("warm_looks", looks, 50.0))
 
 
 func _warm_fonts() -> void:

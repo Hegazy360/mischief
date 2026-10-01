@@ -11,7 +11,8 @@ Checks
 * use_x inside the hotspot's room; the use point lies within 90 px of its own box (tap-assist);
 * stations: x within 80 px of the GDD §7.1 guide, stand_x inside the room, kinds as TECH §14;
 * links reference real rooms, doorway/door x on the shared wall, stairs ends inside their rooms;
-* landings, entries and quake props inside their rooms; every art path exists on disk.
+* landings, entries and quake props inside their rooms; every art path exists on disk (except the rooms' 2D
+  backdrops, deleted in R3D).
 Exit code 1 on any error. Usage: python3 tools/art/house/lint_rects.py [house.json]
 """
 import json
@@ -74,10 +75,8 @@ def lint(house):
     for r in house["rooms"]:
         if r["x1"] <= r["x0"]:
             errs.append("room %s empty range" % r["id"])
-        for k in ("bg", "fg"):
-            p = r.get("art", {}).get(k)
-            if not p or not os.path.exists(res_to_path(p)):
-                errs.append("room %s art.%s missing: %s" % (r["id"], k, p))
+        # R3D: the 2D room backdrops (art.bg / art.fg) were deleted with the 2D path; no live file loads them
+        # (the 3D rooms come from house3d.json), so their paths are no longer checked.
     # links
     for l in house["links"]:
         a, b = rooms.get(l["a"]), rooms.get(l["b"])

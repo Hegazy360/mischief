@@ -163,6 +163,22 @@ func _process(delta: float) -> void:
 	advance(delta)
 
 
+## C8's sim rule for a world that is not a SimWorld (fixtures, the sandbox's fake world): he is off this view and near
+## (≤ 1 nav link), heading to her room, or she is rigging (was PipView.rule, the 2D PiP's; the 2D view was removed).
+static func fallback_rule(snap: ViewSnapshot, view_rect: Rect2, layout: HouseLayout, heading_extra: bool = false) -> bool:
+	var b := snap.bellows
+	var h := snap.hush
+	if not b.present or not h.present:
+		return false
+	var body := Rect2(b.x - 90.0, b.y - 390.0, 180.0, 390.0)
+	if view_rect.intersects(body):
+		return false
+	var dist := layout.room_distance(h.room, b.room) if layout != null else 99
+	var near := dist >= 0 and dist <= 1
+	var heading := heading_extra or snap.path_rooms.has(h.room)
+	var rigging := h.state == "RIGGING"
+	return near or heading or rigging
+
 ## A reaction / payoff or an emote-less micro-gag is running (the lean mode opens the window for those).
 static func is_busy(snap: ViewSnapshot, bv: CharacterView3D) -> bool:
 	return snap.bellows.reacting or (bv != null and bv.ctx.mg != "" and bv.ctx.mg_emote == "")
@@ -203,7 +219,7 @@ func advance(delta: float) -> void:
 		sim_pip = SimVisibility.pip_shows(wv.world as SimWorld)
 		reason = SimVisibility.pip_reason(wv.world as SimWorld)
 	else:
-		sim_pip = PipView.rule(snap, main_cam.visible_world_rect() if main_cam != null else Rect2(), wv.layout, wv.entry_warning_active()) \
+		sim_pip = PipView3D.fallback_rule(snap, main_cam.visible_world_rect() if main_cam != null else Rect2(), wv.layout, wv.entry_warning_active()) \
 				or (snap.bellows.present and snap.bellows.room == snap.hush.room)
 		reason = &"room" if snap.bellows.room == snap.hush.room else &"adjacent"
 	var busy := PipView3D.is_busy(snap, wv.bellows_view)

@@ -173,6 +173,16 @@ func test_oneshot_loop_row_loops_for_its_length() -> void:
 	assert_eq(p.clip, "b/cravat")
 	assert_true(p.loop, "the pause (1–90 ticks) loops the cravat straighten")
 	assert_almost_eq(p.frame, 45.0, 1e-6)
+	# held longer than the clip (60 f here): the frame wraps instead of freezing on the last frame
+	a.oneshot_t = 75
+	a.oneshot_len = 90
+	p = _pick(a, 0.5)
+	assert_almost_eq(p.frame, 15.5, 1e-6, "75.5 wraps to 15.5 in a 60 f loop")
+	# a non-loop one-shot past its end is not wrapped (the rig holds its last frame)
+	a.oneshot = "bump"
+	a.oneshot_t = 75
+	p = _pick(a)
+	assert_almost_eq(p.frame, 75.0, 1e-6)
 
 
 func test_oneshot_overlay_rows_go_to_the_overlay_layer() -> void:
@@ -386,7 +396,7 @@ func test_merge_data_map_wins_key_by_key() -> void:
 
 
 func test_default_maps_use_the_schema() -> void:
-	for rig in ["hush", "bellows", "_mannequin"]:
+	for rig in ["hush", "bellows"]:   # (the 2D _mannequin rig was deleted in R3D)
 		var m := ClipMap.load_map(rig)
 		assert_true(m.has("idle"), "%s map has idle" % rig)
 	var h := ClipMap.load_map("hush")
@@ -436,7 +446,5 @@ func test_fixture_maps_resolve_on_real_fixture_clips() -> void:
 
 
 func assert_not_null_clip(id: String) -> void:
-	var c := ClipLib.get_clip(id)
-	assert_true(c != null, "%s loads through ClipLib" % id)
-	if c != null:
-		assert_eq(c.errors.size(), 0, "%s: %s" % [id, ", ".join(c.errors)])
+	var path := "res://tests/view/fixtures/anim/%s.json" % id
+	assert_gt(FIX.length_of(path), 0, "%s: the fixture clip parses with a length" % id)

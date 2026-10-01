@@ -122,6 +122,17 @@ static func piece_box(d: Dictionary) -> AABB:
 
 ## Every count and geometry rule on a Night's facts. `mantels` = the mantel-top boxes of the house (AABB; quake props
 ## "on the mantel" sit on one).
+## Lead ruling D13 (issues.md): the negative-space row of a room at the five-live-prop cap listed here is a WARNING,
+## not an error — the N02 hall holds five sim-anchored live props 0.84 m apart + the MIRROR, MIRROR landing (frozen
+## house.json, C3); N01/N02 are stage-door previews in the slice and R3 must re-space it.
+const NEG_SPACE_EXEMPT := {"n02_something_fishy": ["hall"]}
+
+
+## True when `night` / `room` holds the live-prop cap and D13 exempts its negative-space row.
+static func neg_space_exempt(night: String, room: String, live_n: int) -> bool:
+	return live_n >= MAX_LIVE and (NEG_SPACE_EXEMPT.get(night, []) as Array).has(room)
+
+
 static func check_facts(facts: Dictionary, mantels: Array = []) -> Array:
 	var out: Array = []
 	var night := String(facts.get("night", ""))
@@ -176,12 +187,16 @@ static func check_facts(facts: Dictionary, mantels: Array = []) -> Array:
 					out.append(Lint3D.issue(LINT, "quake_height", Lint3D.ERROR, night, rid, String(d["id"]), b.position.y,
 						QUAKE_MIN_Y, OWNER_SETS, "quake props hang ≥ 2.2 m or sit on the mantel (REDESIGN §3.5)"))
 		var gap := free_stretch(rm)
-		# a room nobody acts in (no live prop: the porch's doorstep) only warns
-		var ns_level := (Lint3D.ERROR if not live.is_empty() else Lint3D.WARNING) if float(gap["len"]) < NEG_SPACE_M - 0.005 \
+		# a room nobody acts in (no live prop: the porch's doorstep) only warns; so does a room the lead exempted at
+		# the five-live-prop cap (D13: the N02 hall, a stage-door preview — R3 re-spaces it)
+		var ns_err := not live.is_empty() and not neg_space_exempt(night, rid, live.size())
+		var ns_level := (Lint3D.ERROR if ns_err else Lint3D.WARNING) if float(gap["len"]) < NEG_SPACE_M - 0.005 \
 			else Lint3D.INFO
+		var ns_why := "longest lane stretch with nothing behind it at head height; blockers %s" % ", ".join(gap["blockers"])
+		if not ns_err and not live.is_empty() and float(gap["len"]) < NEG_SPACE_M - 0.005:
+			ns_why += " — WARNING by lead ruling D13 (a room at the %d-live-prop cap; R3 re-spaces it)" % MAX_LIVE
 		out.append(Lint3D.issue(LINT, "negative_space", ns_level,
-			night, rid, "x %.2f–%.2f m" % [gap["x0"], gap["x1"]], float(gap["len"]), NEG_SPACE_M, OWNER_SETS,
-			"longest lane stretch with nothing behind it at head height; blockers %s" % ", ".join(gap["blockers"])))
+			night, rid, "x %.2f–%.2f m" % [gap["x0"], gap["x1"]], float(gap["len"]), NEG_SPACE_M, OWNER_SETS, ns_why))
 		var fam := {}
 		var groups := {}
 		for l in live:

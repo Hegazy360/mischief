@@ -36,8 +36,9 @@ func test_every_basic_residue_and_lazy_textures_are_warmed() -> void:
 	var l := NightWarm.list("g0_sneeze")
 	var looks: PackedStringArray = (l["looks"] as Dictionary)["bellows"]
 	assert_has(looks, "SOAKED", "landings leave residues no prank lists (the sink)")
-	assert_has(looks, "FRAZZLED:blind", "the blind variant page")
+	assert_has(looks, "BLINDED", "the blinded look (3D: the flipped bouffant)")
 	assert_has((l["looks"] as Dictionary)["hush"], "TOMATO", "Hush's doorstep tomato")
+	assert_has((l["looks"] as Dictionary)["hush"], "CARRY_KIPPER", "her carries (rig3d.json)")
 	var tex: PackedStringArray = l["textures"]
 	assert_has(tex, "res://art/ui/glyph_stars.svg", "the dizzy glyph")
 	assert_has(tex, "res://art/icons/activities/tea.svg", "thought-bubble icons")

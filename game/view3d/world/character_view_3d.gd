@@ -43,6 +43,8 @@ const STEP_DOWN_CLIP := "hush/rig_step_down"
 const GLANCE_CLIP := "hush/act_glance"
 const FALLBACK_REACTION := "bellows/st_double_take"
 const PLINTH_POP_S := 0.1
+## The freeze plinth's height (plinth.glb, origin at the floor): the rig stands on top of it while frozen.
+const PLINTH_H_M := 0.12
 const SHIVER_S := 0.15
 const TOMATO_S := 4.0
 const LOOK_WEIGHT_EASE := 6.0
@@ -129,6 +131,9 @@ var _landed := false
 var _tier := -1
 var _looks := PackedStringArray()
 var _looks_key := ""
+## Hush's carry looks (rig3d.json) and the carried items they were last set for.
+const CARRY_LOOKS: PackedStringArray = ["CARRY_SQUEAKER", "CARRY_MAGNIFIER", "CARRY_KIPPER"]
+var _carry_last := PackedStringArray()
 var _costume := ""
 var _specs := ""
 var _slots: Dictionary = {}
@@ -137,6 +142,8 @@ var _last_prank := ""
 var _state := ""
 var _reacting := false
 var _moving := false
+## Whether the last moving frame was a run (the stop plays `flavour:skid`, a walk's stop `flavour:arrive`).
+var _running := false
 var _snap_facing := 0
 var _idle_s := 0.0
 var _fidget_n := 0
@@ -227,6 +234,9 @@ func setup(actor_id: String, rig_variant: String = "", force_stand_in: bool = fa
 		if rig == null:
 			_make_stand_in()
 	_make_blob()
+	if actor == "hush":
+		# built hidden at setup (drawn by the warm-up), never lazily at the first freeze (a compile in PLAY)
+		_ensure_plinth()
 
 
 func _try_rig() -> void:
@@ -515,6 +525,7 @@ func reset() -> void:
 	_specs = ""
 	_looks = PackedStringArray()
 	_looks_key = "#"
+	_carry_last = PackedStringArray()
 	_lk_costume = "\u0001"
 	_slots.clear()
 	_rx_key = ""
@@ -863,6 +874,10 @@ func _update_ctx(cur: ViewSnapshot.Actor, vf: float) -> void:
 	# rigging: glances and the stepped-rig bookkeeping
 	if actor == "hush":
 		_rigging_extras(cur, vf)
+	if actor == "hush" and _flavour_pending == "":
+		_flavour_pending = CharacterView3D.stop_flavour(_moving, cur.moving, _running, cur.reacting)
+	if cur.moving:
+		_running = cur.running
 	_state = cur.state
 	_reacting = cur.reacting
 	_moving = cur.moving
@@ -1121,6 +1136,12 @@ func _play_overlay() -> void:
 		mask = "head"
 	if want != "" and want != _ov_clip:
 		if mask == "":
+			# the clip's own sidecar mask first (e.g. mg_admire_in_kettle is authored for `head`: an `upper` overlay
+			# would drag the lent jar and spoon with its hands); clip_rules.json only for a sidecar without one
+			var ovc := ClipLib3D.get_clip(want)
+			if ovc != null and ovc.layer == "overlay" and ovc.mask != "":
+				mask = ovc.mask
+		if mask == "":
 			mask = ClipRules.mask_of(_pick.ov_key, actor)
 		if bool(_has.get("play_overlay", false)):
 			var tq := Time.get_ticks_usec() if profile else 0
@@ -1197,17 +1218,48 @@ func _known_slots(want: Dictionary) -> Dictionary:
 
 ## Hush's TOMATO look: on from the doorstep splat until 4 s after control returns.
 func _apply_hush_looks(cur: ViewSnapshot.Actor) -> void:
-	if cur.oneshot == "caught:doorstep" and cur.oneshot_t >= CaughtStager.DOORSTEP_KNOCK_F + 6:
+	if cur.oneshot == "caught:doorstep" and cur.oneshot_t >= CaughtStager3D.DOORSTEP_KNOCK_F + 6:
 		_tomato_s = TOMATO_S
 	elif _tomato_s > 0.0:
 		_tomato_s -= _view_dt
 	var on := _tomato_s > 0.0
-	if on != _looks.has("TOMATO") and bool(_has.get("set_look", false)):
-		rig.call("set_look", "TOMATO", on)
-		if on:
-			_looks.append("TOMATO")
-		else:
-			_looks.remove_at(_looks.find("TOMATO"))
+	_set_hush_look("TOMATO", on)
+	# the carried items in her hands (rig3d.json CARRY_<ITEM> attachments on carry_1 / carry_2; r3d-cast-hush)
+	if cur.carrying != _carry_last:
+		_carry_last = cur.carrying.duplicate()
+		var want := CharacterView3D.carry_looks(_carry_last, _known_looks(CARRY_LOOKS))
+		for l in CARRY_LOOKS:
+			_set_hush_look(l, want.has(l))
+
+
+## The flavour of a stop (clip_rules `flavour:skid` / `flavour:arrive`, 3D): Hush's run ends in the skid, a walk in
+## the small arrival settle; nothing while reacting or when she did not just stop. Pure.
+static func stop_flavour(was_moving: bool, moving: bool, was_running: bool, reacting: bool) -> String:
+	if not was_moving or moving or reacting:
+		return ""
+	return "skid" if was_running else "arrive"
+
+
+## One Hush look on / off (kept in `_looks`; a no-op when unchanged or the rig has no `set_look`).
+func _set_hush_look(look: String, on: bool) -> void:
+	if on == _looks.has(look) or not bool(_has.get("set_look", false)):
+		return
+	rig.call("set_look", look, on)
+	if on:
+		_looks.append(look)
+	else:
+		_looks.remove_at(_looks.find(look))
+
+
+## The CARRY_<ITEM> looks for the items she carries, limited to the looks the descriptor has (`known`; at most two:
+## one per carry socket, in carrying order). Pure.
+static func carry_looks(carrying: PackedStringArray, known: PackedStringArray) -> PackedStringArray:
+	var out := PackedStringArray()
+	for it in carrying:
+		var l := "CARRY_" + String(it).to_upper()
+		if known.has(l) and not out.has(l) and out.size() < 2:
+			out.append(l)
+	return out
 
 
 ## The looks of `list` the rig's descriptor knows (an unknown look is dropped, never an error).
@@ -1361,8 +1413,13 @@ func _update_freeze(cur: ViewSnapshot.Actor, dt: float) -> void:
 			var k := _plinth_t / PLINTH_POP_S
 			plinth.visible = true
 			plinth.scale = Vector3(1.0, maxf(0.01, k * (1.0 + 0.15 * sin(k * PI))), 1.0)
+			# she stands ON the plinth: lift the rig with its pop (r3d-cast-hush P2 request — the shoes sank into it)
+			if uses_rig:
+				rig.position.y = PLINTH_H_M * plinth.scale.y
 		else:
 			plinth.visible = false
+			if uses_rig and rig.position.y != 0.0:
+				rig.position.y = 0.0
 	if _shiver_t > 0.0:
 		_shiver_t = maxf(0.0, _shiver_t - dt)
 		var s := sin(_shiver_t * 120.0) * 0.012 * (_shiver_t / SHIVER_S)
@@ -1381,6 +1438,8 @@ func _ensure_plinth() -> void:
 		var ps: Variant = load(PLINTH_SCENE)
 		if ps is PackedScene:
 			plinth = (ps as PackedScene).instantiate() as Node3D
+			if plinth != null:
+				_stone_plinth(plinth)
 	if plinth == null:
 		var mi := MeshInstance3D.new()
 		var cy := CylinderMesh.new()
@@ -1400,6 +1459,22 @@ func _ensure_plinth() -> void:
 	plinth.name = "Plinth"
 	add_child(plinth)
 	plinth.visible = false
+
+
+## plinth.glb carries a bare imported StandardMaterial3D (a flat black disc in the unshaded toon world, r3d-night):
+## draw every mesh of it with the set shader in the marble colour, like the stand-in and the Cast page.
+func _stone_plinth(root: Node) -> void:
+	var m := ShaderMaterial.new()
+	m.shader = load(View3DConst.SH_SET)
+	m.set_shader_parameter("albedo_color", View3DConst.STONE)
+	MaterialWarm3D.register(m, &"set")
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is MeshInstance3D:
+			(n as MeshInstance3D).material_override = m
+		for c in n.get_children():
+			stack.append(c)
 
 
 # --- driverless (Busted Cam, Gag Reel, curtain call) ------------------------------------------------

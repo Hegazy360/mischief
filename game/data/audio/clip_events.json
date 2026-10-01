@@ -102,56 +102,56 @@
    ]
   },
   "bellows/act_warmup": {
-   "len_f": 1200,
-   "phase": "G",
+   "len_f": 480,
+   "phase": "R3D",
    "events": [
     {
-     "f": 0,
+     "f": 40,
      "type": "voice",
      "id": "vo_bellows_warmup_1"
     },
     {
-     "f": 5,
+     "f": 45,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 15,
+     "f": 55,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 25,
+     "f": 65,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 35,
+     "f": 75,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 46,
+     "f": 86,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 600,
+     "f": 250,
      "type": "voice",
      "id": "vo_bellows_warmup_3"
     },
     {
-     "f": 604,
+     "f": 254,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 616,
+     "f": 266,
      "type": "sfx",
      "id": "vase_nudge"
     },
     {
-     "f": 628,
+     "f": 278,
      "type": "sfx",
      "id": "vase_nudge"
     }
@@ -427,8 +427,8 @@
    ]
   },
   "hush/loco_walk": {
-   "len_f": 80,
-   "phase": "G",
+   "len_f": 54,
+   "phase": "R3D",
    "events": [
     {
      "f": 0,
@@ -436,37 +436,7 @@
      "id": "step_pizz_up"
     },
     {
-     "f": 10,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 20,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 30,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 40,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 50,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 60,
-     "type": "sfx",
-     "id": "step_pizz_up"
-    },
-    {
-     "f": 70,
+     "f": 27,
      "type": "sfx",
      "id": "step_pizz_up"
     }
@@ -521,70 +491,6 @@
      "f": 50,
      "type": "sfx",
      "id": "step_pizz_up"
-    }
-   ]
-  },
-  "hush/act_tinker_q": {
-   "len_f": 48,
-   "phase": "G",
-   "events": [
-    {
-     "f": 6,
-     "type": "sfx",
-     "id": "tinker"
-    },
-    {
-     "f": 22,
-     "type": "sfx",
-     "id": "tinker"
-    },
-    {
-     "f": 38,
-     "type": "sfx",
-     "id": "tinker"
-    }
-   ]
-  },
-  "hush/act_tinker_s": {
-   "len_f": 90,
-   "phase": "G",
-   "events": [
-    {
-     "f": 4,
-     "type": "sfx",
-     "id": "tinker_frantic"
-    },
-    {
-     "f": 48,
-     "type": "sfx",
-     "id": "tinker_frantic",
-     "vol_db": -2.0
-    }
-   ]
-  },
-  "hush/act_tinker_b": {
-   "len_f": 150,
-   "phase": "G",
-   "events": [
-    {
-     "f": 4,
-     "type": "sfx",
-     "id": "tinker_frantic"
-    },
-    {
-     "f": 48,
-     "type": "sfx",
-     "id": "tinker_frantic"
-    },
-    {
-     "f": 92,
-     "type": "sfx",
-     "id": "tinker"
-    },
-    {
-     "f": 118,
-     "type": "sfx",
-     "id": "hush_phew"
     }
    ]
   },
@@ -681,6 +587,611 @@
    "len_f": 18,
    "phase": "G",
    "events": []
+  },
+  "bellows/act_fixup_mirror": {
+   "len_f": 240,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 40,
+     "type": "voice",
+     "id": "vo_bellows_hum",
+     "vol_db": -3.0
+    },
+    {
+     "f": 152,
+     "type": "voice",
+     "id": "vo_bellows_hum",
+     "vol_db": -3.0
+    }
+   ]
+  },
+  "bellows/act_hunt": {
+   "len_f": 180,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "creak"
+    },
+    {
+     "f": 90,
+     "type": "sfx",
+     "id": "creak"
+    }
+   ]
+  },
+  "bellows/bit_livid": {
+   "len_f": 120,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 30,
+     "type": "sfx",
+     "id": "stomp"
+    },
+    {
+     "f": 30,
+     "type": "voice",
+     "id": "vo_bellows_who_squeaked"
+    },
+    {
+     "f": 57,
+     "type": "sfx",
+     "id": "meltdown_stomp"
+    }
+   ]
+  },
+  "bellows/bit_tea": {
+   "len_f": 100,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 4,
+     "type": "sfx",
+     "id": "tea_slurp"
+    },
+    {
+     "f": 17,
+     "type": "voice",
+     "id": "vo_bellows_pff"
+    },
+    {
+     "f": 28,
+     "type": "voice",
+     "id": "vo_bellows_ugh"
+    },
+    {
+     "f": 58,
+     "type": "sfx",
+     "id": "sniffle"
+    }
+   ]
+  },
+  "bellows/bit_warmup": {
+   "len_f": 90,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 8,
+     "type": "voice",
+     "id": "vo_bellows_yodel"
+    },
+    {
+     "f": 46,
+     "type": "voice",
+     "id": "vo_bellows_the_pipes"
+    }
+   ]
+  },
+  "bellows/cc_wander_on": {
+   "len_f": 144,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 16,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 32,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 48,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 64,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 80,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 96,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 112,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    },
+    {
+     "f": 128,
+     "type": "sfx",
+     "id": "bellows_step",
+     "vol_db": -4.0
+    }
+   ]
+  },
+  "bellows/cue_picture_bonk": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 12,
+     "type": "sfx",
+     "id": "bonk"
+    },
+    {
+     "f": 40,
+     "type": "voice",
+     "id": "vo_bellows_hmph"
+    }
+   ]
+  },
+  "bellows/loco_irked": {
+   "len_f": 28,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "bellows_step"
+    },
+    {
+     "f": 14,
+     "type": "sfx",
+     "id": "bellows_step"
+    }
+   ]
+  },
+  "bellows/loco_stomp": {
+   "len_f": 26,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "stomp"
+    },
+    {
+     "f": 13,
+     "type": "sfx",
+     "id": "stomp"
+    }
+   ]
+  },
+  "bellows/mg_comb_flourish": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 6,
+     "type": "sfx",
+     "id": "zip",
+     "vol_db": -6.0
+    },
+    {
+     "f": 20,
+     "type": "sfx",
+     "id": "sparkle",
+     "vol_db": -4.0
+    }
+   ]
+  },
+  "bellows/mg_cravat_tug": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 10,
+     "type": "sfx",
+     "id": "cravat_tug",
+     "vol_db": -3.0
+    },
+    {
+     "f": 27,
+     "type": "sfx",
+     "id": "cravat_ping",
+     "vol_db": -4.0
+    }
+   ]
+  },
+  "bellows/mg_peer_under_piano": {
+   "len_f": 60,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 38,
+     "type": "voice",
+     "id": "vo_bellows_hmm"
+    }
+   ]
+  },
+  "bellows/mg_walk_hum": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "voice",
+     "id": "vo_bellows_hum"
+    }
+   ]
+  },
+  "bellows/mg_walk_scale": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "voice",
+     "id": "vo_bellows_scales"
+    }
+   ]
+  },
+  "bellows/rx_dizzy_spin_a": {
+   "len_f": 169,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "record_scratch"
+    },
+    {
+     "f": 12,
+     "type": "voice",
+     "id": "vo_bellows_dizzy_babble"
+    },
+    {
+     "f": 40,
+     "type": "sfx",
+     "id": "spin"
+    },
+    {
+     "f": 88,
+     "type": "sfx",
+     "id": "thud"
+    },
+    {
+     "f": 89,
+     "type": "sfx",
+     "id": "dizzy_tweets"
+    },
+    {
+     "f": 149,
+     "type": "voice",
+     "id": "vo_bellows_ugh"
+    }
+   ]
+  },
+  "bellows/st_straighten_cravat": {
+   "len_f": 92,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 20,
+     "type": "sfx",
+     "id": "cravat_tug",
+     "vol_db": -3.0
+    }
+   ]
+  },
+  "bellows/st_suspicious": {
+   "len_f": 60,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 10,
+     "type": "sfx",
+     "id": "sniffle",
+     "vol_db": -4.0
+    }
+   ]
+  },
+  "hush/act_bow": {
+   "len_f": 150,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 28,
+     "type": "sfx",
+     "id": "bow_creak"
+    }
+   ]
+  },
+  "hush/act_rummage": {
+   "len_f": 36,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "rustle"
+    },
+    {
+     "f": 18,
+     "type": "sfx",
+     "id": "rustle"
+    }
+   ]
+  },
+  "hush/act_wheeze": {
+   "len_f": 60,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 0,
+     "type": "sfx",
+     "id": "wheeze_chicken"
+    }
+   ]
+  },
+  "hush/freeze_5": {
+   "len_f": 150,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 5,
+     "type": "sfx",
+     "id": "freeze_clack"
+    }
+   ]
+  },
+  "hush/freeze_6": {
+   "len_f": 150,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 5,
+     "type": "sfx",
+     "id": "freeze_clack"
+    }
+   ]
+  },
+  "hush/freeze_7": {
+   "len_f": 150,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 5,
+     "type": "sfx",
+     "id": "freeze_clack"
+    }
+   ]
+  },
+  "hush/freeze_8": {
+   "len_f": 150,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 5,
+     "type": "sfx",
+     "id": "freeze_clack"
+    }
+   ]
+  },
+  "hush/loco_arrive": {
+   "len_f": 8,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 6,
+     "type": "sfx",
+     "id": "land_soft"
+    }
+   ]
+  },
+  "hush/loco_skid": {
+   "len_f": 6,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 2,
+     "type": "sfx",
+     "id": "slide_down_short"
+    }
+   ]
+  },
+  "hush/rig_achoo_ria": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 6,
+     "type": "sfx",
+     "id": "stool_creak"
+    },
+    {
+     "f": 16,
+     "type": "sfx",
+     "id": "pepper_shake"
+    },
+    {
+     "f": 26,
+     "type": "sfx",
+     "id": "pepper_shake"
+    },
+    {
+     "f": 36,
+     "type": "sfx",
+     "id": "pepper_shake"
+    },
+    {
+     "f": 47,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    }
+   ]
+  },
+  "hush/rig_allegro_go_go": {
+   "len_f": 48,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 13,
+     "type": "sfx",
+     "id": "creak"
+    },
+    {
+     "f": 22,
+     "type": "sfx",
+     "id": "clack"
+    }
+   ]
+  },
+  "hush/rig_high": {
+   "len_f": 120,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 15,
+     "type": "sfx",
+     "id": "tiptoe"
+    },
+    {
+     "f": 27,
+     "type": "sfx",
+     "id": "slide_up_short"
+    },
+    {
+     "f": 59,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 77,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 95,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 110,
+     "type": "sfx",
+     "id": "land_soft"
+    }
+   ]
+  },
+  "hush/rig_low": {
+   "len_f": 144,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 10,
+     "type": "sfx",
+     "id": "thud"
+    },
+    {
+     "f": 48,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 69,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 90,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 111,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 132,
+     "type": "sfx",
+     "id": "boing_small"
+    }
+   ]
+  },
+  "hush/rig_mid": {
+   "len_f": 96,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 28,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 52,
+     "type": "sfx",
+     "id": "tinker"
+    },
+    {
+     "f": 76,
+     "type": "sfx",
+     "id": "tinker"
+    }
+   ]
+  },
+  "hush/rig_step_down": {
+   "len_f": 8,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 6,
+     "type": "sfx",
+     "id": "step_pizz_up"
+    }
+   ]
+  },
+  "hush/st_yanked": {
+   "len_f": 36,
+   "phase": "R3D",
+   "events": [
+    {
+     "f": 4,
+     "type": "sfx",
+     "id": "whoosh"
+    },
+    {
+     "f": 27,
+     "type": "sfx",
+     "id": "land_soft"
+    }
+   ]
   }
  },
  "event_clips": [
@@ -796,18 +1307,22 @@
    "event": "rig_start",
    "filter": "",
    "clips": [
-    "hush/act_tinker_q",
-    "hush/act_tinker_s",
-    "hush/act_tinker_b"
+    "hush/rig_achoo_ria",
+    "hush/rig_allegro_go_go",
+    "hush/rig_mid",
+    "hush/rig_high",
+    "hush/rig_low"
    ]
   },
   {
    "event": "rig_step_done",
    "filter": "",
    "clips": [
-    "hush/act_tinker_q",
-    "hush/act_tinker_s",
-    "hush/act_tinker_b"
+    "hush/rig_achoo_ria",
+    "hush/rig_allegro_go_go",
+    "hush/rig_mid",
+    "hush/rig_high",
+    "hush/rig_low"
    ]
   },
   {
@@ -838,7 +1353,11 @@
     "hush/freeze_1",
     "hush/freeze_2",
     "hush/freeze_3",
-    "hush/freeze_4"
+    "hush/freeze_4",
+    "hush/freeze_5",
+    "hush/freeze_6",
+    "hush/freeze_7",
+    "hush/freeze_8"
    ]
   },
   {

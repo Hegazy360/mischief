@@ -374,16 +374,18 @@ comb = T.merge(*[T.se_blob(comb_c + Vector((0, 0.011 * k, 0.004 - 0.004 * abs(k)
 body.add(comb, "clarence_comb", name="clarence_comb", outline=0.7)
 
 # =====================================================================================================
-# THE PEPPER POT (ACHOO-RIA!): oversized x1.5, 0.35 m, red cap, on prop_r (hidden by default via rig3d.json)
+# THE PEPPER POT (ACHOO-RIA!): oversized x1.5, 0.35 m, on prop_r (hidden by default via rig3d.json). It is the SET's pot
+# once she snatches it (honey shelf, tools/art3d/set/build.py prop_honey_jar): white body, dark cap, the same squat belly
+# (r3d-integrate, r3d-cast-hush request) — the red cap read as the honey lid and the white body as her glove in game.
+# The holes end (fx_pepper) stays 0.215 m out of the fist (rig_achoo_ria's spout targets); 0.135 m below it (her beret).
 # =====================================================================================================
 gp = Vector(EX["prop_r"][0])
 ax = Vector((0, -1, 0))            # prop_r's axis: out of the fist on the thumb side = the cap end
 p0, p1 = gp - ax * 0.135, gp + ax * 0.215
-bm = T.capsule_chain([p0, gp - ax * 0.02, p1 - ax * 0.04, p1], [0.050, 0.046, 0.052, 0.040], "pot", seg=9,
+bm = T.capsule_chain([p0, gp - ax * 0.02, p1 - ax * 0.07, p1], [0.064, 0.066, 0.060, 0.044], "pot", seg=9,
                      cap_rings=2, samples_per_m=16)
-T.bisect(bm, gp + ax * 0.150, ax)
-T.bisect(bm, p0 + ax * 0.045, ax)
-T.recolor(bm, lambda c, n, cur: "pot_cap" if (c - gp).dot(ax) > 0.150 else ("pot_band" if (c - gp).dot(ax) < -0.090 else None))
+T.bisect(bm, gp + ax * 0.140, ax)
+T.recolor(bm, lambda c, n, cur: "pot_cap" if (c - gp).dot(ax) > 0.140 else None)
 holes = [T.se_blob(p1 + ax * 0.034 + Vector((dx, 0, dz)), 0.007, 0.004, 0.007, 2.0, "black", n=2)
          for dx, dz in ((-0.013, 0.0), (0.013, 0.0), (0.0, 0.013), (0.0, -0.013))]
 body.add(T.merge(bm, *holes), "prop_r", name="pepper_pot", outline=0.8)

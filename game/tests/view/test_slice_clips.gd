@@ -122,6 +122,20 @@ func test_detours_loco_tiers_and_last_beats() -> void:
 	assert_false(d.has("hush/act_tinker_s"), "no S-prep step in this Night")
 
 
+func test_t3_needs_livid_before_a_prank_and_a_rules_row_can_drop_a_bit() -> void:
+	var db := _db()
+	(db["episodes"]["n01_throat_tea"] as Dictionary)["script"] = [{"kind": "prank", "prank": "achoo_ria"},
+		{"kind": "prank", "prank": "in_a_pickle"}]   # 35 + 45 = 80: Livid only after both
+	var d := _by(SliceClips.build_from(db))
+	assert_has(d, "bellows/loco_stomp", "Livid after both pranks → walk@tier3")
+	assert_false(d.has("bellows/beat_tear"), "no reaction starts at T3 (35 < 70 before the second)")
+	assert_has(d, "bellows/beat_slow_burn", "the every-4th slow burn stays")
+	db = _db()
+	(db["rules"] as Array).append({"key": "bit:bit_tea", "rig": "bellows", "clip": "bellows/bit_tea", "layer": "base",
+		"len": {"src": "squeak_bits"}, "episodes": []})
+	assert_false(_by(SliceClips.build_from(db)).has("bellows/bit_tea"), "a bit:<id> row's episodes drop the bit")
+
+
 func test_pip_skin_swaps_in_the_overrides() -> void:
 	var d := _by(SliceClips.build_from(_db(), "pip"))
 	assert_has(d, "bellows/lec_broom_a")

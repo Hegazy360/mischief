@@ -575,8 +575,9 @@ func _home_xform() -> Transform3D:
 # --- lend / return (set-piece hand-offs, index §7.2) ------------------------------------------
 
 ## Slides the piece into `to` (a socket node) over `frames` (60 fps), keeping its state, armed look, tag and
-## particles. The world transform is unchanged on the first frame (no pop).
-func lend(to: Node3D, frames: int = 6) -> void:
+## particles. The world transform is unchanged on the first frame (no pop). `at` is the end pose in the socket's
+## space (identity: on the socket; the picture frame passes a camera-facing pose on Bellows' head).
+func lend(to: Node3D, frames: int = 6, at: Transform3D = Transform3D.IDENTITY) -> void:
 	if to == null:
 		return
 	if _lent_to == null:
@@ -593,7 +594,7 @@ func lend(to: Node3D, frames: int = 6) -> void:
 		to.add_child(self)
 		transform = to.global_transform.affine_inverse() * g if to.is_inside_tree() else g
 	_slide_from = transform
-	_slide_to = Transform3D.IDENTITY
+	_slide_to = at
 	_start_slide(frames)
 
 

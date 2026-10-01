@@ -100,3 +100,33 @@ static func thresholds(s: String) -> Dictionary:
 ## on the CPU box one frame (≈ 85–125 ms) can exceed a sub-frame threshold.
 static func within_quantised(value_s: float, threshold_s: float, frame_s: float) -> bool:
 	return value_s <= maxf(threshold_s, frame_s) + 0.0005
+
+
+## The sneeze's accent staging (r3d-integrate §3.2; E2eProbe `sneeze`): the CHOO on its clip frame (94, frame-
+## quantised to one measured frame), the 1.4 dolly punch-in, the 5 f hit-stop, a caption, the flipped bouffant, the
+## stool never doubled and his pelvis in the sink's landing box on the landing frame. `frame_ms` = the run's measured
+## frame (p95). Empty = pass.
+static func sneeze_failures(sn: Dictionary, frame_ms: float) -> PackedStringArray:
+	var out := PackedStringArray()
+	if sn.is_empty() or not bool(sn.get("seen", false)):
+		out.append("sneeze: bellows/rx_sneeze_blast_a never played")
+		return out
+	var tol := maxf(2.0, ceilf(frame_ms / (1000.0 / 60.0)) + 1.0)
+	var af := float(sn.get("accent_frame", -1.0))
+	if af < 0.0 or absf(af - 94.0) > tol:
+		out.append("sneeze: the sim's accent tick shows clip frame %.1f, expected 94 ± %.0f" % [af, tol])
+	if float(sn.get("zoom_max", 0.0)) < 1.35:
+		out.append("sneeze: punch-in zoom %.2f < 1.4" % float(sn.get("zoom_max", 0.0)))
+	if int(sn.get("hitstop_us", 0)) < 66000:
+		out.append("sneeze: hit-stop %d µs < 5 frames" % int(sn.get("hitstop_us", 0)))
+	if (sn.get("captions", []) as Array).is_empty():
+		out.append("sneeze: no caption")
+	if String(sn.get("bouffant_after", "")) != "flipped":
+		out.append("sneeze: bouffant after the CHOO is '%s', expected flipped" % String(sn.get("bouffant_after", "")))
+	if int(sn.get("stool_doubled", 0)) > 0:
+		out.append("sneeze: the stool was drawn twice on %d frames" % int(sn.get("stool_doubled", 0)))
+	if not bool(sn.get("land_in_box", false)):
+		out.append("sneeze: pelvis %s not in the sink on clip frame %.1f" % [str(sn.get("land_pelvis", [])),
+			float(sn.get("land_frame", -1.0))])
+	return out
+

@@ -8,7 +8,6 @@
       "kitchen_pantry_shelf": {"sfx": "cupboard"}}, "default": {"sfx": "cupboard"}}},
     "pick": {"sfx": "zip", "vol_db": -8.0, "pan": "hush"},
     "item_home": {"sfx": "whoosh", "vol_db": -6.0, "pan": "hush"},
-    "rig_start": {"by": {"field": "prank", "map": {"achoo_ria": {"sfx": "pepper_shake", "pan": "hush", "vol_db": -4.0}}}},
     "rig_step_done": {"sfx": "rig_done"},
     "rigged": [{"sting": "rigged"}, {"crowd": "t0", "delay_s": 0.35}],
     "hide": {"by": {"field": "watched", "map": {"true": {"crowd": "gasp"}}}},

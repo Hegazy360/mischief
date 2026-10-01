@@ -608,13 +608,13 @@ func set_decor_visible(id: String, on: bool) -> void:
 
 
 ## Lends a set piece (a hotspot prop or a furniture / decor piece; "set:<id>" accepted) to a socket node over
-## `frames`; returns the piece (null when not built).
-func lend(id: String, to: Node3D, frames: int = 6) -> Node3D:
+## `frames`, ending at `at` in the socket's space (Prop3D.lend); returns the piece (null when not built).
+func lend(id: String, to: Node3D, frames: int = 6, at: Transform3D = Transform3D.IDENTITY) -> Node3D:
 	var pid := id.substr(4) if id.begins_with("set:") else id
 	var p: Prop3D = _props.get(pid, _by_decor.get(pid, null))
 	if p == null or to == null:
 		return null
-	p.lend(to, frames)
+	p.lend(to, frames, at)
 	_lent[pid] = p
 	return p
 

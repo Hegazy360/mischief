@@ -69,7 +69,7 @@ func test_every_boot_config_key_has_its_default() -> void:
 	assert_true(bool((missing["render"] as Dictionary)["outline"]))
 	var part := BootConfig.merged({"view": "2D", "render": {"render_scale": 0.2, "outline": false}, "bellows_window": "wide",
 		"show_previews": "yes"})
-	assert_eq(String(part["view"]), "2d", "case-insensitive view")
+	assert_eq(String(part["view"]), "3d", "the 2D view is gone: \"2d\" reads as the default")
 	assert_almost_eq(float((part["render"] as Dictionary)["render_scale"]), 0.5, 0.0001, "render scale clamped")
 	assert_false(bool((part["render"] as Dictionary)["outline"]))
 	assert_true(bool((part["render"] as Dictionary)["msaa_3d"]), "a missing render key keeps its default")
@@ -92,29 +92,23 @@ func test_the_shipped_boot_config_is_the_owner_apks() -> void:
 
 
 func test_night_args_3d_flags() -> void:
-	var a := NightArgs.parse(PackedStringArray(["--view=3d", "--msaa=off", "--no-captions", "--hud=off", "--window=lean"]))
-	assert_eq(String(a["view"]), "3d")
+	var a := NightArgs.parse(PackedStringArray(["--msaa=off", "--no-captions", "--hud=off", "--window=lean"]))
+	assert_false(a.has("view"), "no --view switch (the 2D view was removed)")
 	assert_eq(String(a["msaa"]), "off")
 	assert_true(bool(a["no_captions"]))
 	assert_false(bool(a["hud"]))
 	assert_eq(String(a["window"]), "lean")
-	var b := NightArgs.parse(PackedStringArray(["--view=4d", "--msaa=2x"]))
-	assert_eq(String(b["view"]), "", "an unknown view is ignored")
+	var b := NightArgs.parse(PackedStringArray(["--msaa=2x"]))
 	assert_eq(String(b["msaa"]), "2")
 	assert_true(bool(b["hud"]), "the HUD is on by default")
 
 
 # --- the view switch, build, play ------------------------------------------------------------------------------
 
-func test_the_view_switch() -> void:
+## The 3D view is the only one (r3d-integrate removed the 2D path): even a stale `view: "2d"` param builds it.
+func test_the_night_is_always_3d() -> void:
 	allow_errors()
-	var n2 := _make({"episode": "g0_sneeze", "from": "test", "skip_intro": true, "view": "2d"})
-	assert_eq(n2.view_mode, "2d")
-	assert_true(n2.world_view is WorldView, "2d: WorldView")
-	assert_true(n2.cam is CameraDirector, "2d: CameraDirector")
-	assert_true(n2.overlays == null, "2d: no world overlays")
-	await _free(n2)
-	var n3 := _make({"episode": "g0_sneeze", "from": "test", "skip_intro": true, "view": "3d"})
+	var n3 := _make({"episode": "g0_sneeze", "from": "test", "skip_intro": true, "view": "2d"})
 	assert_eq(n3.view_mode, "3d")
 	assert_true(n3.world_view is WorldView3D, "3d: WorldView3D")
 	assert_true(n3.cam is CameraDirector3D, "3d: CameraDirector3D")
@@ -124,9 +118,6 @@ func test_the_view_switch() -> void:
 	assert_true(n3.stalls.hidden_at_rest, "3d: the Stalls are hidden at rest")
 	assert_true(n3.night_input.view3d, "3d: taps are screen px on projected rects")
 	await _free(n3)
-	var nd := _make({"episode": "g0_sneeze", "from": "test", "skip_intro": true})
-	assert_eq(nd.view_mode, BootConfig.view(), "no param: boot_config.json's view")
-	await _free(nd)
 
 
 func test_g0_and_p00_build_and_play_600_frames_in_3d() -> void:
@@ -508,9 +499,7 @@ func test_g0_curtain_call_has_3d_bows_and_again() -> void:
 	if not assert_true(cc != null, "the curtain call runs"):
 		await _free(n)
 		return
-	assert_true(cc.view3d, "over the 3D view")
 	assert_true(cc.bows is CurtainBows3D, "the bows are 3D")
-	assert_eq(cc.apron.hush, null, "no 2D rig is loaded for the bows")
 	assert_true(cc.results != null, "Gate 0's results (Again ▶ / Stage door) from the first frame")
 	var got := [-1]
 	n.retry_done.connect(func(ms: int) -> void: got[0] = ms)

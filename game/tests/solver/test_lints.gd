@@ -138,17 +138,6 @@ func test_micro_gag_cadence_and_emotes() -> void:
 	assert_false(used.has("curious"), "beats never play while curious")
 
 
-func test_clip_coverage_warns_and_lists_the_missing() -> void:
-	var parts := ContentLint.load_parts(GOOD)
-	var cov := BeatLint.coverage(parts, GOOD)
-	assert_eq(str(cov["source"]), "fallback", "a fixture dir: the lint's own derivation")
-	var miss: PackedStringArray = cov["missing"]
-	assert_has(miss, "bellows/mg_trill", "micro-gag clips")
-	assert_gt(int(cov["rows"]), 0)
-	var real := BeatLint.coverage(ContentLint.load_parts("res://data"), "res://data")
-	print("  [real data] clip coverage from %s: %d of %d missing" % [real["source"], (real["missing"] as PackedStringArray).size(), int(real["rows"])])
-	assert_has(["SliceClips", "fallback"], str(real["source"]))
-
 
 func test_hotspot_stacked_objects_pass() -> void:
 	var h := {"rooms": [{"id": "kitchen", "x0": 2800, "x1": 3900}], "stations": [], "hotspots": [

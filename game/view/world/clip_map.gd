@@ -210,7 +210,8 @@ static func clip_exists(clip_id: String) -> bool:
 	return ok
 
 
-## A clip's length in frames (0 when unknown): fixture clips first, then ClipLib (owner rig).
+## A 2D-format clip's length in frames (0 when unknown): fixture clips first, then its JSON's `length` (the 2D clip
+## files were removed with the 2D view; the 3D clips use `clip_length3d`).
 static func clip_length(clip_id: String) -> int:
 	if fixture_clips.has(clip_id):
 		return int(fixture_clips[clip_id])
@@ -218,8 +219,8 @@ static func clip_length(clip_id: String) -> int:
 		return _len[clip_id]
 	var n := 0
 	if ClipMap.clip_exists(clip_id):
-		var c := ClipLib.get_clip(clip_id)
-		n = c.length if c != null else 0
+		var d: Variant = ViewKit.json("%s/%s.json" % [ANIM_DIR, clip_id])
+		n = int((d as Dictionary).get("length", 0)) if d is Dictionary else 0
 	_len[clip_id] = n
 	return n
 
@@ -269,6 +270,29 @@ static func clip_length3d(clip_id: String) -> int:
 			n = int((d as Dictionary).get("length", 0))
 	_len3d[clip_id] = n
 	return n
+
+
+## The reach band (`low` | `mid` | `high`) of a prank in rig_actions.json ("" when unknown).
+static func rig_band_of(ra: Dictionary, prank: String) -> String:
+	var pr: Variant = (ra.get("pranks", {}) as Dictionary).get(prank, null) if ra.get("pranks") is Dictionary else null
+	return ViewKit.s((pr as Dictionary).get("band", "")) if pr is Dictionary else ""
+
+
+## The held frame of a banded mid-job freeze clip (sidecar `variants` {band: [f0, f1]} + `variant_default`) for
+## `band`; −1 when the clip has no variants (it then plays as a loop).
+static func midjob_frame(clip: String, band: String) -> float:
+	var cd: Variant = ClipLib3D.get_clip(clip) if clip != "" else null
+	if cd == null:
+		return -1.0
+	var raw: Dictionary = (cd as ClipDef3D).raw
+	var vs: Variant = raw.get("variants", null)
+	if not (vs is Dictionary) or (vs as Dictionary).is_empty():
+		return -1.0
+	var b := band if (vs as Dictionary).has(band) else ViewKit.s(raw.get("variant_default", "mid"))
+	var seg: Variant = (vs as Dictionary).get(b, null)
+	if seg is Array and not (seg as Array).is_empty():
+		return float((seg as Array)[0])
+	return -1.0
 
 
 ## rig_actions.json (empty when absent).
@@ -487,6 +511,12 @@ static func _base_oneshot(map: Dictionary, a: ViewSnapshot.Actor, alpha: float, 
 	out.loop = bool(row.get("loop", false))
 	if e is Dictionary and (e as Dictionary).has("loop"):
 		out.loop = bool((e as Dictionary)["loop"])
+	# a frame-locked LOOP one-shot (doorway pause, curious look) wraps when the sim holds it longer than the clip
+	# (the rig clamps an external frame at the clip's end, which would freeze it) — r3d-anim-bellows-b request
+	if out.loop:
+		var ln := ClipMap._length(clip, c)
+		if ln > 1 and frame >= float(ln):
+			out.frame = fposmod(frame, float(ln))
 	return true
 
 
@@ -527,6 +557,13 @@ static func _base(map: Dictionary, a: ViewSnapshot.Actor, out: Pick, c: Ctx) -> 
 	# freeze (mid-job first)
 	if a.frozen or a.state == "FROZEN":
 		if a.rig_pm > 0 and ClipMap._try(map, "freeze_midjob", a, out, c, -1.0, 0):
+			# 3D: freeze_midjob holds one statue per reach band (sidecar `variants` {band: [f0, f1]}, anim-hush-b):
+			# hold the band's first frame instead of playing the three statues in turn
+			if c.format3d:
+				var vf := ClipMap.midjob_frame(out.clip, ClipMap.rig_band_of(c.rig_actions, a.rig_prank))
+				if vf >= 0.0:
+					out.external = true
+					out.frame = vf
 			return
 		if ClipMap._try(map, "freeze", a, out, c, -1.0, a.freeze_pose_seed):
 			return

@@ -6,13 +6,10 @@
 ##      must have beats at all;
 ##  (b) every `emote` (activities, detours, `walk_beats`) is in the HUD edge-bubble vocabulary (`SimEvents.EMOTES`)
 ##      or null;
-##  (c) coverage: every clip the slice can play exists under `data/anim/<clip>.json` — the list is `SliceClips.build()`
-##      (s2-view, ruling L14: the one manifest; soft-loaded) or, until that exists, this lint's own derivation
-##      (activity / detour clips, `mg_<id>`, squeak-bit clips, the pranks' reaction clips, the last beats). Coverage
-##      is a WARNING; `lint.sh --strict` (the pre-gate) makes it an error.
+##  (c3d) the 3D clip coverage (`coverage3d`, R3D ruling R9; the 2D coverage went with the 2D clips, r3d-integrate).
 ##
 ##   var errs := BeatLint.lint(parts)                      # (a) + (b), parts = ContentLint.load_parts(root)
-##   var cov := BeatLint.coverage(parts, "res://data")     # {missing, source, rows}
+##   var cov := BeatLint.coverage3d("res://data")           # {missing, rows, source, info_missing, info_rows}
 class_name BeatLint
 extends RefCounted
 
@@ -25,9 +22,6 @@ const CYCLE_PAD_S := 6.0
 ## Detours in which beats never play (the sim suppresses them in CURIOUS / SEARCH; the herd is Stage 3).
 const NO_BEAT_DETOURS: PackedStringArray = ["curious", "search", "herd_beryl"]
 const SLICE_CLIPS := "res://view/world/slice_clips.gd"
-## The slice episodes the fallback coverage derivation walks (every episode of a set that has none of them).
-const SLICE_EPISODES: PackedStringArray = ["p00_curtain_up", "n01_throat_tea", "n02_something_fishy", "g0_sneeze"]
-const SLOW_BURN := "bellows/beat_slow_burn"
 const EMOTES: PackedStringArray = ["sing", "hum", "smug", "laugh", "tut", "sniff", "yum", "yawn"]
 
 
@@ -218,102 +212,6 @@ static func sidecar3d_ok(clip: String, data_root: String = "res://data") -> bool
 		return false
 	var v: Variant = SolverData.read_json(path)
 	return v is Dictionary and int((v as Dictionary).get("version", 0)) == 2
-
-
-## (c) {missing: PackedStringArray (clip ids), source: "SliceClips" | "fallback", rows: int}.
-static func coverage(parts: Dictionary, data_root: String = "res://data", use_manifest: bool = true) -> Dictionary:
-	var clips := PackedStringArray()
-	var source := "fallback"
-	if use_manifest and data_root == "res://data" and ResourceLoader.exists(SLICE_CLIPS):
-		var s: Script = load(SLICE_CLIPS) as Script
-		if s != null and s.can_instantiate():
-			var rows: Variant = s.call("build")
-			if rows is Array:
-				for r in rows:
-					if r is Dictionary and SolverData.sv((r as Dictionary).get("clip", "")) != "":
-						clips.append(SolverData.sv(r["clip"]))
-				source = "SliceClips"
-	if source == "fallback":
-		clips = derive_clips(parts)
-	var missing := PackedStringArray()
-	for c in clips:
-		if not FileAccess.file_exists("%s/anim/%s.json" % [data_root, c]):
-			missing.append(c)
-	missing.sort()
-	return {"missing": missing, "source": source, "rows": clips.size()}
-
-
-## The fallback manifest: every clip the slice episodes can play, derived from the data (sorted, unique).
-static func derive_clips(parts: Dictionary) -> PackedStringArray:
-	var acc := {}
-	var acd: Dictionary = parts.get("activities", {})
-	var acts: Dictionary = acd.get("activities", {}) if acd.get("activities", {}) is Dictionary else {}
-	var dets: Dictionary = acd.get("detours", {}) if acd.get("detours", {}) is Dictionary else {}
-	var bits: Dictionary = acd.get("squeak_bits", {}) if acd.get("squeak_bits", {}) is Dictionary else {}
-	var rx: Dictionary = parts.get("reactions", {})
-	var archs: Dictionary = rx.get("archetypes", {}) if rx.get("archetypes", {}) is Dictionary else {}
-	var pranks: Dictionary = (parts.get("pranks", {}) as Dictionary).get("pranks", {})
-	var eps: Dictionary = parts.get("episodes", {})
-	var any := false
-	var ids: Array = Array(SLICE_EPISODES)
-	var present := false
-	for eid in ids:
-		present = present or eps.has(eid)
-	if not present:
-		ids = _sorted(eps)   # a fixture set: every episode it has
-	for eid in ids:
-		var ep: Variant = eps.get(eid, null)
-		if not (ep is Dictionary):
-			continue
-		any = true
-		var b: Dictionary = (ep as Dictionary).get("bellows", {}) if (ep as Dictionary).get("bellows", {}) is Dictionary else {}
-		for le in b.get("loop", []):
-			if le is Dictionary:
-				_act_clips(acc, acts.get(SolverData.sv((le as Dictionary).get("a", "")), null), bits)
-		for l in (ep as Dictionary).get("script", []):
-			if l is Dictionary:
-				_prank_clips(acc, pranks.get(SolverData.sv((l as Dictionary).get("prank", "")), null), archs)
-	if any:
-		for d in dets:
-			_act_clips(acc, dets[d], bits)
-		for c in rx.get("t3_last_beats", []):
-			acc[SolverData.sv(c)] = true
-		acc[SLOW_BURN] = true
-	acc.erase("")
-	var out := PackedStringArray(acc.keys())
-	out.sort()
-	return out
-
-
-static func _act_clips(acc: Dictionary, a: Variant, bits: Dictionary) -> void:
-	if not (a is Dictionary):
-		return
-	var ad: Dictionary = a
-	if ad.get("clip", null) != null:
-		acc[SolverData.sv(ad["clip"])] = true
-	for g in _gags(ad):
-		var gid := SolverData.sv((g as Dictionary).get("id", "")) if g is Dictionary else SolverData.sv(g)
-		if gid != "":
-			acc["bellows/mg_%s" % gid] = true
-	var bit := SolverData.sv(ad.get("squeak_bit", ""))
-	if bit != "" and bits.get(bit, null) is Dictionary:
-		acc[SolverData.sv((bits[bit] as Dictionary).get("clip", ""))] = true
-
-
-static func _prank_clips(acc: Dictionary, p: Variant, archs: Dictionary) -> void:
-	if not (p is Dictionary):
-		return
-	var reac: Dictionary = (p as Dictionary).get("reaction", {}) if (p as Dictionary).get("reaction", {}) is Dictionary else {}
-	var arch := SolverData.sv(reac.get("archetype", ""))
-	var keys := PackedStringArray()
-	for v in reac.get("variants", []):
-		keys.append("%s_%s" % [arch, SolverData.sv(v)])
-	if keys.is_empty():
-		keys.append(arch if archs.has(arch) else arch + "_a")
-	for k in keys:
-		var row: Variant = archs.get(k, null)
-		if row is Dictionary and (row as Dictionary).get("clip", null) != null:
-			acc[SolverData.sv(row["clip"])] = true
 
 
 static func _gags(a: Dictionary) -> Array:

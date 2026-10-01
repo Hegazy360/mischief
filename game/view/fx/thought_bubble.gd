@@ -21,7 +21,7 @@ const RING_COL := Color("#E23B4E")
 const RING_BG := Color("#1B2340", 0.18)
 const PIP_COL := Color("#FFD23F")
 
-var cam: CameraDirector = null
+var cam: Variant = null              ## a camera with world_to_screen / current_zoom (optional; duck-typed)
 var enabled: bool = true
 ## 0..1: dimmed while a caption is on screen.
 var dim: float = 0.0
@@ -79,9 +79,9 @@ func thought_bubble(snap: ViewSnapshot, head_top: Vector2, unit: float, lift: fl
 	var p := head_top + Vector2(-float(b.facing) * 30.0 * unit, -30.0 * unit - _lift * unit)
 	# Clamp below the HUD band (screen space); if that would sit on his head, move it beside.
 	if cam != null:
-		var top_screen := cam.world_to_screen(p + Vector2(0, -H * unit)).y
+		var top_screen: float = (cam.world_to_screen(p + Vector2(0, -H * unit)) as Vector2).y
 		if top_screen < HUD_BAND_Y:
-			var push := (HUD_BAND_Y - top_screen) / maxf(0.001, cam.current_zoom())
+			var push: float = (HUD_BAND_Y - top_screen) / maxf(0.001, float(cam.current_zoom()))
 			p.y += push
 			if push > 40.0 * unit:
 				p.x += -float(b.facing) * (W * 0.5 + 60.0) * unit

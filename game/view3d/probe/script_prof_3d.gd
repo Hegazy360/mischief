@@ -20,7 +20,7 @@ const PHASE_PLAY := 5
 ## Watched classes (script global names). Nested watched nodes at the same priority are counted inside their parent too.
 const WATCH: PackedStringArray = ["WorldView3D", "CameraDirector3D", "PipView3D", "GagStager3D", "AudioDirector",
 	"StallsView", "Hud", "WorldOverlays", "InputRouter", "NightScene", "House3D", "HapticsDirector", "NightWarmer",
-	"CurtainCall", "Ftue", "RigPlayer3D", "FxFreezeFrame", "FxBustedOverlay", "FxLayer", "FxWipe", "JuiceClock"]
+	"CurtainCall", "Ftue", "RigPlayer3D", "FxFreezeFrame", "FxWipe", "JuiceClock"]
 const WV_PHASES: PackedStringArray = ["hush_apply", "bellows_apply", "caught_recorder", "props_cues", "decals_fx",
 	"overlays"]
 

@@ -40,6 +40,10 @@ var _route_info: Dictionary = {}
 var _end_t: float = -1.0
 var _timeout_s: float = 600.0
 var _logger: E2eLogger = null
+## Clip coverage (r3d-integrate brief §3.2): every clip the two CharacterView3Ds (base + overlay) and the curtain
+## call's bows played, sampled every frame of route AND flow runs; the report's `clips_played` (merged with the
+## probe's PLAY-phase list).
+var _clips_cov := {}
 
 
 func _ready() -> void:
@@ -144,6 +148,7 @@ func _process(delta: float) -> void:
 	if _done:
 		return
 	_t += delta
+	_sample_cov()
 	if probe != null:
 		_route_tick()
 	elif flows != null and flows.finished:
@@ -250,6 +255,16 @@ static func check(s: String, rep: Dictionary, p_strict: bool) -> PackedStringArr
 		if sc > int(t["shader_compiles_play_max"]):
 			out.append("%d shaders compiled during PLAY: %s" % [sc, str(((rep["perf3d"] as Dictionary).get("compile_detail", {})
 				as Dictionary).get("first_use", []).slice(0, 4))])
+	if p_strict and is_route_strict(s):
+		# R3D (r3d-integrate §3.2): C8 on every tick of the Gate-0 / Prologue replays, the sneeze staged on its accent
+		var c8: Dictionary = rep.get("c8", {}) if rep.get("c8") is Dictionary else {}
+		if int(c8.get("violations", 0)) > 0:
+			out.append("C8: %d of %d ticks (unseen %d, on screen + window %d), first %s" % [int(c8["violations"]),
+				int(c8.get("ticks", 0)), int(c8.get("unseen", 0)), int(c8.get("on_screen_and_window", 0)), str(c8.get("first", []))])
+		var sn: Dictionary = rep.get("sneeze", {}) if rep.get("sneeze") is Dictionary else {}
+		if s == "g0_sneeze" or not sn.is_empty():
+			for f in E2eScenarios.sneeze_failures(sn, float(rep.get("frame_ms_p95", 0.0))):
+				out.append(f)
 	if p_strict and t.has("fallbacks_max"):
 		var fb: Dictionary = rep.get("fallbacks", {})
 		var n := int(fb.get("clip_fallbacks", 0)) + int(fb.get("puppets", 0)) + int(fb.get("greybox_props", 0))
@@ -257,6 +272,11 @@ static func check(s: String, rep: Dictionary, p_strict: bool) -> PackedStringArr
 			out.append("%d view fallbacks (%d clip, %d puppets, %d greybox)" % [n, int(fb.get("clip_fallbacks", 0)),
 				int(fb.get("puppets", 0)), int(fb.get("greybox_props", 0))])
 	return out
+
+
+## A route scenario of the strict episodes (Gate 0 and the Prologue, R9).
+static func is_route_strict(s: String) -> bool:
+	return E2eScenarios.is_route(s) and E2eScenarios.STRICT_EPISODES.has(E2eScenarios.episode_of(s))
 
 
 func _fail_now(msg: String) -> void:
@@ -272,6 +292,12 @@ func _finish() -> void:
 		report.merge(probe.summary(), true)
 		for f in check(scenario, report, strict):
 			failures.append(f)
+	var cov: Array = report.get("clips_played", [])
+	for c in _clips_cov:
+		if not cov.has(c):
+			cov.append(c)
+	cov.sort()
+	report["clips_played"] = cov
 	var errs := _logger.take()
 	report["script_errors"] = int(report.get("script_errors", 0)) + int(errs[0])
 	report["engine_errors"] = int(errs[1])
@@ -319,3 +345,27 @@ func _print_summary() -> void:
 	for f in failures:
 		print("%s   FAIL: %s" % [E2E_TAG, f])
 	print("%s %s %s" % [E2E_TAG, "PASS" if failures.is_empty() else "FAIL", scenario])
+
+
+## One frame of the clip coverage (see `_clips_cov`).
+func _sample_cov() -> void:
+	if night == null or not is_instance_valid(night):
+		return
+	var wv: Variant = night.get("world_view")
+	if wv is Object:
+		for who in ["hush_view", "bellows_view"]:
+			var cv: Variant = (wv as Object).get(who)
+			if cv is Object and (cv as Object).has_method("current_clip"):
+				_cov_add(String((cv as Object).call("current_clip")))
+				if (cv as Object).has_method("overlay_clip"):
+					_cov_add(String((cv as Object).call("overlay_clip")))
+	var cc: Variant = night.get("curtain_call")
+	var bw: Variant = (cc as Object).get("bows") if cc is Object and is_instance_valid(cc) else null
+	if bw is Object and (bw as Object).has_method("current_clip"):
+		_cov_add(String((bw as Object).call("current_clip", "hush")))
+		_cov_add(String((bw as Object).call("current_clip", "bellows")))
+
+
+func _cov_add(c: String) -> void:
+	if c != "" and not _clips_cov.has(c):
+		_clips_cov[c] = true

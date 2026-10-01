@@ -100,6 +100,11 @@ var _entry_t := 0.0
 var _sparkle: Dictionary = {}
 var _gaze_t := 0.0
 var _gaze_at := Vector3.INF
+## The squeak / noise head turn: how far the look point is pulled from the noise toward the camera, and its weight.
+const NOISE_GAZE_CAM := 0.5
+const NOISE_GAZE_W := 0.7
+## PipView3D.is_busy of this frame (the lean badge waits while he reacts or plays an emote-less micro-gag).
+var _badge_busy := false
 var _replay_t := -1.0
 var _replay_moment := -1
 ## actor → {piece id: true} lent to its rig; actor → the base clip last frame (a switch returns what it does not keep)
@@ -700,7 +705,7 @@ func _update_gaze(snap: ViewSnapshot, vdt: float) -> void:
 	elif _gaze_t > 0.0 and not b.reacting:
 		_gaze_t -= vdt
 		bellows_view.look_target = _gaze_at
-		bellows_view.look_weight = 0.85
+		bellows_view.look_weight = NOISE_GAZE_W
 
 
 # --- readability drivers (REDESIGN §3.7, §4.1–§4.5) --------------------------------------------------------
@@ -991,8 +996,15 @@ func _update_visibility(snap: ViewSnapshot) -> void:
 	_vis["sim"] = sim
 	_vis["reason"] = reason
 	_vis["on_screen"] = bellows_on_screen()
-	var badge := window_mode == "lean" and reason == &"adjacent" and not PipView3D.is_busy(snap, bellows_view) \
-			and not bool(_vis["on_screen"])
+	_badge_busy = PipView3D.is_busy(snap, bellows_view)
+	_decide_badge()
+
+
+## The lean-mode edge badge from this frame's sample (index R15, §7.9): decided again once PipView3D reports the
+## on-screen share it used after the camera moved, so a doorway frame never shows neither the badge nor the window.
+func _decide_badge() -> void:
+	var badge := window_mode == "lean" and StringName(_vis.get("reason", &"")) == &"adjacent" and not _badge_busy \
+			and not bool(_vis.get("on_screen", false))
 	_vis["badge"] = badge
 	if badge != _edge_badge:
 		_edge_badge = badge
@@ -1005,6 +1017,7 @@ func set_window_shown(on: bool, on_screen: int = -1) -> void:
 	_vis["window"] = on
 	if on_screen >= 0:
 		_vis["on_screen"] = on_screen == 1
+		_decide_badge()
 
 
 ## {tick, sim, reason, on_screen, window, badge} of this frame (the C8 test and the visibility lint).
@@ -1048,7 +1061,12 @@ func on_ticked(events: Array) -> void:
 				var np := _room_point(str(d.get("room", snap.hush.room)), float(d.get("x", snap.hush.x)))
 				var r_m := float(d.get("r", 500)) / View3DConst.PX_PER_M
 				decals.ring(np, r_m, View3DConst.SQUEAK_RING if kind == "squeak" else View3DConst.NOISE_RING, 0.8)
+				# D8: he turns toward the noise with his face still given to the house — the look point is halfway
+				# between the noise and the camera (Hush is usually behind him: a pure look-at showed the back of
+				# his head to the Stalls; r3d-anim-bellows-b request 3)
 				_gaze_at = np + Vector3(0.0, 1.0, 0.0)
+				if cam != null:
+					_gaze_at = _gaze_at.lerp(cam.global_position if cam.is_inside_tree() else cam.position, NOISE_GAZE_CAM)
 				_gaze_t = 1.2
 			"squeak":
 				decals.ring(_room_point(str(d.get("room", snap.hush.room)), float(d.get("x", snap.hush.x))), SQUEAK_RADIUS_M,

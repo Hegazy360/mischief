@@ -16,6 +16,13 @@ const FPS := 60.0
 const SHARED_OK := {
 	"vo_bellows_hum": "b_activity pickles / mirror hum until act_pickles / act_mirror carry it (Phase M)",
 	"vo_bellows_ahem": "doorway_pause 'ahem' until st_straighten_cravat carries it (Phase M)",
+	# R3D: the 3D clips that time their own sounds reuse common ids at other moments (never over the same event)
+	"vo_bellows_hmph": "cue_picture_bonk's 'hmph' (3D clip) vs the hunt / detour / search / fizzle lines",
+	"zip": "mg_comb_flourish's comb (3D clip) vs the pick / hook / Figgis-hook UI zips",
+	"sparkle": "mg_comb_flourish's preen (3D clip) vs the sparkle_lever director cue",
+	"record_scratch": "rx_dizzy_spin_a's needle (3D clip) vs the Busted Cam's scratch",
+	"boing_small": "rig_low's spring (3D band clip) vs the wink",
+	"whoosh": "st_yanked (3D clip) vs item_home / the safety net",
 }
 
 var audio: Node = null
@@ -82,7 +89,7 @@ func test_table_parses_and_every_row_resolves() -> void:
 	assert_ge(n, 60, "%d rows" % n)
 	for must in ["bellows/rx_sneeze_blast_a", "bellows/act_tea", "bellows/act_warmup", "bellows/mg_hum",
 			"bellows/mg_admire_in_kettle", "bellows/mg_pinkie_up", "bellows/mg_trill", "bellows/beat_slow_burn",
-			"hush/loco_walk", "hush/act_dive", "hush/act_pop", "hush/freeze_1", "hush/act_snicker", "hush/act_tinker_b"]:
+			"hush/loco_walk", "hush/act_dive", "hush/act_pop", "hush/freeze_1", "hush/act_snicker", "hush/rig_achoo_ria", "hush/rig_mid"]:
 		assert_true(clips.has(must), "table covers %s" % must)
 
 
@@ -127,6 +134,9 @@ func test_the_sneeze_is_cut_to_its_beats() -> void:
 func test_the_warmup_sings_once_per_6_s() -> void:
 	var c: Dictionary = (table.get("clips", {}) as Dictionary).get("bellows/act_warmup", {})
 	var len_f := int(c.get("len_f", 0))
+	# R3D: the 3D warm-up is an 8 s loop timed by the clip itself (phase R3D, two phrases 3.5 s apart — the body
+	# sings the whole loop; r3d-integrate's audio-table regeneration, a recorded deviation from GDD §9.5's 6 s)
+	var gap_min := 180 if String(c.get("phase", "")) == "R3D" else 360
 	var starts: Array = []
 	var nudges := 0
 	for ev: Dictionary in c.get("events", []):
@@ -138,7 +148,7 @@ func test_the_warmup_sings_once_per_6_s() -> void:
 	assert_ge(nudges, starts.size() * 3, "the vase nudges on each note")
 	for i in starts.size():
 		var nxt: int = int(starts[i + 1]) if i + 1 < starts.size() else int(starts[0]) + len_f
-		assert_ge(nxt - int(starts[i]), 360, "≤ 1 sung line per 6 s (loop wrap included)")
+		assert_ge(nxt - int(starts[i]), gap_min, "sung lines spaced (loop wrap included)")
 
 
 func test_l12_no_sound_is_both_an_event_cue_and_a_clip_event() -> void:
@@ -264,8 +274,9 @@ func test_existing_clips_carry_their_rows() -> void:
 	var checked := 0
 	var pending := PackedStringArray()
 	for clip: String in (table.get("clips", {}) as Dictionary):
-		var path := "res://data/anim/%s.json" % clip
-		if not FileAccess.file_exists(path):
+		# R3D: the clips are the 3D sidecars (data/anim/<rig>3d/<clip>.json; the 2D clips were removed)
+		var path := ClipMap.sidecar_path(clip) if clip.contains("/") else ""
+		if path == "" or not FileAccess.file_exists(path):
 			continue
 		var d: Variant = load_json(path)
 		if not (d is Dictionary):

@@ -92,11 +92,10 @@ var done: bool = false
 var layer: CanvasLayer = null
 var apron: CurtainApron = null
 var results: ResultsScreen = null
-## GagReel (2D) or GagReel3D.
+## The Gag Reel (GagReel3D).
 var reel: Node = null
-## 3D: the bows (null in 2D).
+## The 3D bows.
 var bows: CurtainBows3D = null
-var view3d: bool = false
 var proxy_next: UiButton = null
 var proxy_retry: UiButton = null
 ## Tests: the step never ends on its own (only skip()).
@@ -122,16 +121,12 @@ func start(p_night: Node, p_kind: String, p_result: Dictionary) -> void:
 	layer.layer = LAYER
 	layer.name = "CurtainCallLayer"
 	add_child(layer)
-	view3d = night != null and String(night.get("view_mode")) == "3d"
-	if view3d:
-		bows = CurtainBows3D.new()
-		layer.add_child(bows)
+	bows = CurtainBows3D.new()
+	layer.add_child(bows)
 	apron = CurtainApron.new()
-	apron.view3d = view3d
 	apron.bows = bows
 	layer.add_child(apron)
-	if view3d:
-		_prime_reel()
+	_prime_reel()
 	_catcher = _TapCatcher.new()
 	_catcher.call_ref = skip
 	layer.add_child(_catcher)
@@ -334,7 +329,7 @@ func _start_reel(budget: float) -> void:
 	if night == null or moments.is_empty():
 		return
 	if reel == null:
-		reel = GagReel3D.new() if view3d else GagReel.new()
+		reel = GagReel3D.new()
 		add_child(reel)
 	reel.call("start", night, moments, budget, result.get("cmds", []))
 	if results != null:

@@ -31,8 +31,8 @@ COLORS = [
     ("comb", "#E23B4E"),
     ("beak", "#F29A2E"),
     ("black", "#141018"),
-    ("pot", "#F3EDE2"),          # the oversized pepper pot
-    ("pot_cap", "#D8344A"),      # red cap (brief 4.2)
+    ("pot", "#F4F1EA"),          # the oversized pepper pot = the set's pot on the honey shelf (set palettes.py "pepper")
+    ("pot_cap", "#2A2D36"),      # its dark cap ("pepper_cap"; r3d-cast-hush request via r3d-integrate: the swap at f7 / f42)
     ("pot_band", "#2B3566"),
     ("white", "#FFFFFF"),
     ("stone", "#E8E6E1"),        # the freeze plinth / marble

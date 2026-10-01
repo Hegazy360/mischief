@@ -10,8 +10,7 @@
 ##   → "To be continued…" → the Playbill; then Gate 0 → g0_done → Again ▶ ≤ 1.5 s (frame-quantised).
 ## * `touch_smoke` — synthetic InputEventScreenTouch taps on a real hotspot rect, an action-button hold,
 ##   a Clarence tap → the commands, the ripple and the feedback in the same frame.
-## * `tap_accuracy` — 2D: every hotspot on screen at zoom 1.0 and 0.5, 20 seeded taps jittered around its art
-##   centre (±40 / ±20 px). **3D** (R3D index §6 row 18): for Gate 0, the Prologue (pass/fail) and N01/N02 (info), the
+## * `tap_accuracy` — (R3D index §6 row 18) for Gate 0, the Prologue (pass/fail) and N01/N02 (info), the
 ##   camera peeks at each built room at the base framing and every live hotspot's PROJECTED hit box gets 20 seeded
 ##   taps jittered ±40 px around its centre through NightInput.resolve (TapAssist on the projected rects) → ≥ 19/20
 ##   and never a neighbour; drags of 25–200 px in 8 directions never move Hush.
@@ -448,66 +447,10 @@ func _flow_touch_smoke() -> void:
 func _flow_tap_accuracy() -> void:
 	if not await _wait_phase("PLAY", 30.0):
 		return
-	if String(night.get("view_mode")) == "3d":
-		await _flow_tap_accuracy_3d()
-		return
-	await _secs(0.5)
-	night.get("driver").call("set_paused", true)
-	var cam: Object = night.get("cam")
-	var table: Array = []
-	var ni: Object = night.get("night_input")
-	for zoom in [1.0, 0.5]:
-		cam.call("pinch", zoom / float(cam.call("current_zoom")), Vector2(960, 540))
-		await _frames(30)
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 60606
-		var cands: Array = ni.call("candidates")
-		for c in cands:
-			var d: Dictionary = c
-			if String(d.get("kind", "")) == "floor" or not d.get("enabled", true):
-				continue
-			var wr: Rect2 = d.get("rect", Rect2())
-			var centre := wr.get_center()
-			var jitter := 40.0 / float(cam.call("current_zoom")) if zoom == 1.0 else 20.0 / float(cam.call("current_zoom"))
-			var hits := 0
-			var neighbour := 0
-			for k in 20:
-				var p := centre + Vector2(rng.randf_range(-jitter, jitter), rng.randf_range(-jitter, jitter))
-				var r: Dictionary = TapAssist.resolve(p, cands, float(cam.call("current_zoom")))
-				var got := String(r.get("hotspot", r.get("via", "")))
-				if got == String(d.get("id", "")) or String(r.get("via", "")) == String(d.get("id", "")):
-					hits += 1
-				elif got != "":
-					neighbour += 1
-			table.append({"id": d.get("id", ""), "zoom": zoom, "hits": hits, "neighbour": neighbour})
-			if hits < 19 or neighbour > 0:
-				failures.append("tap_accuracy: %s at zoom %.1f: %d/20, %d neighbour picks" % [d.get("id", ""), zoom, hits, neighbour])
-	# drags never move Hush
-	var cmds: Array = []
-	ni.connect("command", func(cm: Dictionary) -> void: cmds.append(cm))
-	var moved := 0
-	var dirs := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1),
-		Vector2(-1, -1)]
-	for dist in [25.0, 60.0, 120.0, 200.0]:
-		for dv in dirs:
-			var st := Vector2(1200, 540)
-			var n0 := cmds.size()
-			_touch(st, true, 3)
-			for s in 6:
-				var p: Vector2 = st + (dv as Vector2).normalized() * float(dist) * float(s + 1) / 6.0
-				_drag(p, (dv as Vector2).normalized() * float(dist) / 6.0, 3)
-				await get_tree().process_frame
-			_touch(st + (dv as Vector2).normalized() * float(dist), false, 3)
-			await _frames(2)
-			for i in range(n0, cmds.size()):
-				if String((cmds[i] as Dictionary).get("c", "")) in ["go", "move"]:
-					moved += 1
-	result = {"table": table, "drags_that_moved": moved}
-	if moved > 0:
-		failures.append("tap_accuracy: %d drags moved Hush" % moved)
+	await _flow_tap_accuracy_3d()
 
 
-## 3D: every live hotspot of each episode's built rooms, at the base framing (the camera peeks at each room), on its
+## Every live hotspot of each episode's built rooms, at the base framing (the camera peeks at each room), on its
 ## projected hit box: 20 seeded taps ±40 px around the box centre through NightInput.resolve → ≥ 19/20, no neighbour.
 ## Gate 0 and the Prologue fail the flow; N01 / N02 are info (R9). Then the drags.
 func _flow_tap_accuracy_3d() -> void:

@@ -2,6 +2,9 @@
 ## process start and from sim tick 0), laughs, the director's `laugh_*` cues vs `cue_staged` + the
 ## crowd sound, every AudioDirector call (→ doubled sound ids within 100 ms), draw calls per PLAY
 ## frame, TexStats pages built during PLAY, the view's fallbacks, and how the Night ended.
+## R3D (r3d-integrate §3.2): every clip id either character played (`clips_played`), C8 on every tick (`c8`), the
+## tag flights to the Script pip (`tag_flights`) and the sneeze's accent staging (`sneeze`: the CHOO on its clip
+## frame, the dolly punch-in, the hit-stop, the caption, the flipped bouffant, the stool never doubled, the landing).
 ## Game time = the sum of frame deltas (with `--fixed-fps 60` exactly frames / 60).
 class_name E2eProbe
 extends Node
@@ -70,6 +73,20 @@ var _pip_windows: Array = []
 var _pip_open_tick: int = -1
 var _wall_ms := PackedFloat32Array()
 var _last_us: int = 0
+# --- r3d-integrate: clips, tag flights, the sneeze accent
+const SNEEZE_CLIP := "bellows/rx_sneeze_blast_a"
+const SNEEZE_ACCENT_F := 94
+const SNEEZE_LAND_F := 112
+const SNEEZE_STOOL := "kitchen_stool"
+const SNEEZE_LANDING := "kitchen.sink"
+const SNEEZE_BASE_DIST := 7.5
+const SNEEZE_LANE_Z := -1.0
+var _clips_seen: Dictionary = {}
+var _last_clip_keys: PackedStringArray = ["", "", "", ""]
+var _flights_out: int = 0
+var _flights_in: int = 0
+var _sneeze: Dictionary = {}
+var _accent_ticks: Array = []
 
 
 ## Hook a NightScene (its driver, view and audio director).
@@ -91,6 +108,11 @@ func attach(n: Node) -> void:
 	var wv: Variant = n.get("world_view")
 	if wv is Object and (wv as Object).has_signal("cue_staged"):
 		(wv as Object).connect("cue_staged", _on_cue_staged)
+	if wv is Object and (wv as Object).has_signal("tag_flight"):
+		(wv as Object).connect("tag_flight", func(_h: String) -> void: _flights_out += 1)
+	var hud: Variant = n.get("hud")
+	if hud is Object and (hud as Object).has_signal("tag_arrived"):
+		(hud as Object).connect("tag_arrived", func(_i: int) -> void: _flights_in += 1)
 	var replay: Variant = n.get("replay")
 	if replay is Object:
 		var cm: Array = (replay as Object).get("cmds")
@@ -115,6 +137,7 @@ func _process(delta: float) -> void:
 		if _last_us > 0:
 			_wall_ms.append(float(now_us - _last_us) / 1000.0)
 		_sample_3d()
+		_sample_clips()
 		if perf:
 			_draws.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 			_objects.append(Performance.get_monitor(Performance.OBJECT_COUNT))
@@ -166,6 +189,118 @@ func _sample_3d() -> void:
 		_ov_samples.append([_play_frames, n, loud])
 
 
+## Every base / overlay clip id each character shows this frame (r3d-integrate §3.2: every clip of
+## `SliceClips.build3d(["g0_sneeze", "p00_curtain_up"])` played at least once across the replays).
+func _sample_clips() -> void:
+	var wv: Variant = night.get("world_view")
+	if not (wv is Object):
+		return
+	var i := 0
+	for who in ["hush_view", "bellows_view"]:
+		var cv: Variant = (wv as Object).get(who)
+		if cv is Object and (cv as Object).has_method("current_clip"):
+			var c := String((cv as Object).call("current_clip"))
+			var o := String((cv as Object).call("overlay_clip")) if (cv as Object).has_method("overlay_clip") else ""
+			if c != _last_clip_keys[i]:
+				_last_clip_keys[i] = c
+				if c != "":
+					_clips_seen[c] = int(_clips_seen.get(c, 0)) + 1
+			if o != _last_clip_keys[i + 1]:
+				_last_clip_keys[i + 1] = o
+				if o != "":
+					_clips_seen[o] = int(_clips_seen.get(o, 0)) + 1
+		i += 2
+	_sample_sneeze(wv as Object)
+
+
+## The sneeze's accent staging, sampled every PLAY frame while Bellows plays rx_sneeze_blast_a (Gate 0 and the
+## Prologue): the clip frame on the sim's `reaction_accent` tick, the camera zoom (max over the accent's hold), the
+## frames the JuiceClock held the sim (hit-stop), the captions shown, the bouffant slot after the CHOO, the frames
+## where the set's stool and his ride-along stool were both visible, and his pelvis vs the sink's landing box on the
+## sim's landing frame.
+func _sample_sneeze(wv: Object) -> void:
+	var bv: Variant = wv.get("bellows_view")
+	if not (bv is Object) or String((bv as Object).call("current_clip")) != SNEEZE_CLIP:
+		return
+	var f := float((bv as Object).call("current_frame"))
+	if _sneeze.is_empty():
+		_sneeze = {"seen": true, "first_tick": _tick(), "frames": 0, "accent_frame": -1.0, "accent_tick": -1,
+			"zoom_max": 0.0, "zoom_at_accent": 0.0, "hitstop_frames": 0, "captions": [], "bouffant_after": "",
+			"stool_doubled": 0, "stool_missing": 0, "land_frame": -1.0, "land_in_box": false, "land_pelvis": []}
+	_sneeze["frames"] = int(_sneeze["frames"]) + 1
+	var cam: Variant = night.get("cam")
+	var z := 0.0
+	if cam is Camera3D and (bv as Object).has_method("head_world"):
+		# the dolly as the player sees it: Bellows' head depth from the camera vs its depth at the base framing
+		# (7.5 m to the lane, index §7.7) — CameraDirector3D.current_zoom() is the framing, not the punch-in
+		var hw: Vector3 = (bv as Object).call("head_world")
+		var q := (cam as Camera3D).global_transform.affine_inverse() * hw
+		if q.z < -0.01:
+			z = (SNEEZE_BASE_DIST + (SNEEZE_LANE_Z - hw.z)) / -q.z
+	if f >= float(SNEEZE_ACCENT_F) and f <= float(SNEEZE_ACCENT_F) + 100.0:
+		_sneeze["zoom_max"] = maxf(float(_sneeze["zoom_max"]), z)
+	var drv: Variant = night.get("driver")
+	var juice: Variant = (drv as Object).get("juice") if drv is Object else null
+	if f >= float(SNEEZE_ACCENT_F) - 1.0 and f <= float(SNEEZE_ACCENT_F) + 12.0 and juice is Object:
+		if bool((juice as Object).call("is_frozen")):
+			_sneeze["hitstop_frames"] = int(_sneeze["hitstop_frames"]) + 1
+		# the granted freeze in real µs (5 frames = 83 333 µs; the frame count above depends on the frame rate)
+		_sneeze["hitstop_us"] = maxi(int(_sneeze.get("hitstop_us", 0)), int((juice as Object).call("freeze_used_us")))
+	if not _accent_ticks.is_empty() and float(_sneeze["accent_frame"]) < 0.0 and _tick() >= int(_accent_ticks[0]):
+		_sneeze["accent_frame"] = f
+		_sneeze["accent_tick"] = int(_accent_ticks[0])
+		_sneeze["zoom_at_accent"] = z
+	var ov: Variant = wv.get("overlays")
+	if ov is Object:
+		for c in (ov as Object).get("captions"):
+			if c is Object and bool((c as Object).get("active")):
+				var t := String((c as Object).get("text"))
+				if not (_sneeze["captions"] as Array).has(t):
+					(_sneeze["captions"] as Array).append(t)
+	var rig: Variant = (bv as Object).get("rig")
+	if f >= float(SNEEZE_ACCENT_F) + 2.0 and rig is Object and (rig as Object).has_method("body_slot"):
+		_sneeze["bouffant_after"] = String((rig as Object).call("body_slot", "bouffant"))
+	var set3d: Variant = wv.get("set3d")
+	if set3d is Object and (set3d as Object).has_method("decor") and rig is Object and (rig as Object).has_method("prop_state"):
+		var d: Variant = (set3d as Object).call("decor", SNEEZE_STOOL)
+		var set_on := d is Node3D and (d as Node3D).is_visible_in_tree()
+		var ride_on := String((rig as Object).call("prop_state", "stool")) == "shown"
+		if set_on and ride_on:
+			_sneeze["stool_doubled"] = int(_sneeze["stool_doubled"]) + 1
+		elif not set_on and not ride_on and f < 150.0:
+			_sneeze["stool_missing"] = int(_sneeze["stool_missing"]) + 1
+	if float(_sneeze["land_frame"]) < 0.0 and f >= float(SNEEZE_LAND_F) and set3d is Object \
+			and (set3d as Object).has_method("landing_box") and (bv as Object).has_method("socket_world"):
+		var box: AABB = (set3d as Object).call("landing_box", SNEEZE_LANDING)
+		var pel: Vector3 = ((bv as Object).call("socket_world", "seat") as Transform3D).origin
+		_sneeze["land_frame"] = f
+		_sneeze["land_in_box"] = box.size != Vector3.ZERO and box.grow(0.02).has_point(pel)
+		_sneeze["land_pelvis"] = [snappedf(pel.x, 0.01), snappedf(pel.y, 0.01), snappedf(pel.z, 0.01)]
+
+
+## C8 on every sampled tick (index §7.9): the sim wants him visible (room / pip) ⇒ on screen, in the window or (lean)
+## the edge badge; on screen ⇒ the window closed.
+static func c8_of(rows: Array) -> Dictionary:
+	var bad := 0
+	var both := 0
+	var first: Array = []
+	for r in rows:
+		var row: Array = r
+		var want := String(row[1]) == "room" or String(row[1]) == "pip"
+		var on := int(row[3]) == 1
+		var win := int(row[4]) == 1
+		var badge := int(row[5]) == 1
+		if want and not (on or win or badge):
+			bad += 1
+			if first.size() < 5:
+				first.append(row)
+		if on and win:
+			both += 1
+			if first.size() < 5:
+				first.append(row)
+	return {"ticks": rows.size(), "unseen": bad, "on_screen_and_window": both, "violations": bad + both, "first": first}
+
+
 func _tick() -> int:
 	var w: Variant = night.get("world") if night != null else null
 	return int((w as Object).get("tick")) if w is Object else -1
@@ -210,6 +345,8 @@ func _on_ticked(events: Array) -> void:
 			if e != "director_cue" and _first_laugh_tick < 0:
 				_first_laugh_tick = tk
 				_first_laugh_ms = DeviceLog.process_ms()
+		if e == "reaction_accent" and String(d.get("id", d.get("prank", ""))) in ["achoo_ria", "sneeze"]:
+			_accent_ticks.append(tk)
 		if e == "reaction_accent" and _first_prank_tick < 0:
 			_first_prank_tick = tk
 			_first_prank_ms = DeviceLog.process_ms()
@@ -328,6 +465,8 @@ func summary() -> Dictionary:
 	out["tick_at_rise"] = _tick_at_rise
 	var ns_rise := int(night.get("rise_frame")) if night != null and is_instance_valid(night) else -1
 	out["tick0_frame_error"] = absi(ns_rise - _rise_frame) if ns_rise >= 0 and _rise_frame >= 0 else 99
+	# the engine frame of the first PLAY frame (DevShot --shot-seq frames ≈ this + tick at 60 fps; strips, r3d-integrate)
+	out["play_from_frame"] = _play_from_frame
 	out["events_before_rise"] = int(night.get("events_before_rise")) if night != null and is_instance_valid(night) else 0
 	var live_s: Variant = night.get("input_live_s") if night != null and is_instance_valid(night) else null
 	out["input_live_s"] = snappedf(float(live_s), 0.001) if live_s != null and float(live_s) >= 0.0 else snappedf(_live_t, 0.001)
@@ -387,7 +526,7 @@ func summary() -> Dictionary:
 
 ## The 3D report fields (see the class doc).
 func _summary_3d(out: Dictionary, fb: Variant) -> void:
-	out["view"] = String(night.get("view_mode")) if night != null and is_instance_valid(night) and night.get("view_mode") != null else "2d"
+	out["view"] = String(night.get("view_mode")) if night != null and is_instance_valid(night) and night.get("view_mode") != null else "3d"
 	out["fallback_counts"] = (fb as Dictionary).get("by_clip", {}) if fb is Dictionary else {}
 	out["hud_pieces"] = _hud_samples
 	out["overlays"] = {"max": _ov_max, "loud_max": _ov_loud_max, "samples": _ov_samples}
@@ -399,6 +538,12 @@ func _summary_3d(out: Dictionary, fb: Variant) -> void:
 	out["pip_on_share"] = snappedf(float(_pip_frames) / maxf(1.0, float(_play_frames)), 0.0001)
 	out["pip_longest_s"] = snappedf(float(longest) / 60.0, 0.01)
 	out["pip_windows"] = wins
+	# the HUD lint's inputs (r3d-tools-b request): the logical viewport and the Bellows-window mode of this run
+	var vp := get_viewport().get_visible_rect().size if is_inside_tree() else Vector2.ZERO
+	out["viewport"] = [int(vp.x), int(vp.y)]
+	var wv0: Variant = night.get("world_view") if night != null and is_instance_valid(night) else null
+	out["bellows_window"] = String((wv0 as Object).get("window_mode")) if wv0 is Object \
+		and (wv0 as Object).get("window_mode") != null else ""
 	out["frame_ms_p50"] = snappedf(_pct(_wall_ms, 0.5), 0.1)
 	out["frame_ms_p95"] = snappedf(_pct(_wall_ms, 0.95), 0.1)
 	var p3: Variant = night.get("perf3d") if night != null and is_instance_valid(night) else null
@@ -408,6 +553,12 @@ func _summary_3d(out: Dictionary, fb: Variant) -> void:
 		if sw is Object:
 			(out["perf3d"] as Dictionary)["compile_detail"] = (sw as Object).call("summary")
 	out["cue_staged"] = out.get("laugh_cues", [])
+	var seen := _clips_seen.keys()
+	seen.sort()
+	out["clips_played"] = seen
+	out["c8"] = c8_of(_vis_rows)
+	out["tag_flights"] = {"out": _flights_out, "arrived": _flights_in}
+	out["sneeze"] = _sneeze
 	var wr: Variant = night.get("warmer") if night != null and is_instance_valid(night) else null
 	if wr is Object and bool((wr as Object).get("view3d")):
 		out["warm3d"] = {"materials_drawn": int((wr as Object).get("materials_drawn")),

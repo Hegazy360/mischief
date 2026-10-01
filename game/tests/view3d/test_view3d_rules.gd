@@ -416,3 +416,41 @@ func test_a_caption_keeps_its_side_while_it_fits() -> void:
 	# only when the right no longer fits does it switch
 	r = Overlays3D.caption_place(Rect2(1900, 260, 220, 260), box, screen, 212.0, int(r.z))
 	assert_eq(int(r.z), 2, "switched left when the right ran out")
+
+
+func test_carry_looks_follow_the_items_she_carries() -> void:
+	var known := PackedStringArray(["CARRY_SQUEAKER", "CARRY_MAGNIFIER", "CARRY_KIPPER"])
+	assert_eq(CharacterView3D.carry_looks(PackedStringArray(), known), PackedStringArray())
+	assert_eq(CharacterView3D.carry_looks(PackedStringArray(["kipper"]), known), PackedStringArray(["CARRY_KIPPER"]))
+	# an item without a carry model (flour) shows nothing; two hands at most, in carrying order
+	assert_eq(CharacterView3D.carry_looks(PackedStringArray(["flour", "squeaker", "magnifier", "kipper"]), known),
+		PackedStringArray(["CARRY_SQUEAKER", "CARRY_MAGNIFIER"]))
+	# a descriptor without the look drops it (never an error)
+	assert_eq(CharacterView3D.carry_looks(PackedStringArray(["kipper"]), PackedStringArray(["CARRY_SQUEAKER"])),
+		PackedStringArray())
+
+
+func test_a_stop_plays_the_skid_after_a_run_and_the_arrival_after_a_walk() -> void:
+	assert_eq(CharacterView3D.stop_flavour(true, false, true, false), "skid")
+	assert_eq(CharacterView3D.stop_flavour(true, false, false, false), "arrive")
+	assert_eq(CharacterView3D.stop_flavour(true, true, true, false), "", "still moving")
+	assert_eq(CharacterView3D.stop_flavour(false, false, false, false), "", "was not moving")
+	assert_eq(CharacterView3D.stop_flavour(true, false, false, true), "", "a reaction owns the body")
+
+
+func test_the_picture_frame_lands_face_on_whatever_his_head_bone_faces() -> void:
+	# his head bone turned to face +x (a profile walk), scaled like a popped rig: an identity pose there is edge-on
+	var sock := Transform3D(Basis(Vector3.UP, PI * 0.5).scaled(Vector3.ONE * 1.1), Vector3(7.6, 2.4, -1.0))
+	var want := Vector3(7.6, 2.28, -0.92)
+	var at := CueStager3D.picture_pose(sock, want, 14.0, Basis.IDENTITY)
+	var world := sock * at
+	assert_true(world.origin.is_equal_approx(want), "at the asked point: %s" % world.origin)
+	assert_true(world.basis.z.normalized().is_equal_approx(Vector3(0, 0, 1)), "faces the camera: %s" % world.basis.z)
+	assert_almost_eq(world.basis.get_scale().x, 1.0, 1e-4, "its own size, not the rig's")
+	assert_almost_eq(rad_to_deg(atan2(world.basis.x.y, world.basis.x.x)), 14.0, 1e-3, "askew 14°")
+	# a frame model authored facing +x and turned onto the wall keeps that wall orientation (face-on), only tilted
+	var wall := Basis(Vector3.UP, -PI * 0.5)
+	var w2 := sock * CueStager3D.picture_pose(sock, want, 0.0, wall)
+	assert_true(w2.basis.is_equal_approx(wall), "the wall orientation: %s" % w2.basis)
+	var edge_on := sock * Transform3D.IDENTITY
+	assert_almost_eq(absf(edge_on.basis.z.normalized().z), 0.0, 1e-4, "the identity pose was edge-on (the bug)")

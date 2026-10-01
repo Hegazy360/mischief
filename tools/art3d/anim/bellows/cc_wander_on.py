@@ -33,7 +33,7 @@ def build(ctx):
     G.apply(c, pelvis_h=lambda f: -0.030 + 0.012 * math.cos(4 * math.pi * (f - 7) / 32.0), f1=L)
     c.ik("l", HIP_L, 0, L, pole=POLE_L, hand=[("y", 80), ("z", -20)], effector="palm", blend=0, world=False)
     c.ik("r", HIP_R, 0, L, pole=POLE_R, hand=[("y", -80), ("z", 20)], effector="palm", blend=0, world=False)
-    for f in range(0, L + 1, 16):
+    for f in range(0, L, 16):          # f144 = the clip end (one-shot): an event there never fires
         c.sfx(f, "bellows_step", vol_db=-4.0)
     c.look_camera(48, 128, weight=0.6, blend=8)   # D8: the blissful face turned 3/4 to the Stalls, still gazing up
     c.face(0, "hum")

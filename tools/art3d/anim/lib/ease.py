@@ -1,4 +1,4 @@
-"""Eases for clip keys — identical to the 2D `RigEase` (game/view/rig/rig_ease.gd) and TECH §4.8.
+"""Eases for clip keys — identical to the (removed) 2D `RigEase` and TECH §4.8.
 
 A key's `ease` is the curve INTO that key: `linear`, `hold` (keep the previous key's pose until this key's frame,
 then jump: a step), `pop` (the same step — the accent pose pops in on its frame; the lint allows a > 45°/f jump

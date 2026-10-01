@@ -271,7 +271,14 @@ func _start_reaction(d: Dictionary) -> void:
 	if camera != null:
 		if _gag_id != 0:
 			camera.release_gag(_gag_id)
-		_gag_id = camera.request_gag(_chest(), z, 11, hold_f, 21, 10, yaw * facing, approach, lerpf(1.0, z, 0.4) if not _clip_driven else 1.0)
+		# the approach dolly: the synthetic push, or the reaction clip's own `cam push {zoom, frames}` (the sneeze's
+		# slow 1.15 push through the build, D15: the wind-up read small at the wide shot)
+		var az := lerpf(1.0, z, 0.4) if not _clip_driven else 1.0
+		if _clip_driven:
+			var push := GagStager3D.clip_push3d(_reaction_clip_id(arch, variant, entry))
+			if not push.is_empty():
+				az = clampf(float(push.get("zoom", 1.0)), 1.0, z)
+		_gag_id = camera.request_gag(_chest(), z, 11, hold_f, 21, 10, yaw * facing, approach, az)
 		_gag_in_pip = camera.active_gag_id() == _gag_id and camera.gag_in_pip()
 	_gag_prank = prank
 
@@ -280,10 +287,28 @@ func _reaction_clip_drives(arch: String, variant: String, entry: int) -> bool:
 	var bv := world_view.bellows_view if world_view != null else null
 	if bv == null or not bv.uses_rig:
 		return false
+	return GagStager3D.clip_has_events3d(_reaction_clip_id(arch, variant, entry), ["cam", "hitstop"])
+
+
+## The reaction's 3D clip id (its `_ko` variant after a knock-on entry when one exists).
+func _reaction_clip_id(arch: String, variant: String, entry: int) -> String:
 	var clip := ViewSnapshot.reaction_clip(driver.world.get("db") if driver != null and driver.world != null else null, arch, variant)
 	if entry > 0 and ClipMap.clip_exists3d(clip + "_ko"):
 		clip += "_ko"
-	return GagStager3D.clip_has_events3d(clip, ["cam", "hitstop"])
+	return clip
+
+
+## The first `cam {op: "push"}` event of a 3D clip's sidecar ({} when none).
+static func clip_push3d(clip_id: String) -> Dictionary:
+	if not ClipMap.clip_exists3d(clip_id):
+		return {}
+	var d: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id))
+	if not (d is Dictionary):
+		return {}
+	for e in (d as Dictionary).get("events", []):
+		if e is Dictionary and str((e as Dictionary).get("type", "")) == "cam" and str((e as Dictionary).get("op", "")) == "push":
+			return e
+	return {}
 
 
 ## True when the 3D clip's sidecar carries an event of one of `types`.

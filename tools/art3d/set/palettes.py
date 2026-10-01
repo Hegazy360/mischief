@@ -40,8 +40,11 @@ PARLOUR = {
     "firebox": ("#2A2230", False), "ember": ("#E8743A", True), "flame": ("#FFB44A", True),
     "window_frame": ("#CEBDB9", False), "pane": ("#A9C6D2", True),
     "frame_gold": ("#B49A7E", False), "canvas": ("#A58E86", False), "canvas_face": ("#C4A89C", False),
-    "vase": ("#B89F9C", False), "vase_band": ("#A08784", False), "basket": ("#A1886C", False), "log": ("#8C7458", False),
+    "vase": ("#3F6FB8", False), "vase_band": ("#EFEAE0", False), "basket": ("#A1886C", False), "log": ("#8C7458", False),
     "chandelier": ("#C2A56A", False), "candle": ("#EFE6D6", False),
+    # r3d-fix-gags (Q-G3 / Q-G4): the Prologue's two cue pieces read at phone size — the vase is blue-and-white china,
+    # the falling picture a gilt frame round a dark oil portrait (both carry the live props' ink, house3d "ink": true)
+    "pic_gilt": ("#D9A63A", False), "pic_canvas": ("#3C3A5C", False), "pic_face": ("#E8C9A6", False),
 }
 
 HALL = {

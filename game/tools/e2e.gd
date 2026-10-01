@@ -44,6 +44,11 @@ var _logger: E2eLogger = null
 ## call's bows played, sampled every frame of route AND flow runs; the report's `clips_played` (merged with the
 ## probe's PLAY-phase list).
 var _clips_cov := {}
+## D17 (the deterministic-spike rule): when ScriptProf3D runs (`--view3d-prof`), the sim tick of every profiler frame
+## (index = the profiler's frame counter), so its 60 slowest frames can be matched across runs by tick (report
+## `prof_frame_ticks`; −1 = no sim yet). e2e runs at priority 1000, after the profiler's end sentinel (899).
+var _prof: Node = null
+var _prof_ticks := PackedInt32Array()
 
 
 func _ready() -> void:
@@ -149,6 +154,7 @@ func _process(delta: float) -> void:
 		return
 	_t += delta
 	_sample_cov()
+	_sample_prof()
 	if probe != null:
 		_route_tick()
 	elif flows != null and flows.finished:
@@ -298,6 +304,8 @@ func _finish() -> void:
 			cov.append(c)
 	cov.sort()
 	report["clips_played"] = cov
+	if _prof != null:
+		report["prof_frame_ticks"] = Array(_prof_ticks)
 	var errs := _logger.take()
 	report["script_errors"] = int(report.get("script_errors", 0)) + int(errs[0])
 	report["engine_errors"] = int(errs[1])
@@ -364,6 +372,31 @@ func _sample_cov() -> void:
 	if bw is Object and (bw as Object).has_method("current_clip"):
 		_cov_add(String((bw as Object).call("current_clip", "hush")))
 		_cov_add(String((bw as Object).call("current_clip", "bellows")))
+
+
+## One frame of the profiler's tick map (see `_prof_ticks`).
+func _sample_prof() -> void:
+	if night == null or not is_instance_valid(night):
+		return
+	if _prof == null:
+		_prof = night.get_node_or_null("ScriptProf3D")
+		if _prof == null and night.get_parent() != null:
+			_prof = night.get_parent().get_node_or_null("ScriptProf3D")
+		if _prof == null:
+			return
+	if not is_instance_valid(_prof):
+		return
+	var f := int(_prof.get("_frame")) - 1
+	if f < 0 or f > 200000:
+		return
+	var w: Variant = night.get("world")
+	var tick := int((w as Object).get("tick")) if w is Object else -1
+	if _prof_ticks.size() <= f:
+		var old := _prof_ticks.size()
+		_prof_ticks.resize(f + 1)
+		for i in range(old, f + 1):
+			_prof_ticks[i] = -1
+	_prof_ticks[f] = tick
 
 
 func _cov_add(c: String) -> void:

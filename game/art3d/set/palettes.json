@@ -64,7 +64,10 @@
    "basket",
    "log",
    "chandelier",
-   "candle"
+   "candle",
+   "pic_gilt",
+   "pic_canvas",
+   "pic_face"
   ],
   "hall": [
    "wall",

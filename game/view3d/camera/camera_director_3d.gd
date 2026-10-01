@@ -75,6 +75,9 @@ const GAG_FOCUS_MID := 0.18          ## the focus stays within the middle 36 % o
 ## A punch-in never shows more than this much below the floor at the lane (the aim rises instead of framing the pit).
 const GAG_BELOW_FLOOR_M := 0.35
 const APPROACH_HOLD_MAX_F := 600     ## a push waits this long past its frames for punch_gag, then punches anyway
+## Gags at or below this priority are cue shots (CueStager3D's framing of a small gag): a higher-priority request
+## replaces them at once instead of queueing behind them.
+const SHOT_PREEMPT_MAX := 5
 ## C6: boxes stay this many px inside the safe rect / clear of a HUD rect (float slack for the lints' inclusive tests).
 const C6_MARGIN_PX := 1.0
 ## C6: Hush's half width and height (m) kept inside the safe rect.
@@ -82,6 +85,10 @@ const C6_HUSH_HALF_W := 0.35
 const C6_HUSH_H := 1.2
 ## C6: when the target x falls in a HUD gap, the side the camera is on wins unless the other is this much nearer (m).
 const C6_HYSTERESIS_M := 0.3
+## Hush clear of the always-on HUD hit rects: her height for the test, and how far past the C2 limit the camera may go.
+const HUSH_HUD_H := 1.6
+const HUSH_HUD_EDGE_M := 1.0
+const HUSH_HUD_GAP_PX := 12.0
 const C6_MAX_BOXES := 24
 const C6_PULL_STEPS := 7
 const KEEP_REFRESH_F := 15
@@ -419,7 +426,9 @@ func request_gag(focus: Variant, zoom: float, in_f: int, hold_f: int, out_f: int
 	g.seq = _seq
 	g.approach_f = maxi(0, approach_f)
 	g.approach_zoom = minf(approach_zoom, REDUCED_ZOOM_MAX) if reduce_motion else approach_zoom
-	if _gag == null or _gag.phase == GagPhase.OUT or _gag.released:
+	if _gag == null or _gag.phase == GagPhase.OUT or _gag.released or (_gag.priority <= SHOT_PREEMPT_MAX and priority > _gag.priority):
+		# a cue shot (priority ≤ SHOT_PREEMPT_MAX: the director's framing of a small gag) yields at once to a
+		# higher-priority punch-in; the new gag starts from the current frame (no jump)
 		if _gag != null:
 			_finish_gag()
 		_start_gag(g)
@@ -759,6 +768,7 @@ func advance(view_dt: float, real_dt: float) -> void:
 		want = clampf(want, hx + (0.5 - hi_f) * V, hx + (0.5 - lo_f) * V)
 	want = _c6_clamp(want, hx, fl)
 	want = _c2_clamp(want, fl, V)
+	want = _hush_hud_clear(want, hx, fl, V)
 	var room_id := room.id if room != null else ""
 	if _snap:
 		_cx = want
@@ -780,7 +790,10 @@ func advance(view_dt: float, real_dt: float) -> void:
 			_cx = lerpf(_cx, want, _damp(view_dt, TAU_RUN if running else TAU_WALK))
 	# Manual pan (within the C2 limits).
 	_update_pan(real_dt)
-	var base_x := _c2_clamp(_cx + _pan_off, fl, V)
+	# (the follow x is already within C2, or past it by Hush's own HUD clearance; a manual pan is clamped)
+	var base_x := _cx
+	if _pan_mode != Pan.NONE or _pan_off != 0.0:
+		base_x = _c2_clamp(_cx + _pan_off, fl, V)
 	if _pan_mode != Pan.NONE:
 		_pan_off = base_x - _cx
 	var aim := Vector3(base_x, _aim_y, View3DConst.LANE_Z)
@@ -941,6 +954,79 @@ func _c6_clamp(want: float, hx: float, fl: int) -> float:
 	if _safe.size.x <= 0.0:
 		return want
 	return _c6_solve(want, hx, fl, _dist, true).x
+
+
+## C6 for Hush herself (r3d-fix-gags Q-G5): she never stands under an always-on HUD hit rect (the action button at the
+## kitchen window's stage end after her climb-in). When the C2-clamped x would put her body (± 0.35 m, 1.6 m tall)
+## under one, the camera takes the nearest x that clears it, up to HUSH_HUD_EDGE_M past the C2 limit (a little more
+## of the wings shows); past that the HUD yields as before.
+func _hush_hud_clear(want: float, hx: float, fl: int, V: float) -> float:
+	if _safe.size.x <= 0.0 or is_overview():
+		return want
+	var hr: Array = hud_rects()
+	if hr.is_empty():
+		return want
+	var f := focal_px()
+	var vs := view_size()
+	var cxs := vs.x * 0.5
+	var cys := vs.y * 0.5
+	var sn := PITCH_TAN / sqrt(1.0 + PITCH_TAN * PITCH_TAN)
+	var cs := 1.0 / sqrt(1.0 + PITCH_TAN * PITCH_TAN)
+	var fy := View3DConst.floor_y(fl)
+	var cy := fy + View3DConst.CAM_AIM_Y + _dist * PITCH_TAN
+	var cz := View3DConst.LANE_Z + _dist
+	var z := View3DConst.LANE_Z
+	var top := CameraDirector3D._sy(fy + HUSH_HUD_H, z, cy, cz, sn, cs, cys, f)
+	var bot := CameraDirector3D._sy(fy, z, cy, cz, sn, cs, cys, f)
+	var dn := (cy - fy - HUSH_HUD_H) * sn + (cz - z) * cs
+	var df := (cy - fy) * sn + (cz - z) * cs
+	var lo := -INF
+	var hi := INF
+	if _edges.has(fl):
+		var e: Vector2 = _edges[fl]
+		lo = e.x - View3DConst.EDGE_CLAMP_M + V * 0.5 - HUSH_HUD_EDGE_M
+		hi = e.y + View3DConst.EDGE_CLAMP_M - V * 0.5 + HUSH_HUD_EDGE_M
+	var x := want
+	for rv in hr:
+		if not (rv is Rect2):
+			continue
+		var r: Rect2 = rv
+		if bot <= r.position.y or top >= r.end.y:
+			continue
+		var a := CameraDirector3D._linv(hx - C6_HUSH_HALF_W, r.end.x + HUSH_HUD_GAP_PX, dn, df, cxs, f)
+		var c := CameraDirector3D._rinv(hx + C6_HUSH_HALF_W, r.position.x - HUSH_HUD_GAP_PX, dn, df, cxs, f)
+		if x > a and x < c:
+			var to := a if (x - a) < (c - x) else c
+			if to < lo or to > hi:
+				to = c if to == a else a
+			if to >= lo and to <= hi and _boxes_bad_at(to, cy, cz, sn, cs, cxs, cys, f, hr) <= _boxes_bad_at(x, cy, cz, sn, cs, cxs, cys, f, hr):
+				x = to
+	return x
+
+
+## How many gathered C6 boxes leave the safe rect or touch a HUD rect with the camera at x `cam_x` (Hush's own HUD
+## clearance never costs a live box its place).
+func _boxes_bad_at(cam_x: float, cy: float, cz: float, sn: float, cs: float, cxs: float, cys: float, f: float, hr: Array) -> int:
+	var bad := 0
+	for i in _c6_n:
+		var b: AABB = _c6_boxes[i]
+		var dn := (cy - b.end.y) * sn + (cz - b.end.z) * cs
+		var df := (cy - b.position.y) * sn + (cz - b.position.z) * cs
+		if dn < 0.1:
+			continue
+		var l := cxs + f * (b.position.x - cam_x) / (dn if b.position.x < cam_x else df)
+		var r := cxs + f * (b.end.x - cam_x) / (df if b.end.x < cam_x else dn)
+		if l < _safe.position.x or r > _safe.end.x:
+			bad += 1
+			continue
+		var t0 := minf(CameraDirector3D._sy(b.end.y, b.position.z, cy, cz, sn, cs, cys, f), CameraDirector3D._sy(b.end.y, b.end.z, cy, cz, sn, cs, cys, f))
+		var t1 := maxf(CameraDirector3D._sy(b.position.y, b.position.z, cy, cz, sn, cs, cys, f), CameraDirector3D._sy(b.position.y, b.end.z, cy, cz, sn, cs, cys, f))
+		var br := Rect2(l, t0, r - l, t1 - t0)
+		for rv in hr:
+			if rv is Rect2 and br.intersects(rv as Rect2):
+				bad += 1
+				break
+	return bad
 
 
 ## C6 pull-back: the smallest distance in [the user's, 1.15 × base] at which Hush and every gathered box fit the

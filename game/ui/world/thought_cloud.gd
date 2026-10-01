@@ -35,8 +35,10 @@ func set_data(tex: Texture2D, p_tail: Vector2, p_k: float) -> void:
 	queue_redraw()
 
 
+## Everything it draws round its centre (PreviewCloud.cloud_half_extent: the lobes reach past the
+## 180 × 144 body), so the placer keeps it truly clear of faces and other clouds.
 func box_size() -> Vector2:
-	return Vector2(W, H) * k
+	return PreviewCloud.cloud_half_extent(W, H) * 2.0 * k
 
 
 func _ready() -> void:

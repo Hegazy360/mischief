@@ -102,6 +102,10 @@ func settle_gags() -> void:
 
 
 func reset() -> void:
+	_jets_left = 0
+	_spin_f = -1.0
+	_spin_next = 0.0
+	_window_punched = false
 	_fired.clear()
 	_slowmo_done.clear()
 	_gag_id = 0
@@ -141,9 +145,9 @@ func _caption(text: String, at: Vector3, size: int, actor: StringName = &"bellow
 	captions += 1
 
 
-func _burst(kind: String, at: Vector3) -> void:
+func _burst(kind: String, at: Vector3, dir: Vector3 = Vector3.UP) -> void:
 	if world_view != null and world_view.fx3d != null:
-		world_view.fx3d.burst(kind, at)
+		world_view.fx3d.burst(kind, at, dir)
 
 
 func on_ticked(events: Array) -> void:
@@ -155,6 +159,8 @@ func on_ticked(events: Array) -> void:
 				_fire_link = int(d.get("link", 0))
 			"reaction_start":
 				_start_reaction(d)
+				if str(d.get("archetype", "")) == "dizzy_spin":
+					_record_runs_away(str(d.get("prank", "")))
 			"reaction_accent":
 				_accent(d)
 			"reaction_end":
@@ -192,6 +198,10 @@ func on_ticked(events: Array) -> void:
 				_caption(ViewKit.word("fx.hmph", "HMPH!"), _head() + Vector3(0, 0.7, 0), 60)
 			"face_to_face":
 				_small_gag(ViewKit.word("fx.boo", "BOO!"), 0.3)
+			"squeak_bit", "head_turn":
+				_punch_window()
+			"squeak":
+				_squeak_puff()
 			"near_miss":
 				if world_view != null:
 					_caption(ViewKit.word("fx.near_miss", "NEAR MISS!"), world_view.actor_anchor(&"hush", &"top") + Vector3(0, 0.6, 0), 64, &"hush")
@@ -358,6 +368,77 @@ func _accent(d: Dictionary) -> void:
 		_schedule(0.1, "freeze_frame", str(p.get("caption", "")))
 
 
+## Q-G1: the cause of the dizzy spin on screen before he spins — the gramophone shakes and notes jet out of its horn
+## in a stream (JET_N bursts every JET_F frames from the trigger).
+const JET_N := 6
+const JET_F := 9.0
+const WINDOW_PUNCH_S := 1.8
+var _jet_at: Vector3 = Vector3.INF
+var _jet_dir := Vector3.UP
+var _jets_left := 0
+var _jet_t := 0.0
+var _window_punched := false
+## The spin's dust ring at his toe: clip frames SPIN_DUST_F0..F1 (rx_dizzy_spin_a's top), a burst every SPIN_DUST_DF.
+const SPIN_DUST_F0 := 38.0
+const SPIN_DUST_F1 := 82.0
+const SPIN_DUST_DF := 7.0
+var _spin_f := -1.0
+var _spin_next := 0.0
+## Bellows-window punches for his off-screen answers (tests / the review).
+var window_punches: int = 0
+
+
+func _record_runs_away(prank: String) -> void:
+	if world_view == null or info == null:
+		return
+	var rp := str(info.prank(prank).get("rig_point", ""))
+	if rp == "":
+		return
+	var p: Variant = world_view.prop(rp) if world_view.has_method("prop") else null
+	if p != null and (p as Object).has_method("play"):
+		(p as Object).call("play", "play")
+	var top := world_view.anchor_of(rp, &"preview")
+	if top == Vector3.ZERO:
+		return
+	# the horn's bell sits under the preview anchor; the notes jet up and out toward the room (+x, the camera)
+	_jet_at = top + Vector3(0.05, -0.45, 0.1)
+	_jet_dir = Vector3(0.8, 0.9, 0.5)
+	_jets_left = JET_N
+	_jet_t = 0.0
+	_spin_f = 0.0
+	_burst("note_jet", _jet_at, _jet_dir)
+	_burst("sparkles", _jet_at, _jet_dir)
+	_jets_left -= 1
+
+
+## Q-G5: his answer to the squeak (the bit's head snap) happens off-screen in the small window — punch it to the
+## escalated size for WINDOW_PUNCH_S so it reads.
+func _punch_window() -> void:
+	if pip == null or not pip.is_shown() or pip.is_escalated() or (camera != null and camera.gag_in_pip()):
+		return
+	pip.escalate(true)
+	_window_punched = true
+	window_punches += 1
+	_schedule(WINDOW_PUNCH_S, "window_down", null)
+
+
+## The squeeze's yellow burst at Clarence's beak (her `grip_r` socket, his head forward-up), on the squeeze frame.
+const SQUEAK_PUFF_DELAY_S := 8.0 / 60.0
+
+
+func _squeak_puff() -> void:
+	_schedule(SQUEAK_PUFF_DELAY_S, "squeak_puff", null)
+
+
+func _squeak_puff_now() -> void:
+	var hv := world_view.hush_view if world_view != null else null
+	if hv == null or not hv.visible:
+		return
+	var g := hv.socket_world("grip_r")
+	var at := g.origin if g != Transform3D.IDENTITY else hv.head_world()
+	_burst("squeak_puff", at + Vector3(0.0, 0.12, 0.08), Vector3(0.0, 0.8, 0.6))
+
+
 func _small_gag(text: String, trauma: float) -> void:
 	if camera != null:
 		camera.shake(trauma)
@@ -389,6 +470,26 @@ func advance(delta: float) -> void:
 			t[0] = -1.0
 			if str(t[1]) == "freeze_frame" and driver != null and not reduce_motion:
 				driver.juice.request_kind(&"freeze_frame")
+			elif str(t[1]) == "squeak_puff":
+				_squeak_puff_now()
+			elif str(t[1]) == "window_down" and _window_punched:
+				_window_punched = false
+				if pip != null and not (camera != null and camera.gag_in_pip()):
+					pip.escalate(false)
+	if _spin_f >= 0.0:
+		_spin_f += maxf(vdt, delta * 0.05) * 60.0
+		if _spin_f >= SPIN_DUST_F0 and _spin_f >= _spin_next:
+			_spin_next = _spin_f + SPIN_DUST_DF
+			_burst("spin_dust", _feet() + Vector3(0.0, 0.04, 0.0), Vector3.UP)
+		if _spin_f > SPIN_DUST_F1:
+			_spin_f = -1.0
+			_spin_next = 0.0
+	if _jets_left > 0:
+		_jet_t += maxf(vdt, delta * 0.05) * 60.0
+		if _jet_t >= JET_F:
+			_jet_t = 0.0
+			_jets_left -= 1
+			_burst("note_jet", _jet_at, _jet_dir)
 	if camera != null and _gag_id != 0 and camera.active_gag_id() == _gag_id:
 		camera.set_gag_focus(_gag_id, _chest())
 

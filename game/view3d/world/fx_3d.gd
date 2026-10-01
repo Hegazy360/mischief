@@ -6,19 +6,32 @@ class_name Fx3D
 extends Node3D
 
 const MAX_EMITTERS := 8
-## id → [colour, amount, lifetime, speed, size, gravity y, spread deg, emissive]
+## The music-note glyph (white, navy ink) the note kinds draw instead of a disc (r3d-fix-gags: dots read as smoke).
+const NOTE_TEX := "res://art/fx/particles/note.svg"
+## id → [colour, amount, lifetime, speed, size, gravity y, spread deg, emissive, (texture path)]
 const KINDS := {
 	"dust": [Color("#D8CBB4"), 10, 0.5, 1.0, 0.08, -1.0, 70.0, 0.0],
 	"pepper": [Color("#3B2F2A"), 16, 0.6, 1.4, 0.035, -3.0, 40.0, 0.0],
 	"pepper_shake": [Color("#3B2F2A"), 12, 0.5, 0.6, 0.03, -4.0, 20.0, 0.0],
 	"sparkles": [Color("#FFE38A"), 10, 0.6, 1.3, 0.07, 0.5, 180.0, 1.0],
-	"notes": [Color("#1B2340"), 5, 1.0, 0.7, 0.10, 0.6, 50.0, 0.0],
+	"notes": [Color.WHITE, 5, 1.0, 0.7, 0.13, 0.6, 50.0, 0.0, NOTE_TEX],
 	"drops": [Color("#5CB8FF"), 14, 0.6, 2.0, 0.05, -6.0, 60.0, 0.0],
 	"roses": [Color("#D8263A"), 12, 1.2, 2.4, 0.09, -4.0, 45.0, 0.0],
 	"onions": [Color("#F4EFE6"), 8, 0.9, 2.6, 0.08, -7.0, 70.0, 0.0],
 	"steam": [Color(1, 1, 1, 0.8), 8, 1.1, 0.5, 0.14, 1.0, 25.0, 1.0],
 	"stars": [Color("#FFD23F"), 6, 1.2, 0.8, 0.09, 0.0, 180.0, 1.0],
 	"choo_puff": [Color("#F7F4EE"), 14, 0.7, 2.2, 0.16, 0.3, 35.0, 0.0],
+	## r3d-fix-gags: a jet of big notes out of the gramophone's horn (the record running away, Q-G1)
+	"note_jet": [Color.WHITE, 8, 1.1, 2.4, 0.2, 0.2, 16.0, 0.0, NOTE_TEX],
+	## r3d-fix-gags: his warm-up note flying across the room to the vase (Q-G4): few, big, straight, slow to fade
+	"note_fly": [Color.WHITE, 3, 1.6, 2.0, 0.2, 0.05, 6.0, 0.0, NOTE_TEX],
+	## r3d-fix-gags: the squeak's yellow burst out of Clarence's beak (Q-G5 / Q-V1: the toy and the noise read)
+	"squeak_puff": [Color("#FFD23F"), 12, 0.45, 2.2, 0.08, 0.0, 75.0, 1.0],
+	## r3d-fix-gags: the door-frame bonk's contact (Q-G2): a big plaster puff off the frame and big stars
+	## r3d-fix-gags: the top's dust ring at his toe while he spins (Q-G1: the spin reads in a still frame)
+	"spin_dust": [Color("#E9DCC4"), 10, 0.45, 1.9, 0.11, -0.4, 88.0, 0.0],
+	"bonk_dust": [Color("#EFE6D2"), 12, 0.55, 1.5, 0.16, -0.6, 55.0, 0.0],
+	"bonk_stars": [Color("#FFD23F"), 7, 1.3, 0.9, 0.15, 0.0, 180.0, 1.0],
 }
 
 var _emitters: Array[CPUParticles3D] = []
@@ -49,7 +62,12 @@ func _init() -> void:
 		m.shader = load(View3DConst.SH_FX)
 		m.set_shader_parameter("albedo_color", k[0])
 		m.set_shader_parameter("billboard", true)
-		m.set_shader_parameter("round_disc", true)
+		var tex_path := str(k[8]) if k.size() > 8 else ""
+		if tex_path != "" and ResourceLoader.exists(tex_path):
+			m.set_shader_parameter("tex", load(tex_path))
+			m.set_shader_parameter("round_disc", false)
+		else:
+			m.set_shader_parameter("round_disc", true)
 		m.set_shader_parameter("emissive", k[7])
 		_mats[id] = m
 		MaterialWarm3D.register(m, &"fx")

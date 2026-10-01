@@ -31,8 +31,11 @@ func _build_eyes() -> void:
 	_eyes.name = "Eyes"
 	add_child(_eyes)
 	_eyes.position = SetGeo.vec3(entry.get("eyes_anchor", [0.0, 1.1, 0.1])) * float(entry.get("scale", 1.0))
-	# the card faces the camera (+z) whatever the prop's yaw
+	# the card faces the camera (+z) whatever the prop's yaw; house3d `eyes_scale` enlarges it (r3d-fix-gags Q-G6:
+	# her eyes in the gap must read in the near-miss two-shot)
 	_eyes.rotation.y = -rotation.y
+	var es := float(entry.get("eyes_scale", 1.0))
+	_eyes.scale = Vector3(es, es, es)
 	var white := mats.get_mat(Color(0.97, 0.97, 0.95, 0.4), &"set")
 	var dark := mats.get_mat(Color("#141018"), &"set")
 	# sized to read at phone scale (each eye ≈ 12 px tall at 1200×540 from the base framing)

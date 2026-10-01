@@ -10,7 +10,9 @@
 ##   V5  for QUIET_AFTER_S after an action completes (a rig armed, an item taken, a dive) nothing new
 ##       is suggested.
 ##   V1  at a rig point: Hush's thought (the joke, on the side away from the prop) + the ring at the
-##       prop; every other preview of the room fades to 30 %.
+##       prop; every other preview of the room fades to 30 %. Once she RIGS (the hold has started) the
+##       thought goes: the joke is being set up, the ring at the prop is the one loud thing (r3d QA
+##       Q-C1 — the thought, the glowing prop and the ring piled onto her head).
 ##   V4  otherwise the passive previews (80 %) are the menu — N2: every available (unarmed, unspent)
 ##       rig point of her room; armed ones show the 3D tag instead, spent ones nothing; a needs cloud
 ##       (the missing item's grey silhouette) once she has seen its container; an item bubble over a
@@ -73,7 +75,7 @@ static func fill(model: OverlayModel, snap: ViewSnapshot, ctx: OverlayCtx) -> vo
 	var n4 := ctx.idle_s >= IDLE_HINT_S and ctx.next_useful != "" and ctx.previews_mode != OverlayCtx.MODE_OFF
 	# V1: at a rig point — the thought, the other previews faded
 	var at_rig := at != "" and not hidden and not h.moving and _available(snap, at) and _prank_at(snap, ctx, at) != ""
-	if at_rig:
+	if at_rig and not rigging:
 		var prank := _prank_at(snap, ctx, at)
 		model.thought.hotspot = at
 		model.thought.prank = prank

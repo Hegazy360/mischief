@@ -3,6 +3,9 @@
 ## ring anchor, filling from 12 o'clock. It pulses at 3 Hz over the last 20 % while held; after a
 ## release it stays partial (dimmer, no pulse); completion pops it 1.0 → 1.18 → 1.0 and fades.
 ## Echoed on the action button. The node's position is the ring's centre.
+## Next to a face (r3d QA Q-C1: the ring sat on Hush's face while she reached for a shelf prop) the
+## ring passes BEHIND the head: `set_occluders(face boxes)` — the arc parts inside them are not drawn,
+## so the ring stays on the prop and nothing covers her face.
 class_name RigRing
 extends Node2D
 
@@ -13,6 +16,9 @@ const YELLOW := Color("#F2D23A")
 const GREEN := Color("#5CCF6A")
 const PULSE_FROM := 0.8
 const DONE_S := 0.35
+## Angular bins of the occlusion test (5° each) and the most occluders kept.
+const OCC_BINS := 72
+const MAX_OCC := 2
 
 var frac: float = 0.0
 var active: bool = false
@@ -20,6 +26,43 @@ var k: float = 1.0
 
 var _done_t: float = -1.0
 var _shown: bool = false
+## Screen-space rects the ring passes behind (a fixed pool; unused = Rect2()).
+var _occ: Array[Rect2] = [Rect2(), Rect2()]
+var _occ_n: int = 0
+## Per bin: 1 = drawn (filled in _draw; no allocation).
+var _vis := PackedByteArray()
+
+
+func _init() -> void:
+	_vis.resize(OCC_BINS)
+	_vis.fill(1)
+
+
+## The face boxes (screen px) the ring passes behind this frame; [] = none. Redraws on change.
+func set_occluders(rects: Array[Rect2]) -> void:
+	var n := 0
+	var changed := false
+	for r in rects:
+		if n >= MAX_OCC or not r.has_area():
+			continue
+		if _occ[n] != r:
+			_occ[n] = r
+			changed = true
+		n += 1
+	if n != _occ_n:
+		changed = true
+	_occ_n = n
+	if changed:
+		queue_redraw()
+
+
+## True when any part of the ring is hidden behind an occluder (tests).
+func occluded() -> bool:
+	_fill_vis(k)
+	for b in _vis:
+		if b == 0:
+			return true
+	return false
 
 
 ## Set the ring (frac 0..1; active = she holds now). Hidden via `visible`.
@@ -43,6 +86,11 @@ func clear() -> void:
 	_shown = false
 	if _done_t < 0.0:
 		visible = false
+
+
+## The ring's drawn outer radius at k = 1 (the track's outer edge; the face keep-out uses it).
+static func outer_radius() -> float:
+	return RADIUS + TRACK * 0.5
 
 
 ## The ring's colour at `f` (yellow → green).
@@ -80,11 +128,54 @@ func _draw() -> void:
 	var pulse := 0.0
 	if active and frac >= PULSE_FROM and frac < 1.0 and not UiKit.reduce_flash():
 		pulse = 0.5 + 0.5 * sin(float(UiKit.now_ms()) * 0.001 * TAU * 3.0)
+	_fill_vis(s)
+	var a0 := -PI * 0.5
+	var bin := TAU / float(OCC_BINS)
 	UiShapes.begin()
-	UiShapes.arc(Vector2.ZERO, RADIUS, 0.0, TAU, TRACK, Color(0, 0, 0, 0.35 * a), 72)
+	# the track: every visible run of bins
+	var i := 0
+	while i < OCC_BINS:
+		if _vis[i] == 0:
+			i += 1
+			continue
+		var j := i
+		while j < OCC_BINS and _vis[j] == 1:
+			j += 1
+		UiShapes.arc(Vector2.ZERO, RADIUS, a0 + bin * i, a0 + bin * j, TRACK, Color(0, 0, 0, 0.35 * a), maxi(2, j - i + 1))
+		i = j
 	if frac > 0.0:
-		var a0 := -PI * 0.5
-		var col := color_at(frac).lightened(0.25 * pulse)
-		UiShapes.arc(Vector2.ZERO, RADIUS, a0, a0 + TAU * frac, STROKE + 4.0 * pulse, Color(col, a), maxi(8, int(72.0 * frac)))
+		var col := Color(color_at(frac).lightened(0.25 * pulse), a)
+		var w := STROKE + 4.0 * pulse
+		var end_a := a0 + TAU * frac
+		i = 0
+		while i < OCC_BINS and a0 + bin * i < end_a:
+			if _vis[i] == 0:
+				i += 1
+				continue
+			var j := i
+			while j < OCC_BINS and _vis[j] == 1 and a0 + bin * j < end_a:
+				j += 1
+			var e := minf(a0 + bin * j, end_a)
+			UiShapes.arc(Vector2.ZERO, RADIUS, a0 + bin * i, e, w, col, maxi(2, j - i + 1))
+			i = j
 	UiShapes.flush(self)
 	draw_set_transform(Vector2.ZERO)
+
+
+## Which bins are drawn at scale `s` (a bin is hidden when its middle, on the ring, lies inside an
+## occluder grown by half the track).
+func _fill_vis(s: float) -> void:
+	_vis.fill(1)
+	if _occ_n == 0:
+		return
+	var a0 := -PI * 0.5
+	var bin := TAU / float(OCC_BINS)
+	var rr := RADIUS * s
+	var pad := TRACK * 0.5 * s
+	for b in OCC_BINS:
+		var a := a0 + bin * (float(b) + 0.5)
+		var p := position + Vector2(cos(a), sin(a)) * rr
+		for o in _occ_n:
+			if _occ[o].grow(pad).has_point(p):
+				_vis[b] = 0
+				break

@@ -246,6 +246,14 @@ def piece(pid, d, kind):
             pb.cyl(0.006, 0.006, 0.06, (x, h - 0.09, 0), "pan_rail", seg=5)
             pb.cyl(r, r, 0.03, (x, h - 0.1 - r, -0.02), "pan" if i % 2 == 0 else "pan_dk", seg=20, rot=(90, 0, 0))
             pb.box((x - 0.012, h - 0.1 - 2 * r - 0.14, -0.02), (x + 0.012, h - 0.1 - 2 * r + 0.01, 0.0), "pan_dk")
+    elif prim == "frame" and pid == "parlour_picture_frame":
+        # the cue picture (Q-G3): a thick gilt moulding round a dark oil portrait with a pale face — it must read as a
+        # picture frame against the pink wall, on the wall and on his head
+        gilt = c("pic_gilt", "frame_gold")
+        pb.box((lo[0], 0.0, lo[2]), (hi[0], h, hi[2]), gilt, bevel=0.02)
+        pb.box((lo[0] + 0.08, 0.08, hi[2] - 0.004), (hi[0] - 0.08, h - 0.08, hi[2] + 0.006), c("pic_canvas", "canvas"))
+        pb.sphere(0.075, (0.0, h * 0.58, hi[2] + 0.008), c("pic_face", "canvas_face"), scale=(1.0, 1.25, 0.08), seg=16, rings=8)
+        pb.sphere(0.13, (0.0, h * 0.24, hi[2] + 0.008), c("pic_face", "canvas_face"), scale=(1.2, 0.5, 0.06), seg=16, rings=8)
     elif prim == "frame":
         col = c("frame_gold", "window_frame")
         pb.box((lo[0], 0.0, lo[2]), (hi[0], h, hi[2]), col, bevel=0.015)

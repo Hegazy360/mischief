@@ -50,9 +50,10 @@ def build(ctx):
         if f < 7 or f > 13:
             return {}
         k = 1.0 if 8 <= f <= 10 else (max(0.0, 1.0 - (f - 10) / 3.0) if f > 10 else (f - 7) / 1.0)
-        # he bulges between her fists (x1.8 across, the part the 64 px silhouette reads beyond the gloves)
-        return {"clarence_body": {"s": (1.0 + 0.80 * k, 1.0 + 0.45 * k, 1.0 + 0.80 * k)},
-                "clarence_comb": {"s": (1.0 + 1.4 * k, 1.0 + 1.4 * k, 1.0 + 1.4 * k), "r": [("x", -30 * k)]}}
+        # he bulges between her fists (x2.4 across, the part the 64 px silhouette reads beyond the gloves; r3d-fix-gags
+        # Q-G5 / Q-V1: "fiddling with something small and yellow" — the squeeze must swell the toy, big)
+        return {"clarence_body": {"s": (1.0 + 1.40 * k, 1.0 + 0.70 * k, 1.0 + 1.40 * k)},
+                "clarence_comb": {"s": (1.0 + 2.0 * k, 1.0 + 2.0 * k, 1.0 + 2.0 * k), "r": [("x", -36 * k)]}}
     c.motion(squash)
     # the gloves on him by IK (riding on her chest, so they follow the squash): both fists round him at the end of her
     # straight arms, stacked like a bat grip, his neck + head pointing forward-up out of the top fist (his long axis =

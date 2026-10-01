@@ -169,6 +169,10 @@ var pip_ring_frac: float = -1.0
 ## from: Vector2 (screen px, the prop's projected tag socket; INF = the screen centre)}. The world
 ## overlays start the same flight from OverlayModel.tag_flights (they know the prop's anchor).
 var tag_flights: Array = []
+## (r3d QA Q-C1) The action's hold is in progress — Hush is rigging (or holding FREEZE): the teaching
+## glove leaves the action button and the button shows its ring and ONE icon. The Hud also infers it
+## from a press on the button and from `ring_frac` rising, so a presenter that never sets it still works.
+var holding: bool = false
 
 
 ## Copy every field from `other` (tests, demos).

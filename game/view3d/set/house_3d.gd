@@ -291,7 +291,7 @@ func _build_pieces() -> void:
 				"model": d.get("model", null) if d.get("model", null) != null else "primitive:" + SetGeo.s(d.get("primitive", "box")),
 				"silhouette": SetGeo.s(d.get("primitive", "box")),
 				"color": d.get("color", "#9C8466"), "bounds": d.get("box", [-0.2, 0.0, -0.2, 0.2, 0.4, 0.2]),
-				"scale": 1.0, "yaw": float(d.get("yaw", 0.0)), "z": float(d.get("z", -2.2)),
+				"scale": float(d.get("scale", 1.0)), "yaw": float(d.get("yaw", 0.0)), "z": float(d.get("z", -2.2)),
 				"anims": {}, "tag_socket": null,
 			}
 			var model := SetGeo.s(piece_entry["model"])

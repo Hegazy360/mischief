@@ -48,6 +48,18 @@ const PLINTH_H_M := 0.12
 const SHIVER_S := 0.15
 const TOMATO_S := 4.0
 const LOOK_WEIGHT_EASE := 6.0
+## After a pinned beat (stage_pin) he catches up with the sim at this speed (m/s): a quick shuffle, never a snap.
+const PIN_RELEASE_M_S := 1.8
+## Into a pinned spot (the bounce off the door frame): 0.5 m in ≈ 8 f.
+const PIN_KNOCK_M_S := 4.0
+## The dive into a hiding spot: the body yawed away from the camera (cheat < 0 = upstage), turned fast (the dive is
+## 15 f).
+const DIVE_CHEAT := -62.0
+const DIVE_CHEAT_EASE_S := 0.07
+## A dive with no named spot goes into the hiding spot within this distance of her (m).
+const DIVE_SPOT_M := 0.8
+## Bellows' station sidestep speed (house3d.json stations `bellows_dx`).
+const STATION_DX_M_S := 1.1
 
 var actor: String = "hush"
 var rig_id: String = ""
@@ -167,6 +179,14 @@ var _stone := false
 var _plinth_t := 0.0
 var _shiver_t := 0.0
 var _tomato_s := 0.0
+## View-only cue staging (CueStager3D, r3d-fix-gags): a held base clip, a staged overlay, a pinned x.
+var _hold_clip := ""
+var _hold_f := 0.0
+var _st_ov_clip := ""
+var _st_ov_f := 0.0
+var _pin_f := 0.0
+var _pin_x := NAN
+var _pin_off := 0.0
 ## Anchor caches (the anchor source asks for these several times a frame; valid for one process frame and one pose:
 ## `_pose_serial` moves whenever apply / show_* / preroll / reset changes the pose).
 var _pose_serial := 0
@@ -536,6 +556,13 @@ func reset() -> void:
 	_rig_step_used = false
 	_stone = false
 	_tomato_s = 0.0
+	_hold_clip = ""
+	_hold_f = 0.0
+	_st_ov_clip = ""
+	_st_ov_f = 0.0
+	_pin_f = 0.0
+	_pin_x = NAN
+	_pin_off = 0.0
 	if plinth != null:
 		plinth.visible = false
 	if uses_rig and bool(_has.get("reset", false)):
@@ -578,6 +605,35 @@ func play_cue(id: String, len_f: float = 0.0) -> void:
 	_cue_len = len_f if len_f > 0.0 else float(maxi(1, ClipMap.clip_length3d(clip)))
 
 
+## Cue staging (view only, r3d-fix-gags): play `clip` as the base clip for `frames` view frames instead of the sim's
+## pick (a dazed `st_bonk` where he would walk on the spot); never over a reaction. "" / 0 clears it.
+func stage_hold(clip: String, frames: float) -> void:
+	_hold_clip = clip if ClipMap.clip_exists3d(clip) else ""
+	_hold_f = frames if _hold_clip != "" else 0.0
+
+
+## Cue staging: play `clip` as the overlay for `frames` view frames (his relieved smirk to the camera).
+func stage_overlay(clip: String, frames: float) -> void:
+	_st_ov_clip = clip if ClipMap.clip_exists3d(clip) else ""
+	_st_ov_f = frames if _st_ov_clip != "" else 0.0
+
+
+## Cue staging: hold the view x at `x_m` (NAN = where he stands now) for `frames` view frames — he stops at the door
+## frame he walked into while the sim walks on — then catch up at PIN_RELEASE_M_S.
+func stage_pin(frames: float, x_m: float = NAN) -> void:
+	_pin_f = frames
+	_pin_x = x_m
+
+
+## The view-only x offset of a pinned beat (m; 0 when none).
+func pin_offset() -> float:
+	return _pin_off
+
+
+func staged_clip() -> String:
+	return _hold_clip if _hold_f > 0.0 else ""
+
+
 # --- per frame --------------------------------------------------------------------------------------
 
 ## Update from the snapshot actors (`prev` → `cur` at `alpha`); `view_dt` = view-time delta.
@@ -597,6 +653,7 @@ func apply(prev: ViewSnapshot.Actor, cur: ViewSnapshot.Actor, alpha: float, view
 	ClipMap.resolve(map, cur, alpha, _pick, ctx)
 	_step_down_rule(cur)
 	_note_fallbacks()
+	_apply_staging(cur, vf)
 	var hidden := _pick.hidden or (actor == "hush" and (cur.state == "HIDDEN" or cur.hidden_spot != ""
 		or (cur.entering and cur.oneshot != "enter")))
 	var t1 := Time.get_ticks_usec() if profile else 0
@@ -659,9 +716,17 @@ static func placement_for(actor_id: String, cur: ViewSnapshot.Actor, reach: Dict
 			cheat = minf(cheat, View3DConst.CHEAT_REACH_MAX)
 		elif (cur.state == "DIVING" or cur.state == "HIDDEN" or cur.hidden_spot != "") and not is_nan(hide_z):
 			z = hide_z
+		if cur.state == "DIVING":
+			# Q-V2: she dives INTO the spot behind her — the body turns away from the camera (upstage) so the
+			# flat-out flight reads as going in, never as leaping out of it toward the room
+			cheat = DIVE_CHEAT
 		elif cur.state == "FROZEN" or cur.frozen:
 			cheat = View3DConst.CHEAT_PERFORM
 	else:
+		if not cur.moving and cur.activity != "" and not station.is_empty():
+			# the station's view-only x offset holds through a reaction there too (beside the gramophone, not in
+			# front of it: the dizzy spin's cause stays in view, Q-G1)
+			dx = float(station.get("bellows_dx", 0.0))
 		if not cur.moving and cur.activity != "" and not station.is_empty() and not cur.reacting:
 			z = float(station.get("bellows_z", View3DConst.BELLOWS_STATION_Z))
 			if station.has("yaw"):
@@ -706,8 +771,23 @@ func _place(cur: ViewSnapshot.Actor, p2: Vector2, view_dt: float) -> void:
 		_z = lerpf(_z_from, _z_to, _z_t * _z_t * (3.0 - 2.0 * _z_t))
 	else:
 		_z = _z_to
-	_dx = move_toward(_dx, _dx_to, view_dt / View3DConst.REACH_EASE_S * maxf(0.3, absf(_dx_to)))
-	_x = p2.x / View3DConst.PX_PER_M + _dx
+	if actor == "bellows":
+		# his station sidestep (house3d `bellows_dx`) at a walking pace, never a slide
+		_dx = move_toward(_dx, _dx_to, view_dt * STATION_DX_M_S)
+	else:
+		_dx = move_toward(_dx, _dx_to, view_dt / View3DConst.REACH_EASE_S * maxf(0.3, absf(_dx_to)))
+	var sim_x := p2.x / View3DConst.PX_PER_M + _dx
+	if _pin_f > 0.0:
+		if is_nan(_pin_x):
+			_pin_x = sim_x + _pin_off
+		# into the pinned spot fast (a knock-back off what he walked into), then held while the sim walks on
+		_pin_off = move_toward(_pin_off, _pin_x - sim_x, view_dt * PIN_KNOCK_M_S)
+		_pin_f -= view_dt * 60.0
+		if _pin_f <= 0.0:
+			_pin_x = NAN
+	elif _pin_off != 0.0:
+		_pin_off = move_toward(_pin_off, 0.0, view_dt * PIN_RELEASE_M_S)
+	_x = sim_x + _pin_off
 	_floor_y = -p2.y / View3DConst.PX_PER_M
 	position = Vector3(_x, _floor_y + _y_off, _z)
 	_facing = cur.facing if cur.facing != 0 else _facing
@@ -817,6 +897,24 @@ func _rig_point_of(prank: String) -> String:
 	return ""
 
 
+## The hiding spot a dive goes into when the snapshot names none: the house3d `hide` spot of her room nearest her
+## (within DIVE_SPOT_M), "" when none.
+func _dive_spot(cur: ViewSnapshot.Actor) -> String:
+	if layout == null or not (house3d.get("hide", null) is Dictionary):
+		return ""
+	var best := ""
+	var best_d := DIVE_SPOT_M * View3DConst.PX_PER_M
+	for id in (house3d["hide"] as Dictionary):
+		var hs: HouseLayout.Hotspot = layout.hotspot(String(id))
+		if hs == null or hs.room != cur.room:
+			continue
+		var d := absf(hs.use_x - cur.x)
+		if d <= best_d:
+			best_d = d
+			best = String(id)
+	return best
+
+
 ## The house3d.json station entry of Bellows' current activity ({} when none).
 func _station_for(cur: ViewSnapshot.Actor) -> Dictionary:
 	if cur.activity == "" or info == null or info.world == null:
@@ -851,6 +949,8 @@ func _hide_z_for(cur: ViewSnapshot.Actor) -> float:
 	var spot := cur.hidden_spot
 	if spot == "" and cur.state == "DIVING":
 		spot = cur.watched_spot
+	if spot == "" and cur.state == "DIVING":
+		spot = _dive_spot(cur)
 	if spot == "":
 		return NAN
 	var hd: Variant = (house3d.get("hide", {}) as Dictionary).get(spot, null) if house3d.get("hide", null) is Dictionary else null
@@ -1053,7 +1153,7 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 		rig.call("set_facing", facing, anim)
 	if bool(_has.get("set_cheat", false)) and cheat != _d_cheat:
 		_d_cheat = cheat
-		rig.call("set_cheat", cheat, View3DConst.CHEAT_EASE_S)
+		rig.call("set_cheat", cheat, DIVE_CHEAT_EASE_S if cheat == DIVE_CHEAT else View3DConst.CHEAT_EASE_S)
 	if bool(_has.get("look_at_point", false)):
 		var lt := look_target
 		var lw := look_weight
@@ -1083,6 +1183,24 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 		rig.call("advance", _view_dt)
 		if profile:
 			_prof_adv_us += Time.get_ticks_usec() - ta
+
+
+## The cue staging's overrides of this frame's pick (a held base clip, a staged overlay); a reaction always wins.
+func _apply_staging(cur: ViewSnapshot.Actor, vf: float) -> void:
+	if _hold_f > 0.0:
+		_hold_f -= vf
+		if not cur.reacting and not _pick.hidden:
+			_pick.clip = _hold_clip
+			_pick.key = "cue_hold"
+			_pick.loop = false
+			_pick.stride = false
+			_pick.speed = 1.0
+			_pick.external = false
+	if _st_ov_f > 0.0:
+		_st_ov_f -= vf
+		if not cur.reacting:
+			_pick.ov_clip = _st_ov_clip
+			_pick.ov_key = "cue_overlay"
 
 
 func _play_base(cur: ViewSnapshot.Actor) -> void:
@@ -1124,7 +1242,9 @@ func _play_base(cur: ViewSnapshot.Actor) -> void:
 		if bool(_has.get("release_external", false)) and changed:
 			rig.call("release_external")
 		if _pick.stride and cur.moving and bool(_has.get("set_speed", false)):
-			rig.call("set_speed", maxf(0.05, cur.speed_px_s / View3DConst.PX_PER_M))
+			# catching up after a pinned beat: his steps hurry with the extra speed (no foot slide)
+			var catch := PIN_RELEASE_M_S if _pin_f <= 0.0 and absf(_pin_off) > 0.01 else 0.0
+			rig.call("set_speed", maxf(0.05, cur.speed_px_s / View3DConst.PX_PER_M + catch))
 		_frame = float(rig.call("current_frame")) if bool(_has.get("current_frame", false)) else 0.0
 
 

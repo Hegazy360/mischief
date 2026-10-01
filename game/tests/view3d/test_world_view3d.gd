@@ -100,10 +100,17 @@ func test_p00_route_lights_reach_tags_and_hit_rects() -> void:
 	var node0 := -1
 	var obj1 := -1
 	var node1 := -1
+	var shot_kinds := PackedStringArray()
+	var pin_max := 0.0
 	while not _driver.snapshot().ended and frames < 4200:
 		_step()
 		frames += 1
 		var s := _driver.snapshot()
+		# r3d-fix-gags: the cue shots that put each small gag on screen, and the door-frame knock-back
+		var sk := _wv.cues.shot_kind()
+		if sk != "" and not shot_kinds.has(sk):
+			shot_kinds.append(sk)
+		pin_max = maxf(pin_max, absf(_wv.bellows_view.pin_offset()))
 		# no per-frame allocation: object / node counts flat over 10 s of PLAY (ticks 2400…3000: the second rig,
 		# the piano hide, his exits and entries)
 		if s.tick == 2400:
@@ -172,6 +179,11 @@ func test_p00_route_lights_reach_tags_and_hit_rects() -> void:
 		assert_has(staged, "laugh_vase:prop")
 		assert_eq(_wv.cues.vase_phase(), "smashed", "the vase ended on the floor")
 		assert_gt(_wv.cues.nudges, 0, "it crept along the mantel first")
+	print("[test_world_view3d] P00 cue shots %s, door-frame knock-back %.2f m" % [", ".join(shot_kinds), pin_max])
+	for k in ["establish", "bonk", "relief", "picture"]:
+		assert_has(shot_kinds, k, "the %s cue shot framed its gag" % k)
+	assert_gt(pin_max, 0.2, "he stops dead at the door frame (the view pins him off it)")
+	assert_almost_eq(_wv.bellows_view.pin_offset(), 0.0, 0.01, "and catches up with the sim afterwards")
 	assert_eq(_wv.recorder.count(), MomentRecorder3D.CAP, "the ring is full after a Night")
 	assert_eq(_wv.recorder.last_tick(), _driver.snapshot().tick, "the ring records every frame")
 	var fc := _wv.fallback_counts()

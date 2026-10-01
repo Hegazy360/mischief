@@ -1,19 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
 <desc>ids: jar straining_arm onions</desc>
-<rect x="20.0" y="50.0" width="58.0" height="70.0" rx="12.0" fill="#CFE8D8" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
-<path d="M62 54 L74 54 Q78 54 78 60 L78 110 Q78 118 70 118 L60 118 Q68 110 68 84 Z" fill="#A9CFB6"/>
-<ellipse cx="36.0" cy="80.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 36.0 80.0)"/>
-<ellipse cx="52.0" cy="96.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 52.0 96.0)"/>
-<ellipse cx="40.0" cy="104.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 40.0 104.0)"/>
-<ellipse cx="58.0" cy="72.0" rx="7.0" ry="11.0" fill="#6DBE45" stroke="#1B2340" stroke-width="3" transform="rotate(20 58.0 72.0)"/>
-<rect x="16.0" y="38.0" width="66.0" height="16.0" rx="5.0" fill="#E8413C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
-<path d="M126 22 L96 30 L92 46 L126 40 Z" fill="#7B3F8C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M94 30 Q74 26 70 38 Q70 50 86 50 Q96 48 96 40 Z" fill="#F4C9A8" stroke="#1B2340" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M76 36 L84 40 M74 42 L82 46" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M104 12 L100 20 M114 10 L112 18" fill="none" stroke="#E8413C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="102.0" cy="76.0" r="12.0" fill="#E9B8E6" stroke="#1B2340" stroke-width="4"/>
-<path d="M100 64 Q102 56 108 58" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="112.0" cy="106.0" r="11.0" fill="#E9B8E6" stroke="#1B2340" stroke-width="4"/>
-<path d="M111 95 Q114 88 119 91" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M82 70 L90 74 M92 112 L100 110" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="6.0" y="60.0" width="62.0" height="62.0" rx="14.0" fill="#CFE8D8" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M54 64 L60 64 Q64 64 64 70 L64 108 Q64 116 56 116 L50 116 Q58 106 58 88 Z" fill="#A9CFB6"/>
+<ellipse cx="31.0" cy="92.0" rx="12.0" ry="24.0" fill="#6DBE45" stroke="#1B2340" stroke-width="4" transform="rotate(-18 31.0 92.0)"/>
+<circle cx="27.0" cy="81.0" r="2.6" fill="#3F8A2C"/>
+<circle cx="35.0" cy="93.0" r="2.6" fill="#3F8A2C"/>
+<circle cx="28.0" cy="104.0" r="2.6" fill="#3F8A2C"/>
+<circle cx="51.0" cy="104.0" r="8.0" fill="#F4ECF4" stroke="#1B2340" stroke-width="3.5"/>
+<circle cx="49.0" cy="84.0" r="6.5" fill="#F4ECF4" stroke="#1B2340" stroke-width="3.5"/>
+<rect x="2.0" y="46.0" width="70.0" height="17.0" rx="5.0" fill="#E8413C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M14 50 L14 59 M26 50 L26 59 M38 50 L38 59" fill="none" stroke="#1B2340" stroke-width="3" stroke-linecap="round"/>
+<path d="M6 36 Q14 24 30 26 M24 20 L31 26 L24 32" fill="none" stroke="#1B2340" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M84 52 Q104 44 128 48 L128 124 L92 124 Q96 90 84 52 Z" fill="#7B3F8C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<path d="M94 48 L102 60 L110 48 Z" fill="#FFFFFF" stroke="#1B2340" stroke-width="3.5" stroke-linejoin="round"/>
+<path d="M126 100 L90 94 L72 92 L72 104 L90 106 L126 112 Z" fill="#7B3F8C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<ellipse cx="70.0" cy="98.0" rx="9.0" ry="10.0" fill="#F4C9A8" stroke="#1B2340" stroke-width="4.5"/>
+<path d="M126 74 Q108 66 90 62 L74 54 L68 64 L86 72 Q104 78 120 86 Z" fill="#7B3F8C" stroke="#1B2340" stroke-width="5" stroke-linejoin="round"/>
+<ellipse cx="64.0" cy="52.0" rx="12.0" ry="10.0" fill="#F4C9A8" stroke="#1B2340" stroke-width="5"/>
+<path d="M58 46 L58 58 M64 44 L64 58" fill="none" stroke="#1B2340" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="84.0" cy="26.0" r="10.0" fill="#ECEEF5" stroke="#1B2340" stroke-width="4.5"/>
+<circle cx="120.0" cy="26.0" r="10.0" fill="#ECEEF5" stroke="#1B2340" stroke-width="4.5"/>
+<circle cx="102.0" cy="30.0" r="20.0" fill="#E9695A" stroke="#1B2340" stroke-width="5"/>
+<path d="M90 22 L97 26 L90 29 M114 22 L107 26 L114 29" fill="none" stroke="#1B2340" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="92.0" y="34.0" width="20.0" height="9.0" rx="3.0" fill="#FFFFFF" stroke="#1B2340" stroke-width="3"/>
+<path d="M97 34 L97 43 M102 34 L102 43 M107 34 L107 43" fill="none" stroke="#1B2340" stroke-width="2" stroke-linecap="round"/>
+<path d="M88 8 Q102 0 116 8 Q112 14 102 13 Q92 14 88 8 Z" fill="#ECEEF5" stroke="#1B2340" stroke-width="4.5" stroke-linejoin="round"/>
+<path d="M98 15 L101 19 L104 15 L107 19" fill="none" stroke="#B3263A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M78 40 Q74 48 78 50 Q82 48 78 40 Z" fill="#8FC8F0" stroke="#1B2340" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M124 38 Q120 46 124 48 Q128 46 124 38 Z" fill="#8FC8F0" stroke="#1B2340" stroke-width="2.5" stroke-linejoin="round"/>
 </svg>

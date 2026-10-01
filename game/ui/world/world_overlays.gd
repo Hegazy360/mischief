@@ -15,6 +15,16 @@
 ## `placer.request(...)` their rects between two apply() calls; apply() adds the overlays' own items,
 ## solves once, and every producer reads its placed `rect` / `visible` afterwards (their results are
 ## the ones of the latest apply, one frame behind at most).
+##
+## Crowding rules (r3d QA Q-C1 / Q-C2, on top of §2.5):
+##   * FACE BOXES — each character's head on screen (`face_box`) is a hard keep-out: no cloud, bubble,
+##     marker or item covers a face, and the rig ring stays ON the prop but passes behind a face next to
+##     it (a little smaller, the arc inside the face box not drawn — RigRing.set_occluders);
+##   * the transient top band — the APPLAUSE meter and the RUNNING GAG fuse, while the Hud shows them
+##     (`Hud.transient_rects`) — is a hard keep-out too: a preview slides clear or waits;
+##   * ONE thought cloud at a time (his bubble or Hush's thought): the one nearest the action (the rig
+##     point she is at, else her head) — OverlayPlacer's one-cloud rule;
+##   * every item is clamped into the safe rect; its tail points at its anchor from where it lands.
 class_name WorldOverlays
 extends CanvasLayer
 
@@ -23,6 +33,19 @@ const LAYER := 8
 const HUD_PAD := 48.0
 ## The thought sits this far beside her head (px at the 1080 base).
 const THOUGHT_GAP := 24.0
+## Margin round a face box and round the transient top-band HUD (px at the 1080 base; 24 keeps a 16:9 preview room
+## to slide between the Script chip's +48 and the fuse instead of waiting out a whole Running Gag).
+const FACE_PAD := 12.0
+const TRANSIENT_PAD := 24.0
+## A face box's half-width and its reach above the head top / below the head anchor, as fractions of
+## the projected head span (head anchor → head top).
+const FACE_HALF_W := 0.6
+const FACE_UP := 0.2
+const FACE_DOWN := 0.35
+## The ring next to a face is drawn this much smaller (and passes behind the face).
+const RING_NEAR_FACE_SCALE := 0.85
+## Who has a face box.
+const FACE_ACTORS: Array[StringName] = [&"hush", &"bellows"]
 
 var anchor_src: Object = null
 var hud: Object = null
@@ -45,16 +68,24 @@ var apply_count: int = 0
 ## Last apply's phase costs in µs: [protected rects, requests, solve, nodes] (perf probes; always filled, 4 clock reads).
 var phase_us: PackedInt32Array = PackedInt32Array([0, 0, 0, 0])
 
+## The last apply's face boxes (FACE_ACTORS order; Rect2() = not on screen) and the one-cloud focus.
+var faces: Array[Rect2] = [Rect2(), Rect2()]
+var focus: Vector2 = Vector2.INF
+
 ## Protected rects of this frame: a fixed pool (unused slots hold FAR, which touches nothing).
 var _protected: Array[Rect2] = []
+## Hard keep-outs of this frame (face boxes + the shown top-band HUD): a fixed pool like _protected.
+var _hard: Array[Rect2] = []
 var _item_tex: Dictionary = {}
 var _combine_tex: Dictionary = {}
 ## The anchor source has a `hud_rects` property (WorldView3D) and a Hud is bound: its protected_rects() already
 ## carries the HUD's always-on rects.
 var _src_takes_hud: bool = false
 
-## Capacity of the protected-rect pool (the anchor source's ~5 + the Hud's 4 + spare).
+## Capacity of the protected-rect pool (the anchor source's ~5 + the Hud's 4 + spare) and of the hard pool
+## (two faces + the meter + the fuse + spare).
 const MAX_PROTECTED := 16
+const MAX_HARD := 6
 const FAR := Rect2(-1.0e9, -1.0e9, 1.0, 1.0)
 
 
@@ -66,6 +97,8 @@ func _init() -> void:
 	add_child(root)
 	_protected.resize(MAX_PROTECTED)
 	_protected.fill(FAR)
+	_hard.resize(MAX_HARD)
+	_hard.fill(FAR)
 	for i in OverlayModel.MAX_PREVIEWS:
 		var p := PreviewCloud.new()
 		p.name = "Preview%d" % i
@@ -118,6 +151,15 @@ func warm(ctx: OverlayCtx) -> void:
 		for e in ctx.combines[pr]:
 			if e is Dictionary:
 				_combine_icon(String((e as Dictionary).get("badge", "")))
+	# the HUD's activity icons of tonight (his next activity in the Bellows window / edge badge, the action
+	# button's target): rasterised here, not on first sight during PLAY (a cold SVG raster costs ~1 ms in
+	# Hud.apply — D17 spike hunt)
+	if ctx.episode != null:
+		for le in ctx.episode.loop:
+			if le != null and le.activity != "":
+				UiIcons.activity(le.activity)
+	for act in ctx.trig_hotspots:
+		UiIcons.activity(String(act))
 
 
 ## The viewport's logical size.
@@ -138,10 +180,17 @@ func apply(model: OverlayModel) -> void:
 	loud_count = 0
 	var t0 := Time.get_ticks_usec()
 	_build_protected(vs)
+	var src_ok := anchor_src != null and is_instance_valid(anchor_src)
+	_build_hard(src_ok)
 	var t1 := Time.get_ticks_usec()
 	var safe := _safe_rect(vs)
-	var src_ok := anchor_src != null and is_instance_valid(anchor_src)
 	var hidden := model.hidden or not src_ok
+	# the one-cloud focus: the rig point she is at, else her head
+	focus = Vector2.INF
+	if src_ok and model.at_hotspot != "":
+		focus = _anchor_screen(model.at_hotspot, &"ring")
+	if src_ok and not focus.is_finite():
+		focus = _actor_screen(&"hush", &"head")
 	# --- requests (the placer's own items)
 	var tpos := Vector2.INF
 	if not hidden and model.thought.hotspot != "":
@@ -149,7 +198,12 @@ func apply(model: OverlayModel) -> void:
 		if head.is_finite():
 			var sz := thought.box_size()
 			var side := float(model.thought.side)
-			var c := head + Vector2(side * (sz.x * 0.5 + THOUGHT_GAP * k), -sz.y * 0.45)
+			# beside her face box (not on it), on its side
+			var fx := head.x + side * (sz.x * 0.5 + THOUGHT_GAP * k)
+			var fb := faces[0]
+			if fb.has_area():
+				fx = (fb.end.x if side > 0.0 else fb.position.x) + side * (sz.x * 0.5 + THOUGHT_GAP * k * 0.5)
+			var c := Vector2(fx, head.y - sz.y * 0.45)
 			placer.request(&"ov_thought", OverlayPlacer.Pri.THOUGHT, Rect2(c - sz * 0.5, sz), head, false, true)
 			tpos = head
 	if not hidden and model.safety_marker.hotspot != "":
@@ -190,7 +244,7 @@ func apply(model: OverlayModel) -> void:
 		var sz := items[i].box_size()
 		placer.request(_item_id(i), OverlayPlacer.Pri.ITEM, Rect2(p - Vector2(sz.x * 0.5, sz.y), sz), p)
 	var t2 := Time.get_ticks_usec()
-	placer.solve(_protected, safe)
+	placer.solve(_protected, safe, _hard, focus)
 	var t3 := Time.get_ticks_usec()
 	# --- results → nodes
 	var th := placer.item(&"ov_thought")
@@ -230,13 +284,15 @@ func apply(model: OverlayModel) -> void:
 		if on:
 			items[i].position = it.rect.get_center()
 			shown_count += 1
-	# the ring sits ON the prop (never moved by the placer)
+	# the ring sits ON the prop (never moved by the placer) — stepping aside from a face (Q-C1)
 	if not hidden and model.rig_ring.hotspot != "":
 		var p := _anchor_screen(model.rig_ring.hotspot, &"ring")
 		if p.is_finite():
+			var sc := ring_scale_near(p, RigRing.outer_radius() * k, faces)
 			ring.visible = true
 			ring.position = p
-			ring.set_data(model.rig_ring.frac, model.rig_ring.active, k)
+			ring.set_occluders(faces)
+			ring.set_data(model.rig_ring.frac, model.rig_ring.active, k * sc)
 			shown_count += 1
 			loud_count += 1
 		else:
@@ -356,6 +412,74 @@ func _build_protected(_vs: Vector2) -> void:
 					n += 1
 	for i in range(n, MAX_PROTECTED):
 		_protected[i] = FAR
+
+
+## The face box of `actor` on screen (Rect2() when absent / off screen): the head anchor → head top
+## span, FACE_HALF_W of it to each side, FACE_UP above the top, FACE_DOWN below the head anchor, plus
+## FACE_PAD. Works on WorldView3D and on FakeAnchors (both modes).
+func face_box(actor: StringName) -> Rect2:
+	if anchor_src == null or not is_instance_valid(anchor_src):
+		return Rect2()
+	if anchor_src.has_method("actor_screen_rect"):
+		var ar: Variant = anchor_src.call("actor_screen_rect", actor)
+		if not (ar is Rect2) or not (ar as Rect2).has_area():
+			return Rect2()
+	var hs := _actor_screen(actor, &"head")
+	var ts := _actor_screen(actor, &"top")
+	if not hs.is_finite() or not ts.is_finite():
+		return Rect2()
+	return face_rect(hs, ts, FACE_PAD * k)
+
+
+## A face box from the projected head anchor `hs` and head top `ts` (pure; tests).
+static func face_rect(hs: Vector2, ts: Vector2, pad: float) -> Rect2:
+	var span := maxf(hs.distance_to(ts), 1.0)
+	var r := Rect2(hs, Vector2.ZERO).expand(ts)
+	var half := span * FACE_HALF_W
+	return r.grow_individual(half, span * FACE_UP, half, span * FACE_DOWN).grow(pad)
+
+
+## The rig ring's scale at the prop `p` (outer radius `r`): RING_NEAR_FACE_SCALE when it would run into a
+## face box (it then passes behind that face), else 1 — pure; tests.
+static func ring_scale_near(p: Vector2, r: float, face_boxes: Array[Rect2]) -> float:
+	for fb in face_boxes:
+		if fb.has_area() and _circle_hits(p, r, fb):
+			return RING_NEAR_FACE_SCALE
+	return 1.0
+
+
+static func _circle_hits(c: Vector2, r: float, b: Rect2) -> bool:
+	var q := Vector2(clampf(c.x, b.position.x, b.end.x), clampf(c.y, b.position.y, b.end.y))
+	return q.distance_squared_to(c) < r * r
+
+
+## The hard keep-outs of the last apply (FAR slots excluded; allocates — tests / lints only).
+func hard_now() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for r in _hard:
+		if r != FAR:
+			out.append(r)
+	return out
+
+
+## Face boxes + the Hud's shown transient top-band rects (+ TRANSIENT_PAD) into the hard pool.
+func _build_hard(src_ok: bool) -> void:
+	var n := 0
+	for i in FACE_ACTORS.size():
+		var fb := face_box(FACE_ACTORS[i]) if src_ok else Rect2()
+		faces[i] = fb
+		if fb.has_area() and n < MAX_HARD:
+			_hard[n] = fb
+			n += 1
+	if hud != null and is_instance_valid(hud) and hud.has_method("transient_rects"):
+		var tr: Variant = hud.call("transient_rects")
+		if tr is Array:
+			for r in tr:
+				if r is Rect2 and (r as Rect2).has_area() and n < MAX_HARD:
+					_hard[n] = (r as Rect2).grow(TRANSIENT_PAD * k)
+					n += 1
+	for i in range(n, MAX_HARD):
+		_hard[i] = FAR
 
 
 ## The protected rects of the last apply (FAR slots excluded; allocates — tests / lints only).

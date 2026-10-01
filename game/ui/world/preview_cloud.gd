@@ -52,12 +52,33 @@ func set_data(p_pict: Texture2D, p_strength: float, p_need: Texture2D, p_ring: f
 	queue_redraw()
 
 
-## The cloud's box size in screen px (placer input).
+## The cloud's box size in screen px (placer input): everything it draws — the lobes with their ink
+## and drop shadow, and his ring when it shows (not the two tail bubbles, which point at the prop) —
+## so two placed clouds never overlap on screen (r3d QA Q-C1/Q-C2: 112 × 90 was the spec's body, the
+## drawing reaches 142 × 128).
 func box_size() -> Vector2:
 	if pict == null and badge_tex != null:
 		return Vector2(96.0, 56.0) * k
 	var s := OverlayRules.LOUD_SCALE if loud else 1.0
-	return Vector2(W, H) * k * s
+	var e := cloud_half_extent(W, H)
+	if ring_frac >= 0.0:
+		var rr := W * 0.5 + 10.0 + (RING_W + 6.0) * 0.5
+		e = Vector2(maxf(e.x, rr), maxf(e.y, rr))
+	return e * 2.0 * k * s
+
+
+## Half the drawn size of `cloud(…, w, h, …)` round its centre (lobes + ink + the 6 px shadow; the
+## larger of the top and bottom halves; tail bubbles excluded).
+static func cloud_half_extent(w: float, h: float) -> Vector2:
+	var rx := w * 0.5
+	var ry := h * 0.5
+	var ex := 0.0
+	var ey := 0.0
+	for v in LOBES:
+		var r := v.z * minf(w, h * 1.25) + INK
+		ex = maxf(ex, absf(v.x * rx) + r)
+		ey = maxf(ey, maxf(-(v.y * ry) + r, v.y * ry + r + 6.0))
+	return Vector2(ex, ey)
 
 
 func _draw() -> void:
@@ -68,7 +89,8 @@ func _draw() -> void:
 	var s := k * (OverlayRules.LOUD_SCALE if loud else 1.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
 	UiShapes.begin()
-	cloud(Vector2.ZERO, W, H, a, tail_dir)
+	# with his ring round it the tail starts outside the ring, so a cloud the placer moved still points at its prop
+	cloud(Vector2.ZERO, W, H, a, tail_dir, (W * 0.5 + 10.0 + RING_W * 0.5 + 6.0) if ring_frac >= 0.0 else 0.0)
 	if ring_frac >= 0.0:
 		UiShapes.arc(Vector2.ZERO, W * 0.5 + 10.0, 0.0, TAU, RING_W + 6.0, Color(UiKit.NAVY, 0.55 * a), 48)
 		if ring_frac > 0.0:
@@ -103,7 +125,8 @@ func _draw_badge(a: float) -> void:
 
 ## A comic thought-cloud of w × h centred on `c` (navy ink, cream fill, soft drop shadow) with two
 ## tail bubbles toward `tail` (a direction; ZERO = no tail) — into the current UiShapes batch.
-static func cloud(c: Vector2, w: float, h: float, a: float, tail: Vector2) -> void:
+## `tail_from` > 0: the tail bubbles start that far from the centre along `tail` (outside a ring).
+static func cloud(c: Vector2, w: float, h: float, a: float, tail: Vector2, tail_from: float = 0.0) -> void:
 	var rx := w * 0.5
 	var ry := h * 0.5
 	# shadow, ink, fill (three passes over the same lobes)
@@ -122,6 +145,9 @@ static func cloud(c: Vector2, w: float, h: float, a: float, tail: Vector2) -> vo
 			var d := tail.normalized()
 			var t1 := c + Vector2(d.x * rx * 0.75, d.y * ry * 1.25)
 			var t2 := c + Vector2(d.x * rx * 1.05, d.y * ry * 1.75)
+			if tail_from > 0.0:
+				t1 = c + d * (tail_from + 10.0)
+				t2 = c + d * (tail_from + 28.0)
 			UiShapes.circle(t1, 9.0 + INK, Color(UiKit.NAVY, a))
 			UiShapes.circle(t2, 5.0 + INK * 0.8, Color(UiKit.NAVY, a))
 			UiShapes.circle(t1, 9.0, Color(UiKit.CREAM, a))

@@ -20,7 +20,11 @@
 ##   figgis_tap(), pause_tap(), overview_tap(), pip_tap(), pip_release(), meter_tap() (the Script
 ##   chip or the meter: open the Script panel), bow_tap(), hint_tap(), map_open().
 ## * `debug_pieces()` / `always_on_rects()` feed the HUD lint, the screen-rect lint and the world
-##   overlays' protected rects; `fly_tag(from, line)` flies a red beret tag to a Script pip.
+##   overlays' protected rects; `transient_rects()` the shown top-band pieces (meter + fuse) the world
+##   overlays keep out of (r3d QA Q-C2); `fly_tag(from, line)` flies a red beret tag to a Script pip.
+## * While a hold is in progress (`model.holding`, a press, the ring rising) a teaching glove on the
+##   action button steps away (r3d QA Q-C1: ring + glove + icon stacked on the button) and comes back
+##   if she lets go before the ring completes.
 ## * Left-handed mode (Settings.left_handed or `set_left_handed`) mirrors every rect but the centred
 ##   meter. Tap-to-rig (Settings.tap_to_rig) turns holds into toggles. Tablets ×0.8 (UiScale).
 ## * Panels (ScriptPanel, PauseMenu, SettingsPanel, LoadingCard, ResultsScreen) are shown on top with
@@ -177,7 +181,12 @@ var _c_taitem := "\u0001"
 var _c_pips := PackedInt32Array([-1])
 var _c_pips_key := Vector3i(-1, -1, -1)
 var _c_meter_until := -2.0
+var _c_holding := -1
 var _always_on: Array[Rect2] = []
+## [meter (+ its "+n" stamp), fuse]: Rect2() while hidden (transient_rects).
+var _transient: Array[Rect2] = [Rect2(), Rect2()]
+## The meter's "+n" stamp reaches this far right of the pill (ApplauseMeter draws it at W + 64, 56 px).
+const METER_STAMP_W := 130.0
 
 
 func _init() -> void:
@@ -382,6 +391,10 @@ func apply(m: HudModel) -> void:
 		_c_rim = m.rim
 		action.set_rim(m.rim)
 		n += 1
+	if int(m.holding) != _c_holding:
+		_c_holding = int(m.holding)
+		action.set_holding(m.holding)
+		n += 1
 	# Clarence
 	if m.clarence_mode != _c_cmode:
 		_c_cmode = m.clarence_mode
@@ -512,6 +525,7 @@ func apply(m: HudModel) -> void:
 ## Force the next apply() to push every field again (after a retry / relayout).
 func invalidate() -> void:
 	_c_applause = -2147483648
+	_c_holding = -1
 	_c_verb = -1
 	_c_live = -1
 	_c_tray = PackedStringArray(["\u0001"])
@@ -921,6 +935,16 @@ func always_on_rects() -> Array[Rect2]:
 	return _always_on
 
 
+## The transient top-band pieces on screen now (r3d QA Q-C2): [the APPLAUSE meter with its "+n" stamp,
+## the RUNNING GAG fuse] as global rects, Rect2() while hidden. The world overlays treat them as hard
+## keep-outs. The same array every call (no allocation; do not modify it).
+func transient_rects() -> Array[Rect2]:
+	_transient[0] = Rect2(meter.position, Vector2(meter.size.x + METER_STAMP_W, meter.size.y) * meter.scale) \
+		if meter.visible else Rect2()
+	_transient[1] = Rect2(banner.position, banner.size * banner.scale) if banner.visible else Rect2()
+	return _transient
+
+
 func _cache_always_on() -> void:
 	_always_on.resize(4)
 	_always_on[0] = Rect2(pause_button.position, pause_button.size * pause_button.scale)
@@ -1019,8 +1043,17 @@ func _ghost_tip(target: StringName) -> Vector2:
 	return c.position + c.size * c.scale * 0.5
 
 
+## True when the glove would sit on the action button while its hold is in progress (it steps away).
+func ghost_yields() -> bool:
+	return _ghost_target == &"action" and action.is_holding()
+
+
 func _place_ghost() -> void:
 	if _ghost_target == &"":
+		return
+	if ghost_yields():
+		if ghost.visible:
+			ghost.stop()
 		return
 	var tip: Vector2
 	if _ghost_target == GHOST_WORLD:

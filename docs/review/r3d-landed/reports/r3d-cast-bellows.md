@@ -220,3 +220,84 @@ Horace Bellows in 3D, look A (Toy Box) with the board's fixes. The glb, descript
 ## Hours
 
 About 2.8 h (16:31Z–19:20Z).
+
+## Addendum: FIX PASS 2026-10-01 (index row 17, integrate Q02)
+
+Row 17 is now green. I ran alone on 5fd4911; the fix pass took about 50 minutes.
+
+### Row 17 numbers
+RigPerf3D `--rig=bellows --clip=bellows/rx_sneeze_blast_a --perf-log`, 5 runs, median.
+
+| Metric | Budget | Before | After |
+|---|---|---|---|
+| CPU | ≤ 0.25 ms | 0.215 ms | **0.199 ms** (195 / 199 / 206 / 207 / 194 µs; p95 316) |
+| Draw calls | ≤ 4 | 5 | **4** (the borrowed stool is reported apart: `set_piece_draw_calls` 1) |
+| Triangles | ≤ 10k (target ≤ 9.6k) | 10,377 | **9,495** (`set_piece_tris` 450; 9,945 if you count the stool too) |
+| Deform bones | ≤ 50 | 57 | **50** |
+
+### What the 5 draws were
+In the measured frame (sneeze f95–128):
+- the body and its outline (2),
+- the flipped bouffant variant and its outline (2),
+- the ride-along kitchen stool (1, 450 tris).
+
+The stool is `res://art3d/set/stool.glb`, an attachment under contract §7.3. RigPlayer3D draws it with the set's `set_toon` shader and the kitchen palette, without an outline. The same clip hides the set's own stool on the same frame (`decor kitchen_stool visible false`, f95). So the frame total does not change, and row 16 already counts the draw.
+
+REDESIGN §5.6 budgets a character at "1 skinned mesh + ≤ 4 attachments, 1 material + outline (≤ 4 draw calls)". The stool is one of the ≤ 4 attachments, but its draw is not one of the character's own material draws.
+
+There was no real draw left to cut:
+- Baking the stool into the body as a bone prop would add 450 tris to every frame of every clip.
+- It would also drop r3d-rig's same-stool-as-the-set material path, which §7.3 specifies.
+- The flipped variant cannot share the body's surface without a new bone, and the skeleton is frozen.
+
+So I fixed the measurement. `RigProfile3D.rig_counts` now reports a visible set or props-art attachment as `set_piece_draw_calls` / `set_piece_tris`, separate from the character's `draw_calls` / `tris`. `game/tools/anim3d/rig_profile3d.gd` belongs to r3d-rig; I edited it under this brief's measurement clause.
+
+### Triangles
+- **Body: 9,155 → 8,755.** Only hidden geometry was removed:
+  - the shirt core under the coat (above the hem and outside the V, with margins),
+  - the legs' hip ends inside the barrel,
+  - the cuffs' elbow caps inside the sleeve,
+  - the tea disc, from n3 to n2.
+- **Variants:** flipped 772 → 740 and wet 792 → 722. They lose faces buried in the head below the crown opening. Frazzled (816) and floured (650) are unchanged.
+- **Worst body + slot variant:** 9,571.
+
+### Deform bones: 57 → 50
+- **Ring finger:** rides the middle finger's bones (middle_01/_02), weighted along its own segments with `seg_override`. `curl()` and `fist()` curl both fingers alike, so the bend is unchanged.
+- **Thumb:** rigid on thumb_01.
+- **Neck stub:** blends spine_03 → Head.
+
+ring_01/_02, thumb_02 and neck_01 stay in the skeleton without weight. The descriptor's `deform_bones` is now the count of weighted bones, jiggle and prop / FX bones included. That matches how RigPerf3D and Hush count it, and `build.py` computes it from the vertex groups. The test asserts that the count is ≤ 50 and equals the descriptor, and it names the freed and the kept bones.
+
+### Skeleton contract: unchanged
+- `skeleton.json` sha256 is still 3fad5abf…bfad.
+- The glb has the same 91 nodes and 90 joints: same names, order, hierarchy and rest TRS. The inverse binds differ by at most 0.0.
+- No clip was touched. Lint --strict passes on all 72 3D clips (0 errors, 0 warnings), and `anim3d/test_bellows_clips3d.gd` passes.
+
+### Looked at
+`docs/review/r3d-cast-bellows/fixpass_before_after.png`: 26 before/after frames at 1200×540.
+- Covered: the game camera (idle, sneeze f94, f110), the face camera, tea, livid fists, hunt curls, the variants from q34, back and above, and the side view of the sneeze build.
+- Result: he looks the same.
+
+Tried and reverted, because they showed:
+- making all fingers rigid (stiff fists),
+- culling the sleeve's shoulder cap (a gap when the arms go up in bit_livid),
+- culling the spat sole,
+- culling sibling lobes on the variants (lost creases and a gap),
+- culling above the crown opening (the back of the head showed through).
+
+### Checks
+| Check | Result |
+|---|---|
+| Focused tests (cast3d/, anim3d/test_bellows_clips3d.gd, rig3d/test_perf_3d.gd) | 43 passed, 0 failed, 0 skipped |
+| Full suite | 1262 passed, 0 failed |
+| lint.sh --strict | rc 0 |
+| e2e g0_sneeze --strict | PASS (draw p95 57, no shader compiles in play) |
+| Import metadata | OK |
+| Rebuild from source | byte-identical outputs |
+
+### Requests
+- **r3d-rig:** adopt the `rig_profile3d.gd` set-piece split.
+- **Orchestrator / r3d-docs:** add one line to index row 17 and REDESIGN §5.6 saying a borrowed set piece is reported apart.
+
+### Residual risk
+The deform-bone count is exactly 50, so there is no margin. The next weighted bone has to come from merging another one.

@@ -27,6 +27,9 @@
 ##          face with an amber rim (`set_freeze_danger(1)`: he is in her room, she is exposed), the rim
 ##          pulsing red-amber at 3 Hz while a "?" fills on her (`set_freeze_danger(2)`).
 ## `set_live(on)` (Hud: `Hud.is_live(model)`); RIG / RIG_DIM / POP_OUT / GO are always shown LIVE.
+## While a hold is in progress (`set_holding(true)`, a press, or the ring rising) the face is quiet
+## round its ring: ONE centred icon, no target disc, no arrow, no verb tag (r3d QA Q-C1: "one loud
+## thing at a time near the action button").
 class_name ActionButton
 extends TouchWidget
 
@@ -57,6 +60,8 @@ const QUIET_ICON := 84.0
 const QUIET_FILL := Color(0.106, 0.137, 0.251, 0.62)
 const STONE := Color("#E4DFEC")
 const STONE_SHADE := Color("#B3AAC4")
+## The ring counts as "being held" for this long after it last rose (a presenter-driven hold).
+const HOLD_GRACE_MS := 400
 
 const V := HudModel.Verb
 const RIM_COLORS: Array[Color] = [UiKit.GREEN, UiKit.AMBER, UiKit.RED]
@@ -81,6 +86,10 @@ var freeze_danger: int = 0
 
 var _target_live: bool = false
 var _prev_live: bool = false
+## The model says the hold is on (Hud: HudModel.holding).
+var _holding_model: bool = false
+var _ring_rise_ms: int = -100000
+var _held_face: bool = false
 var _tex_quiet: Texture2D = null
 
 var _target_verb: int = V.FREEZE
@@ -183,6 +192,31 @@ func set_icons(item: String, target: String) -> void:
 	queue_redraw()
 
 
+## The model's "hold in progress" flag (HudModel.holding).
+func set_holding(on: bool) -> void:
+	if on == _holding_model:
+		return
+	_holding_model = on
+	_refresh_held()
+
+
+## True while a hold is in progress: pressed / toggled, the model says so, or the ring rose within
+## HOLD_GRACE_MS (and is not complete).
+func is_holding() -> bool:
+	if latched_verb >= 0 or _toggled or _holding_model:
+		return true
+	return ring_frac > 0.0 and ring_frac < 1.0 and UiKit.now_ms() - _ring_rise_ms < HOLD_GRACE_MS
+
+
+func _refresh_held() -> void:
+	var h := is_holding()
+	if h != _held_face:
+		_held_face = h
+		queue_redraw()
+	if h:
+		set_process(true)
+
+
 ## Ring progress 0..1; fires ring_half / ring_complete on the crossing (RIG only).
 func set_ring(frac: float) -> void:
 	var f := clampf(frac, 0.0, 1.0)
@@ -190,6 +224,9 @@ func set_ring(frac: float) -> void:
 		return
 	var old := ring_frac
 	ring_frac = f
+	if f > old and f < 1.0:
+		_ring_rise_ms = UiKit.now_ms()
+	_refresh_held()
 	var rigging := shown_verb == V.RIG or latched_verb == V.RIG
 	if rigging and old < 0.5 and f >= 0.5 and f < 1.0:
 		UiKit.haptic(&"ring_half")
@@ -346,8 +383,9 @@ func _pop(peak: float) -> void:
 
 func _process(_delta: float) -> void:
 	_update_verb()
+	_refresh_held()
 	var now := UiKit.now_ms()
-	var busy := _target_verb != shown_verb
+	var busy := _target_verb != shown_verb or _held_face
 	busy = busy or now - _fade_from_ms < FADE_MS or now - _pop_ms < POP_MS or now - _tag_ms < TAG_MS
 	busy = busy or (ring_frac >= PULSE_FROM and ring_frac < 1.0 and shown_verb == V.RIG)
 	busy = busy or ((shown_verb == V.POP_OUT or shown_verb == V.GO) and rim == HudModel.Rim.RED)
@@ -376,7 +414,7 @@ func _draw() -> void:
 	draw_set_transform(c, 0.0, Vector2.ONE)
 	if shown_verb == V.RIG:
 		_draw_ring(now)
-	if shown_live:
+	if shown_live and not _held_face:
 		_draw_tag(now)
 	draw_set_transform(Vector2.ZERO)
 
@@ -424,7 +462,7 @@ func _draw_face(v: int, a: float, with_shadow: bool = false, live: bool = true) 
 	match v:
 		V.RIG:
 			var main: Texture2D = _item_tex if _item_tex != null else _tex_hand
-			if _target_tex != null:
+			if _target_tex != null and not _held_face:
 				UiKit.draw_icon(self, main, Rect2(-62, -64, ICON, ICON), m)
 				UiShapes.begin()
 				UiShapes.circle(Vector2(38, 34), 38, Color(UiKit.NAVY, a))

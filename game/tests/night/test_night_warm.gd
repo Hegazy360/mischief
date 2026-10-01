@@ -46,6 +46,43 @@ func test_every_basic_residue_and_lazy_textures_are_warmed() -> void:
 		assert_true(p.ends_with(".svg"), p)
 
 
+## D17 (r3d-fix-perf): the action button's RIG icons of tonight's pranks are on the warm list (the first rig point
+## she reached rasterised them in Hud.apply, ~2 ms at the same tick every run), and the warmer rasterises them.
+func test_hud_icons_cover_tonights_rig_points() -> void:
+	var l := NightWarm.list("p00_curtain_up")
+	var hi: Dictionary = l.get("hud_icons", {})
+	var targets: PackedStringArray = hi.get("targets", PackedStringArray())
+	assert_has(targets, "res://art/house/props/honey_jar.svg", "the sneeze's rig point (kitchen_honey)")
+	for t in targets:
+		assert_true(String(t).begins_with("res://") and ResourceLoader.exists(String(t)), "%s exists" % t)
+	var n1 := NightWarm.list("n01_throat_tea")
+	assert_gt(((n1.get("hud_icons", {}) as Dictionary).get("items", PackedStringArray()) as PackedStringArray).size(), 0,
+		"N01 has pranks that need an item")
+	var w := NightWarmer.new()
+	w.list = l
+	w._warm_ui_icons()
+	assert_eq(w.hud_icons_warmed, targets.size() + (hi.get("items", PackedStringArray()) as PackedStringArray).size())
+	w.free()
+
+
+## D17 (r3d-fix-perf): the edge badge's tier faces and emote faces are loaded under the curtain (a tier rise at a
+## reaction accent loaded a portrait inside Hud.apply, 2.4–3.0 ms at the same tick every run).
+func test_edge_badge_faces_are_warmed() -> void:
+	var h := Hud.new()
+	var w := NightWarmer.new()
+	w.list = {}
+	w.hud = h
+	w._warm_ui_icons()
+	assert_eq(w.edge_faces_warmed, EdgeBubble.TIER_FACES.size() + EdgeBubble.EMOTES.size())
+	for fn in EdgeBubble.TIER_FACES:
+		assert_true(h.edge_bubble._faces.has(fn), "tier face %s cached" % fn)
+	var t0 := Time.get_ticks_usec()
+	h.edge_bubble.set_tier(3)
+	assert_lt(Time.get_ticks_usec() - t0, 500, "a tier change after the warm loads nothing")
+	w.free()
+	h.free()
+
+
 func test_unknown_episode_is_empty() -> void:
 	assert_true(NightWarm.list("nope").is_empty())
 

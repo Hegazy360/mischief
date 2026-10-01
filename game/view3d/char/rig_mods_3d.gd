@@ -1,8 +1,9 @@
 ## RigMods3D — the player's own SkeletonModifier3D (runs after the AnimationTree applied the clip, before look-at
 ## and jiggle): bone-driven prop states (hidden = scale ≈ 0, on another socket = the prop bone placed on that socket,
 ## flying = the PropSim3D world path), bones hidden by looks / body slots, and the temper tier's bone scale
-## (Bellows' sideburn bristle). Everything is precomputed into packed arrays by RigPlayer3D; the per-frame pass
-## allocates nothing. The skeleton restores the animated poses after skinning, so nothing accumulates.
+## (Bellows' sideburn bristle). A prop moved to another socket keeps the clip's baked bone scale (a squeeze swell);
+## at home a keyed hidden-extra scale is forced to 1 (`prop_fix_scale`). Everything is precomputed into packed
+## arrays by RigPlayer3D; the per-frame pass allocates nothing. The skeleton restores the animated poses after skinning, so nothing accumulates.
 class_name RigMods3D
 extends SkeletonModifier3D
 
@@ -12,6 +13,8 @@ const MODE_HIDDEN := 1
 const MODE_SOCKET := 2
 const MODE_FLYING := 3
 const MODE_LOOSE := 4
+## Below this (any axis) a socketed prop's keyed scale counts as "hidden by the bake" and is shown at 1.
+const KEEP_SCALE_MIN := 0.01
 
 ## Bones scaled to ≈ 0 (looks' `hide_bones`, body-slot variants).
 var hidden_bones := PackedInt32Array()
@@ -77,9 +80,12 @@ func _process_modification_with_delta(_delta: float) -> void:
 		elif m == MODE_SOCKET and prop_sock_bone[i] >= 0:
 			if not _parent_ok(sk, b):
 				continue
+			# The clip's baked prop-bone scale (a squeeze swell) rides along to the socket; a bone the clip keys at
+			# ≈ 0 (a hidden extra) or a degenerate scale shows at 1, as at home.
+			var ks := sk.get_bone_pose_scale(b)
 			var g := sk.get_bone_global_pose(prop_sock_bone[i]) * prop_sock_xf[i]
 			sk.set_bone_global_pose(b, g.orthonormalized())
-			sk.set_bone_pose_scale(b, Vector3.ONE)
+			sk.set_bone_pose_scale(b, ks if minf(ks.x, minf(ks.y, ks.z)) > KEEP_SCALE_MIN else Vector3.ONE)
 		elif m == MODE_FLYING or m == MODE_LOOSE:
 			if not _parent_ok(sk, b):
 				continue

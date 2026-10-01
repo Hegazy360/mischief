@@ -35,6 +35,23 @@ func test_next_episode_never_a_draft() -> void:
 	assert_eq(BootRouting.next_after("g0_sneeze", EPS), "", "drafts have no next")
 
 
+## (r3d QA Q-N1) Next ▶ to a slice Night that is still a hidden preview opens the stage door's WIP card on it.
+func test_next_to_a_hidden_preview_opens_the_wip_card() -> void:
+	var to := BootRouting.after_next("n01_throat_tea", false, true)
+	assert_eq(String(to["route"]), "stage_door", "previews hidden: the stage door, not N01")
+	assert_eq(String((to["params"] as Dictionary).get("wip", "")), "n01_throat_tea", "with the WIP card on N01")
+	to = BootRouting.after_next("n02_something_fishy", false, true)
+	assert_eq(String((to["params"] as Dictionary).get("wip", "")), "n02_something_fishy")
+	to = BootRouting.after_next("n01_throat_tea", true, true)
+	assert_eq(String(to["route"]), "night", "previews shown: straight on")
+	assert_eq(String((to["params"] as Dictionary).get("episode", "")), "n01_throat_tea")
+	to = BootRouting.after_next("n01_throat_tea", false, false)
+	assert_eq(String(to["route"]), "night", "a release build (no stage door) plays it")
+	assert_eq(String(BootRouting.after_next("", false, true)["route"]), "to_be_continued")
+	assert_eq(String(BootRouting.after_next("n03_singing_in_the_bath", false, true)["route"]), "night",
+		"a Night that is not a slice preview is never guarded")
+
+
 func test_live_content_next_after_n02_is_to_be_continued() -> void:
 	var t := BootRouting.episode_table()
 	if t.is_empty():

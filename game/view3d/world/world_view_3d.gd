@@ -545,6 +545,8 @@ func warm_clips(extra: PackedStringArray = PackedStringArray()) -> int:
 		var cid := str(id)
 		if not ClipMap.clip_exists3d(cid):
 			continue
+		# its sidecar too (stage / keeps / events: CharacterView3D at a clip switch, GagStager3D at a reaction start)
+		CharacterView3D.warm_sidecar(cid)
 		if lib is Script and (lib as Script).has_method("get_clip"):
 			if (lib as Script).call("get_clip", cid) != null:
 				n += 1
@@ -704,6 +706,10 @@ func _update_gaze(snap: ViewSnapshot, vdt: float) -> void:
 	if bellows_view.current_clip().contains("slow_burn"):
 		bellows_view.look_target = bellows_view.head_world() + Vector3(0.0, -0.8, 4.0)
 		bellows_view.look_weight = 1.0
+	elif cues != null and cues.gaze_target() != Vector3.INF and not b.reacting:
+		# the near miss: he peers right at the gap she hides in (CueStager3D's relief two-shot)
+		bellows_view.look_target = cues.gaze_target()
+		bellows_view.look_weight = CueStager3D.RELIEF_GAZE_W
 	elif _gaze_t > 0.0 and not b.reacting:
 		_gaze_t -= vdt
 		bellows_view.look_target = _gaze_at

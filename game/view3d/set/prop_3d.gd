@@ -9,6 +9,8 @@
 class_name Prop3D
 extends Node3D
 
+## The gramophone's `play` (the record running away, the dizzy spin's cause): long enough to read before he spins.
+const PLAY_S := 1.0
 const TAG_GLB := "res://art3d/chars/hush/tag_beret.glb"
 const TAG_PALETTE := "res://art3d/chars/hush/palette_hush.png"
 const TAG_SWING_S := 0.3
@@ -501,7 +503,7 @@ func play(anim: String) -> void:
 		return
 	_anim = real
 	_anim_t = 0.0
-	_anim_dur = 0.5 if real != "breathe" else 2.0
+	_anim_dur = 2.0 if real == "breathe" else (PLAY_S if real == "play" else 0.5)
 	_wake()
 
 
@@ -706,7 +708,10 @@ func _run_anim(k: float) -> void:
 		"smash":
 			v.visible = k < 0.2
 		"play":
-			_pose_part("horn", Vector3(0, 1, 0), 8.0 * sin(k * TAU * 4.0))
+			# the record runs away (Q-G1): the horn swings and the whole cabinet rattles on the floor, dying away
+			_pose_part("horn", Vector3(0, 0, 1), 12.0 * sin(k * TAU * 6.0) * (1.0 - 0.6 * k), Vector3.ZERO,
+					1.0 + 0.18 * absf(sin(k * TAU * 6.0)) * (1.0 - k))
+			v.rotation.z = deg_to_rad(3.5) * sin(k * TAU * 11.0) * (1.0 - 0.7 * k)
 		"spray":
 			_pose_part("head", Vector3(0, 0, 1), 25.0 * sin(k * TAU * 5.0) * (1.0 - k))
 		"ring":

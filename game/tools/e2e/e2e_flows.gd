@@ -236,13 +236,7 @@ func _flow_curtain_call() -> void:
 		var c0 := _cc()
 		if c0 != null:
 			c0.call("press", "next")
-		var tp := _t
-		while _t - tp < 20.0:
-			var n0 := get_tree().get_first_node_in_group("night_scene")
-			if n0 != null and n0 != night and is_instance_valid(n0) and String(n0.get("episode_id")) == "n01_throat_tea":
-				night = n0
-				break
-			await get_tree().process_frame
+		out["p00_next_wip"] = await _next_into("n01_throat_tea", 20.0)
 		out["p00_next_to_n01"] = String(night.get("episode_id")) == "n01_throat_tea"
 		if not bool(out["p00_next_to_n01"]):
 			failures.append("Prologue → Next ▶ did not load N01")
@@ -270,13 +264,8 @@ func _flow_curtain_call() -> void:
 	c = _cc()
 	if c != null:
 		c.call("press", "next")
+	out["n01_next_wip"] = await _next_into("n02_something_fishy", 15.0)
 	var t0 := _t
-	while _t - t0 < 15.0:
-		var n := get_tree().get_first_node_in_group("night_scene")
-		if n != null and n != night and is_instance_valid(n) and String(n.get("episode_id")) == "n02_something_fishy":
-			night = n
-			break
-		await get_tree().process_frame
 	out["next_to_n02"] = String(night.get("episode_id")) == "n02_something_fishy"
 	if not bool(out["next_to_n02"]):
 		failures.append("Next Night ▶ after N01 did not load N02")
@@ -337,6 +326,26 @@ func _flow_curtain_call() -> void:
 		if got[0] < 0 or not E2eScenarios.within_quantised(float(got[0]) / 1000.0, 1.5, frame_s()):
 			failures.append("g0 Again ▶ took %d ms (> max(1500, one frame))" % got[0])
 	result = out
+
+
+## After a curtain call's Next ▶: waits for the NightScene of `episode`. With the N1/N2 previews hidden (the owner
+## build) Next ▶ goes to the stage door's "Work in progress" card first (r3d QA Q-N1): it is pressed through with
+## "Play anyway". Returns true when that card was on the way (false = straight into the Night).
+func _next_into(episode: String, limit_s: float) -> bool:
+	var t0 := _t
+	var wip := false
+	while _t - t0 < limit_s:
+		var n := get_tree().get_first_node_in_group("night_scene")
+		if n != null and n != night and is_instance_valid(n) and String(n.get("episode_id")) == episode:
+			night = n
+			break
+		var sd := get_tree().current_scene
+		if not wip and sd is StageDoor and (sd as StageDoor).wip_card != null:
+			wip = true
+			await _secs(0.3)
+			(sd as StageDoor).press("wip_play")
+		await get_tree().process_frame
+	return wip
 
 
 static func _find_class(n: Node, cls: String) -> Node:

@@ -154,6 +154,14 @@ var _keep_buf: Array = []
 var _safe_set: Rect2 = Rect2()
 ## Frame start (µs) stamped by _FrameStart (the scripts' time, _FrameEnd).
 var _frame_t0_us: int = 0
+## D17 (r3d-fix-perf): set by the e2e driver while ScriptProf3D runs — this frame's own HUD-pass split (µs) in
+## `prof_frame_us`: [ctx (snapshot, action context, env projections), presenter, hud.apply, input, cues, ftue,
+## ov_next (the overlay context + next useful spot + N4 pool), ov_rules (OverlayRules.fill), ov_apply
+## (WorldOverlays.apply)]. Off by default (no stamps taken).
+var profile: bool = false
+const PROF_PHASES: PackedStringArray = ["ctx", "presenter", "hud_apply", "input", "cues", "ftue", "ov_next",
+	"ov_rules", "ov_apply"]
+var prof_frame_us := PackedInt64Array([0, 0, 0, 0, 0, 0, 0, 0, 0])
 ## Stamped by _AfterSim right after the SimDriver's _process (sim ticks + their `ticked` handlers).
 var _after_sim_us: int = 0
 var _retry_t0: int = -1
@@ -319,6 +327,7 @@ func _build() -> void:
 	warmer = NightWarmer.new()
 	warmer.name = "NightWarmer"
 	warmer.view3d = true
+	warmer.hud = hud
 	warmer.cam = cam
 	warmer.overlays = overlays
 	warmer.octx = octx
@@ -846,6 +855,8 @@ func _process(delta: float) -> void:
 
 
 func _update_hud(delta: float) -> void:
+	var pf := profile
+	var t0 := Time.get_ticks_usec() if pf else 0
 	var snap := driver.snapshot()
 	var ctx := _context()
 	env.tick = snap.tick
@@ -865,20 +876,34 @@ func _update_hud(delta: float) -> void:
 		var hs: HouseLayout.Hotspot = world_view.layout.hotspot(pc)
 		if hs != null:
 			env.pick_screen_pos = world_view.project(world_view.anchor_of(pc, &"item"))
+	var t1 := Time.get_ticks_usec() if pf else 0
 	presenter.fill(model, snap, ctx, env)
 	presenter.fill_r3d(model, snap, ctx, env)
 	if "tray_arrows" in model:
 		model.set("tray_arrows", night_input.arrows)
+	var t2 := Time.get_ticks_usec() if pf else 0
 	hud.apply(model)
+	var t3 := Time.get_ticks_usec() if pf else 0
 	_update_overlays(snap, ctx, delta)
+	var t4 := Time.get_ticks_usec() if pf else 0
 	night_input.advance(delta)
+	var t5 := Time.get_ticks_usec() if pf else 0
 	if cues != null:
 		cues.suspend(cam.is_gag_active() or not _paused_why.is_empty() or map_open)
 		cues.danger = env.entry_warning or model.freeze_danger != HudModel.FreezeDanger.NONE or b.reacting
 		cues.idle_s = idle_s
 		cues.advance(delta)
+	var t6 := Time.get_ticks_usec() if pf else 0
 	if ftue != null and ftue.has_method("advance"):
 		ftue.call("advance", delta)
+	if pf:
+		var t7 := Time.get_ticks_usec()
+		prof_frame_us[0] = t1 - t0
+		prof_frame_us[1] = t2 - t1
+		prof_frame_us[2] = t3 - t2
+		prof_frame_us[3] = t5 - t4
+		prof_frame_us[4] = t6 - t5
+		prof_frame_us[5] = t7 - t6
 
 
 ## ★ earned on a Night that ends with a bow (the Prologue and Gate 0 end by themselves).
@@ -892,6 +917,8 @@ func _can_bow() -> bool:
 ## 3D: the world overlays for this frame (OverlayRules over the snapshot; index §7.8) + the tag flights the view
 ## raised since the last frame; the HUD's safe rect for the camera (C6) and the anchor source.
 func _update_overlays(snap: ViewSnapshot, ctx: Dictionary, _delta: float) -> void:
+	if profile:
+		_ov_t0 = Time.get_ticks_usec()
 	var safe: Rect2 = hud.layout.get(&"safe", Rect2()) if hud.layout is Dictionary else Rect2()
 	if safe.has_area() and safe != _safe_set:
 		_safe_set = safe
@@ -906,20 +933,28 @@ func _update_overlays(snap: ViewSnapshot, ctx: Dictionary, _delta: float) -> voi
 	octx.chase = snap.bellows.state == "CHASE"
 	octx.action = ctx
 	octx.hide_all = map_open or not _paused_why.is_empty() or phase == Phase.END or phase == Phase.CURTAIN_CALL
-	octx.next_useful = next_useful(snap) if idle_s >= OverlayRules.IDLE_HINT_S else ""
+	octx.next_useful = _next_useful_cached(snap) if idle_s >= OverlayRules.IDLE_HINT_S else ""
 	if cues != null and cues.sparkle_left > 0.0 and cues.sparkled != "":
 		# the Prologue's sparkle cue: that spot's preview at full size while its pool is lit
 		octx.next_useful = cues.sparkled
 		octx.idle_s = maxf(idle_s, OverlayRules.IDLE_HINT_S)
 	_update_n4_pool(octx.next_useful if idle_s >= OverlayRules.IDLE_HINT_S else "")
+	var pf := profile
+	var t1 := Time.get_ticks_usec() if pf else 0
 	OverlayRules.fill(omodel, snap, octx)
 	for f in _pending_flights:
 		omodel.add_tag_flight(String(f[0]), int(f[1]))
 	_pending_flights.clear()
+	var t2 := Time.get_ticks_usec() if pf else 0
 	overlays.apply(omodel)
+	if pf:
+		prof_frame_us[6] = t1 - _ov_t0
+		prof_frame_us[7] = t2 - t1
+		prof_frame_us[8] = Time.get_ticks_usec() - t2
 
 
 var _n4_spot: String = ""
+var _ov_t0: int = 0
 var _n4_t: float = 0.0
 
 
@@ -939,6 +974,21 @@ func _update_n4_pool(spot: String) -> void:
 		if _n4_t <= 0.0:
 			_n4_t = 1.0
 			world_view.sparkle(_n4_spot, 1.5)
+
+
+## `next_useful` at most once per NEXT_USEFUL_TICKS sim ticks (D17: it walks the Script lines and allocates; a hint
+## 0.1 s late is invisible) — recomputed at once when the cached spot stops being available.
+const NEXT_USEFUL_TICKS := 6
+var _nu_tick: int = -1000000
+var _nu_spot: String = ""
+
+
+func _next_useful_cached(snap: ViewSnapshot) -> String:
+	if snap.tick < _nu_tick or snap.tick - _nu_tick >= NEXT_USEFUL_TICKS \
+			or (_nu_spot != "" and not _spot_available(snap, _nu_spot)):
+		_nu_tick = snap.tick
+		_nu_spot = next_useful(snap)
+	return _nu_spot
 
 
 ## The hint ladder's "next useful" spot (GDD §6.4, REDESIGN §4.4 N4): the `hint.rig_point` of the first open Script
@@ -1564,15 +1614,20 @@ func _on_curtain_call_action(action: String) -> void:
 		"retry", "again":
 			retry()
 		"next":
-			var nxt := BootRouting.next_episode(episode_id)
-			if nxt == "":
-				_leave("to_be_continued")
-			else:
-				_leave("night", {"episode": nxt, "from": "night"})
+			# (r3d QA Q-N1) a hidden preview Night opens behind the stage door's WIP card
+			var to := BootRouting.after_next(BootRouting.next_episode(episode_id), StageDoor.previews_on(),
+				_has_stage_door())
+			_leave(String(to["route"]), to["params"])
 		"playbill":
 			_leave("playbill")
 		"stage_door":
 			_leave("stage_door")
+
+
+## True when this build has the stage door (debug builds: the Router has its scene).
+func _has_stage_door() -> bool:
+	var r := ViewKit.autoload("Router")
+	return r != null and r.has_method("has_scene") and bool(r.call("has_scene", "stage_door"))
 
 
 ## Leave the Night through the Router (or change_scene_to_file when a route is missing).

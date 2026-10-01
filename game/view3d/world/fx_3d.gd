@@ -8,6 +8,17 @@ extends Node3D
 const MAX_EMITTERS := 8
 ## The music-note glyph (white, navy ink) the note kinds draw instead of a disc (r3d-fix-gags: dots read as smoke).
 const NOTE_TEX := "res://art/fx/particles/note.svg"
+const SPARKLE_TEX := "res://art/fx/particles/sparkle.svg"
+const DUST_TEX := "res://art/fx/particles/dust.svg"
+const DROP_TEX := "res://art/fx/particles/drop.svg"
+## id → [shape, radius m, radial accel, tangential accel] for the kinds that do not burst from a point: "ring" = a ring
+## facing the camera that swells (a sound ring), "whirl" = a floor ring swept round (a spin's dust).
+const SHAPES := {
+	"squeak_ring": ["ring", 0.05, 8.0, 0.0],
+	"spin_dust": ["whirl", 0.38, 4.0, 9.0],
+	"disc_whirl": ["whirl", 0.16, 0.0, 7.0],
+	"spin_lines": ["whirl", 0.58, 1.5, 11.0],
+}
 ## id → [colour, amount, lifetime, speed, size, gravity y, spread deg, emissive, (texture path)]
 const KINDS := {
 	"dust": [Color("#D8CBB4"), 10, 0.5, 1.0, 0.08, -1.0, 70.0, 0.0],
@@ -27,12 +38,29 @@ const KINDS := {
 	"note_fly": [Color.WHITE, 3, 1.6, 2.0, 0.2, 0.05, 6.0, 0.0, NOTE_TEX],
 	## r3d-fix-gags: the squeak's yellow burst out of Clarence's beak (Q-G5 / Q-V1: the toy and the noise read)
 	"squeak_puff": [Color("#FFD23F"), 12, 0.45, 2.2, 0.08, 0.0, 75.0, 1.0],
-	## r3d-fix-gags: the door-frame bonk's contact (Q-G2): a big plaster puff off the frame and big stars
-	## r3d-fix-gags: the top's dust ring at his toe while he spins (Q-G1: the spin reads in a still frame)
-	"spin_dust": [Color("#E9DCC4"), 10, 0.45, 1.9, 0.11, -0.4, 88.0, 0.0],
-	"bonk_dust": [Color("#EFE6D2"), 12, 0.55, 1.5, 0.16, -0.6, 55.0, 0.0],
-	"bonk_stars": [Color("#FFD23F"), 7, 1.3, 0.9, 0.15, 0.0, 180.0, 1.0],
+	## r3d-fix-gags: the squeak's sound ring — a camera-facing ring of bright dots that swells off the beak (SHAPES)
+	"squeak_ring": [Color("#FFF3B0"), 18, 0.34, 0.0, 0.075, 0.0, 0.0, 1.0],
+	## r3d-fix-gags: the top's dust whirl round his feet while he spins (Q-G1: the spin reads in a still frame) —
+	## inked puffs on a floor ring, swept round it (SHAPES), never a heap of discs
+	"spin_dust": [Color("#EFE6D2"), 8, 0.3, 0.7, 0.1, 0.5, 30.0, 0.0, DUST_TEX],
+	## r3d-fix-gags: her "phew" in the gap after the near miss (Q-G6): big inked drops
+	"sweat": [Color("#8FD0FF"), 5, 0.75, 1.7, 0.13, -5.0, 35.0, 0.0, DROP_TEX],
+	## r3d-fix-gags: the spin's whirlwind: inked puffs swept round his middle on a waist-high ring — the cartoon top /
+	## tornado silhouette (Q-G1: the spin reads in a still)
+	"spin_lines": [Color("#F7F1E3"), 14, 0.34, 0.2, 0.15, 0.0, 20.0, 0.0, DUST_TEX],
+	## r3d-fix-gags: the record at speed (Q-G1): white flecks whirled off the turntable
+	"disc_whirl": [Color.WHITE, 14, 0.6, 0.3, 0.06, 0.0, 20.0, 1.0],
+	## r3d-fix-gags: the door-frame bonk's contact (Q-G2): a white impact star at the contact point, a plaster puff off
+	## the frame, plaster sifting down from its top, and inked stars round his head
+	"impact": [Color.WHITE, 2, 0.2, 0.05, 0.62, 0.0, 10.0, 1.0, SPARKLE_TEX],
+	"bonk_dust": [Color("#EFE6D2"), 10, 0.6, 1.4, 0.2, -0.6, 55.0, 0.0, DUST_TEX],
+	"plaster": [Color("#EFE6D2"), 12, 0.9, 0.5, 0.09, -3.5, 30.0, 0.0, DUST_TEX],
+	"bonk_stars": [Color("#FFD23F"), 7, 1.3, 0.9, 0.17, 0.0, 180.0, 1.0, SPARKLE_TEX],
+	## r3d-fix-gags: the picture lands on his head (Q-G3): a few big inked stars
+	"thunk_stars": [Color("#FFD23F"), 5, 0.7, 1.4, 0.18, 0.0, 70.0, 1.0, SPARKLE_TEX],
 }
+
+const _NO_SHAPE: Array = []
 
 var _emitters: Array[CPUParticles3D] = []
 var _mats: Dictionary = {}
@@ -89,6 +117,23 @@ func burst(id: String, at: Vector3, dir: Vector3 = Vector3.UP) -> void:
 	p.gravity = Vector3(0.0, float(k[5]), 0.0)
 	p.spread = float(k[6])
 	p.direction = dir.normalized() if dir.length_squared() > 0.0001 else Vector3.UP
+	var sh: Array = SHAPES.get(key, _NO_SHAPE)
+	if sh.is_empty():
+		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_POINT
+		p.radial_accel_min = 0.0
+		p.radial_accel_max = 0.0
+		p.tangential_accel_min = 0.0
+		p.tangential_accel_max = 0.0
+	else:
+		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
+		p.emission_ring_axis = Vector3(0.0, 0.0, 1.0) if str(sh[0]) == "ring" else Vector3.UP
+		p.emission_ring_height = 0.0
+		p.emission_ring_radius = float(sh[1])
+		p.emission_ring_inner_radius = float(sh[1]) * 0.92
+		p.radial_accel_min = float(sh[2])
+		p.radial_accel_max = float(sh[2])
+		p.tangential_accel_min = float(sh[3])
+		p.tangential_accel_max = float(sh[3])
 	p.material_override = _mats[key]
 	if p.is_inside_tree():
 		p.global_position = at

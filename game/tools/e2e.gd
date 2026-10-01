@@ -49,6 +49,15 @@ var _clips_cov := {}
 ## `prof_frame_ticks`; −1 = no sim yet). e2e runs at priority 1000, after the profiler's end sentinel (899).
 var _prof: Node = null
 var _prof_ticks := PackedInt32Array()
+## D17: NightScene's own HUD-pass split on its slow frames (≥ NIGHT_SLOW_US): [profiler frame, tick, {phase: ms}]
+## (report `night_phase_frames`, at most NIGHT_SLOW_CAP).
+const NIGHT_SLOW_US := 900
+const NIGHT_SLOW_CAP := 600
+var _night_slow: Array = []
+## Every PLAY frame's split per phase (µs, flat: phase × NIGHT_RING + frame) → report `night_phase_stats` (ms).
+const NIGHT_RING := 20000
+var _night_ring := PackedFloat32Array()
+var _night_n := 0
 
 
 func _ready() -> void:
@@ -306,6 +315,8 @@ func _finish() -> void:
 	report["clips_played"] = cov
 	if _prof != null:
 		report["prof_frame_ticks"] = Array(_prof_ticks)
+		report["night_phase_frames"] = _night_slow
+		report["night_phase_stats"] = _night_stats()
 	var errs := _logger.take()
 	report["script_errors"] = int(report.get("script_errors", 0)) + int(errs[0])
 	report["engine_errors"] = int(errs[1])
@@ -386,6 +397,8 @@ func _sample_prof() -> void:
 			return
 	if not is_instance_valid(_prof):
 		return
+	if "profile" in night and not bool(night.get("profile")):
+		night.set("profile", true)
 	var f := int(_prof.get("_frame")) - 1
 	if f < 0 or f > 200000:
 		return
@@ -397,6 +410,41 @@ func _sample_prof() -> void:
 		for i in range(old, f + 1):
 			_prof_ticks[i] = -1
 	_prof_ticks[f] = tick
+	var pu: Variant = night.get("prof_frame_us") if "prof_frame_us" in night else null
+	if pu is PackedInt64Array and int(night.get("phase")) == NightScene.Phase.PLAY:
+		var np := (pu as PackedInt64Array).size()
+		if _night_ring.is_empty():
+			_night_ring.resize(np * NIGHT_RING)
+		if _night_n < NIGHT_RING:
+			for j in np:
+				_night_ring[j * NIGHT_RING + _night_n] = float((pu as PackedInt64Array)[j])
+			_night_n += 1
+		var sum := 0
+		for v in (pu as PackedInt64Array):
+			sum += v
+		if sum >= NIGHT_SLOW_US and _night_slow.size() < NIGHT_SLOW_CAP:
+			var names: PackedStringArray = NightScene.PROF_PHASES
+			var d := {}
+			for j in (pu as PackedInt64Array).size():
+				if (pu as PackedInt64Array)[j] >= 100:
+					d[names[j] if j < names.size() else str(j)] = snappedf(float((pu as PackedInt64Array)[j]) / 1000.0, 0.01)
+			_night_slow.append([f, tick, d])
+
+
+## p50 / p95 / max (ms) per NightScene phase over the PLAY frames sampled.
+func _night_stats() -> Dictionary:
+	var out := {}
+	if _night_n <= 0:
+		return out
+	var names: PackedStringArray = NightScene.PROF_PHASES
+	for j in names.size():
+		var a := _night_ring.slice(j * NIGHT_RING, j * NIGHT_RING + _night_n)
+		a.sort()
+		out[names[j]] = {"p50": snappedf(a[int(_night_n * 0.5)] / 1000.0, 0.001),
+			"p95": snappedf(a[mini(_night_n - 1, int(_night_n * 0.95))] / 1000.0, 0.001),
+			"max": snappedf(a[_night_n - 1] / 1000.0, 0.001)}
+	out["frames"] = _night_n
+	return out
 
 
 func _cov_add(c: String) -> void:

@@ -18,6 +18,13 @@ var _whites: Array[Node3D] = []
 var _look: Vector2 = Vector2.ZERO
 var _blink_t: float = -1.0
 var _breathe_t: float = 0.0
+## The near-miss duck (r3d-fix-gags Q-G6): the eye card sinks DUCK_M out of sight while he peers at the gap, and pops
+## back up (with a blink) once he turns away.
+const DUCK_M := 0.24
+const DUCK_S := 0.09
+var _duck := false
+var _duck_k := 0.0
+var _eyes_y := 0.0
 
 
 func setup(id: String, p_entry: Dictionary, xf: Transform3D, p_room: String, p_verb: String, p_live: bool,
@@ -36,6 +43,7 @@ func _build_eyes() -> void:
 	_eyes.rotation.y = -rotation.y
 	var es := float(entry.get("eyes_scale", 1.0))
 	_eyes.scale = Vector3(es, es, es)
+	_eyes_y = _eyes.position.y
 	var white := mats.get_mat(Color(0.97, 0.97, 0.95, 0.4), &"set")
 	var dark := mats.get_mat(Color("#141018"), &"set")
 	# sized to read at phone scale (each eye ≈ 12 px tall at 1200×540 from the base framing)
@@ -52,6 +60,8 @@ func set_occupied(on: bool) -> void:
 	if on == _occupied:
 		return
 	_occupied = on
+	if not on:
+		_duck = false
 	if _eyes != null:
 		_eyes.visible = on
 	if on:
@@ -73,6 +83,20 @@ func eyes_blink() -> void:
 		return
 	_blink_t = 0.0
 	_wake()
+
+
+## The near-miss duck: `on` sinks the eyes out of sight in the gap (fast), off pops them back up with a blink.
+func eyes_duck(on: bool) -> void:
+	if on == _duck:
+		return
+	_duck = on
+	if not on and _occupied:
+		eyes_blink()
+	_wake()
+
+
+func ducking() -> bool:
+	return _duck
 
 
 func look_dir() -> Vector2:
@@ -98,6 +122,12 @@ func _occupied_busy() -> bool:
 			_blink_t = -1.0
 		else:
 			busy = true
+	var dk := 1.0 if (_duck and _occupied) else 0.0
+	if _duck_k != dk:
+		_duck_k = move_toward(_duck_k, dk, dt / DUCK_S)
+		if _eyes != null:
+			_eyes.position.y = _eyes_y - DUCK_M * _duck_k * _duck_k * (3.0 - 2.0 * _duck_k)
+		busy = true
 	if _occupied:
 		_breathe_t += dt
 		var s := float(entry.get("scale", 1.0))

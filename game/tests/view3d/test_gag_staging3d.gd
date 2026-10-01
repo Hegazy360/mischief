@@ -136,3 +136,84 @@ func test_a_cue_shot_yields_to_a_reaction_punch_in() -> void:
 	cam.cancel_gag(other)
 	t.free()
 	cam.free()
+
+
+## Q-G2: the bonked wing flat rocks on its base, its top away from him (he walks left → it tips left), and settles
+## within WING_F frames.
+func test_the_bonked_frame_rocks_away_from_him_and_settles() -> void:
+	var peak := 0.0
+	var first_sign := 0.0
+	for i in int(CueStager3D.WING_F):
+		var th := CueStager3D.wing_angle(float(i) + 0.5, -1.0)
+		peak = maxf(peak, absf(th))
+		if first_sign == 0.0 and absf(th) > 1e-4:
+			first_sign = signf(th)
+	assert_gt(peak, deg_to_rad(1.0), "it visibly rocks")
+	assert_le(peak, deg_to_rad(CueStager3D.WING_DEG) + 1e-6, "never more than WING_DEG")
+	assert_eq(first_sign, 1.0, "walking left into it: the top tips left first (+z rotation)")
+	assert_almost_eq(CueStager3D.wing_angle(CueStager3D.WING_F, -1.0), 0.0, 1e-9, "settled")
+	assert_eq(signf(CueStager3D.wing_angle(2.0, 1.0)), -signf(CueStager3D.wing_angle(2.0, -1.0)), "mirrored by facing")
+
+
+## Q-G5 / Q-G1 / Q-G2: the sound ring swells from a ring facing the camera, the spin's dust is a floor whirl, the
+## bonk's contact a big star; a point burst after a ring burst goes back to a point (the pool is shared).
+func test_ring_and_whirl_bursts_and_the_pool_resets_them() -> void:
+	var fx := Fx3D.new()
+	tree.root.add_child(fx)
+	for k in ["squeak_ring", "spin_dust", "disc_whirl", "impact", "plaster", "sweat", "thunk_stars", "bonk_stars"]:
+		assert_true(Fx3D.KINDS.has(k), "kind %s" % k)
+	fx.burst("squeak_ring", Vector3(1.0, 1.0, -1.0))
+	var p: CPUParticles3D = fx.get_child(0)
+	assert_eq(p.emission_shape, CPUParticles3D.EMISSION_SHAPE_RING, "the squeak ring emits on a ring")
+	assert_eq(p.emission_ring_axis, Vector3(0.0, 0.0, 1.0), "facing the camera")
+	assert_gt(p.radial_accel_max, 0.0, "it swells outward")
+	fx.burst("spin_dust", Vector3.ZERO)
+	var q: CPUParticles3D = fx.get_child(1)
+	assert_eq(q.emission_ring_axis, Vector3.UP, "the spin's dust on a floor ring")
+	assert_gt(q.tangential_accel_max, 0.0, "swept round it")
+	for i in Fx3D.MAX_EMITTERS - 1:
+		fx.burst("dust", Vector3.ZERO)
+	assert_eq(p.emission_shape, CPUParticles3D.EMISSION_SHAPE_POINT, "reused for a point burst: a point again")
+	assert_almost_eq(p.radial_accel_max, 0.0, 1e-9, "no radial pull left over")
+	fx.get_parent().remove_child(fx)
+	fx.free()
+
+
+## fix-hud R1: his bubble's drawn extent (glyph disc + pips on the left, the cloud's lobe on the right) stays on
+## screen — the clamp numbers match what FxThoughtBubble draws at BUBBLE_SCALE.
+func test_the_bubble_clamp_covers_its_drawn_extent() -> void:
+	var s := Overlays3D.BUBBLE_SCALE
+	assert_almost_eq(Overlays3D.BUBBLE_LEFT_PX, 115.0 * s, 1.0, "glyph disc: 115 local units left")
+	assert_almost_eq(Overlays3D.BUBBLE_RIGHT_PX, 95.0 * s, 1.0, "cloud lobe: 95 local units right")
+	assert_ge(Overlays3D.EDGE_PX, 8.0, "kept 8 px from the edge")
+	assert_almost_eq(Overlays3D.BUBBLE_FLIP_LEFT_PX, 55.0 * s, 1.0, "flipped: the cloud's left lobe 55 units left")
+	assert_almost_eq(Overlays3D.BUBBLE_FLIP_RIGHT_PX, 155.0 * s, 1.0, "flipped: the glyph disc 155 units right")
+
+
+## Q-G6: the near-miss beat is timed off his hunt running out (the relief cue): he peers at her gap first, her eyes
+## duck after, and nothing happens while he is not hunting.
+func test_the_near_miss_beat_is_timed_off_the_hunt() -> void:
+	var b := _actor("ROUTINE")
+	b.activity = "hunt"
+	b.activity_len = 600
+	b.activity_t = 400
+	assert_eq(CueStager3D.hunt_left(b), 200, "200 ticks of hunt left")
+	assert_gt(CueStager3D.RELIEF_GAZE_LEFT, CueStager3D.RELIEF_DUCK_LEFT, "he turns to the gap before her eyes duck")
+	b.activity_t = 700
+	assert_eq(CueStager3D.hunt_left(b), 0, "never negative")
+	b.activity = "warmup"
+	assert_gt(CueStager3D.hunt_left(b), 100000, "not hunting: no beat")
+
+
+## D17: a clip's sidecar is parsed under the curtain (WorldView3D.warm_clips -> CharacterView3D.warm_sidecar), into
+## the one JSON cache CharacterView3D (stage / keeps) and GagStager3D (events) both read — never first in PLAY.
+func test_warm_sidecar_fills_the_shared_json_cache() -> void:
+	var cid := "hush/rig_high"
+	var path := ClipMap.sidecar_path(cid)
+	if not assert_true(path != "" and FileAccess.file_exists(path), "the sidecar exists: %s" % path):
+		return
+	CharacterView3D._stage_cache.erase(cid)
+	ViewKit._json_cache.erase(path)
+	CharacterView3D.warm_sidecar(cid)
+	assert_true(ViewKit._json_cache.has(path), "parsed once into ViewKit's cache")
+	assert_true(CharacterView3D._stage_cache.has(cid), "and its stage / keeps bits cached")

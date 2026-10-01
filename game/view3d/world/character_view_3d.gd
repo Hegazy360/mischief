@@ -54,7 +54,7 @@ const PIN_RELEASE_M_S := 1.8
 const PIN_KNOCK_M_S := 4.0
 ## The dive into a hiding spot: the body yawed away from the camera (cheat < 0 = upstage), turned fast (the dive is
 ## 15 f).
-const DIVE_CHEAT := -62.0
+const DIVE_CHEAT := -85.0
 const DIVE_CHEAT_EASE_S := 0.07
 ## A dive with no named spot goes into the hiding spot within this distance of her (m).
 const DIVE_SPOT_M := 0.8
@@ -182,6 +182,7 @@ var _tomato_s := 0.0
 ## View-only cue staging (CueStager3D, r3d-fix-gags): a held base clip, a staged overlay, a pinned x.
 var _hold_clip := ""
 var _hold_f := 0.0
+var _hold_delay_f := 0.0
 var _st_ov_clip := ""
 var _st_ov_f := 0.0
 var _pin_f := 0.0
@@ -558,6 +559,7 @@ func reset() -> void:
 	_tomato_s = 0.0
 	_hold_clip = ""
 	_hold_f = 0.0
+	_hold_delay_f = 0.0
 	_st_ov_clip = ""
 	_st_ov_f = 0.0
 	_pin_f = 0.0
@@ -607,9 +609,12 @@ func play_cue(id: String, len_f: float = 0.0) -> void:
 
 ## Cue staging (view only, r3d-fix-gags): play `clip` as the base clip for `frames` view frames instead of the sim's
 ## pick (a dazed `st_bonk` where he would walk on the spot); never over a reaction. "" / 0 clears it.
-func stage_hold(clip: String, frames: float) -> void:
+## `delay_f` view frames later (D17: a cue that also starts an overlay this frame starts the base clip a couple of
+## frames after it, so two clip starts never land on one frame).
+func stage_hold(clip: String, frames: float, delay_f: float = 0.0) -> void:
 	_hold_clip = clip if ClipMap.clip_exists3d(clip) else ""
 	_hold_f = frames if _hold_clip != "" else 0.0
+	_hold_delay_f = maxf(0.0, delay_f) if _hold_clip != "" else 0.0
 
 
 ## Cue staging: play `clip` as the overlay for `frames` view frames (his relieved smirk to the camera).
@@ -710,17 +715,20 @@ static func placement_for(actor_id: String, cur: ViewSnapshot.Actor, reach: Dict
 	if cur.moving or cur.leg_kind != "":
 		cheat = View3DConst.CHEAT_WALK
 	if actor_id == "hush":
+		var placed := false
 		if cur.state == "RIGGING":
 			dx = float(reach.get("dx", 0.0))
 			z = maxf(float(reach.get("z", View3DConst.REACH_Z)), View3DConst.REACH_Z_MIN)
 			cheat = minf(cheat, View3DConst.CHEAT_REACH_MAX)
+			placed = true
 		elif (cur.state == "DIVING" or cur.state == "HIDDEN" or cur.hidden_spot != "") and not is_nan(hide_z):
 			z = hide_z
+			placed = true
 		if cur.state == "DIVING":
-			# Q-V2: she dives INTO the spot behind her — the body turns away from the camera (upstage) so the
-			# flat-out flight reads as going in, never as leaping out of it toward the room
+			# Q-V2: she dives INTO the spot behind her — the body turns away from the camera (upstage, back to the
+			# camera) so the flat-out flight reads as going in, never as leaping out of it toward the room
 			cheat = DIVE_CHEAT
-		elif cur.state == "FROZEN" or cur.frozen:
+		elif not placed and (cur.state == "FROZEN" or cur.frozen):
 			cheat = View3DConst.CHEAT_PERFORM
 	else:
 		if not cur.moving and cur.activity != "" and not station.is_empty():
@@ -1187,7 +1195,9 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 
 ## The cue staging's overrides of this frame's pick (a held base clip, a staged overlay); a reaction always wins.
 func _apply_staging(cur: ViewSnapshot.Actor, vf: float) -> void:
-	if _hold_f > 0.0:
+	if _hold_delay_f > 0.0:
+		_hold_delay_f -= vf
+	elif _hold_f > 0.0:
 		_hold_f -= vf
 		if not cur.reacting and not _pick.hidden:
 			_pick.clip = _hold_clip
@@ -1409,6 +1419,11 @@ static func clip_keeps(clip_id: String) -> PackedStringArray:
 	return e.get("keeps", PackedStringArray())
 
 
+## Warm the sidecar caches for `clip_id` (WorldView3D.warm_clips, under the curtain).
+static func warm_sidecar(clip_id: String) -> void:
+	CharacterView3D._sidecar_bits(clip_id)
+
+
 static func _sidecar_bits(clip_id: String) -> Dictionary:
 	if clip_id == "" or clip_id == STATIC_CLIP:
 		return {}
@@ -1419,7 +1434,9 @@ static func _sidecar_bits(clip_id: String) -> Dictionary:
 	var out := {}
 	var path := ClipMap.sidecar_path(clip_id)
 	if path != "" and FileAccess.file_exists(path):
-		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		# ViewKit's shared JSON cache (GagStager3D reads the same sidecars); WorldView3D.warm_clips fills it under the
+		# curtain, so no sidecar is read or parsed in PLAY (D17: the first rig clip's 1-1.5 ms at P00 t377-379)
+		var d: Variant = ViewKit.json(path)
 		if d is Dictionary:
 			if (d as Dictionary).get("stage") is Dictionary:
 				out["stage"] = (d as Dictionary)["stage"]

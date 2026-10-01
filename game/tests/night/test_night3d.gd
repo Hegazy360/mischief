@@ -589,6 +589,34 @@ func test_stage_door_entries() -> void:
 	assert_eq(StageDoor.head_label(1.0), "1")
 
 
+## (r3d QA Q-N1) The Router's {wip: <episode>} params open the WIP card on that Night as the stage door shows.
+func test_stage_door_opens_the_wip_card_from_router_params() -> void:
+	var sd := StageDoor.new()
+	sd.dry_run = true
+	sd.setup({"wip": "n01_throat_tea"})
+	var got: Array = []
+	sd.launched.connect(func(what: String, p: Dictionary) -> void: got.append([what, p]))
+	tree.root.add_child(sd)
+	await tree.process_frame
+	await tree.process_frame
+	assert_true(sd.wip_card != null, "the WIP card is up")
+	if assert_false(got.is_empty(), "the card announced itself"):
+		assert_eq(String((got[0][1] as Dictionary).get("episode", "")), "n01_throat_tea")
+	sd.press("wip_play")
+	assert_eq(String((got[got.size() - 1][1] as Dictionary).get("episode", "")), "n01_throat_tea", "Play anyway → N1")
+	sd.queue_free()
+	await tree.process_frame
+	var plain := StageDoor.new()
+	plain.dry_run = true
+	plain.setup({})
+	tree.root.add_child(plain)
+	await tree.process_frame
+	await tree.process_frame
+	assert_true(plain.wip_card == null, "no params, no card")
+	plain.queue_free()
+	await tree.process_frame
+
+
 func test_stage_door_previews_open_behind_the_wip_card() -> void:
 	var sd := StageDoor.new()
 	sd.dry_run = true

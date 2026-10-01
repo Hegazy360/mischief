@@ -182,6 +182,8 @@ func fill(m: HudModel, snap: ViewSnapshot, ctx: Dictionary, env: HudEnv) -> void
 		_fill_verb_ctx(m, snap, ctx)
 	else:
 		_fill_verb_fallback(m, snap)
+	# (r3d QA Q-C1, fix-hud R2) the hold comes from the sim's state, so a paused or slow frame keeps it
+	m.holding = h.state == "RIGGING"
 	# Clarence / ⏩ (⏩ only while hidden; she can never squeak from a hiding spot)
 	m.clarence_mode = HudModel.ClarenceMode.FF if h.state == "HIDDEN" else HudModel.ClarenceMode.SQUEAK
 	m.lure_grey = env.tick - _lure_ticks[0] < LURE_WINDOW_TICKS and _lure_ticks[0] > -100000

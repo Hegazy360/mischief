@@ -581,6 +581,11 @@ func floor_band(room: String) -> AABB:
 
 
 ## A furniture / dressing / decor piece by its id or house.json decor id (kitchen_stool, parlour_vase …).
+## The wing flat at doorway link `link_id` (null when that doorway has none): CueStager3D rocks it when he bonks into it.
+func wing(link_id: String) -> Node3D:
+	return _stage.get_node_or_null(NodePath("wing_" + link_id)) as Node3D if _stage != null else null
+
+
 func decor(id: String) -> Node3D:
 	return _by_decor.get(id, null)
 

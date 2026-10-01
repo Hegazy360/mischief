@@ -92,6 +92,18 @@ static func next_episode(id: String) -> String:
 	return next_after(id, episode_table())
 
 
+## Where the curtain call's Next ▶ goes when `nxt` is the next episode (r3d QA Q-N1): {route, params}.
+## "" → the "To be continued…" card; a slice Night that is still a preview (N01 / N02) while the previews are
+## hidden → the stage door with its "Work in progress" card open on that Night (Play anyway / Back), never the
+## Night itself; a release build (no stage door) plays it.
+static func after_next(nxt: String, previews_on: bool, has_stage_door: bool) -> Dictionary:
+	if nxt == "":
+		return {"route": "to_be_continued", "params": {}}
+	if SLICE_NIGHTS.has(nxt) and not previews_on and has_stage_door:
+		return {"route": "stage_door", "params": {"wip": nxt}}
+	return {"route": "night", "params": {"episode": nxt, "from": "night"}}
+
+
 ## Stars per episode from the Save autoload.
 static func saved_stars() -> Dictionary:
 	var out := {}

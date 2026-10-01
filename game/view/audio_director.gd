@@ -602,15 +602,33 @@ static func clip_sounds(clip_id: String) -> PackedStringArray:
 	if _sounds_cache.has(clip_id):
 		return _sounds_cache[clip_id]
 	var out := PackedStringArray()
-	var sd: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id)) if ClipMap.clip_exists3d(clip_id) else null
-	if sd is Dictionary:
-		for e3 in (sd as Dictionary).get("events", []):
-			if e3 is Dictionary:
-				var t3 := ViewKit.s((e3 as Dictionary).get("type", ""))
-				if t3 == "sfx" or t3 == "voice":
-					out.append(ViewKit.s((e3 as Dictionary).get("id", (e3 as Dictionary).get("bank", ""))))
+	# D17 (r3d-fix-perf): the clip library already holds the parsed events (warmed under the curtain), so a cue's
+	# first L12 check reads no sidecar from disk in PLAY; the sidecar JSON is only the fallback.
+	var events: Array = []
+	var cd: ClipDef3D = ClipLib3D.get_clip(clip_id) if ClipLib3D.exists(clip_id) else null
+	if cd != null:
+		events = cd.events
+	else:
+		var sd: Variant = ViewKit.json(ClipMap.sidecar_path(clip_id)) if ClipMap.clip_exists3d(clip_id) else null
+		if sd is Dictionary and (sd as Dictionary).get("events", []) is Array:
+			events = (sd as Dictionary).get("events", [])
+	for e3 in events:
+		if e3 is Dictionary:
+			var t3 := ViewKit.s((e3 as Dictionary).get("type", ""))
+			if t3 == "sfx" or t3 == "voice":
+				out.append(ViewKit.s((e3 as Dictionary).get("id", (e3 as Dictionary).get("bank", ""))))
 	_sounds_cache[clip_id] = out
 	return out
+
+
+## Fills the clip-sound cache for `ids` (NightWarmer, under the curtain): the L12 check never builds one in PLAY.
+static func warm_clip_sounds(ids: PackedStringArray) -> int:
+	var n := 0
+	for id in ids:
+		if not _sounds_cache.has(id):
+			clip_sounds(id)
+			n += 1
+	return n
 
 
 func _set_music(state: String) -> void:

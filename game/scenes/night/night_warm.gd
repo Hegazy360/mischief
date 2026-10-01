@@ -12,7 +12,10 @@
 ## * fx = the particle kinds the Night can emit (the pool's kinds + the curtain call's roses);
 ## * fonts = captions 88 px, stamps 64 px, HUD numbers 48 px (display / ui faces), each glyph set drawn
 ##   once off-screen;
-## * audio = the cue ids of the Night's pranks and archetypes (`cues.json`).
+## * audio = the cue ids of the Night's pranks and archetypes (`cues.json`);
+## * hud_icons = {targets, items}: the action button's RIG icons for tonight's pranks — each rig point's icon (its
+##   `art.icon` / `art.idle`) and every step's `needs` item — rasterised by UiIcons under the curtain (D17: the
+##   first rig point she reaches rasterised them in Hud.apply, ~2 ms, at the same tick every run).
 ## `NightWarmer` (a Node) executes it in 3D: the materials / instanced meshes / clips of the Night's tree (hidden
 ## looks included), the font primer, `PipView3D` (soft), `Audio.warm(ids)` — one step per frame under an 8 ms
 ## budget; `done` when finished.
@@ -148,6 +151,7 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	audio.sort()
 	var all_captions := captions.duplicate()
 	all_captions.append_array(STAMP_TEXTS)
+	var hud_icons := hud_icons_for(night_pranks, pranks, hj)
 	# The title card (+ bulbs) only for the Night whose curtain call slams it (the Prologue): 72 MB
 	# at 2× on every other Night otherwise (s2-fix G #7).
 	var textures := lazy_textures(data_root, CurtainCall.kind_for(episode_id, "") == CurtainCall.KIND_PROLOGUE)
@@ -181,7 +185,36 @@ static func list(episode_id: String, data_root: String = "res://data") -> Dictio
 	return {"episode": episode_id, "rigs": PackedStringArray(["hush", "bellows"]), "rooms": rooms, "props": props,
 		"pranks": night_pranks, "looks": rig_looks, "combos": combo_ids,
 		"fx": FX_KINDS.duplicate(), "captions": all_captions, "fonts": FONT_SIZES.duplicate(true), "audio": audio,
-		"textures": textures, "pip": true}
+		"textures": textures, "pip": true, "hud_icons": hud_icons}
+
+
+## The action button's RIG icons for `night_pranks` (see the class doc): {targets: [icon paths / activity ids],
+## items: [item ids]}, sorted, no duplicates.
+static func hud_icons_for(night_pranks: PackedStringArray, pranks: Dictionary, house: Variant) -> Dictionary:
+	var by_id := {}
+	if house is Dictionary:
+		for hs in (house as Dictionary).get("hotspots", []):
+			if hs is Dictionary:
+				by_id[String((hs as Dictionary).get("id", ""))] = hs
+	var targets := PackedStringArray()
+	var items := PackedStringArray()
+	for pid in night_pranks:
+		var pd: Variant = pranks.get(pid, null)
+		if not (pd is Dictionary):
+			continue
+		var rp := String((pd as Dictionary).get("rig_point", "")) if (pd as Dictionary).get("rig_point") != null else ""
+		var hd: Variant = by_id.get(rp, null)
+		if hd is Dictionary and (hd as Dictionary).get("art") is Dictionary:
+			var art: Dictionary = (hd as Dictionary)["art"]
+			var icon := String(art.get("icon", art.get("idle", "")))
+			if icon != "":
+				_add(targets, icon)
+		for st in (pd as Dictionary).get("steps", []):
+			if st is Dictionary and (st as Dictionary).get("needs") != null and String((st as Dictionary)["needs"]) != "":
+				_add(items, String((st as Dictionary)["needs"]))
+	targets.sort()
+	items.sort()
+	return {"targets": targets, "items": items}
 
 
 ## Textures the view loads lazily (HiResTex rasters through ViewKit.tex): the awareness glyphs and

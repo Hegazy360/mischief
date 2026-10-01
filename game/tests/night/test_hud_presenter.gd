@@ -45,6 +45,22 @@ func test_rig_carries_item_icon_and_ring() -> void:
 	assert_eq(m.ring_frac, 0.0, "no ring outside RIG")
 
 
+## (fix-hud R2) The Hud reads the hold from the sim (Hush RIGGING), not from the ring rising.
+func test_holding_while_she_rigs() -> void:
+	p.fill(m, snap, _ctx("rig", "green", "squeaker"), env)
+	assert_false(m.holding, "standing at the rig point is not a hold")
+	snap.hush.state = "RIGGING"
+	p.fill(m, snap, _ctx("rig", "green", "squeaker"), env)
+	assert_true(m.holding, "RIGGING holds")
+	env.paused = true
+	p.fill(m, snap, _ctx("rig", "green", "squeaker"), env)
+	assert_true(m.holding, "a paused frame keeps the hold")
+	env.paused = false
+	snap.hush.state = "IDLE"
+	p.fill(m, snap, {}, env)
+	assert_false(m.holding, "let go (fallback verb path too)")
+
+
 func test_rim_colours() -> void:
 	for d in [["green", HudModel.Rim.GREEN], ["amber", HudModel.Rim.AMBER], ["red", HudModel.Rim.RED]]:
 		p.fill(m, snap, _ctx("freeze", String(d[0])), env)

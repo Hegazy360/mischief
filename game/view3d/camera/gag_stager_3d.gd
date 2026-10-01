@@ -374,6 +374,9 @@ const JET_N := 6
 const JET_F := 9.0
 const WINDOW_PUNCH_S := 1.8
 var _jet_at: Vector3 = Vector3.INF
+## The turntable from the gramophone's tag anchor (its x3 sticker on the cabinet top front).
+const DISC_FROM_TAG := Vector3(-0.08, 0.04, -0.12)
+var _disc_at: Vector3 = Vector3.INF
 var _jet_dir := Vector3.UP
 var _jets_left := 0
 var _jet_t := 0.0
@@ -381,9 +384,10 @@ var _window_punched := false
 ## The spin's dust ring at his toe: clip frames SPIN_DUST_F0..F1 (rx_dizzy_spin_a's top), a burst every SPIN_DUST_DF.
 const SPIN_DUST_F0 := 38.0
 const SPIN_DUST_F1 := 82.0
-const SPIN_DUST_DF := 7.0
+const SPIN_DUST_DF := 6.0
 var _spin_f := -1.0
 var _spin_next := 0.0
+var _spin_n := 0
 ## Bellows-window punches for his off-screen answers (tests / the review).
 var window_punches: int = 0
 
@@ -406,9 +410,15 @@ func _record_runs_away(prank: String) -> void:
 	_jets_left = JET_N
 	_jet_t = 0.0
 	_spin_f = 0.0
+	_spin_n = 0
 	_burst("note_jet", _jet_at, _jet_dir)
 	_burst("sparkles", _jet_at, _jet_dir)
 	_jets_left -= 1
+	# the record itself at speed: a white whirl off the turntable (twice: now and DISC_WHIRL2_F later)
+	var tag := world_view.anchor_of(rp, &"tag")
+	_disc_at = tag + DISC_FROM_TAG if tag != Vector3.ZERO else Vector3.INF
+	if _disc_at != Vector3.INF:
+		_burst("disc_whirl", _disc_at)
 
 
 ## Q-G5: his answer to the squeak (the bit's head snap) happens off-screen in the small window — punch it to the
@@ -424,6 +434,7 @@ func _punch_window() -> void:
 
 ## The squeeze's yellow burst at Clarence's beak (her `grip_r` socket, his head forward-up), on the squeeze frame.
 const SQUEAK_PUFF_DELAY_S := 8.0 / 60.0
+const SQUEAK_RING2_S := 7.0 / 60.0
 
 
 func _squeak_puff() -> void:
@@ -434,9 +445,21 @@ func _squeak_puff_now() -> void:
 	var hv := world_view.hush_view if world_view != null else null
 	if hv == null or not hv.visible:
 		return
+	var at := _beak()
+	_burst("squeak_puff", at, Vector3(0.0, 0.8, 0.6))
+	# the noise itself: a sound ring swells off the beak, then a second one (SQUEAK_RING2_S later)
+	_burst("squeak_ring", at + Vector3(0.0, 0.0, 0.15))
+	_schedule(SQUEAK_RING2_S, "squeak_ring", null)
+
+
+## Clarence's beak (world): her `grip_r` socket, a little up and toward the camera; her head when no socket.
+func _beak() -> Vector3:
+	var hv := world_view.hush_view if world_view != null else null
+	if hv == null:
+		return Vector3.ZERO
 	var g := hv.socket_world("grip_r")
 	var at := g.origin if g != Transform3D.IDENTITY else hv.head_world()
-	_burst("squeak_puff", at + Vector3(0.0, 0.12, 0.08), Vector3(0.0, 0.8, 0.6))
+	return at + Vector3(0.0, 0.12, 0.08)
 
 
 func _small_gag(text: String, trauma: float) -> void:
@@ -472,6 +495,10 @@ func advance(delta: float) -> void:
 				driver.juice.request_kind(&"freeze_frame")
 			elif str(t[1]) == "squeak_puff":
 				_squeak_puff_now()
+			elif str(t[1]) == "squeak_ring":
+				var hv2 := world_view.hush_view if world_view != null else null
+				if hv2 != null and hv2.visible:
+					_burst("squeak_ring", _beak() + Vector3(0.0, 0.0, 0.15))
 			elif str(t[1]) == "window_down" and _window_punched:
 				_window_punched = false
 				if pip != null and not (camera != null and camera.gag_in_pip()):
@@ -480,7 +507,12 @@ func advance(delta: float) -> void:
 		_spin_f += maxf(vdt, delta * 0.05) * 60.0
 		if _spin_f >= SPIN_DUST_F0 and _spin_f >= _spin_next:
 			_spin_next = _spin_f + SPIN_DUST_DF
-			_burst("spin_dust", _feet() + Vector3(0.0, 0.04, 0.0), Vector3.UP)
+			# alternately the dust whirl at his toe and the whoosh ring round his middle: a top, even in a still
+			_spin_n += 1
+			if _spin_n % 2 == 1:
+				_burst("spin_dust", _feet() + Vector3(0.0, 0.04, 0.0), Vector3.UP)
+			else:
+				_burst("spin_lines", _chest() + Vector3(0.0, -0.15, 0.0), Vector3.UP)
 		if _spin_f > SPIN_DUST_F1:
 			_spin_f = -1.0
 			_spin_next = 0.0
@@ -490,6 +522,8 @@ func advance(delta: float) -> void:
 			_jet_t = 0.0
 			_jets_left -= 1
 			_burst("note_jet", _jet_at, _jet_dir)
+			if _jets_left == JET_N - 3 and _disc_at != Vector3.INF:
+				_burst("disc_whirl", _disc_at)
 	if camera != null and _gag_id != 0 and camera.active_gag_id() == _gag_id:
 		camera.set_gag_focus(_gag_id, _chest())
 

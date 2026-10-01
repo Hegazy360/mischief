@@ -13,7 +13,8 @@
 ## * **Gate 0 · voice A / B**, **Gate 0 · crowd A / B** — set the style and launch `g0_sneeze`, so the
 ##   owner judges the voices in the scene, not as isolated lines;
 ## * *Hush / Pip* (Settings `hush_skin`), *Reset save* (tap twice), *Device log* (the log + Copy).
-## Reached from `boot_config.json` (`start: stage_door`) or the debug overlay.
+## Reached from `boot_config.json` (`start: stage_door`) or the debug overlay, and from a curtain call's Next ▶ to a
+## hidden preview Night (Router params `{wip: <episode>}`: the WIP card opens on that Night, r3d QA Q-N1).
 class_name StageDoor
 extends Control
 
@@ -66,6 +67,9 @@ var view: String = "3d"
 ## The WIP card over the menu (null when closed) and the episode it guards.
 var wip_card: Control = null
 var _wip_episode: String = ""
+## Router params {wip: <episode>}: open the WIP card on that Night once shown (a curtain call's Next ▶ to a
+## hidden preview Night, r3d QA Q-N1).
+var _wip_on_open: String = ""
 
 
 func _init() -> void:
@@ -75,6 +79,11 @@ func _init() -> void:
 	theme = UiKit.theme()
 
 
+## Router hook (before `_ready`).
+func setup(params: Dictionary) -> void:
+	_wip_on_open = String(params.get("wip", ""))
+
+
 func _ready() -> void:
 	ab = _read_ab()
 	_title = UiStrings.t("stage_door.title")
@@ -82,8 +91,19 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--page="):
 			first = a.substr(7)   # shots: voice_ab | crowd_ab | device_log
+		elif a.begins_with("--wip="):
+			_wip_on_open = a.substr(6)   # shots: the WIP card a curtain call's Next ▶ opens (Q-N1)
 	show_page(first)
 	resized.connect(func() -> void: show_page(page))
+	if _wip_on_open != "":
+		_open_wip_sized.call_deferred(_wip_on_open)
+		_wip_on_open = ""
+
+
+## Opens the WIP card once the menu has its size (the Router's params path).
+func _open_wip_sized(episode: String) -> void:
+	if is_inside_tree():
+		open_wip(episode)
 
 
 ## Android back: a sub page → the menu; the menu → nothing (never quits).

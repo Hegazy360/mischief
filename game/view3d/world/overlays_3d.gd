@@ -13,6 +13,15 @@ extends CanvasLayer
 
 ## His bubble at REDESIGN §4.2 size: the Stage-2 bubble (150×130) × 1.333 = 200×173.
 const BUBBLE_SCALE := 1.333
+## His bubble's drawn extent from its position (screen px at BUBBLE_SCALE): the awareness-glyph disc + ear pips reach
+## 115 local units left (153 px), the cloud's right lobe 95 units right (127 px); EDGE_PX kept from the screen edge.
+const BUBBLE_LEFT_PX := 153.0
+const BUBBLE_RIGHT_PX := 127.0
+const EDGE_PX := 8.0
+## With the glyph flipped right of the cloud (fix-perf's FxThoughtBubble.glyph_right near the left edge): the cloud's
+## left lobe 55 units left (73 px), the glyph disc 155 units right (207 px).
+const BUBBLE_FLIP_LEFT_PX := 73.0
+const BUBBLE_FLIP_RIGHT_PX := 207.0
 const HUD_BAND_Y := 212.0
 const CAPTIONS := 3
 const STAMPS := 2
@@ -34,6 +43,8 @@ var wiper: FxWipe = null
 var _safe := false
 var _unit := 1.0
 var _bubble_rect := Rect2()
+var _bubble_has_wait := false
+var _bubble_can_flip := false
 var _cap_i := 0
 var _stamp_i := 0
 var _busted := false
@@ -64,6 +75,8 @@ func setup(w: WorldView3D) -> void:
 	meter = FxSpotMeter.new()
 	lane.add_child(meter)
 	bubble = FxThoughtBubble.new()
+	_bubble_has_wait = "waiting" in bubble
+	_bubble_can_flip = "glyph_right" in bubble
 	lane.add_child(bubble)
 	screen = Node2D.new()
 	screen.name = "ScreenSpace"
@@ -172,14 +185,31 @@ func advance(snap: ViewSnapshot, dt: float) -> void:
 			# no room above his head under the HUD band: beside his head, behind his facing (the 2D rule)
 			var side := -float(b.facing) if b.facing != 0 else 1.0
 			sx = s.x + side * (w * 0.5 + 70.0)
-			if sx < w * 0.6 or sx > vs.x - w * 0.6:
+			if sx < BUBBLE_LEFT_PX + EDGE_PX or sx > vs.x - BUBBLE_RIGHT_PX - EDGE_PX:
 				sx = s.x - side * (w * 0.5 + 70.0)
-		sx = clampf(sx, w * 0.6, vs.x - w * 0.6)
+		# the drawn extent stays on screen (fix-hud R1): glyph disc + ear pips left of the cloud, or — where the
+		# bubble can flip them (FxThoughtBubble.glyph_right) — right of it at the left edge
+		var flip := _bubble_can_flip and bool(bubble.get(&"glyph_right"))
+		var lo := (BUBBLE_FLIP_LEFT_PX if _bubble_can_flip else BUBBLE_LEFT_PX) + EDGE_PX
+		var hi := vs.x - (BUBBLE_FLIP_RIGHT_PX if flip else BUBBLE_RIGHT_PX) - EDGE_PX
+		sx = clampf(sx, lo, maxf(lo, hi))
 		if sx != s.x or sy != s.y:
 			bubble.position = to_lane(Vector2(sx, sy))
-		_bubble_rect = Rect2(Vector2(sx - w * 0.5 - 70.0, sy - h), Vector2(w + 70.0, h))
+		var l_px := BUBBLE_FLIP_LEFT_PX if flip else BUBBLE_LEFT_PX
+		var r_px := BUBBLE_FLIP_RIGHT_PX if flip else BUBBLE_RIGHT_PX
+		_bubble_rect = Rect2(Vector2(sx - l_px, sy - h), Vector2(l_px + r_px, h))
 	else:
 		_bubble_rect = Rect2()
+	# the one-cloud rule (§2.5): when the last solve kept his bubble waiting (Hush's thought is the action), it fades
+	# out on a flag of its own (the bubble's `waiting`, else its self_modulate; `quiet` is the gag holds')
+	var it: OverlayPlacer.Item = placer.item(&"fx_bubble") if placer != null else null
+	var wait := it != null and (it.active or it.was_active) and not it.visible
+	if _bubble_has_wait:
+		bubble.set(&"waiting", wait)
+	else:
+		bubble.self_modulate.a = move_toward(bubble.self_modulate.a, 0.0 if wait else 1.0, dt * 6.0)
+	# a cue shot's close-up on him (the bonk, the picture) is his face's: the bubble steps out of it
+	bubble.quiet = wv.cues != null and wv.cues.wants_quiet_bubble()
 	bubble.tick(dt)
 	entry.tick(dt, _unit)
 	if placer != null and _bubble_rect.size.x > 0.0:

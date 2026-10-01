@@ -37,6 +37,14 @@ var octx: Object = null
 var materials_drawn: int = 0
 var instanced_drawn: int = 0
 var clips_warmed: int = 0
+## Clip sound lists built for the AudioDirector's L12 check (D17).
+var clip_sounds_warmed: int = 0
+## The action button's RIG icons rasterised (D17).
+var hud_icons_warmed: int = 0
+## The Night's Hud (NightScene sets it): its edge badge's faces are loaded under the curtain (D17).
+var hud: Node = null
+## Edge-badge faces loaded (tier faces + emotes, D17).
+var edge_faces_warmed: int = 0
 ## Scenes the view builds lazily in PLAY (CharacterView3D's freeze plinth at the first freeze): their materials join
 ## the warm rig, so their shaders compile under the curtain.
 const LAZY_SCENES: PackedStringArray = ["res://art3d/chars/hush/plinth.glb"]
@@ -191,6 +199,12 @@ func _free_rigs() -> void:
 func _warm_clips_3d() -> void:
 	if world_view != null and world_view.has_method("warm_clips"):
 		clips_warmed = int(world_view.call("warm_clips"))
+	# D17 (r3d-fix-perf): the AudioDirector's L12 check (a cue's sound vs the playing clip's own) reads each clip's
+	# sound list on its first cue; build them now so PLAY never does
+	var ids := PackedStringArray()
+	for rig in ["hush", "bellows"]:
+		ids.append_array(ClipLib3D.clips_of(rig))
+	clip_sounds_warmed = AudioDirector.warm_clip_sounds(ids)
 
 
 func _warm_overlays_3d() -> void:
@@ -348,12 +362,36 @@ func _warm_textures() -> bool:
 	return true
 
 
-## The HUD's own rasters the Night will ask for (PiP awareness glyphs, badges).
+## The HUD's own rasters the Night will ask for (PiP awareness glyphs, badges, the action button's RIG icons of
+## tonight's pranks: `list.hud_icons`, D17).
 func _warm_ui_icons() -> void:
 	for g in ["specs_off", "specs_on", "blinded", "asleep", "stars"]:
 		UiIcons.glyph(g)
 	for b in ["gold", "hide", "in_use", "needs"]:
 		UiIcons.badge(b)
+	var hi: Variant = list.get("hud_icons", {})
+	if hi is Dictionary:
+		for t in (hi as Dictionary).get("targets", PackedStringArray()):
+			var ts := String(t)
+			if ts.begins_with("res://"):
+				UiIcons.texture(ts)
+			else:
+				UiIcons.activity(ts)
+			hud_icons_warmed += 1
+		for it in (hi as Dictionary).get("items", PackedStringArray()):
+			UiIcons.item(String(it))
+			hud_icons_warmed += 1
+	# D17: his temper tier rising at a reaction accent swapped the edge badge's face — a portrait PNG loaded on
+	# first sight inside Hud.apply (2.4–3.0 ms at the same tick every run); the emotes' faces and puffs likewise.
+	var eb: Variant = hud.get("edge_bubble") if hud != null and is_instance_valid(hud) and "edge_bubble" in hud else null
+	if eb is EdgeBubble:
+		for fn in EdgeBubble.TIER_FACES:
+			(eb as EdgeBubble).face_for(fn)
+			edge_faces_warmed += 1
+		for em in EdgeBubble.EMOTES:
+			(eb as EdgeBubble).face_for(em)
+			UiIcons.get_icon(StringName("puff_" + em))
+			edge_faces_warmed += 1
 
 
 func _warm_audio() -> void:

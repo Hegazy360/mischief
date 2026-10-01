@@ -39,6 +39,7 @@ const EST_OUT_F := 27
 const BONK_ZOOM := 1.3
 const BONK_PIN_F := 58.0
 const BONK_HOLD_CLIP := "bellows/st_bonk"
+const BONK_HOLD_DELAY_F := 2.0
 const BONK_ACCENT_F := 4.0
 const BONK_RECOIL_M := 0.12
 ## Half the wing flat's thickness (house3d.json stage.wing_flat 0.22 m).
@@ -49,10 +50,19 @@ const RELIEF_ZOOM := 1.3
 const RELIEF_NEAR_M := 1.7
 const RELIEF_TAIL_F := 40
 const RELIEF_CLIP := "bellows/st_smirk"
+## His gaze on the gap she hides in through the near miss (look weight).
+const RELIEF_GAZE_W := 0.85
+## Ticks before his hunt runs out (the relief cue) when he turns to peer at her gap / when her eyes duck.
+const RELIEF_GAZE_LEFT := 46
+const RELIEF_DUCK_LEFT := 22
 ## The vase teeters from this many nudges on (amplitude per nudge past it, degrees; rate Hz).
 const TEETER_FROM := 3
 const TEETER_DEG := 4.5
 const TEETER_HZ := 2.6
+## The bonked wing flat's wobble (degrees at first, Hz, frames).
+const WING_DEG := 2.2
+const WING_HZ := 7.0
+const WING_F := 30.0
 
 var wv: WorldView3D = null
 var nudges: int = 0
@@ -75,6 +85,12 @@ var _relief_done := false
 var _shot_tail := -1.0    ## frames left before the current shot is let go (-1 = it plays its own hold)
 ## Cue shots requested (tests / the review).
 var shots: int = 0
+var _wing: Node3D = null
+var _gaze_eyes := Vector3.INF
+var _relief_spot := ""
+var _wing_home := Transform3D.IDENTITY
+var _wing_t := 0.0
+var _wing_dir := -1.0
 
 
 func setup(w: WorldView3D) -> void:
@@ -90,10 +106,15 @@ func reset() -> void:
 	_vase_phase = ""
 	_pic_phase = ""
 	_teeter_t = 0.0
+	if _wing != null and is_instance_valid(_wing):
+		_wing.transform = _wing_home
+	_wing = null
 	_end_shot()
 	_est_done = false
 	_bonk_t = -1.0
 	_relief_done = false
+	_gaze_eyes = Vector3.INF
+	_relief_spot = ""
 	var v := _decor(VASE)
 	if v != null:
 		v.transform = _vase_home
@@ -142,7 +163,8 @@ func on_event(ev: Dictionary, snap: ViewSnapshot) -> void:
 			var face := float(snap.bellows.facing if snap.bellows.facing != 0 else -1)
 			if wv.bellows_view != null:
 				wv.bellows_view.stage_pin(BONK_PIN_F, x - face * (FLAT_HALF_M + 0.30 + BONK_RECOIL_M))
-				wv.bellows_view.stage_hold(BONK_HOLD_CLIP, BONK_PIN_F)
+				# the dazed base clip starts 2 f after the cue overlay (two clip starts never share a frame, D17)
+				wv.bellows_view.stage_hold(BONK_HOLD_CLIP, BONK_PIN_F, BONK_HOLD_DELAY_F)
 			_start_shot("bonk", _bellows_head(), BONK_ZOOM, 8, int(BONK_PIN_F) + 6, 24, 5.0 * face)
 			_bonk_t = 0.0
 			wv.cue_staged.emit(id, "clip" if played else "fx")
@@ -150,7 +172,10 @@ func on_event(ev: Dictionary, snap: ViewSnapshot) -> void:
 			if wv.fx3d != null and wv.hush_view != null:
 				var eyes := _hidden_eyes(snap)
 				var at := eyes if eyes != Vector3.INF else wv.hush_view.head_world()
-				wv.fx3d.burst("drops", at + Vector3(0.15, 0.2, 0.0), Vector3(0.3, 1.0, 0.0))
+				# phew: big sweat drops fly off her brow in the gap, both sides
+				wv.fx3d.burst("sweat", at + Vector3(0.12, 0.15, 0.25), Vector3(0.5, 1.0, 0.2))
+				wv.fx3d.burst("sweat", at + Vector3(-0.12, 0.15, 0.25), Vector3(-0.5, 1.0, 0.2))
+			_duck_spot(_relief_spot if _relief_spot != "" else snap.hush.hidden_spot, false)
 			if wv.bellows_view != null:
 				wv.bellows_view.stage_overlay(RELIEF_CLIP, 34.0)
 			if _shot == "relief" and wv.cam != null:
@@ -163,7 +188,7 @@ func on_event(ev: Dictionary, snap: ViewSnapshot) -> void:
 			_pic_t = 0.0
 			_start_shot("picture", _bellows_head(), PIC_ZOOM, 10, int(PIC_DROP_F + PIC_HANG_F + PIC_OFF_F) + 8, 24)
 			if wv.bellows_view != null:
-				wv.bellows_view.stage_hold(PIC_HOLD_CLIP, PIC_DROP_F + PIC_HANG_F)
+				wv.bellows_view.stage_hold(PIC_HOLD_CLIP, PIC_DROP_F + PIC_HANG_F - BONK_HOLD_DELAY_F, BONK_HOLD_DELAY_F)
 			var top: Node3D = wv.bellows_view.socket_node("head_top") if wv.bellows_view != null else null
 			_pic_basis = _pic_home_basis()
 			if wv.set3d != null and wv.set3d.has_method("lend") and top != null and top.is_inside_tree():
@@ -236,6 +261,7 @@ func advance(snap: ViewSnapshot, dt: float) -> void:
 	_advance_picture(f)
 	_advance_shot(snap, f)
 	_advance_bonk(f)
+	_advance_wing(f)
 
 
 func _advance_vase(f: float) -> void:
@@ -265,8 +291,12 @@ func _advance_vase(f: float) -> void:
 			_play(VASE, "smash")
 			_set_visible(VASE_SMASHED, true)
 			if wv.fx3d != null:
-				wv.fx3d.burst("dust", at)
+				wv.fx3d.burst("bonk_dust", at + Vector3(0.0, 0.1, 0.0), Vector3(0.0, 1.0, 0.3))
 				wv.fx3d.burst("sparkles", at + Vector3(0.0, 0.2, 0.0))
+			# the crash lands: a jolt the whole frame feels (it is the curtain-up gag's payoff)
+			if wv.cam != null:
+				wv.cam.shake(0.3)
+				wv.cam.kick(Vector2.DOWN, 8.0)
 
 
 func _advance_picture(f: float) -> void:
@@ -278,8 +308,12 @@ func _advance_picture(f: float) -> void:
 			if _pic_t >= PIC_DROP_F:
 				_pic_phase = "hang"
 				_pic_t = 0.0
+				# THUNK: the frame lands on his head — stars, a jolt
 				if wv.fx3d != null and wv.bellows_view != null:
-					wv.fx3d.burst("stars", wv.bellows_view.head_world() + Vector3(0.0, 0.25, 0.0))
+					wv.fx3d.burst("thunk_stars", wv.bellows_view.head_world() + Vector3(0.0, 0.35, 0.15))
+				if wv.cam != null:
+					wv.cam.shake(0.35)
+					wv.cam.kick(Vector2.DOWN, 10.0)
 		"hang":
 			_hold_picture_on_head()
 			if _pic_t >= PIC_HANG_F:
@@ -390,6 +424,10 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 	var c := wv.cam
 	if c == null:
 		return
+	if _shot != "relief" and _relief_spot != "":
+		# the near-miss shot is over: her eyes are back up in the gap
+		_duck_spot(_relief_spot, false)
+		_relief_spot = ""
 	# the curtain rises on HIM: until Hush starts her climb-in (P00) the camera frames him and the vase
 	var pre := snap.hush.entering and snap.hush.oneshot != "enter" and snap.bellows.present
 	if pre and _shot == "" and not _est_done:
@@ -403,6 +441,7 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 		var head := _bellows_head()
 		if eyes != Vector3.INF and head != Vector3.INF and absf(eyes.x - head.x) <= RELIEF_NEAR_M:
 			_start_shot("relief", _relief_focus(head, eyes), RELIEF_ZOOM, 14, 100000, 26)
+			_relief_spot = snap.hush.hidden_spot
 	if _shot == "":
 		return
 	if c.active_gag_id() == _shot_id:
@@ -424,6 +463,12 @@ func _advance_shot(snap: ViewSnapshot, f: float) -> void:
 		"relief":
 			var eyes2 := _hidden_eyes(snap)
 			var head2 := _bellows_head()
+			# the beat before the cue (his hunt runs out — it fires laugh_relief): he turns to peer at her gap, her
+			# eyes sink out of sight as he does, then pop up when he turns away (the cue)
+			var left := CueStager3D.hunt_left(snap.bellows)
+			_gaze_eyes = eyes2 if left <= RELIEF_GAZE_LEFT else Vector3.INF
+			if not _relief_done and left <= RELIEF_DUCK_LEFT:
+				_duck_spot(snap.hush.hidden_spot, true)
 			if eyes2 != Vector3.INF and head2 != Vector3.INF:
 				c.set_gag_focus(_shot_id, _relief_focus(head2, eyes2))
 			elif _shot_tail < 0.0:
@@ -477,12 +522,85 @@ func _advance_bonk(f: float) -> void:
 	if wv.cam != null:
 		wv.cam.shake(0.5)
 		wv.cam.kick(Vector2(float(bv.get_facing()) * -1.0, -0.3), 14.0)
+	var l := wv.layout.link_between("parlour", "kitchen")
+	var x := float(l.x) / View3DConst.PX_PER_M if l != null else head.x
+	var fdir := float(bv.get_facing())
+	var edge := x - fdir * FLAT_HALF_M
 	if wv.fx3d != null:
-		var l := wv.layout.link_between("parlour", "kitchen")
-		var x := float(l.x) / View3DConst.PX_PER_M if l != null else head.x
-		var edge := x - float(bv.get_facing()) * FLAT_HALF_M
-		wv.fx3d.burst("bonk_dust", Vector3(edge, head.y, View3DConst.LANE_Z - 0.25), Vector3(-float(bv.get_facing()), 0.4, 0.3))
+		# the contact, where his head meets the frame's edge: a white impact star in front of it, a plaster puff off
+		# the edge, plaster sifting down from above, stars round his head
+		wv.fx3d.burst("impact", Vector3(edge, head.y + 0.05, View3DConst.LANE_Z + 0.25), Vector3.UP)
+		wv.fx3d.burst("bonk_dust", Vector3(edge, head.y, View3DConst.LANE_Z - 0.2), Vector3(-fdir, 0.4, 0.3))
+		wv.fx3d.burst("plaster", Vector3(edge, head.y + 0.65, View3DConst.LANE_Z - 0.3), Vector3.DOWN)
 		wv.fx3d.burst("bonk_stars", head + Vector3(0.0, 0.3, 0.0))
+	# the frame itself takes the hit: the wing flat rocks on its base, away from him
+	if _wing != null and is_instance_valid(_wing):
+		_wing.transform = _wing_home
+	_wing = wv.set3d.call("wing", l.id) as Node3D if l != null and wv.set3d != null and wv.set3d.has_method("wing") else null
+	if _wing != null:
+		_wing_home = _wing.transform
+		_wing_t = 0.0
+		_wing_dir = fdir
+
+
+## The bonked wing flat rocks on its base (a damped WING_HZ wobble, WING_DEG at first, gone in WING_F frames), its top
+## away from him.
+func _advance_wing(f: float) -> void:
+	if _wing == null:
+		return
+	if not is_instance_valid(_wing):
+		_wing = null
+		return
+	_wing_t += f
+	if _wing_t >= WING_F:
+		_wing.transform = _wing_home
+		_wing = null
+		return
+	var th := CueStager3D.wing_angle(_wing_t, _wing_dir)
+	var half_h := (_wing as MeshInstance3D).get_aabb().size.y * 0.5 if _wing is MeshInstance3D else _wing_home.origin.y
+	var t := _wing_home
+	t.basis = Basis(Vector3(0.0, 0.0, 1.0), th) * _wing_home.basis
+	# rotate about the base, not the centre: the floor end stays put
+	t.origin.x = _wing_home.origin.x - half_h * sin(th)
+	t.origin.y = _wing_home.origin.y - half_h + half_h * cos(th)
+	_wing.transform = t
+
+
+## The wing flat's wobble angle (radians) `t` frames after the bonk by a man facing `dir` (its top tips his way).
+static func wing_angle(t: float, dir: float) -> float:
+	if t < 0.0 or t >= WING_F:
+		return 0.0
+	var decay := exp(-t / (WING_F * 0.35))
+	return deg_to_rad(WING_DEG) * decay * sin(t / 60.0 * TAU * WING_HZ) * signf(-dir if dir != 0.0 else 1.0)
+
+
+## Ticks left of his hunt (999999 when he is not hunting): the relief cue fires as it runs out.
+static func hunt_left(b: ViewSnapshot.Actor) -> int:
+	if b.activity != "hunt" or b.activity_len <= 0:
+		return 999999
+	return maxi(0, b.activity_len - b.activity_t)
+
+
+## The near miss: duck (or pop up) her eyes in hiding spot `spot`.
+func _duck_spot(spot: String, on: bool) -> void:
+	if spot == "" or wv == null or not wv.has_method("prop"):
+		return
+	var p: Object = wv.prop(spot)
+	if p != null and p.has_method("eyes_duck"):
+		p.call("eyes_duck", on)
+
+
+## Where he looks during a cue shot (INF = his own gaze): her eyes in the gap while the near-miss two-shot holds,
+## until the cue (then his smirk is to the camera).
+func gaze_target() -> Vector3:
+	if _shot != "relief" or _relief_done or _gaze_eyes == Vector3.INF:
+		return Vector3.INF
+	return _gaze_eyes
+
+
+## True while a cue shot holds a close-up on his face (the bonk, the picture): his thought bubble steps out of it.
+func wants_quiet_bubble() -> bool:
+	return (_shot == "bonk" or _shot == "picture") and _shot_live
 
 
 ## Debug / tests: the vase / picture phases.

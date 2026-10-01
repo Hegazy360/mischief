@@ -328,6 +328,30 @@ func test_props_states_resolution_and_reset() -> void:
 	p.set_prop("banana", "held")
 
 
+## A prop moved to another socket keeps the clip's baked bone scale (Clarence's squeeze swell, r3d-fix-perf); a
+## scale keyed at ≈ 0 (a hidden extra) still shows at 1, and the socket placement is unchanged.
+func test_socket_mode_keeps_the_clips_baked_prop_scale() -> void:
+	var p := _player()
+	var sk := p.skeleton
+	var i: int = p._prop_index["cup"]
+	var b := sk.find_bone("prop_r")
+	p.set_prop("cup", "brace")
+	assert_eq(p.mods.prop_mode[i], RigMods3D.MODE_SOCKET)
+	p.advance(0.0)
+	var want := sk.get_bone_global_pose(p.mods.prop_sock_bone[i]) * p.mods.prop_sock_xf[i]
+	sk.set_bone_pose_scale(b, Vector3(1.4, 1.25, 1.4))
+	p.mods._process_modification_with_delta(0.0)
+	var got := sk.get_bone_pose_scale(b)
+	assert_true(got.is_equal_approx(Vector3(1.4, 1.25, 1.4)), "the keyed swell survives the socket move (%s)" % got)
+	assert_true(sk.get_bone_global_pose(b).origin.distance_to(want.origin) < 0.001, "still on the brace socket")
+	sk.set_bone_pose_scale(b, RigMods3D.TINY)
+	p.mods._process_modification_with_delta(0.0)
+	assert_true(sk.get_bone_pose_scale(b).is_equal_approx(Vector3.ONE), "a hidden-extra key (≈ 0) shows at 1")
+	sk.set_bone_pose_scale(b, Vector3.ONE)
+	p.mods._process_modification_with_delta(0.0)
+	assert_true(sk.get_bone_pose_scale(b).is_equal_approx(Vector3.ONE), "an unkeyed bone stays at 1")
+
+
 func test_launch_is_deterministic_and_reset_reattaches() -> void:
 	var p := _player()
 	p.play("fix/rx_take")

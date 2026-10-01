@@ -1,4 +1,4 @@
-# Mischief Next Door — Technical Design and Contracts (v1.1-3D, BINDING)
+# Mischief Next Door — Technical Design and Contracts (v1.2-3D as built, BINDING)
 
 Godot **4.7.2**, GDScript (typed, tabs, `##` docs), Compatibility renderer, **a 3D view (Node3D world, Camera3D) with
 a 2D HUD and overlays** (branch `r3d`; `main` keeps the 2D view), 1920×1080 base, `canvas_items` + `expand`,
@@ -7,6 +7,14 @@ landscape (`SENSOR_LANDSCAPE`). Design: `docs/GDD.md` v1.2 (binding) + `docs/RED
 This document is the contract between parallel agents: module boundaries, file ownership, data formats, public
 APIs, events, determinism rules, tools, budgets and tests. If code and this document disagree, fix the code or
 raise a request — never silently diverge.
+
+**v1.2-3D as built (2026-10-01, `r3d-qa`).** The as-built deltas of every R3D report (`<SP>/reports/r3d-*.md`) and the
+lead rulings D7–D16 (`<SP>/issues.md`) folded into the sections `r3d-docs` wrote, each under an **As built (R3D)**
+paragraph: §1.1 (the 2D path is gone on `r3d`; files as built), §3.5, §3.10, §4.6, §4.10–§4.12, §5.11–§5.18, §8.5,
+§8.6, §9 (D14 proxy rule, D16 set pieces), §10.5 (the lints as built), §11, §11.1, §12 (CI, `pregate3d.sh`). Where an
+as-built paragraph and the designed text above it disagree, **the as-built paragraph is the contract**. Text marked
+"(2D, main only)" is true on `main` only: the reachability scan deleted the 2D path on `r3d`
+(`docs/review/r3d-integrate/reachability.md`).
 
 **Versions.** **v1.1-3D (2026-09-30, the 3D pivot)** adds the 3D view's contracts *as designed* for R3D (the build plan
 and binding contract text are `<SP>/tasks/r3d-index.md` §7, R1–R19; the lead decisions D6–D7 in `<SP>/issues.md`): the
@@ -201,6 +209,27 @@ The perf-probe APK (a throwaway `r3d-probe` branch) is the one build that ships 
 Class names above are the contract; file names not given in `r3d-index.md` are the owners' (the as-built list is
 `r3d-qa`'s fold-in).
 
+**As built (R3D) — the module map.** The game has **one view: the 3D one** (`game/view3d/**`, Node3D world + Camera3D +
+the 2D HUD). The Stage-2 2D view (`game/view/rig/**`, WorldView / CharacterView / RoomView / PropView, the 2D camera,
+PiP, FX, ViewSandbox, the 2D rig lints, the 2D rig / clip / art data) was **deleted on `r3d`** after the reachability
+scan (`docs/review/r3d-integrate/reachability.md`: 1006 candidates, 545 kept, 461 + 76 tests deleted; the list is
+`docs/review/r3d-integrate/deleted_files.txt`); `--view=2d` and `BootConfig.VIEWS` "2d" no longer exist (`VIEWS =
+["3d"]`). Still shared with the 3D view from `game/view/`: `view_snapshot.gd`, `sim_driver.gd`, `audio_director.gd`,
+`haptics_director.gd`, `view_kit.gd`, `world/{clip_map,clip_rules,slice_clips,content_info,house_layout}.gd`
+(+ `default_maps/`), `camera/juice_clock.gd`, `stalls/**`, `tex/{hi_res_tex,tex_stats}.gd`, the 2D screen overlays
+`fx/{caption,stamp,thought_bubble,spot_meter,freeze_frame,wipe,entry_warning,fx_art}.gd` and `sandbox/fake_world.gd`.
+`main` keeps the 2D Gate-0 build. Files as built beyond the tree above: `view3d/world/{overlays_3d,cue_stager_3d,
+caught_stager_3d,moment_recorder_3d,greybox_set_3d}.gd`, `view3d/world/gag_stager_3d.gd` (GagStager3D),
+`view3d/char/{clip_def_3d,rig_mods_3d}.gd`, `view3d/set/{set_geo,set_check,set_mats}.gd`, `view3d/probe/
+script_prof_3d.gd` (ScriptProf3D, `--view3d-prof=`), `tools/anim3d/{sheet3d,rig_profile3d}.gd`, `tools/anim/
+Verbs3D.tscn`, `tools/lint3d/{lint3d,run_lint3d,set_lint,screen_rect_lint,hud_lint,visibility_check,perf_check}.gd` +
+`render_measure.py` + `status_md.py`, `scenes/night/{shader_watch,perf3d,curtain_bows_3d,gag_reel_3d}.gd`,
+`ui/world/**` (+ `PreviewCloud`, `ThoughtCloud`, `ItemBubbleView`, `RigRing`, `SafetyMarker`, `TagFlight`,
+`PreviewArt`, `FakeAnchors`), `ui/demo/HudOn3D.tscn`, `tests/slice/` (the whole-route checks, `r3d-qa`),
+`tools/scripts/pregate3d.sh` (the exit checklist, §12). The Hush head variant `head_b` shipped
+(`data/rigs3d/hush/rig3d_head_b.json` + `art3d/chars/hush/hush_head_b.glb`, ×1.2 about the neck; the build default
+stays B's head ×1.0 until the owner answers, R6).
+
 ---
 
 ## 2. Conventions
@@ -330,6 +359,11 @@ queued (holds are immediate); any other command during the climb-in is rejected 
 **(v1.1-3D) Struck hotspots:** a `go` (and a hotspot `pin`) to a hotspot outside the episode's live mask (§3.10) is
 rejected with `cmd_rejected {c, why: "struck", target}` — feedback, never silence (fairness rule 9 counts it); Hush
 does not move.
+
+**As built (R3D) — rejections.** `cmd_rejected {c, why, target}`: why `struck` (a hotspot not on stage tonight — the
+view answers with the grey "no" pop) and `here` (a go / pin on the hiding spot she is in or diving into; it clears any
+pin, and POP OUT then goes nowhere); the older whys carry no `target`. A tap on the spot she is hiding in keeps her
+there (it cancels a GO ▶ pin).
 
 ### 3.6 Tick order (`SimWorld.step`)
 1. `tick += 1`; apply commands in array order (validation, queue).
@@ -491,6 +525,14 @@ squeak bits, panto rounds, near misses, combos, Meltdown, bump-first, door slam,
 
 ---
 
+**As built (R3D) — the live mask** (`r3d-content`): a container is live iff it is the source of an item one of the
+Night's *named* pranks needs; exits as before; doors and stairs only when they lead to a room Hush may enter tonight
+(the kitchen back door and the roped-off stairs are struck in Act I). `SimCtx` stores the mask as a byte per hotspot
+(`live_mask`, `is_live(hi)`, `live_kind`; `SimCtx.live_hotspots(db, episode) -> Dictionary`; `hotspot_state(id).enabled`).
+`micro_gag` events carry `pip_reason`. `SimVisibility.pip_reason(w) -> StringName` (`adjacent` | `heading` | `rigging` |
+`payoff` …). The solver mirrors the mask in `SolverData.{live_hotspots, live_kind, live_hides, struck_hotspots,
+is_live, named_pranks, hush_rooms, fixup_hold_activities}`.
+
 ## 4. Data formats (`game/data/**`)
 All files carry `"version": 1`. `ContentDB.validate()` enforces every MUST below; the content lint (§10.5) adds
 design rules. Examples are normative in shape, illustrative in values (GDD numbers win).
@@ -638,6 +680,11 @@ from them by more than 2 frames.
   listed id is a hiding hotspot in the Night's rooms; one per room in Act I episodes with a list (a warning for drafts);
   every solution `hide` step and the Director's safety-net pulse use a listed spot. It drives the live mask (§3.10).
 
+**As built (R3D) — episode fields.** `hides` (optional list of hiding hotspots; one per room in Act I finals, C1);
+`director.fixup_holds` [{kind: DRY | SINK | HONEY | MIRROR, until: a gate condition}]: a fix-up of that kind does not
+end while `until` is false (the Prologue: the mirror waits for the gramophone lever, so the Prologue cannot lose its
+spin). Solutions were re-planned by `r3d-content` (C2); the retired N02 `face_to_face*` routes are gone.
+
 ### 4.7 Rigs: `rigs/<id>/rig.json`, `poses.json`, `faces.json` (owners `art-hush`, `art-bellows`, `rig`)
 **(2D, main only)** — the cutout rig format. The 3D rigs use `rigs3d/<rig>/rig3d.json` (§4.10); `faces.json` preset
 *names* carry over to `rigs3d/<rig>/faces.json`. `rigs/figgis/**` and `rigs/stalls/**` are kept on `r3d` (Figgis is
@@ -776,6 +823,25 @@ atlas grid in the example is illustrative; do not squeeze the cells to 128 px.
 - **Budgets** (checked by the cast tests): `tris` ≤ 10,000, `deform_bones` ≤ 50 (+ jiggle), 1 skinned mesh + ≤ 4
   attachments, 1 material + the outline pass.
 
+**As built (R3D) — `rig3d.json`.** Both rigs validate in `RigDef3D`; fields honoured beyond the designed list:
+`face.default`, nested `face.mirror_cells {layer: {cell: cell}}`, `face.blink.hide_layers`, `face.mirror_pupil_x`,
+`face.no_pupils`, `slot_parts.<slot>.hide_bones`, `hidden_bones` (scale 0 unless the playing clip keys that bone's scale
+or the prop is shown), `props.<id>.hides`, `attachments.<id>.soft` (a missing scene warns and is skipped),
+`attachments.<id>.socket`, `looks.<id>.face_extra`, `tint.livid_specs`, `tint.skin` (default `#E9B79A`).
+**`outline_px` is 4.8 for both characters** (lead ruling D7; `RigDef3D` defaults to `View3DConst.OUTLINE_CHAR_PX`).
+**`deform_bones` = the count of weighted bones** (jiggle and prop / FX bones included), computed by the builders from
+the vertex groups — RigPerf3D and the cast tests count the same way (Hush 48, Bellows 50 after the D16 fix pass: the
+ring finger rides middle_01/_02, the thumb is rigid on thumb_01, the neck stub blends spine_03 → Head; ring_01/_02,
+thumb_02 and neck_01 stay in the skeleton unweighted, so `skeleton.json`'s sha is unchanged). Hush: sockets `grip_r`,
+`grip_l`, `head_top`, `brace_r`, `carry_1`, `carry_2`, `feet`, `face`; props `clarence` (brace / held / squeeze) and
+`pepper_pot` (the set's pot: white `#F4F1EA` body, dark `#2A2D36` cap, squat belly; `fx_pepper` 0.215 m out of the
+fist); carry looks `CARRY_SQUEAKER`, `CARRY_MAGNIFIER`, `CARRY_KIPPER`; face grid 6 × 8 on 2048 × 1024; cheats idle 35 /
+walk 20 / perform 35 / face_to_face 5; `blob_shadow_r` 0.34. Bellows: four mutually exclusive bouffant variants
+(flipped, wet, frazzled, floured) + the ride-along kitchen stool — **a set piece on loan** (`res://art3d/set/stool.glb`,
+drawn with the set's `set_toon` + the kitchen palette, no outline; the set's own stool hides on the same frame) is
+reported apart as `set_piece_draw_calls` / `set_piece_tris` and counts against the room, not the character (lead ruling
+D16; `RigProfile3D.rig_counts`).
+
 ### 4.11 The 3D clip: `art3d/anim/<rig>/<clip>.res` + sidecar v2 `data/anim/<rig>3d/<clip>.json` (v1.1-3D, ruling R2)
 Poses are authored in Blender 4.5 (the bpy pose language: FK, 2-bone arm IK, foot grounding, steps, reach helpers,
 60 fps, frame 0 = the clip start) and **baked one clip per file** to a Godot `Animation` resource (binary `.res`,
@@ -833,6 +899,29 @@ JSON poses sampled by a ported `RigSampler` are **not** built.
   (the prank's own `clip`, else `bands.<band>.clip`; a `map.json` row may override); `rigging@*` with no `rig:` row
   resolves to `bands.mid.clip`, counted as a clip fallback. `act_tinker_q` is not in the 3D manifest.
 
+**As built (R3D) — sidecar v2 optional fields** (all read by the runtime or the lint; absent = off):
+`stage {x, z, facing, cheat_deg}` (the view plays the clip with this facing: `rig_achoo_ria` −1, `rig_allegro_go_go`
++1, the band clips +1 at z −1.5, cheat 10); `step {kind: stool | mime, h, id, support: [[f, h] …]}` (`rig_high`: the
+mime step 0.40 m from f 27, back on the floor from f 104); **`gaze` [{f0, f1, at: "camera", weight, blend}]** — the
+D8 runtime turn of the face to the camera, facing-proof, on base and overlay clips (43 sidecars carry it; a window
+touching a loop seam carries across it; never where a glove rides the head); `reach_offset [dx, y, dz]` on the band
+clips (where her gloves work relative to her root at facing +1: `rig_mid` [0.26, 1.00, −0.20], `rig_high` [0.24, 1.86,
+−0.20], `rig_low` [0.30, 0.28, −0.22] — D11: `house3d.json` stands her at `reach_target − reach_offset`, the view never
+adds it at runtime); `variants {band: [f0, f1]}` + `variant_default` (`freeze_midjob`: mid 0–359, high 360–479, low
+480–599 — the view holds the frame of the band the rig was in, `ClipMap.midjob_frame`); `source.audio` `table` | `own`
+(own = the sidecar's sound events generate the audio frame table rows, §5.18); `lint.draft` (R19 drafts: exempt from
+rubric scoring, listed in the owner pack); `mask` on overlays (`act_glance` head, `st_shrug` upper,
+`mg_admire_in_kettle` head — the view plays an overlay with its sidecar mask first, else `ClipRules.mask_of`).
+Every `.res` ≤ 250 KB (largest `freeze_midjob` 212 KB). **Bake commands as built:** `SANDBOX=<key>
+tools/art3d/anim/bake.sh <rig> <clip…> | --all | --changed [--strict]`; `… --ual <action> --as <rig>/<id> [--layers
+mime,damp_head]`; `bake.sh <rig> --done <clip>` (the `DONE <clip> <sha>` line); `bake.sh --audio-rows`
+(`docs/review/r3d-anim/audio_rows.md`); the lint `NO_IMPORT=1 tools/scripts/sandbox.sh <key> -s
+res://tools/anim/lint_anim.gd -- --format=3d [--rig|--clip|--file] [--scope=g0,p00] [--strict] [--json=]`; the 64 px
+verb cut-outs `tools/scripts/shot.sh res://tools/anim/Verbs3D.tscn /abs/x.png <6×items+10> <key>-shot -- --out=/abs/dir
+--items="name=hush/clip@f[:facing=-1][:cheat=10][:prop=id.state],…"`. Pose-language additions (`ik_handoff`,
+`keyed_arm`, callable IK targets, `blend=(in, out)`, `soft=`, `start_on`, `jump`, `pose.mix`, `stage.prop_point`) are
+documented in `tools/art3d/anim/README.md`; Bellows' presets in `tools/art3d/anim/bellows/_lib/`.
+
 ### 4.12 `house/house3d.json` (v1.1-3D; owner `r3d-sets`; readers `House3D`, `SetList`, view3d, hud, tools, content's validation)
 ```json
 {"version": 1,
@@ -889,6 +978,28 @@ its tests prove them.)
   family (no two live props of a room share one). `nights` (dressing) is `"all"` or a list; omitted = derived by
   `SetList`. Every slice hotspot of P00 / g0 / N01 / N02 has an entry; later-Night hotspots may be absent (struck).
   Furniture `anims` play through `decor {id, anim}` events and `House3D.play_decor`.
+
+**As built (R3D) — `house3d.json`** (`r3d-sets`): blocks `version, notes, units`; `reach {shoulder_y_m 1.127,
+shoulder_half_m 0.118, tiptoe_m 0.07, kneel_drop_m 0.42, max_m 0.5, bands, step_above_m 1.7, hush {radius_m,
+height_m}, bellows {radius_m, barrel_y_m}}`; `stage {lip, apron, proscenium (z −2.3), wing_flat (front z −1.4),
+end_flat, footlight, void}`; `rooms.<id> {wall, wainscot, rail, floor, outdoor, arch, palette, built_ins}`;
+`hotspots.<id> {model, primitive, z, yaw, scale, visual_offset, hit_box, hit_z_half, bounds, collide, reach,
+reach_target, reach_pos {dx, z, step, step_h, facing}, silhouette, view_kind, color, states, anims, parts, tag_socket,
+preview_anchor, ring_anchor, item_anchor, eyes_anchor, halo, stack, merge | zone | zone_bounds, part_of, staged_by,
+seat_y_m, why_offset}`; `stations.<id> {bellows_z, yaw, furniture, seat_y_m, handoffs [{prop: "set:<id>", socket}]}`;
+`furniture`, `landings.<room>.<name> {z, y, yaw, box, host}`, `dressing`, `decor`. **Every live prop carries `halo`**
+(lead ruling D10: the "actions not obvious" complaint outranks §3.7's implication; "C* ≥ 45 or a halo" is met by the
+halo). **`reach_pos` = the placed reach target − the band clip's `reach_offset`** for every hotspot whose
+`rig_actions.json` clip is a band clip (D11), z ≥ −1.6; a `reach_pos.facing` −1 stages her from the right (the kettle).
+The sink landing is y 0.68 (his slippers show over the basin). **Hand-offs:** `House3D.lend(id | "set:<id>", socket,
+frames := 6, at := Transform3D.IDENTITY)` (and `Prop3D.lend`) ends at `at` in the socket's space; `return_home`,
+`return_all`. The `laugh_picture` frame passes `CueStager3D.picture_pose(...)`: face-on, 14° askew on Bellows'
+bouffant (socket `head_top`); for 60 f it follows his head's position but never its turns, then slides down beside his
+feet (20 f) and is gone in dust. `SetGeo` (pure: placement, boxes, `hit_box(rect, e)` = the explicit box or rect +
+`visual_offset`, z ± `hit_z_half` 0.3, `reach_info`, capsules), `SetList.for_episode(db, episode, house3d := {},
+prefer_sim := true) -> SetList.Result` (`rooms_lit`, `rooms_backstage`, `live {id: kind}`, …, `live_props_in(room)`;
+the live mask is `SimCtx.live_hotspots` when present, a test holds `local_live` equal to it), `SetCheck.run(house)`
+(reach + collisions: errors on P00 / g0, warnings on N01 / N02).
 
 ### 4.13 The view data: `view/previews.json` and `anim/hush3d/rig_actions.json` (v1.1-3D; owner `r3d-content`)
 - `previews.json` `{version, pranks: {<prank>: {pictogram: [ids], needs: item | null, combines: [{with, badge}]}}}` —
@@ -1139,6 +1250,30 @@ NightScene (Node)                      night_scene.gd — wires everything; owns
   the owner APK's values; the Bellows-window default (§5.15) and the perf probe's device numbers may flip
   `bellows_window` / `render`; Boot and NightScene read every key (defaults when absent).
 
+**As built (R3D) — the Night.** `BootConfig.DEFAULTS` = `{start: "auto", view: "3d", show_previews: false,
+bellows_window: "sim", render: {msaa_3d: true, render_scale: 1.0, outline: true}}` (`render_scale` clamped 0.5–1.0);
+the owner build's `scenes/boot/boot_config.json` = `{start: "stage_door", view: "3d", show_previews: false,
+bellows_window: "sim", render: <the defaults>}` (R15: `sim` kept — P00-ideal window share ≤ 35 %, `d1_lean` fails the ⅓
+edge cap on 7 of 9 routes; O2 unanswered → render defaults unchanged). NightArgs: `--msaa=off|2|4`, `--no-captions`,
+`--hud=off`, `--window=sim|lean`, `--card=g0`, `--seek-tick`, `--paused`, `--no-curtain`, `--curtain-call=`,
+`--open=`. **Compile detection (`ShaderWatch`, method `first_use`):** GLES3 reports 0 on every pipeline-compilation
+counter even while a shader compiles, so at the rise ShaderWatch records the warmed set (the MaterialWarm3D registry
+keys + every material in the tree + `NightWarmer.warmed_keys`) and in PLAY counts as a compile every registry key first
+registered and every shader first seen on a visible instance (a tree scan every 60 frames), keyed by shader
+(ShaderMaterial) or feature set (BaseMaterial3D); plus hitches > max(50 ms, 2.5 × the running median frame).
+`summary()` = {method, shader_compiles_play, first_use [{key, kind, tick, source, node, material}], hitches,
+hitch_max_ms, pipeline_delta, known}. NightWarmer's 3D steps: `materials, clips, overlays, fonts, pip, audio,
+textures, ui_icons` (+ `LAZY_SCENES`: the freeze plinth; every live rig prop's tag shown for the two warm frames;
+`RigPlayer3D.warm()` prepares every clip). **Perf3D** = {frames, frame_ms_p50/p95/max, draw_calls_p95/max, tris_max,
+objects_max, emitters_max, tex_mb_max, vmem_mb_max, process_ms_p95, script_ms_p50/p95, sim_ms_p95, **view_ms_p50/p95**
+(view + HUD, split from the sim by an `_AfterSim` stamp), shader_compiles_play, hitches, hitch_max_ms,
+compile_method}; perf sampling runs in a `_PerfSample` node after `_FrameEnd` (priority 901), outside the measured
+window; `action_context` is cached per tick. The curtain-call bows render in their **own** World3D (a stage-lip camera,
+two RigPlayer3Ds: Hush `act_bow`, Bellows `cc_wander_on → st_double_take → beat_slow_burn → st_bonk`); the 3D Gag Reel
+re-poses kept moments (`MomentRecorder3D`) at 704 × 396 and replays no sounds. Stage door: Gate 0, Prologue, Cast
+(3D), "Gate 0 · Hush, B's head" and "Gate 0 · Hush, head ×1.2" (Settings `hush_head` "" / "head_b"), the A/B pages;
+Night 1/2 previews only with `show_previews` or Settings → debug, behind the "Work in progress" card.
+
 ### 5.12 The 3D character player — `RigPlayer3D` and the pure layer (v1.1-3D; owner `r3d-rig`, `game/view3d/char/`)
 ```gdscript
 class_name RigPlayer3D extends Node3D
@@ -1193,6 +1328,26 @@ func counts() -> Dictionary                            ## {missing_clips: {id: n
   height — so the Night still plays; counted by the view as a "puppet".
 - **Budget:** ≤ 0.25 ms CPU per character per frame (skinning + jiggle + face), ≤ 4 draw calls, ≤ 10k triangles,
   ≤ 50 deform bones (`RigPerf3D`, §9).
+
+**As built (R3D) — `RigPlayer3D` additions** (beyond §7.1's signatures, all present): `@export auto_advance := true` +
+`advance(view_dt)` (the view drives it on its own hit-stopped clock), `is_external()`, `set_speed(m_s)`, `plan()`,
+`body_yaw()`, static `yaw_for(dir, cheat)`, `reset_jiggle()`, `kick_jiggle(k)`, `has_look`, `body_slot(slot)`,
+`body_slot_owner(slot)`, `reset(clear_residues := false)`, static `tint_uniform(def, tier)`, `tint_tier()`,
+`stone_amount()`, `flash(color, s := 0.15)`, `set_stage_light(level, desat)`, `material()`, `prop_state(id)`,
+`launch_prop(id, vel, spin_deg, at_f := -1)`, `socket_node(socket)` (for `House3D.lend`), `attach(node, socket,
+keep_world := false)`, **`prepare_clips(ids) -> int` / `prepare_all_clips()`** (load, conform loop mode, add to the
+library, cache plans and keyed-scale bones, one mixer evaluation — `warm()` calls it, so `play()` does no load, no
+Animation build and no string building), looks precomputed at setup (`_LookFx`; a looks pass only when looks / slots
+change, a bones pass on a clip switch). **D8 gaze runtime:** inside a sidecar `gaze` window the face turns to the
+active camera (yaw shared spine_02 0.15, spine_03 0.15, neck 0.25, head 0.45; absolute, capped ±85°; after RigMods3D
+and the look-at, before the springs; a PiP / off-screen fallback). The outline is one `next_pass` with `outline_px` ×
+`set_outline_scale(k)` (one path: Settings "Outline +50 %" goes through `mnd_outline_scale` only). Attachments keep the
+palette they were built with (the stool is brown). Pure layer: `RigDef3D.load(rig, variant := "")`, `ClipLib3D`
+(`get_clip`, `animation`, `length`, `clips_of`, `register`, `reload_if_changed`, `problems`, `load_glb_action`),
+`ClipDef3D.gaze_weight(f)`, `ClipEvents3D.between`, `PlayPlan3D.build` / `sim_length`, `PropSim3D.pose_at`;
+`RigSampler3D.sample(rig, clip, frame)` (model space, within 1 mm of the live player). Measured (rig perf pass 2):
+`play()` 69–84 µs mean (from ~0.95 ms), post-switch `advance` 0.16–0.20 ms, per-character mean 0.12–0.16 ms.
+`RigPerf3D` also has a switch mode (`--switch-every=N --look-every=M [--prepare] [--clips=…]`).
 
 ### 5.13 World in 3D — `WorldView3D`, `House3D`, `SetList`, `CharacterView3D` (v1.1-3D; owners `r3d-view3d`, `r3d-sets`)
 - **`WorldView3D.setup(db, episode, snapshot_source)`** (the same signature and entry points as `WorldView`: `reset`,
@@ -1265,6 +1420,30 @@ func counts() -> Dictionary                            ## {missing_clips: {id: n
   Bellows' room 0.9, other built rooms 0.78 + 40 % desaturation, backstage 0.3 — a backstage room holding Bellows 0.9 —
   tweened 0.4 s; `room_dimming` off → every built room 1.0).
 
+**As built (R3D) — the world view.** `WorldView3D` (wiring = `ViewSandbox3D.build(world)`): `setup(db_or_null,
+episode_or_null, driver)`, `fallback_counts() {clip_fallbacks, puppets, greybox_props, by_clip}`, `hotspot_rects_in_view()`
+([{id, kind, rect (logical px, the projected `House3D.hotspot_box`), world_rect, room, priority, enabled, stack}] + a
+`floor:<room>` band per built room), `warm_clips(extra)`, `preroll(dt)`, `tap_feedback(…)`, `target_point`,
+`start_busted_replay` / `end_busted_replay`, `on_ticked(events)`, the anchor source (§5.16), `visibility_sample()`,
+`edge_badge_active()`, `window_mode`, `warm_materials(cam)`, `recorder` (MomentRecorder3D), `show_moment_frame`,
+`cues` (CueStager3D), `caught` (CaughtStager3D), signals `built`, `cue_staged(id, kind)`, `replay_changed(on)`,
+`edge_badge_wanted(on)`, `tag_flight(hotspot)`; `advance(delta)` is public (fixed-step tests and shots).
+**CharacterView3D:** an overlay plays with its sidecar `mask` (else `ClipRules.mask_of`); Hush's carry looks follow
+`snapshot.hush.carrying` (`CARRY_<ITEM>`, at most two); a stop after a run plays `flavour:skid`, after a walk
+`flavour:arrive` (`stop_flavour`); the statue plinth is built hidden at setup in the set shader's STONE; the squeak /
+noise gaze aims halfway between the noise and the camera (weight 0.7, D8); Hush's facing comes from the clip's
+`stage.facing` while a `rig_*` clip plays (cheat ≤ 10); band clips play `variants[band][0]` held by
+`set_external_frame`; a rig released mid-step hops down with `rig_step_down` first. **ClipMap:** a frame-locked
+one-shot whose map row loops wraps (`fposmod`) when the sim holds it longer than the clip; a non-loop one-shot holds
+its last frame; `freeze_midjob` holds the frame of the band the rig was in (`ClipMap.midjob_frame`). **GagStager3D:**
+the gag approach takes the reaction clip's own `cam push` zoom (the sneeze wind-up pushes in from the wide shot; g0
+measured zoom 1.14 at the accent frame, peak 1.59). **SliceClips.build3d:** the T3 last-beat pool is listed only
+where a reaction can start at T3 (total temper gain minus the smallest ≥ 70); the Prologue reaches Livid only after
+both pranks (walk@tier3 listed, the T3 beats not); a `clip_rules.json` row for exactly `bit:<id>` overrides `bit:*`
+and its `episodes` drop that bit (`bit:bit_livid`: `[]` until the sim plays `while_tier` bits). The g0 + P00 manifest
+is 69 clips + the band fallbacks `rig_high/mid/low` (72 in the strict lint scope); `freeze_5..8` shipped (all 8
+statues). Set hand-offs and `House3D` / `Prop3D` / `HideSpot3D` APIs: §4.12.
+
 ### 5.14 Camera in 3D — `CameraDirector3D` (v1.1-3D; owner `r3d-view3d`, `game/view3d/camera/camera_director_3d.gd`)
 The same public API as §5.5 with sim-px arguments at the lane, on a `Camera3D`:
 ```gdscript
@@ -1323,6 +1502,14 @@ func advance(view_dt: float, real_dt: float) -> void ; func snap_now() -> void ;
   next-activity icon, emotes); C8 accepts `badge` for those ticks. Both modes are built and tested. **Default `"sim"`;**
   the orchestrator flips `boot_config.json` to `"lean"` before `r3d-integrate` iff the first 3D P00-ideal e2e shows
   `pip_on_share` > 35 % **and** `d1_lean` (§8.5) passes D1 on every route; the owner can flip it in Settings (debug).
+
+**As built (R3D) — C8 and the window.** `PipView3D.setup(wv, cam)`, `share() {frames, shown_frames, pip_on_share,
+pip_longest_s}`, static `want_window(on_screen, sim_pip, reason, lean, busy)` / `is_busy(snap, bellows_view)`; under
+`lean` WorldView3D decides the edge badge **after** PipView3D's post-camera `on_screen` (no 1–2 frame gap per doorway).
+The shipped mode is **`sim`** (K3 decision). Measured window share (e2e, shipped mode): g0 0.28 (longest 6.4 s), P00
+ideal 0.30, slow 0.33, **required 0.38** (a HUD-lint warning above 35 %, printed in the owner pack); N01 0.17–0.33,
+N02 0.15–0.20. C8: 0 violations on every tick of every solver route in the shipped mode (`lint3d.sh --visibility`) and
+on every frame of the g0 + Prologue e2e replays (`--strict`).
 
 ### 5.16 FX in 3D — floor decals, 2D overlays, the anchor API, `OverlayPlacer` (v1.1-3D; owners `r3d-view3d`, `r3d-hud`)
 - **Floor decals** (`Decals3D`, visual layer 4 `DECAL`; unshaded transparent quads with depth test and no depth write —
@@ -1408,6 +1595,25 @@ func safe_rect() -> Rect2 ; func on_screen(p: Vector3) -> bool
   registered (shader, kind) pair once under the curtain (§5.11). A rendered smoke test compiles every shader from a
   fresh process and checks the dark-side luminance floor.
 
+**As built (R3D) — shaders.** **The halo technique is STENCIL** (proved on Compatibility 4.7.2): the live prop
+(`prop_toon`) and its ink (`outline_prop`) write stencil ref 1 (`stencil_mode write, compare_always, 1`);
+`halo.gdshader` is its own MeshInstance3D on layer 3 `PROP_INK` — a `cull_front` shell grown by ink_px + halo_px
+(8 px), drawn only where stencil ≠ 1, its depth pulled 0.30 m toward the camera (a prop set into the wall still shows
+its halo), a `blend_mix` alpha pulse (`glow_color`, `glow_amp` 0 / 1 / 2, `glow_hz` 1.2, `glow_phase`); the Bellows
+window's camera excludes layer 3. Globals as built (`[shader_globals]`): `mnd_key_dir, mnd_key_color, mnd_key_lit,
+mnd_key_top, mnd_fill, mnd_fill_color, mnd_band_soft, mnd_rim_color, mnd_rim_power, mnd_foot_strength, mnd_foot_fade_m,
+mnd_lip_z, mnd_outline_scale, mnd_shadow_tint, mnd_bounce, mnd_sheen`, lit by `stage_light.gdshaderinc` (A's vinyl
+terminator −0.05 ± 2·band_soft, shadow tint, top band, bounce, footlight gradient, rim `smoothstep(0.10, 0.42,
+fresnel^power)`, a luminance floor at `mnd_fill` × albedo). `char_toon` uniforms: palette, albedo_color, face_atlas,
+face_grid, face_cell_a/b, face_rect[6], pupil_offset, pupil_range, tint_color, stone + stone_color, flash +
+flash_color, rim 0.45, rim_damp 0.6 (× COLOR.b), stage_light, key_front 0.35, desat, vc_masks. `outline`: inverted
+hull grown in view space by logical px — **ink `#1B2340`, 4.8 px @1080 for characters, 3.4 px for live props (`halo
+ink_px` 3.4), none for dressing** (lead ruling D7; `View3DConst.OUTLINE_CHAR_PX` / `OUTLINE_PROP_PX`) ×
+`mnd_outline_scale` × COLOR.a (`width_from_alpha`), `use_color_normal`, `room_color` / `room_lerp`, `max_world` 0.05.
+`decal` shapes 0 TEX, 1 DISC, 2 RING, 3 STRIP, 4 DOTS; `fx_toon` adds `round_disc` (untextured billboards are soft
+vinyl balls — the CHOO puff). `StageLighting3D._globals_available()` checks `ProjectSettings.has_setting(
+"shader_globals/mnd_fill")` (no editor-only call, no engine ERROR per Night).
+
 ### 5.18 Audio, HUD and UI in 3D (v1.1-3D; `AudioDirector` `r3d-view3d`; HUD `r3d-hud`)
 - **AudioDirector:** pans by the source's **projected screen x**; everything else in §5.8 is unchanged (the audio files
   and cues are frozen during R3D).
@@ -1431,6 +1637,24 @@ func safe_rect() -> Rect2 ; func on_screen(p: Vector3) -> bool
 - **Settings keys** (§7): `previews` (`always` | `idle_6s` | `off`), `room_dimming` (bool), `outline_boost` (bool); debug:
   `hush_head` (`""` | `"head_b"`), `bellows_window` (`"sim"` | `"lean"`), `msaa_3d`, `render_scale`, `show_previews`; a
   debug key's default comes from `boot_config.json` when present.
+
+**As built (R3D) — audio, HUD, settings.** **One mouth:** AudioDirector plays one voice line at a time — a new voice
+line within `VOICE_CUT_S` (2.5 s) of the last one cuts it (`Audio.stop_voice`, counted in `voice_cuts`). The audio
+frame table (`game/data/audio/clip_events.json`, 156 rows) is generated by `tools/audio/clip_events.py` from the 3D
+sidecars (`source.audio: "own"` → phase `R3D` rows); its validation rejects a voice line cut by the next before it
+sounded 8 frames (`VOICE_CUT_MIN_F`) and a sound owned by both a clip and a cue (L12). The 2D tinker rows are retired;
+the pepper `rig_start` cue is gone (`rig_achoo_ria` owns `pepper_shake`). `act_warmup` sings two phrases per 8 s.
+`tools/audio/aliases.py` maps `sting_title_slam` → `sting_new` (the curtain-call title slam sounds). **HudModel R3D
+block:** enums `Pip`, `FreezeDanger`, `LureRing`; fields `verb_live`, `freeze_danger`, `meter_until_s`, `carrying`,
+`bow_visible`, `figgis_visible`, `overview_visible`, `lure_ring` (−1 = from `lure_grey`), `script_pips`,
+`edge_badge_side/_arrow/_icon/_lean`, `pip_next_icon`, `pip_ring_frac`, `tag_flights {line_index, from}`.
+`Hud.debug_pieces()` / `always_on_rects()` (the four: pause, script, clarence, action). `WorldOverlays.setup(anchor_src,
+hud)`, `OverlayCtx.prepare(db, episode)`, `OverlayRules.fill`, `OverlayPlacer` (slide sideways ≤ own width, then up
+≤ 150 px, then wait). **Settings:** player keys `previews` (always / when idle / off — replaces Hints), `room_dimming`,
+`outline_boost`; debug keys `hush_head`, `bellows_window`, `msaa_3d`, `render_scale` (0.5–1.0; designed 1.0 | 0.85),
+`show_previews` — their defaults come from `boot_config.json` (`reload_boot_defaults()`, `default_of(key)`; `save()`
+leaves a boot key out while it equals its default); `FILE_VERSION` 3. Figgis: the SVG level only, 5 moods (idle, psst,
+point, shh, proud), a look-A matte-vinyl bust (R7).
 
 ### 5.19 The Stalls and Figgis in 3D (v1.1-3D)
 - **StallsView** (`r3d-view3d`): **hidden at rest**; it rises 60–150 px by tier on laughs, and for a gasp, shush, "BEHIND
@@ -1579,6 +1803,10 @@ prank_interval_mean_s, hold_total_s, hash}`.
 - A tick is **dead air** when there was no player command in the previous 180 ticks, no laugh in the previous 300,
   and Bellows isn't reacting. Target < 20 % per Night; `max_gap_s` ≤ 10 on ideal routes.
 
+**As built (R3D).** `d1_lean`: the D1 metric with adjacency-only PiP beats visible only with an emote (as edge beats,
+inside the ⅓ cap) — an info column (`Metrics.d1_lean(log, laugh_fn, persona)`, `Metrics.lean_text`); it decided R15
+(`sim` kept). `--pregate` fails a run on a `warn_` key left or an edge-beat share > ⅓.
+
 ### 8.6 Fairness invariants (`Invariants`, run on every solver and fuzz log)
 1. Every `caught` has a preceding "?" that filled continuously for ≥ the episode's fill time (or a
    `face_to_face` window ≥ 48 ticks) in which escape was possible.
@@ -1603,6 +1831,11 @@ Fuzz bots: `random` (a random valid command every 0.2–2 s), `reckless` (straig
 per final episode per bot with fixed seeds; the nightly/local run uses 200.
 
 ---
+
+**As built (R3D) — invariant 13.** No command on a struck hotspot is accepted: every go / pin on one is answered the
+same tick by `cmd_rejected struck`; no `hush_go`, `hush_arrive` or `hide` names one (fuzz random taps include struck
+hotspots, 1 in 4). Rule 3 ignores a catch on the tick she pops out of that spot. Rule 9's progress check exempts held
+fix-ups like uncapped gates.
 
 ## 9. Performance budgets
 | Budget | Target (mid-range Android: Adreno 610 / Mali-G52 class) | How it's measured |
@@ -1638,6 +1871,16 @@ per final episode per bot with fixed seeds; the nightly/local run uses 200.
 The desktop proxy (llvmpipe, one render thread per process) is relative only: every real-time check compares against
 max(threshold, one measured frame time) and runs with MSAA off; the device numbers come from the owner's phone (the
 perf probe, then the owner APK's device log).
+**As built (R3D) — how the budgets are judged.** (1) **Per character (D16):** a set piece on loan (its set copy hidden
+that frame — Bellows' ride-along stool) is reported apart as `set_piece_draw_calls` / `set_piece_tris` and counts
+against the room; the character's own draws, triangles and deform bones are judged. (2) **View + HUD scripts on the
+CPU proxy (D14):** the shared box runs at load 4–6 with process pauses up to 34 ms, so the exit row is **p50 ≤ 3.5 ms
+AND p95 ≤ 8.0 ms**, plus no single-call spike > 1 ms from our code in ScriptProf3D's 60 slowest frames (spikes are fixed
+at the source); the ≤ 4.0 ms p95 target is judged on the device from the owner APK's DeviceLog `perf3d:<episode>`
+notes. `perf3d.sh` still prints its ≤ 4.0 line; `pregate3d.sh` row 16 applies D14. (3) Real-time rows on the proxy run
+with MSAA off; frame-quantised checks use max(threshold, one measured frame). The measured numbers of the owner build
+are the pre-gate's (`docs/review/r3d-qa/pregate.json`, `docs/review/r3d-qa/perf/`); llvmpipe fps is not a phone number.
+
 ---
 
 ## 10. Test strategy
@@ -1758,6 +2001,40 @@ length; 60 fps with PiP + gag burst; launch → first laugh ≤ 10 s.
 
 ---
 
+**As built (R3D) — the lints.** `lint.sh` runs content / hotspot / IP (`run_lints.gd --all`, incl. the 3D clip
+coverage of g0 + p00 + the band fallbacks, R9) and the 3D anim lint twice: every 3D clip (errors only), then the g0 +
+p00 scope with `--strict` / `--json`; the 2D anim / rig lints and the 2D clip coverage went with the 2D path. **The 3D
+anim lint** = `lint_anim.gd --format=3d`, rules **L01–L30** in `tools/anim/lint3d_rules.gd`, thresholds in
+`lint3d_limits.json`: structure (L01 ids resolve, L02 `.res` length + loop match, L03 events / faces inside the clip,
+L04 loop seam ≤ 0.5° and seam kink ≤ max(1°/f, the clip's own worst)); timing (L05 accent ≤ 4 f, L06 a bone ≥ 20°/f at
+the accent, L07 anticipation against the accent, L08 holds ≥ 24 f (36 f at tier 2), L09 no dead hold > 20 f unless a
+declared freeze, L10 no jump > 45°/f except declared pops, L11 no mirrored limbs within 1° for > 10 f); feet (L12 per
+heel / ball / toe in lane space, a planted point drifts ≤ 0.01 m, a contact is a plant at ≥ 3 f or when it ends a
+one-shot, walks −speed ± 5 %; L13 no sole point > 0.015 m below the floor or step); sound / face / reactions (L14
+sounds ±1 f of a beat / mark / pop / contact, L15 face swap on the accent ±1 f, L16 laughs after the accent, L17
+reactions 60–240 f, signatures ≤ 420 f, L18 silhouette change ≥ 15 % anticipation → accent, L19 beats within 2 f of
+`reactions.json`, L20 `time_jitter` 0, L21 four beats, L22 mark names, L23 overlays masked + blend ≥ 4 f); data (L24
+sounds match the audio table, L25 lengths match the manifest); staging (L26 cheat 0–40°, ≤ 10° on reaching rig clips,
+`rig_step_down` exempt; L27 root travel ≤ 0.15 m; L28 rig clips `rig_pm`, tiers Q 48 / S 90 / B 150, band clips ≥ 48 f
+without glance marks, stepped clips end on the floor ± 0.01 m; L29 lock values; L30 `.res` ≤ 250 KB). **`lint3d.sh`**
+(`--set`, `--screen`, `--hud --from=`, `--visibility`, `--self-test`; `--no-render` = the headless rules only, the
+colour and silhouette rules then SKIP; a SKIP fails only under `--strict`; warnings never fail) and `perf3d.sh` as built
+with the thresholds of §10.5 above, plus: **set** `live_count` ≤ 5, `dressing_count` ≤ 4, `hides_act1`, `dressing_size`
+≥ 0.5 m, `dressing_lane` (front z > −1.6 ⇒ top ≤ 0.45 m), `preview_band` 0.6 m, `quake_height` ≥ 2.2 m or the mantel,
+`negative_space` ≥ 1.5 m at head height y 1.1–1.8 m (**a WARNING for a room at the 5-live-prop cap — the N02 hall,
+D13**; a room with no live prop only warns), `silhouette_family`, `stack` ≥ 24 px, rendered `silhouette_iou` < 0.80 and
+`colour` (lab.py §3.7 rules; furniture, dimmed wainscots, backstage rooms are info; the lamp shade `exempt`);
+**screen** at every framing (Hush walks the room in 0.25 m steps, C1 / C2 / C6 applied; 20:9 2400 × 1080 with S 96,
+16:9 1920 × 1080, 4:3 1440 × 1080 from the ×0.8 HUD): `min_size` ≥ 144², `gap` ≥ 24 px, `safe_rect`, `hud_overlap`
+(error), `window_overlap` (warning), `back_wall` ≥ 201 px/m, `on_screen`; **HUD** `always_on_count` ≤ 4 and only
+pause / script / clarence / action, `middle_band` y 250–880 (**the four always-on pieces at their exact §2.1 rects are
+info, D9**; the escalated window and BOW-under-window are warnings while ≤ 5 s), overlays ≤ 6 with ≤ 2 loud,
+`window_share` > 35 % a warning; **C8** on every frame of every route at a fixed 60 fps, stopping at the solver's
+`ticks`, the shipped mode as errors and the other as info; **perf** judges `view_ms_p95` when present. The tests
+`tests/slice/` (r3d-qa) replay g0 + every Prologue route through the 3D NightScene at a fixed 60 fps in the suite
+(0 fallbacks per clip id, the four always-on pieces, C8 on g0, the slice set counts, every manifest clip present at
+its length).
+
 ## 11. Review tooling (agents must LOOK at their work)
 - **Screenshots:** `tools/scripts/shot.sh res://scenes/x.tscn out.png [frames] [sandbox] -- [user args]`
   (1200×540 = 20:9; `SHOT_SIZE=960x540` 16:9, `SHOT_SIZE=1080x810` 4:3). **Frame sequences:** add
@@ -1783,6 +2060,16 @@ length; 60 fps with PiP + gag burst; launch → first laugh ≤ 10 s.
   1–5 score on *funny*, *readable*, *fresh*; < 3 on any → back to the author.
 - **Mute test pack:** `docs/review/mute_test/` — 6 silent GIFs of slice reactions, shown to a fresh review agent
   that doesn't know the pranks; ≥ 4 must read as jokes.
+
+**As built (R3D) — the e2e report.** New fields: `clips_played` (base + overlay + the curtain-call bows; route and flow
+runs), `c8`, `tag_flights`, `sneeze` {accent_frame, zoom_at_accent, zoom_max, hitstop_us, captions, bouffant_after,
+stool_doubled, stool_missing, land_frame, land_in_box, land_pelvis}, `viewport`, `bellows_window`, `play_from_frame`,
+`fallback_counts`, `hud_pieces`, `overlays`, `visibility {fields, rows}`, `pip_on_share`, `pip_longest_s`,
+`pip_windows`, `frame_ms_p50/p95`, `perf3d` (+ compile detail), `cue_staged`, `laugh_cues`, `doubles`, `warm3d`.
+`--strict` adds the C8 and sneeze checks and fails view fallbacks on the strict episodes (g0, P00; N01 / N02 fallbacks
+are info, R9). `e2e.sh --fixed` runs a launch-clock scenario at a fixed 60 fps (strips). `E2eScenarios.
+within_quantised(value, threshold, frame)`. DevShot frame `k·every + seq_from` ≈ tick + 5 at the fixed 60 fps (for
+cutting full-Night sequences by tick).
 
 ### 11.1 Review tooling in 3D (v1.1-3D)
 The 2D sheet tools above (`anim_sheet.sh`, the 2D `capture.gd`) are (2D, main only). In 3D:
@@ -1835,6 +2122,16 @@ The 2D sheet tools above (`anim_sheet.sh`, the 2D `capture.gd`) are (2D, main on
 
 ---
 
+**As built (R3D) — review tooling.** `tools/art3d/review/{lab,sil64,strip,boards,packets}.py` + `test_review.py`
+(51 tests, ≈ 10 s; in `lint_all.sh`), contract as in its README. **Fresh-reviewer packets** (R17): `packets.py build`
+writes opaque `pkt_XX` items (re-encoded, shuffled, ids only, a fixed answer format; the key outside the packet dir) and
+`packets.py score` the verdict table; the QA readability review (exit row 19) uses four packets — verb (8 frames,
+free), spot (8 frames, free: the gist of the joke), crowding (8 frames, yes / no) and 2D-vs-3D preference (8 pairs from
+`docs/review/r3d-ref2d/` at the same ticks, A / B) — plus the gag strips scored 1–5 on funny / readable / fresh
+(captions off, re-numbered), its verdict lines read by `pregate3d.sh` row 19. In-engine: `AnimViewer3D`, `RigPerf3D`
+(+ switch mode), `SetPreview3D` / `SetPreviewBatch3D`, `LintShot3D`, `Verbs3D.tscn`, `HudOn3D.tscn`, `sheet3d` via
+`anim_sheet3d.sh`, ScriptProf3D (`--view3d-prof=/abs.json`).
+
 ## 12. Build and CI
 - Existing: `tools/scripts/{sandbox,test_game,shot,export_android}.sh`, `tools/ci/{check_import_meta,export_lib,
   verify_android}.sh`, `.github/workflows/{ci,android-preview}.yml`.
@@ -1878,6 +2175,24 @@ The 2D sheet tools above (`anim_sheet.sh`, the 2D `capture.gd`) are (2D, main on
     `solve_before.json` into `docs/review/r3d-landed/`; after a container restart it re-runs the setup scripts, restores
     them and relaunches the running tasks (each resumes, §13).
 
+
+**As built (R3D) — CI and the pre-gate.** `.github/workflows/ci.yml` (on `main`, `r3d`): import metadata → the suite
+(incl. `tests/slice/`) → `lint.sh --strict` → `lint3d.sh --screen --no-render --aspects=20x9,16x9,4x3` → `lint3d.sh
+--set --no-render --all-nights` (the set counts) → `solve.sh all --route=all` → `fuzz.sh all --runs=20` (20 seeded runs
+per bot per final episode); the Python job runs `lint_all.sh --no-godot` (art validators scoped to what ships — the
+Figgis R7 busts and the Stalls —, the review-toolset tests, `gen_audio.py --check`). The render lints, the e2e routes
+and flows and the perf rows stay local: **`tools/scripts/pregate3d.sh [--rows=…] [--no-render] [--force]`** runs exit
+rows 1–18, 19 (the readability verdicts) and 20a of `r3d-index.md` §6 in sandbox `r3d-qa`, one Godot process at a
+time, refusing a busy box, and writes `build/r3d/pregate.json` (per row: command, pass, numbers, wall, the content hash
+of its inputs — a row kept from an earlier run whose inputs changed is STALE); its header states each row's expected
+duration and `E2E_TIMEOUT`. Row 20a also runs the **exported pack** itself: it unzips the APK's `assets/`, loads every
+`*.gd.remap` script of it headless and builds g0 in 3D for 120 frames (`[apkprobe] scripts N, failed to load M` /
+`[apkprobe] night OK|FAIL`; any `SCRIPT ERROR` fails the row) — the source-tree suite cannot see a shipped script that
+names a `class_name` living under an export-excluded folder (`view3d/probe/`, `view3d/sandbox/`, `scenes/dev/`,
+`ui/demo/`, `tests/`, `tools/`, `solver/`). **Rule:** shipped code reaches dev-only scripts through a soft load (§13
+rule 2: `ResourceLoader.exists` + `load`), never by class name or a typed variable. Row 20b (after the push):
+`android-preview.yml` on `r3d` builds the debug APK; its artefact is compared with the local 20a contents list. `android-preview.yml` paths: `game/**`, the workflow,
+`export_android.sh`, `export_lib.sh`.
 
 ## 13. Parallel-build rules (binding for every task)
 1. Only create or modify files you own (§1, your brief). Need a change elsewhere? Put a precise request in your

@@ -133,7 +133,8 @@ var prof_us := PackedInt64Array([0, 0, 0, 0, 0, 0])
 var prof_frame_us := PackedInt64Array([0, 0, 0, 0, 0, 0, 0])
 var prof_frames: int = 0
 ## The per-node profiler (`--view3d-prof=/abs.json` only; ScriptProf3D).
-var _prof: ScriptProf3D = null
+var _prof: Object = null
+const _PROF_PATH := "res://view3d/probe/script_prof_3d.gd"
 var unlocked: PackedStringArray = PackedStringArray()
 var fx: FxShim = null
 var _empty_snap := ViewSnapshot.new()
@@ -168,7 +169,8 @@ func setup(db_or_null: Variant, episode_or_null: Variant, snapshot_source: Objec
 		_own_snap = ViewSnapshot.from_sim(world)
 		_own_prev = ViewSnapshot.from_sim(world)
 	if _prof == null:
-		_prof = ScriptProf3D.maybe_attach(self)
+		if ResourceLoader.exists(_PROF_PATH):
+			_prof = load(_PROF_PATH).call("maybe_attach", self)
 	built.emit()
 
 

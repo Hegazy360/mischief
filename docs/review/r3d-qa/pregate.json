@@ -1,0 +1,1083 @@
+{
+ "rows": {
+  "1": {
+   "row": "1",
+   "command": "tools/ci/check_import_meta.sh",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 1.0,
+   "numbers": {
+    "import_files": 1010,
+    "uid_files": 409
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:43:28Z",
+   "no_render": false
+  },
+  "4": {
+   "row": "4",
+   "command": "tools/ci/lint_all.sh --no-godot",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 16.0,
+   "numbers": {
+    "validators": 5
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:49:20Z",
+   "no_render": false
+  },
+  "8": {
+   "row": "8",
+   "command": "SANDBOX=r3d-qa tools/scripts/fuzz.sh all --runs=200 --report=$PWD/build/r3d/fuzz.json (as fuzz.sh <final episode> --runs=200 in parallel, merged)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 5829.0,
+   "numbers": {
+    "by_episode_bot": {
+     "n01_throat_tea/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1096
+     },
+     "n01_throat_tea/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 2600
+     },
+     "n01_throat_tea/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1254
+     },
+     "n01_throat_tea/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1200
+     },
+     "n02_something_fishy/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1516
+     },
+     "n02_something_fishy/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 2328
+     },
+     "n02_something_fishy/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1502
+     },
+     "n02_something_fishy/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1800
+     },
+     "p00_curtain_up/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     }
+    },
+    "runs": 2400
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "c31a69aac4e0f8dd",
+   "at": "2026-10-01T08:38:48Z",
+   "no_render": false
+  },
+  "5": {
+   "row": "5",
+   "command": "SANDBOX=r3d-qa tools/scripts/solve.sh all --route=all --report=$PWD/build/r3d/solve.json --timeline=$PWD/build/r3d/tl (+ g0_sneeze --route=all --report=build/r3d/solve_g0.json)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 25.0,
+   "numbers": {
+    "routes": {
+     "n01_throat_tea/ideal": {
+      "ok": true,
+      "stars": 3,
+      "applause": 116.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/required": {
+      "ok": true,
+      "stars": 1,
+      "applause": 44.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/slow": {
+      "ok": true,
+      "stars": 1,
+      "applause": 46.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/caught": {
+      "ok": true,
+      "stars": 1,
+      "applause": 48.4,
+      "catches": 1,
+      "invariants": 0
+     },
+     "n01_throat_tea/chase": {
+      "ok": true,
+      "stars": 0,
+      "applause": 0.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/meltdown": {
+      "ok": true,
+      "stars": 0,
+      "applause": 71.9,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/ideal": {
+      "ok": true,
+      "stars": 3,
+      "applause": 117.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/required": {
+      "ok": true,
+      "stars": 1,
+      "applause": 59.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/slow": {
+      "ok": true,
+      "stars": 1,
+      "applause": 61.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/ideal": {
+      "ok": true,
+      "stars": 0,
+      "applause": 89.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/required": {
+      "ok": true,
+      "stars": 0,
+      "applause": 87.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/slow": {
+      "ok": true,
+      "stars": 0,
+      "applause": 89.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "g0_sneeze/ideal": {
+      "ok": true,
+      "stars": 0,
+      "applause": 70.0,
+      "catches": 0,
+      "invariants": 0
+     }
+    },
+    "n_routes": 13
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "c31a69aac4e0f8dd",
+   "at": "2026-10-01T09:49:45Z",
+   "no_render": false
+  },
+  "6": {
+   "row": "6",
+   "command": "(row 5's build/r3d/solve.json)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 0.0,
+   "numbers": {
+    "routes": {
+     "n01_throat_tea/ideal": {
+      "dead_air_ff_pct": 7.8,
+      "max_gap_ff_s": 4.28,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 17.52
+     },
+     "n01_throat_tea/required": {
+      "dead_air_ff_pct": 4.8,
+      "max_gap_ff_s": 5.47,
+      "edge_share": 0.221,
+      "first_prank_launch_s": 18.65
+     },
+     "n01_throat_tea/slow": {
+      "dead_air_ff_pct": 1.9,
+      "max_gap_ff_s": 4.43,
+      "edge_share": 0.154,
+      "first_prank_launch_s": 27.75
+     },
+     "n02_something_fishy/ideal": {
+      "dead_air_ff_pct": 6.9,
+      "max_gap_ff_s": 3.9,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "n02_something_fishy/required": {
+      "dead_air_ff_pct": 1.9,
+      "max_gap_ff_s": 3.68,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "n02_something_fishy/slow": {
+      "dead_air_ff_pct": 1.6,
+      "max_gap_ff_s": 4.28,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "p00_curtain_up/ideal": {
+      "dead_air_ff_pct": 3.0,
+      "max_gap_ff_s": 4.12,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 25.23
+     },
+     "p00_curtain_up/required": {
+      "dead_air_ff_pct": 1.8,
+      "max_gap_ff_s": 4.12,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 33.2
+     },
+     "p00_curtain_up/slow": {
+      "dead_air_ff_pct": 5.9,
+      "max_gap_ff_s": 5.35,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 27.58
+     },
+     "g0_sneeze/ideal": {
+      "dead_air_ff_pct": 8.1,
+      "max_gap_ff_s": 3.92,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.38
+     }
+    },
+    "worst": {
+     "ideal_ff": 8.1,
+     "required_ff": 4.8,
+     "slow_ff": 5.9,
+     "gap_s": 5.47,
+     "edge_share": 0.221
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "c31a69aac4e0f8dd",
+   "at": "2026-10-01T09:49:45Z",
+   "no_render": false
+  },
+  "7": {
+   "row": "7",
+   "command": "SANDBOX=r3d-qa tools/scripts/solve.sh all --auto && SANDBOX=r3d-qa tools/scripts/solve.sh g0_sneeze --route=ideal",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 144.0,
+   "numbers": {
+    "auto": {
+     "n01_throat_tea": "script OK (6 lines",
+     "n02_something_fishy": "script OK (5 lines",
+     "p00_curtain_up": "script OK (2 lines"
+    },
+    "g0_ideal": {
+     "ok": true,
+     "duration_s": 23.57,
+     "end_g0_done": true
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "c31a69aac4e0f8dd",
+   "at": "2026-10-01T09:52:10Z",
+   "no_render": false
+  },
+  "2": {
+   "row": "2",
+   "command": "tools/scripts/test_game.sh r3d-qa",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 322.0,
+   "numbers": {
+    "passed": 1270,
+    "failed": 0,
+    "skipped": 0,
+    "tests": 1270,
+    "files": 135,
+    "skips": [],
+    "slice_files_seen": 2
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:48:51Z",
+   "no_render": false
+  },
+  "3": {
+   "row": "3",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint.sh --strict",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 12.0,
+   "numbers": {
+    "anim3d_strict_clips": 72,
+    "anim3d_errors": 0,
+    "anim3d_warnings": 0,
+    "anim3d_missing": 0,
+    "coverage3d_clips": 72,
+    "lints_failed": 0,
+    "lints_skipped": 0
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:49:03Z",
+   "no_render": false
+  },
+  "9": {
+   "row": "9",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --set --all-nights ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 50.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 1,
+    "skips": 0,
+    "info": 475,
+    "warning_list": [
+     "n02_something_fishy hall negative_space x 6.82–7.50 m: 0.68"
+    ]
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:53:00Z",
+   "no_render": false
+  },
+  "10": {
+   "row": "10",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --screen --aspects=20x9,16x9,4x3 ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 17.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 1,
+    "skips": 0,
+    "info": 0,
+    "warning_list": [
+     "n02_something_fishy hall window_overlap hall_clock: 572.7882"
+    ]
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:53:17Z",
+   "no_render": false
+  },
+  "12": {
+   "row": "12",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --visibility --routes=all ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 170.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 0,
+    "skips": 0,
+    "info": 26,
+    "warning_list": [],
+    "shipped_mode": "sim",
+    "routes": 26,
+    "violations_shipped": 0,
+    "violations_other": 0,
+    "window_share": {
+     "g0_sneeze/ideal": 0.3041,
+     "n01_throat_tea/caught": 0.2798,
+     "n01_throat_tea/chase": 0.2057,
+     "n01_throat_tea/ideal": 0.1786,
+     "n01_throat_tea/meltdown": 0.0999,
+     "n01_throat_tea/required": 0.3503,
+     "n01_throat_tea/slow": 0.3154,
+     "n02_something_fishy/ideal": 0.2005,
+     "n02_something_fishy/required": 0.1558,
+     "n02_something_fishy/slow": 0.1511,
+     "p00_curtain_up/ideal": 0.3081,
+     "p00_curtain_up/required": 0.3898,
+     "p00_curtain_up/slow": 0.3398
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:56:07Z",
+   "no_render": false
+  },
+  "20a": {
+   "row": "20a",
+   "command": "tools/scripts/export_android.sh --sandbox r3d-qa --out build/r3d/mischief-debug.apk + unzip -l + sha256sum",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 41.0,
+   "numbers": {
+    "size_bytes": 73419843,
+    "size_mb": 73.42,
+    "sha256": "e60c5e7a9997711bb3f48e5c380b706f1ae83ab3c7387bee8c29e477e3d2ff19",
+    "entries": 3277,
+    "clip_res_entries": 77,
+    "clip_sidecars": 80,
+    "boot_config": {
+     "start": "stage_door",
+     "view": "3d",
+     "show_previews": false,
+     "bellows_window": "sim",
+     "render": {
+      "msaa_3d": true,
+      "render_scale": 1.0,
+      "outline": true
+     }
+    },
+    "permissions": "android.permission.VIBRATE",
+    "min_sdk": 24,
+    "orientation": "11",
+    "exported_scripts": 197,
+    "exported_script_failures": [
+     0,
+     "[]"
+    ],
+    "exported_night": "FAIL view=3d world_view=null tick=-",
+    "exported_script_errors": [
+     "SCRIPT ERROR: Parse Error: Could not find type \"ScriptProf3D\" in the current scope.",
+     "SCRIPT ERROR: Parse Error: Identifier \"ScriptProf3D\" not declared in the current scope.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+     "SCRIPT ERROR: Compile Error: Failed to compile depended scripts."
+    ]
+   },
+   "failures": [
+    "the exported pack: 13 script / parse errors, first ['SCRIPT ERROR: Parse Error: Could not find type \"ScriptProf3D\" in the current scope.', 'SCRIPT ERROR: Parse Error: Identifier \"ScriptProf3D\" not declared in the current scope.', 'SCRIPT ERROR: Compile Error: Failed to compile depended scripts.']",
+    "the exported pack does not build a 3D Night: [apkprobe] night FAIL view=3d world_view=null tick=-"
+   ],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:32:10Z",
+   "no_render": false
+  },
+  "13": {
+   "row": "13",
+   "command": "E2E_SANDBOX=r3d-qa E2E_TIMEOUT=600 tools/scripts/e2e.sh g0_sneeze --strict --perf-log --report=$PWD/build/r3d/e2e/g0.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 148.0,
+   "numbers": {
+    "end_reason": "g0_done",
+    "frame_ms_p95": 92.7,
+    "accent_frame": 94.0,
+    "zoom_at_accent": 1.14011537976662,
+    "zoom_max": 1.59404925400534,
+    "hitstop_ms": 83.0,
+    "captions": [
+     "ACHOO-RIA!"
+    ],
+    "bouffant_after": "flipped",
+    "land_in_box": true,
+    "tag_flights": {
+     "arrived": 1,
+     "out": 1
+    },
+    "c8_violations": 0,
+    "pip_on_share": 0.2802,
+    "pip_longest_s": 6.38,
+    "hitstop_check": "83 ms vs 5 f = 83 ms (quantised ≥ 66 ms; one measured frame 93 ms)",
+    "perf3d": {
+     "draw_calls_p95": 57.0,
+     "draw_calls_max": 65.0,
+     "tris_max": 67497.0,
+     "emitters_max": 4,
+     "tex_mb_max": 81.2,
+     "shader_compiles_play": 0,
+     "view_ms_p50": 2.78,
+     "view_ms_p95": 4.07,
+     "frame_ms_p95": 92.8
+    },
+    "g0_again_ms": 234
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T09:58:35Z",
+   "no_render": false
+  },
+  "14": {
+   "row": "14",
+   "command": "E2E_TIMEOUT=450 e2e.sh prologue_ideal --strict --perf-log --report=…/p00_ideal.json; prologue_slow --strict --report=…/p00_slow.json (+ prologue_required --strict, info: the window share)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 292.0,
+   "numbers": {
+    "p00_ideal": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 7,
+     "laughs": 7,
+     "cues": 4,
+     "cue_crowd_s_max": 0.269,
+     "frame_ms_p95": 98.2,
+     "doubles": 0,
+     "first_player_laugh_s": 3.833,
+     "first_prank_s": 22.933,
+     "first_player_laugh_ms_proxy_launch": 8799,
+     "first_prank_ms_proxy_launch": 30678,
+     "pip_on_share": 0.2999,
+     "pip_longest_s": 2.52,
+     "c8_violations": 0,
+     "cue_check": "crowd ≤ max(0.30 s, one frame 0.098 s): worst 0.269 s"
+    },
+    "p00_required": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 4,
+     "laughs": 6,
+     "cues": 4,
+     "cue_crowd_s_max": 0.27,
+     "frame_ms_p95": 100.9,
+     "doubles": 0,
+     "first_player_laugh_s": 30.9,
+     "first_prank_s": 30.9,
+     "first_player_laugh_ms_proxy_launch": 40341,
+     "first_prank_ms_proxy_launch": 40341,
+     "pip_on_share": 0.3811,
+     "pip_longest_s": 4.48,
+     "c8_violations": 0
+    },
+    "p00_slow": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 7,
+     "laughs": 7,
+     "cues": 4,
+     "cue_crowd_s_max": 0.236,
+     "frame_ms_p95": 96.3,
+     "doubles": 0,
+     "first_player_laugh_s": 4.333,
+     "first_prank_s": 25.283,
+     "first_player_laugh_ms_proxy_launch": 8770,
+     "first_prank_ms_proxy_launch": 32807,
+     "pip_on_share": 0.3304,
+     "pip_longest_s": 3.08,
+     "c8_violations": 0,
+     "first_laugh_launch_s": 6.63,
+     "first_prank_launch_s": 27.58
+    },
+    "prologue_ideal_strict": true
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:03:27Z",
+   "no_render": false
+  },
+  "11": {
+   "row": "11",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --hud --from=$PWD/build/r3d/e2e",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 9.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 1,
+    "skips": 0,
+    "info": 28,
+    "warning_list": [
+     "p00_curtain_up  window_share p00_required: 38.1 %"
+    ],
+    "window_share_warnings": [
+     "p00_curtain_up  window_share p00_required: 38.1 %"
+    ]
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:03:36Z",
+   "no_render": false
+  },
+  "15": {
+   "row": "15",
+   "command": "E2E_SANDBOX=r3d-qa tools/scripts/e2e.sh slice_all --report=$PWD/build/r3d/e2e/slice_all.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 487.0,
+   "numbers": {
+    "runs": {
+     "g0_sneeze": {
+      "ok": true,
+      "end": "g0_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.2765
+     },
+     "prologue_ideal": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.3
+     },
+     "prologue_required": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.3848
+     },
+     "prologue_slow": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.3384
+     },
+     "n01_ideal": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 34,
+      "doubles": 0,
+      "pip_on_share": 0.1725
+     },
+     "n01_required": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 18,
+      "doubles": 0,
+      "pip_on_share": 0.3341
+     },
+     "n01_slow": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 18,
+      "doubles": 0,
+      "pip_on_share": 0.306
+     },
+     "n02_ideal": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 60,
+      "doubles": 0,
+      "pip_on_share": 0.2003
+     },
+     "n02_required": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 22,
+      "doubles": 0,
+      "pip_on_share": 0.1557
+     },
+     "n02_slow": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 24,
+      "doubles": 0,
+      "pip_on_share": 0.1517
+     },
+     "n01_caught": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 27,
+      "doubles": 0,
+      "pip_on_share": 0.2696
+     },
+     "n01_chase": {
+      "ok": true,
+      "end": "route_end",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 14,
+      "doubles": 0,
+      "pip_on_share": 0.1973
+     },
+     "n01_meltdown": {
+      "ok": true,
+      "end": "route_end",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 16,
+      "doubles": 0,
+      "pip_on_share": 0.0855
+     }
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:11:43Z",
+   "no_render": false
+  },
+  "16": {
+   "row": "16",
+   "command": "E2E_TIMEOUT=2700 e2e.sh n01_ideal --perf-log --report=…/e2e/n01_ideal_perf.json; E2E_TIMEOUT=450 e2e.sh prologue_ideal --perf-log -- --view3d-prof=…/view3d_prof.json; perf3d.sh build/r3d/e2e/{g0,p00_ideal,n01_ideal_perf}.json",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 807.0,
+   "numbers": {
+    "table": {
+     "g0": "FAIL | 57.0 | 65.0 | 67497.0 | 4.0 | 81.2 | 0.0 | 4.07",
+     "p00_ideal": "FAIL | 73.0 | 80.0 | 91217.0 | 4.0 | 103.4 | 0.0 | 4.4",
+     "n01_ideal_perf": "FAIL | 82.0 | 98.0 | 101392.0 | 4.0 | 102.1 | 0.0 | 4.61"
+    },
+    "reports": {
+     "g0": {
+      "draw_calls_p95": 57.0,
+      "draw_calls_max": 65.0,
+      "tris_max": 67497.0,
+      "emitters_max": 4,
+      "tex_mb_max": 81.2,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 2.78,
+      "view_ms_p95": 4.07,
+      "frame_ms_p95": 92.8,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "n01_ideal_perf": {
+      "draw_calls_p95": 82.0,
+      "draw_calls_max": 98.0,
+      "tris_max": 101392.0,
+      "emitters_max": 4,
+      "tex_mb_max": 102.1,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 3.12,
+      "view_ms_p95": 4.61,
+      "frame_ms_p95": 101.9,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "p00_ideal": {
+      "draw_calls_p95": 73.0,
+      "draw_calls_max": 80.0,
+      "tris_max": 91217.0,
+      "emitters_max": 4,
+      "tex_mb_max": 103.4,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 3.05,
+      "view_ms_p95": 4.4,
+      "frame_ms_p95": 98.2,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "p00_required": {
+      "draw_calls_p95": 74.0,
+      "draw_calls_max": 83.0,
+      "tris_max": 91215.0,
+      "emitters_max": 4,
+      "tex_mb_max": 103.4,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 3.05,
+      "view_ms_p95": 4.75,
+      "frame_ms_p95": 100.9,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "p00_slow": {
+      "draw_calls_p95": 73.0,
+      "draw_calls_max": 82.0,
+      "tris_max": 92192.0,
+      "emitters_max": 4,
+      "tex_mb_max": 103.4,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 3.03,
+      "view_ms_p95": 4.52,
+      "frame_ms_p95": 96.2,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     }
+    },
+    "profiler": {
+     "frames": 882,
+     "total": {
+      "max": 8.66,
+      "mean": 3.181,
+      "p50": 3.025,
+      "p95": 4.39
+     },
+     "spike_frames": 60,
+     "spikes_over_1ms": {
+      "NightScene": 4.33,
+      "AudioDirector": 2.77,
+      "WorldView3D.hush_apply": 2.61,
+      "WorldView3D.hush_view.mine": 2.19,
+      "FxFreezeFrame": 2.17,
+      "CameraDirector3D": 2.13,
+      "WorldView3D.bellows_apply": 2.12,
+      "WorldView3D.bellows_view.rig_advance": 1.87,
+      "Hud": 1.85,
+      "WorldView3D.hush_view.rig_advance": 1.29,
+      "WorldView3D.props_cues": 1.29,
+      "StallsView": 1.24,
+      "WorldView3D.bellows_view.mine": 1.22,
+      "WorldView3D.rest": 1.21
+     }
+    },
+    "perf3d_tool": "[lint3d] perf: FAIL — 3 error"
+   },
+   "failures": [
+    "D14 spike rule: 14 of our nodes / phases over 1 ms in the 60 slowest frames, worst {'NightScene': 4.33, 'AudioDirector': 2.77, 'WorldView3D.hush_apply': 2.61, 'WorldView3D.hush_view.mine': 2.19, 'FxFreezeFrame': 2.17, 'CameraDirector3D': 2.13}"
+   ],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:25:10Z",
+   "no_render": false
+  },
+  "17": {
+   "row": "17",
+   "command": "tools/scripts/shot.sh res://scenes/dev/anim3d/RigPerf3D.tscn build/r3d/perf_<rig>_<n>.png 600 r3d-qa -- --rig=<rig> --clip=<clip> --perf-log (5 × hush/loco_run, 5 × bellows/rx_sneeze_blast_a; medians)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 184.0,
+   "numbers": {
+    "hush": {
+     "cpu_ms_median": 0.195,
+     "cpu_runs_us": [
+      195.0,
+      175.0,
+      214.0,
+      168.0,
+      200.0
+     ],
+     "draw_calls": 2,
+     "tris": 9812,
+     "deform_bones": 48,
+     "set_piece_draw_calls": 0,
+     "set_piece_tris": 0,
+     "clip": "hush/loco_run"
+    },
+    "bellows": {
+     "cpu_ms_median": 0.24,
+     "cpu_runs_us": [
+      263.0,
+      238.0,
+      259.0,
+      213.0,
+      240.0
+     ],
+     "draw_calls": 4,
+     "tris": 9495,
+     "deform_bones": 50,
+     "set_piece_draw_calls": 1,
+     "set_piece_tris": 450,
+     "clip": "bellows/rx_sneeze_blast_a"
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:28:15Z",
+   "no_render": false
+  },
+  "18": {
+   "row": "18",
+   "command": "E2E_SANDBOX=r3d-qa tools/scripts/e2e.sh retry | pause_back | touch_smoke | tap_accuracy | curtain_call --report=build/r3d/flows/<flow>.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 194.0,
+   "numbers": {
+    "retry": "621 ms (wall 696 ms) vs max(1500, one frame 74 ms)",
+    "tap_feedback_frames": 1,
+    "touch_commands": [
+     "go",
+     "freeze",
+     "freeze",
+     "squeak"
+    ],
+    "pause_back": {
+     "back_resumed": true,
+     "log_flushed": true,
+     "menu_open": true,
+     "still_paused_after_focus_in": true,
+     "tick_stopped": true,
+     "ticking_after": true
+    },
+    "tap_accuracy": {
+     "hotspots": 25,
+     "slice_hotspots": 6,
+     "min_hits": 20,
+     "neighbour_hits": 0,
+     "frame_ms": 77.1
+    },
+    "curtain_call": {
+     "g0_again_ms": 272,
+     "g0_buttons_live": true,
+     "next_to_n02": true,
+     "frame_ms": 139.0,
+     "p00": {
+      "done": true,
+      "length_s": 9.67,
+      "next_live_frame1": true,
+      "steps": {
+       "bow": 1.61,
+       "fall": 0.86,
+       "reel": 5.07,
+       "results": 0.59,
+       "title": 1.54
+      }
+     }
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:31:29Z",
+   "no_render": false
+  },
+  "19": {
+   "row": "19",
+   "command": "(docs/review/r3d-qa/readability.md verdict lines)",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 0.0,
+   "numbers": {
+    "tests": {
+     "verb": "7/8",
+     "spot": "6/8",
+     "crowded_yes": "2/8",
+     "prefer_3d": "8/8"
+    },
+    "gags": {
+     "g0_sneeze": "funny 4 readable 4 fresh 3",
+     "p00_sneeze": "funny 4 readable 4 fresh 3",
+     "p00_dizzy_spin": "funny 3 readable 3 fresh 4",
+     "p00_curtain_call": "funny 3 readable 3 fresh 3",
+     "p00_picture": "funny 1 readable 1 fresh 1",
+     "p00_doorframe_bonk": "funny 2 readable 2 fresh 2",
+     "p00_vase": "funny 1 readable 2 fresh 1",
+     "p00_squeak_bit": "funny 1 readable 3 fresh 1",
+     "p00_relief": "funny 1 readable 3 fresh 1"
+    }
+   },
+   "failures": [
+    "crowded_yes 2/8 (bar <= 1)",
+    "gag p00_dizzy_spin: funny 3 readable 3 (bar 4)",
+    "gag p00_picture: funny 1 readable 1 (bar 3)",
+    "gag p00_picture: fresh 1 < 3",
+    "gag p00_doorframe_bonk: funny 2 readable 2 (bar 3)",
+    "gag p00_doorframe_bonk: fresh 2 < 3",
+    "gag p00_vase: funny 1 readable 2 (bar 3)",
+    "gag p00_vase: fresh 1 < 3",
+    "gag p00_squeak_bit: funny 1 readable 3 (bar 3)",
+    "gag p00_squeak_bit: fresh 1 < 3",
+    "gag p00_relief: funny 1 readable 3 (bar 3)",
+    "gag p00_relief: fresh 1 < 3"
+   ],
+   "notes": [],
+   "head": "5b5a135",
+   "tree": "eee8a789f5e192c7",
+   "at": "2026-10-01T10:32:45Z",
+   "no_render": false
+  }
+ },
+ "generated_by": "tools/scripts/pregate3d.sh",
+ "summary": {
+  "tree": "eee8a789f5e192c7",
+  "sim_tree": "c31a69aac4e0f8dd",
+  "rows_run": [
+   "19"
+  ],
+  "pass": false
+ }
+}

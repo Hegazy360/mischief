@@ -92,6 +92,40 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [ ] 60 fps p95, ≤ 150 draw calls with Gag-Cam + PiP + particles; launch → first laugh ≤ 10 s on a budget Android
 - [ ] Cost of one prank end to end recorded here
 
+## R3D — the 3D view slice (branch `r3d`; `<SP>/tasks/r3d-index.md`, TECH v1.2-3D)
+The owner's Gate-0 verdict (core idea right; UI crowded, characters unappealing, house crowded, actions unclear) moved
+the view to 3D (look A, Hush in B's dimensions) for g0 + the Prologue, with Nights 1–2 as hidden previews.
+- [x] Pre-flight: CPU slots (`slot.sh`), Godot / Blender / SDK setup scripts, the CC0 UAL skeleton, look-dev references,
+  the 2D reference frames (`docs/review/r3d-ref2d/`), CI on `r3d`
+- [x] B1 (10 tasks), queue keys 1–6, the lint fix passes; K2 real-project import; K3
+- [x] r3d-integrate: request table, g0 + every Prologue route in 3D, `slice_all` N01/N02, the 2D view deleted (§3.5)
+- [x] r3d-qa Phase 1: `tools/scripts/pregate3d.sh`, `game/tests/slice/` (8 tests, ≈ 2.1 min), CI (`lint.sh --strict`,
+  headless `lint3d --screen/--set`), TECH as built, the row-19 packets built (`docs/review/r3d-qa/`)
+- [x] Pre-gate rows 1–15, 17, 18 green alone on the CPU box (2026-10-01, re-run 09:43–10:36Z under hash eee8a789f5e192c7;
+  numbers in `docs/review/r3d-qa/index.md` §0)
+- [ ] Row 16: D14's spike clause — 14 of our nodes / WorldView3D phases over 1 ms in the profiler's 60 slowest Prologue
+  frames (NightScene 4.3 ms, AudioDirector 2.8, `hush_apply` 2.6 …; phase 1's run: 20, worst 10.2 ms); every count and
+  the p50 / p95 rule pass
+- [ ] **20a: the exported APK boots the 3D game** — FAIL: `world_view_3d.gd` names `ScriptProf3D` from the
+  export-excluded `view3d/probe/` (fix verified in a scratch export; request to r3d-view3d / integrate)
+- [ ] 19: readability verdicts from fresh reviewers — scored, **FAIL** (`docs/review/r3d-qa/readability.md`): verb 7/8,
+  spot 6/8, 3D preferred 8/8 pass; crowded 2/8 (bar ≤ 1) and the gags (dizzy spin 3/3 vs 4/4; picture, bonk, vase,
+  squeak bit, relief under 3) fail — requests Q-C1/Q-C2, Q-G1…Q-G6
+- [ ] 20b: the CI android-preview APK of the pushed head matches 20a
+- [ ] Owner check: R1 / R2 verdict on the owner pack (`docs/review/r3d/index.md` — drafted, held until 16 / 19 / 20a pass)
+
+| Exit row (index §6) | Result | Numbers |
+|---|---|---|
+| 1 import metadata · 2 suite · 3 lints --strict · 4 validators | PASS | 1010 .import / 409 .uid; 1270/1270 tests, 0 skips; 72 clips strict 0 errors; 5 validators |
+| 5 routes · 6 dead air · 7 planner | PASS | 13 routes; N01 ★★★ 116, N02 ★★★ 118; worst ⏩ 8.1 / 4.8 / 5.9 %, gap 5.5 s, edge 0.22, N02 first prank 19.4 s |
+| 8 fuzz | PASS | 2400 runs (200 × 4 bots × 3 Nights), 0 invariants, 0 soft-locks |
+| 9 set · 10 screen · 11 HUD · 12 C8 | PASS | 0 errors; C8 0 violations on 13 routes × 2 modes; Bellows window ≤ 39 % (P00 required, WARNING > 35 %) |
+| 13 g0 · 14 Prologue · 15 other routes | PASS | CHOO accent f 94, hit-stop 83 ms; 7 laughs by 60 s; slow first laugh 6.6 s / prank 27.6 s; 13/13 scenarios |
+| 16 frame budget | **FAIL** (D14 spikes) | draws p95 ≤ 82 (max 98), tris ≤ 101k, tex ≤ 103 MB, 0 compiles in PLAY, view + HUD p50 ≤ 3.12 / p95 ≤ 4.61 ms; 14 nodes > 1 ms (worst 4.3 ms) |
+| 17 per character · 18 flows | PASS | Hush 0.195 ms / 2 draws / 9.8k tris / 48 bones; Bellows 0.240 ms / 4 / 9.5k / 50 (+ stool apart, D16); retry 621 ms, tap 20/20, feedback 1 frame |
+| 19 readability | **FAIL** | verb 7/8 · spot 6/8 · crowded 2/8 (≤ 1) · 3D preferred 8/8; sneezes 4/4/3, dizzy spin 3/3/4 (≥ 4/4), 5 small gags < 3 |
+| 20a APK | **FAIL** | 73.4 MB, VIBRATE only, minSdk 24, contents OK — the exported pack does not compile `WorldView3D` |
+
 ## Fun Gate (owner, his phone)
 - [ ] 1. First player-caused laugh ≤ 10 s and first prank ≤ 30 s from launch (log)
 - [ ] 2. ≥ 5 audible laughs or grins in the first 10 minutes
@@ -152,3 +186,13 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   (b) hider 53 / 73: false alarms — the run ended mid-dive, the probe's first go was pinned (TECH §3.5) and the
   executor never popped her out → `Executor._ensure_mobile()` waits out a dive. Tests in tests/sim/test_routine.gd and
   tests/solver/test_real_solutions.gd.
+- 2026-10-01 — r3d-qa Phase 1 on `r3d` 5b5a135 + its working tree: `tools/scripts/pregate3d.sh` (rows 1–18, 19, 20a +
+  an exported-pack probe), `game/tests/slice/` (8 tests), CI (`lint.sh --strict`, headless `lint3d --screen/--set`), TECH
+  v1.2-3D as built, the five row-19 packets built (not scored). Pre-gate alone on the CPU box: rows 1–15, 17, 18 PASS;
+  16 FAIL (D14 spike clause); **20a FAIL — the exported APK cannot compile `WorldView3D` (`ScriptProf3D` lives in the
+  export-excluded `view3d/probe/`), so the game would not start**; fix verified in a scratch export; 19 pending.
+- 2026-10-01 — r3d-qa Phase 3: row 19 scored from the fresh reviewers' verbatim answers (`docs/review/r3d-qa/readability.md`,
+  `packets.py score` + the gist by hand): verb 7/8, spot 6/8, 3D preferred 8/8 PASS; crowded 2/8 and the Prologue's small
+  gags FAIL (requests Q-C1/2, Q-G1–6, Q-S1/2, Q-V1/2). Full pre-gate re-run alone (hash eee8a789f5e192c7): 1–15, 17, 18
+  PASS (8 kept), 16 FAIL (14 spikes, worst 4.3 ms), 19 FAIL, 20a FAIL (the P0 `ScriptProf3D` fix is not applied; APK
+  73.42 MB, sha256 e60c5e7a…ff19). Owner pack `docs/review/r3d/index.md` drafted (held: "not ready to send").

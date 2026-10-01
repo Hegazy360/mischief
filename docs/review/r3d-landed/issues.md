@@ -202,3 +202,26 @@ and rebuilds the packet; orchestrator re-runs a new reviewer. Sneeze wind-up wea
 - 22:55Z r3d-rig perf pass 2 DONE: play() 0.96-0.95 ms mean -> 69/84 us (p95 83/110), post-switch advance 0.40 -> 0.16-0.20
   ms, per-character mean 0.12-0.16 ms; prepare_all_clips in warm() (NightWarmer already calls warm). Suite 1510/0.
   Remaining B1: r3d-content only (N02 fuzz running).
+
+## K3 (23:59Z) — committed 7250fdd on r3d (suite 1510/0, lint.sh OK, solve 12/12 OK, import meta OK)
+- R15 window default: keep `bellows_window: "sim"` — P00-ideal pip_on_share <= 35 % (only P00 required 38-39 %, a warning),
+  and d1_lean FAILS the 1/3 edge-share cap on 7 of 9 routes (r3d-content). boot_config.json unchanged.
+- O1/O3 (Hush head B vs x1.2): no owner answer yet -> default B's head (x1.0, his pick) + the stage-door "head x1.2" entry.
+- O2 (perf-probe card photo): no answer yet -> render defaults stay BootConfig.DEFAULTS (msaa_3d true, render_scale 1.0,
+  outline true). The device log's perf3d notes in the owner pack decide later (D14).
+- r3d-integrate launched alone next. Its input list = every report + LANDED REQUESTS + the "integrate queue" lines in this
+  file (D9-D15 and the per-landing notes above).
+
+## Integrate done (05:30Z, 5fd4911): pre-gate 1-18 green except row 17 (Bellows 5 draws / 57 deform bones / 10377 tris)
+and row 8 partial (fuzz all timed out before N02's last 3 bots; QA re-runs it). 2D path deleted (537 files). Suite 1262/0.
+- Orchestrator 05:40Z: Q03 fixed (tools/audio/aliases.py "sting_title_slam" -> "sting_new"; sfx_map --map-only; --check PASS;
+  the map rewrite also dropped 3 vo_mannequin_* aliases whose 2D refs were deleted).
+- 05:42Z r3d-cast-bellows fix pass launched alone for row 17 (Q02). Then r3d-qa alone.
+- Q01 (sim: on_squeak plays while_tier livid bits) -> R3 backlog (bit_livid episodes [] for the slice).
+
+## D16 — borrowed set pieces don't count against the character budget (lead, 06:25Z; r3d-cast-bellows fix pass)
+- Row 17 GREEN after the fix pass: Bellows CPU 0.199 ms, 4 draws, 9,495 tris (+ stool 450 reported apart), 50 deform bones
+  (skeleton sha unchanged, no clip touched, 5 visible trims reverted after looking). The ride-along kitchen stool is the
+  set's own piece on loan (set shader, no outline; the set copy hides on the same frame, so the frame total is unchanged).
+  RULING: accepted — reported as set_piece_draw_calls / set_piece_tris, counted against the room. REDESIGN §5.6 + index
+  row 17 amended. rig_profile3d.gd change (r3d-rig's file) accepted.

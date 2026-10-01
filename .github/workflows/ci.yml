@@ -1,7 +1,11 @@
-# Mischief Next Door CI (TECH §12): import metadata → GDScript tests → design lints → solver routes
-# for every `final` episode → bounded fairness fuzz, plus the Python checks (art validators, audio).
-# The Python job needs numpy + Pillow and `rsvg-convert` (apt `librsvg2-bin`, not on the ubuntu-24.04
-# image): the art validators rasterise every SVG part with it to check pivots, ink and silhouettes.
+# Mischief Next Door CI (TECH §12): import metadata → GDScript tests (incl. tests/slice/, the 3D whole-route checks)
+# → design lints --strict (content, hotspot, IP, the 3D anim lint + 3D clip coverage of g0 + the Prologue, ruling R9)
+# → the 3D screen-rect lint and the set counts, headless (lint3d.sh --no-render) → solver routes for every `final`
+# episode → bounded fairness fuzz (20 seeded runs per bot per episode), plus the Python checks (art validators, the 3D
+# review toolset tests, gen_audio.py --check). The render lints (set colour / silhouettes, HUD, C8 shots), the e2e
+# routes and flows and the perf rows stay local: tools/scripts/pregate3d.sh (r3d-index §6, run alone on the CPU box).
+# The Python job needs numpy + Pillow and `rsvg-convert` (apt `librsvg2-bin`, not on the ubuntu-24.04 image): the art
+# validators rasterise every SVG part with it.
 # Every step passes on an empty-but-valid repo: a module that doesn't exist yet is SKIPPED with a
 # clear log line by the script itself (solve/fuzz/lint print "SKIP: …" and exit 0).
 # The Android preview APK lives in android-preview.yml (untouched here).
@@ -37,22 +41,30 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
       - name: Import metadata is committed (.import / .uid sidecars)
         run: tools/ci/check_import_meta.sh
-      - name: GDScript test suite
+      - name: GDScript test suite (incl. tests/slice — g0 + every Prologue route through the 3D NightScene)
         run: tools/scripts/test_game.sh ci
-      - name: Design lints (content, hotspot, IP; anim/rig when present)
-        run: tools/scripts/lint.sh
+      - name: Design lints --strict (content incl. 3D clip coverage, hotspot, IP, 3D anim lint on the g0 + P00 scope)
+        run: tools/scripts/lint.sh --strict
+      - name: 3D screen-rect lint, headless (projected hit boxes, every live hotspot, 20:9 / 16:9 / 4:3)
+        run: |
+          mkdir -p build/lint3d
+          tools/scripts/lint3d.sh --screen --no-render --aspects=20x9,16x9,4x3 --json="$PWD/build/lint3d/screen_ci.json"
+      - name: 3D set counts, headless (live ≤ 5, dressing ≤ 4, one hiding spot per room in Act I, geometry rules)
+        run: tools/scripts/lint3d.sh --set --no-render --all-nights --json="$PWD/build/lint3d/set_ci.json"
       - name: Solver — every route of every final episode (expects, invariants, determinism)
         run: |
           mkdir -p build/solver
           tools/scripts/solve.sh all --route=all --report="$PWD/build/solver/solve.json"
       - name: Fairness fuzz — 20 seeded runs per bot per final episode
         run: tools/scripts/fuzz.sh all --runs=20 --report="$PWD/build/solver/fuzz.json"
-      - name: Upload solver reports
+      - name: Upload solver + lint3d reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: solver-reports
-          path: build/solver
+          path: |
+            build/solver
+            build/lint3d/*.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -72,5 +84,5 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends librsvg2-bin
           rsvg-convert --version
-      - name: Art validators and gen_audio.py --check (each skipped when absent)
+      - name: Art validators, the 3D review toolset tests and gen_audio.py --check (each skipped when absent)
         run: tools/ci/lint_all.sh --no-godot

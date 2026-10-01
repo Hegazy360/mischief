@@ -358,3 +358,12 @@ in their round-2 form.
 **After the fixes:** re-shoot the failing frames and strips from the same ticks (the dizzy spin every 6 ticks). Then
 run **new** fresh reviewers on rebuilt crowding and gag packets with new seeds, ideally three per packet, scored by
 median. Re-run pre-gate row 19.
+
+# Round 3 — QA round 3 (2026-10-01, fix-round-2 tree): packets built, NOT scored here
+Phase 1 of round 3 rebuilt the spot, crowding and gag packets from 74967b5 + fix round 2 (new seeds 131 / 137 / 149,
+new keys `keys/r3_*_key.json`): [`packets/set_i`](packets/set_i/prompt.md) (spot, 8 frames),
+[`packets/set_j`](packets/set_j/prompt.md) (crowding, 8 frames), [`packets/set_k`](packets/set_k/prompt.md) (gags,
+9 strips; the dizzy spin every 6 ticks). Per D18.1 each packet goes to 3 fresh reviewers: spot = the median count,
+crowding = a frame counts only if ≥ 2 of 3 say yes, gags = the median per score. How to run them:
+[`reviewer_prompts.md`](reviewer_prompts.md) "Round 3". The round-3 answers, keys and `verdict` lines go below this
+heading when they are scored; until then row 19 reads round 2's lines above.

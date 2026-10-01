@@ -52,3 +52,22 @@ seen any round-1 packet. Give each one only the packet's `prompt.md` and its ima
 
 Score with `python3 tools/art3d/review/packets.py score <key> <answers.md>` and record the verdict lines in
 `readability.md` (round 2 section). Round 1's verb (set_a, 7/8) and 2D-vs-3D (set_d, 8/8) results stand.
+
+## Round 3 (2026-10-01, QA round 3): three rebuilt packets, THREE fresh reviewers each (D18.1)
+Rebuilt from the fix-round-2 tree (74967b5 + r3d-fix-hud3 / r3d-fix-gags2 / r3d-fix-night2) at the same moments and
+ticks as rounds 1 and 2, 1200×540, `--no-captions`, MSAA off, with new seeds and new keys
+(`keys/r3_<packet>_key.json` in the r3d-qa scratch dir; rounds 1–2's packets, keys and answers are untouched). The dizzy
+spin is now shot every 6 ticks (was 9), so its strip has 5 pages.
+
+Per D18.1 each packet goes to **3 independent fresh reviewers** (9 reviewers in all; none may have seen any earlier
+packet, this game or another reviewer's answer). Give each one only the packet's `prompt.md` and its images.
+
+| packet | prompt | images | how the 3 answers are combined (D18.1) | pass (index §6 row 19) |
+|---|---|---|---|---|
+| spot | `docs/review/r3d-qa/packets/set_i/prompt.md` | `set_i/pkt_01.jpg` … `pkt_08.jpg` | each reviewer's count of right gists; the median of the 3 counts | median ≥ 6/8 |
+| crowding | `docs/review/r3d-qa/packets/set_j/prompt.md` | `set_j/pkt_01.jpg` … `pkt_08.jpg` | a frame counts "crowded" only if ≥ 2 of the 3 say yes | ≤ 1/8 frames |
+| gags | `docs/review/r3d-qa/packets/set_k/prompt.md` | `set_k/pkt_01/page_1.jpg` … `pkt_09/page_3.jpg` (pkt_07 has 5 pages) | the median of the 3 scores, per score, per strip | the sneezes and the dizzy spin funny and readable ≥ 4; the rest ≥ 3; fresh ≥ 3 |
+
+Score each answer sheet with `python3 tools/art3d/review/packets.py score <key> <answers.md>`, judge the gist by hand,
+and append the round-3 `verdict …` lines at the END of `readability.md` (row 19 reads the last line per test). Round 1's
+verb (set_a, 7/8) and 2D-vs-3D (set_d, 8/8) results carry.

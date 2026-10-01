@@ -30,7 +30,7 @@ EXPLICIT: dict[str, str] = {
     "creak": "stair_creak",
     # --- doors
     "front_door": "door_front", "back_door": "door_back", "cupboard_door": "cupboard", "handle_jiggle": "door_jiggle",
-    "entry_warning": "door_jiggle", "door_slam": "door_slam_bonk", "slam": "door_slam_bonk", "knocker": "knocker_bonk",
+    "entry_warning": "door_jiggle", "door_slam": "door_slam_bonk", "slam": "door_slam_bonk", "sting_title_slam": "sting_new", "knocker": "knocker_bonk",
     # --- props (activity micro-gags and reaction clips)
     "pepper": "pepper_shake", "stool": "stool_scrape", "stool_zip": "stool_scrape", "splash": "sink_crash", "tap_spray": "spray_blast",
     "spray": "spray_blast", "hose": "hose_wrestle", "kettle": "kettle_melody", "kettle_squeak": "kettle_melody",

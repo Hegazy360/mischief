@@ -109,6 +109,33 @@ def inside_lobe(p, c, radii, shrink=0.93):
     return d.length < T.se_radius(d.normalized(), radii[0], radii[1], radii[2], 2.0) * shrink
 
 
+def inside_torso(p, TC, shrink=0.85):
+    """True when p lies inside the barrel (torso_q) shrunk by `shrink` (hidden-geometry trims, fix pass)."""
+    d = p - TC
+    if d.length < 1e-6:
+        return True
+    return d.length < torso_q(d.normalized()).length * shrink
+
+
+def inside_head(p, HC, shrink=0.88):
+    """True when p lies inside the head ellipsoid (HEAD_R half axes, power 2 = inside the real power-2.35 head)."""
+    return inside_lobe(p, HC, HEAD_R[:3], shrink)
+
+
+def cull_variant(bms, HC, shrink_head=0.88):
+    """A bouffant variant's hidden faces go (fix pass): faces buried inside the head (rigid on Head, so they never
+    show) -- except under the neat bouffant's footprint and above the opening's lower edge: the head has no skin where
+    the neat lobes cover it (hidden while a variant shows), and the variant's inner faces close that opening. Faces
+    inside a sibling lobe stay too: they carry the outline creases between the lobes."""
+    neat = [(HC + Vector(o), r) for o, r, _p, _n in BOUFFANT_LOBES.values()]
+    for bm in bms:
+        # below the opening only (z < head centre - 0.02): a ray through the open crown can reach any deeper face at
+        # its own height (the back view showed the head's outline hull where the fringe's back had been)
+        T.delete_faces(bm, lambda p, n: inside_head(p, HC, shrink_head) and p.z < HC.z - 0.02
+                       and not any(inside_lobe(p, lc, lr, 1.0) for lc, lr in neat))
+    return bms
+
+
 def star_prism(center, r_out, r_in, thick, color, rot=(0, 0, 0), points=5):
     """A chunky 5-point vinyl star, extruded (front faces -Y before rot)."""
     bm = T._new_bm()
@@ -211,7 +238,8 @@ def build_body(body, rig, L):
     # ---- neck stub (hidden under the collar unless he stretches) ----
     bm = T.capsule_chain([H("neck_01") + Vector((0, 0, -0.03)), H("Head") + Vector((0, 0, 0.06))], [0.09, 0.085], "peach",
                          seg=8, cap_rings=1, samples_per_m=12)
-    body.add(bm, ["spine_03", "neck_01", "Head"], name="neck")
+    # fix pass: the stub blends spine_03 -> Head (neck_01 carries no weight; Head rides it, so the stub still follows)
+    body.add(bm, ["spine_03", "Head"], name="neck")
 
     # ---- the barrel: white shirt V core + plum tail-coat shell open at the front ----
     W_TOP, Z_TOP, SLOPE = 0.062, TC.z + BARREL_R[2] * 0.70, 0.30
@@ -223,6 +251,10 @@ def build_body(body, rig, L):
     T.bisect(bm, (0, 0, Z_WAIST), (0, 0, 1))
     T.recolor(bm, lambda c, n, cur: "trouser" if c.z < Z_WAIST else None)
     T.delete_faces(bm, lambda c, n: (c - TC).y > 0.10 and c.z > Z_WAIST)      # hidden under the coat
+    # fix pass: the shirt faces the coat shell covers (above its hem, outside its front V, with margins) are hidden
+    # from every view (same weights as the coat, 0.02 m under it) -- only the V and the trousers below the hem stay
+    T.delete_faces(bm, lambda c, n: c.z > Z_WAIST - 0.02 - 0.35 * (c.y - TC.y) + 0.07
+                   and not ((c - TC).y < 0.05 and abs(c.x) < lapel_w(c.z) + 0.09))
     body.add(bm, ["pelvis", "spine_01", "spine_02", "spine_03"], power=3.0, keep=3, name="barrel")
     COAT_OFF = 0.020
 
@@ -298,6 +330,9 @@ def build_body(body, rig, L):
         body.add(bm, ["upperarm_" + s, "lowerarm_" + s], power=4.0, keep=2, name="sleeve")
         ax = (wr - el).normalized()
         bm = T.capsule_chain([wr - ax * 0.045, wr + ax * 0.005], [0.074, 0.072], "cuff", seg=8, cap_rings=1, samples_per_m=12)
+        # fix pass: the elbow-side cap inside the sleeve (both on lowerarm here) goes
+        T.delete_faces(bm, lambda c, n, wr=wr, ax=ax: (c - wr).dot(ax) < -0.05
+                       and ((c - wr) - ax * (c - wr).dot(ax)).length < 0.056)
         body.add(bm, "lowerarm_" + s, name="cuff")
         hx = (H("middle_01_" + s) - wr).normalized()
         bm = T.se_blob(wr + hx * 0.070, 0.066, 0.060, 0.040, 2.3, "glove", n=3)
@@ -306,16 +341,26 @@ def build_body(body, rig, L):
             a, b = H(f + "_01_" + s), rig.tail(f + "_03_" + s)
             r = 0.024 if f != "pinky" else 0.020
             bm = T.capsule_chain([a - hx * 0.02, b], [r, r * 0.92], "glove", seg=4, cap_rings=1, samples_per_m=20)
-            bones = [f + "_01_" + s, f + "_02_" + s] if f != "pinky" else "pinky_01_" + s
-            body.add(bm, bones, power=4.0, keep=2, name="finger")
+            if f == "pinky":
+                body.add(bm, "pinky_01_" + s, name="finger")      # rigid: the pinkie-up gag
+            elif f == "ring":
+                # fix pass (deform bones, index row 17): the ring finger rides the MIDDLE finger's bones, weighted
+                # along its own segments -- curl() / fist() curl them alike and the knuckles share the curl axis,
+                # so it bends as before (a few mm off in a full fist, no spread fan); ring_01/_02 stay unweighted
+                body.add(bm, ["middle_01_" + s, "middle_02_" + s], power=4.0, keep=2, name="finger",
+                         seg_override={"middle_01_" + s: (H("ring_01_" + s), rig.tail("ring_01_" + s)),
+                                       "middle_02_" + s: (H("ring_02_" + s), rig.tail("ring_02_" + s))})
+            else:
+                body.add(bm, [f + "_01_" + s, f + "_02_" + s], power=4.0, keep=2, name="finger")
         a, b = H("thumb_01_" + s), rig.tail("thumb_03_" + s)
         bm = T.capsule_chain([a + hx * 0.01, b], [0.026, 0.023], "glove", seg=4, cap_rings=1, samples_per_m=20)
-        body.add(bm, ["thumb_01_" + s, "thumb_02_" + s], power=4.0, keep=2, name="thumb")
+        body.add(bm, "thumb_01_" + s, name="thumb")      # rigid on thumb_01 (fix pass, as the fingers)
     # ---- legs: striped trousers, spats, tiny shoes ----
     for s, sx in (("l", 1), ("r", -1)):
         th, kn, an = H("thigh_" + s), H("calf_" + s), H("foot_" + s)
         bm = T.capsule_chain([th + Vector((0, 0, 0.02)), kn, an + Vector((0, 0, 0.02))], [0.062, 0.058, 0.052], "trouser",
                              seg=8, cap_rings=1, samples_per_m=16)
+        T.delete_faces(bm, lambda c, n: inside_torso(c, TC, 0.85))       # the hip end inside the barrel
         L_ = T._col_layer(bm)
         for f in bm.faces:
             cc = f.calc_center_median() - th
@@ -353,7 +398,7 @@ def build_props(body, rig, L):
     T.bisect(cup, PR + Vector((0, 0, 0.026 * CS)), (0, 0, 1))
     T.recolor(cup, lambda c, n, cur: "cup_band" if (PR.z < c.z < PR.z + 0.016 * CS or c.z > PR.z + 0.026 * CS) and abs(n.z) < 0.85 else None)
     T.delete_faces(cup, lambda c, n: c.z > PR.z + 0.033 * CS)
-    tea = T.se_blob(PR + Vector((0, 0, 0.028 * CS)), 0.038 * CS, 0.038 * CS, 0.004, 2.0, "tea", n=3)
+    tea = T.se_blob(PR + Vector((0, 0, 0.028 * CS)), 0.038 * CS, 0.038 * CS, 0.004, 2.0, "tea", n=2)
     handle = T.torus(0.017 * CS, 0.006 * CS, PR + Vector((0.046 * CS, 0, 0.004)), "cup", seg=10, rseg=4, rot=(90, 0, 0))
     body.add(T.merge(cup, tea, handle), "prop_teacup", name="teacup")
     # saucer (prop_saucer, left hand): a flat white dish with the gold rim
@@ -502,7 +547,7 @@ def bouffant_flipped(HC):
         sl = lobe(HC + Vector((sx * 0.262, 0.015, 0.02)), (0.125, 0.150, 0.190), (sx * 1.0, -0.3, -0.2), "bouffant",
                   "bouffant_dk", n_ridges=8, amp=0.10, rings=5, segs=16)
         bms.append(sl)
-    return bms
+    return cull_variant(bms, HC)
 
 
 def bouffant_frazzled(HC):
@@ -514,7 +559,7 @@ def bouffant_frazzled(HC):
         bm = lobe(c, rr, pole, "frazzle", "frazzle_dk", n_ridges=nr + (2 if bone == "bouffant" else 1), amp=0.22, rings=7,
                   segs=28 if bone == "bouffant" else 20)
         bms.append(bm)
-    return bms
+    return cull_variant(bms, HC)
 
 
 def bouffant_wet(HC):
@@ -530,7 +575,7 @@ def bouffant_wet(HC):
             rr = (0.11, 0.13, 0.22)
         bm = lobe(c, rr, (0, -1, 0.2), "wet", "wet_dk", n_ridges=6, amp=0.05, rings=7, segs=22)
         bms.append(bm)
-    return bms
+    return cull_variant(bms, HC)
 
 
 def bouffant_floured(HC):

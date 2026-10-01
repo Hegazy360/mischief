@@ -97,9 +97,13 @@ def to_local(bone, p):
 
 
 sockets = {k: to_local(b, p) for k, (b, p) in SOCK_W.items()}
+# deform bones = the bones that carry skin weight (jiggle and prop / FX bones included), as RigPerf3D counts them
+# (index row 17: <= 50). The skeleton keeps every bone (clips, sockets); a bone flagged deform without weight is free.
+_gname = {g.index: g.name for g in bodyob.vertex_groups}
+weighted = {_gname[g.group] for v in bodyob.data.vertices for g in v.groups if g.weight > 0.0}
 sockets_world = {k: [round(v, 4) for v in p] for k, (b, p) in SOCK_W.items()}
 meta = {"character": "bellows", "sockets": sockets, "sockets_world": sockets_world, "arm_out": SK.ARM_OUT, "tris": tris, "verts": len(bodyob.data.vertices), "bones": len(arm.data.bones),
-        "deform_bones": sum(1 for b in arm.data.bones if b.use_deform and b.name not in SK.JIGGLE),
+        "deform_bones": len(weighted), "weighted_bones": sorted(weighted),
         "jiggle_bones": len(SK.JIGGLE), "hip_ratio": hip_ratio, "tri_log": body.tri_log, "landmarks": P.landmarks_json(L),
         "attachments": attach, "height_m": P.measure_height(bodyob)}
 T.export_glb(arm, bodyob, GLB, animations=False)

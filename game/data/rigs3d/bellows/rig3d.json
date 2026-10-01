@@ -6,8 +6,8 @@
   "mesh": "Armature/Skeleton3D/bellows_body",
   "height_m": 1.78,
   "head_scale": 1.0,
-  "tris": 9155,
-  "deform_bones": 49,
+  "tris": 8755,
+  "deform_bones": 50,
   "bones": {
     "root": "root",
     "pelvis": "pelvis",

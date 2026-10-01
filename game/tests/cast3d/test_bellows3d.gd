@@ -118,17 +118,42 @@ func test_bones_are_ual_plus_extras_and_deform_budget() -> void:
 	for n in SKELETON_EXTRAS:
 		assert_has(names, n, "extra bone " + n)
 	assert_eq(ref.size(), 65, "UAL has 65 bones")
-	# deform = bones that carry weights, jiggle bones not counted (brief §4.2 budgets)
-	var jig: Array[String] = []
-	for g in _rig["jiggle"]:
-		for b in g["bones"]:
-			jig.append(String(b))
-	var used := {}
-	for b in _vertex_bones(_mesh()):
-		if not jig.has(b):
-			used[b] = true
-	assert_le(used.size(), 50, "deform bones (excluding jiggle) <= 50, got %d" % used.size())
-	assert_le(int(_rig["deform_bones"]), 50)
+	# deform = every bone that carries skin weight, jiggle and prop / FX bones included — as RigPerf3D counts them
+	# (index row 17: <= 50; the fix pass rides the ring finger on the middle finger's bones, makes the thumb rigid on
+	# thumb_01 and blends the neck stub spine_03 -> Head: ring_01/_02, thumb_02 and neck_01 carry no weight)
+	var used := _weighted_bones(_mesh())
+	assert_le(used.size(), 50, "deform bones (weighted, jiggle included) <= 50, got %d" % used.size())
+	assert_eq(int(_rig["deform_bones"]), used.size(), "rig3d.json deform_bones is the weighted count")
+	for free in ["ring_01_l", "ring_02_r", "thumb_02_l", "thumb_02_r", "neck_01", "pinky_02_l", "index_03_r", "root", "ride"]:
+		assert_false(used.has(free), free + " carries no weight (the bone stays in the skeleton for clips / sockets)")
+	for kept in ["Head", "bouffant", "cravat", "prop_teacup", "fx_choo", "pinky_01_r", "index_02_l", "middle_02_r",
+			"thumb_01_r", "nose", "ball_l"]:
+		assert_true(used.has(kept), kept + " carries weight")
+	# the skeleton contract is untouched: every bone is still there (clips, sockets, props)
+	assert_eq(sk.get_bone_count(), 90, "90 bones (UAL 65 + 25 extras)")
+
+
+## Bone names carrying any skin weight > 0 on `mi` (every influence, not only the strongest).
+func _weighted_bones(mi: MeshInstance3D) -> Dictionary:
+	var out := {}
+	var skel := _skeleton()
+	for s in mi.mesh.get_surface_count():
+		var arr := mi.mesh.surface_get_arrays(s)
+		var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+		var weights: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+		for i in bones.size():
+			if weights[i] <= 0.0:
+				continue
+			var bi := bones[i]
+			var nm := ""
+			if mi.skin != null and bi < mi.skin.get_bind_count() and mi.skin.get_bind_name(bi) != &"":
+				nm = String(mi.skin.get_bind_name(bi))
+			elif mi.skin != null and bi < mi.skin.get_bind_count():
+				nm = skel.get_bone_name(mi.skin.get_bind_bone(bi))
+			else:
+				nm = skel.get_bone_name(bi)
+			out[nm] = true
+	return out
 
 
 func test_triangle_budget() -> void:

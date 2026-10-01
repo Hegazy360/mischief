@@ -487,6 +487,9 @@ the stare strip), `mock_n2_hall_plan.png` (five live props, an item bubble, the 
   jelly helmet, sausage boa…); temper tints the skin by a material parameter (peach → beetroot, GDD §1.2).
 - Budgets per character on a mid-range phone: ≤ 10k triangles, ≤ 50 deform bones + jiggle, 1 skinned mesh + ≤ 4
   attachments, 1 material + outline (≤ 4 draw calls), ≤ 0.25 ms CPU (skinning + jiggle).
+  A set piece the character borrows on loan while its set copy is hidden on the same frame (Bellows' ride-along stool
+  in the sneeze) is reported apart (`set_piece_draw_calls` / `set_piece_tris`) and counts against the room, not the
+  character (lead ruling D16, 2026-10-01).
 - The Pip fallback stays a skin on Hush's skeleton (GDD §1.2).
 
 ### 5.7 Animation data

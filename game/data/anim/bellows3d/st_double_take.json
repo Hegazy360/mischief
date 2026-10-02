@@ -84,11 +84,18 @@
   },
   "gaze": [
     {
-      "f0": 8,
-      "f1": 18,
+      "f0": 7,
+      "f1": 11,
       "at": "camera",
       "weight": 1.0,
       "blend": 2
+    },
+    {
+      "f0": 9,
+      "f1": 18,
+      "at": "camera",
+      "weight": 1.0,
+      "blend": 0
     }
   ],
   "tags": [

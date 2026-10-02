@@ -14,7 +14,10 @@
 ##   * the pelmet is drawn on `top` — a control CurtainCall keeps ABOVE the ResultsScreen — so the results' navy wash
 ##     never mutes it: it lurches into view at the top (6 f), WOBBLES on its ropes for BIT_WOBBLE_S (the set-up: one
 ##     rope slips, dust sifts — he is still fuming at the audience, he never looks up), the ropes snap and it DROPS in
-##     BIT_DROP_F frames onto his head (contact: an impact star, he is squashed into his knees, the pelmet squashes),
+##     BIT_DROP_F frames onto his head — CONTACT (r3d polish): its solid fabric edge lands ON the top of his bouffant
+##     (CurtainBows3D.wig_top_screen: the wig's crown from the `bouffant` bone / a variant's bounds, squashed — never a
+##     fixed height), the wig squashes flat under it and springs back (`wig_squash_at`), he is squashed into his knees,
+##     the pelmet squashes and rocks on the wig, whack lines + a small dust puff burst out of the old fabric,
 ##     then his dazed face holds to the camera (`st_bonk`, its gaze window; body cheat 70°) with stars circling for
 ##     ≥ BIT_HOLD_S before the reel step may end — no cut, nothing else moves on the stage; then the topper: the
 ##     stars go and he gathers his dignity, the pelmet still on his head like a crown (BIT_TOPPER_CLIP: he
@@ -51,13 +54,27 @@ const BIT_TOPPER_CLIP := "bellows/beat_dignity_fail"
 ## he glares at the audience, the pelmet still on (`beat_slow_burn`, looping: the end picture while the call waits).
 const BIT_TOPPER_LEN_S := 0.5
 const BIT_END_CLIP := "bellows/beat_slow_burn"
-## The pelmet (logical px at the 1080 base): size, the bottom edge while it hangs at the top, how far it sits down
-## over his head top (the bouffant) once it lands, its lurch into view (frames).
+## The pelmet (logical px at the 1080 base): size, the bottom edge while it hangs at the top, its lurch into view
+## (frames). The valance art (curtain_valance.svg) is solid fabric down to PELMET_FABRIC_K of its height; below hang
+## the scalloped fringe and the tassels (to ≈ 0.86) and the last 13 % is empty — so the CONTACT line is the fabric's
+## edge, not the rect's bottom (QA3: resting the rect's bottom 30 px under the head top left the fabric 28 px above
+## the wig, "hovering"). Once it lands the fabric edge sits PELMET_PRESS px into the (squashed) top of his wig.
 const PELMET_SIZE := Vector2(500, 150)
 const PELMET_HANG_Y := 150.0
-const PELMET_SINK := 30.0
+const PELMET_FABRIC_K := 0.62
+const PELMET_PRESS := 14.0
 const PELMET_LURCH_F := 6
 const ORBIT_STARS := 4
+## His wig under the pelmet: flattened on contact, springs back, then rests a little squashed while it is on.
+const WIG_HIT := 0.6
+const WIG_REST := 0.88
+## The dust shaken out of the pelmet on contact: puffs, how long they live (frames).
+const DUST_PUFFS := 10
+const DUST_F := 30.0
+## Per puff of a clump: its angle (deg above the horizontal, outwards), how far it billows, its final radius.
+const DUST_ANG := [-14.0, -38.0, -62.0, -24.0, -50.0]
+const DUST_DIST := [74.0, 88.0, 58.0, 112.0, 96.0]
+const DUST_R := [22.0, 28.0, 18.0, 15.0, 24.0]
 
 ## The 3D bows (CurtainBows3D under this control); set before `_ready`.
 var bows: CurtainBows3D = null
@@ -89,7 +106,6 @@ var _bellows_on: bool = false
 var _bonk_t: float = -1.0
 var _frame: float = 0.0
 var _star := PackedVector2Array()
-var _burst := PackedVector2Array()
 
 
 func _init() -> void:
@@ -101,9 +117,14 @@ func _init() -> void:
 	_rr.resize(ROSES)
 	_rs.resize(ROSES)
 	_star.resize(10)
-	_burst.resize(20)
 	top = _Top.new()
 	(top as _Top).apron = self
+
+
+## The pelmet's control is made here; when nobody parented it (tests, an apron that never staged) it goes with us.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and top != null and is_instance_valid(top) and top.get_parent() == null:
+		top.free()
 
 
 func _ready() -> void:
@@ -193,6 +214,8 @@ func start_bellows(residues: Variant, dur: float = 5.0) -> void:
 	bit_t = 0.0
 	bit = bit_plan(dur)
 	_bonk_t = -1.0
+	if bows != null:
+		bows.set_wig_squash(1.0)
 	if bows != null and residues is PackedStringArray:
 		bows.set_residues(residues)
 
@@ -292,6 +315,28 @@ static func squash_at(bonk_f: float) -> float:
 	return 1.0
 
 
+## His wig's squash from the hit (1 = none): flattened under the pelmet on contact, springs back up (lifting it),
+## then settles a little squashed under its weight (WIG_REST) while the pelmet stays on.
+static func wig_squash_at(bonk_f: float) -> float:
+	if bonk_f < 0.0:
+		return 1.0
+	if bonk_f < 3.0:
+		return WIG_HIT
+	if bonk_f < 9.0:
+		var k := (bonk_f - 3.0) / 6.0
+		return lerpf(WIG_HIT, 0.97, 1.0 - (1.0 - k) * (1.0 - k))
+	if bonk_f < 16.0:
+		return lerpf(0.97, WIG_REST, (bonk_f - 9.0) / 7.0)
+	return WIG_REST
+
+
+## The pelmet's rock on his round wig after it lands (rad about its contact line; decays by 40 f).
+static func rock_at(bonk_f: float) -> float:
+	if bonk_f < 0.0 or bonk_f >= 40.0:
+		return 0.0
+	return 0.06 * sin(bonk_f / 60.0 * TAU * 2.4) * (1.0 - bonk_f / 40.0)
+
+
 ## 3D: the bit on CurtainBows3D (wander on → double take → slow burn under the wobbling pelmet → the bonk + hold).
 func _advance_bellows_3d() -> void:
 	if bit.is_empty():
@@ -299,15 +344,19 @@ func _advance_bellows_3d() -> void:
 	var t := bit_t
 	if _bonk_t >= BIT_TOPPER_S + BIT_TOPPER_LEN_S:
 		bows.pose_bellows(BIT_MARK_X, BIT_END_CLIP, 1, 60.0, true, 10)
+		bows.set_wig_squash(WIG_REST)
 		return
 	if _bonk_t >= BIT_TOPPER_S:
 		bows.pose_bellows(BIT_MARK_X, BIT_TOPPER_CLIP, 1, 60.0, false, 8)
 		bows.set_bellows_squash(1.0)
+		bows.set_wig_squash(WIG_REST)
 		return
 	if _bonk_t >= 0.0:
 		bows.pose_bellows(BIT_MARK_X, "bellows/st_bonk", 1, 70.0, false, 0)
 		bows.set_bellows_squash(squash_at(_bonk_t * 60.0))
+		bows.set_wig_squash(wig_squash_at(_bonk_t * 60.0))
 		return
+	bows.set_wig_squash(1.0)
 	var walk := float(bit["walk"])
 	if t < walk:
 		var e := 1.0 - pow(1.0 - clampf(t / walk, 0.0, 1.0), 2.0)
@@ -395,19 +444,24 @@ static func _perimeter(r: Rect2, u: float) -> Vector2:
 	return Vector2(r.position.x, r.end.y - d)
 
 
-## The pelmet's state now (pure on `bit_t` / `_bonk_t`): {on, bottom (its bottom edge y), rot (rad, about its top
-## centre), ropes (true while it hangs), x}. `head` = his head top on screen.
+## The pelmet's state now (pure on `bit_t` / `_bonk_t`): {on, bottom (its rect's bottom edge y), line (its solid
+## fabric's edge y: the contact line), rot (rad), ropes (true while it hangs), x}. `head` = the top of his wig on
+## screen (CurtainBows3D.wig_top_screen, squashed): from the hit on the fabric's edge sits PELMET_PRESS px into it.
 func pelmet_state(head: Vector2) -> Dictionary:
-	var out := {"on": false, "bottom": -PELMET_SIZE.y - 20.0, "rot": 0.0, "ropes": false, "x": head.x}
+	var below := PELMET_SIZE.y * (1.0 - PELMET_FABRIC_K)
+	var out := {"on": false, "bottom": -PELMET_SIZE.y - 20.0, "line": -PELMET_SIZE.y - 20.0 - below, "rot": 0.0,
+		"ropes": false, "x": head.x}
 	if not _bellows_on or bit.is_empty():
 		return out
-	var rest := head.y + PELMET_SINK
+	var rest := head.y + PELMET_PRESS + below
 	var wob := float(bit["wobble"])
 	var drop := float(bit["drop"])
 	var hit := float(bit["hit"])
 	if _bonk_t >= 0.0:
 		out["on"] = true
 		out["bottom"] = rest
+		out["line"] = rest - below
+		out["rot"] = rock_at(_bonk_t * 60.0)
 		return out
 	if bit_t < wob:
 		return out
@@ -421,10 +475,12 @@ func pelmet_state(head: Vector2) -> Dictionary:
 		var grow := 0.5 + w / BIT_WOBBLE_S
 		out["rot"] = 0.07 * sin(w * TAU * 4.5) * grow + (0.05 if dip > 0.0 else 0.0)
 		out["ropes"] = true
+		out["line"] = float(out["bottom"]) - below
 		return out
 	# the drop: ease-in from where it hung to his head in BIT_DROP_F frames
 	var k := clampf((bit_t - drop) / maxf(0.001, hit - drop), 0.0, 1.0)
 	out["bottom"] = lerpf(PELMET_HANG_Y, rest, k * k)
+	out["line"] = float(out["bottom"]) - below
 	return out
 
 
@@ -432,11 +488,12 @@ func pelmet_state(head: Vector2) -> Dictionary:
 func _draw_top(ci: Control) -> void:
 	if not _bellows_on or bows == null:
 		return
-	var head: Vector2 = bows.head_screen("bellows")
+	var head: Vector2 = bows.wig_top_screen()
 	var st := pelmet_state(head)
 	if not bool(st["on"]):
 		return
 	var bottom := float(st["bottom"])
+	var line := float(st["line"])
 	var rot := float(st["rot"])
 	var w := PELMET_SIZE.x
 	var h := PELMET_SIZE.y
@@ -463,33 +520,63 @@ func _draw_top(ci: Control) -> void:
 		for side: float in [-1.0, 1.0]:
 			var x := pivot.x + side * (w * 0.5 - 48.0)
 			ci.draw_line(Vector2(x, -12.0), Vector2(x + side * 14.0, 52.0), UiKit.GOLD_SHADE, 9.0)
-	ci.draw_set_transform(pivot + Vector2(0.0, h), rot, sq)
-	var r := Rect2(-w * 0.5, -h, w, h)
+	# about its contact line (the fabric's edge): it squashes down onto the wig and rocks on it without lifting off
+	ci.draw_set_transform(Vector2(float(st["x"]), line), rot, sq)
+	var r := Rect2(-w * 0.5, -h * PELMET_FABRIC_K, w, h)
 	if _valance_tex != null:
 		ci.draw_texture_rect(_valance_tex, r, false)
 	else:
-		ci.draw_rect(r, UiKit.CURTAIN)
-		ci.draw_rect(Rect2(r.position.x, r.end.y - 30.0, r.size.x, 30.0), UiKit.GOLD)
+		ci.draw_rect(Rect2(r.position, Vector2(w, h * PELMET_FABRIC_K)), UiKit.CURTAIN)
+		ci.draw_rect(Rect2(r.position.x, -30.0, r.size.x, 30.0), UiKit.GOLD)
 	ci.draw_set_transform(Vector2.ZERO)
 	if _bonk_t >= 0.0:
-		_draw_hit(ci, Vector2(float(st["x"]), bottom))
+		_draw_hit(ci, Vector2(float(st["x"]), line), w)
 
 
-## The contact: a jagged impact star at his head (8 f), then four stars circling under the pelmet's fringe.
-func _draw_hit(ci: Control, at: Vector2) -> void:
+## The dust shaken out of the pelmet at the hit (pure on the frames since it, `bf`): puff `i` of DUST_PUFFS →
+## Vector4(x, y — its centre, relative to the contact point —, radius, alpha 0..1; a value, no allocation per frame).
+## Two clumps where the fabric meets the sides of his wig (even puffs left, odd right), each puff billowing out and up
+## at its own angle, gone by DUST_F.
+static func dust_puff(i: int, bf: float, w: float) -> Vector4:
+	if bf < 0.0 or bf >= DUST_F:
+		return Vector4.ZERO
+	var side := -1.0 if i % 2 == 0 else 1.0
+	var j := (i >> 1) % DUST_ANG.size()
+	var u := bf / DUST_F
+	var e := 1.0 - pow(1.0 - u, 3.0)
+	var ang := deg_to_rad(float(DUST_ANG[j]))
+	var dir := Vector2(cos(ang) * side, sin(ang))
+	var start := Vector2(side * (w * 0.14 + 7.0 * float(j)), 6.0 - 4.0 * float(j % 2))
+	var p := start + dir * float(DUST_DIST[j]) * e + Vector2(0.0, -10.0 * u)
+	var r1 := float(DUST_R[j])
+	return Vector4(p.x, p.y, lerpf(r1 * 0.45, r1, e), 0.9 * pow(1.0 - u, 1.3))
+
+
+## The contact (at = the middle of the fabric's edge on his wig): whack lines out of both sides of the wig (6 f), the
+## dust puffing out of the old pelmet, then four stars circling round his wig under the fringe. Nothing covers the
+## wig on the contact frame — its squash is the read.
+func _draw_hit(ci: Control, at: Vector2, w: float) -> void:
 	var bf := _bonk_t * 60.0
-	if bf < 8.0:
-		var k := bf / 8.0
-		var ro := lerpf(110.0, 170.0, k)
-		for i in 20:
-			var a := -PI * 0.5 + float(i) * TAU / 20.0
-			var rr := ro if i % 2 == 0 else ro * 0.5
-			_burst[i] = at + Vector2(cos(a), sin(a) * 0.62) * rr
-		var a2 := clampf(1.6 - k * 1.6, 0.0, 1.0)
-		ci.draw_colored_polygon(_burst, Color(ViewKit.INK, a2))
-		for i in 20:
-			_burst[i] = at + (_burst[i] - at) * 0.84
-		ci.draw_colored_polygon(_burst, Color(1.0, 0.97, 0.82, a2))
+	if bf < 6.0:
+		var a2 := clampf(1.4 - bf / 6.0, 0.0, 1.0)
+		for side: float in [-1.0, 1.0]:
+			for j in 3:
+				var ang := deg_to_rad(-38.0 + 30.0 * float(j))
+				var dir := Vector2(cos(ang) * side, sin(ang))
+				var p0 := at + Vector2(side * 96.0, 10.0) + dir * (14.0 + bf * 5.0)
+				var p1 := p0 + dir * 44.0
+				ci.draw_line(p0, p1, Color(ViewKit.INK, a2), 11.0)
+				ci.draw_line(p0, p1, Color(1.0, 0.97, 0.82, a2), 5.0)
+	if bf < DUST_F:
+		for i in DUST_PUFFS:
+			var d := dust_puff(i, bf, w)
+			var al := d.w
+			if al <= 0.0:
+				continue
+			var c0 := at + Vector2(d.x, d.y)
+			var rr := d.z
+			ci.draw_circle(c0 + Vector2(0.0, rr * 0.2), rr * 1.1, Color(0.40, 0.29, 0.27, al * 0.4))
+			ci.draw_circle(c0, rr, Color(0.91, 0.87, 0.79, al))
 	if bf >= 3.0 and _bonk_t < BIT_TOPPER_S:
 		var c := at + Vector2(0.0, 12.0)
 		for i in ORBIT_STARS:

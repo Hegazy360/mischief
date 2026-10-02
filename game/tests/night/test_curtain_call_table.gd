@@ -100,7 +100,7 @@ func test_pelmet_wobbles_then_drops_onto_his_head() -> void:
 			drop_frame = f
 		if a.bonked() and hit_frame < 0:
 			hit_frame = f
-			assert_almost_eq(float(st["bottom"]), head.y + CurtainApron.PELMET_SINK, 0.01, "it lands on his head")
+			assert_almost_eq(float(st["line"]), head.y + CurtainApron.PELMET_PRESS, 0.01, "its fabric edge lands on his wig")
 	assert_true(seen_wobble, "the set-up shows")
 	assert_gt(rots, 10, "it visibly wobbles")
 	assert_between(hit_frame - drop_frame, 3, 5, "the drop takes ~4 frames (%d)" % (hit_frame - drop_frame))

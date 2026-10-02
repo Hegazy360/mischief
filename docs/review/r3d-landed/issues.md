@@ -225,3 +225,65 @@ and row 8 partial (fuzz all timed out before N02's last 3 bots; QA re-runs it). 
   set's own piece on loan (set shader, no outline; the set copy hides on the same frame, so the frame total is unchanged).
   RULING: accepted — reported as set_piece_draw_calls / set_piece_tris, counted against the room. REDESIGN §5.6 + index
   row 17 amended. rig_profile3d.gd change (r3d-rig's file) accepted.
+
+## QA round 1 (11:00Z): FAIL — rows 16, 19 (crowding 2/8 yes; gags 3/9), 20a. 20a fixed by the orchestrator (33759c4:
+ScriptProf3D loaded only if present; probe 197 scripts 0 failures, night OK) and pushed with CI.
+
+## D17 — the proxy spike clause, refined (lead, 11:05Z; replaces D14's spike sentence)
+- The 60 slowest Prologue frames list 14 different nodes at 2-4 ms each (NightScene, AudioDirector, hush_apply, ...): the
+  signature of preemption / llvmpipe render-thread contention on a 4-core shared box, not of 14 code spikes.
+- RULING: a spike counts against us only if it is DETERMINISTIC: the same call site > 1 ms at the same tick (+-2 f) in >= 2
+  of 3 rendered runs, OR > 1 ms in a headless run (dummy renderer, no rasteriser contention) of the same route. Those are
+  fixed at the source; the rest are reported as noise with the evidence. p50 <= 3.5 ms and p95 <= 8.0 ms stand.
+
+## Fix round 1 (started 10:50Z; container restart ~11:33Z killed it; WIP ca8f838 kept every change)
+- r3d-fix-hud FINISHED before the restart (report saved): Q-C1/Q-C2/Q-S1/Q-S2 done; face-box + banner keep-outs, one-cloud rule,
+  ring at 0.85x behind faces, pickle/sneeze pictograms redrawn (game/art/ui/previews/{in_a_pickle,achoo_ria}.svg — ACCEPTED,
+  r3d-hud's files per index §4). Its R1 -> fix-gags (overlays_3d clamp) + fix-perf (thought_bubble glyph), R2 -> fix-perf
+  (hud_presenter holding flag), R4 (REDESIGN §2.4/§2.5 keep-out text) -> orchestrator at the end.
+- 11:40Z relaunched r3d-fix-gags + r3d-fix-perf as resumed runs (wk1ddtnld).
+- 13:05Z fix round 1 committed 5f0092b (pushed, [skip ci]); import meta OK. QA round 2 launched (wnse3vydp): Prep (RQ1 Hud
+  first-show warm + RQ2 overlay solve dirty-flag, alone) -> full pregate + rebuilt spot/crowding/gag packets -> new reviewers
+  -> verdict. Orchestrator note: in r3d-fix-gags after/doorframe_bonk_2.jpg f54 Bellows' 3D thought bubble (overlays_3d /
+  FxThoughtBubble, not ui/world) sits in the APPLAUSE / RUNNING GAG band — the HUD keep-out may not cover the 3D bubble;
+  check in QA2's crowding result.
+
+## QA round 2 (17:05Z): FAIL — rows 9 (parlour vase still "dressing" after fix-gags made it big/blue: C* 42.7), 16 (D17),
+19 (crowding 2/8 yes; gags 1/9 at bar: picture passes 3/4/3; dizzy 3/4/3; vase 2/3/2; bonk 2/3/1; curtain call 2/2/2;
+relief 1/2/2; squeak 1/2/1; BOTH sneezes 3/3/3 although the clip is unchanged since round 1's 4/4/3). Committed 74967b5
+(pushed with CI).
+
+## D18 — measurement rulings after two QA rounds (lead, 17:15Z)
+1. Single-reviewer scores are too noisy to gate on: the unchanged sneeze went 4/4/3 -> 3/3/3 and the unchanged curtain call
+   3/3/3 -> 2/2/2 between two reviewers. RULING: from round 3 every row-19 packet gets 3 independent fresh reviewers;
+   gags = the MEDIAN per score per gag; crowding = a frame counts "crowded" only if >= 2 of 3 say yes; verb/spot = the
+   median count. Bars unchanged.
+2. D17's "same tick in >= 2 of 3 rendered runs" matches at chance level on this box (QA: 11 clusters unshifted vs 9-18
+   with the runs shifted +-120 ticks). RULING: a spike is deterministic only if > 1 ms at the same tick (+-2 f) in 3 of 3
+   rendered runs, OR in both headless runs, OR in a rendered AND a headless run. Others are noise. p50/p95 bars stand.
+
+## Fix round 2 DONE (17:13-20:35Z) + import3 green (1345/1345, lint strict, lint_all, import meta). Container restart ~23:00Z
+killed QA round 3 mid-pregate; tree backed up as 446a69b; QA3 resumed at 23:12Z (fixers + import cached, pregate re-runs).
+- night2 note for D18.2: headless PAIRS also match at chance on this box (h1/h2/h3 pairs: 2-3 matched sites each, a
+  different site per pair). If row 16 trips on chance pairs, the next ruling = 3 headless runs, a site counts only if it
+  repeats in all 3 headless runs (or 3/3 rendered).
+
+## QA round 3 (02:45Z, tree 446a69b): rows 1-15, 18, 20a PASS; 16, 17, 19 FAIL
+- Row 19 with 3 reviewers (D18): spot 7/8 PASS, crowding 1/8 PASS, verb 7/8 + 2D-vs-3D 8/8 (carried) PASS; gags 3/9 at bar:
+  g0 + P00 sneeze 4/4/3 PASS, curtain call 3/3/3 PASS; dizzy 3/3/3, picture 3/3/2, bonk 3/3/2, vase 2/3/2, squeak 1/2/1,
+  relief 1/2/1 below. Reviewers agree within 1 point in 27/27 cells.
+- Row 16: every count + p50/p95 bar passes; the D18.2 spike rule fired on DIFFERENT sites in two passes on identical files
+  (t379 vs t1283) -> chance level. Row 17: Bellows 0.281 ms in pass B vs 0.213 ms in pass A on identical files (host slowed
+  10-30 % after the restart).
+
+## D19 — release the slice to the owner as the R1/R2 owner-check build (lead, 03:00Z)
+- The exit bar's core holds: Gate 0 (the sneeze, 4/4/3 by 3 reviewers) and the Prologue play in 3D end to end; HUD = 4
+  pieces; sets simplified; crowding, spot, verb and 2D-vs-3D readability pass with fresh reviewers; solver, fuzz, lints,
+  dead air, C8 green; the APK builds and starts a Night.
+- Row 16: the spike sub-rule is retired on this proxy (two passes on identical files disagree); the row passes on its counts +
+  p50/p95; spikes are judged from the owner's device log (DeviceLog perf3d notes). Row 17: Bellows 0.213 / 0.281 ms on
+  identical files = host noise around the bar; ACCEPTED as a known risk, judged on device, CPU cut scheduled for R3.
+- Row 19 gags: the six secondary Prologue gags (dizzy, picture, bonk, vase, squeak, relief) are below bar. ACCEPTED as known
+  weak spots for the owner pack; fix round 3 on them (Q3-G1..G6) runs after the owner's feedback, folded into R3.
+- Before sending: a short polish pass for the two visible bugs QA named: Bellows' st_double_take reads as a T-pose (relief +
+  curtain call f360), and the curtain-call pelmet hovers above his wig. Then verify, push, CI APK, owner pack.

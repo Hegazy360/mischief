@@ -826,7 +826,8 @@ PY
 do_row() {
   local row="$1" t0 rc=0
   t0=$(date +%s)
-  rm -f "$LOGS/row${row}"*.log
+  # this row's own logs only: row<N>.log and row<N>_*.log (a bare row<N>*.log glob also matched row10–row18 for row 1)
+  rm -f "$LOGS/row${row}.log" "$LOGS/row${row}"_*.log
   case "$row" in
     1) CMD_OF[1]="tools/ci/check_import_meta.sh"
        run 1 row1.log tools/ci/check_import_meta.sh || rc=$? ;;

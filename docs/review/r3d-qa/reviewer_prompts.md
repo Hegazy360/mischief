@@ -54,7 +54,8 @@ Score with `python3 tools/art3d/review/packets.py score <key> <answers.md>` and 
 `readability.md` (round 2 section). Round 1's verb (set_a, 7/8) and 2D-vs-3D (set_d, 8/8) results stand.
 
 ## Round 3 (2026-10-01, QA round 3): three rebuilt packets, THREE fresh reviewers each (D18.1)
-Rebuilt from the fix-round-2 tree (74967b5 + r3d-fix-hud3 / r3d-fix-gags2 / r3d-fix-night2) at the same moments and
+Rebuilt from the fix-round-2 tree (74967b5 + r3d-fix-hud3 / r3d-fix-gags2 / r3d-fix-night2 — committed unchanged as
+446a69b: same pre-gate content hash) at the same moments and
 ticks as rounds 1 and 2, 1200×540, `--no-captions`, MSAA off, with new seeds and new keys
 (`keys/r3_<packet>_key.json` in the r3d-qa scratch dir; rounds 1–2's packets, keys and answers are untouched). The dizzy
 spin is now shot every 6 ticks (was 9), so its strip has 5 pages.

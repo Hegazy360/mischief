@@ -1,6 +1,6 @@
 # Row 19 — the readability and gag review (fresh reviewers, opaque packets)
 
-> **Current verdict: round 2, at the end of this file** (2026-10-01, the fix-round-1 tree): FAIL, with crowding 2/8 and gags 1 of 9 at their bars; spot 6/8 passes; the verb (7/8) and 2D-vs-3D (8/8) results below are carried. Round 1 follows, unchanged.
+> **Current verdict: round 3, at the end of this file** (2026-10-02, the fix-round-2 tree, 3 fresh reviewers per packet, medians per D18.1): **FAIL** on the gags (3 of 9 at their bar: both sneezes 4/4/3 and the curtain call 3/3/3 pass); spot **7/8** and crowding **1/8** pass; the verb (7/8) and 2D-vs-3D (8/8) results of round 1 carry. Rounds 1 and 2 follow, unchanged.
 
 r3d-qa §3.3, index §6 row 19. **Verdict: FAIL.** Two of the five tests miss their bar:
 - crowding: 2/8 frames answered "yes, crowded" (the bar is ≤ 1/8);
@@ -359,11 +359,243 @@ in their round-2 form.
 run **new** fresh reviewers on rebuilt crowding and gag packets with new seeds, ideally three per packet, scored by
 median. Re-run pre-gate row 19.
 
-# Round 3 — QA round 3 (2026-10-01, fix-round-2 tree): packets built, NOT scored here
-Phase 1 of round 3 rebuilt the spot, crowding and gag packets from 74967b5 + fix round 2 (new seeds 131 / 137 / 149,
-new keys `keys/r3_*_key.json`): [`packets/set_i`](packets/set_i/prompt.md) (spot, 8 frames),
+# Round 3 — QA round 3 (2026-10-02, the fix-round-2 tree): spot, crowding and gags, 3 fresh reviewers per packet (D18.1)
+
+Phase 1 of round 3 rebuilt the spot, crowding and gag packets from 74967b5 + fix round 2 (= 446a69b by content; new
+seeds 131 / 137 / 149, new keys `keys/r3_*_key.json`): [`packets/set_i`](packets/set_i/prompt.md) (spot, 8 frames),
 [`packets/set_j`](packets/set_j/prompt.md) (crowding, 8 frames), [`packets/set_k`](packets/set_k/prompt.md) (gags,
-9 strips; the dizzy spin every 6 ticks). Per D18.1 each packet goes to 3 fresh reviewers: spot = the median count,
-crowding = a frame counts only if ≥ 2 of 3 say yes, gags = the median per score. How to run them:
-[`reviewer_prompts.md`](reviewer_prompts.md) "Round 3". The round-3 answers, keys and `verdict` lines go below this
-heading when they are scored; until then row 19 reads round 2's lines above.
+9 strips; the dizzy spin every 6 ticks). How they were run: [`reviewer_prompts.md`](reviewer_prompts.md) "Round 3".
+**Nine new fresh reviewers** answered them, three per packet; none had seen an earlier packet, the game or another
+reviewer's answer. The orchestrator ran them and handed over the answers, pasted below verbatim, per reviewer.
+Rounds 1 and 2 (above) are kept as they were.
+
+**Verdict: FAIL.** The gags miss their bar: **3 of 9** strips at their bar (round 2: 1 of 9). Spot and crowding now
+pass, and the verb and 2D-vs-3D results carry from round 1.
+
+| Test | Packet | Round 3 (D18.1, 3 reviewers) | Round 2 (1 reviewer) | Bar | Pass? |
+|---|---|---|---|---|---|
+| Verb: what is Hush doing | `packets/set_a/` (not rebuilt) | — (round 1 stands) | — | ≥ 7/8 | PASS (carried, 7/8) |
+| Spot: what happens if he uses it | `packets/set_i/` (8 frames, seed 131) | counts 7, 6, 7 → **median 7/8** | 6/8 | median ≥ 6/8 | **PASS** |
+| Crowding: is the screen crowded | `packets/set_j/` (8 frames, seed 137) | **1/8** frames with ≥ 2 of 3 "yes" | 2/8 | ≤ 1/8 | **PASS** (at the bar) |
+| 2D vs 3D: which would you rather play | `packets/set_d/` (not rebuilt) | — (round 1 stands) | — | ≥ 6/8 | PASS (carried, 8/8) |
+| Gags: funny / readable / fresh, 1–5 | `packets/set_k/` (9 strips, seed 149) | **3 of 9** at their bar (medians) | 1 of 9 | sneezes + dizzy spin ≥ 4/4; the rest ≥ 3/3; fresh ≥ 3 | **FAIL** |
+
+| Gag (median funny / readable / fresh) | Round 3 | Round 2 | Round 1 | Bar | Verdict |
+|---|---|---|---|---|---|
+| g0 sneeze | **4/4/3** | 3/3/3 | 4/4/3 | 4/4/3 | **PASS** |
+| P00 sneeze | **4/4/3** | 3/3/3 | 4/4/3 | 4/4/3 | **PASS** |
+| curtain call | **3/3/3** | 2/2/2 | 3/3/3 | 3/3/3 | **PASS** |
+| dizzy spin | 3/3/3 | 3/4/3 | 3/3/4 | 4/4/3 | FAIL (funny, readable) |
+| picture | 3/3/2 | 3/4/3 | 1/1/1 | 3/3/3 | FAIL (fresh) |
+| door-frame bonk | 3/3/2 | 2/3/1 | 2/2/2 | 3/3/3 | FAIL (fresh) |
+| vase | 2/3/2 | 2/3/2 | 1/2/1 | 3/3/3 | FAIL |
+| squeak bit | 1/2/1 | 1/2/1 | 1/3/1 | 3/3/3 | FAIL |
+| relief | 1/2/1 | 1/2/2 | 1/3/1 | 3/3/3 | FAIL |
+
+## R3 verdict lines (read by `tools/scripts/pregate3d.sh` row 19)
+
+Row 19 reads every `verdict` line in this file, and for each test the **last** line wins, so these lines replace
+rounds 1–2's. Spot is the median of the three reviewers' counts, crowding counts a frame only when ≥ 2 of 3 said
+"yes", and each gag score is the median of the three (D18.1). Verb and 2D-vs-3D repeat round 1 unchanged.
+
+```
+verdict verb 7/8
+verdict spot 7/8
+verdict crowded_yes 1/8
+verdict prefer_3d 8/8
+verdict gag g0_sneeze funny=4 readable=4 fresh=3
+verdict gag p00_sneeze funny=4 readable=4 fresh=3
+verdict gag p00_dizzy_spin funny=3 readable=3 fresh=3
+verdict gag p00_curtain_call funny=3 readable=3 fresh=3
+verdict gag p00_picture funny=3 readable=3 fresh=2
+verdict gag p00_doorframe_bonk funny=3 readable=3 fresh=2
+verdict gag p00_vase funny=2 readable=3 fresh=2
+verdict gag p00_squeak_bit funny=1 readable=2 fresh=1
+verdict gag p00_relief funny=1 readable=2 fresh=1
+```
+
+## R3.1 How it was scored
+1. The nine answer sheets were saved verbatim to `<SP>/work/r3d-qa/p5/answers/{spot,crowding,gags}_r{1,2,3}.md`.
+2. Each sheet was scored on its own: `python3 tools/art3d/review/packets.py score <SP>/work/r3d-qa/keys/r3_<packet>_key.json
+   <answers> --out=… --json=…` (`--bar=3` for the gags) → `<SP>/work/r3d-qa/p5/verdict_<packet>_r<n>.{md,json}`.
+3. Every spot row was then judged by hand on the gist, with round 1–2's standard (a horn = the squeaker; "a tune" =
+   the kettle duet, weakly; the joke counts, the "needs the squeaker" state is noted, not required). I looked at every
+   packet image and every strip page (29 pages). The hand verdict decides.
+4. Matcher vs hand: the matcher left the pickle jar `unmatched` on all three sheets and reviewer 2's honey `unmatched`;
+   all four are wrong on the gist. Every other row agrees (spot matcher 7 / 6 / 7 = the hand counts).
+5. Combined per D18.1 by `<SP>/work/r3d-qa/p5/gen_r3.py` (the tables below; `r3_result.json`).
+
+Frame tags: `g0:n`, `p00i:n` = frame n of the every-3-tick sequence (tick ≈ 3n); `n01i:n` = every 6 ticks from engine
+frame 4404 (tick ≈ 4404 + 6n); `calm_<t>` = a paused shot at tick t on the crafted N1 calm route; `needs:n` ≈ 5105 + 3n.
+## R3.2 Spot — `packets/set_i/` (pass: the median of the 3 counts ≥ 6/8)
+
+Question (as rounds 1–2): *"What will happen if the neighbour uses the object inside the cyan circle? Give the gist of the joke in a few words. (If the circled thing is a box or cupboard, say what is in it.)"*
+
+| id | Key (item · expected · gist · source) | Reviewer 1 (verbatim) | Reviewer 2 (verbatim) | Reviewer 3 (verbatim) | Gist verdict (R1 · R2 · R3) |
+|---|---|---|---|---|---|
+| pkt_01 | sp_box · squeaker · "the box holds the squeaker (a squeaky horn toy) she can take" · `n01i:22` (≈ t4536) | The box holds a bike horn, so it honks loudly in his face when he opens it. | the box holds a clown bulb horn, so it HONKS loudly when he opens it (unsure) | The box holds an air horn that blasts him when he opens it (unsure) | right: a horn in the box (matcher: correct) · right (matcher: correct) · right: a horn (matcher: correct). All three name a horn in the taped box (round 1's standard: the squeaker is a squeaky horn toy; the honk-in-his-face is the reviewers' own addition). |
+| pkt_02 | sp_recliner · chair launch · "the recliner launches him up to the ceiling (reads the paper in orbit)" · `n01i:418` (≈ t6912) | The armchair is spring-loaded and launches him up into the chandelier when he sits. | a spring in the armchair shoots him up into the chandelier when he sits down | The armchair has a spring under the cushion, so sitting down launches him up into the chandelier | right (matcher: correct) · right (matcher: correct) · right (matcher: correct) |
+| pkt_03 | sp_gramophone · dizzy spin · "the record spins him round until he is dizzy (the gramophone goes haywire) (his red countdown ring is on its preview)" · `p00i:756` (≈ t2268) | The gramophone record skips and loops over and over, leaving him dizzy (unsure). | the gramophone plays the record at triple speed and the frantic music makes him dizzy (unsure) | The gramophone record is rigged to skip and loop on a dizzying spin (unsure) | right: dizzy (matcher: correct) · right: dizzy (matcher: correct) · right: a dizzying spin (matcher: correct). Round 3's gramophone badge sits on its prop with a tail (Q2-C1), and the record + ×3 still reads as speed → dizzy. |
+| pkt_04 | sp_pickle · jar fight · "he fights the jar: it will not open and he strains and slips (loses a fight with a jar)" · N1 `calm_360` | The jar is full of spring snakes, which pop out at him when he opens it (unsure). | a fake spring snake jumps out of the jar when he opens it (unsure) | A spring snake pops out of the jar when he opens it (unsure) | **wrong**: spring snakes (matcher: unmatched) · **wrong**: a spring snake (matcher: unmatched) · **wrong**: a spring snake (matcher: unmatched). **The jar now reads as a jar** for all three (round 1: "tea jar", round 2: "vase"), but the two fat green gherkins of the redrawn `in_a_pickle` pictogram read as **spring snakes** (3/3), and the strain/twist arrow did not read. The prop on the shelf is still the green polka-dot pot (Q2-S1's prop half is open). |
+| pkt_05 | sp_honey · sneeze · "he gets a face full of pepper and sneezes (the pepper pot / honey pot rigged)" · `g0:30` (≈ t90) | The spice or pepper on the shelf is rigged, so he turns red and sneezes or puffs steam (unsure). | the jar's sugar is swapped for hot chili, so he puffs steam from the heat (unsure) | The spice or pepper on the shelf is swapped, so he sneezes or gets a burning puff (unsure) | right: sneezes (matcher: correct) · **wrong**: hot chili, steam (round 1's misread) (matcher: unmatched) · right: sneezes (matcher: correct). Two of three read the sneeze; one repeats round 1's "hot chilli" misread (the red-striped pot reads as a spice jar, the CHOO puff as steam). |
+| pkt_06 | sp_tap · face wash · "the tap sprays water in his face (a face wash)" · N1 `calm_150` | The tap sprays water straight into his face. | the tap sprays water straight into his face | The tap sprays water straight into his face | right (matcher: correct) · right (matcher: correct) · right (matcher: correct) |
+| pkt_07 | sp_kettle · kettle duet · "the kettle sings / plays music along with him (a duet with the kettle)" · N1 `calm_520` | The kettle blasts a loud whistling tune and he covers his ears. | the kettle whistles a loud tune and startles him over his tea (unsure) | The kettle whistles a loud tune and startles him (unsure) | right, weakly: a tune (the duet not named) (matcher: correct) · right, weakly: a tune (matcher: correct) · right, weakly: a tune (matcher: correct). "A whistling tune" names the music (round 2's standard); none names his singing along; "startles him" / "covers his ears" is a different joke. |
+| pkt_08 | sp_needs · kettle duet · "the kettle sings a duet with him - the dimmed preview + the grey squeaker silhouette say she must fetch the squeaker first (his red ring: he is coming for tea next)" · `needs:38` (≈ t5219) | The kettle blasts a loud whistling tune and he covers his ears; the "?" badge suggests it still needs an item (unsure). | the kettle whistles a loud tune and startles him over his tea; this rig seems to still need an extra item (unsure) | The kettle whistles a loud tune and startles him (unsure) | right: a tune + **the need read** (matcher: correct) · right: a tune + **the need read** (matcher: correct) · right, weakly: a tune (the need not named) (matcher: correct). **Round 2's honk misread is gone**: the redrawn `kettle_drum` reads as a tune, and the dashed "?" slot reads as "still needs an item" for 2 of 3 (Q2-S2). |
+
+**Counts: reviewer 1 7/8, reviewer 2 6/8, reviewer 3 7/8 → median 7/8. PASS** (round 2: 6/8; round 1: 6/8).
+
+## R3.3 Crowding — `packets/set_j/` (pass: ≤ 1/8 frames with ≥ 2 of 3 "yes")
+
+Question (as rounds 1–2): *"Is this screen crowded or confusing? Answer yes or no, then one sentence why."* The key expects "no" for every frame.
+
+| id | Key (item · source) | Reviewer 1 (verbatim) | Reviewer 2 (verbatim) | Reviewer 3 (verbatim) | yes | Counts? | Notes |
+|---|---|---|---|---|---|---|---|
+| pkt_01 | cr_p00_b · `p00i:730` (≈ t2190) | no — the layout is readable, but two gramophone-related bubbles and two outlined objects (gramophone and piano) make it a little unclear which one to use (unsure). | no — The busiest parts are the HUD bar, the thought bubble over the old man and the red-ringed record bubble over the gramophone, but each one is clearly separate and the room has plenty of space between things. | no — It's busy, with the score bar, two thought bubbles, outlined props and a floor marker all showing, but each element has its own space and the bubble by the gramophone clearly points to the next target (unsure). | 0/3 | no | **Fixed** (round 2: "yes"): the gramophone's badge sits on the gramophone with a tail, one ring. R1 and R3 still note two gramophone bubbles (his thought + the badge). |
+| pkt_02 | cr_p00_c · `p00i:891` (≈ t2673) | no — one character fills the center and the music notes clearly show the gag, though the thick clump of small notes on his wig looks messy. | no — This is a close-up reaction shot of one character, and the pile of music notes around his head is messy but still reads as a single obvious joke. | no — The old man is clearly the focus, though the pile of music notes around his head is dense and a bit messy. | 0/3 | no | All three: the clump of notes on his wig is messy. |
+| pkt_03 | cr_g0_plan · `g0:30` (≈ t90) | no — the room is clean and the path is clear, but the thought bubble and pointing hand above the shelf are too small to read at phone size, and the inset in the top-right corner pulls attention away (unsure). | no — The scene is clean with one character, a highlighted cabinet and a small inset view, though the pointing-hand thought bubble above the shelf is a little unclear about what it wants. | no — The scene is clean with one character walking toward a marked spot, though the small hint bubble with the pointing hand above the shelf is hard to read at a glance. | 0/3 | no | All three: the pointing-hand hint above the shelf is small / unclear at phone size. |
+| pkt_04 | cr_p00_d · `p00i:568` (≈ t1704) | no — the dazed character is the clear focus, with only the score bar, two buttons and a quiet row of audience silhouettes around him. | no — The dazed old man is clearly the main subject, and the eyes peeking from the curtain and the audience silhouettes along the bottom stay in the background. | no — One dazed character sits in the center with the score bar and audience silhouettes kept to the edges, so it reads easily. | 0/3 | no |  |
+| pkt_05 | cr_g0_sneeze · `g0:118` (≈ t354) | no — the scene is sparse and easy to follow, with the hidden eyes, the falling item and the inset each showing one thing. | no — The room is mostly empty, with just the peeking eyes, a small inset view and a few buttons, so it is easy to read. | no — The screen is sparse and calm with eyes peeking from the curtain and an inset view, though the small red object falling from the shelf is easy to miss (unsure). | 0/3 | no |  |
+| pkt_06 | cr_p00_a · `p00i:463` (≈ t1389) | no — the slapstick fall reads clearly, though the shelf debris and smoke cloud crowd the top-left status pill. | no — This chaotic action frame still has one clear focus (the old man falling off the stool), though the falling shelf items brush against the top-left HUD pill (unsure). | no — The big moment of the man flying off the stool is clear, though the debris falling from the shelf overlaps the top-left counter. | 0/3 | no | All three: the shelf debris overlaps the top-left Script pill. |
+| pkt_07 | cr_n01 · `n01i:394` (≈ t6768) | yes — two thought bubbles (one ringed bubble packed with tiny icons), an outlined booth, a floor target, a longer status bar and three bottom buttons all compete, so it is hard to tell what to do first (unsure). | yes — Two thought bubbles compete for attention, the red-ringed one packs music notes, a kettle and a face into one small icon, and the highlighted kettle, highlighted curtain, two characters, a dotted progress pill and three buttons all show up together. | no — This is the busiest frame, with two thought bubbles, a highlighted closet, a floor marker and three buttons, but they are spread apart; the red bubble that combines three tiny icons is the hardest part to read (unsure). | 2/3 | **yes** | **Counts as crowded (2 of 3).** The second red ring is gone (Q2-C1), but two thought bubbles remain for one target (the kettle's badge with his ring + his own tea thought), and the new duet pictogram packs notes + kettle + face into one ~80 px bubble. |
+| pkt_08 | cr_g0_rig · `g0:64` (≈ t192) | no — the reach-for-the-teapot action and its progress rings are obvious, and the rest of the screen stays calm. | no — The mime reaching the shelf, with matching green progress rings on the object and the action button, is easy to follow, and the rest of the screen is uncluttered. | no — The mime reaching for the jar has matching progress rings on the object and the action button, so it is clear what is happening. | 0/3 | no |  |
+
+**Result: 1/8 frames count as crowded. PASS, at the bar** (round 2: 2/8; round 1: 2/8). Per reviewer: 1, 1 and 0 "yes".
+
+## R3.4 Gag strips — `packets/set_k/` (9 strips, TECH §11 rubric in the prompt; the median per score)
+
+Bars: the sneezes (`g0_sneeze`, `p00_sneeze`) and `p00_dizzy_spin` need funny ≥ 4 and readable ≥ 4; every other strip needs ≥ 3 on both; fresh ≥ 3 for all. Question: *"For each strip: what happens, in one sentence? Then score it 1-5 on funny, readable (can you tell what happens and why, at this size, without sound?) and fresh (not the obvious version of the joke)."* Each window is `[sequence, t0, t1, stride]` (ticks), the same moments as rounds 1–2; the dizzy spin is now shot every 6 ticks (was 9).
+
+### pkt_01 · `p00_relief` · p00i 3196–3265 every 3
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 1 | 2 | 2 | funny=1 readable=2 fresh=2 — Eyes peek over the piano and duck (f0-3), the neighbour snaps into a stiff arms-straight-out pose with his mouth open and holds it for 30 frames (f9-39), which reads like a broken T-pose rather than a startle, then sweat pops over the piano (f42) and he turns and walk-cycles left without really moving (f45-69); there is no wind-up, no accent and no clear gag. |
+| 2 | 1 | 1 | 1 | funny=1 readable=1 fresh=1 — With the prankster's eyes peeking over the piano (f0), the neighbour gives a small startled "o" (f6), then locks into a stiff arms-out T-pose held unchanged from f9 to f39 with his cravat covering his mouth so his face never reads, flinches with sweat drops (f42), and turns to walk in place against the doorframe from f45 to f69 while white puffs stack above the piano, so no prank or payoff is readable (unsure what was rigged). |
+| 3 | 1 | 2 | 1 | funny=1 readable=2 fresh=1 — With the prankster's eyes peeking over the piano (f0), he snaps into a stiff arms-out T-pose with a blank face and holds it about 30 frames (f9-f39), which looks like a missing animation rather than a reaction; then sweat drops pop over the piano (f42), he turns (f45) and walks off left while barely moving across the floor, so his feet seem to slide (f48-f69, unsure), and no prank lands. |
+
+**Median 1/2/1** (bar 3/3, fresh 3) → **FAIL** (funny 1 < 3, readable 2 < 3, fresh 1 < 3). Round 2: 1/2/2; round 1: 1/3/1. All three: his double-take pose is a stiff **arms-straight-out T-pose** held f9–39 with a blank face (`st_double_take`'s take pose; also seen at the curtain call f360). Two of three: he then walks in place (feet slide, f45–69). The "phew" puffs over the piano read as "sweat" / "white puffs", not relief. The gramophone horn behind him reads as a hat at f12–39.
+
+### pkt_02 · `p00_squeak_bit` · p00i 217–331 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 1 | 2 | 1 | funny=1 readable=2 fresh=1 — The prankster makes a small gesture in the kitchen (f0-18, +2), then the camera cuts to the neighbour, who reaches up at the gramophone (f24-36), startles once (f42), fiddles with something at his chest while a few notes come out (f48-78, unsure), conducts (f84-96) and thinks of tea (f102) as the camera pans back to her (f108-114); no prank lands and no face hold earns anything. |
+| 2 | 2 | 3 | 2 | funny=2 readable=3 fresh=2 — A setup with no payoff: the mime loiters in the kitchen under a hint card (f0-f18) while the neighbour stretches by the gramophone (f24-f36), startles (f42), fiddles with something yellow at his chest (f48-f60, unsure whether it is a duck), sways eyes-closed as notes rise (f66-f78), conducts (f84-f96), switches his thought bubble to tea (f102) and heads for the kitchen as the mime sneaks off (f108-f114). |
+| 3 | 1 | 2 | 1 | funny=1 readable=2 fresh=1 — The mime tiptoes around the bathroom (f0-f18, small +2 at f12), the camera cuts to the neighbour stretching, fiddling with a small object that gives off notes and conducting by the gramophone (f24-f102) while his thought bubble changes from gramophone to tea (f102), then it cuts back to the mime (f108-f114); nothing happens to him, so there is no gag to read. |
+
+**Median 1/2/1** (bar 3/3, fresh 3) → **FAIL** (funny 1 < 3, readable 2 < 3, fresh 1 < 3). Round 2: 1/2/1; round 1: 1/3/1. His answer is now on the main screen (Q2-G4's cue shot), but nothing links it to her squeak: R1 "no prank lands", R3 "nothing happens to him"; his throat clutch reads as "fiddling with something at his chest" (R2: "something yellow … a duck"). The crack has no visible glyph.
+
+### pkt_03 · `g0_sneeze` · g0 1090–1228 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — He sips tea on a stool while a pepper shaker on the shelf showers him (f0-66), tips his head back with eyes squeezed to wind up (f48-66), then a sneeze with a big white puff launches him and the stool backwards across the room (f72-84) onto the sink by the door (f90), where he sits dazed with stars for over 40 frames (f96-138) while his cup rolls across the floor (f102-138); the silhouette and the hold read well, but the pepper build is long and the pepper sneeze itself is the obvious joke, saved by the stool-rocket and sink landing. |
+| 2 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — While he sips tea on a stool, pepper sprinkles from the shelf onto his face (f6-f42), he winds up an inhale with his head thrown back and eyes squinting (f48-f66), then a puff-cloud sneeze (f72) rockets him and the stool backwards across the room (f78-f84) into the sink (f90), where he sits dazed under circling stars for a strong 40+ frame face hold (f96-f138) as the teacup clatters down (f102-f138); the slow pepper build is the only drag. |
+| 3 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — Sipping tea on a stool under a shaker that sprinkles pepper on him (f0-f42), he tips his head back and squints in a clear opposite wind-up (f48-f66), then sneezes with a big white puff that launches him and the stool across the kitchen (f72-f84) into the sink (f90), and sits dazed with stars while his teacup lands on the floor (f96-f138, a readable 40+ frame hold); the silhouette is strong and the launch beats the plain sneeze, but the pepper build is slow, the stool stays stuck to his feet in the air, the right edge of the frame crops him, and it ends with no button. |
+
+**Median 4/4/3** (bar 4/4, fresh 3) → **PASS**. Round 2: 3/3/3; round 1: 4/4/3. **Passes, 4/4/3 from all three** (round 2: 3/3/3). Q2-G1 landed: the pepper falling is seen by all three, and the dazed hold in the sink reads ("a readable 40+ frame hold"). Notes: the pepper build is slow; the stool stays stuck to his feet in the air; "ends with no button".
+
+### pkt_04 · `p00_picture` · p00i 3256–3394 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — A picture frame drops off the wall onto his head (f18-30) and he stands dazed wearing it like a portrait of himself (f36-66, a good 30-frame face hold), grumbles while stomping without travelling (f72-90; the stanchion and mirror stay put, so it looks like a treadmill), then the frame slowly slides off (f96-114) and he stays furious (f114-138); the late slide-off is a nice second beat, but it is unclear who rigged it or why. |
+| 2 | 3 | 3 | 2 | funny=3 readable=3 fresh=2 — After walking in place against the doorframe (f0-f12, feet stepping but not moving), the portrait above the door drops (f18) and lands on his head like a hat (f24), he wobbles dazed under stars wearing it (f30-f66), turns grumpy (f72-f90), and lets it slide off to the floor (f96-f114) while glaring at camera for a readable hold (f96-f132) before stomping off (f138); it's the obvious picture-falls-on-head joke. |
+| 3 | 2 | 3 | 2 | funny=2 readable=3 fresh=2 — As he walks off left (f0-f12) the shot jumps and a picture frame swings down onto his head (f18-f30), he stands dazed with sparkles (f36-f66, a readable hold), turns angry (f72-f90), and the frame slides off and falls to the floor (f96-f114) while he fumes (f114-f138); it is clear, but it is the stock thing-falls-on-head gag, the hit has no squash or pop (f30), and the white cloud stack over the piano (f0-f60) is never explained. |
+
+**Median 3/3/2** (bar 3/3, fresh 3) → **FAIL** (fresh 2 < 3). Round 2: 3/4/3; round 1: 1/1/1. Readable 3 from all; **fails on fresh** (median 2): "the stock thing-falls-on-head gag". R1 liked "wearing it like a portrait of himself" and the late slide-off (Q2-G8 landed). R1 and R3: he stomps without travelling ("a treadmill"); R3: no squash or pop at the hit (f30); the white puff stack over the piano (from the relief) is "never explained".
+
+### pkt_05 · `p00_vase` · p00i 82–208 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 2 | 3 | 2 | funny=2 readable=3 fresh=2 — He belts along to the gramophone (f0-36) while a vase on the far mantel wobbles (f0-54), topples (f60) and smashes (f66) and he keeps conducting (f72-126), with only one wide-eyed glance at f90 and no 30-frame reaction hold; the vase is small and far from him at phone size, and "singing breaks the vase" is the expected version. |
+| 2 | 2 | 3 | 2 | funny=2 readable=3 fresh=2 — He belts opera next to the gramophone, and his stream of notes rattles a blue vase on the mantel (f0-f54) until it tips (f60) and shatters on the hearth (f66-f96), while he stays eyes-closed and oblivious apart from one brief wide-eyed beat (f90) and keeps conducting (f96-f126); it's the stock voice-breaks-glass gag, the shards are tiny at this size, and his face never reacts. |
+| 3 | 2 | 2 | 2 | funny=2 readable=2 fresh=2 — He sings at the gramophone (f0-f36) and his drifting notes rock the vase on the mantel until it falls and smashes by the fireplace (f42-f72), but he keeps conducting with only a quick wide-eyed glance (f90) and no 30-frame face hold, and the vase is tiny and far from him, so at phone size the payoff is easy to miss; it is the stock voice-breaks-china joke. |
+
+**Median 2/3/2** (bar 3/3, fresh 3) → **FAIL** (funny 2 < 3, fresh 2 < 3). Round 2: 2/3/2; round 1: 1/2/1. Unchanged at 2/3/2: the crash reads, but **his reaction does not** — all three see "only a quick wide-eyed glance (f90), no 30-frame face hold"; Q2-G5's push-in + `st_straighten_cravat` "ovation" did not register. The vase is "tiny and far from him" at phone size. "Voice breaks the vase" is the stock version.
+
+### pkt_06 · `p00_doorframe_bonk` · p00i 1624–1750 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 3 | 3 | 2 | funny=3 readable=3 fresh=2 — He shuffles along conducting with his eyes shut (f24-48), rears back with his arm up (f54, a good opposing wind-up) and bonks the doorframe with a short star pop (f60), stays dazed with wobbly eyes for about 40 frames (f66-108), then carries on (f114-126); it reads as a clean pratfall, but nothing shows what the prankster in the curtain did, and a white oval drifts along with his feet the whole strip (f0-126, unclear what it is). |
+| 2 | 3 | 4 | 2 | funny=3 readable=4 fresh=2 — Conducting eyes-closed as he walks left through the kitchen (f0-f48), he rears back (f54) and smacks his head on the doorframe with a clear white impact star (f60), staggers with spiral glasses, stars and a wobbly mouth for a good face hold (f66-f108), then carries on through the door still waving the baton (f114-f126); clean, but it's the obvious walk-into-the-door version. |
+| 3 | 2 | 3 | 1 | funny=2 readable=3 fresh=1 — Walking left pointing his baton (f0-f18), he turns to camera mid-yawn (f24-f42), looks up startled (f54) and bonks his head on the wall corner with an impact star (f60), then wobbles dazed with stars and a wavy mouth (f66-f108, a good readable hold) before walking on (f114-f126); it reads, but it is the plain walk-into-the-doorframe gag, the look-up at f54 is not a real opposite wind-up, and applause stays at 37 throughout. |
+
+**Median 3/3/2** (bar 3/3, fresh 3) → **FAIL** (fresh 2 < 3). Round 2: 2/3/1; round 1: 2/2/2. Readable 3–4, **fails on fresh** (median 2): "the plain walk-into-the-doorframe gag". Q2-G6 landed (no cut, a face hold of ~40 f); the f54 wind-up reads for R1 only. The portrait tilt it sets up is outside the strip. R1: a white oval drifts by his feet the whole strip (by my look: the sneeze's dropped teacup on the floor).
+
+### pkt_07 · `p00_dizzy_spin` · p00i 2560–2767 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — With eyes peeking from behind the piano, he cranks the gramophone (f12-42) and dances wildly to the stream of notes (f48-90), then at f96 (+52) heavy dark notes land on him and he slumps red-faced with notes circling his head like dizzy stars (f102-162, a long face hold), grits his teeth (f174), turns suspicious (f180) and leans in nose-to-nose with the hidden eyes (f192-204); notes in place of stars is a fresh twist, but the cause of the switch and whether the red face means dizzy or angry are unclear, and the strip runs long. |
+| 2 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — With the prankster's eyes peeking from behind the piano, he leans in to inspect the gramophone (f12) and it blasts a geyser of notes (f18-f42) that drags him into a jerky dance and twirl (f48-f96), leaving him squatting red-faced and dizzy with notes orbiting his head (f102-f162) before he recovers, grits his teeth (f174) and searches nose to nose with the hidden eyes (f186-f204); the ending is nice, but at about 200 frames the strip runs long. |
+| 3 | 3 | 3 | 4 | funny=3 readable=3 fresh=4 — He tinkers with the gramophone (f0-f12), bursts of notes (f18-f42) whip him into a frantic dance with notes swirling at his feet (f48-f90), then he slumps flushed and dizzy with music notes circling his head instead of stars (f102-f162, a long readable hold), straightens up grimacing (f168-f174) and shuffles off with a suspicious bubble (f180-f204); the notes-as-stars is a nice twist, but without sound it is unclear why the music makes him dance, and the hold runs long. |
+
+**Median 3/3/3** (bar 4/4, fresh 3) → **FAIL** (funny 3 < 4, readable 3 < 4). Round 2: 3/4/3; round 1: 3/3/4. 3/3/3 (bar 4/4). The 2-turn spin (Q2-G2) now shows, but it reads as **a wild dance**: "unclear why the music makes him dance" (R3), "whether the red face means dizzy or angry" (R1). Liked: notes circling his head instead of stars (R1, R3), the nose-to-nose end with the hidden eyes (R1, R2). All: the hold runs long (~60 f).
+
+### pkt_08 · `p00_curtain_call` · p00i 3577–4267 every 30
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — The curtain drops (f30), the prankster bows under thrown roses (f60-150) beside the title sign (f150-210), then on the results screen the neighbour stomps on (f270-330), flings his arms out stiffly (f360, the same T-pose look as pkt_01), sulks red-faced (f390-480) and gets bonked by the falling pelmet (f480-510, stars), then glowers under it for a long hold (f540-690); having the stage itself prank him at his own curtain call is a good button, but the replay window and text compete with him, the 30-frame spacing hides the accent, and the pelmet hovers just above his head afterwards. |
+| 2 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — On the end screen the curtain drops (f30), the mime bows under thrown roses (f60-f150) and peeks from behind the dropping title marquee (f180-f210), then the neighbour storms onto the results screen (f270-f330), shouts with arms flung wide (f360) and fumes red-faced (f390-f450) until a pelmet drops onto his head (f480-f510, stars f540); he then sulks under it, oddly hovering above his head, for a very long hold (f570-f690), small and cluttered behind the results panel. |
+| 3 | 3 | 3 | 3 | funny=3 readable=3 fresh=3 — End screen: the curtain drops (f30), the mime bows under thrown roses (f60-f120) and the title sign comes down (f150-f210), then on the results card the neighbour stomps on (f270-f360), sulks (f390-f480), the curtain's pelmet drops on his head with stars (f510-f540), and he glowers under it in a long hold (f570-f690); a good final callback, but frames 30 apart are too far apart to judge the accent or overshoot, it competes with the results text and the replay inset, and the pelmet seems to hang just above his head rather than rest on it (unsure). |
+
+**Median 3/3/3** (bar 3/3, fresh 3) → **PASS**. Round 2: 2/2/2; round 1: 3/3/3. **Passes, 3/3/3 from all three** (round 2: 2/2/2). Q2-G7 landed: "having the stage itself prank him at his own curtain call is a good button". All three: the pelmet seems to hover just above his head; the results text and the replay inset compete with him; the 30-f stride hides the accent. R1: his f360 arms-out pose is the same T-pose as the relief.
+
+### pkt_09 · `p00_sneeze` · p00i 1318–1456 every 6
+
+| Reviewer | funny | readable | fresh | Answer (verbatim) |
+|---|---|---|---|---|
+| 1 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — A tighter version of the pepper sneeze: pepper showers his tea (f0-42), he tips his head back to inhale (f42-54), the sneeze puff rockets him and the stool backwards (f60-72) onto the sink (f78), he sits dazed with stars for about 40 frames (f78-120), then a suspicious magnifier thought appears (f126) and he walks right past the prankster's eyes in the curtain (f132-138); the quick build and the near-miss ending help, but the core joke is still the expected pepper sneeze. |
+| 2 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — Same pepper-sneeze gag with tighter timing: pepper falls into his tea (f0-f42), he inhales with head back and eyes squinting (f48-f54), and a puff-cloud sneeze (f60) launches him and the stool into the sink (f66-f78) right beside the prankster's eyes in the curtain; he sits dazed under stars for a solid face hold (f78-f120), then gets up with a magnifier "who did this" thought (f126) and stomps off pointing his baton (f132-f138), a fuller arc than the stock sneeze. |
+| 3 | 4 | 4 | 3 | funny=4 readable=4 fresh=3 — Pepper sprinkles onto him as he sips tea on a stool (f0-f36), he squints and tips his head back in a clear wind-up (f42-f54), and the sneeze puff launches him and the stool across the room into the sink (f60-f72) inside 6 frames, so the accent is short; he sits dizzy with stars while his teacup lands (f78-f120, about a 42-frame face hold), then gets up with a suspicious magnifying-glass bubble and walks off (f126-f138); tight timing with a good button, though the stool again rides with him in the air and the right edge of the frame crops him. |
+
+**Median 4/4/3** (bar 4/4, fresh 3) → **PASS**. Round 2: 3/3/3; round 1: 4/4/3. **Passes, 4/4/3 from all three** (round 2: 3/3/3). "A fuller arc than the stock sneeze" (R2: the magnifier "who did this" button). Notes: the accent is short (6 f launch); the right edge crops him; the stool rides with him.
+
+**Result: 3 of 9 strips at their bar. FAIL.** Means of the medians: funny 2.67, readable 3.00, fresh 2.22 (round 2, one reviewer: 2.22 / 2.89 / 2.22). The three reviewers agree closely: in 27 of the 27 strip × score cells all three are within one point (15 identical), so the medians are not one reviewer's luck.
+
+## R3.5 What I saw in the frames (beyond the answers)
+- **The relief and the curtain call share one pose fault:** `st_double_take`'s held take is both arms straight out at
+  shoulder height, so it reads as a T-pose (relief f9–39, curtain call f360). Phase 1 flagged it; all three gag
+  reviewers named it.
+- **Walking in place:** after the relief take (f45–69) and in the picture's stomp (f72–138) his feet cycle while he
+  barely moves against the stanchion and the mirror.
+- **Lingering puffs:** the relief's "phew" is a stack of small white cloud puffs over the piano that drifts and stays
+  for 60+ frames (it is still there at the start of the picture strip); reviewers read it as sweat or "never explained".
+  White puffs also keep rising from the vase shards by the parlour fireplace long after the crash (they are still there
+  in the kitchen frames at t400–445, `docs/review/r3d/hud_2d_vs_3d.jpg`).
+- **The pickle jar** now sits on its raised shelf above Hush's head (Q2-C2), with its ring at [658, 207]. In the calm
+  t520 kettle frame (spot pkt_07) she stands right under it and the jar's lit outline nearly touches the top of her beret.
+- **The sneezes pass** with the dazed hold now head-up, face to camera, stars readable (g0 f96–138); the pepper motes
+  fall from the pot into the cup through the build-up (g0 f6–60).
+- **The curtain call passes:** the pelmet drops in a few frames onto him centre-left (f510), stars, then the glare; its
+  fringe sits a few pixels above the wig in the hold (f570–690), which all three read as hovering.
+
+## R3.6 Requests (round 3: what was misread, which frame, who can fix it)
+
+Per the brief, the re-run is an **r3d-integrate re-run (alone)** or a fix round; the "Owner" column names the area whose
+files change. Round 2's requests that round 3 closed are not repeated: Q2-C1 (the P00 frame now reads "no" 3/3; one ring
+per target), Q2-G1 (both sneezes pass), Q2-G7 (the curtain call passes), Q2-G8 (the frame slides off), Q2-S2 (the kettle
+reads as a tune and the need reads). **Keep what passes:** no change may regress the sneezes (4/4/3), the curtain call
+(3/3/3) or the round-3 spot / crowding frames.
+
+| # | Test · frame | What the reviewers misread | Change requested | Owner (files) |
+|---|---|---|---|---|
+| **Q3-G1** | gags pkt_01 (`p00_relief`, p00i 3196–3265, laugh_relief t3238; median 1/2/1) | "a stiff arms-straight-out pose … reads like a broken T-pose rather than a startle" (3/3); "walk-cycles left without really moving" (2/3); "white puffs stack above the piano" | (1) Re-pose the **`st_double_take` take**: hands up at chest height with bent elbows, shoulders up, the upper body pulled back away from the gap, eyes wide at the piano with the face to camera (D8); a 4-f accent and a settle, not a frozen 30-f hold. The curtain call's f360 uses the same pose. (2) **Her payoff:** one readable "phew" — her eyes squeeze shut and one sigh puff rises and fades within ~40 f; today's stack of puffs lingers 60+ f and reads as sweat. (3) His walk-off must travel at the walk cycle's speed (no foot slide). (4) Stage him clear of the gramophone horn (it reads as a hat behind his head, f12–39). | r3d-anim-bellows-b (`st_double_take` re-pose + bake); r3d-view3d / r3d-fix-gags (`game/view3d/set/hide_spot_3d.gd` phew, `cue_stager_3d.gd` near-miss staging and walk-off) |
+| **Q3-G2** | gags pkt_02 (`p00_squeak_bit`, p00i 217–331, bit_warmup t230; 1/2/1) | "no prank lands" (R1); "nothing happens to him, so there is no gag to read" (R3); the throat clutch read as "fiddles with something at his chest … a duck" | His answer is on the main screen now (Q2-G4), but mute it has no cause and no payoff. (1) **Link the cause:** her squeeze shows a big squeak glyph (a burst of notes from Clarence), and the same glyph arrives at his ear when the shot cuts to him; he lifts his head to it as his cue. (2) **The payoff:** his high note is a big note glyph that visibly cracks (a broken red note, his eyes pop), then the throat clutch with both hands clear of the jabot and his face to camera ≥ 30 f. (3) Keep his thought bubble still during the bit (the gramophone → tea switch at f102 is noise). Alternatively the lead may rule the squeak bit a sound-led beat judged with sound: it has scored 1/2–3/1 mute in all three rounds. | r3d-view3d (`fx_3d.gd` squeak / crack glyphs, `cue_stager_3d.gd` cue shot); r3d-anim-bellows-b (`bit_warmup` pose + gaze); `overlays_3d.gd` (quiet his thought during the bit); lead (the option) |
+| **Q3-G3** | gags pkt_04 (`p00_picture`, p00i 3256–3394, laugh_picture t3273; 3/3/**2**) | "the stock thing-falls-on-head gag" (R2, R3); "unclear who rigged it or why" (R1); "the hit has no squash or pop (f30)" (R3); "stomping without travelling … a treadmill" (R1) | Fails on fresh only. (1) **The twist R1 half-saw** ("wearing it like a portrait of himself"): the frame lands framing his face, so he *becomes* the portrait, and he holds the portrait's pompous pose (chin up, hand in the waistcoat) to camera for a beat before he notices. (2) A contact pop at f30 (impact star + a squash). (3) Open the shot on the portrait hanging crooked from the bonk, so the callback is inside the strip. (4) Replace the stomp-in-place with an in-place tantrum, or let him travel. | r3d-view3d / r3d-fix-gags (`cue_stager_3d.gd` picture beat, `fx_3d.gd` impact); r3d-anim-bellows-c (`cue_picture_bonk` portrait-pose hold); r3d-sets (portrait art, optional) |
+| **Q3-G4** | gags pkt_05 (`p00_vase`, p00i 82–208, laugh_vase t138; 2/3/2) | "only a quick wide-eyed glance (f90) and no 30-frame face hold" (3/3); "the vase is tiny and far from him" (3/3); "the stock voice-breaks-china joke" | (1) **Bring the vase into his shot:** today it sits on the far mantel, about 50 px tall and about 300 px from him at full size. Move it beside him (the piano top or next to the gramophone) or frame the push-in on both. (2) **An unmistakable "ovation" take:** on the crash he opens his eyes, sees the shards and takes a deep, smug bow to them (hand on heart, face to camera) held ≥ 30 f. `st_straighten_cravat` is too small to register at strip size. (3) A bigger shatter (shards + a puff that clears in ≤ 1 s). | r3d-sets (`game/data/house/house3d.json` `decor.parlour_vase` position); r3d-anim-bellows-b (an overlay bow clip); r3d-view3d / r3d-fix-gags (`cue_stager_3d.gd` framing + hold, `fx_3d.gd` shatter) |
+| **Q3-G5** | gags pkt_06 (`p00_doorframe_bonk`, p00i 1624–1750, laugh_doorframe t1677; 3/3/**2**) | "the plain walk-into-the-doorframe gag" (3/3); "the look-up at f54 is not a real opposite wind-up" (R3); "nothing shows what the prankster in the curtain did" (R1) | Fails on fresh only; Q2-G6's no-cut and face hold landed. (1) **A twist inside the strip:** after the daze he scolds the doorframe (wags the baton at it, nose up) and turns away, and the jolted parlour portrait swings askew behind him in the same shot (the set-up of the picture gag, now visible). (2) A bigger wind-up the other way (lean back, chin up, baton drawn back, 6–8 f); `cue_doorframe_windup` is too small at this shot size. (3) The white oval at his feet is the sneeze's teacup on the floor: leave it, or let him kick it for an extra beat. | r3d-view3d / r3d-fix-gags (`cue_stager_3d.gd`); r3d-anim-bellows-c (`cue_doorframe_windup`, `cue_doorframe_bonk`); r3d-sets (the portrait swing) |
+| **Q3-G6** | gags pkt_07 (`p00_dizzy_spin`, p00i 2560–2767 every 6, accent t2659; 3/3/3, bar 4/4) | "dances wildly to the stream of notes" (3/3); "unclear why the music makes him dance" (R3); "whether the red face means dizzy or angry" (R1); "the hold runs long" (3/3) | (1) **Make the cause physical:** the gramophone shows the speed-up (spin lines on the disc, the ×3 burst), and a ribbon of notes wraps him and *pulls* him round: arms trailing, not conducting, heels off the floor, the bouffant trailing. (2) **Dizzy, not angry:** spiral eyes from the first slump frame and a queasy green tint instead of the red flush. (3) A shorter hold (~40 f, not ~60) that ends on the button two reviewers liked: nose to nose with the hidden eyes. Keep the notes circling his head instead of stars (liked by R1 and R3). | r3d-anim-bellows-c (`rx_dizzy_spin_a` pose, inside its locked window); r3d-view3d (`fx_3d.gd` spin lines / note ribbon, the gramophone disc); r3d-rig (the face tint / spiral eyes look) |
+| Q3-C1 *(at the bar, counts)* | crowding pkt_07 (`cr_n01`, `n01i:394` ≈ t6768; 2 of 3 "yes") | "two thought bubbles compete … the red-ringed one packs music notes, a kettle and a face into one small icon" | While a prop's badge carries his countdown ring for his next activity, hide his own thought bubble for that target (Q2-C1's option (b)): one bubble per target. Draw `kettle_drum` simpler at badge size (two shapes sharing one note). N1 is a hidden preview, but the frame is in the packet and counts. | r3d-hud (`game/ui/world/overlay_rules.gd`, `game/art/ui/previews/kettle_drum.svg`); `game/view3d/world/overlays_3d.gd` / `game/view/fx/thought_bubble.gd` |
+| Q3-S1 *(spot passes)* | spot pkt_04 (`sp_pickle`, N1 calm t360; 0 of 3) | "the jar is full of spring snakes, which pop out at him" (3/3) | The jar now reads as a jar; the joke does not. Redraw `in_a_pickle` with the stuck lid as the subject: round pickled onions instead of the long gherkins that read as snakes, a jar label, a big twist arrow and stress lines at the lid, his straining hands. The shelf prop is still the green polka-dot pot: make it a glass jar with pickles (Q2-S1's prop half). N1 preview, so it can wait for R3. | r3d-hud (`game/art/ui/previews/in_a_pickle.svg`); r3d-sets (the N1 pickle-jar prop) |
+| Q3-S2 *(spot passes, note)* | spot pkt_05 (`sp_honey`, `g0:30`; 2 of 3 right) | "the jar's sugar is swapped for hot chili, so he puffs steam from the heat" (R2, = round 1's misread) | Optional: make the CHOO puff read as a sneeze spray (droplets, his head thrown back), not steam. | r3d-hud (`game/art/ui/previews/achoo_ria.svg`) |
+| notes *(passing)* | curtain call (3/3/3); both sneezes (4/4/3); crowding "no" frames | the pelmet "seems to hang just above his head" (3/3); "the stool stays stuck to his feet in the air", "the right edge of the frame crops him" (sneeze); the hand hint above the shelf is small (crowd pkt_03, 3/3); the note clump on his wig is messy (pkt_02, 3/3); shelf debris over the Script pill (pkt_06, 3/3) | Polish, not required: rest the pelmet on the wig (squash it a little); frame the sneeze launch so he stays inside the frame. | r3d-night (`curtain_bows_3d.gd`); r3d-view3d (`gag_stager_3d.gd`) |
+
+**After the fixes:** re-shoot the gag strips at the same windows (the dizzy spin every 6 ticks) and build a new gag
+packet with a new seed for **three new** fresh reviewers (D18.1). If a fix touches the overlays (Q3-C1) or the
+previews (Q3-S1/S2), re-run the crowding and spot packets too, so their passes are confirmed on the new frames.
+Then re-run pre-gate row 19.

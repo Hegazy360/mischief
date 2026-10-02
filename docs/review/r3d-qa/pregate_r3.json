@@ -1,0 +1,2001 @@
+{
+ "rows": {
+  "1": {
+   "row": "1",
+   "command": "tools/ci/check_import_meta.sh",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 1.0,
+   "numbers": {
+    "import_files": 1010,
+    "uid_files": 413
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:13:43Z",
+   "no_render": false
+  },
+  "4": {
+   "row": "4",
+   "command": "tools/ci/lint_all.sh --no-godot",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 53.0,
+   "numbers": {
+    "validators": 5
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:20:57Z",
+   "no_render": false
+  },
+  "8": {
+   "row": "8",
+   "command": "SANDBOX=r3d-qa tools/scripts/fuzz.sh all --runs=200 --report=$PWD/build/r3d/fuzz.json (as fuzz.sh <final episode> --runs=200 in parallel, merged)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 6539.0,
+   "numbers": {
+    "by_episode_bot": {
+     "n01_throat_tea/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1096
+     },
+     "n01_throat_tea/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 2600
+     },
+     "n01_throat_tea/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1254
+     },
+     "n01_throat_tea/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1200
+     },
+     "n02_something_fishy/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1516
+     },
+     "n02_something_fishy/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 2328
+     },
+     "n02_something_fishy/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1502
+     },
+     "n02_something_fishy/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 1800
+     },
+     "p00_curtain_up/random": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/reckless": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/hider": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     },
+     "p00_curtain_up/bait": {
+      "runs": 200,
+      "ok": 200,
+      "softlocks": 0,
+      "invariants": 0,
+      "catches": 0
+     }
+    },
+    "runs": 2400
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "ee4b12e86af732e9",
+   "at": "2026-10-02T02:04:41Z",
+   "no_render": false
+  },
+  "5": {
+   "row": "5",
+   "command": "SANDBOX=r3d-qa tools/scripts/solve.sh all --route=all --report=$PWD/build/r3d/solve.json --timeline=$PWD/build/r3d/tl (+ g0_sneeze --route=all --report=build/r3d/solve_g0.json)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 30.0,
+   "numbers": {
+    "routes": {
+     "n01_throat_tea/ideal": {
+      "ok": true,
+      "stars": 3,
+      "applause": 116.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/required": {
+      "ok": true,
+      "stars": 1,
+      "applause": 44.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/slow": {
+      "ok": true,
+      "stars": 1,
+      "applause": 46.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/caught": {
+      "ok": true,
+      "stars": 1,
+      "applause": 48.4,
+      "catches": 1,
+      "invariants": 0
+     },
+     "n01_throat_tea/chase": {
+      "ok": true,
+      "stars": 0,
+      "applause": 0.0,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n01_throat_tea/meltdown": {
+      "ok": true,
+      "stars": 0,
+      "applause": 71.9,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/ideal": {
+      "ok": true,
+      "stars": 3,
+      "applause": 117.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/required": {
+      "ok": true,
+      "stars": 1,
+      "applause": 59.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "n02_something_fishy/slow": {
+      "ok": true,
+      "stars": 1,
+      "applause": 61.3,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/ideal": {
+      "ok": true,
+      "stars": 0,
+      "applause": 89.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/required": {
+      "ok": true,
+      "stars": 0,
+      "applause": 87.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "p00_curtain_up/slow": {
+      "ok": true,
+      "stars": 0,
+      "applause": 89.5,
+      "catches": 0,
+      "invariants": 0
+     },
+     "g0_sneeze/ideal": {
+      "ok": true,
+      "stars": 0,
+      "applause": 70.0,
+      "catches": 0,
+      "invariants": 0
+     }
+    },
+    "n_routes": 13
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "ee4b12e86af732e9",
+   "at": "2026-10-01T23:21:27Z",
+   "no_render": false
+  },
+  "6": {
+   "row": "6",
+   "command": "(row 5's build/r3d/solve.json)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 0.0,
+   "numbers": {
+    "routes": {
+     "n01_throat_tea/ideal": {
+      "dead_air_ff_pct": 7.8,
+      "max_gap_ff_s": 4.28,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 17.52
+     },
+     "n01_throat_tea/required": {
+      "dead_air_ff_pct": 4.8,
+      "max_gap_ff_s": 5.47,
+      "edge_share": 0.221,
+      "first_prank_launch_s": 18.65
+     },
+     "n01_throat_tea/slow": {
+      "dead_air_ff_pct": 1.9,
+      "max_gap_ff_s": 4.43,
+      "edge_share": 0.154,
+      "first_prank_launch_s": 27.75
+     },
+     "n02_something_fishy/ideal": {
+      "dead_air_ff_pct": 6.9,
+      "max_gap_ff_s": 3.9,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "n02_something_fishy/required": {
+      "dead_air_ff_pct": 1.9,
+      "max_gap_ff_s": 3.68,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "n02_something_fishy/slow": {
+      "dead_air_ff_pct": 1.6,
+      "max_gap_ff_s": 4.28,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.43
+     },
+     "p00_curtain_up/ideal": {
+      "dead_air_ff_pct": 3.0,
+      "max_gap_ff_s": 4.12,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 25.23
+     },
+     "p00_curtain_up/required": {
+      "dead_air_ff_pct": 1.8,
+      "max_gap_ff_s": 4.12,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 33.2
+     },
+     "p00_curtain_up/slow": {
+      "dead_air_ff_pct": 5.9,
+      "max_gap_ff_s": 5.35,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 27.58
+     },
+     "g0_sneeze/ideal": {
+      "dead_air_ff_pct": 8.1,
+      "max_gap_ff_s": 3.92,
+      "edge_share": 0.0,
+      "first_prank_launch_s": 19.38
+     }
+    },
+    "worst": {
+     "ideal_ff": 8.1,
+     "required_ff": 4.8,
+     "slow_ff": 5.9,
+     "gap_s": 5.47,
+     "edge_share": 0.221
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "ee4b12e86af732e9",
+   "at": "2026-10-01T23:21:27Z",
+   "no_render": false
+  },
+  "7": {
+   "row": "7",
+   "command": "SANDBOX=r3d-qa tools/scripts/solve.sh all --auto && SANDBOX=r3d-qa tools/scripts/solve.sh g0_sneeze --route=ideal",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 153.0,
+   "numbers": {
+    "auto": {
+     "n01_throat_tea": "script OK (6 lines",
+     "n02_something_fishy": "script OK (5 lines",
+     "p00_curtain_up": "script OK (2 lines"
+    },
+    "g0_ideal": {
+     "ok": true,
+     "duration_s": 23.57,
+     "end_g0_done": true
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "ee4b12e86af732e9",
+   "at": "2026-10-01T23:24:00Z",
+   "no_render": false
+  },
+  "2": {
+   "row": "2",
+   "command": "tools/scripts/test_game.sh r3d-qa",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 366.0,
+   "numbers": {
+    "passed": 1345,
+    "failed": 0,
+    "skipped": 0,
+    "tests": 1345,
+    "files": 139,
+    "skips": [],
+    "slice_files_seen": 2
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:19:49Z",
+   "no_render": false
+  },
+  "3": {
+   "row": "3",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint.sh --strict",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 15.0,
+   "numbers": {
+    "anim3d_strict_clips": 72,
+    "anim3d_errors": 0,
+    "anim3d_warnings": 0,
+    "anim3d_missing": 0,
+    "coverage3d_clips": 72,
+    "lints_failed": 0,
+    "lints_skipped": 0
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:20:04Z",
+   "no_render": false
+  },
+  "9": {
+   "row": "9",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --set --all-nights ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 68.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 1,
+    "skips": 0,
+    "info": 474,
+    "warning_list": [
+     "n02_something_fishy hall negative_space x 6.82–7.50 m: 0.68"
+    ]
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:25:08Z",
+   "no_render": false
+  },
+  "10": {
+   "row": "10",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --screen --aspects=20x9,16x9,4x3 ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 21.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 1,
+    "skips": 0,
+    "info": 0,
+    "warning_list": [
+     "n02_something_fishy hall window_overlap hall_clock: 572.7882"
+    ]
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:25:29Z",
+   "no_render": false
+  },
+  "12": {
+   "row": "12",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --visibility --routes=all ",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 165.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 0,
+    "skips": 0,
+    "info": 26,
+    "warning_list": [],
+    "shipped_mode": "sim",
+    "routes": 26,
+    "violations_shipped": 0,
+    "violations_other": 0,
+    "window_share": {
+     "g0_sneeze/ideal": 0.3041,
+     "n01_throat_tea/caught": 0.2794,
+     "n01_throat_tea/chase": 0.2053,
+     "n01_throat_tea/ideal": 0.1784,
+     "n01_throat_tea/meltdown": 0.0999,
+     "n01_throat_tea/required": 0.3499,
+     "n01_throat_tea/slow": 0.3148,
+     "n02_something_fishy/ideal": 0.2005,
+     "n02_something_fishy/required": 0.1558,
+     "n02_something_fishy/slow": 0.1511,
+     "p00_curtain_up/ideal": 0.2483,
+     "p00_curtain_up/required": 0.337,
+     "p00_curtain_up/slow": 0.2822
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:28:14Z",
+   "no_render": false
+  },
+  "20a": {
+   "row": "20a",
+   "command": "tools/scripts/export_android.sh --sandbox r3d-qa --out build/r3d/mischief-debug.apk + unzip -l + sha256sum",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 74.0,
+   "numbers": {
+    "size_bytes": 73526533,
+    "size_mb": 73.53,
+    "sha256": "fc4ad3ea145c27e921b880f559fae04ede92702bc62f290030b34170f3ea75ed",
+    "entries": 3279,
+    "clip_res_entries": 78,
+    "clip_sidecars": 81,
+    "boot_config": {
+     "start": "stage_door",
+     "view": "3d",
+     "show_previews": false,
+     "bellows_window": "sim",
+     "render": {
+      "msaa_3d": true,
+      "render_scale": 1.0,
+      "outline": true
+     }
+    },
+    "permissions": "android.permission.VIBRATE",
+    "min_sdk": 24,
+    "orientation": "11",
+    "exported_scripts": 197,
+    "exported_script_failures": [
+     0,
+     "[]"
+    ],
+    "exported_night": "OK view=3d world_view=Node3D tick=112",
+    "exported_script_errors": []
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-02T00:15:42Z",
+   "no_render": false
+  },
+  "13": {
+   "row": "13",
+   "command": "E2E_SANDBOX=r3d-qa E2E_TIMEOUT=600 tools/scripts/e2e.sh g0_sneeze --strict --perf-log --report=$PWD/build/r3d/e2e/g0.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 178.0,
+   "numbers": {
+    "end_reason": "g0_done",
+    "frame_ms_p95": 103.1,
+    "accent_frame": 94.0,
+    "zoom_at_accent": 1.14011537976662,
+    "zoom_max": 1.5938018652452,
+    "hitstop_ms": 83.0,
+    "captions": [
+     "ACHOO-RIA!"
+    ],
+    "bouffant_after": "flipped",
+    "land_in_box": true,
+    "tag_flights": {
+     "arrived": 1,
+     "out": 1
+    },
+    "c8_violations": 0,
+    "pip_on_share": 0.2804,
+    "pip_longest_s": 6.38,
+    "hitstop_check": "83 ms vs 5 f = 83 ms (quantised ≥ 66 ms; one measured frame 103 ms)",
+    "perf3d": {
+     "draw_calls_p95": 55.0,
+     "draw_calls_max": 61.0,
+     "tris_max": 81135.0,
+     "emitters_max": 8,
+     "tex_mb_max": 88.5,
+     "shader_compiles_play": 0,
+     "view_ms_p50": 2.65,
+     "view_ms_p95": 3.82,
+     "frame_ms_p95": 103.1
+    },
+    "g0_again_ms": 240
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:31:12Z",
+   "no_render": false
+  },
+  "14": {
+   "row": "14",
+   "command": "E2E_TIMEOUT=450 e2e.sh prologue_ideal --strict --perf-log --report=…/p00_ideal.json; prologue_slow --strict --report=…/p00_slow.json (+ prologue_required --strict, info: the window share)",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 340.0,
+   "numbers": {
+    "p00_ideal": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 7,
+     "laughs": 7,
+     "cues": 4,
+     "cue_crowd_s_max": 0.254,
+     "frame_ms_p95": 109.4,
+     "doubles": 0,
+     "first_player_laugh_s": 3.833,
+     "first_prank_s": 22.933,
+     "first_player_laugh_ms_proxy_launch": 9105,
+     "first_prank_ms_proxy_launch": 34257,
+     "pip_on_share": 0.2245,
+     "pip_longest_s": 1.3,
+     "c8_violations": 0,
+     "cue_check": "crowd ≤ max(0.30 s, one frame 0.109 s): worst 0.254 s"
+    },
+    "p00_required": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 4,
+     "laughs": 6,
+     "cues": 4,
+     "cue_crowd_s_max": 0.267,
+     "frame_ms_p95": 109.7,
+     "doubles": 0,
+     "first_player_laugh_s": 30.9,
+     "first_prank_s": 30.9,
+     "first_player_laugh_ms_proxy_launch": 46342,
+     "first_prank_ms_proxy_launch": 46342,
+     "pip_on_share": 0.3397,
+     "pip_longest_s": 3.75,
+     "c8_violations": 0
+    },
+    "p00_slow": {
+     "end_reason": "prologue_done",
+     "laughs_by_60": 7,
+     "laughs": 7,
+     "cues": 4,
+     "cue_crowd_s_max": 0.279,
+     "frame_ms_p95": 106.7,
+     "doubles": 0,
+     "first_player_laugh_s": 4.333,
+     "first_prank_s": 25.283,
+     "first_player_laugh_ms_proxy_launch": 9951,
+     "first_prank_ms_proxy_launch": 37912,
+     "pip_on_share": 0.2574,
+     "pip_longest_s": 1.77,
+     "c8_violations": 0,
+     "first_laugh_launch_s": 6.63,
+     "first_prank_launch_s": 27.58
+    },
+    "prologue_ideal_strict": true
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:36:52Z",
+   "no_render": false
+  },
+  "11": {
+   "row": "11",
+   "command": "SANDBOX=r3d-qa tools/scripts/lint3d.sh --hud --from=$PWD/build/r3d/e2e",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 11.0,
+   "numbers": {
+    "errors": 0,
+    "warnings": 0,
+    "skips": 0,
+    "info": 29,
+    "warning_list": [],
+    "window_share_warnings": []
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:37:03Z",
+   "no_render": false
+  },
+  "15": {
+   "row": "15",
+   "command": "E2E_SANDBOX=r3d-qa tools/scripts/e2e.sh slice_all --report=$PWD/build/r3d/e2e/slice_all.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 494.0,
+   "numbers": {
+    "runs": {
+     "g0_sneeze": {
+      "ok": true,
+      "end": "g0_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.2755
+     },
+     "prologue_ideal": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.2272
+     },
+     "prologue_required": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.3421
+     },
+     "prologue_slow": {
+      "ok": true,
+      "end": "prologue_done",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 0,
+      "doubles": 0,
+      "pip_on_share": 0.2668
+     },
+     "n01_ideal": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 34,
+      "doubles": 0,
+      "pip_on_share": 0.1619
+     },
+     "n01_required": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 18,
+      "doubles": 0,
+      "pip_on_share": 0.3328
+     },
+     "n01_slow": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 18,
+      "doubles": 0,
+      "pip_on_share": 0.2889
+     },
+     "n02_ideal": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 60,
+      "doubles": 0,
+      "pip_on_share": 0.1907
+     },
+     "n02_required": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 22,
+      "doubles": 0,
+      "pip_on_share": 0.1556
+     },
+     "n02_slow": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 24,
+      "doubles": 0,
+      "pip_on_share": 0.1514
+     },
+     "n01_caught": {
+      "ok": true,
+      "end": "bow",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 27,
+      "doubles": 0,
+      "pip_on_share": 0.269
+     },
+     "n01_chase": {
+      "ok": true,
+      "end": "route_end",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 14,
+      "doubles": 0,
+      "pip_on_share": 0.1968
+     },
+     "n01_meltdown": {
+      "ok": true,
+      "end": "route_end",
+      "errors": 0,
+      "engine_errors": 0,
+      "fallbacks": 16,
+      "doubles": 0,
+      "pip_on_share": 0.0587
+     }
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-01T23:45:17Z",
+   "no_render": false
+  },
+  "16": {
+   "row": "16",
+   "command": "E2E_TIMEOUT=2700 e2e.sh n01_ideal --perf-log --report=…/e2e/n01_ideal_perf.json; 3 × E2E_TIMEOUT=450 e2e.sh prologue_ideal --perf-log --report=…/prof/p00_r<n>.e2e.json -- --view3d-prof=…/prof/p00_r<n>.prof.json and 2 × the same --headless (p00_h<n>; D18.2); perf3d.sh build/r3d/e2e/{g0,p00_ideal,n01_ideal_perf}.json",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 1329.0,
+   "numbers": {
+    "table": {
+     "g0": "PASS | 55.0 | 61.0 | 81135.0 | 8.0 | 88.5 | 0.0 | 3.82",
+     "p00_ideal": "FAIL | 71.0 | 80.0 | 91994.0 | 8.0 | 110.0 | 0.0 | 4.12",
+     "n01_ideal_perf": "FAIL | 81.0 | 96.0 | 103310.0 | 7.0 | 107.4 | 0.0 | 4.43"
+    },
+    "reports": {
+     "g0": {
+      "draw_calls_p95": 55.0,
+      "draw_calls_max": 61.0,
+      "tris_max": 81135.0,
+      "emitters_max": 8,
+      "tex_mb_max": 88.5,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 2.65,
+      "view_ms_p95": 3.82,
+      "frame_ms_p95": 103.1,
+      "hitches": 0,
+      "device_target_4ms_p95": "met"
+     },
+     "n01_ideal_perf": {
+      "draw_calls_p95": 81.0,
+      "draw_calls_max": 96.0,
+      "tris_max": 103310.0,
+      "emitters_max": 7,
+      "tex_mb_max": 107.4,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 3.04,
+      "view_ms_p95": 4.43,
+      "frame_ms_p95": 116.9,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "p00_ideal": {
+      "draw_calls_p95": 71.0,
+      "draw_calls_max": 80.0,
+      "tris_max": 91994.0,
+      "emitters_max": 8,
+      "tex_mb_max": 110.0,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 2.85,
+      "view_ms_p95": 4.12,
+      "frame_ms_p95": 109.3,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     },
+     "p00_required": {
+      "draw_calls_p95": 69.0,
+      "draw_calls_max": 83.0,
+      "tris_max": 90790.0,
+      "emitters_max": 8,
+      "tex_mb_max": 110.0,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 2.81,
+      "view_ms_p95": 3.99,
+      "frame_ms_p95": 109.8,
+      "hitches": 0,
+      "device_target_4ms_p95": "met"
+     },
+     "p00_slow": {
+      "draw_calls_p95": 70.0,
+      "draw_calls_max": 79.0,
+      "tris_max": 98996.0,
+      "emitters_max": 8,
+      "tex_mb_max": 110.0,
+      "shader_compiles_play": 0,
+      "view_ms_p50": 2.87,
+      "view_ms_p95": 4.2,
+      "frame_ms_p95": 106.5,
+      "hitches": 0,
+      "device_target_4ms_p95": "device-judged (D14)"
+     }
+    },
+    "d18": {
+     "rule": "D18.2: > 1 ms at the same tick (±2 f) in 3/3 rendered runs, or in both headless runs, or in a rendered and a headless run",
+     "deterministic_rendered_3of3": [
+      {
+       "site": "NightScene",
+       "ticks": [
+        1283,
+        1283,
+        1283
+       ],
+       "runs": {
+        "r1": 1.91,
+        "r2": 1.28,
+        "r3": 1.14
+       }
+      }
+     ],
+     "deterministic_headless": [
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 1862,
+       "ms": 3.22,
+       "frame_ms": 10.62,
+       "sites_over_in_frame": 3,
+       "repeats": [
+        [
+         "r2",
+         1867,
+         1.12
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 335,
+       "ms": 1.71,
+       "frame_ms": 9.62,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r3",
+         331,
+         1.21
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 445,
+       "ms": 1.24,
+       "frame_ms": 9.17,
+       "sites_over_in_frame": 3,
+       "repeats": [
+        [
+         "r1",
+         451,
+         1.85
+        ],
+        [
+         "r3",
+         447,
+         1.16
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 2010,
+       "ms": 3.61,
+       "frame_ms": 8.96,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r3",
+         2007,
+         1.18
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 3217,
+       "ms": 1.04,
+       "frame_ms": 8.59,
+       "sites_over_in_frame": 3,
+       "repeats": [
+        [
+         "r1",
+         3215,
+         1.01
+        ],
+        [
+         "r2",
+         3223,
+         1.09
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 2029,
+       "ms": 1.28,
+       "frame_ms": 6.59,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r2",
+         2031,
+         1.06
+        ],
+        [
+         "r3",
+         2027,
+         1.11
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 1895,
+       "ms": 1.87,
+       "frame_ms": 6.37,
+       "sites_over_in_frame": 3,
+       "repeats": [
+        [
+         "h2",
+         1892,
+         1.19
+        ],
+        [
+         "h2",
+         1891,
+         1.72
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 3528,
+       "ms": 1.09,
+       "frame_ms": 6.24,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r3",
+         3531,
+         1.22
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 1861,
+       "ms": 2.08,
+       "frame_ms": 5.98,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r2",
+         1867,
+         1.12
+        ],
+        [
+         "h2",
+         1857,
+         3.85
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_apply",
+       "tick": 441,
+       "ms": 1.79,
+       "frame_ms": 5.68,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r3",
+         447,
+         1.03
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 339,
+       "ms": 2.11,
+       "frame_ms": 5.43,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r1",
+         343,
+         2.09
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 334,
+       "ms": 1.71,
+       "frame_ms": 5.23,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r3",
+         331,
+         1.21
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 338,
+       "ms": 1.69,
+       "frame_ms": 5.18,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r1",
+         343,
+         2.09
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 521,
+       "ms": 1.55,
+       "frame_ms": 5.11,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r2",
+         528,
+         3.98
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 572,
+       "ms": 1.19,
+       "frame_ms": 4.89,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r2",
+         571,
+         1.05
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 3525,
+       "ms": 1.11,
+       "frame_ms": 4.88,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r3",
+         3531,
+         1.22
+        ]
+       ]
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 3204,
+       "ms": 1.21,
+       "frame_ms": 4.87,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r3",
+         3203,
+         1.13
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 557,
+       "ms": 6.93,
+       "frame_ms": 11.42,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r2",
+         556,
+         1.07
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1262,
+       "ms": 1.7,
+       "frame_ms": 6.56,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r1",
+         1267,
+         1.56
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1857,
+       "ms": 3.85,
+       "frame_ms": 6.05,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "h1",
+         1861,
+         2.08
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 2848,
+       "ms": 1.73,
+       "frame_ms": 5.75,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r2",
+         2855,
+         1.02
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1502,
+       "ms": 1.48,
+       "frame_ms": 5.57,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r2",
+         1499,
+         1.08
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1892,
+       "ms": 1.19,
+       "frame_ms": 5.54,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "h1",
+         1895,
+         1.87
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1891,
+       "ms": 1.72,
+       "frame_ms": 5.48,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "h1",
+         1895,
+         1.87
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 1457,
+       "ms": 1.02,
+       "frame_ms": 5.2,
+       "sites_over_in_frame": 2,
+       "repeats": [
+        [
+         "r3",
+         1455,
+         1.01
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 207,
+       "ms": 1.13,
+       "frame_ms": 5.15,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r1",
+         203,
+         1.35
+        ]
+       ]
+      },
+      {
+       "run": "h2",
+       "site": "NightScene",
+       "tick": 2849,
+       "ms": 1.86,
+       "frame_ms": 5.12,
+       "sites_over_in_frame": 1,
+       "repeats": [
+        [
+         "r2",
+         2855,
+         1.02
+        ]
+       ]
+      }
+     ],
+     "deterministic_headless_both": 5,
+     "deterministic_headless_and_rendered": 23,
+     "headless_literal_count": 174,
+     "headless_literal": [
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 129,
+       "ms": 5.2,
+       "frame_ms": 12.51,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.overlays",
+       "tick": 129,
+       "ms": 5.29,
+       "frame_ms": 12.51,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 1862,
+       "ms": 3.22,
+       "frame_ms": 10.62,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 1862,
+       "ms": 2.11,
+       "frame_ms": 10.62,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_view.rig_advance",
+       "tick": 1862,
+       "ms": 1.74,
+       "frame_ms": 10.62,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_apply",
+       "tick": 128,
+       "ms": 7.76,
+       "frame_ms": 10.33,
+       "sites_over_in_frame": 1
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 839,
+       "ms": 3.03,
+       "frame_ms": 10.18,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_apply",
+       "tick": 839,
+       "ms": 1.31,
+       "frame_ms": 10.18,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 839,
+       "ms": 1.44,
+       "frame_ms": 10.18,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 335,
+       "ms": 1.71,
+       "frame_ms": 9.62,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.caught_recorder",
+       "tick": 335,
+       "ms": 1.58,
+       "frame_ms": 9.62,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_apply",
+       "tick": 1654,
+       "ms": 6.17,
+       "frame_ms": 9.31,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_view.ctx",
+       "tick": 1654,
+       "ms": 3.86,
+       "frame_ms": 9.31,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_view.mine",
+       "tick": 1654,
+       "ms": 3.96,
+       "frame_ms": 9.31,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 445,
+       "ms": 1.24,
+       "frame_ms": 9.17,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "root:DevShot",
+       "tick": 445,
+       "ms": 4.17,
+       "frame_ms": 9.17,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 445,
+       "ms": 1.03,
+       "frame_ms": 9.17,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 2010,
+       "ms": 3.61,
+       "frame_ms": 8.96,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "PipView3D",
+       "tick": 2010,
+       "ms": 1.07,
+       "frame_ms": 8.96,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 3217,
+       "ms": 1.04,
+       "frame_ms": 8.59,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.overlays",
+       "tick": 3217,
+       "ms": 1.23,
+       "frame_ms": 8.59,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.rest",
+       "tick": 3217,
+       "ms": 3.76,
+       "frame_ms": 8.59,
+       "sites_over_in_frame": 3
+      },
+      {
+       "run": "h1",
+       "site": "CameraDirector3D",
+       "tick": 788,
+       "ms": 1.17,
+       "frame_ms": 8.52,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 788,
+       "ms": 1.12,
+       "frame_ms": 8.52,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 2689,
+       "ms": 4.12,
+       "frame_ms": 8.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.rest",
+       "tick": 2689,
+       "ms": 1.6,
+       "frame_ms": 8.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 1168,
+       "ms": 1.08,
+       "frame_ms": 8.3,
+       "sites_over_in_frame": 1
+      },
+      {
+       "run": "h1",
+       "site": "AudioDirector",
+       "tick": 1871,
+       "ms": 1.68,
+       "frame_ms": 8.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "CameraDirector3D",
+       "tick": 1871,
+       "ms": 3.97,
+       "frame_ms": 8.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 2332,
+       "ms": 4.94,
+       "frame_ms": 7.62,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_view.mine",
+       "tick": 2332,
+       "ms": 4.73,
+       "frame_ms": 7.62,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.overlays",
+       "tick": 436,
+       "ms": 3.62,
+       "frame_ms": 7.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.rest",
+       "tick": 436,
+       "ms": 1.01,
+       "frame_ms": 7.3,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 2373,
+       "ms": 4.56,
+       "frame_ms": 7.08,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_view.rig_advance",
+       "tick": 2373,
+       "ms": 4.3,
+       "frame_ms": 7.08,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 2266,
+       "ms": 1.09,
+       "frame_ms": 7.01,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.hush_apply",
+       "tick": 2266,
+       "ms": 2.71,
+       "frame_ms": 7.01,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_apply",
+       "tick": 3526,
+       "ms": 1.54,
+       "frame_ms": 6.9,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "WorldView3D.bellows_view.rig_advance",
+       "tick": 3526,
+       "ms": 1.4,
+       "frame_ms": 6.9,
+       "sites_over_in_frame": 2
+      },
+      {
+       "run": "h1",
+       "site": "NightScene",
+       "tick": 520,
+       "ms": 2.51,
+       "frame_ms": 6.89,
+       "sites_over_in_frame": 2
+      }
+     ],
+     "info_d17_rendered_2of3": 9,
+     "info_d17_rendered_2of3_sites": [
+      "NightScene t1283 {'r1': 1.91, 'r2': 1.28, 'r3': 1.14}",
+      "NightScene t3279 {'r1': 2.86, 'r3': 1.03}",
+      "NightScene t447 {'r1': 1.85, 'r3': 1.16}",
+      "NightScene t1675 {'r1': 1.05, 'r3': 1.02}",
+      "NightScene t2419 {'r1': 1.15, 'r2': 1.01}",
+      "NightScene t2027 {'r2': 1.06, 'r3': 1.11}",
+      "NightScene t1871 {'r2': 1.14, 'r3': 1.15}",
+      "NightScene t1395 {'r2': 1.04, 'r3': 1.46}",
+      "WorldView3D.bellows_apply t1283 {'r1': 1.78, 'r2': 1.15}"
+     ],
+     "info_clusters_pm2_profiler_frames": 13,
+     "info_chance_baseline_3of3_shift_m120_p120": [
+      2,
+      0
+     ],
+     "info_chance_baseline_2of3_shift_m120_p120": [
+      15,
+      12
+     ],
+     "info_chance_baseline_headless_shift_m120_p120": [
+      36,
+      36
+     ],
+     "nightscene_phase_evidence": {
+      "t1283-1283": [
+       "r1@t1279 ov_apply 0.72",
+       "r1@t1283 ov_apply 0.86",
+       "r2@t1279 ov_apply 0.57",
+       "r2@t1283 ov_apply 0.64",
+       "r3@t1283 ov_apply 0.57"
+      ],
+      "t3279-3283": [
+       "r1@t3275 ov_apply 0.53",
+       "r1@t3279 ov_apply 2.57",
+       "r3@t3283 ov_apply 0.55"
+      ],
+      "t447-451": [
+       "r1@t451 hud_apply 0.52",
+       "r3@t447 hud_apply 0.50"
+      ],
+      "t1675-1675": [
+       "r1@t1671 ov_apply 0.63",
+       "r1@t1675 ov_apply 0.61",
+       "r3@t1671 ov_apply 0.62",
+       "r3@t1675 ov_apply 0.56",
+       "r3@t1679 ov_apply 0.56"
+      ],
+      "t2419-2420": [
+       "r1@t2419 ov_apply 0.58",
+       "r2@t2415 ov_apply 0.63",
+       "r2@t2420 ov_apply 0.55"
+      ],
+      "t2027-2031": [
+       "r2@t2031 ov_apply 0.63",
+       "r3@t2027 ov_apply 0.61",
+       "r3@t2035 ov_apply 0.53"
+      ],
+      "t1871-1875": [
+       "r2@t1867 ov_apply 0.60",
+       "r2@t1871 ov_apply 0.67",
+       "r2@t1875 ov_apply 0.52",
+       "r3@t1867 ov_apply 0.57",
+       "r3@t1871 ov_apply 0.60",
+       "r3@t1875 ov_apply 0.69"
+      ],
+      "t1395-1399": [
+       "r2@t1399 ov_apply 0.55",
+       "r3@t1395 presenter 0.82"
+      ]
+     },
+     "runs": {
+      "r1": {
+       "headless": false,
+       "ok": true,
+       "frames": 879,
+       "total": {
+        "max": 8.472,
+        "mean": 3.257,
+        "p50": 3.033,
+        "p95": 4.452
+       },
+       "view_ms_p50": 3.09,
+       "view_ms_p95": 4.77,
+       "sites_over_1ms": {
+        "WorldView3D.bellows_apply": 5.03,
+        "NightScene": 3.97,
+        "WorldView3D.bellows_view.rig_advance": 2.66,
+        "WorldView3D.overlays": 2.42,
+        "WorldView3D.hush_apply": 2.2,
+        "WorldView3D.hush_view.rig_advance": 2.01,
+        "WorldView3D.bellows_view.mine": 1.6
+       }
+      },
+      "r2": {
+       "headless": false,
+       "ok": true,
+       "frames": 879,
+       "total": {
+        "max": 6.309,
+        "mean": 3.241,
+        "p50": 3.065,
+        "p95": 4.258
+       },
+       "view_ms_p50": 3.14,
+       "view_ms_p95": 4.6,
+       "sites_over_1ms": {
+        "NightScene": 3.98,
+        "WorldView3D.bellows_apply": 1.2,
+        "WorldView3D.hush_apply": 1.05
+       }
+      },
+      "r3": {
+       "headless": false,
+       "ok": true,
+       "frames": 879,
+       "total": {
+        "max": 6.419,
+        "mean": 3.213,
+        "p50": 3.036,
+        "p95": 4.248
+       },
+       "view_ms_p50": 3.1,
+       "view_ms_p95": 4.62,
+       "sites_over_1ms": {
+        "WorldView3D.hush_apply": 3.03,
+        "WorldView3D.hush_view.rig_advance": 2.84,
+        "root:DevShot": 2.1,
+        "NightScene": 2.01,
+        "WorldView3D.hush_view.mine": 1.73,
+        "WorldView3D.bellows_apply": 1.53,
+        "WorldView3D.bellows_view.rig_advance": 1.4
+       }
+      },
+      "h1": {
+       "headless": true,
+       "ok": true,
+       "frames": 3525,
+       "total": {
+        "max": 12.512,
+        "mean": 2.909,
+        "p50": 2.706,
+        "p95": 4.061
+       },
+       "view_ms_p50": 2.76,
+       "view_ms_p95": 4.17,
+       "sites_over_1ms": {
+        "WorldView3D.bellows_apply": 7.76,
+        "WorldView3D.overlays": 5.29,
+        "NightScene": 5.2,
+        "WorldView3D.hush_apply": 4.94,
+        "WorldView3D.hush_view.mine": 4.73,
+        "WorldView3D.hush_view.rig_advance": 4.3,
+        "root:DevShot": 4.17,
+        "CameraDirector3D": 3.97
+       }
+      },
+      "h2": {
+       "headless": true,
+       "ok": true,
+       "frames": 3526,
+       "total": {
+        "max": 14.447,
+        "mean": 2.964,
+        "p50": 2.755,
+        "p95": 4.198
+       },
+       "view_ms_p50": 2.81,
+       "view_ms_p95": 4.33,
+       "sites_over_1ms": {
+        "NightScene": 6.93,
+        "WorldView3D.overlays": 5.67,
+        "WorldView3D.hush_apply": 2.81,
+        "AudioDirector": 2.47,
+        "PipView3D": 2.4,
+        "WorldView3D.bellows_apply": 2.39,
+        "CameraDirector3D": 2.31,
+        "WorldView3D.props_cues": 2.23
+       }
+      }
+     }
+    },
+    "d18_deterministic": 28,
+    "d18_chance_baseline": "3/3: [2, 0] at ±120 ticks vs 1 at 0; headless repeats: [36, 36] at ±120 vs 27 at 0; info D17 2/3: [15, 12] at ±120 vs 9 at 0",
+    "perf3d_tool": "[lint3d] perf: FAIL — 2 error"
+   },
+   "failures": [
+    "D18.2: 1 call sites > 1 ms at the same tick in 3 of 3 rendered runs: [\"NightScene t1283 {'r1': 1.91, 'r2': 1.28, 'r3': 1.14}\"]",
+    "D18.2: 27 headless hits > 1 ms repeated at the same tick in the other headless run or a rendered run: [\"h1 NightScene t1862 3.22 [('r2', 1867, 1.12)]\", \"h1 NightScene t335 1.71 [('r3', 331, 1.21)]\", \"h1 NightScene t445 1.24 [('r1', 451, 1.85), ('r3', 447, 1.16)]\", \"h1 NightScene t2010 3.61 [('r3', 2007, 1.18)]\", \"h1 NightScene t3217 1.04 [('r1', 3215, 1.01), ('r2', 3223, 1.09)]\", \"h1 NightScene t2029 1.28 [('r2', 2031, 1.06), ('r3', 2027, 1.11)]\"]"
+   ],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-02T00:07:26Z",
+   "no_render": false
+  },
+  "17": {
+   "row": "17",
+   "command": "tools/scripts/shot.sh res://scenes/dev/anim3d/RigPerf3D.tscn build/r3d/perf_<rig>_<n>.png 600 r3d-qa -- --rig=<rig> --clip=<clip> --perf-log (5 × hush/loco_run, 5 × bellows/rx_sneeze_blast_a; medians)",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 197.0,
+   "numbers": {
+    "hush": {
+     "cpu_ms_median": 0.206,
+     "cpu_runs_us": [
+      206.0,
+      208.0,
+      200.0,
+      201.0,
+      223.0
+     ],
+     "draw_calls": 2,
+     "tris": 9812,
+     "deform_bones": 48,
+     "set_piece_draw_calls": 0,
+     "set_piece_tris": 0,
+     "clip": "hush/loco_run"
+    },
+    "bellows": {
+     "cpu_ms_median": 0.281,
+     "cpu_runs_us": [
+      281.0,
+      266.0,
+      290.0,
+      269.0,
+      282.0
+     ],
+     "draw_calls": 4,
+     "tris": 9495,
+     "deform_bones": 50,
+     "set_piece_draw_calls": 0,
+     "set_piece_tris": 0,
+     "clip": "bellows/rx_sneeze_blast_a"
+    }
+   },
+   "failures": [
+    "bellows: CPU 0.281 ms > 0.25"
+   ],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-02T00:10:43Z",
+   "no_render": false
+  },
+  "18": {
+   "row": "18",
+   "command": "E2E_SANDBOX=r3d-qa tools/scripts/e2e.sh retry | pause_back | touch_smoke | tap_accuracy | curtain_call --report=build/r3d/flows/<flow>.json",
+   "pass": true,
+   "rc": 0,
+   "wall_s": 225.0,
+   "numbers": {
+    "retry": "763 ms (wall 839 ms) vs max(1500, one frame 88 ms)",
+    "tap_feedback_frames": 1,
+    "touch_commands": [
+     "go",
+     "freeze",
+     "freeze",
+     "squeak"
+    ],
+    "pause_back": {
+     "back_resumed": true,
+     "log_flushed": true,
+     "menu_open": true,
+     "still_paused_after_focus_in": true,
+     "tick_stopped": true,
+     "ticking_after": true
+    },
+    "tap_accuracy": {
+     "hotspots": 24,
+     "slice_hotspots": 5,
+     "min_hits": 20,
+     "neighbour_hits": 0,
+     "frame_ms": 87.0
+    },
+    "curtain_call": {
+     "g0_again_ms": 294,
+     "g0_buttons_live": true,
+     "next_to_n02": true,
+     "frame_ms": 158.8,
+     "p00": {
+      "done": true,
+      "length_s": 9.66,
+      "next_live_frame1": true,
+      "steps": {
+       "bow": 1.66,
+       "fall": 0.87,
+       "reel": 5.0,
+       "results": 0.59,
+       "title": 1.53
+      }
+     }
+    }
+   },
+   "failures": [],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-02T00:14:28Z",
+   "no_render": false
+  },
+  "19": {
+   "row": "19",
+   "command": "(docs/review/r3d-qa/readability.md verdict lines)",
+   "pass": false,
+   "rc": 0,
+   "wall_s": 0.0,
+   "numbers": {
+    "tests": {
+     "verb": "7/8",
+     "spot": "7/8",
+     "crowded_yes": "1/8",
+     "prefer_3d": "8/8"
+    },
+    "gags": {
+     "g0_sneeze": "funny 4 readable 4 fresh 3",
+     "p00_sneeze": "funny 4 readable 4 fresh 3",
+     "p00_dizzy_spin": "funny 3 readable 3 fresh 3",
+     "p00_curtain_call": "funny 3 readable 3 fresh 3",
+     "p00_picture": "funny 3 readable 3 fresh 2",
+     "p00_doorframe_bonk": "funny 3 readable 3 fresh 2",
+     "p00_vase": "funny 2 readable 3 fresh 2",
+     "p00_squeak_bit": "funny 1 readable 2 fresh 1",
+     "p00_relief": "funny 1 readable 2 fresh 1"
+    }
+   },
+   "failures": [
+    "gag p00_dizzy_spin: funny 3 readable 3 (bar 4)",
+    "gag p00_picture: fresh 2 < 3",
+    "gag p00_doorframe_bonk: fresh 2 < 3",
+    "gag p00_vase: funny 2 readable 3 (bar 3)",
+    "gag p00_vase: fresh 2 < 3",
+    "gag p00_squeak_bit: funny 1 readable 2 (bar 3)",
+    "gag p00_squeak_bit: fresh 1 < 3",
+    "gag p00_relief: funny 1 readable 2 (bar 3)",
+    "gag p00_relief: fresh 1 < 3"
+   ],
+   "notes": [],
+   "head": "446a69b",
+   "tree": "b73588a30a7434b2",
+   "at": "2026-10-02T02:42:21Z",
+   "no_render": false
+  }
+ },
+ "generated_by": "tools/scripts/pregate3d.sh",
+ "summary": {
+  "tree": "b73588a30a7434b2",
+  "sim_tree": "ee4b12e86af732e9",
+  "rows_run": [
+   "19"
+  ],
+  "pass": false
+ },
+ "qa_note": "r3d-qa round 3, phase 3 (2026-10-02 02:43Z): every row of this record ran on content hash b73588a30a7434b2 (446a69b; rows 1-18 and 20a in one invocation 23:13Z-02:05Z, row 19 at 02:42Z after the round-3 reviewers were scored). AFTER this record, tools/scripts/pregate3d.sh line 829 was fixed (the per-row log cleanup glob row${row}*.log also deleted row10-row18 logs for row 1 and row20a logs for row 2; now row${row}.log + row${row}_*.log). That one-line log-cleanup change moves the content hash to 8863336abbd0abcc, so a later --rows subset run on the new tree marks these rows STALE; no game/, tools/ci, tools/art3d/review or tools/audio file changed after 23:13Z, and no row's verdict depends on the cleanup line."
+}

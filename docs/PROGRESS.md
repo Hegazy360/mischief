@@ -103,36 +103,40 @@ the view to 3D (look A, Hush in B's dimensions) for g0 + the Prologue, with Nigh
   headless `lint3d --screen/--set`), TECH as built, the row-19 packets built (`docs/review/r3d-qa/`)
 - [x] Fix round 1 (5f0092b: r3d-fix-hud / -gags / -perf) + r3d-fix-hud2 (the Hud first-show warm, the overlay solve
   dirty flag)
-- [x] QA round 2 pre-gate, alone, on 5f0092b + r3d-fix-hud2 (hash bd0fb2503d06829a, sim tree 838f39fc9f4d1a85;
-  13:58–16:40Z): rows 1–8, 10–15, 17, 18, 20a PASS (numbers in `docs/review/r3d-qa/index.md` §R2; record
-  `docs/review/r3d-qa/pregate_r2.json`)
-- [x] **20a: the exported APK boots the 3D game** — PASS since 33759c4: 197 scripts, 0 failures, Night OK; APK 73.47 MB,
-  sha256 9478f00d…6316
-- [ ] Row 9: the P00 parlour vase (×1.5 blue-and-white since fix round 1) is still `"dressing": true` in `house3d.json`,
-  so the dressing colour rule fails it (C* 42.7, |ΔL*| 20.8) — request to r3d-sets / integrate
-- [ ] Row 16 (D17): every count and the p50 / p95 rule pass; 11 call sites > 1 ms at the same tick in ≥ 2 of 3 rendered
-  runs (chance baseline 9–18) + 20 repeated headless hits; the repeatable sites: WorldOverlays.apply t255–263, Hush's
-  CharacterView3D t995 / t2846, NightScene t1572 — requests (a)–(c) + a D17 ruling request
-- [ ] 19: round 2 (new reviewers, rebuilt packets) — **FAIL** (`docs/review/r3d-qa/readability.md`, Round 2): spot 6/8
-  PASS, verb 7/8 and 3D preferred 8/8 carried; crowded 2/8 (bar ≤ 1) and the gags 1 of 9 at their bar (picture 3/4/3
-  passes; sneezes 3/3/3, dizzy spin 3/4/3, vase 2/3/2, bonk 2/3/1, curtain call 2/2/2, relief 1/2/2, squeak bit 1/2/1)
-  — requests Q2-C1/C2, Q2-G1…G8, Q2-S1/S2
+- [x] QA round 2 (5f0092b + r3d-fix-hud2): rows 9, 16, 19 FAIL (`docs/review/r3d-qa/index.md` §R2–§R3,
+  `pregate_r2.json`) → fix round 2 (r3d-fix-hud3 / -gags2 / -night2), committed unchanged as 446a69b
+- [x] QA round 3 pre-gate, alone, one invocation, on 446a69b (hash b73588a30a7434b2, sim tree ee4b12e86af732e9;
+  2026-10-01 23:13Z – 10-02 02:05Z): rows 1–15, 18, 20a PASS — row 9 now 0 errors (the vase fix landed); record
+  `docs/review/r3d-qa/pregate_r3.json`, numbers in `docs/review/r3d-qa/index.md` §R4
+- [x] **20a: the exported APK boots the 3D game** — 73,526,533 B, 3279 entries, sha256 fc4ad3ea…75ed; 197 scripts,
+  0 failures, Night OK
+- [ ] Row 16 (D18.2): every count and the p50 / p95 rule pass; 1 site in 3/3 rendered runs (NightScene t1283; chance
+  baseline 2 / 0) + 27 headless repeats (chance 36 / 36); the previous pass on identical files flagged a different
+  site (t379) — chance level on this box; lead ruling asked + 3 recurring sites sent as fixes (t3351 picture slide-off,
+  t1283 sneeze reaction start, t1677 doorframe bonk)
+- [ ] Row 17: Bellows 0.281 ms > 0.25 (the same files gave 0.213 ms in pass A; re-check 279 µs; the host slowed
+  10–30 % after the ~23:00Z restart); Hush 0.206 ms — lead ruling asked (or a ~15 % rx_sneeze_blast_a CPU cut)
+- [ ] 19: round 3 (3 fresh reviewers per packet, medians, D18.1) — **FAIL** (`docs/review/r3d-qa/readability.md`,
+  Round 3): spot **7/8** PASS (counts 7/6/7), crowded **1/8** PASS (at the bar), verb 7/8 and 3D preferred 8/8
+  carried; gags **3 of 9** at their bar — both sneezes 4/4/3 and the curtain call 3/3/3 PASS; dizzy spin 3/3/3 (bar
+  4/4), picture 3/3/2, bonk 3/3/2, vase 2/3/2, squeak bit 1/2/1, relief 1/2/1 — requests Q3-G1…G6, Q3-C1, Q3-S1/S2
 - [ ] 20b: the CI android-preview APK of the pushed head matches 20a
-- [ ] Owner check: R1 / R2 verdict on the owner pack (`docs/review/r3d/index.md` — refreshed for round 2, held until
-  9 / 16 / 19 pass)
+- [ ] Owner check: R1 / R2 verdict on the owner pack (`docs/review/r3d/index.md` — refreshed for round 3, held until
+  16 / 17 / 19 pass)
 
-| Exit row (index §6) | Result | Numbers (QA round 2) |
+| Exit row (index §6) | Result | Numbers (QA round 3, pass B) |
 |---|---|---|
-| 1 import metadata · 2 suite · 3 lints --strict · 4 validators | PASS | 1010 .import / 412 .uid; 1312/1312 tests, 0 skips; 72 clips strict 0 errors; 5 validators |
-| 5 routes · 6 dead air · 7 planner | PASS | 13 routes, every expect OK; worst ⏩ 8.1 / 4.8 / 5.9 %, gap 5.5 s, edge 0.22 |
-| 8 fuzz | PASS | 2400 runs, 0 invariants, 0 soft-locks, 0 struck-hotspot commands |
-| 9 set lint | **FAIL** | 2 errors: P00 parlour vase flagged dressing (C* 42.7 > 30, \|ΔL*\| 20.8 > 15); 1 warning (N02 hall, D13) |
-| 10 screen · 11 HUD · 12 C8 | PASS | 0 errors; C8 0 violations on 13 routes × 2 modes; Bellows window ≤ 35.0 % (was 39 %) |
-| 13 g0 · 14 Prologue · 15 other routes | PASS | CHOO accent f 94, hit-stop 83 ms; 7 laughs by 60 s; slow first laugh 6.6 s / prank 27.6 s; 13/13 scenarios |
-| 16 frame budget | **FAIL** (D17) | draws p95 ≤ 82 (max 101), tris ≤ 101k, tex ≤ 110.7 MB, 0 compiles in PLAY, view + HUD p50 ≤ 3.16 / p95 ≤ 4.72 ms; D17 repeatable spikes at t255, t995, t2846, t1572 |
-| 17 per character · 18 flows | PASS | Hush 0.159 ms / 2 draws / 9.8k tris / 48 bones; Bellows 0.198 ms / 4 / 9.5k / 50 (+ stool apart, D16); retry 632 ms, tap 20/20, feedback 1 frame |
-| 19 readability | **FAIL** | spot 6/8, crowded 2/8, gags 1 of 9 at bar (verb 7/8, 3D preferred 8/8 carried from round 1) |
-| 20a APK | PASS | 73.47 MB, 3277 entries, exported pack 197 scripts / 0 failures / Night OK |
+| 1 import metadata · 2 suite · 3 lints --strict · 4 validators | PASS | 1010 .import / 413 .uid; 1345/1345 tests, 0 skips, 139 files; 72 clips strict 0 errors; 5 validators |
+| 5 routes · 6 dead air · 7 planner | PASS | 13 routes, every expect OK; worst ⏩ 8.1 / 4.8 / 5.9 %, gap 5.47 s, edge 0.221; N02 first prank 19.4 s |
+| 8 fuzz | PASS | 2400 runs, 0 failed, 0 invariants, 0 soft-locks |
+| 9 set lint | PASS | 0 errors; 1 warning (N02 hall, D13) |
+| 10 screen · 11 HUD · 12 C8 | PASS | 0 errors (10: 1 warning); C8 0 violations on 13 routes × 2 modes; Bellows window ≤ 35.0 % |
+| 13 g0 · 14 Prologue · 15 other routes | PASS | CHOO accent f 94, hit-stop 83 ms, Again 240 ms; 7 laughs by 60 s, crowd ≤ 0.254 s; slow first laugh 6.63 s / prank 27.58 s; 13/13 scenarios |
+| 16 frame budget | **FAIL** (D18.2) | draws p95 ≤ 81 (max 96), tris ≤ 103k, tex ≤ 110 MB, emitters ≤ 8, 0 compiles in PLAY, view + HUD p50 2.65–3.04 / p95 3.82–4.43 ms; 1 site 3/3 rendered (chance level) + 27 headless repeats |
+| 17 per character | **FAIL** | Bellows 0.281 ms (266–290 µs) / 4 draws / 9.5k tris / 50 bones; Hush 0.206 ms / 2 / 9.8k / 48 |
+| 18 flows | PASS | retry 763 ms, tap 20/20, feedback 1 frame, g0 Again 294 ms, P00 Next live frame 1 |
+| 19 readability | **FAIL** | spot 7/8, crowded 1/8, gags 3 of 9 at bar (medians of 3 reviewers; verb 7/8, 3D preferred 8/8 carried) |
+| 20a APK | PASS | 73.53 MB, 3279 entries, exported pack 197 scripts / 0 failures / Night OK |
 | 19 readability | **FAIL** | verb 7/8 · spot 6/8 · crowded 2/8 (≤ 1) · 3D preferred 8/8; sneezes 4/4/3, dizzy spin 3/3/4 (≥ 4/4), 5 small gags < 3 |
 | 20a APK | **FAIL** | 73.4 MB, VIBRATE only, minSdk 24, contents OK — the exported pack does not compile `WorldView3D` |
 
@@ -212,3 +216,10 @@ the view to 3D (look A, Hush in B's dimensions) for g0 + the Prologue, with Nigh
   passes 3/4/3, the sneezes fell to 3/3/3 with an unchanged clip) and re-ran row 19. Verdict FAIL on rows 9 (vase still
   flagged dressing), 16 (D17) and 19; 20a PASS (APK 73,468,995 B, sha256 9478f00d…6316). Owner pack refreshed (boards
   re-shot from this build, round-2 verdicts, rough edges), still held.
+- 2026-10-02 — r3d-qa round 3 (446a69b = 74967b5 + fix round 2): phase 1 ran the full pre-gate alone (pass B, the
+  record; pass A on identical files kept for comparison) and reused the packets set_i / set_j / set_k; nine new fresh
+  reviewers (3 per packet, D18.1) answered them; phase 3 scored row 19 (`readability.md` Round 3: spot 7/8 PASS,
+  crowded 1/8 PASS, gags 3 of 9 at bar FAIL — both sneezes 4/4/3 and the curtain call 3/3/3 now pass) and re-ran row
+  19 alone. Verdict FAIL on rows 16 (D18.2 at chance level), 17 (Bellows 0.281 ms on the slowed host) and 19; 20a PASS
+  (APK 73,526,533 B, sha256 fc4ad3ea…75ed). Owner pack refreshed (boards re-shot from this build, round-3 verdicts,
+  rough edges), still held.

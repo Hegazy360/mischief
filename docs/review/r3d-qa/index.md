@@ -4,6 +4,181 @@ Branch `r3d` at `5b5a135` plus the r3d-qa working-tree changes (the orchestrator
 `910d23a982ac1d19`. Box: 4 CPU cores, llvmpipe (software GL), 1200×540, MSAA off; the timing rows ran with no other Godot or
 Blender process on the box.
 
+## R5. QA round 3, phase 3: row 19 scored (3 reviewers a packet), row 19 re-run, the owner pack refreshed (2026-10-02, 02:20–02:45Z)
+
+**Verdict: FAIL** on rows 16, 17 (phase 1, §R4; rulings asked) and **19**; every other row passes. Tree `446a69b`
+(content hash `b73588a30a7434b2`), unchanged in `game/` since phase 1.
+
+- **Row 19, round 3** ([`readability.md`](readability.md) "Round 3"): nine new fresh reviewers, three per packet (D18.1),
+  answers pasted verbatim per reviewer with the keys. Each sheet scored with `packets.py score` (`<SP>/work/r3d-qa/p5/`),
+  the spot gists judged by hand, combined by `p5/gen_r3.py`.
+  - **Spot `set_i`: 7/8 PASS** (counts 7 / 6 / 7, median 7). The pickle jar was read as a jar but as "spring snakes"
+    by all three; one reviewer read the honey/pepper as hot chilli.
+  - **Crowding `set_j`: 1/8 PASS** (at the bar): only N1 t6768 has ≥ 2 of 3 "yes" (his tea thought + the kettle
+    badge for one target). The round-2 P00 t2190 frame is fixed (0 of 3).
+  - **Gags `set_k`: 3 of 9 at their bar, FAIL.** Medians: g0 sneeze 4/4/3 PASS, P00 sneeze 4/4/3 PASS, curtain call
+    3/3/3 PASS; dizzy spin 3/3/3 (bar 4/4), picture 3/3/2 and bonk 3/3/2 (fresh), vase 2/3/2, squeak bit 1/2/1, relief
+    1/2/1. All 27 strip × score cells have the three reviewers within one point (15 identical).
+  - Requests Q3-G1…G6, Q3-C1, Q3-S1/S2 (`readability.md` §R3.6).
+- **The pre-gate:** `tools/scripts/pregate3d.sh --rows=19` re-ran alone at 02:42Z → FAIL (the gag lines). Rows 16 and
+  17 had no fix since phase 1, so they were not re-run. The record (rows 1–18 + 20a from phase 1, row 19 now, all on
+  `b73588a30a7434b2`) is archived as [`pregate_r3.json`](pregate_r3.json), with a `qa_note`.
+- **`pregate3d.sh` log-cleanup bug fixed after the archive** (§R4): line 829 now removes only `row<N>.log` and
+  `row<N>_*.log`. That one line moves the content hash to `8863336abbd0abcc`, so a later `--rows` subset on this tree
+  marks the record's rows STALE (the `qa_note` says so); no row's verdict depends on it.
+- **Perf charts** [`perf/budgets.png`](perf/budgets.png) and [`perf/rigs.png`](perf/rigs.png) regenerated from this
+  record (they were round 2's).
+- **Owner pack** (`docs/review/r3d/index.md`, still held) refreshed for round 3; shot from this build in sandbox
+  `r3d-qa-shot`, captions off, MSAA off:
+  - `hud_2d_vs_3d.jpg` (P00 slow t415), `tinker_2d_vs_pepper_rig.jpg` (P00 ideal t400), `pip_2d_vs_window.jpg`
+    (P00 ideal t445), the 3D panel of `kitchen_before_after.jpg` (t415): re-shot live at the 2D-reference ticks;
+  - new `sneeze_r3.jpg` (g0 ≈ t1114 the pepper, ≈ t1198 the dazed hold; e2e `g0_sneeze --shot-seq --seq-from=1090`) and
+    `curtain_call_r3.jpg` (P00 ideal curtain call, strip f510 and f600; `prologue_ideal --fixed --seq-from=3997`);
+  - `rig_ring_g0_t192.jpg` and the new `crowding_r3.jpg` from the round-3 packet frames; `still_crowded_r2.jpg`
+    removed (superseded).
+- **Folder size:** `docs/review/r3d-qa/` is 30 MB (29 MB of packets, rounds 1–3; committed in 446a69b), over R12's
+  25 MB. The packets are the evidence the reviewers saw, so they were not recompressed here (orchestrator's call).
+
+## R4. QA round 3, phase 1: the full pre-gate under D18.2 and three rebuilt row-19 packets (2026-10-01 20:45Z – 2026-10-02 02:05Z)
+
+**Tree:** `446a69b` = `74967b5` + the fix-round-2 changes of r3d-fix-hud3, r3d-fix-gags2 and r3d-fix-night2 (imported on
+the real project by r3d-import3: 1345/1345, lint --strict OK, sidecars unchanged) + this task's packets. Pre-gate content
+hash `b73588a30a7434b2`, sim tree `ee4b12e86af732e9`. Row 16's evaluator implements D18.2; `pregate3d.sh` is unchanged
+since 20:44Z.
+
+**Two passes on the same content.** Pass A (20:45–21:39Z, on 74967b5 + the uncommitted fixes, hash `b7c326766e455853`)
+ran rows 1–7, 9–18 and 20a; the ~23:00Z container restart killed its row 8 (N01 fuzz at 3 of 4 bots) before the record
+was summarised. The orchestrator then committed the tree as `446a69b`. Rebuilding pass A's hash from `74967b5` plus the
+diff to `446a69b` gives `b7c326766e455853` again, so the two passes ran on identical files; the hash differs only
+because the files moved from the working tree into the commit. **Pass B** (`tools/scripts/pregate3d.sh --rows=1-18,20a`,
+ONE invocation, 23:13Z–02:05Z) is the record: rows 1–7 and 9–20a with no other Godot or Blender process; row 8
+(sim-only, seeded, no timing) last. Archived as [`pregate_r3.json`](pregate_r3.json). Pass A's numbers are kept for
+comparison (`<SP>/work/r3d-qa/r3/run_a/`).
+
+**A bug in `pregate3d.sh`, not fixed yet.** Each row's log cleanup runs `rm -f "$LOGS/row${row}"*.log`. For
+row 1 that glob also matches `row10.log` to `row18*.log`, and for row 2 it matches `row20a*.log`. So when pass B's row 1
+started, it deleted pass A's logs for rows 10–18 and 20a. Pass A's numbers survive in `run_a/pregate_2139.json`, and its
+row-16 profiler files were copied out first. The fix is to delete `row${row}.log` and `row${row}_*.log` instead. It
+waits until after this record, because editing the script would change the record's hash.
+
+**Verdict of phase 1: FAIL on rows 16 and 17.** Every other row 1–18 and 20a passes. Row 19 waits for the round-3
+reviewers (§R4.4).
+
+| # | Row | Pass B (the record) | Key numbers (pass A in brackets where it differs) |
+|---|---|---|---|
+| 1 | Import metadata | PASS | 1010 .import, 413 .uid |
+| 2 | Full suite | PASS | 1345/1345, 0 skipped, 139 files incl. 2 `tests/slice`; 366 s (325 s) |
+| 3 | Lints --strict | PASS | 72 clips strict, 0 errors / 0 warnings / 0 missing; coverage 72; 0 lints failed |
+| 4 | Validators | PASS | 5 |
+| 5 | Every route | PASS | 13 routes, every expect OK, 0 invariants, 0 catches on ideal; N01 ideal ★★★ 116.3, N02 ideal ★★★ 117.5, required ★ 44.0 / 59.3 |
+| 6 | Dead air (D1) | PASS | worst ⏩ ideal 8.1 % (g0) / required 4.8 % / slow 5.9 %; worst gap 5.47 s; edge 0.221; N02 first prank 19.4 s |
+| 7 | Planner proofs + g0 | PASS | --auto n01 6 lines, n02 5, p00 2; g0 ideal 23.6 s → g0_done |
+| 8 | Fuzz | PASS | 2400 runs (3 final episodes × 4 bots × 200, one process per episode), 0 failed, 0 invariants, 0 soft-locks; 6539 s; the seeded counts equal pass A's (e.g. N01 random 1096 catches, N02 bait 1800) |
+| 9 | Set lint | PASS | 0 errors; 1 warning (N02 hall negative space 0.68 m, D13) |
+| 10 | Screen-rect lint | PASS | 0 errors, 1 warning (N02 hall clock under the window at 16:9) |
+| 11 | HUD lint | PASS | 0 errors, 0 warnings (A: 1 warning, N01 middle-band window 1.5 s); no window-share warning |
+| 12 | C8 | PASS | 26 route × mode runs, 0 violations (sim shipped, lean info); window share max 35.0 % (N01 required), P00 24.8–33.7 %, g0 30.4 % |
+| 13 | Gate 0 in 3D | PASS | g0_done; accent f94; zoom 1.14 at the accent / 1.59 max; hit-stop 83 ms (5 f); ACHOO-RIA!; bouffant flipped; lands in the sink; tag 1/1; C8 0; Again ▶ 240 ms; frame p95 103 ms (89) |
+| 14 | Prologue in 3D | PASS | ideal 7 laughs by 60 s, 4 cues, crowd ≤ 0.254 s after each cue, 0 doubles, C8 0; slow first laugh 6.63 s / first prank 27.58 s launch-relative (bars 10 / 30 s); frame p95 109 ms (90) |
+| 15 | Other routes in 3D | PASS | 13/13, 0 script / engine errors; g0 + P00 × 3 0 fallbacks; N01 / N02 18–60 (info) |
+| 16 | Frame budget | **FAIL** (D18.2 spike clause only) | counts PASS: draws p95 ≤ 81 / max ≤ 96, tris ≤ 103,310, emitters ≤ 8, tex ≤ 110.0 MB, 0 compiles in PLAY; view + HUD p50 2.65–3.04 / p95 3.82–4.43 ms (bars 3.5 / 8.0); the 5 profiler runs 2.76–3.14 / 4.17–4.77. D18.2: 1 site in 3 of 3 rendered runs (NightScene t1283) + 27 headless repeats (§R4.2) |
+| 17 | Per character | **FAIL** | Bellows **0.281 ms** (266–290 µs) > 0.25 [A: 0.213 ms, 197–241 µs, PASS]; Hush 0.206 ms (197–220 µs) [A: 0.170]; 4 / 2 draws, 9495 / 9812 tris, 50 / 48 bones (§R4.3) |
+| 18 | Flow / touch | PASS | retry 763 ms (610); tap feedback 1 f; pause / back OK; tap accuracy min 20/20 on 5 slice hotspots (24 tested), 0 neighbours; g0 Again ▶ 294 ms; P00 Next ▶ live frame 1 (call 9.66 s) |
+| 20a | APK (local) | PASS | 73.53 MB (73,526,533 B, the same size as pass A), sha256 `fc4ad3ea145c27e921b880f559fae04ede92702bc62f290030b34170f3ea75ed`, 3279 entries, 78 clip .res, 81 sidecars, excluded paths absent, VIBRATE only, minSdk 24; exported pack 197 scripts / 0 failures, Night OK (view 3d) |
+
+**The box got slower with the restart.** On identical files, pass B ran 10–30 % slower than pass A: suite 366 vs 325 s,
+g0 frame p95 103 vs 89 ms, P00 109 vs 90 ms, retry 763 vs 610 ms, Bellows' rig CPU +32 %, Hush's +21 %. Load was ~1.1
+(one process) in both. The CPU is the same model string (Xeon @ 2.80 GHz), so this is most likely a different or busier
+host under the VM.
+
+### R4.1 Row 16's evaluator under D18.2
+- **Rendered:** a call site counts when it is > 1 ms at the same tick (±2 f, the `prof_frame_ticks` spans) in **3 of
+  3** rendered runs. D17's ≥ 2 of 3 is kept as info only (`info_d17_rendered_2of3`).
+- **Headless:** a headless hit counts when the same site is > 1 ms at the same tick in the **other headless run** or in
+  **a rendered run**. Both headless runs are required.
+- **Info for the lead:** chance baselines (the other runs shifted ±120 ticks) for every rule, and NightScene's own phase
+  split for every 2-of-3 cluster.
+
+### R4.2 What row 16 found, and why it is noise on this box
+| | pass A | pass B |
+|---|---|---|
+| 3 of 3 rendered | 1 — NightScene **t379–384** (1.20 / 1.27 / 1.05) | 1 — NightScene **t1283** (1.91 / 1.28 / 1.14) |
+| chance (other runs ±120 ticks) | 0 / 1 | **2** / 0 |
+| headless repeats (in the other headless run / in a rendered run; a hit can be both) | 25 (4 / 22) | 27 (5 / 23) |
+| chance (±120 ticks) | 22 / 33 | **36 / 36** |
+| D17 2 of 3 rendered (info) | 20 | 9 (chance 15 / 12) |
+
+- **The two passes disagree.** Each pass has a different 3-of-3 site, and in neither is there a NightScene sub-phase
+  over 1 ms: the 3-of-3 hits are the scene's own sum just above the line (t1283: `ov_apply` 0.57–0.86, the rest
+  < 0.35). In pass B the real alignment has *fewer* headless repeats than the shifted ones.
+- **Across all 10 runs** (6 rendered, 4 headless, identical files; `<SP>/work/r3d-qa/r3/d18_cross.py`): no site is
+  > 1 ms at the same tick (±2 f) in 5 or more runs. Sites in ≥ 4 runs: 7, against 6–9 with the runs shifted
+  ±120 / ±240 ticks. That is chance level.
+- **Of pass A's 26 D18.2 hits, 12 come back anywhere in pass B's five runs** (same site, same tick ±2 f). Of pass B's
+  28, 9 come back in pass A. The two passes' hit lists mostly do not overlap.
+- **Sites that do recur across both passes** (a looser ±6-tick window, by hand). These are the only candidates for real
+  costs:
+
+| ticks (P00 ideal) | what happens there | site, runs (ms) | owner |
+|---|---|---|---|
+| t3351–3361 | the picture slides off his head (`laugh_picture` t3273 → the slide-off) | NightScene in **5 of 10** runs: A r1 1.26 / 1.75, A h1 4.07 (`ov_rules` 3.55), A h2 4.71 (`ov_apply` 4.48), B r1 2.09, B h1 1.61 | r3d-hud (`game/ui/world/world_overlays.gd` / `overlay_rules.gd`: the re-solve when the frame prop is released) |
+| t1279–1284 | the sneeze reaction starts (e2e `sneeze.first_tick` 1283) | NightScene in 4 of 10 (A r3 1.49; B r1 1.91 / 1.17, B r2 1.28, B r3 1.14) + Bellows `apply` 1.78 / 1.15 (B r1, r2) | r3d-view3d / r3d-fix-gags (`gag_stager_3d.gd` set-up, `fx_3d.gd` pepper motes); r3d-rig (`rx_sneeze_blast_a`'s first advance) |
+| t1676–1684 | the doorframe bonk (`cue_doorframe_windup` → bonk) | Bellows `apply` in 4 of 10 (A r1 1.29, A r3 1.19, A h2 1.21, B r2 1.20) | r3d-rig / r3d-fix-gags (`CueStager3D` staged clips through `RigPlayer3D.prepare_clips`) |
+
+  Pass A's pantry site (Hush `rig_advance` t992–996: 4.66 / 1.54 / 3.63 ms) and the CameraDirector3D pair at t433–435
+  did not recur in pass B.
+- **Ruling asked (lead):** D18.2 matches at chance level on this box, as D17 did. That includes the 3/3-rendered clause
+  (it picked a different site in each pass, with a chance baseline of 0–2). Night2's proposed fallback ("a site repeats
+  in all 3 headless runs") would face the same per-run preemption, since the headless runs carry 157–174 one-off
+  hits > 1 ms. Options:
+  - judge the spike clause on **replication across two passes** (the three sites above);
+  - or accept row 16 on its counts and p50/p95, send the three recurring sites as fix requests, and let the owner's
+    device log judge the 4 ms p95 target (D14).
+
+### R4.3 Row 17 on the slower host
+- **The two passes, same files:**
+  - Pass A: Bellows 0.213 ms (197–241 µs), PASS.
+  - Pass B: 0.281 ms (266–290 µs), FAIL.
+- **Hush moved the same way** (0.170 → 0.206 ms), and every real-time row slowed by 10–30 %. That points to the host,
+  not the rig.
+- **A re-check outside the record** (the same RigPerf3D command, 5 runs per rig, after row 8, on an idle box):
+  Hush 196–206 µs (median 204), Bellows 258–297 µs (median 279) at load ~1.1 (02:05–02:08Z, `<SP>/work/r3d-qa/r3/rig_recheck/`), so the pass-B number reproduces on this host.
+- **Bellows' margin** has been thin since D16 (0.199 ms at 06:25Z). If the lead wants margin rather than a ruling,
+  the request is r3d-rig / r3d-cast-bellows: cut Bellows' per-frame CPU on `rx_sneeze_blast_a` (jiggle chains or
+  face-card updates) by ~15 %.
+- **Info:** the set piece on loan (the stool, D16) was counted visible in pass A (1 draw / 450 tris) and not in pass B.
+  `rig_counts` samples one frame of a real-time run, so which frame it lands on changes between runs.
+
+### R4.4 Row 19: three rebuilt packets (not scored here; 3 reviewers each, D18.1)
+- **How they were built:** with `tools/art3d/review/packets.py`, from the real game at 1200×540, `--no-captions` and
+  MSAA off (`<SP>/work/r3d-qa/r3/shoot_r3.sh`, `assemble_r3.py`; sandbox `r3d-qa-shot`; shot 21:40–22:10Z on the same
+  files as `446a69b`).
+- **Moments:** round 1/2's moments and ticks, checked side by side against round 2's frames (`r3/look_*.jpg`).
+- **Seeds and keys:** new seeds, new keys (`keys/r3_<packet>_key.json`, outside the repo). Rounds 1–2's packets, keys
+  and answers are untouched.
+- **Spot rings:** re-checked by eye. The pickle jar's ring moved up with its raised shelf (`[658, 207, 40]`).
+- **Looked at again:** every frame and every strip page was looked at again after the restart.
+
+| packet | test | items | seed | pass (D18.1: 3 fresh reviewers) |
+|---|---|---|---|---|
+| [`packets/set_i`](packets/set_i/prompt.md) | spot: "what will happen if the neighbour uses the circled object?" | 8 frames | 131 | median count ≥ 6/8 the gist |
+| [`packets/set_j`](packets/set_j/prompt.md) | crowding: "is this screen crowded or confusing?" | 8 frames | 137 | ≤ 1/8 frames with ≥ 2 of 3 "yes" |
+| [`packets/set_k`](packets/set_k/prompt.md) | gags: one sentence + funny / readable / fresh 1–5, TECH §11 rubric | 9 strips: every Prologue gag + the g0 sneeze + the curtain call; the dizzy spin every 6 ticks (5 pages) | 149 | medians: the sneezes and the dizzy spin ≥ 4 funny and readable, the rest ≥ 3, fresh ≥ 3 |
+
+Round 1's verb (7/8, `set_a`) and 2D-vs-3D (8/8, `set_d`) results carry. How to run the 9 reviewers:
+[`reviewer_prompts.md`](reviewer_prompts.md) "Round 3".
+
+**What I saw while building them** (not a score):
+- the gramophone badge sits on its horn with a dotted tail and is the only red ring (P00 t2185);
+- the N1 pickle jar stands on its shelf above Hush's beret (t6768);
+- the bonk stays in frame with no cut and holds his dazed face;
+- the curtain-call pelmet drops onto him centre-left.
+
+Two things a reviewer may catch:
+- in the relief strip (f9–39) his double take (`st_double_take`'s held take) is held with both arms straight out to
+  the sides, which can read as a T-pose;
+- the same take opens his curtain-call bit (f360).
+
 ## R3. QA round 2, phase 3: row 19 scored, row 19 re-run, the owner pack refreshed (2026-10-01, 16:47–17:10Z)
 
 **Verdict: FAIL** on rows 9, 16 and 19. Every other row passes (§R2).

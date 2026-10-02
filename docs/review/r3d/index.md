@@ -3,22 +3,24 @@
 This page is for the owner. Everything below comes from the build. All shots are 1200 × 540, the shape of a 20:9
 phone held sideways.
 
-> **Status (r3d-qa round 2, 2026-10-01 17:05Z): not ready to send.** The pre-gate is still not green. Three rows fail:
-> - **9, set lint:** one data flag. The Prologue's vase was made bigger and blue-and-white so its gag reads, but it
->   is still marked as background dressing, and dressing must stay pale. A one-line fix in `house3d.json`.
-> - **16, frame budget:** every count is inside the budget. A few script calls still cost over 1 ms at the same moment
->   in repeated runs on the desktop proxy (D17).
-> - **19, fresh reviewers:** two bars are missed: "is this screen crowded?" (2 of 8, the bar is 1) and the Prologue's
->   gags (1 of 9 at its bar).
+> **Status (r3d-qa round 3, 2026-10-02): not ready to send.** The pre-gate is still not green. Three rows fail:
+> - **19, fresh reviewers:** the Prologue's smaller gags. Three fresh reviewers scored every strip (medians, D18). The
+>   two sneezes (4/4/3) and the curtain call (3/3/3) now pass. Six gags do not: the relief beat, the squeak bit, the
+>   vase and the dizzy spin, plus the picture and the door-frame bonk, which read clearly but are "the obvious version".
+>   "Is this screen crowded?" (1 of 8, the bar is 1) and "what will this spot do?" (7 of 8) now pass.
+> - **16, frame budget:** every count is inside the budget. One script call over 1 ms repeats at the same moment in
+>   3 of 3 rendered runs on the desktop proxy (D18.2), but the previous run of the same files flagged a different
+>   moment: on this box the rule fires at chance level. A ruling is asked.
+> - **17, per-character budget:** Bellows' rig costs 0.281 ms on this host against 0.25 ms. The same files measured
+>   0.213 ms three hours earlier; the box got 10–30 % slower after a restart. A ruling is asked.
 >
-> **20a now passes:** the APK below starts and plays the 3D game. The request tables are in
-> `docs/review/r3d-qa/readability.md` (Round 2) and in the r3d-qa report. When the fixes land, the pre-gate is re-run,
-> the APK line gets its new sha256, and 20b is confirmed after the push.
+> The request tables are in `docs/review/r3d-qa/readability.md` (Round 3, §R3.6) and in the r3d-qa report. When the
+> fixes land, the pre-gate is re-run, the APK line gets its new sha256, and 20b is confirmed after the push.
 
 ## The build
 
-- **APK:** `build/r3d/mischief-debug.apk`, a debug build. **73.47 MB (73,468,995 bytes), 3277 entries.**
-  - sha256 `9478f00dc5dec2dca1c17a38beb8dc00652091b5997d089dac81c237e6446316`. A debug APK is re-signed on every export,
+- **APK:** `build/r3d/mischief-debug.apk`, a debug build. **73.53 MB (73,526,533 bytes), 3279 entries.**
+  - sha256 `fc4ad3ea145c27e921b880f559fae04ede92702bc62f290030b34170f3ea75ed`. A debug APK is re-signed on every export,
     so the sha256 changes each time; the size and the contents list do not.
   - It starts: the exported pack loads all 197 of its scripts with 0 failures and builds a 3D Night.
   - Android 7 or later (min SDK 24), landscape only.
@@ -46,8 +48,8 @@ phone held sideways.
 3. Resume and play to the end (Gate 0 takes about 25 s), then tap **Stage door** in the curtain call.
 4. The stage door now lists **Night 1 (preview)** and **Night 2 (preview)**. Each opens behind a "Work in progress" card: tap **Play anyway**.
 
-**Next ▶** at the end of the Prologue now opens the same "Work in progress" card (Play anyway / Back), not Night 1
-directly (fixed in fix round 1: [`q_n1_wip_card_after.png`](../r3d-fix-perf/q_n1_wip_card_after.png)).
+**Next ▶** at the end of the Prologue opens the same "Work in progress" card (Play anyway / Back), not Night 1
+directly ([`q_n1_wip_card_after.png`](../r3d-fix-perf/q_n1_wip_card_after.png)).
 
 What falls back in the previews: every Bellows clip that is not made in 3D yet. This is counted per clip over the 9
 N1/N2 routes (`e2e.sh slice_all`), and he never drops into a rest pose:
@@ -68,7 +70,7 @@ ideal 60, required 22, slow 24. Gate 0 and the three Prologue routes have **0**.
 
 | Setting | Where | This build | Why |
 |---|---|---|---|
-| **Bellows window** (Sim / Lean) | Settings → Debug | **Sim** | "Sim" shows the window whenever the sim says he can be seen: you are one room away, he is coming, or a payoff is running. "Lean" keeps only his face badge at the screen edge while he is merely next door. Lean was not chosen because the lean dead-air check (`d1_lean`) fails the ⅓ edge-share cap on **7 of 9** routes (edge share 0.37–0.62). In Sim, every Prologue and Gate-0 route is now at or under 35 % of play (P00 *required* 34.6 %; it was 39 % before fix round 1). The share per route is in the verification section. Your call if you prefer Lean. |
+| **Bellows window** (Sim / Lean) | Settings → Debug | **Sim** | "Sim" shows the window whenever the sim says he can be seen: you are one room away, he is coming, or a payoff is running. "Lean" keeps only his face badge at the screen edge while he is merely next door. Lean was not chosen because the lean dead-air check (`d1_lean`) fails the ⅓ edge-share cap on **7 of 9** routes (edge share 0.37–0.62). In Sim, every Prologue and Gate-0 route is at or under 35 % of play (P00 *required* 33.7 %). The share per route is in the verification section. Your call if you prefer Lean. |
 | **MSAA 3D**, **Render scale** (1.0 / 0.85) | Settings → Debug | **MSAA on, 1.0** | **Unchanged — no probe answer.** The O2 perf-probe run on your phone never came back, so the defaults stand. Turn MSAA off or try 0.85 if the phone runs hot or stutters. The device log (Stage door → Device log) records `perf3d:<episode>` per Night. |
 | **Hush's head** (B's head / Head ×1.2) | Settings → Debug | **B's head** (your pick) | The head question, below. The two Gate-0 stage-door buttons set it for you. |
 | **Night 1/2 previews** | Settings → Debug | Off | See above. |
@@ -78,9 +80,9 @@ ideal 60, required 22, slow 24. Gate 0 and the three Prologue routes have **0**.
 ## What to judge — your four complaints (REDESIGN §6.4, R1 + R2)
 
 Fresh reviewers who did not know the game answered on opaque frames, with captions hidden (pre-gate row 19,
-`docs/review/r3d-qa/readability.md`). Round 2 used new reviewers on frames re-shot from this build, at the same moments
-as round 1. Their verdicts sit next to each complaint. Each packet had one reviewer, so a score can move by a point
-between reviewers.
+`docs/review/r3d-qa/readability.md`). Round 3 gave every packet to **three** new reviewers and takes the median
+(D18), because one reviewer's scores moved by a point between rounds on frames that had not changed. This time the
+three agreed closely: on every gag score they were within one point of each other.
 
 **1. "The UI is too crowded."** The 2D HUD vs the four always-on pieces: pause, the Script chip, Clarence and the action button.
 
@@ -88,17 +90,20 @@ between reviewers.
 
 - In side-by-side pairs, the reviewer preferred the 3D frame **8 of 8** times (round 1). Every reason named fewer HUD
   pieces and fewer props.
-- Asked "is this screen crowded?" of single 3D frames, the round-2 reviewer said **yes on 2 of 8**. The bar is 1.
-  - **Fixed since round 1:** while Hush rigs, the joke bubble no longer sits on her head. The ring stays on the pot,
-    and the hand hint is off the button. Round 2 called this frame "no".
+- Asked "is this screen crowded?" of single 3D frames, **1 of 8** frames now counts as crowded (2 of its 3 reviewers
+  said yes). The bar is 1, so this passes, at the bar.
+  - **Fixed since round 2:** at the gramophone, his countdown ring is drawn once, on the badge that now sits on the
+    gramophone with a tail. All three called it "no".
+  - **Still counted:** the Night-1 kitchen (a hidden preview). The second ring is gone, but his own tea thought and the
+    kettle's badge are two bubbles for one target, and the kettle's new duet picture packs three small icons.
+    A fix is requested.
 
-    ![Gate 0 t192: the rig after fix round 1](rig_ring_g0_t192.jpg)
+  ![Crowding, round 3: the P00 frame fixed, the N1 frame still counted](crowding_r3.jpg)
 
-  - **Still crowded:** at the gramophone (Prologue) and in the Night-1 kitchen (a hidden preview). In both, his
-    countdown ring is drawn twice for one target, once in his thought and once on the prop's badge. The badge is also
-    pushed away from its prop, so "it is unclear which icon goes with which object". **Fix requested.**
+  - While Hush rigs, the joke bubble stays off her head, the ring stays on the pot and the hold ring is on the button.
+    No reviewer has called this frame crowded since round 1.
 
-    ![The two frames still read as crowded](still_crowded_r2.jpg)
+    ![Gate 0 t192: the rig](rig_ring_g0_t192.jpg)
 
 **2. "The characters don't look good — 3D would be more appealing."** The 2D cast vs the 3D cast.
 
@@ -112,11 +117,10 @@ between reviewers.
 
 ![2D kitchen vs the look-dev diorama vs the 3D Prologue kitchen in this build](kitchen_before_after.jpg)
 
-- Per room: at most 5 live props, at most 4 dressing pieces, one hiding place (the set lint, row 9).
+- Per room: at most 5 live props, at most 4 dressing pieces, one hiding place (the set lint, row 9: 0 errors now).
 - The reviewers' 8/8 preference above names "a calm, open room" every time.
-- The vase on the parlour mantel (left edge) is new in fix round 1: it is now ×1.5 and blue-and-white, because its gag
-  needs it seen. In this shot it has already smashed. Row 9's one failure is that the vase is still flagged as pale
-  dressing.
+- The vase on the parlour mantel (left edge) is the vase gag's prop: ×1.5 and blue-and-white so it is seen. In this
+  shot it has already smashed.
 
 **4. "The actions are not obvious."** The 2D generic tinker vs the 3D pepper-pot rig: Hush climbs Bellows' own stool and shakes the set's pepper pot over the honey.
 
@@ -125,34 +129,39 @@ between reviewers.
 - **What she is doing:** named right in **7 of 8** frames (round 1; the bar is 7). Sneak, run, reach high on the
   stool, reach the gramophone, dive, statue and bow were all read. The squeak was read as "fiddling with something
   small and yellow".
-- **What each lit spot will do:** the joke was read from its bubble in **6 of 8** (round 2; the bar is 6).
-  - The sneeze bubble now reads as a sneeze; round 1 read it as "chilli". The tap, the kettle, the gramophone, the
-    recliner and the box were read too.
-  - The pickle jar was read as "a vase that falls on his head".
-  - The kettle that still needs the squeaker was read as "a honk that startles him".
+- **What each lit spot will do:** the joke was read from its bubble in **7 of 8** (round 3: the median of 7, 6 and 7;
+  the bar is 6).
+  - The box (a horn), the recliner, the gramophone, the tap and the kettle were read by all three, the sneeze by two.
+  - The kettle that still needs the squeaker now reads as "a tune", and two of the three saw its "?" slot as "still
+    needs an item".
+  - The pickle jar now reads as a jar, but all three thought "spring snakes pop out": the gherkins in its picture
+    look like snakes.
 
-**And: "is the sneeze funny in 3D?"** The Gate-0 sneeze is in [`g0_sneeze.jpg`](../r3d-integrate/strips/g0_sneeze.jpg)
-(the build-up) and [`g0_sneeze_2.jpg`](../r3d-integrate/strips/g0_sneeze_2.jpg) (the CHOO at t1163, the flight on the
-stool, the sink, the Stalls), numbered by sim tick, with captions. Fix round 1 did not change it.
-- Three earlier fresh reviewers scored it **funny 4 / readable 4 / fresh 3** (round 1 and both D15 rounds). The
-  round-2 reviewer scored both sneezes **3/3/3**, under the 4/4 bar. That reviewer named the two faults round 1 also
-  named:
-  - nothing on screen shows the pepper causing it;
-  - in the dazed hold in the sink, his face is hidden under the flipped bouffant and the jabot.
+**And: "is the sneeze funny in 3D?"** Yes, by the reviewers: **4/4/3 from all three**, for both the Gate-0 and the
+Prologue sneeze (round 2's single reviewer gave 3/3/3). Fix round 2 added what rounds 1–2 asked for: the pepper falls
+from the pot into his cup through the build-up, and in the sink he holds his head up, face to camera, with stars.
 
-  Both are requested fixes.
-- **The Prologue's smaller gags** (round 2, after fix round 1; strips in
-  [`r3d-fix-gags/after/`](../r3d-fix-gags/after/)):
+![The Gate-0 sneeze after fix round 2: the pepper, the dazed hold](sneeze_r3.jpg)
 
-  | Gag | Round 2 (funny / readable / fresh) | Round 1 | Bar |
-  |---|---|---|---|
-  | the picture | 3/4/3 (**passes**) | 1/1/1 | 3/3/3 |
-  | the dizzy spin | 3/4/3 ("music makes him dance is close to the obvious version") | 3/3/4 | 4/4/3 |
-  | the vase | 2/3/2 (cause and crash now read; he never reacts) | 1/2/1 | 3/3/3 |
-  | the door-frame bonk | 2/3/1 (the hit now reads; "the most obvious version") | 2/2/2 | 3/3/3 |
-  | the curtain call | 2/2/2 (the pelmet bonk is small and the menu covers it) | 3/3/3 | 3/3/3 |
-  | the relief beat | 1/2/2 (the near miss reads; no payoff) | 1/3/1 | 3/3/3 |
-  | the squeak bit | 1/2/1 (his answer is only in the small window) | 1/3/1 | 3/3/3 |
+- What they still noted: the pepper build is slow; the stool stays stuck to his feet in the air; at the launch the
+  right edge of the frame crops him.
+- The whole strips: [`set_k/pkt_03`](../r3d-qa/packets/set_k/pkt_03/page_1.jpg) (Gate 0) and
+  [`set_k/pkt_09`](../r3d-qa/packets/set_k/pkt_09/page_1.jpg) (Prologue), 3 pages each.
+
+**The Prologue's smaller gags** (round 3: three reviewers, the median per score; strips in
+[`r3d-qa/packets/set_k/`](../r3d-qa/packets/set_k/prompt.md)):
+
+| Gag | Round 3 (funny / readable / fresh) | Round 2 | Round 1 | Bar | What the reviewers said |
+|---|---|---|---|---|---|
+| the curtain call | **3/3/3 (passes)** | 2/2/2 | 3/3/3 | 3/3/3 | "having the stage itself prank him at his own curtain call is a good button"; the pelmet seems to hover just above his head |
+| the dizzy spin | 3/3/3 | 3/4/3 | 3/3/4 | 4/4/3 | it reads as a wild dance: "unclear why the music makes him dance"; the notes circling his head were liked |
+| the picture | 3/3/2 | 3/4/3 | 1/1/1 | 3/3/3 | clear, but "the stock thing-falls-on-head gag" |
+| the door-frame bonk | 3/3/2 | 2/3/1 | 2/2/2 | 3/3/3 | clear now (no cut, a face hold), but "the plain walk-into-the-doorframe gag" |
+| the vase | 2/3/2 | 2/3/2 | 1/2/1 | 3/3/3 | his "ovation" take does not register; the vase is small and far from him |
+| the squeak bit | 1/2/1 | 1/2/1 | 1/3/1 | 3/3/3 | on the main screen now, but with the sound off nothing links her squeak to his cracked note |
+| the relief beat | 1/2/1 | 1/2/2 | 1/3/1 | 3/3/3 | his double take holds both arms straight out and "reads like a broken T-pose" |
+
+![The Prologue curtain call after fix round 2](curtain_call_r3.jpg)
 
 The Bellows window (the 2D PiP's replacement) is in [`pip_2d_vs_window.jpg`](pip_2d_vs_window.jpg) (P00 ideal t445, this build).
 
@@ -175,45 +184,49 @@ The Bellows window (the 2D PiP's replacement) is in [`pip_2d_vs_window.jpg`](pip
 - **The snicker** can read as "bending down" at 64 px (D12: 12/13).
 - **The N02 hall** is too full: 0.68 m of free floor against 1.5 m (D13). That is Night 2, hidden here, and R3 must re-space it.
 
-**The Prologue's gags** (above): fix round 1 put the cause and the contact on screen, and the picture now passes.
-The rest still lack a payoff or a fresh twist:
-- the vase: he never reacts;
-- the relief beat: no "phew";
-- the squeak bit: his answer is inside the small window;
-- the bonk: a camera cut 6 frames before the hit;
-- the dizzy spin: it reads as dancing;
-- the curtain call: the pelmet bonk is small and slow, beside the buttons.
+**The Prologue's gags** (above): the sneezes and the curtain call pass; six do not.
+- The relief beat: Bellows' double-take pose holds both arms straight out, so it reads as a T-pose (the curtain call
+  shows the same pose for a moment), and her "phew" is a cluster of small puffs that reads as sweat.
+- The squeak bit: with the sound off, nothing shows that her squeak cues his song or that his note cracks.
+- The vase: his "ovation" is a small cravat tug, and the vase is small and far from him.
+- The dizzy spin: it reads as dancing, and his red face reads as angry as much as dizzy.
+- The picture and the bonk read clearly but are "the obvious version". The bonk tips the portrait (the set-up for the
+  picture), but out of shot.
+- Twice Bellows walks or stomps in place: after the relief take, and during the picture's stomp.
 
-**Busy overlays** (above):
-- At the gramophone, his countdown ring shows twice (in his thought and on the prop's badge), and the badge floats away
-  from its prop.
-- At the door-frame bonk his thought bubble touches the RUNNING GAG bar for a moment.
+**Busy overlays:**
+- In the N1 kitchen preview, his tea thought and the kettle's badge show together for one target.
+- The kettle's duet picture packs three small icons; the pickle jar's picture reads as "spring snakes".
 - While she rigs on the stool, her feet hover just above the seat.
 
 **Framing and flow:**
-- The N1 kitchen renders dark for a few frames when she enters from the parlour.
-- In the N1 kitchen preview, her head passes in front of the pickle jar's shelf, so the jar looks like a hat.
-- The "Work in progress" card repeats its title in its first line.
+- In the N1 kitchen preview the pickle jar now sits on its raised shelf, but when she stands right under it the jar
+  nearly touches her beret.
+- White puffs keep rising from the vase shards by the parlour fireplace long after the crash (visible from the kitchen).
+- Seen in round 2 and not re-checked since: the N1 kitchen renders dark for a few frames when she enters from the
+  parlour; the "Work in progress" card repeats its title in its first line.
 
 **Curtain call:**
-- The title sign covers Hush for its 1.2 s hold.
-- Bellows walks on behind the "Night 1 ▶" button.
-- With captions off, the gag-reel inset still prints its pun captions.
+- The pelmet's fringe sits a few pixels above his wig in the hold, so it looks as if it hovers.
+- On his walk-on his feet pass behind **Retry** for about 0.4 s.
+- The title card now lands clear of Hush, and with captions off the gag-reel inset's pun caption is hidden.
 
 **The Bellows window** shows him for at most **35 % of play** on the Prologue and Gate 0 routes in this build
-(P00 required 34.6 %, ideal 25.8 %, Gate 0 30.4 %).
+(P00 required 33.7 %, ideal 24.8 %, Gate 0 30.4 %).
 
 **Night 1 / 2 previews:** Bellows' missing clips fall back as described above.
 
 **Figgis** is the 2D bust restyled flat in look A's palette, without its idle animation. His 3D-style sprite is R3.
 
-**Draft clips: none.** All 80 slice clip sidecars are final.
+**Draft clips: none.** The strict 3D anim lint (row 3) passes on all 72 slice clips, drafts included.
 
 **Performance (desktop proxy):**
-- Every count is inside the budget: draw calls p95 ≤ 82, triangles ≤ 101k, at most 8 particle emitters, texture
-  ≤ 111 MB, 0 shader compiles in play. View + HUD scripts: p50 2.91–3.16 ms, p95 4.28–4.72 ms.
-- A few script calls still take over 1 ms at the same moment in repeated runs (row 16, D17). For example, the overlay
-  layout when Hush first walks to the honey, and Hush's view while she hides in the pantry and behind the piano.
+- Every count is inside the budget: draw calls p95 ≤ 81, triangles ≤ 103k, at most 8 particle emitters, texture
+  ≤ 110 MB, 0 shader compiles in play. View + HUD scripts: p50 2.65–3.04 ms, p95 3.82–4.43 ms.
+- The spike rule (row 16, D18.2) fires once per run, at a different moment each time on the same files, which is what
+  chance gives on this shared CPU box. Three moments did recur across both runs and are sent as fixes: the picture
+  sliding off his head, the start of the sneeze reaction, and the door-frame bonk.
+- Bellows' rig CPU (row 17) is 0.28 ms on this host, over 0.25 ms; three hours earlier the same files gave 0.21 ms.
 - The proxy renders on the CPU, so its frame rate is **not a phone number**. 60 fps is judged on your phone; the device log shows it.
 
 **Other:**
@@ -227,57 +240,54 @@ The rest still lack a payoff or a fresh twist:
 - [ ] **Bellows window:** Sim (shipped) or Lean, if you disagree.
 - [ ] **D2–D4** if you want to answer them now: mime or Pip (Pip still falls back to the mime), voice A/B, crowd A/B.
 
-## Verification of this build (desktop CPU proxy, 2026-10-01, QA round 2)
+## Verification of this build (desktop CPU proxy, 2026-10-01/02, QA round 3)
 
-`tools/scripts/pregate3d.sh` (index §6) was run alone on the CPU box, on `5f0092b` plus r3d-fix-hud2's working tree
-(content hash `bd0fb2503d06829a`, sim tree `838f39fc9f4d1a85`). Rows 1–7, 9–18 and 20a ran at 13:58–14:59Z, row 8 at
-15:00–16:40Z, and row 19 at 17:03Z. The record is `docs/review/r3d-qa/pregate_r2.json`, with details in
-`docs/review/r3d-qa/index.md`.
-
-The record's own table marks rows 1–4, 9–18 and 20a "STALE". This is only because the pre-gate script itself was
-edited after those rows ran. No game file changed, so their results stand (the record's `qa_note`).
+`tools/scripts/pregate3d.sh --rows=1-18,20a` was run alone on the CPU box, in one invocation, on `446a69b` (content
+hash `b73588a30a7434b2`, sim tree `ee4b12e86af732e9`), 2026-10-01 23:13Z – 2026-10-02 02:05Z. Row 19 was re-run alone
+after the round-3 reviewers were scored. The record is `docs/review/r3d-qa/pregate_r3.json`, with details in
+`docs/review/r3d-qa/index.md` §R4–§R5.
 
 | # | Check | Result | Numbers |
 |---|---|---|---|
-| 1 | Import metadata | PASS | 1010 `.import`, 412 `.uid` sidecars |
-| 2 | Full test suite | PASS | **1312 / 1312**, 0 failed, 0 skipped, 138 files incl. `tests/slice/` (2 files) |
+| 1 | Import metadata | PASS | 1010 `.import`, 413 `.uid` sidecars |
+| 2 | Full test suite | PASS | **1345 / 1345**, 0 failed, 0 skipped, 139 files incl. `tests/slice/`; 366 s |
 | 3 | Design lints `--strict` | PASS | 3D anim lint strict on 72 clips: 0 errors, 0 warnings, 0 missing; 3D coverage 72; content / hotspot / IP 0 failed |
 | 4 | Art + audio validators | PASS | 5 validators incl. `gen_audio.py --check` |
-| 5 | Every route (solver) | PASS | 13 routes, every route's own expect OK, 0 invariant violations, 0 catches on ideal; g0 ends `g0_done` |
-| 6 | Dead air (D1, ⏩) | PASS | worst ideal 8.1 % / required 4.8 % / slow 5.9 % (bars 20 / 25 / 30); worst gap 5.5 s (≤ 12); edge share 0.22 (≤ ⅓) |
-| 7 | Planner proofs + g0 route | PASS | `--auto` proofs; g0 ideal → `g0_done` |
-| 8 | Fairness fuzz | PASS | 2400 runs (200 per episode × bot group), 0 invariants, 0 soft-locks, 0 struck-hotspot commands |
-| 9 | Set lint | **FAIL** | 2 errors, both on the P00 parlour vase: flagged `dressing`, so it is judged by the dressing colour rule (C* 42.7 > 30, \|ΔL*\| 20.8 > 15 vs the wall). It is now a ×1.5 cue prop; the fix is to drop the flag. 1 warning: N02 hall negative space 0.68 m (D13) |
+| 5 | Every route (solver) | PASS | 13 routes, every route's own expect OK, 0 invariant violations, 0 catches on ideal; N01 ideal ★★★ 116.3, N02 ideal ★★★ 117.5; required ★ 44.0 / 59.3 |
+| 6 | Dead air (D1, ⏩) | PASS | worst ideal 8.1 % / required 4.8 % / slow 5.9 % (bars 20 / 25 / 30); worst gap 5.5 s (≤ 12); edge share 0.22 (≤ ⅓); N02 first prank 19.4 s (≤ 25) |
+| 7 | Planner proofs + g0 route | PASS | `--auto`: N01 6 lines, N02 5, P00 2; g0 ideal 23.6 s → `g0_done` |
+| 8 | Fairness fuzz | PASS | 2400 runs (3 episodes × 4 bots × 200), 0 failed, 0 invariants, 0 soft-locks |
+| 9 | Set lint | PASS | 0 errors (the vase fix landed), 1 warning: N02 hall negative space 0.68 m (D13) |
 | 10 | Screen-rect lint (20:9, 16:9, 4:3) | PASS | 0 errors, 1 warning: N02 hall clock under the Bellows window at 16:9 |
-| 11 | HUD lint | PASS | 0 errors, 2 warnings: the Bellows window's 0.0 s punch into the middle band on P00 ideal / slow (allowed ≤ 5 s, D9/D10) |
-| 12 | Visibility C8 | PASS | 26 route × mode runs: **0 violations** in the shipped `sim` mode, 0 in `lean`; window share max 35.0 % (was 39.0 %) |
-| 13 | Gate 0 in 3D | PASS | `g0_done`; CHOO accent clip f 94; zoom 1.14 at the accent, 1.59 peak; hit-stop 83 ms; caption ACHOO-RIA!; bouffant flipped; lands in the sink; Script tag → pip; C8 0; draw calls p95 55; texture 88.5 MB; 0 compiles; Again ▶ live in 272 ms |
-| 14 | Prologue in 3D | PASS | ideal: **7 laughs by 60 s** (≥ 6), 4 cues staged, crowd ≤ 0.27 s after each, 0 doubled sounds, C8 0; slow: first laugh **6.6 s**, first prank **27.6 s** from launch (≤ 10 / ≤ 30) |
+| 11 | HUD lint | PASS | 0 errors, 0 warnings |
+| 12 | Visibility C8 | PASS | 26 route × mode runs: **0 violations** in the shipped `sim` mode, 0 in `lean`; window share max 35.0 % |
+| 13 | Gate 0 in 3D | PASS | `g0_done`; CHOO accent clip f 94; zoom 1.14 at the accent, 1.59 peak; hit-stop 83 ms; caption ACHOO-RIA!; bouffant flipped; lands in the sink; Script tag 1/1; Again ▶ live in 240 ms; frame p95 103 ms |
+| 14 | Prologue in 3D | PASS | ideal: **7 laughs by 60 s** (≥ 6), 4 cues staged, crowd ≤ 0.254 s after each, 0 doubled sounds; slow: first laugh **6.6 s**, first prank **27.6 s** from launch (≤ 10 / ≤ 30); frame p95 109 ms |
 | 15 | Other routes in 3D | PASS | 13 / 13 scenarios, 0 script / engine errors; g0 + P00 0 fallbacks; N01 / N02 fallbacks 14–60 per route (info, R9) |
-| 16 | Frame budget (desktop proxy) | **FAIL** (D17) | counts inside budget: draw calls p95 ≤ 82 / max ≤ 101 (150 / 250), triangles ≤ 101,162 (150k), emitters ≤ 8 (8), texture ≤ 110.7 MB (250), **0 shader compiles in PLAY**; view + HUD p50 2.91–3.16 ms / p95 4.28–4.72 ms (proxy bars 3.5 / 8.0 met). **Spikes (D17):** 11 call sites over 1 ms at the same tick in ≥ 2 of 3 rendered runs (a chance baseline gives 9–18, so most are coincidence), and 20 headless hits repeated in another run. The repeatable ones: the overlay layout at t255–263, Hush's view at t995 (pantry) and t2846 (piano), NightScene at t1572 |
-| 17 | Per-character budget | PASS | Hush 0.159 ms, 2 draws, 9,812 tris, 48 bones; Bellows 0.198 ms (177–223 µs over 5 runs), 4 draws, 9,495 tris, 50 bones (+ the borrowed stool 1 draw / 450 tris, D16) |
-| 18 | Flow, feedback, touch | PASS | retry 632 ms (≤ 1.5 s); tap feedback in 1 frame; pause / back / focus OK; tap accuracy 20 / 20 on each of the 5 slice hotspots tested, 0 neighbour hits; g0 Again ▶ live (260 ms), P00 Next ▶ live on frame 1 |
-| 19 | Readability (fresh reviewers) | **FAIL** | verb 7/8 (round 1) · spot **6/8** · crowded **2/8** (bar ≤ 1) · 3D preferred 8/8 (round 1); gags: picture 3/4/3 passes; both sneezes 3/3/3 (bar 4/4), dizzy spin 3/4/3 (bar 4/4), vase 2/3/2, bonk 2/3/1, curtain call 2/2/2, relief 1/2/2, squeak bit 1/2/1 — `docs/review/r3d-qa/readability.md`, Round 2 |
-| 20a | APK (local) | PASS | 73.47 MB, 3277 entries, 77 clip `.res` + 80 sidecars, `tests/ tools/ scenes/dev/ view3d/sandbox/ view3d/probe/ ui/demo/ _src/` absent, `boot_config` as listed above, VIBRATE only, min SDK 24; the exported pack loads 197 scripts with 0 failures and builds a 3D Night |
+| 16 | Frame budget (desktop proxy) | **FAIL** (D18.2 spike clause only) | counts inside budget: draw calls p95 ≤ 81 / max ≤ 96 (150 / 250), triangles ≤ 103,310 (150k), emitters ≤ 8 (8), texture ≤ 110 MB (250), **0 shader compiles in PLAY**; view + HUD p50 2.65–3.04 ms / p95 3.82–4.43 ms (proxy bars 3.5 / 8.0 met). **Spikes (D18.2):** 1 site over 1 ms in 3 of 3 rendered runs (NightScene t1283, 1.14–1.91 ms; chance baseline 2 / 0) and 27 headless repeats (chance baseline 36 / 36). The previous run on identical files flagged a different site (t379): chance level. Ruling asked |
+| 17 | Per-character budget | **FAIL** | Bellows **0.281 ms** (266–290 µs over 5 runs) > 0.25, 4 draws, 9,495 tris, 50 bones; Hush 0.206 ms, 2 draws, 9,812 tris, 48 bones. The same files gave Bellows 0.213 ms at 21:30Z; a re-check at 02:05Z gave 279 µs (the host slowed 10–30 % after a restart). Ruling asked |
+| 18 | Flow, feedback, touch | PASS | retry 763 ms (≤ 1.5 s); tap feedback in 1 frame; pause / back / focus OK; tap accuracy ≥ 20 / 20 on each slice hotspot, 0 neighbour hits; g0 Again ▶ live (294 ms), P00 Next ▶ live on frame 1 (call 9.66 s) |
+| 19 | Readability (fresh reviewers) | **FAIL** | round 3, 3 reviewers per packet (D18): verb 7/8 (round 1) · spot **7/8** · crowded **1/8** · 3D preferred 8/8 (round 1); gags (medians): both sneezes 4/4/3 and the curtain call 3/3/3 pass; dizzy spin 3/3/3 (bar 4/4), picture 3/3/2, bonk 3/3/2, vase 2/3/2, squeak bit 1/2/1, relief 1/2/1 — `docs/review/r3d-qa/readability.md`, Round 3 |
+| 20a | APK (local) | PASS | 73.53 MB, 3279 entries, 78 clip `.res` + 81 sidecars, `tests/ tools/ scenes/dev/ view3d/sandbox/ view3d/probe/ ui/demo/ _src/` absent, `boot_config` as listed above, VIBRATE only, min SDK 24; the exported pack loads 197 scripts with 0 failures and builds a 3D Night |
 | 20b | APK (CI, android-preview on the pushed head) | **pending the push** | `gh run list --branch r3d --workflow android-preview.yml -L 1` and its artefact's contents vs 20a, after the fixes are pushed |
 
 **The Bellows-window share per route** (R15; the HUD lint warns above 35 %):
 
 | Route | **Sim (shipped)**: share of PLAY · longest stretch | Lean: share · edge-badge frames | In the game (sim, e2e) | `d1_lean` (the lean dead-air check) |
 |---|---|---|---|---|
-| Gate 0 ideal | **30.4 %** · 7.2 s | 16.8 % · 283 | 28.0 % (rendered; longest 6.4 s) | — |
-| Prologue ideal | **25.8 %** · 7.7 s | 9.4 % · 597 | 26.4 % (rendered; longest 2.0 s) | FAIL (edge 0.44) |
-| Prologue required | **34.6 %** · 15.7 s | 8.3 % · 1075 | 35.0 % (rendered; longest 4.0 s) | FAIL (edge 0.62) |
-| Prologue slow | **29.2 %** · 10.1 s | 9.6 % · 758 | 29.7 % (rendered; longest 2.6 s) | OK (edge 0.16) |
-| Night 1 (preview) ideal | **17.8 %** · 6.7 s | 5.7 % · 1095 | 17.2 % (headless) | FAIL (edge 0.37) |
+| Gate 0 ideal | **30.4 %** · 7.2 s | 16.8 % · 283 | 28.0 % (rendered; longest 6.4 s) | OK (edge 0.05) |
+| Prologue ideal | **24.8 %** · 7.2 s | 9.4 % · 562 | 22.5 % (rendered; longest 1.3 s) | FAIL (edge 0.44) |
+| Prologue required | **33.7 %** · 15.1 s | 8.3 % · 1040 | 34.0 % (rendered; longest 3.8 s) | FAIL (edge 0.62) |
+| Prologue slow | **28.2 %** · 9.5 s | 9.6 % · 723 | 25.7 % (rendered; longest 1.8 s) | OK (edge 0.16) |
+| Night 1 (preview) ideal | **17.8 %** · 6.7 s | 5.7 % · 1095 | 16.2 % (headless) | FAIL (edge 0.37) |
 | Night 1 (preview) required | **35.0 %** · 9.1 s | 12.8 % · 1143 | 33.3 % (headless) | FAIL (edge 0.62) |
-| Night 1 (preview) slow | **31.5 %** · 13.6 s | 11.8 % · 1227 | 30.6 % (headless) | FAIL (edge 0.49) |
+| Night 1 (preview) slow | **31.5 %** · 13.6 s | 11.8 % · 1227 | 28.9 % (headless) | FAIL (edge 0.49) |
 | Night 1 (preview) caught | **27.9 %** · 8.4 s | 11.4 % · 979 | 26.9 % (headless) | info (edge 0.73) |
 | Night 1 (preview) chase | **20.5 %** · 8.0 s | 0.2 % · 1018 | 19.7 % (headless) | info (edge 0.55) |
-| Night 1 (preview) meltdown | **10.0 %** · 5.3 s | 7.4 % · 171 | 8.5 % (headless) | info (edge 0.34) |
-| Night 2 (preview) ideal | **20.0 %** · 9.2 s | 10.5 % · 879 | 20.2 % (headless) | FAIL (edge 0.49) |
+| Night 1 (preview) meltdown | **10.0 %** · 5.3 s | 7.4 % · 171 | 5.9 % (headless) | info (edge 0.34) |
+| Night 2 (preview) ideal | **20.0 %** · 9.2 s | 10.5 % · 879 | 19.1 % (headless) | FAIL (edge 0.49) |
 | Night 2 (preview) required | **15.6 %** · 8.6 s | 9.9 % · 188 | 15.6 % (headless) | FAIL (edge 0.57) |
-| Night 2 (preview) slow | **15.1 %** · 8.4 s | 9.7 % · 182 | 15.2 % (headless) | OK (edge 0.29) |
+| Night 2 (preview) slow | **15.1 %** · 8.4 s | 9.7 % · 182 | 15.1 % (headless) | OK (edge 0.29) |
 
 The sim column is the visibility lint over every tick of the solver route (row 12); "in the game" is the e2e run of the same route (rows 13–15). `d1_lean` fails the ⅓ edge-share cap on 7 of the 9 final routes (ideal / required / slow × 3 Nights) — the reason `sim` ships (R15, K3).
 

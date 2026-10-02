@@ -7,8 +7,8 @@ shape of a 20:9 phone held sideways.
 
 ## The build
 
-- **How to get it:** Download the APK from the latest 'Android preview APK' run on the r3d branch (link added by the
-  orchestrator after the push). On the run's page, scroll to **Artifacts** and tap **mischief-debug-apk**. It comes as
+- **How to get it:** Download the APK from the 'Android preview APK' run for this build:
+  https://github.com/Hegazy360/mischief/actions/runs/36963368544 (direct: https://github.com/Hegazy360/mischief/actions/runs/36963368544/artifacts/11208883037 — open it in the phone's browser while signed in to GitHub, not in the GitHub app). On the run's page, scroll to **Artifacts** and tap **mischief-debug-apk**. It comes as
   a zip with `mischief-debug.apk` inside.
 - **Install:**
   1. Copy `mischief-debug.apk` to the phone (or download it on the phone) and tap it.

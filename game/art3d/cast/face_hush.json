@@ -1,0 +1,172 @@
+{
+ "atlas": 1024,
+ "layers": {
+  "brows": {
+   "band": [
+    0.52,
+    0.6699999999999999
+   ],
+   "origin_px": [
+    0,
+    0
+   ],
+   "cell_px": [
+    340,
+    51
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "neutral",
+    "raised",
+    "angry",
+    "worried",
+    "sly"
+   ]
+  },
+  "eyes": {
+   "band": [
+    0.32999999999999996,
+    0.56
+   ],
+   "origin_px": [
+    0,
+    104
+   ],
+   "cell_px": [
+    340,
+    78
+   ],
+   "per_row": 3,
+   "cells": [
+    "open",
+    "happy",
+    "closed",
+    "sly",
+    "wide",
+    "angry",
+    "squeeze",
+    "spiral",
+    "teary"
+   ]
+  },
+  "mouth": {
+   "band": [
+    0.16000000000000003,
+    0.31999999999999995
+   ],
+   "origin_px": [
+    0,
+    340
+   ],
+   "cell_px": [
+    340,
+    54
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "smile",
+    "grin",
+    "o",
+    "snicker",
+    "grit",
+    "ah",
+    "choo",
+    "wavy",
+    "frown",
+    "shh"
+   ]
+  },
+  "extra": {
+   "band": [
+    0.28,
+    0.6
+   ],
+   "origin_px": [
+    0,
+    558
+   ],
+   "cell_px": [
+    340,
+    109
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "cheeks",
+    "blush",
+    "sweat"
+   ]
+  }
+ },
+ "used_px": 778,
+ "presets": {
+  "neutral": {
+   "eyes": "open",
+   "brows": "neutral",
+   "mouth": "smile",
+   "extra": "cheeks"
+  },
+  "sneaky": {
+   "eyes": "sly",
+   "brows": "sly",
+   "mouth": "grin",
+   "extra": "cheeks"
+  },
+  "shock": {
+   "eyes": "wide",
+   "brows": "raised",
+   "mouth": "o",
+   "extra": "sweat"
+  },
+  "furious": {
+   "eyes": "angry",
+   "brows": "angry",
+   "mouth": "grit",
+   "extra": "cheeks"
+  },
+  "sneeze_build": {
+   "eyes": "teary",
+   "brows": "worried",
+   "mouth": "ah",
+   "extra": "blush"
+  },
+  "dazed": {
+   "eyes": "spiral",
+   "brows": "worried",
+   "mouth": "wavy",
+   "extra": "cheeks"
+  },
+  "snicker": {
+   "eyes": "happy",
+   "brows": "raised",
+   "mouth": "snicker",
+   "extra": "blush"
+  },
+  "blink": {
+   "eyes": "closed",
+   "brows": "neutral",
+   "mouth": "smile",
+   "extra": "cheeks"
+  },
+  "statue": {
+   "eyes": "closed",
+   "brows": "raised",
+   "mouth": "smile",
+   "extra": "cheeks"
+  },
+  "focus": {
+   "eyes": "sly",
+   "brows": "neutral",
+   "mouth": "shh",
+   "extra": "cheeks"
+  },
+  "choo": {
+   "eyes": "squeeze",
+   "brows": "angry",
+   "mouth": "choo",
+   "extra": "blush"
+  }
+ }
+}

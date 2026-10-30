@@ -927,6 +927,10 @@ func _notification(what: int) -> void:
 ## Backgrounding (a pulled-down notification, a call): open the pause menu, stop the sim and the
 ## audio, flush the device log.
 func _on_background() -> void:
+	# A screenshot run has no one at the keyboard and its window drifts out of focus, so
+	# backgrounding would end every capture in the pause menu (DevShot.is_shooting()).
+	if DevShot.is_shooting():
+		return
 	DeviceLog.flush()
 	if driver != null:
 		CmdLog.write(episode_id, driver.cmd_log)

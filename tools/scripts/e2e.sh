@@ -20,6 +20,7 @@
 # Env: E2E_SANDBOX (default e2e), SHOT_SIZE (default 1200x540), E2E_TIMEOUT (default 900 s per process).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 SCEN="${1:?scenario}"; shift
 REPORT=""; PERF=""; STRICT=""; REALTIME=""; HEADLESS=""; MAXS=""; SEQ=(); EXTRA=()
 while [ $# -gt 0 ]; do
@@ -70,10 +71,10 @@ run_one() {
   if [ -z "$REALTIME" ] && [ -n "$(route_of "$scen")" ] && [[ "$scen" != prologue_* ]]; then fps=(--fixed-fps 60); fi
   if [ "${#SEQ[@]}" -gt 0 ]; then args+=("${SEQ[@]}"); fi
   if [ "${#EXTRA[@]}" -gt 0 ]; then args+=("${EXTRA[@]}"); fi
-  local runner=(xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 --audio-driver Dummy --resolution "$SIZE")
+  local runner=("${MND_GUI[@]}" godot --rendering-driver opengl3 --audio-driver Dummy --resolution "$SIZE")
   [ -n "$HEADLESS" ] && runner=(godot --headless --audio-driver Dummy)
   set +e
-  timeout "${E2E_TIMEOUT:-900}" "${runner[@]}" ${fps[@]+"${fps[@]}"} --path "$SB" res://scenes/boot/Boot.tscn -- "${args[@]}" 2>&1 \
+  mnd_timeout "${E2E_TIMEOUT:-900}" "${runner[@]}" ${fps[@]+"${fps[@]}"} --path "$SB" res://scenes/boot/Boot.tscn -- "${args[@]}" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)|V-Sync|set_use_vsync" \
     | grep -E "^\[E2E\]|ERROR|SCRIPT ERROR|at: |WARNING: .*E2E" | head -200
   local rc=${PIPESTATUS[0]}

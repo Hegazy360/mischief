@@ -10,17 +10,19 @@
 # Only the import cache `.godot/` is sandbox-local (kept between runs of the same sandbox).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 NAME="${1:?sandbox name}"; shift || true
 BASE="${MND_SANDBOX_ROOT:-/tmp/mnd_sandbox}"
 SB="$BASE/$NAME/game"
 LOG="$BASE/$NAME.import.log"
+mnd_require_godot
 mkdir -p "$SB"
 rsync -a --delete --exclude '.godot/' "$ROOT/game/" "$SB/"
 if [ -z "${NO_IMPORT:-}" ]; then
   # Godot 4.7.2's headless --import occasionally segfaults on a large first import; retry up to 3 times.
   ok=0
   for attempt in 1 2 3; do
-    if timeout 600 godot --headless --path "$SB" --import >"$LOG" 2>&1; then ok=1; break; fi
+    if mnd_timeout 600 godot --headless --path "$SB" --import >"$LOG" 2>&1; then ok=1; break; fi
     echo "[sandbox] import attempt $attempt failed, retrying" >&2
   done
   [ "$ok" = 1 ] || { echo "[sandbox] import failed, see $LOG" >&2; tail -40 "$LOG" >&2; exit 3; }

@@ -98,6 +98,14 @@ func _ready() -> void:
 	set_process_input(_devlog)
 
 
+## True while this run is capturing (`--shot` / `--shot-seq`). A capture drives the game from the
+## command line with no one at the keyboard, and on a desktop window server the window routinely
+## loses focus for the length of the run — so the scenes that pause themselves when backgrounded
+## (NightScene) must not do it here, or every shot would be of the pause menu.
+func is_shooting() -> bool:
+	return _shooting
+
+
 ## Frames a `--shot` run needs so a sequence completes: seq-from + every × count (+1).
 static func seq_frames_needed(seq_from: int, every: int, count: int) -> int:
 	if count <= 0:

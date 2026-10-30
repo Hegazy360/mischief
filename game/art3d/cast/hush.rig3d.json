@@ -1,0 +1,167 @@
+{
+ "version": 1,
+ "rig": "hush",
+ "doc": "3D cast rig built by tools/art3d/cast/build_hush.py. Angles come from the 2D clips in game/data/anim/hush; everything else is procedural (jiggle, IK, squash, overlap).",
+ "height_m": 1.6,
+ "fk_axis": [
+  1.0,
+  0.0,
+  0.0
+ ],
+ "fk_map": {
+  "pelvis": [
+   "pelvis"
+  ],
+  "torso": [
+   "spine",
+   "chest"
+  ],
+  "head": [
+   "neck",
+   "head"
+  ],
+  "arm_upper_l": [
+   "arm_upper_l"
+  ],
+  "arm_lower_l": [
+   "arm_lower_l"
+  ],
+  "hand_l": [
+   "hand_l"
+  ],
+  "arm_upper_r": [
+   "arm_upper_r"
+  ],
+  "arm_lower_r": [
+   "arm_lower_r"
+  ],
+  "hand_r": [
+   "hand_r"
+  ],
+  "leg_upper_l": [
+   "leg_upper_l"
+  ],
+  "leg_lower_l": [
+   "leg_lower_l"
+  ],
+  "foot_l": [
+   "foot_l"
+  ],
+  "leg_upper_r": [
+   "leg_upper_r"
+  ],
+  "leg_lower_r": [
+   "leg_lower_r"
+  ],
+  "foot_r": [
+   "foot_r"
+  ]
+ },
+ "splits": {
+  "torso": {
+   "spine": 0.55,
+   "chest": 0.45
+  },
+  "head": {
+   "neck": 0.35,
+   "head": 0.65
+  }
+ },
+ "jiggle": [
+  {
+   "bone": "beret",
+   "parent": "head",
+   "stiffness": 150.0,
+   "damping": 0.62,
+   "max_deg": 16.0
+  },
+  {
+   "bone": "hair_back",
+   "parent": "head",
+   "stiffness": 110.0,
+   "damping": 0.58,
+   "max_deg": 22.0
+  },
+  {
+   "bone": "brace_l",
+   "parent": "chest",
+   "stiffness": 220.0,
+   "damping": 0.7,
+   "max_deg": 9.0
+  },
+  {
+   "bone": "brace_r",
+   "parent": "chest",
+   "stiffness": 220.0,
+   "damping": 0.7,
+   "max_deg": 9.0
+  },
+  {
+   "bone": "clarence",
+   "parent": "hand_l",
+   "stiffness": 90.0,
+   "damping": 0.5,
+   "max_deg": 34.0
+  }
+ ],
+ "sockets": [
+  "socket_r",
+  "socket_l"
+ ],
+ "ik": {
+  "arm_l": {
+   "upper": "arm_upper_l",
+   "lower": "arm_lower_l",
+   "tip": "hand_l",
+   "bend": [
+    0,
+    -1,
+    0
+   ]
+  },
+  "arm_r": {
+   "upper": "arm_upper_r",
+   "lower": "arm_lower_r",
+   "tip": "hand_r",
+   "bend": [
+    0,
+    -1,
+    0
+   ]
+  },
+  "leg_l": {
+   "upper": "leg_upper_l",
+   "lower": "leg_lower_l",
+   "tip": "foot_l",
+   "bend": [
+    1,
+    0,
+    0
+   ]
+  },
+  "leg_r": {
+   "upper": "leg_upper_r",
+   "lower": "leg_lower_r",
+   "tip": "foot_r",
+   "bend": [
+    1,
+    0,
+    0
+   ]
+  }
+ },
+ "feet": [
+  "foot_l",
+  "foot_r"
+ ],
+ "toes": [
+  "toe_l",
+  "toe_r"
+ ],
+ "face": {
+  "atlas": "face_hush.png",
+  "uv": "FaceUV"
+ },
+ "tris": 9999,
+ "bones": 27
+}

@@ -17,10 +17,11 @@
 #      CAPTURE_TIMEOUT (s, 600), KEEP_FRAMES=<dir> (keep the raw PNG frames there).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 SCENE="${1:?res://scene.tscn}"; FRAMES="${2:?frames}"; OUT="${3:?out.gif}"
 shift 3
 [ "${1:-}" = "--" ] && shift
-OUT="$(realpath -m "$OUT")"
+OUT="$(mnd_abspath "$OUT")"
 BASE="${MND_SANDBOX_ROOT:-/tmp/mnd_sandbox}"
 NAME="${CAPTURE_SANDBOX:-capture}"
 mkdir -p "$BASE" "$(dirname "$OUT")"
@@ -28,14 +29,14 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/mnd_capture.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 SIZE="${SHOT_SIZE:-1200x540}"
 (
-  flock 9
+  mnd_lock "$NAME"
   "$ROOT/tools/scripts/sandbox.sh" "$NAME" >/dev/null
   SB="$BASE/$NAME/game"
-  timeout "${CAPTURE_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
+  mnd_timeout "${CAPTURE_TIMEOUT:-600}" "${MND_GUI[@]}" godot --rendering-driver opengl3 \
     --resolution "$SIZE" --path "$SB" --write-movie "$TMP/f.png" --fixed-fps 60 --quit-after "$((FRAMES + 2))" \
     -s res://tools/anim/capture.gd -- "--scene=$SCENE" "--frames=$FRAMES" "--log=$TMP/events.json" "$@" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)|V-Sync|set_use_vsync" | tail -20
-) 9>"$BASE/$NAME.lock"
+)
 python3 "$ROOT/tools/anim/gif.py" "$TMP" "$OUT" --width="${GIF_WIDTH:-720}" --fps="${GIF_FPS:-30}" \
   --max-mb="${GIF_MAX_MB:-4}" --strip-every="${STRIP_EVERY:-3}" --strip-range="${STRIP_RANGE:-}" \
   --strip-w="${STRIP_W:-400}" --strip-cols="${STRIP_COLS:-6}" --strip-max="${STRIP_MAX:-60}"

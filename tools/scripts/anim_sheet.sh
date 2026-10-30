@@ -14,9 +14,10 @@
 # sharing a sandbox are serialised with a lock. Tier / suppressed sheets get a _t2 / _sup suffix.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 RIG="${1:?rig id}"; WHAT="${2:?clip | --poses | --rig | --all}"; OUT="${3:?out dir}"
 shift 3
-OUT="$(realpath -m "$OUT")"
+OUT="$(mnd_abspath "$OUT")"
 mkdir -p "$OUT"
 SB_NAME="${ANIM_SANDBOX:-anim_${RIG}}"
 BASE="${MND_SANDBOX_ROOT:-/tmp/mnd_sandbox}"
@@ -29,14 +30,14 @@ case "$WHAT" in
   *) MODE=(--mode=clip "--clip=$WHAT") ;;
 esac
 (
-  flock 9
+  mnd_lock "$SB_NAME"
   "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" >/dev/null
   SB="$BASE/$SB_NAME/game"
-  timeout "${SHEET_TIMEOUT:-600}" xvfb-run -a -s "-screen 0 2560x1440x24" godot --rendering-driver opengl3 \
+  mnd_timeout "${SHEET_TIMEOUT:-600}" "${MND_GUI[@]}" godot --rendering-driver opengl3 \
     --audio-driver Dummy --resolution 640x360 --path "$SB" -s res://tools/anim/sheet.gd -- \
     "--rig=$RIG" "${MODE[@]}" "--out=$OUT" "$@" 2>&1 \
     | grep -vE "ALSA|libpulse|audio_driver|All audio drivers|at: (init_output_device|initialize)" | tail -60
-) 9>"$BASE/$SB_NAME.lock"
+)
 shopt -s nullglob
 for j in "$OUT"/*_curves.json; do
   png="${j%.json}.png"

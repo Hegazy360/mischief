@@ -1,0 +1,173 @@
+{
+ "atlas": 1024,
+ "layers": {
+  "brows": {
+   "band": [
+    0.5800000000000001,
+    0.76
+   ],
+   "origin_px": [
+    0,
+    0
+   ],
+   "cell_px": [
+    340,
+    61
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "neutral",
+    "pompous",
+    "raised",
+    "angry",
+    "worried",
+    "sneeze"
+   ]
+  },
+  "eyes": {
+   "band": [
+    0.43999999999999995,
+    0.6699999999999999
+   ],
+   "origin_px": [
+    0,
+    185
+   ],
+   "cell_px": [
+    340,
+    78
+   ],
+   "per_row": 3,
+   "cells": [
+    "open",
+    "pompous",
+    "suspicious",
+    "wide",
+    "furious",
+    "squeeze",
+    "shut",
+    "spiral",
+    "closed"
+   ]
+  },
+  "mouth": {
+   "band": [
+    0.09999999999999998,
+    0.33999999999999997
+   ],
+   "origin_px": [
+    0,
+    421
+   ],
+   "cell_px": [
+    340,
+    82
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "pursed",
+    "smug",
+    "o",
+    "rage",
+    "ah",
+    "choo",
+    "wavy",
+    "sip"
+   ]
+  },
+  "extra": {
+   "band": [
+    0.38,
+    0.75
+   ],
+   "origin_px": [
+    0,
+    669
+   ],
+   "cell_px": [
+    340,
+    126
+   ],
+   "per_row": 3,
+   "cells": [
+    "none",
+    "steam",
+    "sweat",
+    "tears"
+   ]
+  }
+ },
+ "used_px": 923,
+ "presets": {
+  "neutral": {
+   "eyes": "open",
+   "brows": "neutral",
+   "mouth": "pursed",
+   "extra": "none"
+  },
+  "pompous": {
+   "eyes": "pompous",
+   "brows": "pompous",
+   "mouth": "smug",
+   "extra": "none"
+  },
+  "shock": {
+   "eyes": "wide",
+   "brows": "raised",
+   "mouth": "o",
+   "extra": "sweat",
+   "specs": 1
+  },
+  "furious": {
+   "eyes": "furious",
+   "brows": "angry",
+   "mouth": "rage",
+   "extra": "steam",
+   "temper": 1.0,
+   "specs": 1
+  },
+  "sneeze_build": {
+   "eyes": "squeeze",
+   "brows": "sneeze",
+   "mouth": "ah",
+   "extra": "tears",
+   "temper": 0.35
+  },
+  "dazed": {
+   "eyes": "spiral",
+   "brows": "worried",
+   "mouth": "wavy",
+   "extra": "none",
+   "temper": 0.15
+  },
+  "choo": {
+   "eyes": "shut",
+   "brows": "angry",
+   "mouth": "choo",
+   "extra": "none",
+   "temper": 0.5
+  },
+  "sip": {
+   "eyes": "closed",
+   "brows": "pompous",
+   "mouth": "sip",
+   "extra": "none"
+  },
+  "blink": {
+   "eyes": "closed",
+   "brows": "neutral",
+   "mouth": "pursed",
+   "extra": "none"
+  },
+  "suspicious": {
+   "eyes": "suspicious",
+   "brows": "angry",
+   "mouth": "pursed",
+   "extra": "none",
+   "temper": 0.3,
+   "specs": 1
+  }
+ }
+}

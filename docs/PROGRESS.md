@@ -128,6 +128,24 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [ ] Juice, perf and mix passes on device
 - [ ] Full-game solver run; review agents on every gag; owner playthrough
 
+## 3D pivot — R0/R2 (REDESIGN_3D §6.4)
+### R0 — look-dev + spike
+- [x] Three style look-devs + owner board (`docs/review/lookdev/`); reviewer recommends A (Toy Box)
+- [ ] Owner picks a style (A / B / C) — still open; the cast runtime below is style-agnostic
+- [ ] Device perf numbers from the pipeline spike (risk X1)
+### R2 — cast in 3D (started)
+- [x] Self-contained cast skeleton (`tools/art3d/cast/mnd_rig.py`): 20 body bones + jiggle, no Quaternius dependency
+- [x] Hush + Bellows rebuilt as skinned glTF inside §5.6 budgets (9,999 / 10,000 tris; 27 / 32 bones)
+- [x] 2D → 3D pose retarget: all 236 authored poses + 34 lint-checked clips replay unchanged
+- [x] Procedural layers: jiggle (secondary motion), two-step foot grounding + two-bone IK, squash & stretch, moving holds
+- [x] Toon + inverted-hull outline shaders; 2D face cards on 3D heads (full expression atlas ported)
+- [x] CastWorkbench review scene + shots in `docs/review/cast3d/`
+- [x] 19 tests in `tests/view/test_char3d.gd` (budgets, retarget convention, IK, jiggle, grounding)
+- [ ] Modelling second pass (Bellows' belly + arm separation, Hush's legs)
+- [ ] Per-clip `ground_weight` flag (seated clips like `bellows/act_tea`)
+- [ ] Residue attachments, temper tint tiers on the 3D cast
+- [ ] Wire Character3D into NightScene (needs R1: House3D, CameraDirector3D, HUD declutter)
+
 ## Stage 5 — Release
 - [ ] Version/codes, icon, splash, store screenshots (landscape)
 - [ ] Permissions audit (VIBRATE only); no network
@@ -152,3 +170,14 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   (b) hider 53 / 73: false alarms — the run ended mid-dive, the probe's first go was pinned (TECH §3.5) and the
   executor never popped her out → `Executor._ensure_mobile()` waits out a dive. Tests in tests/sim/test_routine.gd and
   tests/solver/test_real_solutions.gd.
+- 2026-10-30 — Dev environment made cross-platform, and the 3D cast runtime built (R2 start). (1) `tools/scripts/lib.sh`:
+  macOS has no `timeout`, `xvfb-run`, `flock` or GNU `realpath -m`, so every script now picks the native tool or a
+  portable equivalent (`MND_GUI` is a prefix array, not a function — coreutils `timeout` execs its argument and bash 3.2
+  errors on an empty array under `set -u`). Godot 4.7.2 + Blender 4.5 LTS install steps in `docs/DEV_SETUP.md`.
+  `DevShot.is_shooting()` stops NightScene auto-pausing during a capture (a desktop window loses focus, so every shot
+  was of the pause menu). (2) The answer to "should we change technology" is no: the gap was the character pipeline,
+  not the engine — see `docs/review/cast3d/index.md`. Built `game/view/char3d/**` (CastRig3D, PoseRetarget3D, Jiggle3D,
+  Ik3D, Character3D) + `tools/art3d/cast/**`, on a self-contained 20-bone skeleton rather than Quaternius' 65-bone UE5
+  mannequin (40 finger joints on a cast wearing mittens, over the §5.6 budget, and not committed). The retarget means
+  236 poses and 34 clips carry over with zero re-authoring. Tests found an inverted IK bend axis and a grounding bug
+  that floated any root-lifted clip on stretched legs. Full suite 1,114 green.

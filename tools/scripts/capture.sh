@@ -8,6 +8,7 @@
 #   (the scene becomes the current scene, so Boot → Router → NightScene changes work; every
 #   autoload runs; user args pass through to the scene and to DevShot's --e2e driver).
 # Writes <out>.gif (picture + sound strip: loudness, onsets, event labels), <out>_mute.gif,
+# <out>_stability.png/json (per-frame jitter / pops / frozen runs - tools/anim/stability.py),
 # <out>_strip.png (+ _strip_2.png …: a numbered cell every STRIP_EVERY frames), <out>.wav,
 # <out>_events.json, <out>_sync.json (each sfx/voice event vs the nearest onset: ± 1 f = in sync).
 # GIFs are kept ≤ GIF_MAX_MB (width first, then fps; each reduction is reported on stderr).
@@ -40,4 +41,7 @@ SIZE="${SHOT_SIZE:-1200x540}"
 python3 "$ROOT/tools/anim/gif.py" "$TMP" "$OUT" --width="${GIF_WIDTH:-720}" --fps="${GIF_FPS:-30}" \
   --max-mb="${GIF_MAX_MB:-4}" --strip-every="${STRIP_EVERY:-3}" --strip-range="${STRIP_RANGE:-}" \
   --strip-w="${STRIP_W:-400}" --strip-cols="${STRIP_COLS:-6}" --strip-max="${STRIP_MAX:-60}"
+# Motion stability from EVERY frame (a strip cannot show a 1-frame pop or a 2-frame oscillation):
+# <out>_stability.png/json + one summary line. STABILITY_ARGS passes --roi=/--pop=.
+python3 "$ROOT/tools/anim/stability.py" "$TMP" "${OUT%.gif}" ${STABILITY_ARGS:-} || echo "[capture] stability.py failed" >&2
 if [ -n "${KEEP_FRAMES:-}" ]; then mkdir -p "$KEEP_FRAMES"; cp "$TMP"/f*.png "$KEEP_FRAMES"/; fi

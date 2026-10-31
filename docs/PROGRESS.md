@@ -128,26 +128,12 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [ ] Juice, perf and mix passes on device
 - [ ] Full-game solver run; review agents on every gag; owner playthrough
 
-## 3D pivot — R0/R2 (REDESIGN_3D §6.4)
-### R0 — look-dev + spike
-- [x] Three style look-devs + owner board (`docs/review/lookdev/`); reviewer recommends A (Toy Box)
-- [ ] Owner picks a style (A / B / C) — still open; the cast runtime below is style-agnostic
-- [ ] Device perf numbers from the pipeline spike (risk X1)
-### R2 — cast in 3D (open-source base)
-- [x] Off-the-shelf cast evaluated in-engine (`docs/review/oss_cast/`): KayKit (CC0) adopted; procedural Blender builders retired
-- [x] `tools/anim/stability.py` in every `capture.sh` run (jitter / pops / frozen / smooth)
-- [x] Jiggle↔grounding oscillation fixed (grounding solved from the FK-only pose before the springs; damped lift; faded foot plant). Hush jitter 0.42 → 0.13, Bellows 0.18
-- [x] Hush (KayKit Rogue) and Bellows (KayKit Mage) re-dressed: palette recolour, painted Breton stripes, beret / braces / bouffant / nose / specs / cravat on jiggle bones. 9,518 / 9,044 tris, 26 / 28 bones
-- [x] Library playback in `Character3D` + `ClipMap3D`; 23 clips mapped, gags kept as 2D overlays
-- [x] `docs/TESTING_ON_MAC.md` — how to run and review the game on a Mac
-- [ ] Face cards on the KayKit head (atlas + shader path exist; expression vocabulary ported)
-- [ ] Colour polish: Hush's bracer cells, the Mage's belt pouch on Bellows
-- [ ] Per-clip `ground_weight` flag (seated clips like `act_tea`)
-- [ ] Residue attachments and temper tint tiers on the 3D cast
-- [x] `CastProxy2D`: the 3D cast plays in a real Night behind `MND_CAST3D=1` (SubViewport per character, same duck-typed interface as RigPlayer)
-- [x] Bellows' blind shuffle re-posed: one hand gropes, one shields the eyes, both alive per frame (was two rigid parallel arms)
-- [x] Second look pass: high-contrast mime palette, black boots, muttonchops, the Mage's belt kit painted out
-- [ ] Full 3D view (R1: House3D, CameraDirector3D, HUD declutter) — retires CastProxy2D
+## 3D pivot — retired
+- [x] R0 look-dev + open-source evaluation done (`docs/review/lookdev/`, `docs/review/oss_cast/`)
+- [x] R2 cast built on KayKit and wired into a Night behind a flag — **tried in play and dropped** (glitchy, moved backwards); the 2D rig stays. Record in `docs/review/cast3d/`
+- [x] 2D Bellows drawn at 0.9 (`CharacterView.VISUAL_SCALE`) so he reads stout, not giant
+- [x] `bellows/loco_blind_shuffle` re-posed (one hand gropes, one shields the eyes)
+- [ ] Further 2D polish on the owner's notes as they come
 
 ## Stage 5 — Release
 - [ ] Version/codes, icon, splash, store screenshots (landscape)
@@ -210,3 +196,9 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   all 24 frames; now one hand gropes and sweeps while the other shields the eyes, set on every key so the half-cycle
   mirror cannot swap hands. The torso is deliberately left to the poses — it is Bellows' root part, and moving it slid
   the planted foot (anim lint A12/A13/A27). Tests 1,120 green.
+- 2026-10-31 — Owner tested `MND_CAST3D=1`: the 3D cast was glitchy and moved backwards, while the 2D animation works.
+  Decision: one version, the 2D one, improved incrementally. Removed `view/char3d`, `art3d`, `CastProxy2D`, the clip map,
+  the workbench scenes, `tools/art3d/cast` and their tests; `docs/review/{cast3d,oss_cast}` kept as the record with a
+  RETIRED banner. Kept `tools/anim/stability.py` (it works on any capture) and the portable `tools/scripts/lib.sh`.
+  Bellows now drawn at 0.9 via `CharacterView.VISUAL_SCALE` (HEIGHTS follows, so bubble/badge anchors stay on his head);
+  Hush unchanged at the owner's request. The blind-shuffle re-pose from earlier today stands.

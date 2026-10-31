@@ -1,3 +1,8 @@
+> **RETIRED (2026-10-31).** The 3D cast was tried in play and dropped: it was glitchy and moved
+> backwards, while the 2D rig's animation was working correctly. The decision was to keep the 2D
+> cast and improve it incrementally. This folder is kept as the record of what was tried and why.
+> The code and assets were removed in the same commit; they remain in git history.
+
 # Off-the-shelf cast: evaluation and recommendation (replaces the custom character pipeline)
 
 You asked two things: make the review process precise enough to actually catch bad motion, and

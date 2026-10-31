@@ -9,26 +9,11 @@ with `open <file>`.
 
 ---
 
-## 0. Which characters am I looking at?
-
-The view is mid-pivot. The house, HUD and effects are still the original 2D art; the **cast** is
-3D. The 3D cast is **off by default**, because the whole test suite and every review shot of the
-house still assume the 2D rig. Turn it on with `MND_CAST3D=1`:
-
-```bash
-MND_CAST3D=1 godot --path /tmp/mnd_sandbox/play/game        # 3D Hush and Bellows
-godot --path /tmp/mnd_sandbox/play/game                     # the original 2D cutouts
-```
-
-Prefix any command on this page with `MND_CAST3D=1` to see the 3D cast in it. If you run the game
-without it, **you are looking at the old characters** — that is the single most likely reason the
-game looks unchanged.
-
 ## 1. The fastest look: play it
 
 ```bash
 tools/scripts/sandbox.sh play
-MND_CAST3D=1 godot --path /tmp/mnd_sandbox/play/game
+godot --path /tmp/mnd_sandbox/play/game
 ```
 
 This opens the real game in a window. It runs from a private copy, so nothing you do can disturb
@@ -59,8 +44,6 @@ Other useful scenes:
 
 | Scene | What it shows |
 |---|---|
-| `res://scenes/dev/CastWorkbench.tscn` | Hush and Bellows alone on a bare stage |
-| `res://scenes/dev/OssCastEval.tscn` | any glTF character + animation library, for auditioning clips |
 | `res://scenes/boot/Boot.tscn` | the front end |
 
 ---
@@ -71,8 +54,7 @@ Other useful scenes:
 judgement about *movement* has to be made on a capture.
 
 ```bash
-tools/scripts/capture.sh res://scenes/dev/CastWorkbench.tscn 150 /tmp/walk.gif -- \
-  --who=hush --clip=loco_walk --yaw=-55 --outline=6
+tools/scripts/capture.sh res://scenes/dev/AnimViewer.tscn 150 /tmp/walk.gif -- --rig=hush --clip=loco_walk
 ```
 
 That writes four things next to `/tmp/walk.gif`:
@@ -99,20 +81,17 @@ It plots how much the picture changes each frame and prints one line:
 | `frozen` | stretches where nothing moves although it should | **none** |
 | `smooth` | overall roll-up | **≥ 85** |
 
-For reference: a professional library clip sits at 0.14–0.23. Our cast currently measures Hush
-0.16 and Bellows 0.24. An earlier build measured 0.42 and that is what "unstable" felt like.
+For reference: a clean clip sits around 0.15–0.25; a build that measured 0.42 is what "unstable" felt like.
 
 ### Comparing two options
 
 Add a flag to turn one layer off and capture again:
 
 ```bash
-tools/scripts/capture.sh res://scenes/dev/CastWorkbench.tscn 150 /tmp/no_jiggle.gif -- \
-  --who=hush --clip=loco_walk --no-jiggle
+tools/scripts/capture.sh res://scenes/dev/AnimViewer.tscn 150 /tmp/strut.gif -- --rig=bellows --clip=loco_strut
 ```
 
-`--no-jiggle` (no hair/clothing swing), `--no-ground` (no foot contact), `--mode=pose` (hold one
-pose), `--temper=0.8` (angry tint), `--outline=7`, `--yaw=<deg>` (turn the character).
+The AnimViewer takes `--rig=` and `--clip=`; see its header for the full list.
 
 ---
 
@@ -140,18 +119,6 @@ it alone to confirm: `tools/scripts/test_game.sh mine -- test_determinism`.
 
 ---
 
-## 6. Rebuilding the characters
-
-Only needed if you want to change how the cast looks. Requires Blender.
-
-```bash
-tools/art3d/cast/build.sh              # both; add --quick for a fast draft
-```
-
-Colours live in `tools/art3d/cast/recolour.py` (a table of palette cells to hex colours) and the
-hats, hair and accessories in `tools/art3d/cast/redress.py`. After rebuilding, run
-`godot --headless --path game --import` so Godot picks the new files up.
-
 ---
 
 ## Gotchas specific to macOS
@@ -160,8 +127,5 @@ hats, hair and accessories in `tools/art3d/cast/redress.py`. After rebuilding, r
   finish. It closes itself.
 - **Don't worry if it loses focus.** The game pauses when backgrounded, which is correct on a
   phone, but it is suppressed during captures so your screenshots are not of the pause menu.
-- **Outlines look thin in a review shot.** Outline width is specified for a 1080-tall screen and
-  review shots are 540 tall, so pass `--outline=7` to judge the real thickness.
-- **Seeing the old characters?** You almost certainly forgot `MND_CAST3D=1` (see §0).
 - **Sandboxes live in `/tmp/mnd_sandbox/`.** They are private copies; delete the folder any time.
 - **First run of a sandbox is slow** (it imports ~1,200 assets). Later runs reuse the cache.

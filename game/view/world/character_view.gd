@@ -35,7 +35,14 @@ signal clip_event(ev: Dictionary)
 signal sound_event(ev: Dictionary)
 
 const RIG_PLAYER := "res://view/rig/rig_player.gd"
-const HEIGHTS := {"hush": 340.0, "bellows": 380.0}
+## On-stage draw scale per actor, applied to the rig node. The owner's note on the 2D cast was that
+## Bellows read as a giant next to Hush: his rig is 380 px to her 340 and he is half again as wide.
+## At 0.9 he stands at her height and keeps his girth, which reads as stout rather than huge. The
+## sim is untouched (it has no idea what size anyone is drawn at); only the picture changes.
+const VISUAL_SCALE := {"hush": 1.0, "bellows": 0.9}
+## Drawn heights in px: the rig's `height_px` x VISUAL_SCALE. Bubble, badge and head anchors use
+## these, so they must follow the scale or every speech bubble floats above his head.
+const HEIGHTS := {"hush": 340.0, "bellows": 342.0}
 const TURN_FRAMES := 6.0
 ## Puppet-only stride (the rig derives its stride from the clip's `stride_px`).
 const PUPPET_STRIDES := {"hush": 58.0, "bellows": 46.0}
@@ -153,15 +160,11 @@ func setup(actor_id: String, rig_id_: String = "", force_fallback: bool = false)
 		puppet = FallbackPuppet.new()
 		puppet.kind = actor
 		add_child(puppet)
+		puppet.scale = Vector2.ONE * float(VISUAL_SCALE.get(actor, 1.0))
 		puppets = 1
 
 
 func _try_rig() -> void:
-	# The 3D cast, when it is switched on (--cast3d). It presents the same duck-typed interface as
-	# RigPlayer, so everything below this point is unchanged; if it cannot build, we fall straight
-	# through to the 2D rig.
-	if CastProxy2D.enabled() and _try_cast3d():
-		return
 	var s := ViewKit.soft_script(RIG_PLAYER)
 	if s == null:
 		return
@@ -179,6 +182,9 @@ func _try_rig() -> void:
 		return
 	rig = n
 	add_child(rig)
+	# RigPlayer never touches its own Node2D scale (its mirror lives on the canvas items), so the
+	# node's scale is free to carry the on-stage size.
+	rig.scale = Vector2.ONE * float(VISUAL_SCALE.get(actor, 1.0))
 	rig.call("setup", use_id, skin if actor == "hush" else "")
 	var loaded := rig.get("rig") != null and rig.get("poses") != null and rig.get("atlas") != null
 	if not loaded:
@@ -199,30 +205,6 @@ func _try_rig() -> void:
 		rig.connect("clip_event", _on_rig_event)
 	_static_pose = _stand_pose(use_id)
 	uses_rig = true
-
-
-## Build the 3D backend for this actor. Returns false (quietly, once per actor) when the 3D cast
-## has no rig for it, so a Night with one 3D character and one 2D one still runs.
-func _try_cast3d() -> bool:
-	if not FileAccess.file_exists("res://art3d/cast/%s.rig3d.json" % rig_id):
-		return false
-	var proxy := CastProxy2D.new()
-	add_child(proxy)
-	if not proxy.setup(rig_id, skin if actor == "hush" else ""):
-		proxy.queue_free()
-		push_warning("CharacterView: 3D cast rig '%s' did not load; using the 2D rig" % rig_id)
-		return false
-	rig = proxy
-	for m in ["set_external_frame", "set_speed", "set_facing", "set_tint_tier", "set_prop_state", "set_residue",
-			"set_face", "look_toward", "stop_layer", "set_static_pose", "set_part_texture", "socket_global_transform",
-			"layer_clip", "layer_frame", "current_frame", "reset_layers"]:
-		_has[m] = rig.has_method(m)
-	rig.set("self_hitstop", false)
-	if rig.has_signal("clip_event"):
-		rig.connect("clip_event", _on_rig_event)
-	_static_pose = PackedFloat32Array()
-	uses_rig = true
-	return true
 
 
 ## The rig's stand pose (poses.json `<x>_stand`, else the first pose) for the no-clip fallback.

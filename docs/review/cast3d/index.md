@@ -1,3 +1,8 @@
+> **RETIRED (2026-10-31).** The 3D cast was tried in play and dropped: it was glitchy and moved
+> backwards, while the 2D rig's animation was working correctly. The decision was to keep the 2D
+> cast and improve it incrementally. This folder is kept as the record of what was tried and why.
+> The code and assets were removed in the same commit; they remain in git history.
+
 # The cast in 3D — KayKit base, re-dressed (REDESIGN_3D R2)
 
 The procedural characters that used to live here are gone. The cast now stands on the KayKit

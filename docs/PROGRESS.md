@@ -141,7 +141,11 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [x] Toon + inverted-hull outline shaders; 2D face cards on 3D heads (full expression atlas ported)
 - [x] CastWorkbench review scene + shots in `docs/review/cast3d/`
 - [x] 19 tests in `tests/view/test_char3d.gd` (budgets, retarget convention, IK, jiggle, grounding)
-- [ ] Modelling second pass (Bellows' belly + arm separation, Hush's legs)
+- [x] Off-the-shelf cast evaluated in-engine (`docs/review/oss_cast/`): adopt KayKit (CC0) mannequins + 161 clips; drop the procedural Blender builders
+- [x] `tools/anim/stability.py` in every `capture.sh` run (jitter / pops / frozen); Hush jitter 0.42 vs library 0.14–0.23 — the oscillation is our jiggle↔grounding loop
+- [ ] Decouple jiggle from grounding (FK-only grounding, springs fed the post-ground transform); target Hush jitter ≤ 0.25
+- [ ] Re-dress KayKit Medium/Large mannequins as Hush/Bellows (recolour atlas, beret/bouffant/specs accessories)
+- [ ] Sim-state → library-clip map; authored 2D clips kept as overlays for gag beats
 - [ ] Per-clip `ground_weight` flag (seated clips like `bellows/act_tea`)
 - [ ] Residue attachments, temper tint tiers on the 3D cast
 - [ ] Wire Character3D into NightScene (needs R1: House3D, CameraDirector3D, HUD declutter)
@@ -181,3 +185,10 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   mannequin (40 finger joints on a cast wearing mittens, over the §5.6 budget, and not committed). The retarget means
   236 poses and 34 clips carry over with zero re-authoring. Tests found an inverted IK bend axis and a grounding bug
   that floated any root-lifted clip on stretched legs. Full suite 1,114 green.
+- 2026-10-30 — Owner: motion still unstable, models not good enough, prefer open source. (1) Review loop fixed: strips
+  cannot show a 1-frame pop, so `tools/anim/stability.py` now scores every frame of every `capture.sh` run; it showed Hush's
+  walk at jitter 0.42 (a 2–3-frame sawtooth = jiggle and grounding IK correcting each other) against 0.14–0.23 for library
+  clips. (2) Evaluated KayKit, Quaternius, Kenney, Blender Studio rigs and Mixamo inside our renderer (`OssCastEval.tscn`,
+  `docs/review/oss_cast/`). Recommendation: adopt KayKit Adventurers + Character Animations (CC0; 23-bone rig matching our 2D
+  hierarchy; 161 clips incl. Sneaking/Lockpicking/Interact/Sit_Chair; medium + large rigs inside §5.6) as the base, keep our
+  retarget/IK/face layers as overlays, drop the procedural Blender modelling. Mixamo only as a baked clip fallback.

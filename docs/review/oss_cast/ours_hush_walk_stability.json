@@ -1,0 +1,14 @@
+{
+ "frames": 151,
+ "median_change": 1.565,
+ "pops": [],
+ "jitter": 0.422,
+ "frozen_runs": [],
+ "smooth_score": 78.9,
+ "roi": [
+  240,
+  27,
+  960,
+  513
+ ]
+}

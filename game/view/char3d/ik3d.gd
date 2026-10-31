@@ -21,6 +21,8 @@ extends RefCounted
 
 ## A target closer than this to the root is treated as fully folded (avoids a divide by ~0).
 const MIN_REACH := 0.001
+## Depth of floor penetration over which a foot plant fades from 0 to full (metres).
+const PLANT_BAND := 0.02
 ## How far past the chain's length a target may sit before the chain simply points at it.
 const STRETCH_EPS := 0.0001
 
@@ -193,14 +195,21 @@ static func plant_feet(skel: Skeleton3D, rig: CastRig3D, floor_y: float, weight 
 		if i < 0:
 			continue
 		var sole := sole_y(skel, name)
-		if is_inf(sole) or sole >= floor_y - 0.0005:
+		if is_inf(sole):
 			continue
+		# Fade the correction in over a band instead of switching it on at a hard threshold. A foot
+		# that hovers either side of the floor for a frame at a time would otherwise flick the leg
+		# IK on and off every frame -- a 2-frame oscillation that reads as a vibrating ankle.
+		var depth := floor_y - sole
+		if depth <= 0.0:
+			continue
+		var fade := clampf(depth / PLANT_BAND, 0.0, 1.0)
 		var p := (sk * skel.get_bone_global_pose(i)).origin
 		var chain_name := "leg_l" if name.ends_with("_l") else "leg_r"
 		if not rig.ik.has(chain_name):
 			continue
 		# Raise the bone by exactly the amount the sole is through the floor.
-		var target := Vector3(p.x, p.y + (floor_y - sole), p.z)
-		if Ik3D.apply(skel, rig.ik[chain_name], target, clampf(weight, 0.0, 1.0)):
+		var target := Vector3(p.x, p.y + depth, p.z)
+		if Ik3D.apply(skel, rig.ik[chain_name], target, clampf(weight, 0.0, 1.0) * fade):
 			planted += 1
 	return planted

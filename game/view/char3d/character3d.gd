@@ -37,6 +37,8 @@ const BREATH_HZ := 0.28
 ## Moving-hold drift: a sub-degree sway so a held pose never freezes solid.
 const DRIFT_DEG := 0.55
 const DRIFT_HZ := 0.17
+## Grounding lift follow rate (1/s). See _smooth_lift.
+const LIFT_RATE := 18.0
 
 var rig_id := ""
 var rig3d: CastRig3D = null
@@ -68,6 +70,7 @@ var _time := 0.0
 var _seed := 0.0
 var _manual := false
 var _face_preset := ""
+var _lift := 0.0
 var _ok := false
 
 
@@ -258,16 +261,39 @@ func _apply_pose(dt: float) -> void:
 
 	position = base_position + Vector3(root_off.x * facing, root_off.y, 0.0)
 
-	# Jiggle and grounding run AFTER the FK pose exists, in that order: the springs react to where
-	# the pose actually put their parents, and grounding gets the last word on the feet.
-	jiggle.step(skeleton, dt)
-
-	# Grounding, in two steps: move the BODY so the lowest foot meets the floor, then IK only the
-	# residual. A leg cannot stretch, so IK alone would leave a root-lifted clip hanging in the air.
+	# ORDER MATTERS, and getting it wrong is what made the first cut of this vibrate.
+	#
+	# Grounding must be solved from the FK-ONLY pose and the body moved to its final place BEFORE
+	# the springs run. The earlier order (jiggle, then move the body) gave the springs a world-space
+	# target computed from a position that grounding then changed, so every frame they chased where
+	# the body had been one frame ago. Two feedback loops on one skeleton, oscillating at 2-3 frames
+	# — measured at jitter 0.42 against 0.14-0.23 for a clean clip (tools/anim/stability.py).
+	#
+	# 1. Grounding, from the FK pose, in two steps: move the BODY so the lowest sole meets the
+	#    floor, then IK only the residual (a leg cannot stretch, so IK alone would leave a
+	#    root-lifted clip hanging in the air on straight legs).
 	if ground_weight > 0.0:
 		var lift := Ik3D.ground_offset(skeleton, rig3d, floor_y, ground_weight)
-		position.y += lift
+		position.y += _smooth_lift(lift, dt)
 		Ik3D.plant_feet(skeleton, rig3d, floor_y, ground_weight)
+
+	# 2. Springs last, against a body that is already where it will be drawn. They see real motion
+	#    only, never a correction.
+	jiggle.step(skeleton, dt)
+
+
+## Smooth the grounding lift so a single odd frame (a clip key that drops a foot through the floor,
+## a blend crossing a contact) cannot step the whole body. Critically damped, ~4 frames to settle:
+## fast enough that a stair or a stool reads as instant, slow enough that it never pumps.
+func _smooth_lift(target: float, dt: float) -> float:
+	if dt <= 0.0:
+		_lift = target
+		return _lift
+	var k := 1.0 - exp(-LIFT_RATE * dt)
+	_lift += (target - _lift) * k
+	if absf(target - _lift) < 0.0002:
+		_lift = target
+	return _lift
 
 
 ## Breathing + a slow sway, so a held pose is never dead-still (comedy.md: the moving hold).

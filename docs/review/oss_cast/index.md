@@ -106,5 +106,14 @@ a prerequisite for any character, library or custom, so it stays on the list.
 
 `knight_sneaking.gif`, `rogue_walking.gif`, `large_walking.gif`, `mage_interact.gif`,
 `ours_hush_walk.gif`, `ours_bellows_strut.gif` — each with `_mute.gif`, `_strip.png`,
-`_stability.png/json`. Evaluation assets (CC0, with licence files) are under
-`game/art3d/eval/` and excluded from exports.
+`_stability.png/json`. ## Outcome
+
+Adopted. The two chosen bases (KayKit Rogue -> Hush, KayKit Mage -> Bellows) and their source
+textures live in `tools/art3d/cast/src/` with the CC0 licence; the clips we use are in
+`game/art3d/cast/anim/`. The rest of the evaluation downloads were deleted once the decision was
+made -- `tools/art3d/SOURCES.txt` and `tools/art3d/itch_free_dl.py` re-fetch any of them. The
+GIFs, strips and stability plots in this folder are the evidence and stand on their own.
+
+Measured after adoption, same camera and capture settings: Hush jitter **0.16** (smooth 92),
+Bellows **0.24** (smooth 88) -- both inside the library's own 0.14-0.23 band, against 0.42 for the
+procedural rig this replaced.

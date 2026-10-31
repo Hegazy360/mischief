@@ -1,0 +1,46 @@
+{
+  "_doc": [
+    "Sim/view clip id -> KayKit library clip (REDESIGN_3D R2). The KayKit Character Animations",
+    "pack (CC0) ships 161 clips on the same Rig_Medium skeleton both cast members use, so the",
+    "everyday motion -- walking, idling, reaching, sitting, reacting -- is library animation and",
+    "nobody re-authors it. Only the gags the library has no equivalent for stay as our own 2D",
+    "clips, replayed on the 3D skeleton by PoseRetarget3D (listed under `overlay`).",
+    "A clip id absent from both lists falls back to the 2D overlay with a warning."
+  ],
+  "library": "res://art3d/cast/anim/",
+  "rigs": {
+    "hush": {
+      "loco_idle": "Idle_A",
+      "loco_walk": "Sneaking",
+      "loco_run": "Running_A",
+      "loco_turn": "Walking_C",
+      "act_tinker_q": "Interact",
+      "act_tinker_b": "Lockpicking",
+      "act_tinker_s": "Use_Item",
+      "act_pop": "PickUp",
+      "act_dive": "Dodge_Forward",
+      "act_climb_in": "Crawling",
+      "idle_fidget_look": "Idle_B",
+      "idle_fidget_proud": "Cheering",
+      "idle_fidget_clarence": "Waving"
+    },
+    "bellows": {
+      "loco_idle": "Idle_A",
+      "loco_strut": "Walking_B",
+      "loco_turn": "Walking_C",
+      "loco_blind_shuffle": "Walking_Backwards",
+      "act_tea": "Sit_Chair_Idle",
+      "act_warmup": "Push_Ups",
+      "cue_doorframe_bonk": "Hit_A",
+      "st_bonk": "Hit_B",
+      "mg_hum": "Idle_B",
+      "mg_conduct_air": "Cheering"
+    }
+  },
+  "overlay": {
+    "_doc": "Kept as our own 2D clips: the library has no sneeze, no freeze and no mime business.",
+    "hush": ["freeze_1", "freeze_2", "freeze_3", "freeze_4", "act_snicker", "act_squeak"],
+    "bellows": ["rx_sneeze_blast_a", "mg_admire_in_kettle", "mg_admire_reflection_horn",
+                "mg_pinkie_up", "mg_trill"]
+  }
+}

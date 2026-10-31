@@ -17,6 +17,10 @@ const DIR := "res://art3d/cast/"
 
 var rig_id := ""
 var height_m := 1.6
+## The .glb's own height in its authoring units. Library characters (KayKit) are not modelled in
+## metres, so the runtime scales each one by height_m / model_height_u to put it on stage at the
+## size REDESIGN_3D §5.6 asks for. 0 = already metric, no scaling.
+var model_height_u := 0.0
 ## Sagittal rotation axis in Godot space: a 2D clip angle is a rotation about this.
 var fk_axis := Vector3(0, 0, 1)
 ## 2D channel name -> [bone names]. A channel listed against several bones is split by `splits`.
@@ -54,6 +58,7 @@ static func load_rig(rig: String) -> CastRig3D:
 		push_error("CastRig3D: cannot read %s" % desc_path)
 		return null
 	r.height_m = float(d.get("height_m", 1.6))
+	r.model_height_u = float(d.get("model_height_u", 0.0))
 	var ax: Array = d.get("fk_axis", [0, 0, 1])
 	r.fk_axis = Vector3(ax[0], ax[1], ax[2]).normalized()
 	r.tris = int(d.get("tris", 0))
@@ -153,6 +158,13 @@ func channel_bones(channel: String) -> Dictionary:
 		for b in bones:
 			out[b] = 1.0 / float(maxi(1, bones.size()))
 	return out
+
+
+## Uniform scale that puts this character on stage at its design height.
+func stage_scale() -> float:
+	if model_height_u <= 0.01:
+		return 1.0
+	return height_m / model_height_u
 
 
 func errors() -> PackedStringArray:

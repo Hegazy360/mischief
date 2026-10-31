@@ -44,10 +44,16 @@ var rig_id := ""
 var rig3d: CastRig3D = null
 var rig2d: RigDef = null
 var skeleton: Skeleton3D = null
-var mesh_instance: MeshInstance3D = null
+## Every skinned mesh of the character. A library character is split into body, head, arms and
+## legs, so this is a list: overriding only the first left five sixths of the cast un-outlined and
+## sampling the wrong palette.
+var mesh_instances: Array[MeshInstance3D] = []
 
 var jiggle := Jiggle3D.new()
 var retarget: PoseRetarget3D = null
+## Library clips (KayKit, CC0) share the cast's skeleton; ours replay on top through the retarget.
+var anim: AnimationPlayer = null
+var clip_map: ClipMap3D = null
 
 ## Where the character stands on the stage. The animation's root offset is added to this every
 ## frame, so placing a character never fights the clip (and a clip never teleports one home).
@@ -71,6 +77,7 @@ var _seed := 0.0
 var _manual := false
 var _face_preset := ""
 var _lift := 0.0
+var _lib_playing := ""
 var _ok := false
 
 
@@ -94,16 +101,23 @@ func setup(rig: String) -> bool:
 	var inst := packed.instantiate()
 	add_child(inst)
 	skeleton = _find_skeleton(inst)
-	mesh_instance = _find_mesh(inst)
-	if skeleton == null or mesh_instance == null:
+	mesh_instances = _find_meshes(inst)
+	if skeleton == null or mesh_instances.is_empty():
 		push_error("Character3D: %s has no skinned mesh" % rig3d.mesh_path)
 		return false
+
+	# Library characters are authored in their own units; scale the whole node so one metre on
+	# stage is one metre here, which is what grounding, IK and the camera all assume.
+	var s := rig3d.stage_scale()
+	if not is_equal_approx(s, 1.0):
+		inst.scale = Vector3(s, s, s)
 
 	_build_materials()
 	retarget = PoseRetarget3D.build(rig3d, rig2d, skeleton)
 	for m in retarget.missing():
 		push_warning("Character3D(%s): %s" % [rig, m])
 	jiggle.configure(rig3d, skeleton)
+	_build_library()
 	_rest = rig2d.rest.duplicate()
 	_pose = _rest.duplicate()
 	_seed = float(hash(rig)) * 0.001
@@ -132,38 +146,114 @@ func _find_skeleton(n: Node) -> Skeleton3D:
 	return null
 
 
-func _find_mesh(n: Node) -> MeshInstance3D:
+func _find_meshes(n: Node, out: Array[MeshInstance3D] = []) -> Array[MeshInstance3D]:
 	if n is MeshInstance3D:
-		return n as MeshInstance3D
+		out.append(n as MeshInstance3D)
 	for c in n.get_children():
-		var m := _find_mesh(c)
-		if m != null:
-			return m
+		_find_meshes(c, out)
+	return out
+
+
+## The character's own colour atlas, taken from the imported material rather than assumed.
+## KayKit paints a whole character from one gradient atlas embedded in its .glb; the toon shader
+## samples that through UV0 exactly as the imported material did.
+func _source_albedo(mi: MeshInstance3D) -> Texture2D:
+	for s in mi.mesh.get_surface_count():
+		var m := mi.get_active_material(s)
+		if m is BaseMaterial3D:
+			var tex := (m as BaseMaterial3D).albedo_texture
+			if tex != null:
+				return tex
 	return null
 
 
 func _build_materials() -> void:
 	_toon = ShaderMaterial.new()
 	_toon.shader = load(TOON_SHADER)
-	var pal: Texture2D = load(PALETTE_TEX)
-	if pal != null:
-		_toon.set_shader_parameter("palette", pal)
-	var face: Texture2D = load(rig3d.face_atlas_path)
+	var palette: Texture2D = null
+	for mi in mesh_instances:
+		palette = _source_albedo(mi)
+		if palette != null:
+			break
+	if palette == null:
+		palette = load(PALETTE_TEX)      # procedural fallback / greybox stand-ins
+	_toon.set_shader_parameter("palette", palette)
+	var face: Texture2D = load(rig3d.face_atlas_path) if ResourceLoader.exists(rig3d.face_atlas_path) else null
 	if face != null:
 		_toon.set_shader_parameter("face_atlas", face)
 	for layer in ["brows", "eyes", "mouth", "extra"]:
 		_toon.set_shader_parameter("%s_band" % layer, rig3d.face_band(layer))
 
-	# The outline rides as a second pass on the same mesh: one MeshInstance, two draw calls.
+	# The outline rides as a second pass on the same material: 2 draw calls per mesh, and every
+	# piece of the character gets one.
 	_outline = ShaderMaterial.new()
 	_outline.shader = load(OUTLINE_SHADER)
 	_toon.next_pass = _outline
 
-	# `material_override` rather than per-surface overrides: a glTF import has no override slots
-	# populated, so set_surface_override_material() silently wrote nothing and the imported
-	# StandardMaterial3D kept drawing.
-	mesh_instance.material_override = _toon
+	for mi in mesh_instances:
+		mi.material_override = _toon
 	set_face("neutral")
+
+
+## Load every animation-library .glb once and merge its clips into one AnimationPlayer beside the
+## skeleton. The libraries are authored on the same rig as the characters, so the tracks resolve by
+## bone name; only the node prefix has to be rewritten to this character's skeleton.
+func _build_library() -> void:
+	clip_map = ClipMap3D.load_map()
+	var files := clip_map.library_files()
+	if files.is_empty():
+		return
+	anim = AnimationPlayer.new()
+	anim.name = "Library"
+	skeleton.get_parent().add_child(anim)
+	var lib := AnimationLibrary.new()
+	for path in files:
+		var packed: PackedScene = load(path)
+		if packed == null:
+			push_warning("Character3D(%s): cannot load animation library %s" % [rig_id, path])
+			continue
+		var inst := packed.instantiate()
+		var src := _find_anim_player(inst)
+		if src == null:
+			inst.free()
+			continue
+		for lib_name in src.get_animation_library_list():
+			var l := src.get_animation_library(lib_name)
+			for clip in l.get_animation_list():
+				if lib.has_animation(clip):
+					continue
+				var a := l.get_animation(clip).duplicate() as Animation
+				_rebind(a)
+				lib.add_animation(clip, a)
+		inst.free()
+	anim.add_animation_library("", lib)
+
+
+## Point every bone track at THIS character's Skeleton3D ("<skel>:<bone>").
+func _rebind(a: Animation) -> void:
+	for i in a.get_track_count():
+		var bone := a.track_get_path(i).get_concatenated_subnames()
+		if bone == "":
+			continue
+		a.track_set_path(i, NodePath("%s:%s" % [skeleton.name, bone]))
+
+
+func _find_anim_player(n: Node) -> AnimationPlayer:
+	if n is AnimationPlayer:
+		return n as AnimationPlayer
+	for c in n.get_children():
+		var r := _find_anim_player(c)
+		if r != null:
+			return r
+	return null
+
+
+## Library clips this character can play (for tooling and tests).
+func library_clips() -> PackedStringArray:
+	if anim == null:
+		return PackedStringArray()
+	var lib := anim.get_animation_library("")
+	return PackedStringArray(lib.get_animation_list()) if lib != null else PackedStringArray()
 
 
 # --- playback ------------------------------------------------------------------------------------
@@ -171,15 +261,32 @@ func _build_materials() -> void:
 ## Play a clip id (`"hush/loco_walk"`). Opts: `speed` (px/s, for a clip with `stride_px`),
 ## `loop` (defaults to the clip's own), `from` (start frame).
 func play(clip_id: String, opts := {}) -> void:
+	_clip_id = clip_id
+	_speed = float(opts.get("speed", 0.0))
+	# Library first: the everyday motion is KayKit's, and it drives the skeleton directly through
+	# the AnimationPlayer rather than through the 2D sampler.
+	var lib_clip := clip_map.library_clip(rig_id, clip_id) if clip_map != null else ""
+	if lib_clip != "" and anim != null and anim.has_animation(lib_clip):
+		_clip = null
+		_lib_playing = lib_clip
+		var a := anim.get_animation(lib_clip)
+		a.loop_mode = Animation.LOOP_LINEAR if bool(opts.get("loop", true)) else Animation.LOOP_NONE
+		anim.play(lib_clip)
+		return
+	_lib_playing = ""
+	if anim != null:
+		anim.stop()
+
 	var c := ClipLib.get_clip(clip_id)
 	if c == null:
-		push_warning("Character3D(%s): no clip '%s'" % [rig_id, clip_id])
+		push_warning("Character3D(%s): no clip '%s' in the library or in data/anim" % [rig_id, clip_id])
 		return
+	if clip_map != null and not clip_map.is_overlay(rig_id, clip_id):
+		# Not an intentional overlay and not mapped: it still plays, but the mapping is missing.
+		push_warning("Character3D(%s): '%s' has no library mapping (data/anim/clipmap3d.json)" % [rig_id, clip_id])
 	_clip = c
-	_clip_id = clip_id
 	_frame = float(opts.get("from", 0.0))
 	_loop = bool(opts.get("loop", c.loop))
-	_speed = float(opts.get("speed", 0.0))
 
 
 func clip_id() -> String:
@@ -221,6 +328,12 @@ func advance(dt: float) -> void:
 	var before := _frame
 	_frame += dt * rate
 
+	if _lib_playing != "":
+		# The AnimationPlayer has already written the FK pose for this frame; skip the 2D sampler
+		# and run only the procedural layers on top of it.
+		_apply_procedural(dt)
+		return
+
 	if _clip != null:
 		var ln := float(maxi(1, _clip.length))
 		if _loop:
@@ -246,6 +359,21 @@ func _pump_events(from_f: float, to_f: float) -> void:
 	for e in ClipEvents.between(_clip, from_f, to_f):
 		if e is Dictionary:
 			clip_event.emit(e)
+
+
+## Grounding, springs and the moving hold, on top of whatever wrote the FK pose. Shared by the
+## library path (AnimationPlayer) and the 2D overlay path (PoseRetarget3D).
+func _apply_procedural(dt: float) -> void:
+	if skeleton == null:
+		return
+	_moving_hold()
+	# A library clip carries no 2D root channel, so the character sits exactly where it is placed.
+	position = base_position
+	if ground_weight > 0.0:
+		var lift := Ik3D.ground_offset(skeleton, rig3d, floor_y, ground_weight)
+		position.y += _smooth_lift(lift, dt)
+		Ik3D.plant_feet(skeleton, rig3d, floor_y, ground_weight)
+	jiggle.step(skeleton, dt)
 
 
 func _apply_pose(dt: float) -> void:

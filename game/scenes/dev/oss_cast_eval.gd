@@ -5,10 +5,10 @@
 ## animations share the `Rig_Medium` skeleton, so a library's tracks apply by bone name).
 ##
 ##   tools/scripts/capture.sh res://scenes/dev/OssCastEval.tscn 180 out/knight_sneak.gif -- \
-##       --char=res://art3d/eval/kaykit/Knight.glb --clip=Sneaking --yaw=-55
+##       --char=res://art3d/cast/hush.glb --clip=Sneaking --yaw=-55
 ##
 ## Flags: --char=<res path>   the character .glb (default KayKit Knight)
-##        --libs=<a.glb;b.glb> animation glbs (default every Rig_Medium_*.glb next to the character)
+##        --libs=<a.glb;b.glb> animation glbs (default every Rig_Medium_*.glb in art3d/cast/anim/)
 ##        --clip=<name>       clip to play (default Sneaking); --speed=<scale>
 ##        --yaw=<deg>         character yaw; --outline=<px> add the cast outline pass
 ##        --list              print every clip found, then quit
@@ -20,7 +20,7 @@ const OUTLINE_SHADER := "res://art3d/shaders/cast_outline.gdshader"
 
 func _ready() -> void:
 	var a := _args()
-	var char_path := String(a.get("char", "res://art3d/eval/kaykit/Knight.glb"))
+	var char_path := String(a.get("char", "res://art3d/cast/hush.glb"))
 	_build_stage(String(a.get("bg", "2B2440")))
 
 	var packed: PackedScene = load(char_path)

@@ -142,15 +142,20 @@ func test_a_split_channel_keeps_the_authored_total_angle() -> void:
 	assert_true(rig3d != null)
 	if rig3d == null:
 		return
-	# A 2D "torso" hinge is spread over spine + chest so it bends like a spine, but the summed
-	# angle has to stay exactly what the animator authored or every pose changes shape.
-	for ch in ["torso", "head"]:
+	# A 2D "torso" hinge is spread over spine + chest so it bends like a spine rather than a
+	# hinge. Which channels are split depends on the rig (KayKit has no neck bone, so `head` is
+	# one bone), but WHATEVER is split must still sum to the authored angle or every pose
+	# silently changes shape.
+	var split_seen := 0
+	for ch in rig3d.fk_map:
 		var weights := rig3d.channel_bones(ch)
-		assert_gt(weights.size(), 1, "'%s' is split over several bones" % ch)
 		var total := 0.0
 		for b in weights:
 			total += float(weights[b])
 		assert_almost_eq(total, 1.0, 0.0001, "'%s' split weights sum to 1" % ch)
+		if weights.size() > 1:
+			split_seen += 1
+	assert_gt(split_seen, 0, "at least one channel (the torso) is spread over several bones")
 
 
 func test_retarget_turns_a_clockwise_2d_angle_into_a_negative_sagittal_turn() -> void:
@@ -167,7 +172,11 @@ func test_retarget_turns_a_clockwise_2d_angle_into_a_negative_sagittal_turn() ->
 	assert_ge(part, 0)
 	pose[RigDef.ROOT_CH + part * RigDef.STRIDE + RigDef.C_ROT] = 30.0
 	rt.apply(skel, pose)
-	var bone := skel.find_bone("arm_upper_r")
+	# The 3D bone a channel drives is the rig's business, not the test's: KayKit calls it
+	# "upperarm.r". Resolve it the way the retarget does.
+	var bones := rig3d.channel_bones("arm_upper_r")
+	assert_eq(bones.size(), 1, "arm_upper_r drives exactly one bone")
+	var bone := skel.find_bone(String(bones.keys()[0]))
 	assert_ge(bone, 0)
 	var rest := skel.get_bone_rest(bone).basis.get_rotation_quaternion()
 	var delta := rest.inverse() * skel.get_bone_pose_rotation(bone)
@@ -353,3 +362,54 @@ func test_plant_feet_leaves_a_raised_foot_alone() -> void:
 	skel.get_parent().position = Vector3(0, 1.0, 0)
 	assert_eq(Ik3D.plant_feet(skel, rig3d, 0.0, 1.0), 0, "feet above the floor are not touched")
 	skel.get_parent().free()
+
+
+# --- clip map (library vs our own) -------------------------------------------------------------
+
+func test_clip_map_resolves_library_clips_for_every_rig() -> void:
+	var m := ClipMap3D.load_map()
+	assert_gt(m.rigs().size(), 0, "clipmap3d.json lists at least one rig")
+	for rig in m.rigs():
+		assert_gt(m.mapped_count(rig), 0, "%s maps clips onto the library" % rig)
+	# Spot-check the mapping that matters most: a stealth game's walk is the library's sneak.
+	assert_eq(m.library_clip("hush", "loco_walk"), "Sneaking")
+	assert_eq(m.library_clip("hush", "hush/loco_walk"), "Sneaking", "a full clip id resolves too")
+	assert_eq(m.library_clip("hush", "no_such_clip"), "", "an unmapped clip resolves to nothing")
+
+
+func test_clip_map_keeps_our_own_gags_as_overlays() -> void:
+	var m := ClipMap3D.load_map()
+	# The library has no sneeze and no freeze: those must stay our authored 2D clips, and must
+	# NOT be silently expected to come from the library.
+	assert_true(m.is_overlay("hush", "freeze_1"), "the freezes stay ours")
+	assert_true(m.is_overlay("bellows", "rx_sneeze_blast_a"), "the sneeze stays ours")
+	assert_eq(m.library_clip("hush", "freeze_1"), "", "an overlay has no library mapping")
+	assert_false(m.is_overlay("hush", "loco_walk"), "a mapped clip is not an overlay")
+
+
+func test_every_mapped_clip_exists_in_the_shipped_animation_library() -> void:
+	var m := ClipMap3D.load_map()
+	var files := m.library_files()
+	assert_gt(files.size(), 0, "the animation library ships with the game")
+	# Gather every clip name the library glbs actually contain.
+	var have := {}
+	for path in files:
+		var packed: PackedScene = load(path)
+		assert_true(packed != null, "library %s loads" % path)
+		if packed == null:
+			continue
+		var inst := packed.instantiate()
+		tree.root.add_child(inst)
+		for ap in inst.find_children("*", "AnimationPlayer", true, false):
+			for lib_name in (ap as AnimationPlayer).get_animation_library_list():
+				for clip in (ap as AnimationPlayer).get_animation_library(lib_name).get_animation_list():
+					have[clip] = true
+		inst.free()
+	# A mapping that names a clip the library does not have would leave a character frozen.
+	for rig in m.rigs():
+		for our_clip in ["loco_idle", "loco_walk", "loco_strut", "act_tea", "act_tinker_q"]:
+			var lib_clip := m.library_clip(rig, our_clip)
+			if lib_clip == "":
+				continue
+			assert_true(have.has(lib_clip),
+				"%s/%s -> '%s' exists in the library" % [rig, our_clip, lib_clip])

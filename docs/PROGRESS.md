@@ -133,22 +133,18 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [x] Three style look-devs + owner board (`docs/review/lookdev/`); reviewer recommends A (Toy Box)
 - [ ] Owner picks a style (A / B / C) — still open; the cast runtime below is style-agnostic
 - [ ] Device perf numbers from the pipeline spike (risk X1)
-### R2 — cast in 3D (started)
-- [x] Self-contained cast skeleton (`tools/art3d/cast/mnd_rig.py`): 20 body bones + jiggle, no Quaternius dependency
-- [x] Hush + Bellows rebuilt as skinned glTF inside §5.6 budgets (9,999 / 10,000 tris; 27 / 32 bones)
-- [x] 2D → 3D pose retarget: all 236 authored poses + 34 lint-checked clips replay unchanged
-- [x] Procedural layers: jiggle (secondary motion), two-step foot grounding + two-bone IK, squash & stretch, moving holds
-- [x] Toon + inverted-hull outline shaders; 2D face cards on 3D heads (full expression atlas ported)
-- [x] CastWorkbench review scene + shots in `docs/review/cast3d/`
-- [x] 19 tests in `tests/view/test_char3d.gd` (budgets, retarget convention, IK, jiggle, grounding)
-- [x] Off-the-shelf cast evaluated in-engine (`docs/review/oss_cast/`): adopt KayKit (CC0) mannequins + 161 clips; drop the procedural Blender builders
-- [x] `tools/anim/stability.py` in every `capture.sh` run (jitter / pops / frozen); Hush jitter 0.42 vs library 0.14–0.23 — the oscillation is our jiggle↔grounding loop
-- [ ] Decouple jiggle from grounding (FK-only grounding, springs fed the post-ground transform); target Hush jitter ≤ 0.25
-- [ ] Re-dress KayKit Medium/Large mannequins as Hush/Bellows (recolour atlas, beret/bouffant/specs accessories)
-- [ ] Sim-state → library-clip map; authored 2D clips kept as overlays for gag beats
-- [ ] Per-clip `ground_weight` flag (seated clips like `bellows/act_tea`)
-- [ ] Residue attachments, temper tint tiers on the 3D cast
-- [ ] Wire Character3D into NightScene (needs R1: House3D, CameraDirector3D, HUD declutter)
+### R2 — cast in 3D (open-source base)
+- [x] Off-the-shelf cast evaluated in-engine (`docs/review/oss_cast/`): KayKit (CC0) adopted; procedural Blender builders retired
+- [x] `tools/anim/stability.py` in every `capture.sh` run (jitter / pops / frozen / smooth)
+- [x] Jiggle↔grounding oscillation fixed (grounding solved from the FK-only pose before the springs; damped lift; faded foot plant). Hush jitter 0.42 → 0.13, Bellows 0.18
+- [x] Hush (KayKit Rogue) and Bellows (KayKit Mage) re-dressed: palette recolour, painted Breton stripes, beret / braces / bouffant / nose / specs / cravat on jiggle bones. 9,518 / 9,044 tris, 26 / 28 bones
+- [x] Library playback in `Character3D` + `ClipMap3D`; 23 clips mapped, gags kept as 2D overlays
+- [x] `docs/TESTING_ON_MAC.md` — how to run and review the game on a Mac
+- [ ] Face cards on the KayKit head (atlas + shader path exist; expression vocabulary ported)
+- [ ] Colour polish: Hush's bracer cells, the Mage's belt pouch on Bellows
+- [ ] Per-clip `ground_weight` flag (seated clips like `act_tea`)
+- [ ] Residue attachments and temper tint tiers on the 3D cast
+- [ ] Wire `Character3D` into NightScene (needs R1: House3D, CameraDirector3D, HUD declutter)
 
 ## Stage 5 — Release
 - [ ] Version/codes, icon, splash, store screenshots (landscape)
@@ -192,3 +188,13 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   `docs/review/oss_cast/`). Recommendation: adopt KayKit Adventurers + Character Animations (CC0; 23-bone rig matching our 2D
   hierarchy; 161 clips incl. Sneaking/Lockpicking/Interact/Sit_Chair; medium + large rigs inside §5.6) as the base, keep our
   retarget/IK/face layers as overlays, drop the procedural Blender modelling. Mixamo only as a baked clip fallback.
+
+- 2026-10-31 — R2 on an open-source base. (1) Fixed the instability: `Character3D` ran the jiggle springs BEFORE
+  grounding moved the body, so each frame the springs chased the previous frame's position — two feedback loops on one
+  skeleton. Grounding is now solved from the FK-only pose and applied first, the lift is critically damped and the foot
+  plant fades over a 2 cm band. Isolation captures then showed the remaining jitter was the authored 2D tiptoe clip
+  itself, not the runtime. (2) Replaced the procedural characters with re-dressed KayKit (CC0): `recolour.py` repaints
+  the gradient atlas, `redress.py` drops clashing meshes, paints Hush's stripes onto the tunic's own faces and adds our
+  accessories on jiggle bones. (3) `ClipMap3D` + `clipmap3d.json` play library clips for everyday motion and keep the
+  gags as 2D overlays. Measured: Hush 0.13 / Bellows 0.18 jitter (library band is 0.14–0.23; the old rig was 0.42).
+  Retired `mnd_rig.py` and `build_cast.py`; deleted the 18 MB evaluation staging. Tests 1,120 green.

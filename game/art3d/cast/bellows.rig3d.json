@@ -1,8 +1,10 @@
 {
  "version": 1,
  "rig": "bellows",
- "doc": "3D cast rig built by tools/art3d/cast/build_bellows.py. Angles come from the 2D clips in game/data/anim/bellows; everything else is procedural (jiggle, IK, squash, overlap).",
- "height_m": 1.72,
+ "doc": "KayKit bellows re-dressed by tools/art3d/cast/redress.py. Body, skeleton and skinning are KayKit (CC0); the palette and accessories are ours. Base animation comes from the KayKit library clips; the 2D clips in game/data/anim/bellows replay as overlays through fk_map.",
+ "source": "KayKit Adventurers 2.0 / Character Animations 1.1 (CC0, Kay Lousberg)",
+ "height_m": 1.78,
+ "model_height_u": 2.508,
  "fk_axis": [
   1.0,
   0.0,
@@ -10,61 +12,56 @@
  ],
  "fk_map": {
   "pelvis": [
-   "pelvis"
+   "hips"
   ],
   "torso": [
    "spine",
    "chest"
   ],
   "head": [
-   "neck",
    "head"
   ],
   "arm_upper_l": [
-   "arm_upper_l"
+   "upperarm.l"
   ],
   "arm_lower_l": [
-   "arm_lower_l"
+   "lowerarm.l"
   ],
   "hand_l": [
-   "hand_l"
+   "hand.l"
   ],
   "arm_upper_r": [
-   "arm_upper_r"
+   "upperarm.r"
   ],
   "arm_lower_r": [
-   "arm_lower_r"
+   "lowerarm.r"
   ],
   "hand_r": [
-   "hand_r"
+   "hand.r"
   ],
   "leg_upper_l": [
-   "leg_upper_l"
+   "upperleg.l"
   ],
   "leg_lower_l": [
-   "leg_lower_l"
+   "lowerleg.l"
   ],
   "foot_l": [
-   "foot_l"
+   "foot.l"
   ],
   "leg_upper_r": [
-   "leg_upper_r"
+   "upperleg.r"
   ],
   "leg_lower_r": [
-   "leg_lower_r"
+   "lowerleg.r"
   ],
   "foot_r": [
-   "foot_r"
+   "foot.r"
   ]
  },
  "splits": {
   "torso": {
    "spine": 0.55,
    "chest": 0.45
-  },
-  "head": {
-   "neck": 0.35,
-   "head": 0.65
   }
  },
  "jiggle": [
@@ -73,81 +70,46 @@
    "parent": "head",
    "stiffness": 130.0,
    "damping": 0.6,
-   "max_deg": 15.0
+   "max_deg": 14.0
   },
   {
    "bone": "bouffant_l",
    "parent": "head",
    "stiffness": 115.0,
    "damping": 0.56,
-   "max_deg": 19.0
+   "max_deg": 18.0
   },
   {
    "bone": "bouffant_r",
    "parent": "head",
    "stiffness": 115.0,
    "damping": 0.56,
-   "max_deg": 19.0
-  },
-  {
-   "bone": "sideburn_l",
-   "parent": "head",
-   "stiffness": 170.0,
-   "damping": 0.64,
-   "max_deg": 14.0
-  },
-  {
-   "bone": "sideburn_r",
-   "parent": "head",
-   "stiffness": 170.0,
-   "damping": 0.64,
-   "max_deg": 14.0
+   "max_deg": 18.0
   },
   {
    "bone": "nose",
    "parent": "head",
    "stiffness": 300.0,
    "damping": 0.8,
-   "max_deg": 7.0
-  },
-  {
-   "bone": "belly",
-   "parent": "spine",
-   "stiffness": 190.0,
-   "damping": 0.74,
-   "max_deg": 11.0
+   "max_deg": 6.0
   },
   {
    "bone": "cravat",
    "parent": "chest",
    "stiffness": 140.0,
    "damping": 0.58,
-   "max_deg": 20.0
-  },
-  {
-   "bone": "tail_l",
-   "parent": "pelvis",
-   "stiffness": 100.0,
-   "damping": 0.54,
-   "max_deg": 26.0
-  },
-  {
-   "bone": "tail_r",
-   "parent": "pelvis",
-   "stiffness": 100.0,
-   "damping": 0.54,
-   "max_deg": 26.0
+   "max_deg": 18.0
   }
  ],
  "sockets": [
-  "socket_r",
-  "socket_l"
+  "handslot.l",
+  "handslot.r"
  ],
  "ik": {
   "arm_l": {
-   "upper": "arm_upper_l",
-   "lower": "arm_lower_l",
-   "tip": "hand_l",
+   "upper": "upperarm.l",
+   "lower": "lowerarm.l",
+   "tip": "hand.l",
    "bend": [
     0,
     -1,
@@ -155,9 +117,9 @@
    ]
   },
   "arm_r": {
-   "upper": "arm_upper_r",
-   "lower": "arm_lower_r",
-   "tip": "hand_r",
+   "upper": "upperarm.r",
+   "lower": "lowerarm.r",
+   "tip": "hand.r",
    "bend": [
     0,
     -1,
@@ -165,38 +127,38 @@
    ]
   },
   "leg_l": {
-   "upper": "leg_upper_l",
-   "lower": "leg_lower_l",
-   "tip": "foot_l",
+   "upper": "upperleg.l",
+   "lower": "lowerleg.l",
+   "tip": "foot.l",
    "bend": [
-    1,
     0,
-    0
+    0,
+    1
    ]
   },
   "leg_r": {
-   "upper": "leg_upper_r",
-   "lower": "leg_lower_r",
-   "tip": "foot_r",
+   "upper": "upperleg.r",
+   "lower": "lowerleg.r",
+   "tip": "foot.r",
    "bend": [
-    1,
     0,
-    0
+    0,
+    1
    ]
   }
  },
  "feet": [
-  "foot_l",
-  "foot_r"
+  "foot.l",
+  "foot.r"
  ],
  "toes": [
-  "toe_l",
-  "toe_r"
+  "toes.l",
+  "toes.r"
  ],
  "face": {
   "atlas": "face_bellows.png",
   "uv": "FaceUV"
  },
- "tris": 10000,
- "bones": 32
+ "tris": 9044,
+ "bones": 28
 }

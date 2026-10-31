@@ -9,11 +9,26 @@ with `open <file>`.
 
 ---
 
+## 0. Which characters am I looking at?
+
+The view is mid-pivot. The house, HUD and effects are still the original 2D art; the **cast** is
+3D. The 3D cast is **off by default**, because the whole test suite and every review shot of the
+house still assume the 2D rig. Turn it on with `MND_CAST3D=1`:
+
+```bash
+MND_CAST3D=1 godot --path /tmp/mnd_sandbox/play/game        # 3D Hush and Bellows
+godot --path /tmp/mnd_sandbox/play/game                     # the original 2D cutouts
+```
+
+Prefix any command on this page with `MND_CAST3D=1` to see the 3D cast in it. If you run the game
+without it, **you are looking at the old characters** — that is the single most likely reason the
+game looks unchanged.
+
 ## 1. The fastest look: play it
 
 ```bash
 tools/scripts/sandbox.sh play
-godot --path /tmp/mnd_sandbox/play/game
+MND_CAST3D=1 godot --path /tmp/mnd_sandbox/play/game
 ```
 
 This opens the real game in a window. It runs from a private copy, so nothing you do can disturb
@@ -147,5 +162,6 @@ hats, hair and accessories in `tools/art3d/cast/redress.py`. After rebuilding, r
   phone, but it is suppressed during captures so your screenshots are not of the pause menu.
 - **Outlines look thin in a review shot.** Outline width is specified for a 1080-tall screen and
   review shots are 540 tall, so pass `--outline=7` to judge the real thickness.
+- **Seeing the old characters?** You almost certainly forgot `MND_CAST3D=1` (see §0).
 - **Sandboxes live in `/tmp/mnd_sandbox/`.** They are private copies; delete the folder any time.
 - **First run of a sandbox is slow** (it imports ~1,200 assets). Later runs reuse the cache.

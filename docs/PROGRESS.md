@@ -144,7 +144,10 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
 - [ ] Colour polish: Hush's bracer cells, the Mage's belt pouch on Bellows
 - [ ] Per-clip `ground_weight` flag (seated clips like `act_tea`)
 - [ ] Residue attachments and temper tint tiers on the 3D cast
-- [ ] Wire `Character3D` into NightScene (needs R1: House3D, CameraDirector3D, HUD declutter)
+- [x] `CastProxy2D`: the 3D cast plays in a real Night behind `MND_CAST3D=1` (SubViewport per character, same duck-typed interface as RigPlayer)
+- [x] Bellows' blind shuffle re-posed: one hand gropes, one shields the eyes, both alive per frame (was two rigid parallel arms)
+- [x] Second look pass: high-contrast mime palette, black boots, muttonchops, the Mage's belt kit painted out
+- [ ] Full 3D view (R1: House3D, CameraDirector3D, HUD declutter) — retires CastProxy2D
 
 ## Stage 5 — Release
 - [ ] Version/codes, icon, splash, store screenshots (landscape)
@@ -198,3 +201,12 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   accessories on jiggle bones. (3) `ClipMap3D` + `clipmap3d.json` play library clips for everyday motion and keep the
   gags as 2D overlays. Measured: Hush 0.13 / Bellows 0.18 jitter (library band is 0.14–0.23; the old rig was 0.42).
   Retired `mnd_rig.py` and `build_cast.py`; deleted the 18 MB evaluation staging. Tests 1,120 green.
+- 2026-10-31 — Owner: the game still shows the old characters. Correct and expected — nothing in the game path used
+  the 3D cast, only the dev workbench; that was stated in the docs but buried. Fixed by building `CastProxy2D`, which
+  renders each 3D character into a SubViewport and draws it where the 2D rig stood, behind the duck-typed interface
+  `CharacterView` already used (`MND_CAST3D=1`; off by default so the suite and house shots keep the 2D rig). Second
+  look pass on both characters (high-contrast mime palette, black boots, muttonchops, the Mage's belt kit painted out,
+  accessories fitted to the 10k budget). Re-posed `bellows/loco_blind_shuffle`: it was two rigid parallel arms held for
+  all 24 frames; now one hand gropes and sweeps while the other shields the eyes, set on every key so the half-cycle
+  mirror cannot swap hands. The torso is deliberately left to the poses — it is Bellows' root part, and moving it slid
+  the planted foot (anim lint A12/A13/A27). Tests 1,120 green.

@@ -274,7 +274,8 @@ def build_hush(arm, meshes, mat, n):
     for side in ("l", "r"):
         a = bone_world(arm, "brace_%s" % side)
         b = bone_tail(arm, "brace_%s" % side)
-        bm = T.capsule_chain([a, b], [body_s.x * 0.048, body_s.x * 0.042], "braces", seg=8)
+        bm = T.capsule_chain([a, b], [body_s.x * 0.048, body_s.x * 0.042], "braces",
+                             seg=8, cap_rings=3, samples_per_m=14)
         ob = attach(bm, arm, "brace_%s" % side, "Hush_Brace%s" % side.upper(), mat)
         palette_uv(ob, *CELL["red"])
         out.append(ob)
@@ -300,6 +301,10 @@ def build_bellows(arm, meshes, mat, n):
          Vector((head_c.x, head_c.y + fwd * 1.05, head_c.z))),
         ("cravat", "chest", chest + Vector((0, fwd * 0.55, 0.02)),
          chest + Vector((0, fwd * 0.65, -0.14))),
+        ("chop_l", "head", Vector((head_c.x + head_s.x * 0.34, head_c.y + fwd * 0.18, head_c.z + head_s.z * 0.10)),
+         Vector((head_c.x + head_s.x * 0.30, head_c.y + fwd * 0.30, head_c.z - head_s.z * 0.22))),
+        ("chop_r", "head", Vector((head_c.x - head_s.x * 0.34, head_c.y + fwd * 0.18, head_c.z + head_s.z * 0.10)),
+         Vector((head_c.x - head_s.x * 0.30, head_c.y + fwd * 0.30, head_c.z - head_s.z * 0.22))),
     ])
     out = []
     for bone, k, off in (("bouffant_c", 0.46, Vector((0, 0, head_s.z * 0.06))),
@@ -308,6 +313,15 @@ def build_bellows(arm, meshes, mat, n):
         c = bone_world(arm, bone) + off
         bm = T.se_blob(c, head_s.x * k, head_s.y * k * 0.92, head_s.z * k * 0.70, 2.3, "bouffant", n=n)
         ob = attach(bm, arm, bone, "Bellows_%s" % bone, mat)
+        palette_uv(ob, *CELL["silver"])
+        out.append(ob)
+    # Muttonchops, swept forward along the jaw.
+    for side in ("l", "r"):
+        a = bone_world(arm, "chop_%s" % side)
+        b = bone_tail(arm, "chop_%s" % side)
+        bm = T.capsule_chain([a, b], [head_s.x * 0.105, head_s.x * 0.070], "bouffant",
+                             seg=9, cap_rings=3, samples_per_m=14)
+        ob = attach(bm, arm, "chop_%s" % side, "Bellows_Chop%s" % side.upper(), mat)
         palette_uv(ob, *CELL["silver"])
         out.append(ob)
     # Nose.
@@ -344,6 +358,8 @@ JIGGLE = {
         ("bouffant_l", "head", 115.0, 0.56, 18.0),
         ("bouffant_r", "head", 115.0, 0.56, 18.0),
         ("nose", "head", 300.0, 0.80, 6.0),
+        ("chop_l", "head", 210.0, 0.70, 10.0),
+        ("chop_r", "head", 210.0, 0.70, 10.0),
         ("cravat", "chest", 140.0, 0.58, 18.0),
     ],
 }
@@ -385,6 +401,42 @@ def descriptor(who, arm, tris, model_height):
     }
 
 
+# REDESIGN_3D §5.6: <= 10k triangles per character.
+TRI_BUDGET = 10000
+
+
+def fit_budget(accessories, base_tris, budget=TRI_BUDGET):
+    """Collapse OUR accessories until the character fits its triangle budget.
+
+    KayKit's own meshes are already optimised and are never touched -- the overspend is always
+    ours (a swept muttonchop or a bouffant lobe at full smoothness). Collapse is UV-aware enough
+    to keep each accessory's flat palette cell intact, and these are smooth blobs where a lower
+    density is invisible at phone size.
+    """
+    acc_tris = sum(count_tris(o) for o in accessories)
+    total = base_tris + acc_tris
+    if total <= budget or acc_tris <= 0:
+        return total
+    keep = max(0.08, float(budget - base_tris) / float(acc_tris))
+    for o in accessories:
+        if count_tris(o) < 80:
+            continue
+        bpy.context.view_layer.objects.active = o
+        mod = o.modifiers.new("Budget", "DECIMATE")
+        mod.decimate_type = "COLLAPSE"
+        mod.ratio = keep
+        mod.use_collapse_triangulate = True
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    out = base_tris + sum(count_tris(o) for o in accessories)
+    print("[redress]   accessories %d -> %d tris (budget %d)" % (acc_tris, out - base_tris, budget))
+    return out
+
+
+def count_tris(obj):
+    obj.data.calc_loop_triangles()
+    return len(obj.data.loop_triangles)
+
+
 def export(arm, path):
     bpy.ops.object.select_all(action="DESELECT")
     arm.select_set(True)
@@ -408,13 +460,10 @@ def main():
     meshes = drop_meshes(meshes, DROP.get(who, []))
     swap_atlas(meshes, o["atlas"])
     mat = meshes[0].data.materials[0] if meshes[0].data.materials else None
-    BUILD[who](arm, meshes, mat, n)
+    accessories = BUILD[who](arm, meshes, mat, n)
 
-    tris = 0
-    for ob in bpy.data.objects:
-        if ob.type == "MESH":
-            ob.data.calc_loop_triangles()
-            tris += len(ob.data.loop_triangles)
+    base_tris = sum(count_tris(o) for o in meshes)
+    tris = fit_budget(accessories, base_tris)
     zs = [(ob.matrix_world @ v.co).z for ob in bpy.data.objects if ob.type == "MESH"
           for v in ob.data.vertices]
     model_height = round(max(zs) - min(zs), 3) if zs else 1.0

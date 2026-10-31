@@ -29,52 +29,61 @@ GRID = 8
 
 # cell (col, row) -> target hex. Source colours are noted for readability only.
 HUSH = {
-    # torso + sleeves: Breton navy, with the light green cell becoming the cream of her collar
-    (0, 3): "#2B3566",   # 0A4C47 tunic dark
-    (1, 2): "#F6F1E6",   # 009958 tunic light -> cream
-    (1, 3): "#1F2A52",   # 006E4F
-    (0, 2): "#2B3566",   # 077860 sleeve
-    (5, 1): "#2B3566",   # A3624A bracer
-    (7, 5): "#1F2A52",   # 884835
+    # A mime reads in high contrast: near-black navy against a true off-white, not two mid tones.
+    # Every cell the Rogue's meshes sample is listed, so no leftover adventurer leather shows.
+    (0, 3): "#232C57",   # 0A4C47 tunic
+    (1, 2): "#FFFFFF",   # 009958 tunic light -> stripe
+    (1, 3): "#19204A",   # 006E4F tunic shadow
+    (0, 2): "#232C57",   # 077860 sleeve
+    (5, 1): "#232C57",   # A3624A bracer
+    (7, 5): "#19204A",   # 884835
+    (7, 4): "#232C57",   # A9684D forearm
     (5, 0): "#FFFFFF",   # C07D5A hand -> white glove
-    (6, 1): "#2B3566",   # 884835 bracer strap
-    (5, 3): "#1F2A52",   # A3624A
-    (6, 3): "#1F2A52",   # 884835
-    (6, 2): "#2B3566",   # A9684D
-    (6, 0): "#4A2C3C",   # A9684D hair tie
-    (3, 0): "#E23B4E",   # 9BA7AD buckle -> red braces
+    (6, 1): "#232C57",   # 884835 bracer strap
+    (5, 3): "#19204A",
+    (6, 3): "#19204A",
+    (6, 2): "#232C57",
+    (3, 0): "#E23B4E",   # 9BA7AD buckle -> cherry (the beret and braces sample this too)
+    (3, 1): "#FFFFFF",   # 687075 trim -> collar
     # head: white face paint, dark bob
     (0, 1): "#FFF6EA",   # F3B189 skin -> paint
     (0, 0): "#FFFFFF",   # F7C7A5 skin light
-    (1, 1): "#3A2230",   # 884835 hair dark
-    (1, 0): "#4A2C3C",   # A9684D hair light
-    (2, 0): "#2A2036",   # 1F292C eyes/ink
-    # legs: trousers and black shoes
-    (3, 4): "#2C2A44",   # A9684D boot light -> trouser
-    (3, 5): "#26202E",   # 884835 boot dark -> shoe
-    (7, 3): "#26202E",
-    (7, 2): "#4A4050",   # sole
+    (1, 1): "#2E1B28",   # 884835 hair dark
+    (1, 0): "#3E2433",   # A9684D hair light
+    (6, 0): "#3E2433",   # A9684D hair tie
+    (2, 0): "#1A1420",   # 1F292C eyes/ink
+    # legs: black trousers and shoes, so the silhouette ends in a clean dark block
+    (3, 4): "#1A1620",   # A9684D boot light -> trouser
+    (3, 5): "#0E0B12",   # 884835 boot dark -> shoe
+    (7, 3): "#0E0B12",
+    (7, 2): "#3A3442",   # sole
 }
 
 BELLOWS = {
     # Base: the Mage. Its robe is the closest thing in the pack to a frock coat, and its hat and
-    # cape are dropped in redress.py so none of their cells constrain the palette.
-    (0, 2): "#7B3F8C",   # 605B8C robe
-    (0, 3): "#5B2D6B",   # 2E2B4E robe shadow
-    (3, 0): "#F3E4C4",   # 9BA7AD trim -> cream waistcoat
+    # cape are dropped in redress.py so none of their cells constrain the palette. Every cell its
+    # meshes sample is listed -- the leftovers are what used to show a teal spellbook and an
+    # orange potion on his belt.
+    (0, 2): "#6B2F7C",   # 605B8C robe -> wine plum
+    (0, 3): "#4A2259",   # 2E2B4E robe shadow
+    (3, 0): "#F0DCA8",   # 9BA7AD trim -> mustard waistcoat
+    (3, 1): "#D9C089",   # 687075 trim shadow
     (4, 0): "#E8C25A",   # 9BA7AD -> gold buttons
     (4, 1): "#C99422",   # 687075 -> gold shadow
-    (5, 1): "#5B2D6B",   # 944221 leather
+    (5, 1): "#4A2259",   # 944221 leather -> coat
+    (5, 0): "#6B2F7C",   # D46E31 potion -> coat (the Mage's belt kit, hidden)
+    (2, 4): "#4A2259",   # 2B7C80 spellbook -> coat
+    (2, 5): "#4A2259",   # 325D67 spellbook -> coat
     (7, 5): "#F4C9A8",   # F3B189 skin on the arms
-    (2, 0): "#2A2036",   # ink
+    (2, 0): "#1A1420",   # ink
     # head: ruddy peach under silver hair
     (0, 1): "#F4C9A8",   # F3B189 skin
     (0, 0): "#FBE0C8",   # F7C7A5 skin light
-    (1, 0): "#D9DCE6",   # 2D292C hair -> silver
-    (1, 1): "#B4B8C8",   # 0A090A hair shadow
+    (1, 0): "#DFE2EC",   # 2D292C hair -> silver
+    (1, 1): "#BCC0D0",   # 0A090A hair shadow
     # legs: dark plum trousers, burgundy slippers
-    (3, 4): "#4B2A58",   # A9684D
-    (3, 5): "#3A2045",   # 884835
+    (3, 4): "#43234F",   # A9684D
+    (3, 5): "#32183C",   # 884835
     (7, 3): "#8E2E4A",   # 1F1D3B -> slipper
     (7, 2): "#6E2038",   # 38355C -> sole
 }

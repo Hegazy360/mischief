@@ -4,7 +4,7 @@
  "doc": "KayKit bellows re-dressed by tools/art3d/cast/redress.py. Body, skeleton and skinning are KayKit (CC0); the palette and accessories are ours. Base animation comes from the KayKit library clips; the 2D clips in game/data/anim/bellows replay as overlays through fk_map.",
  "source": "KayKit Adventurers 2.0 / Character Animations 1.1 (CC0, Kay Lousberg)",
  "height_m": 1.78,
- "model_height_u": 2.508,
+ "model_height_u": 2.509,
  "fk_axis": [
   1.0,
   0.0,
@@ -94,6 +94,20 @@
    "max_deg": 6.0
   },
   {
+   "bone": "chop_l",
+   "parent": "head",
+   "stiffness": 210.0,
+   "damping": 0.7,
+   "max_deg": 10.0
+  },
+  {
+   "bone": "chop_r",
+   "parent": "head",
+   "stiffness": 210.0,
+   "damping": 0.7,
+   "max_deg": 10.0
+  },
+  {
    "bone": "cravat",
    "parent": "chest",
    "stiffness": 140.0,
@@ -159,6 +173,6 @@
   "atlas": "face_bellows.png",
   "uv": "FaceUV"
  },
- "tris": 9044,
- "bones": 28
+ "tris": 9992,
+ "bones": 30
 }

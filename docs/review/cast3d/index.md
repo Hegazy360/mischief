@@ -68,10 +68,18 @@ has no equivalent for — the freezes, the snicker, the sneeze — replayed on t
 `PoseRetarget3D`, which is why that retarget was worth keeping when the custom rig was dropped. A
 clip in neither list still plays, as a 2D overlay, with one warning.
 
-## Honest state
+## In the game
 
-- **Not wired into a Night yet.** This is the cast runtime and its workbench; `NightScene` still
-  renders the 2D view. R1 (`House3D`, `CameraDirector3D`, the HUD declutter) comes first.
+The 3D cast now plays in a real Night. `CastProxy2D` renders each character into its own
+SubViewport and shows it where the 2D rig used to stand, behind the same duck-typed interface
+`CharacterView` already used — so the house, HUD and effects stay 2D and nothing else changed.
+It is **off by default** (`MND_CAST3D=1` or `--cast3d`), because the test suite and every house
+review shot assume the 2D rig. `in_game_n01.png` is Night 1 with it on.
+
+This is a bridge, not the destination: at R1 the set becomes 3D and the characters move into the
+shared world, at which point `cast_proxy2d.gd` goes away.
+
+## Honest state
 - **Faces are baked into the texture.** Both characters currently wear the one expression KayKit
   painted. The face-card atlas (`face_hush.png`, `face_bellows.png`) and the shader path for it
   exist and the full 2D expression vocabulary is ported, but it is not yet applied to a KayKit

@@ -289,6 +289,21 @@ func play(clip_id: String, opts := {}) -> void:
 	_loop = bool(opts.get("loop", c.loop))
 
 
+## Jump to a frame of the current clip. Reactions are frame-locked to the sim tick, so the view
+## can never drift from the logic that scored them (the 2D rig does the same).
+func seek_frame(f: float) -> void:
+	if _lib_playing != "" and anim != null:
+		var a := anim.get_animation(_lib_playing)
+		if a != null:
+			anim.seek(clampf(f / 60.0, 0.0, a.length), true)
+		_apply_procedural(0.0)
+		return
+	_frame = maxf(0.0, f)
+	if _clip != null:
+		RigSampler.sample(_clip, _frame, _pose)
+		_apply_pose(0.0)
+
+
 func clip_id() -> String:
 	return _clip_id
 

@@ -1,32 +1,741 @@
-{"version":1,"clip":"bellows/loco_blind_shuffle","rig":"bellows","loop":true,"length":24,"layer":"base","mask":null,"doc":"FRAZZLED and blind: zombie arms out groping, head poking ahead, short quick shuffling steps (12 f, 48 px each, 96 px per loop = 240 px/s), slippers barely lifting. The bouffant flip is the residue's.","blend_in":6,"blend_out":6,"stride_px":96.0,"tags":["loco","walk","blind"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
-"keys":[
-{"f":0,"pose":"b_shuffle_0","ease":"linear","face":"huh"},
-{"f":1,"pose":"b_shuffle_1","ease":"linear"},
-{"f":2,"pose":"b_shuffle_2","ease":"linear"},
-{"f":3,"pose":"b_shuffle_3","ease":"linear"},
-{"f":4,"pose":"b_shuffle_4","ease":"linear"},
-{"f":5,"pose":"b_shuffle_5","ease":"linear"},
-{"f":6,"pose":"b_shuffle_6","ease":"linear"},
-{"f":7,"pose":"b_shuffle_7","ease":"linear"},
-{"f":8,"pose":"b_shuffle_8","ease":"linear"},
-{"f":9,"pose":"b_shuffle_9","ease":"linear"},
-{"f":10,"pose":"b_shuffle_10","ease":"linear"},
-{"f":11,"pose":"b_shuffle_11","ease":"linear"},
-{"f":12,"pose":"b_shuffle_m0","ease":"linear"},
-{"f":13,"pose":"b_shuffle_m1","ease":"linear"},
-{"f":14,"pose":"b_shuffle_m2","ease":"linear"},
-{"f":15,"pose":"b_shuffle_m3","ease":"linear"},
-{"f":16,"pose":"b_shuffle_m4","ease":"linear"},
-{"f":17,"pose":"b_shuffle_m5","ease":"linear"},
-{"f":18,"pose":"b_shuffle_m6","ease":"linear"},
-{"f":19,"pose":"b_shuffle_m7","ease":"linear"},
-{"f":20,"pose":"b_shuffle_m8","ease":"linear"},
-{"f":21,"pose":"b_shuffle_m9","ease":"linear"},
-{"f":22,"pose":"b_shuffle_m10","ease":"linear"},
-{"f":23,"pose":"b_shuffle_m11","ease":"linear"},
-{"f":24,"pose":"b_shuffle_0","ease":"linear"}
-],
-"events":[
-{"f":0,"type":"sfx","id":"slipper_scuff"},
-{"f":12,"type":"sfx","id":"slipper_scuff","vol_db":-2.0}
-]}
+{
+ "version": 1,
+ "clip": "bellows/loco_blind_shuffle",
+ "rig": "bellows",
+ "loop": true,
+ "length": 24,
+ "layer": "base",
+ "mask": null,
+ "doc": "FRAZZLED and blind, backing off: the near hand gropes low and sweeps for obstacles, the far hand shields his eyes, head ducked, short quick shuffling steps (12 f, 48 px each, 96 px per loop = 240 px/s), slippers barely lifting. Arm and head channels are set on every key so the half-cycle mirror (which swaps l/r) cannot swap which hand is groping; the torso is left to the poses because it is the root part and moving it slides the planted foot. The bouffant flip is the residue's.",
+ "blend_in": 6,
+ "blend_out": 6,
+ "stride_px": 96.0,
+ "tags": [
+  "loco",
+  "walk",
+  "blind"
+ ],
+ "variation": {
+  "time_jitter": 0.0,
+  "rot_jitter": 0.0
+ },
+ "smear": {
+  "auto": false
+ },
+ "keys": [
+  {
+   "f": 0,
+   "pose": "b_shuffle_0",
+   "ease": "linear",
+   "face": "huh",
+   "set": {
+    "arm_upper_r": {
+     "rot": -72.0
+    },
+    "arm_lower_r": {
+     "rot": -22.0
+    },
+    "hand_r": {
+     "rot": -15.0
+    },
+    "arm_upper_l": {
+     "rot": -118.0
+    },
+    "arm_lower_l": {
+     "rot": -98.0
+    },
+    "hand_l": {
+     "rot": -30.0
+    },
+    "head": {
+     "rot": -16.0
+    }
+   }
+  },
+  {
+   "f": 1,
+   "pose": "b_shuffle_1",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -69.9
+    },
+    "arm_lower_r": {
+     "rot": -19.4
+    },
+    "hand_r": {
+     "rot": -13.4
+    },
+    "arm_upper_l": {
+     "rot": -115.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -27.5
+    },
+    "head": {
+     "rot": -14.0
+    }
+   }
+  },
+  {
+   "f": 2,
+   "pose": "b_shuffle_2",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -68.0
+    },
+    "arm_lower_r": {
+     "rot": -17.0
+    },
+    "hand_r": {
+     "rot": -12.0
+    },
+    "arm_upper_l": {
+     "rot": -113.7
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -25.7
+    },
+    "head": {
+     "rot": -12.5
+    }
+   }
+  },
+  {
+   "f": 3,
+   "pose": "b_shuffle_3",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -66.3
+    },
+    "arm_lower_r": {
+     "rot": -14.9
+    },
+    "hand_r": {
+     "rot": -10.8
+    },
+    "arm_upper_l": {
+     "rot": -113.0
+    },
+    "arm_lower_l": {
+     "rot": -104.0
+    },
+    "hand_l": {
+     "rot": -25.0
+    },
+    "head": {
+     "rot": -12.0
+    }
+   }
+  },
+  {
+   "f": 4,
+   "pose": "b_shuffle_4",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -65.1
+    },
+    "arm_lower_r": {
+     "rot": -13.3
+    },
+    "hand_r": {
+     "rot": -9.8
+    },
+    "arm_upper_l": {
+     "rot": -113.7
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -25.7
+    },
+    "head": {
+     "rot": -12.5
+    }
+   }
+  },
+  {
+   "f": 5,
+   "pose": "b_shuffle_5",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -64.3
+    },
+    "arm_lower_r": {
+     "rot": -12.3
+    },
+    "hand_r": {
+     "rot": -9.2
+    },
+    "arm_upper_l": {
+     "rot": -115.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -27.5
+    },
+    "head": {
+     "rot": -14.0
+    }
+   }
+  },
+  {
+   "f": 6,
+   "pose": "b_shuffle_6",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -64.0
+    },
+    "arm_lower_r": {
+     "rot": -12.0
+    },
+    "hand_r": {
+     "rot": -9.0
+    },
+    "arm_upper_l": {
+     "rot": -118.0
+    },
+    "arm_lower_l": {
+     "rot": -98.0
+    },
+    "hand_l": {
+     "rot": -30.0
+    },
+    "head": {
+     "rot": -16.0
+    }
+   }
+  },
+  {
+   "f": 7,
+   "pose": "b_shuffle_7",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -64.3
+    },
+    "arm_lower_r": {
+     "rot": -12.3
+    },
+    "hand_r": {
+     "rot": -9.2
+    },
+    "arm_upper_l": {
+     "rot": -120.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -32.5
+    },
+    "head": {
+     "rot": -18.0
+    }
+   }
+  },
+  {
+   "f": 8,
+   "pose": "b_shuffle_8",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -65.1
+    },
+    "arm_lower_r": {
+     "rot": -13.3
+    },
+    "hand_r": {
+     "rot": -9.8
+    },
+    "arm_upper_l": {
+     "rot": -122.3
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -34.3
+    },
+    "head": {
+     "rot": -19.5
+    }
+   }
+  },
+  {
+   "f": 9,
+   "pose": "b_shuffle_9",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -66.3
+    },
+    "arm_lower_r": {
+     "rot": -14.9
+    },
+    "hand_r": {
+     "rot": -10.8
+    },
+    "arm_upper_l": {
+     "rot": -123.0
+    },
+    "arm_lower_l": {
+     "rot": -104.0
+    },
+    "hand_l": {
+     "rot": -35.0
+    },
+    "head": {
+     "rot": -20.0
+    }
+   }
+  },
+  {
+   "f": 10,
+   "pose": "b_shuffle_10",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -68.0
+    },
+    "arm_lower_r": {
+     "rot": -17.0
+    },
+    "hand_r": {
+     "rot": -12.0
+    },
+    "arm_upper_l": {
+     "rot": -122.3
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -34.3
+    },
+    "head": {
+     "rot": -19.5
+    }
+   }
+  },
+  {
+   "f": 11,
+   "pose": "b_shuffle_11",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -69.9
+    },
+    "arm_lower_r": {
+     "rot": -19.4
+    },
+    "hand_r": {
+     "rot": -13.4
+    },
+    "arm_upper_l": {
+     "rot": -120.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -32.5
+    },
+    "head": {
+     "rot": -18.0
+    }
+   }
+  },
+  {
+   "f": 12,
+   "pose": "b_shuffle_m0",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -72.0
+    },
+    "arm_lower_r": {
+     "rot": -22.0
+    },
+    "hand_r": {
+     "rot": -15.0
+    },
+    "arm_upper_l": {
+     "rot": -118.0
+    },
+    "arm_lower_l": {
+     "rot": -98.0
+    },
+    "hand_l": {
+     "rot": -30.0
+    },
+    "head": {
+     "rot": -16.0
+    }
+   }
+  },
+  {
+   "f": 13,
+   "pose": "b_shuffle_m1",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -74.1
+    },
+    "arm_lower_r": {
+     "rot": -24.6
+    },
+    "hand_r": {
+     "rot": -16.6
+    },
+    "arm_upper_l": {
+     "rot": -115.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -27.5
+    },
+    "head": {
+     "rot": -14.0
+    }
+   }
+  },
+  {
+   "f": 14,
+   "pose": "b_shuffle_m2",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -76.0
+    },
+    "arm_lower_r": {
+     "rot": -27.0
+    },
+    "hand_r": {
+     "rot": -18.0
+    },
+    "arm_upper_l": {
+     "rot": -113.7
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -25.7
+    },
+    "head": {
+     "rot": -12.5
+    }
+   }
+  },
+  {
+   "f": 15,
+   "pose": "b_shuffle_m3",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -77.7
+    },
+    "arm_lower_r": {
+     "rot": -29.1
+    },
+    "hand_r": {
+     "rot": -19.2
+    },
+    "arm_upper_l": {
+     "rot": -113.0
+    },
+    "arm_lower_l": {
+     "rot": -104.0
+    },
+    "hand_l": {
+     "rot": -25.0
+    },
+    "head": {
+     "rot": -12.0
+    }
+   }
+  },
+  {
+   "f": 16,
+   "pose": "b_shuffle_m4",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -78.9
+    },
+    "arm_lower_r": {
+     "rot": -30.7
+    },
+    "hand_r": {
+     "rot": -20.2
+    },
+    "arm_upper_l": {
+     "rot": -113.7
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -25.7
+    },
+    "head": {
+     "rot": -12.5
+    }
+   }
+  },
+  {
+   "f": 17,
+   "pose": "b_shuffle_m5",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -79.7
+    },
+    "arm_lower_r": {
+     "rot": -31.7
+    },
+    "hand_r": {
+     "rot": -20.8
+    },
+    "arm_upper_l": {
+     "rot": -115.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -27.5
+    },
+    "head": {
+     "rot": -14.0
+    }
+   }
+  },
+  {
+   "f": 18,
+   "pose": "b_shuffle_m6",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -80.0
+    },
+    "arm_lower_r": {
+     "rot": -32.0
+    },
+    "hand_r": {
+     "rot": -21.0
+    },
+    "arm_upper_l": {
+     "rot": -118.0
+    },
+    "arm_lower_l": {
+     "rot": -98.0
+    },
+    "hand_l": {
+     "rot": -30.0
+    },
+    "head": {
+     "rot": -16.0
+    }
+   }
+  },
+  {
+   "f": 19,
+   "pose": "b_shuffle_m7",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -79.7
+    },
+    "arm_lower_r": {
+     "rot": -31.7
+    },
+    "hand_r": {
+     "rot": -20.8
+    },
+    "arm_upper_l": {
+     "rot": -120.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -32.5
+    },
+    "head": {
+     "rot": -18.0
+    }
+   }
+  },
+  {
+   "f": 20,
+   "pose": "b_shuffle_m8",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -78.9
+    },
+    "arm_lower_r": {
+     "rot": -30.7
+    },
+    "hand_r": {
+     "rot": -20.2
+    },
+    "arm_upper_l": {
+     "rot": -122.3
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -34.3
+    },
+    "head": {
+     "rot": -19.5
+    }
+   }
+  },
+  {
+   "f": 21,
+   "pose": "b_shuffle_m9",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -77.7
+    },
+    "arm_lower_r": {
+     "rot": -29.1
+    },
+    "hand_r": {
+     "rot": -19.2
+    },
+    "arm_upper_l": {
+     "rot": -123.0
+    },
+    "arm_lower_l": {
+     "rot": -104.0
+    },
+    "hand_l": {
+     "rot": -35.0
+    },
+    "head": {
+     "rot": -20.0
+    }
+   }
+  },
+  {
+   "f": 22,
+   "pose": "b_shuffle_m10",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -76.0
+    },
+    "arm_lower_r": {
+     "rot": -27.0
+    },
+    "hand_r": {
+     "rot": -18.0
+    },
+    "arm_upper_l": {
+     "rot": -122.3
+    },
+    "arm_lower_l": {
+     "rot": -103.2
+    },
+    "hand_l": {
+     "rot": -34.3
+    },
+    "head": {
+     "rot": -19.5
+    }
+   }
+  },
+  {
+   "f": 23,
+   "pose": "b_shuffle_m11",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -74.1
+    },
+    "arm_lower_r": {
+     "rot": -24.6
+    },
+    "hand_r": {
+     "rot": -16.6
+    },
+    "arm_upper_l": {
+     "rot": -120.5
+    },
+    "arm_lower_l": {
+     "rot": -101.0
+    },
+    "hand_l": {
+     "rot": -32.5
+    },
+    "head": {
+     "rot": -18.0
+    }
+   }
+  },
+  {
+   "f": 24,
+   "pose": "b_shuffle_0",
+   "ease": "linear",
+   "set": {
+    "arm_upper_r": {
+     "rot": -72.0
+    },
+    "arm_lower_r": {
+     "rot": -22.0
+    },
+    "hand_r": {
+     "rot": -15.0
+    },
+    "arm_upper_l": {
+     "rot": -118.0
+    },
+    "arm_lower_l": {
+     "rot": -98.0
+    },
+    "hand_l": {
+     "rot": -30.0
+    },
+    "head": {
+     "rot": -16.0
+    }
+   }
+  }
+ ],
+ "events": [
+  {
+   "f": 0,
+   "type": "sfx",
+   "id": "slipper_scuff"
+  },
+  {
+   "f": 12,
+   "type": "sfx",
+   "id": "slipper_scuff",
+   "vol_db": -2.0
+  }
+ ]
+}

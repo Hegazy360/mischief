@@ -1,6 +1,8 @@
 ## StageDoor — the debug-build dev menu (s2-night §4.1, ruling L8; Router key `stage_door`, debug only).
 ## Big buttons (≥ 144 px tall, 24 px gaps), every label from `stage_door.*` keys:
 ## * *Prologue*, *Night 1*, *Night 2* — play that Night (`Router.goto("night", {episode, from})`);
+## * **All Nights** — a page with every episode of the Programme (GDD §7.2), drafts included and marked, so
+##   every Act can be tested on the sandbox before its wave is final (docs/LEVELS.md);
 ## * **Gate 0: the Sneeze** — the 3-icon card (Gate0Card, 2.5 s or a tap), then `g0_sneeze`;
 ## * *Cast* — `cast.tscn`: live RigPlayers (Hush with a Hush/Pip toggle, Bellows, Figgis, the Stalls);
 ## * *Voice A/B*, *Crowd A/B* — the pairs of `data/audio/ab.json` (Play A / Play B through
@@ -24,9 +26,15 @@ const MENU := [
 	["gate0", "stage_door.gate0"], ["g0_voice_a", "stage_door.play_g0_voice_a"], ["g0_voice_b", "stage_door.play_g0_voice_b"],
 	["cast", "stage_door.cast"], ["g0_crowd_a", "stage_door.play_g0_crowd_a"], ["g0_crowd_b", "stage_door.play_g0_crowd_b"],
 	["prologue", "stage_door.prologue"], ["night1", "stage_door.night1"], ["night2", "stage_door.night2"],
-	["voice_ab", "stage_door.voice_ab"], ["crowd_ab", "stage_door.crowd_ab"], ["hush_pip", "stage_door.hush_pip"],
-	["device_log", "stage_door.device_log"], ["reset_save", "stage_door.reset_save"]]
+	["nights", "stage_door.nights"], ["voice_ab", "stage_door.voice_ab"], ["crowd_ab", "stage_door.crowd_ab"],
+	["hush_pip", "stage_door.hush_pip"], ["device_log", "stage_door.device_log"], ["reset_save", "stage_door.reset_save"]]
 const EPISODES := {"prologue": "p00_curtain_up", "night1": "n01_throat_tea", "night2": "n02_something_fishy"}
+## The whole Programme in play order (GDD §7.2): [episode id, short label]. Button ids are `ep:<episode>`.
+const ALL_NIGHTS := [
+	["p00_curtain_up", "P"], ["n01_throat_tea", "N1"], ["n02_something_fishy", "N2"], ["n03_singing_in_the_bath", "N3"],
+	["n04_the_big_sulk", "N4"], ["n05_enter_beryl", "N5"], ["n06_behind_you", "N6"], ["n07_kidding_around", "N7"],
+	["n08_companys_coming", "N8"], ["n09_tutu_much", "N9"], ["n10_it_takes_two", "N10"], ["gala_the_comeback", "Gala"]]
+const NIGHT_COLS := 4
 ## Style values per A/B side.
 const STYLES := {"voice": ["formant", "tuba"], "crowd": ["formant", "fallback"]}
 
@@ -103,6 +111,8 @@ func show_page(p: String) -> void:
 			_build_ab("crowd")
 		"device_log":
 			_build_log()
+		"nights":
+			_build_nights()
 		_:
 			_build_main()
 	queue_redraw()
@@ -138,6 +148,29 @@ func _build_main() -> void:
 		var gold := id == "gate0" or id.begins_with("g0_")
 		_add_button(id, text, cell(r, i), UiKit.GOLD if gold else UiKit.CREAM, UiKit.GOLD_SHADE if gold else UiKit.CREAM_SHADE)
 		i += 1
+
+
+## Every episode as a button: "N3 · Singing in the Bath" (+ " · draft" while its status is draft), four per row.
+func _build_nights() -> void:
+	var r := safe_rect()
+	var i := 0
+	for row in ALL_NIGHTS:
+		var ep := String(row[0])
+		var e: Variant = ViewKit.json("res://data/episodes/%s.json" % ep)
+		var title := ep
+		var draft := false
+		if e is Dictionary:
+			title = String((e as Dictionary).get("title", ep))
+			draft = String((e as Dictionary).get("status", "draft")) != "final"
+		var text := "%s · %s" % [row[1], title]
+		if draft:
+			text += " · %s" % UiStrings.t("stage_door.draft")
+		_add_button("ep:" + ep, text, cell(r, i, NIGHT_COLS), UiKit.CREAM if draft else UiKit.GOLD,
+			UiKit.CREAM_SHADE if draft else UiKit.GOLD_SHADE)
+		i += 1
+	var by := r.end.y - BTN_H - 32.0
+	var w := (r.size.x - 96.0 - GAP) * 0.5
+	_add_button("back", UiStrings.t("stage_door.back"), Rect2(r.position.x + 48.0 + w + GAP, by, w, BTN_H))
 
 
 func _build_ab(kind: String) -> void:
@@ -223,7 +256,12 @@ func _on_press(id: String) -> void:
 	if EPISODES.has(id):
 		launch(String(EPISODES[id]))
 		return
+	if id.begins_with("ep:"):
+		launch(id.substr(3))
+		return
 	match id:
+		"nights":
+			show_page("nights")
 		"gate0":
 			launch(G0, {"card": "g0"})
 		"g0_voice_a", "g0_voice_b":

@@ -760,8 +760,8 @@
     },
     "bellows/st_search": {"frames": 360, "marks": {}, "desc": "Specs on, searches the room.", "loop": true},
     "bellows/st_bump": {
-      "frames": 72,
-      "marks": {"pat": [0, 30], "steps": [30, 60], "double_take": [60, 72]},
+      "frames": 82,
+      "marks": {"pat": [0, 30], "steps": [30, 70], "double_take": [70, 82]},
       "desc": "First bump: 'Pardon', pats the statue, two steps, double take.",
       "voice": "vo_bellows_pardon"
     },

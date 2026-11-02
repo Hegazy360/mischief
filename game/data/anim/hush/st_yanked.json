@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "clip": "hush/st_yanked",
+  "rig": "hush",
+  "loop": false,
+  "length": 36,
+  "layer": "base",
+  "mask": null,
+  "doc": "Yanked out of frame (36 f): she is hauled up and away by the braces — the Prologue's and Gate 0's end-of-scene exit.",
+  "blend_in": 0,
+  "blend_out": 0,
+  "tags": [
+    "take",
+    "caught",
+    "yanked"
+  ],
+  "beats": {
+    "anticipation": [
+      0,
+      4
+    ],
+    "accent": [
+      4,
+      8
+    ],
+    "hold": [
+      8,
+      26
+    ],
+    "settle": [
+      26,
+      36
+    ]
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 4,
+      "pose": "h_busted_antic",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -11.61
+        },
+        "leg_lower_r": {
+          "rot": 15.64
+        },
+        "foot_r": {
+          "rot": -3.61
+        },
+        "leg_upper_l": {
+          "rot": -1.06
+        },
+        "leg_lower_l": {
+          "rot": 15.72
+        },
+        "foot_l": {
+          "rot": -13.18
+        }
+      }
+    },
+    {
+      "f": 8,
+      "pose": "h_busted",
+      "ease": "pop",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -40.0,
+          "sx": 0.84,
+          "sy": 1.2
+        }
+      }
+    },
+    {
+      "f": 16,
+      "pose": "h_busted",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -120.0,
+          "sy": 1.14
+        }
+      }
+    },
+    {
+      "f": 26,
+      "pose": "h_busted",
+      "ease": "in_quad",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -260.0,
+          "rot": -8.0,
+          "sx": 0.94,
+          "sy": 1.1
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_busted",
+      "ease": "linear",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -420.0,
+          "rot": -12.0,
+          "sx": 0.96,
+          "sy": 1.08
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 8,
+      "type": "sfx",
+      "id": "zip"
+    },
+    {
+      "f": 8,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": true
+  }
+}

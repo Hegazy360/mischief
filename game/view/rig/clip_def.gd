@@ -211,7 +211,20 @@ func mark(name: String) -> int:
 ## True for reaction clips (`rx_` / `sig_`), whose timing the sim trusts.
 func is_reaction() -> bool:
 	var s := short_name()
-	return s.begins_with("rx_") or s.begins_with("sig_")
+	if not (s.begins_with("rx_") or s.begins_with("sig_")):
+		return false
+	# MIRROR, MIRROR's stand-in rounds (`sig_mirror_mirror_r1..3`, reactions.json `mirror_rounds`) are sim-locked
+	# loops played while Hush holds the frame, not reactions: no accent, no beats (lint A21 / TECH §3.7.7).
+	return not is_round()
+
+
+## True for a `<signature>_r<n>` stand-in round clip.
+func is_round() -> bool:
+	var s := short_name()
+	var i := s.rfind("_r")
+	if i < 0 or i + 2 >= s.length():
+		return false
+	return s.substr(i + 2).is_valid_int()
 
 
 ## Index of the key at frame `f` (-1 when no key sits exactly there).

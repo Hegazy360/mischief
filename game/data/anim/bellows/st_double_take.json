@@ -1,0 +1,14 @@
+{"version":1,"clip":"bellows/st_double_take","rig":"bellows","loop":false,"length":18,"layer":"base","mask":null,"doc":"SPOTTED (18 f): he looks away, then snaps back on the '!' sting — the 0.3 s double take.","blend_in":0,"blend_out":4,"tags":["state","spotted","take"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_dt_away","ease":"linear","face":"smug","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":6,"pose":"b_dt_away","ease":"linear","set":{"head":{"rot":-16},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":8,"pose":"b_dt_back","ease":"pop","face":"shock","set":{"root":{"x":0.0,"y":-19.6,"rot":0,"sx":0.92,"sy":1.1}}},
+{"f":12,"pose":"b_dt_back","ease":"linear","set":{"root":{"x":0.0,"y":-19.6,"rot":0,"sx":0.92,"sy":1.1},"belly":{"sy":1.06}}},
+{"f":18,"pose":"b_dt_back","ease":"out_quad","set":{"root":{"x":0.0,"y":-19.6,"rot":0,"sx":0.92,"sy":1.1}}}
+],
+"events":[
+{"f":8,"type":"sfx","id":"sting_spot"},
+{"f":8,"type":"spring","part":"bouffant","kick":36.0},
+{"f":8,"type":"shake","trauma":0.3},
+{"f":9,"type":"smear","part":"head","frames":2,"stretch":1.5}
+]}

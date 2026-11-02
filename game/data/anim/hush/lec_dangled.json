@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "clip": "hush/lec_dangled",
+  "rig": "hush",
+  "loop": false,
+  "length": 132,
+  "layer": "base",
+  "mask": null,
+  "doc": "Dangled through the Lecture (132 f, the length of lec_a / lec_b / lec_c): she hangs from her braces, swinging gently, rolling her eyes at every wag of his finger.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "caught",
+    "lecture",
+    "dangle"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_dangled_a",
+      "ease": "linear",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 22,
+      "pose": "h_dangled_b",
+      "ease": "in_out_sine",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "h_dangled_a",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 66,
+      "pose": "h_dangled_b",
+      "ease": "in_out_sine",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 88,
+      "pose": "h_dangled_a",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 110,
+      "pose": "h_dangled_b",
+      "ease": "in_out_sine",
+      "face": "shock",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 122,
+      "pose": "h_dangled_a",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    },
+    {
+      "f": 132,
+      "pose": "h_dangled_a",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "root": {
+          "y": -96.0
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  }
+}

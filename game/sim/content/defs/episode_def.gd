@@ -18,6 +18,9 @@ class LoopEntry:
 	## `hooks: "after_gate"`: the activity's USE hooks (and trigger marks) wait until the gate opens —
 	## their marks count from the gate-open tick ("waits for the lever, then drops the needle").
 	var hooks_after_gate: bool = false
+	## `dur_s`: this Night's duration for the activity (-1 = the activity's own `dur_s`). Lets an upstairs
+	## Night shorten `bath` / `nap` to meet the Act I loop rule (GDD §2.4 rule 5, docs/LEVELS.md §6).
+	var dur_ticks: int = -1
 
 
 var id: String = ""
@@ -129,6 +132,8 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 			_apply_gate(l, g)
 		if ContentUtil.s(entry_d, "hooks") == "after_gate":
 			l.hooks_after_gate = true
+		if entry_d.has("dur_s"):
+			l.dur_ticks = Fx.ticks(ContentUtil.f(entry_d, "dur_s", 0.0))
 		e.loop.append(l)
 	e.fixup_overrides = ContentUtil.dict(d, "fixup_overrides")
 	for ld in ContentUtil.arr(d, "script"):

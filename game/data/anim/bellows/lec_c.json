@@ -1,0 +1,20 @@
+{"version":1,"clip":"bellows/lec_c","rig":"bellows","loop":false,"length":132,"layer":"base","mask":null,"doc":"The Lecture, variant C (132 f): slow operatic scolding — three huge wags and a held high note.","blend_in":4,"blend_out":6,"tags":["state","lecture"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"furious","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.2,"rot":0,"sx":1,"sy":1}}},
+{"f":14,"pose":"b_lecture_hold","ease":"out_quad","face":"lecture","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_lecture_wag_a","ease":"out_quad","face":"lecture","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":38,"pose":"b_lecture_hold","ease":"in_out_sine","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_lecture_wag_b","ease":"out_quad","face":"lecture","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":68,"pose":"b_lecture_hold","ease":"in_out_sine","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":90,"pose":"b_lecture_high","ease":"out_quad","face":"sing_big","set":{"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":98,"pose":"b_lecture_hold","ease":"in_out_sine","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":122,"pose":"b_lecture_plonk","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":-23.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-40.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.5,"y":-2.5,"rot":0,"sx":1,"sy":1}}},
+{"f":132,"pose":"b_lecture_hold","ease":"in_out_sine","face":"furious","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"voice","id":"vo_bellows_lecture_c"},
+{"f":30,"type":"sfx","id":"step_pizz","vol_db":-8.0},
+{"f":60,"type":"sfx","id":"step_pizz","vol_db":-8.0},
+{"f":90,"type":"sfx","id":"step_pizz","vol_db":-8.0},
+{"f":122,"type":"sfx","id":"land_soft","vol_db":-6.0}
+]}

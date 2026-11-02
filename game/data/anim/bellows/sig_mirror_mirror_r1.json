@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/sig_mirror_mirror_r1","rig":"bellows","loop":false,"length":72,"layer":"base","mask":null,"doc":"MIRROR, MIRROR round 1 (72 f): he preens at his 'reflection' -- a mutton chop each side, a nail check.","blend_in":4,"blend_out":4,"tags":["mirror_mirror","round"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_preen","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":18,"pose":"b_preen_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":36,"pose":"b_fidget_admire","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.6,"rot":0,"sx":1,"sy":1}}},
+{"f":54,"pose":"b_preen","ease":"in_out_sine","face":"admiring","set":{"head":{"rot":-14},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":72,"pose":"b_preen","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":18,"type":"sfx","id":"glint","sync":false},
+{"f":36,"type":"voice","id":"vo_bellows_smug","vol_db":-4.0}
+]}

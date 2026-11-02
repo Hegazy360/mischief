@@ -1,0 +1,157 @@
+{
+ "frames": 341,
+ "onsets": [
+  0,
+  21,
+  60,
+  82,
+  90,
+  93,
+  96,
+  99,
+  102,
+  105,
+  108,
+  113,
+  154,
+  176,
+  184,
+  187,
+  190,
+  193,
+  196,
+  199,
+  202,
+  207,
+  248,
+  268,
+  305,
+  314
+ ],
+ "worst_offset_f": 0,
+ "no_onset_within_6f": 2,
+ "worst_audio_offset_f": 0,
+ "events_without_a_sound": 0,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ],
+ "events": [
+  {
+   "engine_frame": 0,
+   "type": "voice",
+   "id": "vo_bellows_pipe_down",
+   "clip": "bellows/melt_a",
+   "clip_frame": 0,
+   "onset": 0,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 0,
+   "type": "audio",
+   "id": "vo_bellows_pipe_down_1",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 0,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 60,
+   "type": "sfx",
+   "id": "meltdown_stomp",
+   "clip": "bellows/melt_a",
+   "clip_frame": 60,
+   "onset": 60,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 60,
+   "type": "audio",
+   "id": "stomp_quake",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 60,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 154,
+   "type": "sfx",
+   "id": "meltdown_stomp",
+   "clip": "bellows/melt_a",
+   "clip_frame": 150,
+   "onset": 154,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 154,
+   "type": "audio",
+   "id": "stomp_quake",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 154,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 248,
+   "type": "sfx",
+   "id": "meltdown_stomp",
+   "clip": "bellows/melt_a",
+   "clip_frame": 240,
+   "onset": 248,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 248,
+   "type": "audio",
+   "id": "stomp_quake",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 248,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 268,
+   "type": "sfx",
+   "id": "kettle_squeak",
+   "clip": "bellows/melt_a",
+   "clip_frame": 256,
+   "onset": 268,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 268,
+   "type": "audio",
+   "id": "kettle_melody",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 268,
+   "offset_f": 0
+  },
+  {
+   "engine_frame": 330,
+   "type": "voice",
+   "id": "vo_bellows_wheeze",
+   "clip": "bellows/melt_a",
+   "clip_frame": 318,
+   "onset": null,
+   "offset_f": null,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 330,
+   "type": "audio",
+   "id": "vo_bellows_wheeze",
+   "clip": "",
+   "clip_frame": null,
+   "onset": null,
+   "offset_f": null
+  }
+ ]
+}

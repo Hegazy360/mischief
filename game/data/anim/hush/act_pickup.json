@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "clip": "hush/act_pickup",
+  "rig": "hush",
+  "loop": false,
+  "length": 48,
+  "layer": "base",
+  "mask": null,
+  "doc": "Picking something up (48 f): a quick scoop, into the tray, and a proud little straighten.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "flavour",
+    "pickup"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 8,
+      "pose": "h_pickup",
+      "ease": "out_quad",
+      "face": "determined",
+      "set": {
+        "leg_upper_r": {
+          "rot": -42.48
+        },
+        "leg_lower_r": {
+          "rot": 75.59
+        },
+        "foot_r": {
+          "rot": -33.11
+        },
+        "leg_upper_l": {
+          "rot": -28.37
+        },
+        "leg_lower_l": {
+          "rot": 75.22
+        },
+        "foot_l": {
+          "rot": -46.86,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 16,
+      "pose": "h_pickup",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_r": {
+          "rot": -42.48
+        },
+        "leg_lower_r": {
+          "rot": 75.59
+        },
+        "foot_r": {
+          "rot": -33.11
+        },
+        "leg_upper_l": {
+          "rot": -28.37
+        },
+        "leg_lower_l": {
+          "rot": 75.22
+        },
+        "foot_l": {
+          "rot": -46.86,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 26,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_fidget_proud",
+      "ease": "out_back",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -4.25
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.74
+        },
+        "leg_upper_l": {
+          "rot": 6.71
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.22
+        }
+      }
+    },
+    {
+      "f": 48,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 8,
+      "type": "sfx",
+      "id": "rustle",
+      "vol_db": -10.0
+    },
+    {
+      "f": 27,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

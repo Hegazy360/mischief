@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/beat_slow_burn","rig":"bellows","loop":false,"length":70,"layer":"base","mask":null,"doc":"T3 last beat (70 f): a long flat stare out at the Stalls and one slow blink.","blend_in":6,"blend_out":6,"tags":["beat","last_beat","slow_burn"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_slow_burn","ease":"linear","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":20,"pose":"b_slow_burn","ease":"in_out_sine","set":{"head":{"rot":6},"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.993}}},
+{"f":40,"pose":"b_slow_burn","ease":"linear","face":"dazed","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1.004},"belly":{"sy":1.013}}},
+{"f":44,"pose":"b_slow_burn","ease":"linear","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1.006},"belly":{"sy":1.02}}},
+{"f":56,"pose":"b_slow_burn","ease":"in_out_sine","set":{"head":{"rot":2},"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.993}}},
+{"f":70,"pose":"b_slow_burn","ease":"in_out_sine","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.993}}}
+],
+"events":[
+{"f":0,"type":"sfx","id":"bassoon_burn"}
+]}

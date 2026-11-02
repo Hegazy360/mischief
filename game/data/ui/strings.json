@@ -83,6 +83,8 @@
     "stage_door.prologue": "Prologue",
     "stage_door.night1": "Night 1",
     "stage_door.night2": "Night 2",
+    "stage_door.nights": "All Nights",
+    "stage_door.draft": "draft",
     "stage_door.gate0": "Gate 0: the Sneeze",
     "stage_door.gate0_card_honey": "Tap the honey",
     "stage_door.gate0_card_hold": "Hold to rig",

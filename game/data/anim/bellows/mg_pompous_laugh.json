@@ -1,0 +1,15 @@
+{"version":1,"clip":"bellows/mg_pompous_laugh","rig":"bellows","loop":false,"length":60,"layer":"overlay","mask":"upper","doc":"Throws his head back at his agent's joke: 'HA-ha-HAAA!' - the receiver at arm's length.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_phone_pompous","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_phone_laugh","ease":"in_out_sine","face":"sly_smile","set":{"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.3,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":20,"pose":"b_phone_laugh","ease":"in_out_sine","set":{"head":{"rot":-33},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.3,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":30,"pose":"b_phone_laugh","ease":"in_out_sine","set":{"head":{"rot":-24},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.3,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":40,"pose":"b_phone_laugh","ease":"in_out_sine","set":{"head":{"rot":-33},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.3,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":50,"pose":"b_phone_pompous","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_phone_pompous","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":12,"type":"voice","id":"vo_bellows_hah"},
+{"f":20,"type":"voice","id":"vo_bellows_hah","vol_db":-2.0},
+{"f":40,"type":"voice","id":"vo_bellows_hah","vol_db":-1.0}
+]}

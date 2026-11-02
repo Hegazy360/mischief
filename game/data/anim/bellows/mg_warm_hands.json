@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/mg_warm_hands","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Warms his hands, then turns and warms his bottom, eyes rolling in bliss.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_warm_hands","ease":"linear","face":"blissful","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_warm_hands","ease":"in_out_sine","set":{"head":{"rot":-14},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":24,"pose":"b_warm_bum","ease":"out_back","face":"blissful","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":36,"pose":"b_warm_bum","ease":"in_out_sine","set":{"head":{"rot":-22},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":48,"pose":"b_warm_hands","ease":"in_out_sine","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":24,"type":"sfx","id":"fire_crackle","vol_db":-6.0},
+{"f":36,"type":"voice","id":"vo_bellows_bliss","vol_db":-4.0}
+]}

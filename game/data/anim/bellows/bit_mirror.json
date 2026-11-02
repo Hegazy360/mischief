@@ -1,0 +1,25 @@
+{"version":1,"clip":"bellows/bit_mirror","rig":"bellows","loop":false,"length":72,"layer":"base","mask":null,"doc":"Squeak bit (mirror): mid-comb the squeak startles him and the comb flies off over his shoulder (f22); he looks round, then preens as if nothing happened. 72 f = squeak_bits.bit_mirror.len_f.","blend_in":4,"blend_out":8,"tags":["bit","mirror"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_comb_a","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":8,"pose":"b_comb_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_comb_a","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":18,"pose":"b_take_antic","ease":"linear","face":"shock","set":{"root":{"x":0.1,"y":-1.7,"rot":0,"sx":1.0,"sy":0.88},"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":22,"pose":"b_take_accent","ease":"pop","face":"wild_take","set":{"root":{"x":0.0,"y":-64.0,"rot":0,"sx":0.86,"sy":1.24}}},
+{"f":28,"pose":"b_take_accent","ease":"linear","set":{"root":{"x":0.0,"y":-44.0,"rot":0,"sx":0.86,"sy":1.24}}},
+{"f":34,"pose":"b_look_behind","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-8.0,"rot":0,"sx":1,"sy":1}}},
+{"f":37,"pose":"b_look_behind","ease":"in_quad","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.0,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_look_behind","ease":"in_out_sine","set":{"head":{"rot":8},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.0,"rot":0,"sx":1,"sy":1}}},
+{"f":52,"pose":"b_preen","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":62,"pose":"b_preen","ease":"in_out_sine","face":"smug","set":{"head":{"rot":-8},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":72,"pose":"b_preen","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"comb","socket":"hand_r:grip"},
+{"f":8,"type":"sfx","id":"rustle","vol_db":-8.0},
+{"f":22,"type":"sfx","id":"zip"},
+{"f":22,"type":"prop","op":"launch","prop":"comb","vel":[-800.0,-1500.0],"spin":1080.0},
+{"f":22,"type":"spring","part":"bouffant","kick":30.0},
+{"f":23,"type":"smear","part":"arm_upper_r","frames":2,"stretch":1.4},
+{"f":28,"type":"voice","id":"vo_bellows_wha"},
+{"f":70,"type":"prop","op":"hide","prop":"comb"}
+]}

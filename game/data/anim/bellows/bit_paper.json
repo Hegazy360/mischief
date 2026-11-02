@@ -1,0 +1,24 @@
+{"version":1,"clip":"bellows/bit_paper","rig":"bellows","loop":false,"length":80,"layer":"base","mask":null,"doc":"Squeak bit (paper): the squeak makes him rip the newspaper clean in half (f24), stare at the halves, and pretend it was deliberate. 80 f = squeak_bits.bit_paper.len_f.","blend_in":4,"blend_out":8,"tags":["bit","paper","recliner"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_rec_sit","ease":"linear","face":"pompous"},
+{"f":8,"pose":"b_rec_sit","ease":"out_quad","face":"irked","set":{"head":{"rot":-6}}},
+{"f":16,"pose":"b_rec_rip_a","ease":"in_out_sine","face":"furious"},
+{"f":22,"pose":"b_rec_rip_a","ease":"linear","set":{"root":{"x":49.7,"y":-83.0,"rot":0,"sx":0.98,"sy":1.02}}},
+{"f":24,"pose":"b_rec_rip_b","ease":"pop","face":"furious"},
+{"f":28,"pose":"b_rec_rip_b","ease":"linear","set":{"root":{"x":47.6,"y":-87.4,"rot":0,"sx":1.0,"sy":1.0}}},
+{"f":40,"pose":"b_rec_rip_b","ease":"in_out_sine","face":"huh","set":{"head":{"rot":16}}},
+{"f":52,"pose":"b_rec_rip_b","ease":"in_out_sine","face":"huh","set":{"head":{"rot":-10}}},
+{"f":66,"pose":"b_rec_sit","ease":"in_out_sine","face":"disdain"},
+{"f":80,"pose":"b_rec_sit","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"newspaper","socket":"hand_r:grip"},
+{"f":0,"type":"prop","op":"state","prop":"newspaper","state":"open"},
+{"f":16,"type":"sfx","id":"paper_rustle","vol_db":-4.0},
+{"f":24,"type":"sfx","id":"paper_rip"},
+{"f":24,"type":"prop","op":"hide","prop":"newspaper"},
+{"f":25,"type":"smear","part":"arm_upper_r","frames":2,"stretch":1.4},
+{"f":40,"type":"voice","id":"vo_bellows_huh","vol_db":-3.0},
+{"f":66,"type":"prop","op":"attach","prop":"newspaper","socket":"hand_r:grip"},
+{"f":66,"type":"prop","op":"state","prop":"newspaper","state":"open"}
+]}

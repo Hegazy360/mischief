@@ -1,0 +1,11 @@
+{"version":1,"clip":"bellows/mg_peer_under_piano","rig":"bellows","loop":false,"length":60,"layer":"overlay","mask":"upper","doc":"Specs on, he bends to peer under the piano as he passes - nose an inch from Hush's hiding spot - and straightens: nothing.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_specs_lift","ease":"linear","face":"suspicious","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":14,"pose":"b_peer_under","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_peer_under","ease":"in_out_sine","set":{"head":{"rot":-34},"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_peer_under","ease":"in_out_sine","set":{"head":{"rot":-28},"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_specs_lift","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":14,"type":"sfx","id":"creak","vol_db":-12.0}
+]}

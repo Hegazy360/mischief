@@ -480,8 +480,8 @@ func _perform(w: SimWorld) -> void:
 		if _hooks_after_gate(w):
 			hooks_on = gate_met_t >= 0
 			base = maxi(0, gate_met_t)
-		while hooks_on and hook_cursor < a.hook_count() and _hook_tick(a, hook_cursor, base) <= activity_t:
-			var mark := _hook_tick(a, hook_cursor, base)
+		while hooks_on and hook_cursor < a.hook_count() and _hook_tick(w, a, hook_cursor, base) <= activity_t:
+			var mark := _hook_tick(w, a, hook_cursor, base)
 			var pi := a.hooks[hook_cursor * 2 + 1]
 			hook_cursor += 1
 			if mark == activity_t:
@@ -503,9 +503,12 @@ func _perform(w: SimWorld) -> void:
 
 
 ## PERFORM tick at which hook `k` fires: its mark, counted from `base` (the gate-open tick for
-## `hooks: "after_gate"`; a mark of 0 then fires on the next tick).
-func _hook_tick(a: ActivityDef, k: int, base: int) -> int:
+## `hooks: "after_gate"`; a mark of 0 then fires on the next tick). An `at_end` hook (BUTTER-FINGERS:
+## "specs back on") fires on the activity's last tick, whatever this Night made its length.
+func _hook_tick(w: SimWorld, a: ActivityDef, k: int, base: int) -> int:
 	var m := a.hooks[k * 2]
+	if m == ActivityDef.HOOK_AT_END:
+		return activity_len if activity_len > 0 else m
 	return m if base <= 0 else base + maxi(1, m)
 
 
@@ -726,8 +729,9 @@ func _start_next(w: SimWorld) -> void:
 	if a.path.size() == 2:
 		tx = a.path[0]
 	var gated := le.has_gate and not (le.first_loop_only and r.loop_count > 0)
+	var dur := le.dur_ticks if le.dur_ticks > 0 else a.dur_ticks
 	state = ROUTINE
-	_begin_task(w, T_ACTIVITY, a.idx, li, sti, troom, tx, tf, -1 if gated else a.dur_ticks, a.id)
+	_begin_task(w, T_ACTIVITY, a.idx, li, sti, troom, tx, tf, -1 if gated else dur, a.id)
 
 
 func _begin_task(w: SimWorld, kind: int, act: int, loop_i: int, station: int, troom: int, tx: int, tf: int,

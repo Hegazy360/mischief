@@ -25,8 +25,11 @@ To jump straight into a Night instead of the front end:
 godot --path /tmp/mnd_sandbox/play/game res://scenes/night/NightScene.tscn -- --episode=n01_throat_tea
 ```
 
-Episodes: `p00_curtain_up` (Prologue), `g0_sneeze` (the sneeze gag), `n01_throat_tea`,
-`n02_something_fishy`.
+Episodes: `p00_curtain_up` (Prologue), `g0_sneeze` (the sneeze gag), `n01_throat_tea`, `n02_something_fishy`,
+`n03_singing_in_the_bath`, `n04_the_big_sulk`, `n05_enter_beryl`, `n06_behind_you`, `n07_kidding_around`,
+`n08_companys_coming`, `n09_tutu_much`, `n10_it_takes_two`, `gala_the_comeback`. In the window, the stage door's
+**All Nights** button lists the same twelve; the ones marked *draft* are the samples Stage 3 is still filling in
+(`docs/LEVELS.md` says what each is missing), so expect placeholder reactions and silent gaps there.
 
 ---
 

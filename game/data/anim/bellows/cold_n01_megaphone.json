@@ -1,0 +1,23 @@
+{"version":1,"clip":"bellows/cold_n01_megaphone","rig":"bellows","loop":false,"length":300,"layer":"base","mask":null,"doc":"Cold open N01 (300 f): at dawn he sings his scales out of the window through a megaphone, louder and louder, then admires himself — while the street's windows crack.","blend_in":0,"blend_out":8,"tags":["cold","megaphone"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_breath_in","ease":"linear","face":"inhale","set":{"leg_upper_r":{"rot":14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-3.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":0.985,"sy":1.02}}},
+{"f":20,"pose":"b_megaphone","ease":"out_quad","face":"sing_small","set":{"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":50,"pose":"b_megaphone","ease":"in_out_sine","face":"sing_mid","set":{"head":{"rot":-22},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":80,"pose":"b_megaphone","ease":"in_out_sine","face":"sing_big","set":{"head":{"rot":-32},"belly":{"sy":1.06},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":110,"pose":"b_megaphone","ease":"in_out_sine","face":"sing_mid","set":{"head":{"rot":-24},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":140,"pose":"b_megaphone","ease":"in_out_sine","face":"sing_big","set":{"head":{"rot":-34},"belly":{"sy":1.08},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":180,"pose":"b_megaphone","ease":"in_out_sine","face":"sing_big","set":{"head":{"rot":-30},"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":210,"pose":"b_preen","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":240,"pose":"b_preen","ease":"in_out_sine","face":"smug","set":{"head":{"rot":-14},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":270,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_stand","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"megaphone","socket":"hand_r:grip"},
+{"f":20,"type":"voice","id":"vo_bellows_warmup_1"},
+{"f":80,"type":"voice","id":"vo_bellows_warmup_3"},
+{"f":140,"type":"voice","id":"vo_bellows_warmup_4"},
+{"f":140,"type":"shake","trauma":0.2},
+{"f":210,"type":"sfx","id":"window_creak","vol_db":-6.0},
+{"f":299,"type":"prop","op":"hide","prop":"megaphone"}
+]}

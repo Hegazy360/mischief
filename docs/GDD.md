@@ -214,8 +214,9 @@ non-scenario route (ideal, required, slow) of every `final` Night and of Gate 0;
 4. **Targets (MUST):** dead air ≤ 20 % on the ideal route, ≤ 25 % on the required-lines route, ≤ 30 % on the slow
    first-timer route, and the worst gap ≤ 12 s on every route. Scenario routes (caught, chase, Meltdown,
    face-to-face) are exempt.
-5. **Fixed at the source, never by pressure on the player** (no timer, no penalty — §2.2): every Act I loop is
-   ≤ 60 s with Hush idle (walking included); Nights 1 and 2 land their first prank ≤ 25 s on the ideal and required
+5. **Fixed at the source, never by pressure on the player** (no timer, no penalty — §2.2): every single-floor Act I loop is ≤ 60 s with Hush idle (walking included) and the two-floor Act I finale
+   (Night 4) ≤ 65 s — a Night shortens an activity with a loop-entry `dur_s` (TECH §4.6) rather than skipping it;
+   measured N1 58.7, N2 55.4, N3 58.9, N4 64.6 s (`tests/solver/test_loop_lengths.gd`); Nights 1 and 2 land their first prank ≤ 25 s on the ideal and required
    routes (≤ 30 s slow); Night 1 has two kettle windows per loop and each of its fix-up detours takes ≤ 12 s from
    queued to done; every activity and fix-up detour has a micro-gag every 5–8 s (§4.1); no activity lasts under 5 s
    (the bubble ring must read).
@@ -403,7 +404,7 @@ Each Night gives Bellows an ordered **loop of 4–6 activities** (§7.2). An act
 §4.1.1). He walks to the station, performs, and moves on; after the last activity the loop repeats.
 
 - **Loop length** (measured by the solver with Hush idle, walking included): **Act I ≤ 60 s** (D1, §2.4 rule 5;
-  Night 1 58.7 s, Night 2 55.4 s — the draft Nights 3–4 are re-measured against it in Stage 3, §7.2), Act II
+  Night 1 58.7 s, Night 2 55.4 s — Night 3 58.9 s; the two-floor finale Night 4 64.6 s against its 65 s allowance, §2.4 rule 5), Act II
   80–95 s, Act III and Gala 90–120 s.
 - **Micro-gags** (timed, D1): every activity and fix-up detour a Night uses carries authored beats
   `{id, at_s, len_f, emote, gag}` in `activities.json` (`at_s` from the activity's start; `gag` is the one-line
@@ -589,7 +590,8 @@ surprises.
 - **Moods:** **Dozing** (in the conservatory sunbeam; wakes on any noise within 300 px, or on a schedule),
   **Grazing** (wanders a fixed lane conservatory ↔ garden, x 3,950–5,650, at 70 px/s, pausing 3 s at each end),
   **Besotted** (for 20 s after Hush drops or offers an apple within 200 px: follows Hush at 150 px, bleating every
-  6 s — each bleat is a noise ring: a liability, and a way to lead her).
+  6 s — each bleat is a noise ring: a liability, and a way to lead her; another apple while she is Besotted restarts the 20 s, so she can be
+  led across the house one apple at a time).
 - **The bend-over rule (the universal finisher):** when anyone bends (activities tagged `bend`, a pick-up, getting
   up from a slip) within 300 px of an awake Beryl facing them, she paws the ground for 0.6 s (telegraph, bell
   jingle) and headbutts. **Bellows** flies along the room's authored landing table (roses, pond, compost,
@@ -727,6 +729,10 @@ v1, two per Act, each a Big Number or an optional flourish:
 
 **Chase Trips:** RUG BURN and PENNY PINCHER are STEP pranks; if he chases Hush over them they fire ("HE FELL FOR
 IT!"). Getting chased is a scoring chance, not only a failure.
+
+**Knock-ons ignore anger gates.** A Double Act's B fires wherever A lands him, Calm or Livid: ENCORE! flips him onto
+the stair runner and RUG BURN fires although he is not Steaming and not climbing under his own steam. Every other
+condition (a goat within reach, Hush in the frame) still applies.
 
 ### 5.6 Free verbs
 **The squeak (Clarence).** He hears a squeak when he is in Hush's room or a room joined to it by an open doorway.
@@ -1046,6 +1052,61 @@ possible now, using each line's authored hint data (TECH §4.6).
 
 ## 7. Content
 
+### 7.0 The story: the Summer of the Comeback
+One house, one summer, three Acts. Every Night is a scene in a single farce, and the set changes with the season so
+the Acts read as chapters — a heatwave, show season, the last week of the holidays — without a second house (§10.1).
+
+**The set-up.** Horace Bellows has announced his return to the stage. The Humdrum Road Summer Show, the street's
+end-of-August concert on the green where everybody does a turn, will this year be *BELLOWS: THE COMEBACK*. Hush used
+to do a turn too — a pavement mime every Saturday outside No. 7 — until he had her banned for "visual noise" and
+locked her props in the CONFISCATED box with every ball, kite and balloon that ever strayed onto his path. The box is
+the tray's larder: she pranks him with the toys he took.
+
+**Three running devices** (cheap, visible, and they tie the Nights together):
+1. **The countdown.** A poster in the hall — "DAYS TO THE COMEBACK" — loses a number every Night (one decor layer,
+   12 states). The player sees the Gala coming from Night 1.
+2. **The box.** Each cold open adds something to the CONFISCATED box (the balloon string N2, the kite N4, the chalk
+   N5…). Hush borrows from it all summer. At the Gala's curtain call the box is tipped out on the pavement and every
+   toy goes home, her unicycle first.
+3. **The season.** One decor set per Act (`house.json` `decor` layers, no new rooms): Act I heatwave — windows wide,
+   sun-blinds, a fan, iced tea; Act II show season — bunting porch to fence, seed trays, the marrow chart, Beryl's
+   shed; Act III the last week — stacked deckchairs, first leaves on the path, posters; Gala — strung bulbs and the
+   garden stage.
+
+**The arc.**
+
+| Act | When | What he wants | What goes wrong | Closing image |
+|---|---|---|---|---|
+| Prologue | the first morning of the holidays | a quiet dawn warm-up | one sneeze | he stomps upstairs; Hush has had a taste |
+| I — The Tenor at Home | Heatwave week (July): every window on the street is open and nobody can escape the scales | to rehearse at home, in peace | kettle, jar, clock, bath: his own house turns on him; the first Meltdown (N4) | he blames the parlour's "DEAD acoustics" and resolves to sing outdoors |
+| II — The Goat and the Garden | Show season (August): bunting, the vegetable class, a lawn to crop for a garden stage | a garden stage, a prize marrow, and a goat as the stingy man's lawnmower | Beryl has opinions; the marrow flies; the goat ends up in his bed (N7) | the committee's letter: this year's judge is Dame Delphine Trill, his old partner |
+| III — Company's Coming | The last week (September): leaves on the path, the Show poster torn down for his own | to impress Delphine and own the Show | she sees every disaster; the tutu; the nerves | dress rehearsal; windows crack the length of the street |
+| Gala — The Comeback | Show night | the spotlight | the street takes its show back; the pond | the box is tipped out; Hush bows; dripping, he bows too — and for once the street applauds him |
+
+**Per-Night beats** (one line each; cold opens, teasers and the curtain-call line draw on them):
+
+| Night | Story beat |
+|---|---|
+| P | First morning of the summer holidays. 6 a.m. scales. Hush climbs in "just to make him sneeze once". |
+| 1 | Heatwave, day one. The megaphone cracks her window. The first thing she takes from the box is her own squeaker, confiscated last summer. |
+| 2 | He pops a child's balloon; on the phone he tells his agent the comeback is ON — through a kipper. |
+| 3 | The heat drives him to the bath at dawn; with every window open, upstairs is open too. |
+| 4 | He snaps a child's kite. The Big Sulk: the first Meltdown; he blames the acoustics and resolves to sing outdoors. |
+| 5 | August, bunting up. He hoses her chalk mime away. A goat has arrived "to crop the lawn" and is already "my little prima donna"; a marrow is growing for the Show. |
+| 6 | He silences the dawn chorus and rehearses his Show number at the piano. The street answers: BEHIND YOU! |
+| 7 | He sells her unicycle to pay for stage lights. A goat in his bed. The letter: the judge is Dame Delphine. |
+| 8 | Delphine to tea. He has rehearsed his bow to a cardboard cut-out of her. |
+| 9 | He tears down the Show poster and pins up his own: the hijack is official. The costume trunk opens — his old stage wardrobe. |
+| 10 | Dress rehearsal. Opening-night nerves; windows crack the length of the street. |
+| G | Show night. The street brings deckchairs into his garden; he booms "PIPE DOWN!" at his own audience. The pond. The box. |
+
+**Where the story lives in data:** cold-open descriptions and teasers (`episodes/*.json`, `barks.json`); the
+countdown and season layers (`house.json` `decor`, built in the Stage 3 art waves); the Gala curtain call (Stage 4
+`s4-ftue-polish`). The story dresses rules, loops and Scripts; it never changes them.
+
+**P1 backlog, not v1:** an "away" Act (Bellows' seaside caravan, or a mountain chalet) is the natural next chapter
+if the summer framing lands, and would replace the cellar/attic Act IV of §8.
+
 ### 7.1 The world: No. 7 Humdrum Road ("Crescendo")
 One side-view house, a dollhouse cut in half, opening up across the Acts. Floor pitch 700 px (640 px interior +
 60 px slab). World x grows to the right; ground floor line y = 0, upper floor line y = −700. Hush lives at No. 9
@@ -1105,7 +1166,7 @@ rigged, then +2 s; no cap) → `tea` → [FRAZZLED → hall mirror, off-stage] �
 Script: R **ACHOO-RIA!** · R **ALLEGRO-GO-GO!** (lines as "Bellows sneezes up a storm", "Bellows gets in a spin").
 No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–70 s launch-relative).
 
-**ACT I — "The Tenor at Home"**
+**ACT I — "The Tenor at Home"** (heatwave week, July — §7.0)
 
 **Night 1 — "Throat Tea"** (hall, parlour, kitchen)
 - New: **carrying items in the tray, the Script, Take a Bow.** Card: *"Your tray carries things. Glowing spots take
@@ -1144,7 +1205,7 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
 - New: **residue → fix-up.** Card: *"Soaked, floury or frazzled? He goes to fix it, and his bubble shows where. Rig
   that spot first."*
 - Cold open: 6 a.m. scales through the bathroom window; Hush's alarm clock shakes itself off her shelf.
-- Loop (~75 s, upstairs; draft, above the Act-I 60 s target of §2.4, re-measured in Stage 3): `gargle` → `bath` →
+- Loop (58.9 s measured; this Night `bath` 12 s, `dress` 5 s and `nap` 12 s via loop-entry `dur_s`): `gargle` → `bath` →
   `radiator` → `dress` → `nap`. (Items come from downstairs: carry them up.)
 - Rules: fix-up override HONEY → kitchen tea counter (SQUEAKY's trip downstairs); combos allowed (POODLE is the Big
   Number); on unseal SNAP DECISION and PIPE DOWN! re-arm. Figgis card cue `card_fixup`.
@@ -1158,7 +1219,7 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
 - New: **MELTDOWN**; tomatoes count from tonight. Card: *"Keep him fuming, prank after prank. At full temper he
   melts down, then sulks blind for 8 s. Tomatoes count now."*
 - Cold open: he confiscates a kite and snaps it over his knee.
-- Loop (~90 s; draft, above the Act-I 60 s target of §2.4, re-measured in Stage 3): `warmup` → `paper` (specs on)
+- Loop (64.6 s measured against the two-floor allowance of 65 s; this Night `warmup` 6 s, `paper` 6 s, `bath` 10 s, `nap` 8 s via loop-entry `dur_s`): `warmup` → `paper` (specs on)
   → `fire` → `bath` (upstairs) → `nap`.
 - Script: R "Bellows surfs the stairs" (**RUG BURN** — he must be Steaming, or chasing Hush, going up) ·
   R "Bellows gets in a spin" (ALLEGRO-GO-GO!) · R "Bellows throws a tantrum" (MELTDOWN) · O "Bellows dances in the
@@ -1167,7 +1228,7 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
   (**IN OVER HIS HEAD**).
 - Tomatoes 3 · "?" 1.0 s · 5 min.
 
-**ACT II — "The Goat and the Garden"**
+**ACT II — "The Goat and the Garden"** (show season, August — §7.0)
 
 **Night 5 — "Enter Beryl"** (+ conservatory, garden; upstairs roped off)
 - New: **Beryl** (bend-over rule, apples, Besotted). Card: *"Beryl headbutts anyone who bends over near her.
@@ -1202,7 +1263,7 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
   (LIFT-OFF) · BN **KIDDING AROUND** — "Put a goat in his bed".
 - Tomatoes 3 · "?" 0.8 s · 6 min.
 
-**ACT III — "Company's Coming"**
+**ACT III — "Company's Coming"** (the last week of the holidays, September — §7.0)
 
 **Night 8 — "Company's Coming"** (ground floor + upstairs, and the conservatory and garden: FAN MAIL's feathers come from the potting bench)
 - New: **Dame Delphine** (opera glasses, high C, EMBARRASSED!). Card: *"Dame Delphine sees nothing without her
@@ -1223,7 +1284,8 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
 - Loop (~100 s): `cloak` → `polish` (specs on) → `mirror` (dressing mirror) → `host_tea` (downstairs; Delphine
   visits all Night) → `piano`.
 - Script: R "Bellows wears a tutu" (**TUTU MUCH**) · R "Bellows wins an award, hard" (**AWARD-WINNING**) · R "He fell
-  for it! Trip him mid-chase" (any Chase Trip) · O "Bellows surfs the stairs" (RUG BURN) · O "Bellows argues with
+  for it! Trip him mid-chase" (RUG BURN — the only Chase Trip this Night: PENNY PINCHER needs Beryl, who is not in the cast; the hint
+  points at the stair rods) · O "Bellows surfs the stairs" (RUG BURN) · O "Bellows argues with
   the plumbing" (PIPE DOWN!) · O "Delphine gives him a spray" (SPIT TAKE) · BN "Take the tutu to tea" (TUTU MUCH
   witnessed by Delphine).
 - Rules: fix-up override DRY → landing radiator (SPIT TAKE's soak sends him upstairs, past RUG BURN, to PIPE
@@ -1240,9 +1302,14 @@ No Curtain Calls; unlimited tomatoes; "?" 2.0 s; 60–75 s (Checkpoint G: 62–7
   tutu" (TUTU MUCH) · BN "Land four in one Running Gag" (a link-4 chain).
 - Tomatoes 3 · "?" 0.8 s · 7 min.
 
-**GALA NIGHT — "The Comeback"** (whole house + garden stage; the street fills the Stalls)
+**GALA NIGHT — "The Comeback"** (Show night — §7.0) (whole house + garden stage; the street fills the Stalls)
 - New: **the spotlight** (and everyone at once). Card: *"It's his comeback concert. Give the street the show they
   deserve."*
+- **The spotlight rule:** once the old spotlight is rigged and aimed at the apron, the garden stage (x 5000–5800) is a
+  lit zone. Hush on it is always *seen as moving* (FREEZE is no protection in the light), but Bellows on the stage faces
+  the Stalls and never looks back at it, and anyone in the light draws Delphine's glasses (her 12 s cycle restarts,
+  aimed at the stage). A trade, not a penalty; off the stage nothing changes. The loading card and Figgis's one ghost
+  finger teach it.
 - Cold open: the street arrives with deckchairs; he booms "PIPE DOWN!" at his own audience.
 - Loop (~120 s): `warmup` → `host_tea` → `feed_beryl` → `stroll` → `rehearse` (garden stage) → `mirror`.
 - Script: R "Bellows steals the spotlight" (**SPOTLIGHT STEALER**) · R "Bellows pinches a penny too far"
@@ -1258,7 +1325,7 @@ nerves, a new Double Act).
 | Lever | Prologue | Act I | Act II | Act III + Gala |
 |---|---|---|---|---|
 | "?" fill | 2.0 s | 1.0 s | 0.8 s | 0.8 s (never lower) |
-| Loop | scripted | ≤ 60 s (N1–2, D1); ~75–90 s (N3–4, draft) | 85–95 s | 100–120 s |
+| Loop | scripted | ≤ 60 s (N1–3); ≤ 65 s for the two-floor finale (N4) | 85–95 s | 100–120 s |
 | Required lines | 2 | 3 | 3 | 3–4 |
 | Characters | Bellows | Bellows | + Beryl | + Delphine (+ Beryl in the Gala) |
 | Tomatoes | ∞ | ∞ N1–3, 3 from N4 | 3 | 3 |

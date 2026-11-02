@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/mg_cravat_tug","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Tugs his cravat and puffs his chest out mid-stride.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous"},
+{"f":10,"pose":"b_idle_tug","ease":"out_quad","face":"smug"},
+{"f":18,"pose":"b_idle_tug_b","ease":"out_back"},
+{"f":28,"pose":"b_idle_tug","ease":"in_out_sine"},
+{"f":36,"pose":"b_idle_tug_b","ease":"out_back","set":{"belly":{"sy":1.05}}},
+{"f":48,"pose":"b_stand","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":18,"type":"sfx","id":"cravat_tug","vol_db":-6.0}
+]}

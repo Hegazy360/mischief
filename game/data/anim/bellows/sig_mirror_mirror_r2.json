@@ -1,0 +1,13 @@
+{"version":1,"clip":"bellows/sig_mirror_mirror_r2","rig":"bellows","loop":false,"length":72,"layer":"base","mask":null,"doc":"MIRROR, MIRROR round 2 (72 f): he leans right in and squints, a hand cupped over his brow.","blend_in":4,"blend_out":4,"tags":["mirror_mirror","round"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_preen","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":14,"pose":"b_lean_in","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_squint_in","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.3,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_squint_in","ease":"in_out_sine","set":{"head":{"rot":14},"nose":{"sx":1.06},"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.3,"rot":0,"sx":1,"sy":1}}},
+{"f":58,"pose":"b_squint_in","ease":"in_out_sine","set":{"head":{"rot":6},"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.3,"rot":0,"sx":1,"sy":1}}},
+{"f":72,"pose":"b_lean_in","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":14,"type":"voice","id":"vo_bellows_huh","vol_db":-6.0},
+{"f":30,"type":"sfx","id":"creak","vol_db":-10.0}
+]}

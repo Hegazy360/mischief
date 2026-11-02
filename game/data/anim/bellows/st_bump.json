@@ -1,0 +1,21 @@
+{"version":1,"clip":"bellows/st_bump","rig":"bellows","loop":false,"length":82,"layer":"base","mask":null,"doc":"The first bump (82 f): he walks into the statue, says 'Pardon', pats it, walks on two steps — and double-takes. (Pat 30 + walk-on 40 + turn 12 = the sim's bump clock.)","blend_in":6,"blend_out":4,"tags":["state","bump"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":4,"pose":"b_pardon_pat","ease":"in_out_sine","face":"pardon","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":14,"pose":"b_pardon_pat","ease":"in_out_sine","set":{"head":{"rot":10},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":24,"pose":"b_pardon_pat","ease":"in_out_sine","set":{"head":{"rot":2},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":30,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":44,"pose":"b_stand","ease":"in_out_sine","set":{"head":{"rot":-10},"torso":{"rot":-6},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":58,"pose":"b_stand","ease":"in_out_sine","set":{"head":{"rot":-4},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":70,"pose":"b_dt_away","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":76,"pose":"b_dt_back","ease":"pop","face":"shock","set":{"leg_upper_r":{"rot":-1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":82,"pose":"b_dt_back","ease":"out_quad","set":{"leg_upper_r":{"rot":-1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.4,"rot":0.0,"sx":1.0,"sy":1.0}}}
+],
+"events":[
+{"f":4,"type":"voice","id":"vo_bellows_pardon"},
+{"f":4,"type":"sfx","id":"step_soft","vol_db":-10.0},
+{"f":44,"type":"sfx","id":"bellows_step","vol_db":-6.0},
+{"f":58,"type":"sfx","id":"bellows_step","vol_db":-6.0},
+{"f":76,"type":"sfx","id":"sting_spot","vol_db":-3.0},
+{"f":76,"type":"spring","part":"bouffant","kick":30.0}
+]}

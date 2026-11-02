@@ -1,0 +1,40 @@
+{
+ "frames": 71,
+ "onsets": [
+  10,
+  29,
+  48,
+  65
+ ],
+ "worst_offset_f": 0,
+ "no_onset_within_6f": 0,
+ "worst_audio_offset_f": 0,
+ "events_without_a_sound": 0,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ],
+ "events": [
+  {
+   "engine_frame": 10,
+   "type": "sfx",
+   "id": "sting_caught",
+   "clip": "hush/st_busted",
+   "clip_frame": 10,
+   "onset": 10,
+   "offset_f": 0,
+   "audio_offset_f": 0
+  },
+  {
+   "engine_frame": 10,
+   "type": "audio",
+   "id": "sting_caught",
+   "clip": "",
+   "clip_frame": null,
+   "onset": 10,
+   "offset_f": 0
+  }
+ ]
+}

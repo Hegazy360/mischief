@@ -42,5 +42,105 @@
  "oneshot:stun": "bellows/st_bonk",
  "cue:laugh_doorframe": "bellows/cue_doorframe_bonk",
  "reaction": "<from sim>",
- "reaction_fallback": "bellows/st_bonk"
+ "reaction_fallback": "bellows/st_bonk",
+ "activity:pickles": "bellows/act_pickles",
+ "activity:rinse": "bellows/act_rinse",
+ "activity:paper": "bellows/act_paper",
+ "mg:sniff_jar": "bellows/mg_sniff_jar",
+ "mg:gargle_hum": "bellows/mg_gargle_hum",
+ "mg:tut": "bellows/mg_tut",
+ "mg:chuckle_at_own_photo": "bellows/mg_chuckle_at_own_photo",
+ "bit:bit_tea": "bellows/bit_tea",
+ "bit:bit_paper": "bellows/bit_paper",
+ "bit:bit_warmup": "bellows/bit_warmup",
+ "activity:fire": "bellows/act_fire",
+ "activity:snack": "bellows/act_snack",
+ "activity:mirror": "bellows/act_mirror",
+ "activity:phone": "bellows/act_phone",
+ "activity:clock": "bellows/act_clock",
+ "mg:warm_hands": "bellows/mg_warm_hands",
+ "mg:lick_lips": "bellows/mg_lick_lips",
+ "mg:kiss_reflection": "bellows/mg_kiss_reflection",
+ "mg:pompous_laugh": "bellows/mg_pompous_laugh",
+ "mg:twirl_cord": "bellows/mg_twirl_cord",
+ "mg:check_pocket_watch": "bellows/mg_check_pocket_watch",
+ "bit:bit_mirror": "bellows/bit_mirror",
+ "bit:bit_phone": "bellows/bit_phone",
+ "activity:fixup_dry": "bellows/act_fixup_dry",
+ "activity:fixup_sink": "bellows/act_fixup_sink",
+ "activity:fixup_mirror": "bellows/act_fixup_mirror",
+ "activity:hunt": "bellows/act_hunt",
+ "activity:curious": "bellows/st_look",
+ "activity:search": "bellows/st_search",
+ "walk@tier2": {
+  "clip": "bellows/loco_irked",
+  "stride_px": 132,
+  "speed_px_s": 264
+ },
+ "walk@tier3": {
+  "clip": "bellows/loco_stomp",
+  "stride_px": 138,
+  "speed_px_s": 276
+ },
+ "run": {
+  "clip": "bellows/st_chase",
+  "stride_px": 120,
+  "speed_px_s": 600
+ },
+ "state:chase": {
+  "clip": "bellows/st_chase",
+  "stride_px": 120,
+  "speed_px_s": 600
+ },
+ "door": "bellows/loco_door",
+ "state:search": {
+  "clip": "bellows/st_search",
+  "loop": true
+ },
+ "state:spotted": "bellows/st_double_take",
+ "state:meltdown": [
+  "bellows/melt_a",
+  "bellows/melt_b",
+  "bellows/melt_c"
+ ],
+ "state:exhausted": {
+  "clip": "bellows/melt_exhausted",
+  "loop": true
+ },
+ "oneshot:head_turn": "bellows/st_head_turn",
+ "oneshot:specs_on": "bellows/st_specs_on",
+ "oneshot:doorway_pause": {
+  "clip": "bellows/st_straighten_cravat",
+  "loop": true
+ },
+ "oneshot:look_back": "bellows/st_look_back",
+ "oneshot:bump": "bellows/st_bump",
+ "oneshot:bump_look": {
+  "clip": "bellows/st_look",
+  "loop": true
+ },
+ "oneshot:curious_stop": "bellows/st_suspicious",
+ "oneshot:curious_look": {
+  "clip": "bellows/st_look",
+  "loop": true
+ },
+ "oneshot:chase_wheeze": "bellows/st_wheeze",
+ "oneshot:face_to_face": "bellows/st_face_to_face",
+ "oneshot:fizzle": "bellows/st_smirk",
+ "oneshot:caught:grab": "bellows/st_grab",
+ "oneshot:caught:lecture": [
+  "bellows/lec_a",
+  "bellows/lec_b",
+  "bellows/lec_c"
+ ],
+ "oneshot:caught:doorstep": "bellows/st_door_slam",
+ "cue:laugh_picture": "bellows/cue_picture_bonk",
+ "mg:steam_sideburns": "bellows/mg_steam_sideburns",
+ "mg:scrub_nose": "bellows/mg_scrub_nose",
+ "mg:comb_flourish": "bellows/mg_comb_flourish",
+ "mg:peer_under_piano": "bellows/mg_peer_under_piano",
+ "mg:walk_hum": "bellows/mg_walk_hum",
+ "mg:cravat_tug": "bellows/mg_cravat_tug",
+ "mg:walk_scale": "bellows/mg_walk_scale",
+ "bit:bit_livid": "bellows/bit_livid"
 }

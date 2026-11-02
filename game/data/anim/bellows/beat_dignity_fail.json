@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/beat_dignity_fail","rig":"bellows","loop":false,"length":70,"layer":"base","mask":null,"doc":"T3 last beat (70 f): he straightens his cravat, looks round to check nobody saw — and it pings straight up again.","blend_in":6,"blend_out":6,"tags":["beat","last_beat","dignity"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":2,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":16,"pose":"b_dignity_straighten","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_dignity_straighten","ease":"in_out_sine","set":{"cravat":{"rot":4},"head":{"rot":-18},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_look_behind","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_cravat_ping","ease":"pop","face":"huh","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":66,"pose":"b_cravat_ping","ease":"out_quad","set":{"cravat":{"rot":-80},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":70,"pose":"b_slow_burn","ease":"in_out_sine","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":2,"type":"sfx","id":"cravat_tug"},
+{"f":34,"type":"voice","id":"vo_bellows_ahem","vol_db":-3.0},
+{"f":60,"type":"sfx","id":"cravat_ping"},
+{"f":60,"type":"spring","part":"cravat","kick":60.0}
+]}

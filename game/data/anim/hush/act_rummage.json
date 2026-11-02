@@ -1,0 +1,189 @@
+{
+  "version": 1,
+  "clip": "hush/act_rummage",
+  "rig": "hush",
+  "loop": true,
+  "length": 68,
+  "layer": "base",
+  "mask": null,
+  "doc": "Rummaging in a container (68 f, loops): both gloves deep in the box, elbows working — the pick window plays the same loop.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "activity",
+    "rummage"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_rummage_a",
+      "ease": "linear",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 12,
+      "pose": "h_rummage_b",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "arm_upper_r": {
+          "rot": -243.6
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 24,
+      "pose": "h_rummage_a",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 34,
+      "pose": "h_rummage_b",
+      "ease": "in_out_sine",
+      "face": "shock",
+      "set": {
+        "arm_upper_r": {
+          "rot": -243.6
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "h_rummage_a",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 56,
+      "pose": "h_rummage_b",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "arm_upper_r": {
+          "rot": -243.6
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 68,
+      "pose": "h_rummage_a",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26,
+          "tex": "flat"
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 12,
+      "type": "sfx",
+      "id": "rustle",
+      "vol_db": -8.0
+    },
+    {
+      "f": 44,
+      "type": "sfx",
+      "id": "rustle",
+      "vol_db": -10.0
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

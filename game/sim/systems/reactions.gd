@@ -134,7 +134,7 @@ func _knock_on(w: SimWorld) -> bool:
 	if bi < 0 or w.pranks.state[bi] != Pranks.RIGGED:
 		return false
 	var bd := w.db.prank_list[bi]
-	if not Conditions.prank_conditions(w, bd.conditions, bi):
+	if not Conditions.prank_conditions(w, bd.conditions, bi, true):
 		return false
 	w.emit(SimEvents.KNOCK_ON, {"a": pd.id, "b": bd.id})
 	if not b.rx_accented:

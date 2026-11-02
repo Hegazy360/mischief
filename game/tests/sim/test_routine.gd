@@ -245,3 +245,48 @@ func test_prank_during_perform_ends_activity_resume_continues() -> void:
 	assert_eq(U.find(log, SimEvents.B_ACTIVITY, {"id": "tea"}).size(), 1, "resuming is not a new visit")
 	var tea_end := U.first(log, SimEvents.B_ACTIVITY_END, {"id": "tea"})
 	assert_le(int(tea_end["t"]), int(achoo["t"]), "ACHOO-RIA! ends the tea")
+
+
+func test_loop_entry_dur_s_overrides_the_activity_length() -> void:
+	var w := U.world_patched("fx_act1", U.loop_patch([{"a": "tea", "dur_s": 5.0}, "pickles"], "kitchen", 2900, "hall", 600))
+	var log := U.run(w, 2400)
+	var start := U.first(log, SimEvents.B_ACTIVITY, {"id": "tea"})
+	var end := U.first(log, SimEvents.B_ACTIVITY_END, {"id": "tea"})
+	assert_eq(int(end["t"]) - int(start["t"]), 300, "this Night's tea lasts 5 s, not the library's")
+	var w2 := U.world_patched("fx_act1", U.loop_patch(["tea", "pickles"], "kitchen", 2900, "hall", 600))
+	var log2 := U.run(w2, 2400)
+	var s2 := U.first(log2, SimEvents.B_ACTIVITY, {"id": "tea"})
+	var e2 := U.first(log2, SimEvents.B_ACTIVITY_END, {"id": "tea"})
+	assert_eq(int(e2["t"]) - int(s2["t"]), w2.db.activities["tea"].dur_ticks, "no override: the library length")
+
+
+func test_at_end_hook_fires_on_the_overridden_last_tick() -> void:
+	# IN A PICKLE re-triggered `at_end` on a 6 s pickles: it fires when he finishes, not at its 1 s mark.
+	var w := U.world_patched("fx_act1", U.loop_patch([{"a": "pickles", "dur_s": 6.0}, "tea"], "kitchen", 3100, "hall", 600), {},
+		func(f: Dictionary) -> void:
+			f["pranks"]["pranks"]["in_a_pickle"]["trigger"]["at_end"] = true)
+	U.force_rig(w, "in_a_pickle")
+	var log := U.run(w, 1500)
+	var start := U.first(log, SimEvents.B_ACTIVITY, {"id": "pickles"})
+	var rx := U.first(log, SimEvents.REACTION_START, {"prank": "in_a_pickle"})
+	assert_false(rx.is_empty())
+	assert_eq(int(rx["t"]) - int(start["t"]), 360, "the last tick of a 6 s pickles")
+
+
+func test_dur_s_override_is_validated() -> void:
+	var files := U.raw()
+	(files["episodes"]["fx_act1"]["bellows"]["loop"] as Array)[1] = {"a": "tea", "dur_s": 3.0}
+	var d := ContentDB.load_dicts(files)
+	var hit := false
+	for err in d.errors:
+		if str(err).contains("dur_s") and str(err).contains("5 s minimum"):
+			hit = true
+	assert_true(hit, "a 3 s activity is under the 5 s floor: %s" % str(d.errors))
+	files = U.raw()
+	(files["episodes"]["fx_act1"]["bellows"]["loop"] as Array)[1] = {"a": "tea", "dur_s": 6.0}
+	d = ContentDB.load_dicts(files)
+	hit = false
+	for err in d.errors:
+		if str(err).contains("dur_s") and str(err).contains("achoo_ria"):
+			hit = true
+	assert_true(hit, "a 6 s tea cuts ACHOO-RIA!'s 7 s hook: %s" % str(d.errors))

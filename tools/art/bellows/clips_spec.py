@@ -570,6 +570,16 @@ def map_json():
 	}
 
 
+def _map_with_wave0(m):
+	import clips_w0
+	import clips_n2
+	import clips_w0b
+	m.update(clips_w0.MAP_KEYS)
+	m.update(clips_n2.MAP_KEYS)
+	m.update(clips_w0b.MAP_KEYS)
+	return m
+
+
 def dumps(d):
 	"""Compact, one key / event per line (diff-friendly, small)."""
 	head = {k: v for k, v in d.items() if k not in ("keys", "events")}
@@ -591,12 +601,22 @@ def main():
 	warmup()
 	micro_gags()
 	loco()
+	import clips_w0  # wave 0 (docs/LEVELS.md §5): the Night-1 / Prologue set
+	clips_w0.build()
+	import clips_n2  # wave 0: the Night-2 set
+	clips_n2.build()
+	import clips_w0b  # wave 0: the states, Lecture, Meltdowns, beats, detours, cold opens and walks
+	clips_w0b.build()
 	os.makedirs(OUT, exist_ok=True)
+	# hand-finished clips (edited in the JSON after generation): never overwritten by this script
+	HAND_FINISHED = {"loco_blind_shuffle"}   # re-posed key by key on 2026-10-31 (PROGRESS.md)
 	for name, c in sorted(CLIPS.items()):
+		if name in HAND_FINISHED:
+			continue
 		with open(os.path.join(OUT, name + ".json"), "w") as fh:
 			fh.write(dumps(c))
 	with open(os.path.join(OUT, "map.json"), "w") as fh:
-		json.dump(map_json(), fh, indent=1)
+		json.dump(_map_with_wave0(map_json()), fh, indent=1)
 		fh.write("\n")
 	print("wrote %d clips + map.json to %s" % (len(CLIPS), OUT))
 	print("stool hop: %s" % json.dumps(d["stool_hop"]))

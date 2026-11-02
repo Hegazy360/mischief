@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "clip": "hush/act_glance",
+  "rig": "hush",
+  "loop": false,
+  "length": 44,
+  "layer": "base",
+  "mask": null,
+  "doc": "The glance at the Stalls (44 f): she catches the audience's eye and shushes them — the joke is in the first 20 f, so a cut on any frame still reads.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "flavour",
+    "glance"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 6,
+      "pose": "h_glance_stalls",
+      "ease": "out_quad",
+      "face": "smug",
+      "set": {
+        "leg_upper_r": {
+          "rot": -4.26
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.75
+        },
+        "leg_upper_l": {
+          "rot": 6.73
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.24
+        }
+      }
+    },
+    {
+      "f": 14,
+      "pose": "h_glance_stalls",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "leg_upper_r": {
+          "rot": -4.26
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.75
+        },
+        "leg_upper_l": {
+          "rot": 6.73
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.24
+        }
+      }
+    },
+    {
+      "f": 20,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 28,
+      "pose": "h_shush",
+      "ease": "out_back",
+      "face": "smug",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_shush",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 21,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

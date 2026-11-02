@@ -1,6 +1,7 @@
 # Mischief Next Door — Build Plan (v1.0)
 
 Design: `docs/GDD.md` (binding). Contracts: `docs/TECH.md` (binding). Status: `docs/PROGRESS.md`.
+Per-level build sheets and scenario lists for Stage 3: `docs/LEVELS.md`. The story that connects the Nights: GDD §7.0.
 Task briefs (self-contained, one per task): `<scratchpad>/mnd/tasks/<key>.md` (Stage 2: `s2-<name>.md` + `s2-index.md`); task reports:
 `<scratchpad>/mnd/reports/<key>.md`.
 
@@ -248,6 +249,8 @@ strips (≥ 2 Prologue gags); reviews ≥ 4/5 funny on every Prologue gag and Ni
 audio and APK budgets (debug and profile APKs built locally).
 
 ## 3. The FUN GATE (owner, the profile APK — release template with the device log —, his own phone, no coaching)
+**Wave 0 first** (`docs/LEVELS.md` §5): the gate is played only once the slice's clips exist — today 10 of its 11
+reactions play the `st_bonk` fallback, and the gate would judge the fallback, not the game.
 Reviewers prepare: a clean install build, the device log exporter (plus a screen recording of the first minute from the
 app icon), a one-page "what to try" card (never read aloud before he plays). **Pass = all 8 checks of GDD §10.4** (first laugh ≤ 10 s and first prank ≤ 30 s from launch; ≥ 5
 laughs in 10 min; unprompted replay; 9/10 destination calls; no unfair catch with the ≥ 1.0 s "?" in the log; ≤ 1
@@ -258,6 +261,7 @@ iterates until it passes.
 ## 4. Stage 3 — CONTENT (one wave per Act, owner check after each)
 | Wave | Tasks (keys) | New work |
 |---|---|---|
+| 0 — finish the slice (P, N1, N2) ✅ 2026-11-02 | 118 clips (Bellows 98, Hush 34, Figgis 5; the slice manifest reports 0 missing) + the six new solver scenarios. Left for `s3-sound-slice`: the clip-event rows for the new clips | precedes the Fun Gate |
 | 3A — Act I rest (N3, N4) | `s3-sim-cast` (Beryl, Delphine, panto, herding, witness — starts now so Act II isn't blocked), `s3-art-upstairs` (landing, bathroom, bedroom final art + props), `s3-anim-act1` (upstairs activities, archetypes POOF, DROP_ON, SURF_OUT, SQUEAKY_VOICE, SCARE_LEAP, STEAM_DUEL, FEATHER_BURST, IN OVER HIS HEAD, Meltdown b/c, combo beats), `s3-content-act1` (N3–N4 final + solutions), `s3-sound-act1` | owner check: Act I |
 | 3B — Act II (N5–N7) | `s3-art-beryl`, `s3-art-garden` (conservatory, garden), `s3-anim-act2` (Beryl set, garden activities, BALLOON_CHASE, HEADBUTT_LAUNCH, GOAT_KISS, GRAND EXIT, KIDDING AROUND, panto set), `s3-content-act2`, `s3-sound-act2` | owner check: Act II |
 | 3C — Act III + Gala (N8–N10, G) | `s3-art-delphine`, `s3-art-dressing` (dressing room, garden stage, spotlight), `s3-anim-act3` (Delphine set, host/tango/cloak/polish, COSTUME_BURN, SUPPRESSED, IT TAKES TWO, SPOTLIGHT STEALER, remaining cold opens), `s3-content-act3`, `s3-sound-act3` | owner check: Act III + Gala |

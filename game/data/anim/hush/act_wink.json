@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "clip": "hush/act_wink",
+  "rig": "hush",
+  "loop": false,
+  "length": 30,
+  "layer": "base",
+  "mask": null,
+  "doc": "The wink (30 f): frozen in the mirror frame she lets the mask slip for one frame — and that is what he screams at.",
+  "blend_in": 0,
+  "blend_out": 4,
+  "tags": [
+    "take",
+    "wink",
+    "mirror"
+  ],
+  "beats": {
+    "anticipation": [
+      0,
+      6
+    ],
+    "accent": [
+      6,
+      10
+    ],
+    "hold": [
+      10,
+      24
+    ],
+    "settle": [
+      24,
+      30
+    ]
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_freeze_1",
+      "ease": "linear",
+      "face": "statue"
+    },
+    {
+      "f": 6,
+      "pose": "h_freeze_1",
+      "ease": "linear",
+      "face": "smug"
+    },
+    {
+      "f": 10,
+      "pose": "h_wink",
+      "ease": "out_back",
+      "face": "wink",
+      "set": {
+        "leg_upper_r": {
+          "rot": -28.14
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 32.62
+        },
+        "leg_upper_l": {
+          "rot": -19.91
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": 30.39
+        }
+      }
+    },
+    {
+      "f": 16,
+      "pose": "h_wink",
+      "ease": "in_out_sine",
+      "face": "wink",
+      "set": {
+        "head": {
+          "rot": -4.0
+        },
+        "leg_upper_r": {
+          "rot": -28.14
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 32.62
+        },
+        "leg_upper_l": {
+          "rot": -19.91
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": 30.39
+        }
+      }
+    },
+    {
+      "f": 22,
+      "pose": "h_wink",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "head": {
+          "rot": 2.0
+        },
+        "leg_upper_r": {
+          "rot": -28.14
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 32.62
+        },
+        "leg_upper_l": {
+          "rot": -19.91
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": 30.39
+        }
+      }
+    },
+    {
+      "f": 26,
+      "pose": "h_wink",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "head": {
+          "rot": -2.0
+        },
+        "leg_upper_r": {
+          "rot": -28.14
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 32.62
+        },
+        "leg_upper_l": {
+          "rot": -19.91
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": 30.39
+        }
+      }
+    },
+    {
+      "f": 30,
+      "pose": "h_wink",
+      "ease": "in_out_sine",
+      "face": "statue",
+      "set": {
+        "leg_upper_r": {
+          "rot": -28.14
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 32.62
+        },
+        "leg_upper_l": {
+          "rot": -19.91
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": 30.39
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 7,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "glint",
+      "sync": false
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": true
+  },
+  "plant": true
+}

@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "clip": "figgis/f_psst",
+  "rig": "figgis",
+  "loop": false,
+  "length": 48,
+  "layer": "base",
+  "mask": null,
+  "doc": "'Psst!' (48 f): he pops up over the lip of the box to get her attention.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "cue",
+    "chip"
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "f_rest",
+      "ease": "linear",
+      "face": "proud"
+    },
+    {
+      "f": 6,
+      "pose": "f_psst",
+      "ease": "out_back",
+      "face": "psst"
+    },
+    {
+      "f": 16,
+      "pose": "f_psst",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": 4
+        }
+      }
+    },
+    {
+      "f": 26,
+      "pose": "f_psst",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": -3
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "f_psst",
+      "ease": "in_out_sine",
+      "face": "psst"
+    },
+    {
+      "f": 48,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "face": "proud"
+    }
+  ],
+  "events": [
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "figgis_psst"
+    }
+  ]
+}

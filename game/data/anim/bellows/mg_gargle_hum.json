@@ -1,0 +1,15 @@
+{"version":1,"clip":"bellows/mg_gargle_hum","rig":"bellows","loop":false,"length":60,"layer":"overlay","mask":"upper","doc":"Gargles a tune with the rinse water: a bubbly high note, then spits it out proudly.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_sink_scrub","ease":"linear","face":"neutral"},
+{"f":10,"pose":"b_rinse_lift","ease":"out_quad","face":"sip","set":{"head":{"rot":-26}}},
+{"f":20,"pose":"b_rinse_lift","ease":"in_out_sine","face":"hum","set":{"head":{"rot":-30}}},
+{"f":30,"pose":"b_rinse_lift","ease":"in_out_sine","face":"hum","set":{"head":{"rot":-26},"nose":{"sx":1.06}}},
+{"f":40,"pose":"b_rinse_lift","ease":"in_out_sine","face":"sing_small","set":{"head":{"rot":-32}}},
+{"f":46,"pose":"b_sink_scrub","ease":"pop","face":"disdain","set":{"head":{"rot":22}}},
+{"f":60,"pose":"b_sink_scrub","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":20,"type":"voice","id":"vo_bellows_hum"},
+{"f":46,"type":"sfx","id":"splash","vol_db":-6.0},
+{"f":46,"type":"voice","id":"vo_bellows_pff","vol_db":-3.0}
+]}

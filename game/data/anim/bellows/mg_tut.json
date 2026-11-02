@@ -1,0 +1,15 @@
+{"version":1,"clip":"bellows/mg_tut","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Reads a bad review: 'Tut. Tut. TUT!' and flicks the page at it.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_rec_sit","ease":"linear","face":"pompous"},
+{"f":8,"pose":"b_rec_sit","ease":"out_quad","face":"disdain","set":{"head":{"rot":8}}},
+{"f":16,"pose":"b_rec_sit","ease":"in_out_sine","face":"disdain","set":{"head":{"rot":4}}},
+{"f":24,"pose":"b_rec_sit","ease":"in_out_sine","face":"irked","set":{"head":{"rot":10}}},
+{"f":32,"pose":"b_rec_sit_b","ease":"out_back","face":"furious"},
+{"f":48,"pose":"b_rec_sit","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":8,"type":"voice","id":"vo_bellows_tut","vol_db":-2.0},
+{"f":16,"type":"voice","id":"vo_bellows_tut","vol_db":-1.0},
+{"f":24,"type":"voice","id":"vo_bellows_tut"},
+{"f":32,"type":"sfx","id":"paper_rustle"}
+]}

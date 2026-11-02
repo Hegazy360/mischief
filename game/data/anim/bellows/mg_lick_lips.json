@@ -1,0 +1,14 @@
+{"version":1,"clip":"bellows/mg_lick_lips","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Holds a wobbling trifle up to the fridge light and licks his lips; a drool drop falls.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_fridge_trifle","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"blissful","set":{"head":{"rot":-20},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":24,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"kiss","set":{"head":{"rot":-14},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"blissful","set":{"nose":{"sx":1.04},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":40,"pose":"b_fridge_trifle","ease":"in_out_sine","set":{"head":{"rot":-18},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":48,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":24,"type":"sfx","id":"kiss_smack","vol_db":-6.0},
+{"f":30,"type":"fx","id":"drops","part":"nose","dir":[0.3,1.0],"amount":2},
+{"f":40,"type":"sfx","id":"gulp","vol_db":-4.0}
+]}

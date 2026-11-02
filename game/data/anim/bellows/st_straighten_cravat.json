@@ -1,0 +1,10 @@
+{"version":1,"clip":"bellows/st_straighten_cravat","rig":"bellows","loop":true,"length":30,"layer":"base","mask":null,"doc":"The doorway pause (30 f, loops): the no-ambush rule holds him at the door, so he fills the time straightening his cravat.","blend_in":6,"blend_out":6,"tags":["state","doorway_pause"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_dignity_straighten","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":10,"pose":"b_dignity_straighten","ease":"in_out_sine","set":{"cravat":{"rot":12},"head":{"rot":-16},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.017}}},
+{"f":20,"pose":"b_dignity_straighten","ease":"in_out_sine","set":{"cravat":{"rot":2},"head":{"rot":-10},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":0.995},"belly":{"sy":0.983}}},
+{"f":30,"pose":"b_dignity_straighten","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":10,"type":"sfx","id":"cravat_tug","vol_db":-8.0}
+]}

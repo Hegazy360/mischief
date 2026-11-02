@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/st_look_back","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"Steaming+ doorway look-back (60 f): he pauses in the doorway and glances behind him before going on.","blend_in":6,"blend_out":6,"tags":["state","look_back"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_look_behind","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_look_behind","ease":"in_out_sine","set":{"head":{"rot":2},"nose":{"sx":1.03},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_look_behind","ease":"in_out_sine","set":{"head":{"rot":-10},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_stand","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":12,"type":"sfx","id":"step_soft","vol_db":-12.0},
+{"f":44,"type":"voice","id":"vo_bellows_hmph","vol_db":-6.0}
+]}

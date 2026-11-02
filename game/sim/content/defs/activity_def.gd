@@ -51,7 +51,9 @@ var mg_legacy: bool = false
 ## Schema problems found while parsing `micro_gags` (ContentValidate reports them).
 var mg_errors: PackedStringArray = PackedStringArray()
 ## Derived: USE hooks on this activity, [mark_ticks, prank_idx] pairs flattened, sorted by mark then prank id.
+## A mark of `HOOK_AT_END` sorts last and fires on the activity's final tick (PrankDef.trig_at_end).
 var hooks: PackedInt32Array = PackedInt32Array()
+const HOOK_AT_END: int = 0x7FFFFFFF
 
 
 ## Parse an activities.json entry.

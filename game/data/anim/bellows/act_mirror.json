@@ -1,0 +1,18 @@
+{"version":1,"clip":"bellows/act_mirror","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the hall mirror (facing +1): preens a mutton chop each side, leans in, checks his nails, tugs the\n\tcravat straight. MIRROR, MIRROR starts from b_preen; mg_kiss_reflection at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","mirror"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_preen","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_preen_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_lean_in","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1}}},
+{"f":90,"pose":"b_lean_in","ease":"in_out_sine","set":{"head":{"rot":14},"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1}}},
+{"f":120,"pose":"b_fidget_admire","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.6,"rot":0,"sx":1,"sy":1}}},
+{"f":160,"pose":"b_preen","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":190,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":220,"pose":"b_preen_b","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":260,"pose":"b_preen","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":280,"pose":"b_preen","ease":"in_out_sine","set":{"head":{"rot":-16},"torso":{"rot":-9},"leg_upper_r":{"rot":16.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-1.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_preen","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":30,"type":"sfx","id":"glint","sync":false},
+{"f":190,"type":"sfx","id":"cravat_tug","vol_db":-4.0}
+]}

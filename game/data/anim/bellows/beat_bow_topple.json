@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/beat_bow_topple","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"T3 last beat (60 f): a dignified bow that keeps going, and going, until he topples onto his bottom.","blend_in":6,"blend_out":6,"tags":["beat","last_beat","bow"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":4,"pose":"b_bow","ease":"out_quad","face":"smug","set":{"leg_upper_r":{"rot":-39.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-56.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.2,"y":-3.7,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":16,"pose":"b_bow","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-39.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-56.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.2,"y":-3.7,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":24,"pose":"b_bow_deep","ease":"in_out_sine","face":"strain","set":{"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":30,"pose":"b_topple","ease":"in_quad","face":"shock"},
+{"f":34,"pose":"b_fall_sit","ease":"pop","face":"shock","set":{"root":{"x":0.0,"y":29.0,"rot":0,"sx":1.1,"sy":0.9}}},
+{"f":38,"pose":"b_fall_sit","ease":"linear","set":{"root":{"x":0.0,"y":29.0,"rot":0,"sx":1.02,"sy":0.98}}},
+{"f":60,"pose":"b_dazed_sit","ease":"in_out_sine","face":"dazed"}
+],
+"events":[
+{"f":4,"type":"sfx","id":"bow_creak"},
+{"f":30,"type":"sfx","id":"slide_down_short"},
+{"f":34,"type":"sfx","id":"slip_thud"},
+{"f":34,"type":"shake","trauma":0.4}
+]}

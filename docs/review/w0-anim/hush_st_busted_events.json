@@ -1,0 +1,51 @@
+{
+ "events": [
+  {
+   "clip": "hush/st_busted",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/st_busted",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/st_busted",
+   "clip_frame": 10,
+   "engine_frame": 10,
+   "id": "sting_caught",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "hush/st_busted",
+   "clip_frame": 10,
+   "engine_frame": 10,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "smear"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 10,
+   "id": "sting_caught",
+   "player": "Sfx0",
+   "type": "audio"
+  }
+ ],
+ "fps": 60,
+ "frames": 70,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ]
+}

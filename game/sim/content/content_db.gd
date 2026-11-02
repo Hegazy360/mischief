@@ -295,7 +295,7 @@ func _derive() -> void:
 		if p.trig_type == PrankDef.TRIG_USE and activities.has(p.trig_activity):
 			if not per_act.has(p.trig_activity):
 				per_act[p.trig_activity] = []
-			(per_act[p.trig_activity] as Array).append([p.trig_mark_ticks, p.idx])
+			(per_act[p.trig_activity] as Array).append([ActivityDef.HOOK_AT_END if p.trig_at_end else p.trig_mark_ticks, p.idx])
 	for aid in per_act:
 		var lst: Array = per_act[aid]
 		lst.sort_custom(func(x: Array, y: Array) -> bool:

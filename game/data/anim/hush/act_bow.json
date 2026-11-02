@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "clip": "hush/act_bow",
+  "rig": "hush",
+  "loop": true,
+  "length": 120,
+  "layer": "base",
+  "mask": null,
+  "doc": "Take a bow (120 f, loops): a deep bow, up on a bounce, a second smaller one — the curtain may fall on any frame.",
+  "blend_in": 6,
+  "blend_out": 6,
+  "tags": [
+    "bow",
+    "curtain"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 14,
+      "pose": "h_bow_a",
+      "ease": "out_quad",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.7
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.19,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.26
+        }
+      }
+    },
+    {
+      "f": 30,
+      "pose": "h_bow_b",
+      "ease": "in_out_sine",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.61
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.1
+        },
+        "leg_upper_l": {
+          "rot": 5.59
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.1,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 46,
+      "pose": "h_bow_a",
+      "ease": "in_out_sine",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.7
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.19,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.26
+        }
+      }
+    },
+    {
+      "f": 62,
+      "pose": "h_victory",
+      "ease": "out_back",
+      "face": "grin",
+      "set": {
+        "arm_upper_r": {
+          "rot": -208.3
+        },
+        "leg_upper_r": {
+          "rot": -3.24
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.11,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 4.95
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.22,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 84,
+      "pose": "h_bow_b",
+      "ease": "in_out_sine",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.61
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.1
+        },
+        "leg_upper_l": {
+          "rot": 5.59
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.1,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 104,
+      "pose": "h_bow_a",
+      "ease": "in_out_sine",
+      "face": "happy",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.7
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.19,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.26
+        }
+      }
+    },
+    {
+      "f": 120,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 14,
+      "type": "sfx",
+      "id": "bow_creak",
+      "vol_db": -8.0
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

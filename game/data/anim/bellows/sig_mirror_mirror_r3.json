@@ -1,0 +1,13 @@
+{"version":1,"clip":"bellows/sig_mirror_mirror_r3","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"MIRROR, MIRROR round 3 (60 f, the tell): he lifts his specs slowly toward his nose; release FREEZE before they land or the sim opens the 0.8 s poke window.","blend_in":4,"blend_out":4,"tags":["mirror_mirror","round","tell"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_lean_in","ease":"linear","face":"suspicious","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_dt_away","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":24,"pose":"b_specs_lift","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.0,"rot":0,"sx":1,"sy":1}}},
+{"f":40,"pose":"b_specs_lift","ease":"in_out_sine","set":{"arm_lower_r":{"rot":-135},"head":{"rot":0},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.0,"rot":0,"sx":1,"sy":1}}},
+{"f":52,"pose":"b_specs_lift","ease":"in_out_sine","set":{"arm_lower_r":{"rot":-145},"head":{"rot":2},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.0,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_specs_lift","ease":"linear","set":{"arm_lower_r":{"rot":-150},"head":{"rot":3},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.0,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":24,"type":"sfx","id":"specs_tink","vol_db":-6.0},
+{"f":40,"type":"voice","id":"vo_bellows_hmph","vol_db":-6.0}
+]}

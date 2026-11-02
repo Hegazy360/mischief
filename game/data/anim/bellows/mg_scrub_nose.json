@@ -1,0 +1,12 @@
+{"version":1,"clip":"bellows/mg_scrub_nose","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Scrubs his face so hard his nose squeaks like a balloon.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_scrub_face","ease":"linear","face":"disdain","set":{"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_scrub_nose","ease":"in_out_sine","face":"disdain","set":{"leg_upper_r":{"rot":-9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-26.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.1,"rot":0,"sx":1,"sy":1}}},
+{"f":22,"pose":"b_scrub_nose","ease":"in_out_sine","set":{"nose":{"sx":0.8},"head":{"rot":26},"leg_upper_r":{"rot":-9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-26.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.1,"rot":0,"sx":1,"sy":1}}},
+{"f":32,"pose":"b_scrub_nose","ease":"in_out_sine","set":{"nose":{"sx":0.9},"head":{"rot":18},"leg_upper_r":{"rot":-9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-26.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.1,"rot":0,"sx":1,"sy":1}}},
+{"f":48,"pose":"b_scrub_face","ease":"in_out_sine","face":"disdain","set":{"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":22,"type":"sfx","id":"kettle_squeak","vol_db":-10.0},
+{"f":32,"type":"sfx","id":"kettle_squeak","vol_db":-12.0}
+]}

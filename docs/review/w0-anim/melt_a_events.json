@@ -1,0 +1,206 @@
+{
+ "events": [
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "vo_bellows_pipe_down",
+   "player": "@Node2D@7",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 0,
+   "id": "vo_bellows_pipe_down_1",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 60,
+   "engine_frame": 60,
+   "id": "meltdown_stomp",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 60,
+   "engine_frame": 60,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 60,
+   "engine_frame": 60,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "hitstop"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 60,
+   "engine_frame": 60,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 60,
+   "id": "stomp_quake",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 61,
+   "engine_frame": 65,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "smear"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 150,
+   "engine_frame": 154,
+   "id": "meltdown_stomp",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 150,
+   "engine_frame": 154,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 150,
+   "engine_frame": 154,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "hitstop"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 150,
+   "engine_frame": 154,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 154,
+   "id": "stomp_quake",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 151,
+   "engine_frame": 159,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "smear"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 240,
+   "engine_frame": 248,
+   "id": "meltdown_stomp",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 240,
+   "engine_frame": 248,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "shake"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 240,
+   "engine_frame": 248,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "hitstop"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 240,
+   "engine_frame": 248,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "spring"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 248,
+   "id": "stomp_quake",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 241,
+   "engine_frame": 253,
+   "id": "",
+   "player": "@Node2D@7",
+   "type": "smear"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 256,
+   "engine_frame": 268,
+   "id": "kettle_squeak",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 256,
+   "engine_frame": 268,
+   "id": "steam",
+   "player": "@Node2D@7",
+   "type": "fx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 268,
+   "id": "kettle_melody",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/melt_a",
+   "clip_frame": 318,
+   "engine_frame": 330,
+   "id": "vo_bellows_wheeze",
+   "player": "@Node2D@7",
+   "type": "voice"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 330,
+   "id": "vo_bellows_wheeze",
+   "player": "Voice0",
+   "type": "audio"
+  }
+ ],
+ "fps": 60,
+ "frames": 340,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ]
+}

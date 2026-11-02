@@ -1,0 +1,11 @@
+{"version":1,"clip":"bellows/mg_walk_scale","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Sings 'do-re-mi' a note per footfall, stepping on the beat.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"sing_small"},
+{"f":10,"pose":"b_stand","ease":"in_out_sine","face":"sing_mid","set":{"head":{"rot":-12}}},
+{"f":22,"pose":"b_stand","ease":"in_out_sine","face":"sing_big","set":{"head":{"rot":-20},"cravat":{"rot":-8}}},
+{"f":34,"pose":"b_stand","ease":"in_out_sine","face":"sing_mid","set":{"head":{"rot":-12}}},
+{"f":48,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"head":{"rot":-6}}}
+],
+"events":[
+{"f":0,"type":"voice","id":"vo_bellows_warmup_2","vol_db":-4.0}
+]}

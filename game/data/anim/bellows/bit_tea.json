@@ -1,0 +1,22 @@
+{"version":1,"clip":"bellows/bit_tea","rig":"bellows","loop":false,"length":100,"layer":"base","mask":null,"doc":"Squeak bit (tea): a squeak mid-sip sends the tea up his nose: SNORT (f10), a splutter and a dab (24-44), back to pompous. 100 f = squeak_bits.bit_tea.len_f.","blend_in":4,"blend_out":8,"tags":["bit","tea","stool"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_stool_sip","ease":"linear","face":"sip"},
+{"f":6,"pose":"b_stool_sip_hold","ease":"in_out_sine"},
+{"f":10,"pose":"b_stool_snort","ease":"pop","face":"sneeze_gasp"},
+{"f":14,"pose":"b_stool_snort","ease":"linear","set":{"root":{"x":39.2,"y":-114.1,"rot":0,"sx":1.0,"sy":1.0}}},
+{"f":24,"pose":"b_stool_splutter","ease":"out_quad","face":"disdain"},
+{"f":34,"pose":"b_stool_splutter","ease":"in_out_sine","set":{"head":{"rot":24}}},
+{"f":44,"pose":"b_stool_splutter","ease":"in_out_sine","set":{"head":{"rot":14},"nose":{"sx":1.08}}},
+{"f":60,"pose":"b_stool_sit","ease":"in_out_sine","face":"irked"},
+{"f":78,"pose":"b_stool_sit_b","ease":"in_out_sine","face":"pompous","set":{"head":{"rot":-14}}},
+{"f":100,"pose":"b_stool_sit","ease":"in_out_sine"}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"teacup","socket":"hand_r:grip"},
+{"f":0,"type":"prop","op":"state","prop":"teacup","state":"sip"},
+{"f":10,"type":"sfx","id":"spray_blast","vol_db":-10.0},
+{"f":10,"type":"fx","id":"drops","part":"nose","dir":[1.0,0.3],"amount":12},
+{"f":14,"type":"voice","id":"vo_bellows_ugh"},
+{"f":24,"type":"sfx","id":"sniffle","vol_db":-4.0},
+{"f":44,"type":"sfx","id":"sniffle","vol_db":-6.0}
+]}

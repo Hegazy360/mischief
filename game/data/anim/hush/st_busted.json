@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "clip": "hush/st_busted",
+  "rig": "hush",
+  "loop": false,
+  "length": 60,
+  "layer": "base",
+  "mask": null,
+  "doc": "Caught (60 f, the Busted Cam re-stages it): gloves up, frozen mid-mischief, then a tiny sheepish wave at the Stalls.",
+  "blend_in": 0,
+  "blend_out": 4,
+  "tags": [
+    "take",
+    "caught",
+    "busted"
+  ],
+  "beats": {
+    "anticipation": [
+      0,
+      10
+    ],
+    "accent": [
+      10,
+      14
+    ],
+    "hold": [
+      14,
+      38
+    ],
+    "settle": [
+      38,
+      60
+    ]
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 6,
+      "pose": "h_busted_antic",
+      "ease": "out_quad",
+      "face": "worried",
+      "set": {
+        "root": {
+          "sx": 1.08,
+          "sy": 0.9
+        },
+        "leg_upper_r": {
+          "rot": -13.85
+        },
+        "leg_lower_r": {
+          "rot": 20.33
+        },
+        "foot_r": {
+          "rot": -5.41
+        },
+        "leg_upper_l": {
+          "rot": -3.65
+        },
+        "leg_lower_l": {
+          "rot": 20.67
+        },
+        "foot_l": {
+          "rot": -14.31
+        }
+      }
+    },
+    {
+      "f": 10,
+      "pose": "h_busted",
+      "ease": "pop",
+      "face": "shock",
+      "set": {
+        "root": {
+          "sx": 0.88,
+          "sy": 1.16
+        },
+        "leg_upper_r": {
+          "rot": -3.37
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.76,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.16
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.46,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 16,
+      "pose": "h_busted",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.27
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.43,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.0
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.85,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 26,
+      "pose": "h_busted",
+      "ease": "in_out_sine",
+      "face": "busted",
+      "set": {
+        "head": {
+          "rot": 4.0
+        },
+        "leg_upper_r": {
+          "rot": -3.27
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.43,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.0
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.85,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 38,
+      "pose": "h_busted",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.27
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.43,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.0
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.85,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 50,
+      "pose": "h_fidget_look",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 60,
+      "pose": "h_busted",
+      "ease": "in_out_sine",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.27
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.43,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.0
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.85,
+          "tex": "flat"
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "sting_caught"
+    },
+    {
+      "f": 10,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": true
+  },
+  "plant": true
+}

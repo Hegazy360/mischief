@@ -1,0 +1,16 @@
+{"version":1,"clip":"bellows/mg_kiss_reflection","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Kisses his reflection, then jealously polishes the lip mark off with his sleeve.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_lean_in","ease":"linear","face":"admiring","set":{"leg_upper_r":{"rot":-26.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-6.5,"rot":0,"sx":1,"sy":1}}},
+{"f":10,"pose":"b_lean_in","ease":"in_out_sine","face":"kiss","set":{"head":{"rot":14},"leg_upper_r":{"rot":-26.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-6.5,"rot":0,"sx":1,"sy":1}}},
+{"f":16,"pose":"b_lean_in","ease":"in_out_sine","face":"kiss","set":{"head":{"rot":16},"nose":{"sx":1.04},"leg_upper_r":{"rot":-26.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-6.5,"rot":0,"sx":1,"sy":1}}},
+{"f":26,"pose":"b_polish_mirror","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":-14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-5.7,"rot":0,"sx":1,"sy":1}}},
+{"f":32,"pose":"b_polish_mirror_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-12.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-5.5,"rot":0,"sx":1,"sy":1}}},
+{"f":38,"pose":"b_polish_mirror","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-5.7,"rot":0,"sx":1,"sy":1}}},
+{"f":43,"pose":"b_polish_mirror_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-12.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-5.5,"rot":0,"sx":1,"sy":1}}},
+{"f":48,"pose":"b_lean_in","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":-26.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-6.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":16,"type":"sfx","id":"kiss_smack"},
+{"f":26,"type":"sfx","id":"rustle","vol_db":-6.0},
+{"f":38,"type":"sfx","id":"rustle","vol_db":-8.0}
+]}

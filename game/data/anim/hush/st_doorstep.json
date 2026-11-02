@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "clip": "hush/st_doorstep",
+  "rig": "hush",
+  "loop": false,
+  "length": 36,
+  "layer": "base",
+  "mask": null,
+  "doc": "On the doorstep (36 f): set down outside, the door slams behind her, and she is already planning the next way in.",
+  "blend_in": 0,
+  "blend_out": 4,
+  "tags": [
+    "caught",
+    "doorstep"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_dangled_a",
+      "ease": "linear",
+      "face": "sad",
+      "set": {
+        "root": {
+          "y": -90.0
+        }
+      }
+    },
+    {
+      "f": 8,
+      "pose": "h_doorstep_sit",
+      "ease": "in_quad",
+      "face": "sad",
+      "set": {
+        "leg_upper_r": {
+          "rot": -52.01
+        },
+        "leg_lower_r": {
+          "rot": 93.4
+        },
+        "foot_r": {
+          "rot": -41.39
+        },
+        "leg_upper_l": {
+          "rot": -35.74
+        },
+        "leg_lower_l": {
+          "rot": 92.95
+        },
+        "foot_l": {
+          "rot": -57.21
+        }
+      }
+    },
+    {
+      "f": 12,
+      "pose": "h_doorstep_sit",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -52.01
+        },
+        "leg_lower_r": {
+          "rot": 93.4
+        },
+        "foot_r": {
+          "rot": -41.39
+        },
+        "leg_upper_l": {
+          "rot": -35.74
+        },
+        "leg_lower_l": {
+          "rot": 92.95
+        },
+        "foot_l": {
+          "rot": -57.21
+        }
+      }
+    },
+    {
+      "f": 20,
+      "pose": "h_doorstep_sit",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "head": {
+          "rot": 8.0
+        },
+        "leg_upper_r": {
+          "rot": -52.01
+        },
+        "leg_lower_r": {
+          "rot": 93.4
+        },
+        "foot_r": {
+          "rot": -41.39
+        },
+        "leg_upper_l": {
+          "rot": -35.74
+        },
+        "leg_lower_l": {
+          "rot": 92.95
+        },
+        "foot_l": {
+          "rot": -57.21
+        }
+      }
+    },
+    {
+      "f": 28,
+      "pose": "h_doorstep_sit",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "head": {
+          "rot": -2.0
+        },
+        "leg_upper_r": {
+          "rot": -52.01
+        },
+        "leg_lower_r": {
+          "rot": 93.4
+        },
+        "foot_r": {
+          "rot": -41.39
+        },
+        "leg_upper_l": {
+          "rot": -35.74
+        },
+        "leg_lower_l": {
+          "rot": 92.95
+        },
+        "foot_l": {
+          "rot": -57.21
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_doorstep_sit",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_r": {
+          "rot": -52.01
+        },
+        "leg_lower_r": {
+          "rot": 93.4
+        },
+        "foot_r": {
+          "rot": -41.39
+        },
+        "leg_upper_l": {
+          "rot": -35.74
+        },
+        "leg_lower_l": {
+          "rot": 92.95
+        },
+        "foot_l": {
+          "rot": -57.21
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 8,
+      "type": "sfx",
+      "id": "land_soft"
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

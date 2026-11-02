@@ -1,0 +1,22 @@
+{"version":1,"clip":"bellows/act_fire","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the hearth (facing -1): pumps the bellows at the fire, stands and warms his palms, eyes shut,\n\tpumps again. mg_warm_hands plays over it at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","fire"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_bellows_pump","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":20,"pose":"b_bellows_pump_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.2,"rot":0,"sx":1.0,"sy":1.0}}},
+{"f":40,"pose":"b_bellows_pump","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":60,"pose":"b_bellows_pump_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.2,"rot":0,"sx":1.0,"sy":1.0}}},
+{"f":80,"pose":"b_bellows_pump","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":110,"pose":"b_warm_hands","ease":"in_out_sine","face":"blissful","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":150,"pose":"b_warm_hands","ease":"in_out_sine","set":{"head":{"rot":-14},"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":190,"pose":"b_warm_hands","ease":"in_out_sine","set":{"torso":{"rot":8},"head":{"rot":-4},"leg_upper_r":{"rot":-1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.4,"rot":0,"sx":1,"sy":1}}},
+{"f":230,"pose":"b_bellows_pump","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":250,"pose":"b_bellows_pump_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.2,"rot":0,"sx":1.0,"sy":1.0}}},
+{"f":270,"pose":"b_bellows_pump","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":285,"pose":"b_bellows_pump","ease":"in_out_sine","set":{"head":{"rot":-10},"torso":{"rot":20},"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.2,"rot":0,"sx":1.04,"sy":0.96}}},
+{"f":300,"pose":"b_bellows_pump","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-34.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.4,"rot":0,"sx":1.04,"sy":0.96}}}
+],
+"events":[
+{"f":20,"type":"sfx","id":"bellows_pump"},
+{"f":60,"type":"sfx","id":"bellows_pump","vol_db":-2.0},
+{"f":110,"type":"sfx","id":"fire_crackle","vol_db":-6.0,"sync":false},
+{"f":250,"type":"sfx","id":"bellows_pump","vol_db":-2.0}
+]}

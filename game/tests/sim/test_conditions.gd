@@ -89,3 +89,13 @@ func test_prank_condition_entries() -> void:
 	w.bellows.state = SimBellows.ROUTINE
 	assert_false(Conditions.prank_conditions(w, [{"beryl_within": 150}], rug), "Stage-3: no Beryl yet")
 	assert_true(Conditions.prank_conditions(w, [], rug))
+
+
+func test_knock_on_waives_the_anger_gate() -> void:
+	var w := _tea()
+	var p := w.db.prank_idx("rug_burn")
+	var gate := [{"tier_min": "steaming", "or_chase": true}]
+	assert_false(Conditions.prank_conditions(w, gate, p), "Calm, not chasing: RUG BURN stays armed")
+	assert_true(Conditions.prank_conditions(w, gate, p, true), "a knock-on (ENCORE!) carries him onto it anyway")
+	var with_goat := [{"tier_min": "steaming", "beryl_within": 300}]
+	assert_false(Conditions.prank_conditions(w, with_goat, p, true), "only the anger gate is waived")

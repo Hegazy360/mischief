@@ -202,3 +202,80 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   RETIRED banner. Kept `tools/anim/stability.py` (it works on any capture) and the portable `tools/scripts/lib.sh`.
   Bellows now drawn at 0.9 via `CharacterView.VISUAL_SCALE` (HEIGHTS follows, so bubble/badge anchors stay on his head);
   Hush unchanged at the owner's request. The blind-shuffle re-pose from earlier today stands.
+- 2026-10-31 — Owner: the levels are samples; plan every level and its scenarios before expanding the repo. Wrote
+  `docs/LEVELS.md`: the measured state of all 12 episodes (3 `final` with 15 solver routes; 9 `draft` with none;
+  Bellows has 2 of the 75 clips `reactions.json` references and 2 of 27 activity clips, so even the slice plays the
+  `st_bonk` fallback for 10 of its 11 reactions; Beryl / Delphine / panto are null seams), a per-level definition of
+  done, four scenario families (golden, rule proof, fairness, fun) with stable route names, a build sheet per level
+  (premise, clock, Script, what is new per discipline, the scenarios to author, risks), the wave order (wave 0 =
+  finish the slice's clips before the Fun Gate), and six decisions for the owner (Act I upstairs loop lengths, the
+  spotlight rule, N9's Chase Trip without Beryl, knock-ons into gated STEP pranks, Besotted across the house).
+  No code or data changed.
+- 2026-11-01 — Owner: go with the six recommended decisions, keep the plan current, and give the Nights a connected
+  story. (1) Sim: a loop entry may carry `dur_s` (this Night's activity length; validated ≥ 5 s and against the
+  Night's USE hooks) and a USE trigger `at_end: true` fires on the activity's real last tick (BUTTER-FINGERS was
+  pinned to 18 s); knock-ons waive the `tier_min` anger gate (ENCORE! → RUG BURN). Tests in test_routine,
+  test_conditions, test_reactions. (2) New `tests/solver/test_loop_lengths.gd` measures every episode's steady-state
+  loop with the planner's idle probe: N1 58.7, N2 55.4, N3 77.9 → 58.9 (bath 12, dress 5, nap 12), N4 92.6 → 64.6 s
+  (warmup 6, paper 6, bath 10, nap 8; the stair round trip alone is 30 s, so GDD §2.4 rule 5 allows 65 s for the
+  two-floor finale). Later Acts reported, not gated: N5 55, N6 70, N7 115 (over), N8 70, N9 90, N10 104, Gala 91 s.
+  (3) GDD §7.0 "The story: the Summer of the Comeback": one house, one summer; Act I heatwave, Act II show season,
+  Act III the last week, Gala = the street's Summer Show he hijacked; the hall countdown poster, the CONFISCATED box
+  that fills each cold open and is tipped out at the Gala, one decor set per Act; a story beat per Night. Decisions
+  written into GDD §2.4/§4.8/§5.5/§7.2, TECH §4.6, PLAN §3–4 (wave 0 before the Fun Gate), LEVELS §1/§4/§6.
+- 2026-11-01 — Owner: start the implementation; every Act reachable on the sandbox; a progress summary per run.
+  (1) Stage door: an **All Nights** page lists the 12 episodes (drafts marked), `ep:<id>` buttons; `TESTING_ON_MAC.md`
+  lists every `--episode` id. Nights 3, 5 and the Gala launch into the real NightScene headlessly (shots in
+  `docs/review/w0-anim/`). (2) Wave 0 begun (LEVELS §5): `tools/art/bellows/poses_w0.py` (37 poses: the pickle
+  shelf, the sink, the spin, the recliner cushion (12, −120), the log basket) and `clips_w0.py` (15 clips: DRENCH A,
+  SING_CRACK, STRAIN_SLIP, LAUNCH_CEILING, DIZZY_SPIN; act_pickles / rinse / paper; mg_sniff_jar, gargle_hum, tut,
+  chuckle_at_own_photo; bit_tea / paper / warmup), wired into `clips_spec.py` + map.json. Authoring lesson, now a
+  helper: lint A12 (a planted sole drifts ≤ 2 px) means a standing clip must pin one stance per floor contact —
+  `pin()` writes absolute leg angles minus each key's torso lean and the stance's planted root (hip offset
+  compensated); a stance only changes across an airborne key, and landings come straight down from a `hover()` key.
+  Root squash on planted keys stays ≤ 1.04 (the toe is 50 px from the origin). `lint_anim --rig=bellows --strict`
+  30 clips / 0 / 0; suite 1,105 green; solver 14 / 14; import meta OK. Review: `docs/review/w0-anim/index.md`.
+  Left in wave 0: N2's 11 clips (COLD OPEN, EYE-POPPING NEWS A/B, FISH SLAP, TIME'S UP, MIRROR, MIRROR + 3 rounds;
+  fire / snack / mirror / phone / clock; bits mirror / phone), the Lecture ×3 and 15 state clips, the T3 beats,
+  Meltdown a/b/c, `clip_events.md` rows and SFX for the new clips, the new scenarios of LEVELS §4 for P / N1 / N2.
+- 2026-11-01 — Wave 0, second run: the Night-2 set. `tools/art/bellows/poses_n2.py` (41 poses) + `clips_n2.py` (21 clips:
+  COLD OPEN, EYE-POPPING NEWS, SOMETHING FISHY, TIME'S UP, MIRROR, MIRROR + its three stand-in rounds; act_fire /
+  snack / mirror / phone / clock; six micro-gags; bit_mirror / bit_phone). Every slice reaction, activity, micro-gag
+  and squeak bit now has a real clip: `lint_anim --rig=bellows --strict` 51 clips / 0 / 0; suite 1,105 green; solver
+  14 / 14; import meta OK. **Bug fixed:** `ClipDef.is_reaction()` classified the mirror rounds
+  (`sig_mirror_mirror_r1..3`) as reactions by their `sig_` prefix, so the lint demanded beats they must not have;
+  `is_round()` now excludes `_r<n>` stand-ins (clip_lib's release-mark default and RigPlayer's jitter rule agree).
+  **Gaps noted, not fixed:** (a) COSTUME look `jelly_helmet` exists only as a rig prop, not a residue overlay, so the
+  helmet vanishes when COLD OPEN's clip ends although STICKY + COSTUME persist (art-bellows); (b) the view drives the
+  specs prop from the sim (on / dangling only), so EYE-POPPING NEWS' `magnifier` state is never shown; (c) no
+  `clip_events.md` rows for the 36 new clips yet (sounds sit on contact frames; the sound test covers Phase G only);
+  (d) a PropSim launch at the reactions' speeds drifts slowly (gravity 2600 px/s²) — LIFT-OFF hides the paper instead.
+  Review: `docs/review/w0-anim/index.md`. Left in wave 0: Lecture ×3, state clips ×15, Meltdown a/b/c + Exhausted,
+  T3 beats ×4, the hunt walk, SFX + sound rows, the new scenarios of LEVELS §4 for P / N1 / N2.
+- 2026-11-02 — **Wave 0 closed: the vertical slice is animation-complete.** `SliceClips.build()` reports 0 missing
+  clips for every rig (it was 47 Bellows + 19 Hush/Figgis at the start of this run). New: `tools/art/bellows/`
+  `poses_w0b.py` + `clips_w0b.py` (47 clips — the 15 state clips, the Lecture ×3, the three Meltdowns + Exhausted,
+  the four T3 last beats, the three fix-up detours + the hunt, seven micro-gags, `bit_livid`, EYE-POPPING NEWS' B
+  variant, TAP DANCE's knock-on entry, the two cold opens, the curtain-call wander-on, the picture-bonk cue, and
+  the Irked / Steaming walks + the chase run); `tools/art/hush/clips_w0.py` (15 — the bow, four flavours, the
+  rummage and mid-job freeze loops, the door, the wink and the whole caught chain) and `clips_figgis.py` (5 chip
+  clips). Totals: Bellows 98, Hush 34, Figgis 5; `lint_anim --all --strict` 144 clips / 0 / 0; `lint.sh --strict`
+  all four lints OK (the content lint's anim-coverage block is now clean); suite 1,105 green; import meta OK.
+  Six new solver scenarios from LEVELS §4 — P `no_squeak`, N1 `bn_sealed` + `tray_restock`, N2 `caught` + `chase`
+  + `mirror_r3` + `frazzle_link` (N2's `mirror_poke` was dropped: the executor's `stand_in` always releases, so the
+  poke window needs a solver verb) — solver 21 routes / 0 failed.
+  **Authoring rules learned (now in the helpers):** `pin(..., flat=True)` neutralises a key's root scale *and*
+  rotation, because both pivot the body about the feet origin and drag the soles (lint A12); a planted foot cannot
+  be eased off the floor on his short legs, so a knee hoist must be a `pop` key; a loop's breath period must divide
+  its length, and `plant: true` (an IK lock between keys) must not be set on a loop or its seam never closes.
+  **Bugs fixed:** (1) `ClipDef.is_reaction()` classified `sig_mirror_mirror_r1..3` as reactions by prefix, so the
+  lint demanded beats a stand-in round must not have — `is_round()` now excludes `_r<n>`. (2) `reactions.json`
+  `clip_timings` gave `st_bump` 72 f where the sim's clock is 82 (pat 30 + walk-on 40 + turn 12); the sim is the
+  authority, so the table and its marks were corrected. (3) `curtain:*` and `cold:*` are not `ClipMap.SCHEMA_KEYS`
+  families — those rows resolve from `clip_rules.json`, so they were removed from both rigs' `map.json`.
+  **Open issues (unchanged or new, none blocking):** the `jelly_helmet` COSTUME look exists only as a rig prop, so
+  it vanishes when COLD OPEN's clip ends; the view drives the specs prop on/dangling only, so EYE-POPPING NEWS'
+  `magnifier` state never shows; `tools/audio/clip_events.py` needs numpy, which this machine lacks, so the 118 new
+  clips' sounds are placed on their contact frames but not yet published in the s2-sound table (only the four T3
+  beats, which were already published, are matched exactly); a PropSim launch at reaction speeds drifts, so
+  LIFT-OFF hides the paper instead of throwing it. Review: `docs/review/w0-anim/index.md`.

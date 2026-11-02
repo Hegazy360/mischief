@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "clip": "figgis/f_proud",
+  "rig": "figgis",
+  "loop": false,
+  "length": 54,
+  "layer": "base",
+  "mask": null,
+  "doc": "Proud (54 f): a line landed — he nods along, thoroughly pleased with her.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "cue",
+    "chip"
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "f_rest",
+      "ease": "linear",
+      "face": "proud"
+    },
+    {
+      "f": 10,
+      "pose": "f_proud",
+      "ease": "out_quad",
+      "face": "proud",
+      "set": {
+        "ear_l": {
+          "rot": -5
+        },
+        "ear_r": {
+          "rot": 3
+        }
+      }
+    },
+    {
+      "f": 22,
+      "pose": "f_proud",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": 6
+        },
+        "ear_l": {
+          "rot": 4
+        },
+        "ear_r": {
+          "rot": -2
+        }
+      }
+    },
+    {
+      "f": 32,
+      "pose": "f_proud",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": -4
+        },
+        "ear_l": {
+          "rot": -3
+        },
+        "ear_r": {
+          "rot": 5
+        }
+      }
+    },
+    {
+      "f": 42,
+      "pose": "f_proud",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": 4
+        },
+        "ear_l": {
+          "rot": 2
+        },
+        "ear_r": {
+          "rot": -4
+        }
+      }
+    },
+    {
+      "f": 54,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "face": "proud"
+    }
+  ],
+  "events": []
+}

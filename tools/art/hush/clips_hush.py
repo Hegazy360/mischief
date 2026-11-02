@@ -35,15 +35,18 @@ BEHIND_HEAD = 11       # z for a raised near arm tucked behind the head (head 12
 def build(rig, poses_json, faces_json):
 	kit = K.Kit(rig, poses_json, faces_json)
 	clips = {}
+	import clips_w0            # wave 0 (docs/LEVELS.md §5): the rest of the slice's Hush set
 	for fn in (walk, run, idle, fidget_look, fidget_proud, fidget_clarence, turn, climb_in, tinker_q, tinker_s,
-			   tinker_b, snicker, dive, pop, squeak, freezes):
+			   tinker_b, snicker, dive, pop, squeak, freezes) + clips_w0.CLIPS:
 		out = fn(kit)
 		if isinstance(out, dict) and "clip" in out:
 			out = [out]
 		for c in out:
 			K.auto_smears(c, rig, kit.named, faces_json)
 			clips[c["clip"].split("/", 1)[1]] = c
-	clips["map"] = map_json(clips)
+	m = map_json(clips)
+	m.update(clips_w0.MAP_KEYS)
+	clips["map"] = m
 	return clips
 
 

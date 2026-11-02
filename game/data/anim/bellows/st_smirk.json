@@ -1,0 +1,11 @@
+{"version":1,"clip":"bellows/st_smirk","rig":"bellows","loop":false,"length":30,"layer":"overlay","mask":"upper","doc":"A fizzle (30 f, upper overlay): the trap was there but the condition was not — a smug shrug and a 'hmph'. The prank stays rigged.","blend_in":4,"blend_out":6,"tags":["state","overlay","fizzle"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous"},
+{"f":8,"pose":"b_smirk","ease":"out_quad","face":"sly_smile"},
+{"f":18,"pose":"b_smirk_b","ease":"in_out_sine"},
+{"f":30,"pose":"b_stand","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":8,"type":"voice","id":"vo_bellows_hmph"},
+{"f":8,"type":"sfx","id":"sting_fizzle","vol_db":-4.0}
+]}

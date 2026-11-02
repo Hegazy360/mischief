@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/act_fixup_sink","rig":"bellows","loop":true,"length":240,"layer":"base","mask":null,"doc":"Fix-up SINK (240 f, loops): he scrubs the flour or treacle off his face at the nearest sink or basin.","blend_in":6,"blend_out":6,"tags":["detour","fixup_sink"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_sink_hands","ease":"linear","face":"disdain","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":30,"pose":"b_scrub_face","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":0.996},"belly":{"sy":0.992}}},
+{"f":60,"pose":"b_scrub_face","ease":"in_out_sine","set":{"head":{"rot":22},"arm_lower_r":{"rot":-120},"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":1.006},"belly":{"sy":1.012}}},
+{"f":90,"pose":"b_scrub_face","ease":"in_out_sine","set":{"head":{"rot":14},"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":0.996},"belly":{"sy":0.992}}},
+{"f":120,"pose":"b_sink_hands","ease":"in_out_sine","face":"neutral","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":150,"pose":"b_scrub_face","ease":"in_out_sine","face":"disdain","set":{"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-3.5,"rot":0,"sx":1,"sy":1.004},"belly":{"sy":1.008}}},
+{"f":186,"pose":"b_rinse_lift","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.7,"rot":0,"sx":1,"sy":0.996},"belly":{"sy":0.992}}},
+{"f":214,"pose":"b_rinse_lift","ease":"in_out_sine","set":{"head":{"rot":-20},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.7,"rot":0,"sx":1,"sy":1.002},"belly":{"sy":1.003}}},
+{"f":240,"pose":"b_sink_hands","ease":"in_out_sine","face":"disdain","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":30,"type":"sfx","id":"splash","vol_db":-8.0},
+{"f":120,"type":"sfx","id":"splash","vol_db":-10.0},
+{"f":186,"type":"fx","id":"drops","part":"head","dir":[0.0,1.0],"amount":6}
+]}

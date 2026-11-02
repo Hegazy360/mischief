@@ -380,6 +380,14 @@ MIRROR_OF = {"b_strut_contact_r": "b_strut_contact_l", "b_strut_pass_r": "b_stru
 import poses_s2  # noqa: E402
 poses_s2.define(P, SIT_Z)
 MIRROR_OF.update(poses_s2.define_standing(P))
+# wave 0 (docs/LEVELS.md §5): the pickle shelf, the sink, the spin, the recliner and the log basket
+import poses_w0  # noqa: E402
+poses_w0.define(P, SIT_Z)
+import poses_n2  # noqa: E402
+poses_n2.define(P, SIT_Z)
+import poses_w0b  # noqa: E402
+poses_w0b.define(P, SIT_Z)
+MIRROR_OF.update(poses_w0b.define_cycles(P))
 
 REQUIRED = ["b_stand", "b_breath_in", "b_breath_out", "b_fidget_admire", "b_strut_contact_l", "b_strut_pass_l",
 			"b_strut_contact_r", "b_strut_pass_r", "b_irked_walk_a", "b_irked_walk_b", "b_stomp_a", "b_stomp_b",

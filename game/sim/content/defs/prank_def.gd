@@ -55,6 +55,8 @@ var trig_type: int = TRIG_USE
 var trig_name: String = "use"
 var trig_activity: String = ""
 var trig_mark_ticks: int = 0
+## USE `at_end: true`: the hook fires on the activity's last tick instead of at `mark_s` (TECH §4.4).
+var trig_at_end: bool = false
 var trig_resume: bool = false
 var trig_fixup_kinds: PackedStringArray = PackedStringArray()
 ## STEP: hotspot walked over (the `fire_at` one when `at` lists several), direction, fires in chases.
@@ -125,6 +127,7 @@ static func from_dict(prank_id: String, d: Dictionary) -> PrankDef:
 	p.trig_type = TRIG_NAMES.find(p.trig_name)
 	p.trig_activity = ContentUtil.s(t, "activity")
 	p.trig_mark_ticks = Fx.ticks(ContentUtil.f(t, "mark_s", 0.0))
+	p.trig_at_end = ContentUtil.b(t, "at_end")
 	p.trig_resume = ContentUtil.b(t, "resume")
 	p.trig_fixup_kinds = ContentUtil.strs(t, "fixup_kinds")
 	p.trig_at_list = ContentUtil.strs(t, "at")

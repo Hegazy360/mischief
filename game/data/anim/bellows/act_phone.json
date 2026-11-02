@@ -1,0 +1,20 @@
+{"version":1,"clip":"bellows/act_phone","rig":"bellows","loop":true,"length":480,"layer":"base","mask":null,"doc":"480 f loop at the phone table (facing +1), handset at his cheek: pompous talk, a gesture, the cord twirled, a\n\thmph. SOMETHING FISHY starts from b_phone_pompous; mg_pompous_laugh at 2 s, mg_twirl_cord at 7 s.","blend_in":6,"blend_out":6,"tags":["activity","phone"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_phone_pompous","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":40,"pose":"b_phone_pompous_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":80,"pose":"b_phone_pompous","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":120,"pose":"b_phone_pompous","ease":"in_out_sine","face":"smug","set":{"head":{"rot":-16},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":170,"pose":"b_phone_pompous_b","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":220,"pose":"b_phone_cord","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":280,"pose":"b_phone_pompous","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":330,"pose":"b_phone_pompous_b","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":380,"pose":"b_phone_pompous","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":420,"pose":"b_phone_pompous","ease":"in_out_sine","set":{"torso":{"rot":-9},"head":{"rot":-12},"leg_upper_r":{"rot":16.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-1.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":480,"pose":"b_phone_pompous","ease":"in_out_sine","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"phone_handset","socket":"hand_r:grip"},
+{"f":40,"type":"voice","id":"vo_bellows_hmph","vol_db":-6.0},
+{"f":170,"type":"voice","id":"vo_bellows_smug","vol_db":-6.0},
+{"f":330,"type":"voice","id":"vo_bellows_tut","vol_db":-6.0}
+]}

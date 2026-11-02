@@ -1,0 +1,13 @@
+{"version":1,"clip":"bellows/mg_chuckle_at_own_photo","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Finds his own photo, kisses it, and chuckles behind the paper.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_rec_sit","ease":"linear","face":"pompous"},
+{"f":10,"pose":"b_rec_peer","ease":"out_quad","face":"admiring"},
+{"f":20,"pose":"b_rec_peer","ease":"in_out_sine","face":"kiss","set":{"head":{"rot":20}}},
+{"f":28,"pose":"b_rec_sit","ease":"out_back","face":"sly_smile"},
+{"f":36,"pose":"b_rec_sit","ease":"in_out_sine","face":"sly_smile","set":{"root":{"x":47.7,"y":-85.5,"rot":0,"sx":1,"sy":0.985}}},
+{"f":48,"pose":"b_rec_sit","ease":"in_out_sine","face":"smug"}
+],
+"events":[
+{"f":20,"type":"sfx","id":"kiss_smack","vol_db":-4.0},
+{"f":28,"type":"voice","id":"vo_bellows_hah","vol_db":-3.0}
+]}

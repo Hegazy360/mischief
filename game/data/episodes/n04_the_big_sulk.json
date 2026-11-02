@@ -22,7 +22,7 @@
   "hush": {"start": {"room": "kitchen", "x": 3800}},
   "bellows": {
     "start": {"room": "parlour", "x": 1730},
-    "loop": [{"a": "warmup"}, {"a": "paper"}, {"a": "fire"}, {"a": "bath"}, {"a": "nap"}]
+    "loop": [{"a": "warmup", "dur_s": 6.0}, {"a": "paper", "dur_s": 6.0}, {"a": "fire"}, {"a": "bath", "dur_s": 10.0}, {"a": "nap", "dur_s": 8.0}]
   },
   "cast": {"beryl": null, "delphine": null},
   "fixup_overrides": {},

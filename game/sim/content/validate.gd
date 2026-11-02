@@ -384,6 +384,8 @@ static func _episode(db: ContentDB, ep: EpisodeDef, e: PackedStringArray) -> voi
 			_gate(db, le.until, "%s: bellows.loop[%d].gate.until" % [f, i], e)
 		elif le.hooks_after_gate:
 			e.append("%s: bellows.loop[%d] has hooks: after_gate but no gate" % [f, i])
+		if le.dur_ticks >= 0 and db.activities.has(le.activity):
+			_loop_dur(db, ep, le, "%s: bellows.loop[%d].dur_s" % [f, i], e)
 	var ids := {}
 	for l in ep.script_lines:
 		if l.id == "":
@@ -465,3 +467,17 @@ static func _gate(db: ContentDB, until: Variant, where: String, e: PackedStringA
 			e.append("%s %s" % [where, m])
 	elif until != null:
 		e.append("%s must be a string or a condition" % where)
+
+
+## A loop entry's `dur_s` override: ≥ 5 s (the bubble ring must read, GDD §4.1.1) and no USE hook of a prank this
+## Night lists may sit past the new end (`at_end` hooks move with it).
+static func _loop_dur(db: ContentDB, ep: EpisodeDef, le: EpisodeDef.LoopEntry, where: String, e: PackedStringArray) -> void:
+	if le.dur_ticks < Fx.ticks(5.0):
+		e.append("%s: %.1f s is under the 5 s minimum" % [where, le.dur_ticks / 60.0])
+		return
+	var a: ActivityDef = db.activities[le.activity]
+	for k in a.hook_count():
+		var m := a.hooks[k * 2]
+		var p := db.prank_list[a.hooks[k * 2 + 1]]
+		if m != ActivityDef.HOOK_AT_END and m > le.dur_ticks and p.nights.has(ep.id):
+			e.append("%s: %.1f s cuts %s's hook at %.1f s" % [where, le.dur_ticks / 60.0, p.id, m / 60.0])

@@ -6,49 +6,219 @@
     "ideal": {
       "persona": "ideal",
       "steps": [
-        {"do": "wait", "until": {"tick_ge_s": 0.5}, "max_s": 5},
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "rig", "prank": "tap_dance"},
-        {"do": "rig", "prank": "achoo_ria"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "tap_dance"}, "max_s": 60},
-        {"do": "wait", "until": {"bellows_in_room": "parlour"}, "max_s": 20},
-        {"do": "rig", "prank": "in_a_pickle"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "tea"}, "max_s": 60},
-        {"do": "pop_out", "run": false},
-        {"do": "idle", "s": 0.5},
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 60},
-        {"do": "pop_out", "run": false},
-        {"do": "idle", "s": 0.5},
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "warmup"}, "max_s": 60},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "tea"}, "max_s": 60},
-        {"do": "pop_out", "run": false},
-        {"do": "idle", "s": 0.5},
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 90},
-        {"do": "rig", "prank": "kettle_drum"},
-        {"do": "rig", "prank": "lift_off"},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "lift_off"}, "max_s": 90},
-        {"do": "wait", "until": {"all_required_done": true}, "max_s": 30},
-        {"do": "bow"}
+        {
+          "do": "wait",
+          "until": {
+            "tick_ge_s": 0.5
+          },
+          "max_s": 5
+        },
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "rig",
+          "prank": "achoo_ria"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "tap_dance"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "wait",
+          "until": {
+            "bellows_in_room": "parlour"
+          },
+          "max_s": 20
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "tea"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "pop_out",
+          "run": false
+        },
+        {
+          "do": "idle",
+          "s": 0.5
+        },
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "pop_out",
+          "run": false
+        },
+        {
+          "do": "idle",
+          "s": 0.5
+        },
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "tea"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "pop_out",
+          "run": false
+        },
+        {
+          "do": "idle",
+          "s": 0.5
+        },
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "rig",
+          "prank": "lift_off"
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "lift_off"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "wait",
+          "until": {
+            "all_required_done": true
+          },
+          "max_s": 30
+        },
+        {
+          "do": "bow"
+        }
       ],
       "expect": {
-        "stars": [true, true, true],
-        "applause": [100, 140],
+        "stars": [
+          true,
+          true,
+          true
+        ],
+        "applause": [
+          100,
+          140
+        ],
         "catches_max": 0,
-        "duration_s": [110, 300],
-        "lines": ["kettle", "tap", "pickle", "orbit", "sneeze", "bn"],
+        "duration_s": [
+          110,
+          300
+        ],
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle",
+          "orbit",
+          "sneeze",
+          "bn"
+        ],
         "dead_air_pct_max": 20,
         "max_gap_s_max": 12,
         "first_prank_s_max": 25
@@ -57,25 +227,91 @@
     "required": {
       "persona": "required",
       "steps": [
-        {"do": "rig", "prank": "tap_dance"},
-        {"do": "rig", "prank": "in_a_pickle"},
-        {"do": "hide", "spot": "kitchen_pantry_curtain"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
-        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
-        {"do": "hide", "spot": "hall_coat_cupboard"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 60},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "warmup"}, "max_s": 60},
-        {"do": "rig", "prank": "kettle_drum"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "kettle_drum"}, "max_s": 90},
-        {"do": "bow"}
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_pantry_curtain"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "hall_coat_cupboard"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "kettle_drum"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "bow"
+        }
       ],
       "expect": {
-        "stars": [true, null, null],
-        "applause": [35, 60],
+        "stars": [
+          true,
+          null,
+          null
+        ],
+        "applause": [
+          35,
+          60
+        ],
         "catches_max": 0,
-        "lines": ["kettle", "tap", "pickle"],
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle"
+        ],
         "dead_air_pct_max": 25,
         "max_gap_s_max": 12,
         "first_prank_s_max": 25
@@ -84,24 +320,91 @@
     "slow": {
       "persona": "slow",
       "steps": [
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "rig", "prank": "tap_dance"},
-        {"do": "rig", "prank": "in_a_pickle"},
-        {"do": "hide", "spot": "kitchen_pantry_curtain"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
-        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
-        {"do": "hide", "spot": "hall_coat_cupboard"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 60},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "warmup"}, "max_s": 60},
-        {"do": "rig", "prank": "kettle_drum"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "kettle_drum"}, "max_s": 90},
-        {"do": "bow"}
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_pantry_curtain"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "hall_coat_cupboard"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "kettle_drum"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "bow"
+        }
       ],
       "expect": {
-        "stars": [true, null, null],
-        "lines": ["kettle", "tap", "pickle"],
+        "stars": [
+          true,
+          null,
+          null
+        ],
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle"
+        ],
         "first_player_laugh_s_max": 10,
         "first_prank_s_max": 30,
         "dead_air_pct_max": 30,
@@ -111,57 +414,419 @@
     "caught": {
       "persona": "scenario",
       "steps": [
-        {"do": "rig", "prank": "tap_dance"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "tea"}, "max_s": 60},
-        {"do": "rig", "prank": "achoo_ria", "max_s": 8, "soft": true},
-        {"do": "wait_event", "event": "doorstep", "match": {}, "max_s": 30, "since": "run"},
-        {"do": "pick", "item": "squeaker", "from": "hall_confiscated_box"},
-        {"do": "hide", "spot": "hall_coat_cupboard"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 90},
-        {"do": "hide", "spot": "parlour_piano_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "warmup"}, "max_s": 60},
-        {"do": "rig", "prank": "kettle_drum"},
-        {"do": "rig", "prank": "in_a_pickle"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "in_a_pickle"}, "max_s": 90},
-        {"do": "wait", "until": {"all_required_done": true}, "max_s": 90},
-        {"do": "bow"}
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "tea"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "rig",
+          "prank": "achoo_ria",
+          "max_s": 8,
+          "soft": true
+        },
+        {
+          "do": "wait_event",
+          "event": "doorstep",
+          "match": {},
+          "max_s": 30,
+          "since": "run"
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "hall_coat_cupboard"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "in_a_pickle"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "wait",
+          "until": {
+            "all_required_done": true
+          },
+          "max_s": 90
+        },
+        {
+          "do": "bow"
+        }
       ],
-      "expect": {"events_min": {"caught": 1, "doorstep": 1}, "lines": ["kettle", "tap", "pickle"]}
+      "expect": {
+        "events_min": {
+          "caught": 1,
+          "doorstep": 1
+        },
+        "lines": [
+          "kettle",
+          "tap",
+          "pickle"
+        ]
+      }
     },
     "chase": {
       "persona": "scenario",
       "steps": [
-        {"do": "hide", "spot": "parlour_chaise_back"},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "paper"}, "max_s": 90},
-        {"do": "pop_out", "run": false},
-        {"do": "wait_event", "event": "chase_start", "match": {}, "max_s": 15},
-        {"do": "idle", "s": 0.1},
-        {"do": "move", "room": "kitchen", "x": 3500, "run": true},
-        {"do": "hide", "spot": "kitchen_pantry_curtain"},
-        {"do": "wait_event", "event": "search", "match": {}, "max_s": 30},
-        {"do": "wait", "until": {"bellows_state": "routine"}, "max_s": 30},
-        {"do": "idle", "s": 1.0}
+        {
+          "do": "hide",
+          "spot": "parlour_chaise_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 90
+        },
+        {
+          "do": "pop_out",
+          "run": false
+        },
+        {
+          "do": "wait_event",
+          "event": "chase_start",
+          "match": {},
+          "max_s": 15
+        },
+        {
+          "do": "idle",
+          "s": 0.1
+        },
+        {
+          "do": "move",
+          "room": "kitchen",
+          "x": 3500,
+          "run": true
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_pantry_curtain"
+        },
+        {
+          "do": "wait_event",
+          "event": "search",
+          "match": {},
+          "max_s": 30
+        },
+        {
+          "do": "wait",
+          "until": {
+            "bellows_state": "routine"
+          },
+          "max_s": 30
+        },
+        {
+          "do": "idle",
+          "s": 1.0
+        }
       ],
-      "expect": {"events_min": {"chase_start": 1, "door_slam": 1, "search": 1}}
+      "expect": {
+        "events_min": {
+          "chase_start": 1,
+          "door_slam": 1,
+          "search": 1
+        }
+      }
     },
     "meltdown": {
       "persona": "scenario",
       "steps": [
-        {"do": "wait", "until": {"tick_ge_s": 0.5}, "max_s": 5},
-        {"do": "squeak", "n": 1, "gap_s": 0.5},
-        {"do": "rig", "prank": "tap_dance"},
-        {"do": "rig", "prank": "achoo_ria"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "reaction_end", "match": {"prank": "tap_dance"}, "max_s": 60},
-        {"do": "wait", "until": {"bellows_in_room": "parlour"}, "max_s": 20},
-        {"do": "rig", "prank": "in_a_pickle"},
-        {"do": "hide", "spot": "kitchen_table"},
-        {"do": "wait_event", "event": "meltdown_start", "match": {}, "max_s": 60},
-        {"do": "wait_event", "event": "b_activity", "match": {"id": "rinse"}, "max_s": 60},
-        {"do": "idle", "s": 1.0}
+        {
+          "do": "wait",
+          "until": {
+            "tick_ge_s": 0.5
+          },
+          "max_s": 5
+        },
+        {
+          "do": "squeak",
+          "n": 1,
+          "gap_s": 0.5
+        },
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "rig",
+          "prank": "achoo_ria"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "tap_dance"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "wait",
+          "until": {
+            "bellows_in_room": "parlour"
+          },
+          "max_s": 20
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "meltdown_start",
+          "match": {},
+          "max_s": 60
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 60
+        },
+        {
+          "do": "idle",
+          "s": 1.0
+        }
       ],
-      "expect": {"events_min": {"meltdown_start": 1}, "catches_max": 0}
+      "expect": {
+        "events_min": {
+          "meltdown_start": 1
+        },
+        "catches_max": 0
+      }
+    },
+    "bn_sealed": {
+      "persona": "scenario",
+      "steps": [
+        {
+          "do": "rig",
+          "prank": "tap_dance"
+        },
+        {
+          "do": "rig",
+          "prank": "achoo_ria"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "knock_on",
+          "match": {
+            "a": "achoo_ria",
+            "b": "tap_dance"
+          },
+          "max_s": 120
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 150
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "hall_coat_cupboard"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 150
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 120
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "rig",
+          "prank": "in_a_pickle"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "big_number_unsealed",
+          "match": {},
+          "max_s": 240
+        },
+        {
+          "do": "idle",
+          "s": 2.0
+        }
+      ],
+      "expect": {
+        "events_min": {
+          "knock_on": 1,
+          "big_number_unsealed": 1
+        },
+        "catches_max": 0
+      },
+      "note": "HOT & COLD landed while the Big Number is still sealed must count the moment it unseals, and its two pranks must re-arm (GDD §6.2, rearm_on_unseal)."
+    },
+    "tray_restock": {
+      "persona": "scenario",
+      "steps": [
+        {
+          "do": "hide",
+          "spot": "kitchen_pantry_curtain",
+          "max_s": 25
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "rinse"
+          },
+          "max_s": 120
+        },
+        {
+          "do": "pick",
+          "item": "squeaker",
+          "from": "hall_confiscated_box"
+        },
+        {
+          "do": "hide",
+          "spot": "hall_coat_cupboard"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "paper"
+          },
+          "max_s": 150
+        },
+        {
+          "do": "hide",
+          "spot": "parlour_piano_back"
+        },
+        {
+          "do": "wait_event",
+          "event": "b_activity",
+          "match": {
+            "id": "warmup"
+          },
+          "max_s": 120
+        },
+        {
+          "do": "rig",
+          "prank": "kettle_drum"
+        },
+        {
+          "do": "hide",
+          "spot": "kitchen_table"
+        },
+        {
+          "do": "wait_event",
+          "event": "reaction_end",
+          "match": {
+            "prank": "kettle_drum"
+          },
+          "max_s": 180
+        },
+        {
+          "do": "wait_event",
+          "event": "restock",
+          "match": {
+            "item": "squeaker"
+          },
+          "max_s": 40
+        },
+        {
+          "do": "idle",
+          "s": 1.0
+        }
+      ],
+      "expect": {
+        "events_min": {
+          "restock": 1,
+          "pick": 1
+        },
+        "catches_max": 1
+      },
+      "note": "A used item returns to its container after 20 s (GDD §5.2), so one squeaker can serve two rigs."
     }
   }
 }

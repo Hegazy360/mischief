@@ -1,0 +1,22 @@
+{"version":1,"clip":"bellows/act_pickles","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the pickle shelf (facing +1): reaches up to the jar, twists the lid both ways, peers at it,\n\tscrews it back and stands admiring his own thrift. mg_sniff_jar plays over the twist at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","pickles"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_shelf_reach","ease":"in_out_sine","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_shelf_twist_a","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":1}}},
+{"f":84,"pose":"b_shelf_twist_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-15.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1.02,"sy":0.99}}},
+{"f":108,"pose":"b_shelf_twist_a","ease":"in_out_sine","set":{"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":1}}},
+{"f":132,"pose":"b_shelf_twist_b","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-15.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1.02,"sy":0.99}}},
+{"f":150,"pose":"b_shelf_twist_a","ease":"out_back","face":"smug","set":{"head":{"rot":-14},"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":1}}},
+{"f":170,"pose":"b_shelf_twist_b","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-15.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1.02,"sy":0.99}}},
+{"f":200,"pose":"b_shelf_reach","ease":"in_out_sine","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1}}},
+{"f":236,"pose":"b_stand","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":268,"pose":"b_stand","ease":"in_out_sine","set":{"head":{"rot":-8},"torso":{"rot":-3},"leg_upper_r":{"rot":10.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-7.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.6,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":60,"type":"sfx","id":"jar"},
+{"f":84,"type":"sfx","id":"lid","vol_db":-4.0},
+{"f":108,"type":"sfx","id":"lid","vol_db":-6.0},
+{"f":170,"type":"sfx","id":"lid","vol_db":-4.0},
+{"f":200,"type":"sfx","id":"jar","vol_db":-3.0}
+]}

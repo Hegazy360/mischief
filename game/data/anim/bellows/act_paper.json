@@ -1,0 +1,21 @@
+{"version":1,"clip":"bellows/act_paper","rig":"bellows","loop":true,"length":480,"layer":"base","mask":null,"doc":"480 f loop reclined at st_recliner (facing +1), specs on, the paper held up: reads, flicks a page, peers over\n\this specs at a review, reads on, flicks again, a breath. mg_tut at 2 s and mg_chuckle_at_own_photo at 7 s play\n\tover it; LIFT-OFF's lever pull starts from b_rec_sit.","blend_in":6,"blend_out":6,"tags":["activity","paper","recliner"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_rec_sit","ease":"linear","face":"pompous"},
+{"f":48,"pose":"b_rec_sit","ease":"in_out_sine","set":{"head":{"rot":6}}},
+{"f":70,"pose":"b_rec_sit_b","ease":"in_out_sine"},
+{"f":90,"pose":"b_rec_sit","ease":"in_out_sine"},
+{"f":180,"pose":"b_rec_peer","ease":"in_out_sine","face":"suspicious"},
+{"f":200,"pose":"b_rec_peer","ease":"in_out_sine","set":{"head":{"rot":18}}},
+{"f":230,"pose":"b_rec_sit","ease":"in_out_sine","face":"pompous"},
+{"f":300,"pose":"b_rec_sit_b","ease":"in_out_sine"},
+{"f":320,"pose":"b_rec_sit","ease":"in_out_sine"},
+{"f":400,"pose":"b_rec_sit","ease":"in_out_sine","face":"smug","set":{"root":{"x":47.7,"y":-85.5,"rot":0,"sx":1,"sy":1.01},"head":{"rot":-2}}},
+{"f":480,"pose":"b_rec_sit","ease":"in_out_sine","face":"pompous"}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"newspaper","socket":"hand_r:grip"},
+{"f":0,"type":"prop","op":"state","prop":"newspaper","state":"open"},
+{"f":70,"type":"sfx","id":"paper_rustle"},
+{"f":180,"type":"sfx","id":"specs_tink","vol_db":-8.0},
+{"f":300,"type":"sfx","id":"paper_rustle","vol_db":-3.0}
+]}

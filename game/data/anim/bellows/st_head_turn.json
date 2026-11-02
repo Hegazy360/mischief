@@ -1,0 +1,11 @@
+{"version":1,"clip":"bellows/st_head_turn","rig":"bellows","loop":false,"length":60,"layer":"overlay","mask":"head","doc":"He hears a squeak (60 f, head overlay): a slow turn of the head and a muttered '…the pipes?' — it plays over whatever he is doing.","blend_in":6,"blend_out":8,"tags":["state","overlay","head_turn"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous"},
+{"f":10,"pose":"b_stand","ease":"out_quad","face":"huh","set":{"head":{"rot":-18},"nose":{"rot":-4}}},
+{"f":24,"pose":"b_stand","ease":"in_out_sine","face":"suspicious","set":{"head":{"rot":-22}}},
+{"f":40,"pose":"b_stand","ease":"in_out_sine","face":"huh","set":{"head":{"rot":-12}}},
+{"f":60,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"head":{"rot":0}}}
+],
+"events":[
+{"f":10,"type":"voice","id":"vo_bellows_the_pipes"}
+]}

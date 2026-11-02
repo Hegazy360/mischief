@@ -1,0 +1,11 @@
+{"version":1,"clip":"bellows/mg_walk_hum","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"Hums a march in time with his strut, chin up, arms swinging.","blend_in":6,"blend_out":6,"tags":["micro_gag","overlay"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"hum"},
+{"f":12,"pose":"b_stand","ease":"in_out_sine","face":"hum","set":{"head":{"rot":-14}}},
+{"f":24,"pose":"b_stand","ease":"in_out_sine","face":"hum","set":{"head":{"rot":-6},"cravat":{"rot":8}}},
+{"f":36,"pose":"b_stand","ease":"in_out_sine","face":"hum","set":{"head":{"rot":-14}}},
+{"f":48,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"head":{"rot":-8}}}
+],
+"events":[
+{"f":0,"type":"voice","id":"vo_bellows_hum","vol_db":-4.0}
+]}

@@ -1,0 +1,19 @@
+{"version":1,"clip":"bellows/st_search","rig":"bellows","loop":true,"length":360,"layer":"base","mask":null,"doc":"Search (360 f, loops): specs on, he quarters the room — a look each way, a peer under the furniture, a shrug — until the sim gives up for him.","blend_in":6,"blend_out":6,"tags":["state","search"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_specs_lift","ease":"linear","face":"suspicious","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":40,"pose":"b_hunt_peer_l","ease":"in_out_sine","set":{"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":1,"sy":0.995},"belly":{"sy":0.99}}},
+{"f":80,"pose":"b_peer_under","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.01}}},
+{"f":110,"pose":"b_peer_under","ease":"in_out_sine","set":{"head":{"rot":-30},"leg_upper_r":{"rot":-51.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-68.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":1.9,"y":-4.2,"rot":0,"sx":1,"sy":0.995},"belly":{"sy":0.99}}},
+{"f":140,"pose":"b_hunt_peer_r","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.3,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.01}}},
+{"f":180,"pose":"b_hunt_peer_r","ease":"in_out_sine","set":{"head":{"rot":2},"leg_upper_r":{"rot":-15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-32.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-2.3,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":220,"pose":"b_suspicious","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":-5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-22.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.6,"rot":0,"sx":1,"sy":0.995},"belly":{"sy":0.99}}},
+{"f":260,"pose":"b_hunt_peer_l","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":21.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.2,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.01}}},
+{"f":300,"pose":"b_specs_lift","ease":"in_out_sine","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":330,"pose":"b_cc_shrug","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.7,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":360,"pose":"b_specs_lift","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-14.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.1,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":80,"type":"sfx","id":"rustle","vol_db":-10.0},
+{"f":220,"type":"voice","id":"vo_bellows_grr","vol_db":-8.0},
+{"f":330,"type":"voice","id":"vo_bellows_hmph","vol_db":-6.0}
+]}

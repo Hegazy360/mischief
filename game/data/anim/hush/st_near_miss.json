@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "clip": "hush/st_near_miss",
+  "rig": "hush",
+  "loop": false,
+  "length": 15,
+  "layer": "base",
+  "mask": null,
+  "doc": "The near miss (15 f): he looked straight at her and moved on — she lets the breath go.",
+  "blend_in": 2,
+  "blend_out": 2,
+  "tags": [
+    "flavour",
+    "near_miss"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_hold_breath",
+      "ease": "linear",
+      "face": "hold_breath",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.63
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.31,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.63
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.52,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 5,
+      "pose": "h_near_miss",
+      "ease": "out_quad",
+      "face": "phew",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.68
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.47,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.72
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.81,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 10,
+      "pose": "h_near_miss",
+      "ease": "in_out_sine",
+      "face": "phew",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.68
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.47,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.72
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.81,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 15,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 1,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    },
+    {
+      "f": 5,
+      "type": "sfx",
+      "id": "hush_phew"
+    },
+    {
+      "f": 13,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

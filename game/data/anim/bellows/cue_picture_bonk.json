@@ -1,0 +1,16 @@
+{"version":1,"clip":"bellows/cue_picture_bonk","rig":"bellows","loop":false,"length":48,"layer":"overlay","mask":"upper","doc":"The Prologue's laugh_picture cue (48 f, upper overlay): a picture drops off the wall onto his head and hangs round his neck like a collar.","blend_in":4,"blend_out":6,"tags":["cue","overlay","picture"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_blind_stand","ease":"linear","face":"huh","set":{"leg_upper_r":{"rot":-10.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":10.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":4,"pose":"b_blind_lean","ease":"in_quad","set":{"leg_upper_r":{"rot":-10.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":10.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":6,"pose":"b_bonk_flat","ease":"pop","face":"shock","set":{"leg_upper_r":{"rot":-20.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-11.2,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":12,"pose":"b_picture_wear","ease":"out_quad","face":"dazed_open","set":{"leg_upper_r":{"rot":-16.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.9,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":24,"pose":"b_picture_wear","ease":"in_out_sine","face":"dazed","set":{"head":{"rot":12},"leg_upper_r":{"rot":-16.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.9,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":36,"pose":"b_picture_wear","ease":"in_out_sine","set":{"head":{"rot":-6},"leg_upper_r":{"rot":-16.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":4.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.9,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":48,"pose":"b_blind_stand","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":-10.0},"leg_lower_r":{"rot":8.0},"foot_r":{"rot":0.0},"leg_upper_l":{"rot":10.0},"leg_lower_l":{"rot":6.0},"foot_l":{"rot":0.0},"root":{"x":0.0,"y":-10.5,"rot":0.0,"sx":1.0,"sy":1.0}}}
+],
+"events":[
+{"f":6,"type":"sfx","id":"picture_fall"},
+{"f":6,"type":"spring","part":"bouffant","kick":34.0},
+{"f":7,"type":"smear","part":"head","frames":2,"stretch":1.4},
+{"f":12,"type":"voice","id":"vo_bellows_oof","vol_db":-3.0}
+]}

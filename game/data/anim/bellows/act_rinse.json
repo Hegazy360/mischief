@@ -1,0 +1,24 @@
+{"version":1,"clip":"bellows/act_rinse","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the sink (facing +1): hands in the basin scrubbing the cup, the cup held up to the window and\n\tinspected, shaken dry, back in for another go. mg_gargle_hum plays over the scrub at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","rinse"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_sink_hands","ease":"linear","face":"neutral","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":36,"pose":"b_sink_scrub","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-28.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.2,"rot":0,"sx":1.02,"sy":0.99}}},
+{"f":72,"pose":"b_sink_hands","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":108,"pose":"b_sink_scrub","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":-11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-28.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.2,"rot":0,"sx":1.02,"sy":0.99}}},
+{"f":150,"pose":"b_rinse_lift","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.7,"rot":0,"sx":1,"sy":1}}},
+{"f":186,"pose":"b_rinse_lift","ease":"in_out_sine","face":"suspicious","set":{"head":{"rot":-16},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.7,"rot":0,"sx":1,"sy":1}}},
+{"f":206,"pose":"b_rinse_shake","ease":"out_quad","face":"smug","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.9,"rot":2,"sx":1,"sy":1}}},
+{"f":214,"pose":"b_rinse_lift","ease":"in_out_sine","set":{"root":{"x":0.0,"y":-1.7,"rot":-2,"sx":1,"sy":1},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":222,"pose":"b_rinse_shake","ease":"in_out_sine","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.9,"rot":2,"sx":1,"sy":1}}},
+{"f":260,"pose":"b_sink_hands","ease":"in_out_sine","face":"neutral","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":280,"pose":"b_sink_hands","ease":"in_out_sine","set":{"head":{"rot":22},"torso":{"rot":16},"leg_upper_r":{"rot":-9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-26.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-3.1,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_sink_hands","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.0,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"teacup","socket":"hand_r:grip"},
+{"f":0,"type":"prop","op":"state","prop":"teacup","state":"held"},
+{"f":36,"type":"sfx","id":"splash","vol_db":-6.0},
+{"f":108,"type":"sfx","id":"splash","vol_db":-8.0},
+{"f":206,"type":"fx","id":"drops","part":"hand_r","dir":[0.5,1.0],"amount":8},
+{"f":206,"type":"sfx","id":"splash","vol_db":-12.0},
+{"f":260,"type":"sfx","id":"teacup_clink","vol_db":-4.0}
+]}

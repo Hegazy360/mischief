@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "clip": "hush/loco_door",
+  "rig": "hush",
+  "loop": false,
+  "length": 21,
+  "layer": "base",
+  "mask": null,
+  "doc": "Through a door (21 f, 0.35 s = SimConst's Hush door time): a glove on the frame and she is through without a sound.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "loco",
+    "door"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 6,
+      "pose": "h_door_reach",
+      "ease": "out_quad",
+      "face": "determined",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.55
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.04,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.49
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.0,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 14,
+      "pose": "h_door_reach",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_r": {
+          "rot": -3.55
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.04,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.49
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.0,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 21,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "determined",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 6,
+      "type": "sfx",
+      "id": "door_jiggle",
+      "vol_db": -12.0
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

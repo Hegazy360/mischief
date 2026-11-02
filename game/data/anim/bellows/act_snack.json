@@ -1,0 +1,21 @@
+{"version":1,"clip":"bellows/act_snack","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the fridge (facing +1): opens the door, bends double to rummage, comes up with a trifle he holds\n\tto the light, puts it back, shuts the door. COLD OPEN fires at 1 s; mg_lick_lips at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","snack"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":24,"pose":"b_fridge_open","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.5,"rot":0,"sx":1,"sy":1}}},
+{"f":50,"pose":"b_fridge_reach","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":-27.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-44.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.7,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":80,"pose":"b_fridge_reach_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-33.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-50.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.9,"y":-3.4,"rot":0,"sx":1,"sy":1}}},
+{"f":110,"pose":"b_fridge_reach","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-27.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-44.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.7,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":140,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":180,"pose":"b_fridge_trifle","ease":"in_out_sine","face":"blissful","set":{"head":{"rot":-22},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":210,"pose":"b_fridge_reach","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":-27.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-44.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.7,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":240,"pose":"b_fridge_open","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.5,"rot":0,"sx":1,"sy":1}}},
+{"f":270,"pose":"b_stand","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":285,"pose":"b_stand","ease":"in_out_sine","set":{"head":{"rot":-10},"torso":{"rot":-7},"leg_upper_r":{"rot":14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-3.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":24,"type":"sfx","id":"cupboard_door","vol_db":-4.0},
+{"f":80,"type":"sfx","id":"rustle","vol_db":-6.0},
+{"f":140,"type":"sfx","id":"jelly","vol_db":-8.0},
+{"f":240,"type":"sfx","id":"cupboard_door","vol_db":-6.0}
+]}

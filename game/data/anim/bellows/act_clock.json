@@ -1,0 +1,20 @@
+{"version":1,"clip":"bellows/act_clock","rig":"bellows","loop":true,"length":300,"layer":"base","mask":null,"doc":"300 f loop at the grandfather clock (facing +1): winds it with the key, an ear to the case, winds again, a\n\tsmug step back. TIME'S UP starts from b_clock_wind; mg_check_pocket_watch at 2 s.","blend_in":6,"blend_out":6,"tags":["activity","clock"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_clock_wind","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":20,"pose":"b_clock_wind_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":40,"pose":"b_clock_wind","ease":"in_out_sine","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_clock_wind_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":80,"pose":"b_clock_wind","ease":"in_out_sine","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":110,"pose":"b_clock_listen","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.8,"rot":0,"sx":1,"sy":1}}},
+{"f":150,"pose":"b_clock_listen","ease":"in_out_sine","set":{"head":{"rot":28},"leg_upper_r":{"rot":-14.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-3.8,"rot":0,"sx":1,"sy":1}}},
+{"f":180,"pose":"b_clock_wind","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":200,"pose":"b_clock_wind_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":220,"pose":"b_clock_wind","ease":"in_out_sine","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":250,"pose":"b_dt_away","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":2.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.7,"rot":0,"sx":1,"sy":1}}},
+{"f":300,"pose":"b_clock_wind","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":0.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-2.8,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":20,"type":"sfx","id":"clock","vol_db":-8.0},
+{"f":60,"type":"sfx","id":"clock","vol_db":-8.0},
+{"f":200,"type":"sfx","id":"clock","vol_db":-8.0}
+]}

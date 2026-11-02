@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "clip": "hush/st_shrug",
+  "rig": "hush",
+  "loop": false,
+  "length": 20,
+  "layer": "base",
+  "mask": null,
+  "doc": "The shrug (20 f): a prank fizzled — gloves out, a glance at the Stalls, on with the Night.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "flavour",
+    "shrug"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_stand",
+      "ease": "linear",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 7,
+      "pose": "h_near_miss",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "hand_r": {
+          "rot": 148.0
+        },
+        "leg_upper_r": {
+          "rot": -3.68
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.47,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.72
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.81,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 13,
+      "pose": "h_near_miss",
+      "ease": "in_out_sine",
+      "face": "smug",
+      "set": {
+        "hand_r": {
+          "rot": 144.0
+        },
+        "leg_upper_r": {
+          "rot": -3.68
+        },
+        "leg_lower_r": {
+          "rot": 0.51
+        },
+        "foot_r": {
+          "rot": 3.47,
+          "tex": "flat"
+        },
+        "leg_upper_l": {
+          "rot": 5.72
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -6.81,
+          "tex": "flat"
+        }
+      }
+    },
+    {
+      "f": 20,
+      "pose": "h_stand",
+      "ease": "in_out_sine",
+      "face": "grin",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

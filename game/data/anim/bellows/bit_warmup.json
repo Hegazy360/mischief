@@ -1,0 +1,20 @@
+{"version":1,"clip":"bellows/bit_warmup","rig":"bellows","loop":false,"length":90,"layer":"base","mask":null,"doc":"Squeak bit (warm-up): his top note cracks into a yodel (f16), he clutches his throat, looks round ('...the pipes.'), and resumes as if nothing happened. 90 f = squeak_bits.bit_warmup.len_f.","blend_in":4,"blend_out":8,"tags":["bit","warmup"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_warm_hold","ease":"linear","face":"sing_big","set":{"leg_upper_r":{"rot":19.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.6,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":6,"pose":"b_warm_hold_b","ease":"in_out_sine","set":{"leg_upper_r":{"rot":20.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":3.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.7,"rot":0,"sx":0.985,"sy":1.02}}},
+{"f":12,"pose":"b_warm_hold","ease":"in_out_sine","set":{"head":{"rot":-24},"leg_upper_r":{"rot":19.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.6,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":16,"pose":"b_sing_crack","ease":"pop","face":"shock","set":{"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.9,"rot":0,"sx":1,"sy":1}}},
+{"f":20,"pose":"b_sing_crack","ease":"linear","set":{"root":{"x":0.1,"y":-0.9,"rot":0,"sx":1.0,"sy":1.0},"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":32,"pose":"b_sing_crack","ease":"in_out_sine","face":"huh","set":{"head":{"rot":10},"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.9,"rot":0,"sx":1,"sy":1}}},
+{"f":44,"pose":"b_look_behind","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":58,"pose":"b_look_behind","ease":"in_out_sine","set":{"head":{"rot":4},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":70,"pose":"b_warm_rest","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":90,"pose":"b_warm_rest","ease":"in_out_sine","face":"pompous","set":{"head":{"rot":-8},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":0.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":0,"type":"voice","id":"vo_bellows_warmup_3"},
+{"f":16,"type":"voice","id":"vo_bellows_warmup_crack"},
+{"f":16,"type":"spring","part":"bouffant","kick":24.0},
+{"f":17,"type":"smear","part":"head","frames":2,"stretch":1.3},
+{"f":44,"type":"voice","id":"vo_bellows_the_pipes"}
+]}

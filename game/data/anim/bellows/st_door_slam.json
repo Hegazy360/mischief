@@ -1,0 +1,17 @@
+{"version":1,"clip":"bellows/st_door_slam","rig":"bellows","loop":false,"length":36,"layer":"base","mask":null,"doc":"The doorstep (36 f): he plonks her down outside, slams the front door, and straightens his cravat.","blend_in":4,"blend_out":6,"tags":["state","caught","doorstep"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_lecture_plonk","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":-23.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-40.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.5,"y":-2.8,"rot":0,"sx":1,"sy":1}}},
+{"f":6,"pose":"b_lecture_plonk","ease":"in_out_sine","set":{"torso":{"rot":34},"leg_upper_r":{"rot":-27.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-44.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.7,"y":-3.0,"rot":0,"sx":1,"sy":1}}},
+{"f":9,"pose":"b_door_reach","ease":"in_out_sine","face":"furious","set":{"leg_upper_r":{"rot":1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-16.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.2,"rot":0,"sx":1,"sy":1}}},
+{"f":12,"pose":"b_door_slam","ease":"pop","face":"furious","set":{"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.8,"rot":0,"sx":1,"sy":1}}},
+{"f":16,"pose":"b_door_slam","ease":"linear","set":{"root":{"x":0.1,"y":-1.8,"rot":0,"sx":1.04,"sy":0.96},"leg_upper_r":{"rot":-7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-24.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":26,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":36,"pose":"b_stand","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":6,"type":"sfx","id":"land_soft","vol_db":-6.0},
+{"f":12,"type":"sfx","id":"door_slam"},
+{"f":12,"type":"shake","trauma":0.45},
+{"f":12,"type":"spring","part":"bouffant","kick":24.0},
+{"f":26,"type":"sfx","id":"cravat_tug","vol_db":-6.0}
+]}

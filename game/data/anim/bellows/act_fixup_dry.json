@@ -1,0 +1,15 @@
+{"version":1,"clip":"bellows/act_fixup_dry","rig":"bellows","loop":true,"length":240,"layer":"base","mask":null,"doc":"Fix-up DRY (240 f, loops): he steams himself dry at the nearest fire or radiator, arms out, blissful.","blend_in":6,"blend_out":6,"tags":["detour","fixup_dry"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":24,"pose":"b_steam_dry","ease":"in_out_sine","face":"blissful","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.2,"rot":0,"sx":1,"sy":1.004},"belly":{"sy":1.007}}},
+{"f":70,"pose":"b_steam_dry","ease":"in_out_sine","set":{"head":{"rot":-22},"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.2,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.01}}},
+{"f":116,"pose":"b_steam_dry","ease":"in_out_sine","set":{"torso":{"rot":-4},"head":{"rot":-12},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.995}}},
+{"f":162,"pose":"b_steam_dry","ease":"in_out_sine","set":{"head":{"rot":-20},"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.2,"rot":0,"sx":1,"sy":0.994},"belly":{"sy":0.989}}},
+{"f":206,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1.002},"belly":{"sy":1.005}}},
+{"f":240,"pose":"b_stand","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":24,"type":"sfx","id":"fire_crackle","vol_db":-8.0,"sync":false},
+{"f":70,"type":"fx","id":"steam","part":"torso","dir":[0.0,-1.0],"amount":10},
+{"f":162,"type":"fx","id":"steam","part":"bouffant","dir":[0.0,-1.0],"amount":8}
+]}

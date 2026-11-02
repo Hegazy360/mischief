@@ -22,7 +22,7 @@
   "hush": {"start": {"room": "kitchen", "x": 3800}},
   "bellows": {
     "start": {"room": "bathroom", "x": 1870},
-    "loop": [{"a": "gargle"}, {"a": "bath"}, {"a": "radiator"}, {"a": "dress"}, {"a": "nap"}]
+    "loop": [{"a": "gargle"}, {"a": "bath", "dur_s": 12.0}, {"a": "radiator"}, {"a": "dress", "dur_s": 5.0}, {"a": "nap", "dur_s": 12.0}]
   },
   "cast": {"beryl": null, "delphine": null},
   "fixup_overrides": {"HONEY": "st_tea"},

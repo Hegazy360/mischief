@@ -508,6 +508,9 @@ from them by more than 2 frames.
 ```
 - `status` ∈ `draft | final` (drafts are loaded and linted but the solver only gates `final`).
 - `rules.tomatoes`: −1 = unlimited. Line `kind` per §3.7.7 with fields `prank | double_act | combo | count | link`.
+- A loop entry may carry `dur_s` (`{"a": "bath", "dur_s": 12}`): this Night's length for that activity, ≥ 5 s; the
+  validator rejects a value that cuts a USE hook of a prank the Night lists. A USE trigger may carry `at_end: true`
+  (BUTTER-FINGERS): its hook fires on the activity's last tick whatever the Night made its length.
 - `director` (Prologue): `{"gates": [...], "cues": [{"id": "ghost_squeak", "when": {"tick_ge_s": 3.7}}, ...],
   "safety_net": {"hide_before_entry_s": 1.5, "slowmo": 0.5, "pulse": "kitchen_pantry_curtain"}}` — the `when` language is
   the solver's condition language (§8.2).

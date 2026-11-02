@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "clip": "figgis/f_idle",
+  "rig": "figgis",
+  "loop": true,
+  "length": 120,
+  "layer": "base",
+  "mask": null,
+  "doc": "Figgis waiting in his prompt box (120 f, loops): a slow breath, an ear twitch, a peer out at the set.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "idle",
+    "chip"
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "f_rest",
+      "ease": "linear",
+      "face": "proud"
+    },
+    {
+      "f": 26,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "set": {
+        "ear_l": {
+          "rot": -7
+        },
+        "ear_r": {
+          "rot": 2
+        },
+        "head": {
+          "rot": 3
+        }
+      }
+    },
+    {
+      "f": 58,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "set": {
+        "ear_l": {
+          "rot": 2
+        },
+        "ear_r": {
+          "rot": -6
+        },
+        "head": {
+          "rot": -2
+        }
+      }
+    },
+    {
+      "f": 88,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "set": {
+        "ear_l": {
+          "rot": 6
+        },
+        "ear_r": {
+          "rot": -1
+        },
+        "head": {
+          "rot": 2
+        }
+      }
+    },
+    {
+      "f": 104,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "set": {
+        "ear_l": {
+          "rot": -2
+        },
+        "ear_r": {
+          "rot": 4
+        }
+      }
+    },
+    {
+      "f": 120,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "face": "proud"
+    }
+  ],
+  "events": []
+}

@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "clip": "hush/st_tomato",
+  "rig": "hush",
+  "loop": false,
+  "length": 36,
+  "layer": "base",
+  "mask": null,
+  "doc": "The tomato (36 f): the Stalls' verdict lands on her beret; she wipes one eye and grins anyway.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "caught",
+    "tomato"
+  ],
+  "beats": {
+    "anticipation": [
+      0,
+      10
+    ],
+    "accent": [
+      10,
+      14
+    ],
+    "hold": [
+      14,
+      24
+    ],
+    "settle": [
+      24,
+      36
+    ]
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_doorstep_sit",
+      "ease": "linear",
+      "face": "sad"
+    },
+    {
+      "f": 6,
+      "pose": "h_doorstep_sit",
+      "ease": "out_quad",
+      "face": "worried",
+      "set": {
+        "torso": {
+          "rot": 14.0
+        },
+        "head": {
+          "rot": 18.0
+        },
+        "arm_upper_r": {
+          "rot": -20.0
+        },
+        "arm_lower_r": {
+          "rot": -70.0
+        },
+        "arm_upper_l": {
+          "rot": -16.0
+        },
+        "arm_lower_l": {
+          "rot": -66.0
+        }
+      }
+    },
+    {
+      "f": 10,
+      "pose": "h_tomato_splat",
+      "ease": "pop",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -45.4
+        },
+        "leg_lower_r": {
+          "rot": 76.43
+        },
+        "foot_r": {
+          "rot": 24.96
+        },
+        "leg_upper_l": {
+          "rot": -38.24
+        },
+        "leg_lower_l": {
+          "rot": 68.88
+        },
+        "foot_l": {
+          "rot": 27.36
+        }
+      }
+    },
+    {
+      "f": 14,
+      "pose": "h_tomato_splat",
+      "ease": "out_quad",
+      "face": "shock",
+      "set": {
+        "leg_upper_r": {
+          "rot": -45.4
+        },
+        "leg_lower_r": {
+          "rot": 76.43
+        },
+        "foot_r": {
+          "rot": 24.96
+        },
+        "leg_upper_l": {
+          "rot": -38.24
+        },
+        "leg_lower_l": {
+          "rot": 68.88
+        },
+        "foot_l": {
+          "rot": 27.36
+        }
+      }
+    },
+    {
+      "f": 24,
+      "pose": "h_tomato_splat",
+      "ease": "in_out_sine",
+      "face": "sad",
+      "set": {
+        "leg_upper_r": {
+          "rot": -45.4
+        },
+        "leg_lower_r": {
+          "rot": 76.43
+        },
+        "foot_r": {
+          "rot": 24.96
+        },
+        "leg_upper_l": {
+          "rot": -38.24
+        },
+        "leg_lower_l": {
+          "rot": 68.88
+        },
+        "foot_l": {
+          "rot": 27.36
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_doorstep_sit",
+      "ease": "in_out_sine",
+      "face": "grin"
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    },
+    {
+      "f": 10,
+      "type": "sfx",
+      "id": "tomato_splat"
+    },
+    {
+      "f": 10,
+      "type": "smear",
+      "part": "hand_r",
+      "frames": 2
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": true
+  },
+  "plant": true
+}

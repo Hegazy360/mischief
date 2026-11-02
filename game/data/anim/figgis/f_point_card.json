@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "clip": "figgis/f_point_card",
+  "rig": "figgis",
+  "loop": false,
+  "length": 60,
+  "layer": "base",
+  "mask": null,
+  "doc": "The cue card (60 f): he holds up a picture card and taps it twice — the hint ladder's rung.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "cue",
+    "chip"
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "f_rest",
+      "ease": "linear",
+      "face": "proud"
+    },
+    {
+      "f": 8,
+      "pose": "f_point",
+      "ease": "out_quad",
+      "face": "point"
+    },
+    {
+      "f": 20,
+      "pose": "f_point",
+      "ease": "in_out_sine",
+      "set": {
+        "hand_r": {
+          "rot": -6
+        }
+      }
+    },
+    {
+      "f": 32,
+      "pose": "f_point",
+      "ease": "in_out_sine",
+      "set": {
+        "hand_r": {
+          "rot": 4
+        }
+      }
+    },
+    {
+      "f": 44,
+      "pose": "f_point",
+      "ease": "in_out_sine",
+      "face": "point"
+    },
+    {
+      "f": 60,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "face": "proud"
+    }
+  ],
+  "events": [
+    {
+      "f": 8,
+      "type": "sfx",
+      "id": "figgis_card"
+    }
+  ]
+}

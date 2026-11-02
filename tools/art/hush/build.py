@@ -82,6 +82,8 @@ def main():
 	write_json(os.path.join(DATA, "figgis", "rig.json"), figgis_art.rig())
 	write_json(os.path.join(DATA, "figgis", "faces.json"), figgis_art.faces())
 	write_json(os.path.join(DATA, "figgis", "poses.json"), figgis_art.poses())
+	import clips_figgis
+	write_clips(os.path.join(GAME, "data", "anim", "figgis"), clips_figgis.build())
 	st, meta = stalls_art.build()
 	write_svgs(OUT_STALLS, st)
 	write_json(os.path.join(DATA, "stalls", "stalls.json"), meta)

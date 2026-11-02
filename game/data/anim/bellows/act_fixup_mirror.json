@@ -1,0 +1,19 @@
+{"version":1,"clip":"bellows/act_fixup_mirror","rig":"bellows","loop":true,"length":240,"layer":"base","mask":null,"doc":"Fix-up MIRROR (240 f, loops): bouffant, feathers or costume put right at the nearest mirror, with a comb flourish and a last admiring look.","blend_in":6,"blend_out":6,"tags":["detour","fixup_mirror"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_preen","ease":"linear","face":"irked","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":26,"pose":"b_comb_flourish","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1.002},"belly":{"sy":1.005}}},
+{"f":56,"pose":"b_comb_flourish","ease":"in_out_sine","set":{"arm_lower_r":{"rot":-80},"head":{"rot":-18},"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.995}}},
+{"f":86,"pose":"b_comb_flourish","ease":"in_out_sine","set":{"arm_lower_r":{"rot":-100},"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1.002},"belly":{"sy":1.005}}},
+{"f":118,"pose":"b_comb_tuck","ease":"in_out_sine","face":"sly_smile","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":0.999},"belly":{"sy":0.998}}},
+{"f":150,"pose":"b_lean_in","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.1,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":182,"pose":"b_preen_b","ease":"in_out_sine","face":"admiring","set":{"leg_upper_r":{"rot":15.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.1,"rot":0,"sx":1,"sy":1.001},"belly":{"sy":1.002}}},
+{"f":214,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":0.998},"belly":{"sy":0.995}}},
+{"f":240,"pose":"b_preen","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.3,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":0,"type":"prop","op":"attach","prop":"comb","socket":"hand_r:grip"},
+{"f":26,"type":"sfx","id":"rustle","vol_db":-10.0},
+{"f":118,"type":"sfx","id":"clack","vol_db":-10.0},
+{"f":214,"type":"sfx","id":"cravat_tug","vol_db":-8.0},
+{"f":239,"type":"prop","op":"hide","prop":"comb"}
+]}

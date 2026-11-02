@@ -1,0 +1,133 @@
+{
+ "events": [
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "vo_bellows_lecture_a",
+   "player": "@Node2D@7",
+   "type": "voice"
+  },
+  {
+   "clip": "hush/lec_dangled",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "",
+   "player": "@Node2D@8",
+   "type": "prop"
+  },
+  {
+   "clip": "hush/lec_dangled",
+   "clip_frame": 0,
+   "engine_frame": 0,
+   "id": "",
+   "player": "@Node2D@8",
+   "type": "prop"
+  },
+  {
+   "bus": "Voice",
+   "engine_frame": 0,
+   "id": "vo_bellows_lecture_a",
+   "player": "Voice0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 24,
+   "engine_frame": 24,
+   "id": "step_pizz",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 24,
+   "id": "step_pizz_4",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 44,
+   "engine_frame": 44,
+   "id": "step_pizz",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 44,
+   "id": "step_pizz_3",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 64,
+   "engine_frame": 64,
+   "id": "step_pizz",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 64,
+   "id": "step_pizz_2",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 84,
+   "engine_frame": 84,
+   "id": "step_pizz",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 84,
+   "id": "step_pizz_8",
+   "player": "Sfx1",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 104,
+   "engine_frame": 104,
+   "id": "step_pizz",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 104,
+   "id": "step_pizz_3",
+   "player": "Sfx0",
+   "type": "audio"
+  },
+  {
+   "clip": "bellows/lec_a",
+   "clip_frame": 122,
+   "engine_frame": 122,
+   "id": "land_soft",
+   "player": "@Node2D@7",
+   "type": "sfx"
+  },
+  {
+   "bus": "SFX",
+   "engine_frame": 122,
+   "id": "slip_thud",
+   "player": "Sfx1",
+   "type": "audio"
+  }
+ ],
+ "fps": 60,
+ "frames": 140,
+ "scenes": [
+  {
+   "engine_frame": 0,
+   "scene": "res://scenes/dev/AnimViewer.tscn"
+  }
+ ]
+}

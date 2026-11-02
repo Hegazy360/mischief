@@ -387,30 +387,35 @@ static func _validate(cond: Variant, out: PackedStringArray) -> void:
 # --- prank condition entries (TECH §4.4) ----------------------------------------------------------
 
 ## AND of the prank's condition entries. Within an entry, every key must hold; `or_chase: true` makes the
-## entry also true while he is chasing. Stage-3 keys (beryl_*, delphine_present) are false until the cast
-## exists.
-static func prank_conditions(w: SimWorld, conds: Array, p: int) -> bool:
+## entry also true while he is chasing. `knock_on` (a Double Act carrying him into this prank) waives the
+## anger gate `tier_min`: a fall is a fall (GDD §5.5, ENCORE! into RUG BURN). Stage-3 keys (beryl_*,
+## delphine_present) are false until the cast exists.
+static func prank_conditions(w: SimWorld, conds: Array, p: int, knock_on: bool = false) -> bool:
 	for c in conds:
 		if typeof(c) != TYPE_DICTIONARY:
 			return false
-		if not _prank_entry(w, c, p):
+		if not _prank_entry(w, c, p, knock_on):
 			return false
 	return true
 
 
-static func _prank_entry(w: SimWorld, c: Dictionary, p: int) -> bool:
+static func _prank_entry(w: SimWorld, c: Dictionary, p: int, knock_on: bool = false) -> bool:
 	var b := w.bellows
 	var or_chase := bool(c.get("or_chase", false))
 	var n_other := 0
 	var all_ok := true
+	var waived := false
 	for k in c:
 		var ks := str(k)
 		if ks == "or_chase":
 			continue
+		if ks == "tier_min" and knock_on:
+			waived = true
+			continue
 		n_other += 1
 		if not _prank_key(w, ks, c[k], p):
 			all_ok = false
-	if n_other > 0 and all_ok:
+	if (n_other > 0 and all_ok) or (n_other == 0 and waived):
 		return true
 	if or_chase and b.state == SimBellows.CHASE:
 		return true

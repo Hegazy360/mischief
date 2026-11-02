@@ -1,0 +1,23 @@
+{"version":1,"clip":"bellows/cc_wander_on","rig":"bellows","loop":false,"length":180,"layer":"base","mask":null,"doc":"The curtain call (180 f): still wearing whatever happened to him, he wanders on behind the results panel, notices the audience for the first time, shrugs — and slow-burns at them.","blend_in":6,"blend_out":6,"tags":["curtain","wander_on"],"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":20,"pose":"b_idle_lapel","ease":"in_out_sine","face":"dazed","set":{"leg_upper_r":{"rot":12.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-5.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":44,"pose":"b_idle_lapel_b","ease":"in_out_sine","face":"pompous","set":{"leg_upper_r":{"rot":10.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-7.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.6,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":70,"pose":"b_dt_away","ease":"in_out_sine","face":"smug","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":96,"pose":"b_dt_away","ease":"in_out_sine","set":{"head":{"rot":-16},"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":118,"pose":"b_lean_in","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":-13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-30.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.2,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":132,"pose":"b_dt_back","ease":"pop","face":"shock","set":{"leg_upper_r":{"rot":-1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":138,"pose":"b_dt_back","ease":"linear","set":{"belly":{"sy":1.06},"leg_upper_r":{"rot":-1.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-18.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-1.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":144,"pose":"b_cc_shrug","ease":"in_out_sine","face":"huh","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.7,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":150,"pose":"b_cc_shrug","ease":"in_quad","set":{"leg_upper_r":{"rot":9.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-8.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.7,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":168,"pose":"b_slow_burn","ease":"in_out_sine","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":180,"pose":"b_slow_burn","ease":"in_out_sine","set":{"head":{"rot":4},"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0.0,"sx":1.0,"sy":1.0}}}
+],
+"events":[
+{"f":20,"type":"sfx","id":"bellows_step","vol_db":-8.0},
+{"f":70,"type":"sfx","id":"bellows_step","vol_db":-8.0},
+{"f":132,"type":"sfx","id":"sting_spot"},
+{"f":132,"type":"spring","part":"bouffant","kick":36.0},
+{"f":133,"type":"smear","part":"head","frames":2,"stretch":1.5},
+{"f":150,"type":"voice","id":"vo_bellows_huh"}
+]}

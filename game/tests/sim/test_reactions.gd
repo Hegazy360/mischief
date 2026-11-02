@@ -106,3 +106,18 @@ func test_headbutt_knock_on_is_inactive_in_stage_1() -> void:
 	assert_false(U.first(log, SimEvents.REACTION_END, {"prank": "something_fishy"}).is_empty())
 	assert_true(U.first(log, SimEvents.KNOCK_ON).is_empty())
 	assert_true(U.first(log, SimEvents.HEADBUTT).is_empty())
+
+
+func test_knock_on_into_an_anger_gated_step_prank() -> void:
+	# ENCORE!'s shape on the fixture: LIFT-OFF knocks on into RUG BURN while he is Calm.
+	var w := U.world_patched("fx_act1", U.loop_patch(["paper", "tea"], "parlour", 2080, "kitchen", 3800), {},
+		func(f: Dictionary) -> void:
+			f["pranks"]["pranks"]["lift_off"]["knock_on"] = {"prank": "rug_burn", "frame": 120})
+	U.force_rig(w, "lift_off")
+	U.force_rig(w, "rug_burn")
+	var log := U.run(w, 1500)
+	var ko := U.first(log, SimEvents.KNOCK_ON)
+	assert_false(ko.is_empty(), "the fall is a fall: the Steaming gate does not apply to a knock-on")
+	assert_eq(str(ko["a"]), "lift_off")
+	assert_eq(str(ko["b"]), "rug_burn")
+	assert_false(U.first(log, SimEvents.REACTION_START, {"prank": "rug_burn"}).is_empty())

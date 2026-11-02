@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "clip": "figgis/f_shh",
+  "rig": "figgis",
+  "loop": false,
+  "length": 48,
+  "layer": "base",
+  "mask": null,
+  "doc": "Shh (48 f): a glove to the lips — he has spotted Bellows coming before she has.",
+  "blend_in": 4,
+  "blend_out": 4,
+  "tags": [
+    "cue",
+    "chip"
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "keys": [
+    {
+      "f": 0,
+      "pose": "f_rest",
+      "ease": "linear",
+      "face": "proud"
+    },
+    {
+      "f": 8,
+      "pose": "f_shh",
+      "ease": "out_quad",
+      "face": "shh",
+      "set": {
+        "ear_l": {
+          "rot": -6
+        },
+        "ear_r": {
+          "rot": 2
+        }
+      }
+    },
+    {
+      "f": 22,
+      "pose": "f_shh",
+      "ease": "in_out_sine",
+      "set": {
+        "head": {
+          "rot": 3
+        },
+        "ear_l": {
+          "rot": 3
+        },
+        "ear_r": {
+          "rot": -5
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "f_shh",
+      "ease": "in_out_sine",
+      "face": "shh",
+      "set": {
+        "ear_l": {
+          "rot": -4
+        },
+        "ear_r": {
+          "rot": 1
+        }
+      }
+    },
+    {
+      "f": 48,
+      "pose": "f_rest",
+      "ease": "in_out_sine",
+      "face": "proud"
+    }
+  ],
+  "events": []
+}

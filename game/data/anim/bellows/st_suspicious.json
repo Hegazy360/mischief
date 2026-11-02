@@ -1,0 +1,13 @@
+{"version":1,"clip":"bellows/st_suspicious","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"Curious stop (60 f): he stops mid-stride, squints, and turns his head slowly — 'hmm?'","blend_in":6,"blend_out":6,"tags":["state","suspicious"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":10,"pose":"b_suspicious","ease":"in_out_sine","face":"suspicious","set":{"leg_upper_r":{"rot":-5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-22.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.6,"rot":0,"sx":1,"sy":1}}},
+{"f":16,"pose":"b_suspicious","ease":"in_out_sine","set":{"head":{"rot":2},"nose":{"sx":1.04},"leg_upper_r":{"rot":-5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-22.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.6,"rot":0,"sx":1,"sy":1}}},
+{"f":30,"pose":"b_suspicious","ease":"in_out_sine","set":{"head":{"rot":-10},"leg_upper_r":{"rot":-5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-22.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.6,"rot":0,"sx":1,"sy":1}}},
+{"f":46,"pose":"b_look_behind","ease":"in_out_sine","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":60,"pose":"b_look_behind","ease":"in_out_sine","set":{"head":{"rot":4},"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":10,"type":"sfx","id":"step_soft","vol_db":-10.0},
+{"f":16,"type":"voice","id":"vo_bellows_huh","vol_db":-6.0}
+]}

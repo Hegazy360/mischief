@@ -1,0 +1,14 @@
+{"version":1,"clip":"bellows/beat_tear","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"T3 last beat (60 f): one single tear rolls down — and he sniffs it straight back in.","blend_in":6,"blend_out":6,"tags":["beat","last_beat","tear"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_slow_burn","ease":"linear","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}},
+{"f":10,"pose":"b_tear_lip","ease":"in_out_sine","face":"teary","set":{"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":1.005},"belly":{"sy":1.013}}},
+{"f":24,"pose":"b_tear_lip","ease":"in_out_sine","set":{"head":{"rot":8},"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":0.994},"belly":{"sy":0.986}}},
+{"f":42,"pose":"b_tear_sniff","ease":"out_quad","face":"teary","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1.004},"belly":{"sy":1.009}}},
+{"f":50,"pose":"b_tear_sniff","ease":"in_out_sine","set":{"head":{"rot":-14},"nose":{"sx":1.06},"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":0.995},"belly":{"sy":0.987}}},
+{"f":60,"pose":"b_slow_burn","ease":"in_out_sine","face":"slow_burn","set":{"leg_upper_r":{"rot":7.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-10.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.8,"rot":0,"sx":1,"sy":1.0},"belly":{"sy":1.0}}}
+],
+"events":[
+{"f":0,"type":"sfx","id":"sad_violin"},
+{"f":24,"type":"sfx","id":"tear_plink"},
+{"f":42,"type":"sfx","id":"sniffle"}
+]}

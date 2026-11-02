@@ -1,0 +1,16 @@
+{"version":1,"clip":"bellows/st_grab","rig":"bellows","loop":false,"length":60,"layer":"base","mask":null,"doc":"Caught (60 f, the Busted Cam re-stage plays over it): he lunges, grabs her by the braces and holds her up at arm's length, delighted with himself.","blend_in":0,"blend_out":6,"tags":["state","caught","grab"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_chase_a","ease":"linear","face":"furious","set":{"leg_upper_r":{"rot":-62.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":-25.4,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":4,"pose":"b_take_antic","ease":"in_quad","face":"furious","set":{"root":{"x":0.1,"y":-24.9,"rot":0.0,"sx":1.0,"sy":1.0},"leg_upper_r":{"rot":-54.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":10.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0}}},
+{"f":8,"pose":"b_grab","ease":"pop","face":"livid"},
+{"f":12,"pose":"b_grab","ease":"linear","set":{"root":{"x":0.3,"y":-25.5,"rot":0.0,"sx":1.0,"sy":1.0},"leg_upper_r":{"rot":-64.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0}}},
+{"f":30,"pose":"b_lecture_hold","ease":"out_back","face":"furious","set":{"leg_upper_r":{"rot":-32.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":32.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-23.3,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":44,"pose":"b_lecture_hold","ease":"in_out_sine","set":{"head":{"rot":-14},"leg_upper_r":{"rot":-32.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":32.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-23.3,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":60,"pose":"b_lecture_hold","ease":"in_out_sine","set":{"leg_upper_r":{"rot":-32.0},"leg_lower_r":{"rot":20.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":32.0},"leg_lower_l":{"rot":10.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-23.3,"rot":0.0,"sx":1.0,"sy":1.0}}}
+],
+"events":[
+{"f":8,"type":"sfx","id":"crash_small"},
+{"f":8,"type":"shake","trauma":0.4},
+{"f":9,"type":"smear","part":"arm_upper_r","frames":2,"stretch":1.5},
+{"f":30,"type":"voice","id":"vo_bellows_hah"}
+]}

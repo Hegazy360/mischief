@@ -1,0 +1,21 @@
+{"version":1,"clip":"bellows/bit_livid","rig":"bellows","loop":false,"length":120,"layer":"base","mask":null,"doc":"Squeak bit (Livid, once per Night, 120 f): 'WHO SQUEAKED?!' — a full rage aria at the ceiling, a jabbed finger, then he collects himself.","blend_in":4,"blend_out":8,"tags":["bit","livid"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":false},
+"keys":[
+{"f":0,"pose":"b_stand","ease":"linear","face":"livid","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}},
+{"f":10,"pose":"b_melt_fists","ease":"in_out_sine","face":"livid","set":{"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":0.97}}},
+{"f":22,"pose":"b_rage_point","ease":"in_out_sine","face":"livid","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":32,"pose":"b_rage_aria","ease":"in_out_sine","face":"livid","set":{"leg_upper_r":{"rot":29.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.3,"y":0.7,"rot":0,"sx":0.98,"sy":1.03}}},
+{"f":44,"pose":"b_rage_aria","ease":"in_out_sine","set":{"root":{"x":0.3,"y":0.7,"rot":0,"sx":0.98,"sy":1.03},"head":{"rot":-33},"leg_upper_r":{"rot":29.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":54,"pose":"b_rage_aria","ease":"in_out_sine","set":{"root":{"x":0.3,"y":0.7,"rot":0,"sx":0.98,"sy":1.0},"head":{"rot":-30},"leg_upper_r":{"rot":29.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":68,"pose":"b_rage_aria","ease":"in_out_sine","set":{"root":{"x":0.3,"y":0.7,"rot":0,"sx":0.98,"sy":1.03},"head":{"rot":-34},"leg_upper_r":{"rot":29.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":84,"pose":"b_rage_point","ease":"in_out_sine","face":"livid","set":{"leg_upper_r":{"rot":17.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":0.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-0.1,"rot":0,"sx":1,"sy":1}}},
+{"f":96,"pose":"b_melt_fists","ease":"in_out_sine","face":"furious","set":{"leg_upper_r":{"rot":5.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-12.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.9,"rot":0,"sx":1,"sy":0.97}}},
+{"f":108,"pose":"b_dignity_straighten","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":13.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-4.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.4,"rot":0,"sx":1,"sy":1}}},
+{"f":120,"pose":"b_stand","ease":"in_out_sine","face":"irked","set":{"leg_upper_r":{"rot":11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-6.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.0,"y":-0.5,"rot":0,"sx":1,"sy":1}}}
+],
+"events":[
+{"f":22,"type":"voice","id":"vo_bellows_who_squeaked"},
+{"f":22,"type":"spring","part":"bouffant","kick":30.0},
+{"f":32,"type":"shake","trauma":0.25},
+{"f":68,"type":"fx","id":"steam","part":"head","dir":[0.0,-1.0],"amount":10},
+{"f":108,"type":"sfx","id":"cravat_tug","vol_db":-8.0}
+]}

@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "clip": "hush/freeze_midjob",
+  "rig": "hush",
+  "loop": true,
+  "length": 72,
+  "layer": "base",
+  "mask": null,
+  "doc": "FREEZE mid-rig (72 f, loops): she holds the tinkering pose exactly where it was, breathing as little as she dares.",
+  "blend_in": 2,
+  "blend_out": 2,
+  "tags": [
+    "freeze",
+    "midjob"
+  ],
+  "keys": [
+    {
+      "f": 0,
+      "pose": "h_tinker_q_a",
+      "ease": "linear",
+      "face": "hold_breath",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 18,
+      "pose": "h_tinker_q_a",
+      "ease": "in_out_sine",
+      "face": "hold_breath",
+      "set": {
+        "root": {
+          "sx": 1.004,
+          "sy": 0.996
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 36,
+      "pose": "h_tinker_q_a",
+      "ease": "in_out_sine",
+      "face": "hold_breath",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 54,
+      "pose": "h_tinker_q_a",
+      "ease": "in_out_sine",
+      "face": "hold_breath",
+      "set": {
+        "root": {
+          "sx": 1.004,
+          "sy": 0.996
+        },
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    },
+    {
+      "f": 72,
+      "pose": "h_tinker_q_a",
+      "ease": "in_out_sine",
+      "face": "hold_breath",
+      "set": {
+        "leg_upper_l": {
+          "rot": 6.75
+        },
+        "leg_lower_l": {
+          "rot": 0.51
+        },
+        "foot_l": {
+          "rot": -7.26
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "attach",
+      "prop": "clarence",
+      "socket": "torso:braces"
+    },
+    {
+      "f": 0,
+      "type": "prop",
+      "op": "state",
+      "prop": "clarence",
+      "state": "limp"
+    }
+  ],
+  "variation": {
+    "time_jitter": 0.0,
+    "rot_jitter": 0.0
+  },
+  "smear": {
+    "auto": false
+  },
+  "plant": true
+}

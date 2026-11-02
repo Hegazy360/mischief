@@ -1,0 +1,19 @@
+{"version":1,"clip":"bellows/st_face_to_face","rig":"bellows","loop":false,"length":48,"layer":"base","mask":null,"doc":"Face to face (48 f): he opens the cupboard she is hiding in and they shriek at each other — he leaps back, ducks, and stares.","blend_in":4,"blend_out":6,"tags":["state","face_to_face","take"],"plant":true,"variation":{"time_jitter":0.0,"rot_jitter":0.0},"smear":{"auto":true},
+"keys":[
+{"f":0,"pose":"b_fridge_open","ease":"linear","face":"pompous","set":{"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":5,"pose":"b_fridge_open","ease":"linear","set":{"head":{"rot":8},"leg_upper_r":{"rot":-3.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-20.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":-1.5,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":8,"pose":"b_shriek","ease":"pop","face":"terrified","set":{"leg_upper_r":{"rot":19.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.1,"y":0.0,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":12,"pose":"b_shriek","ease":"linear","set":{"root":{"x":0.1,"y":0.0,"rot":0.0,"sx":1.0,"sy":1.0},"leg_upper_r":{"rot":19.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":22,"pose":"b_shriek","ease":"in_out_sine","set":{"root":{"x":0.1,"y":0.0,"rot":0.0,"sx":1.0,"sy":1.0},"head":{"rot":-14},"leg_upper_r":{"rot":19.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":2.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0}}},
+{"f":34,"pose":"b_duck_cover","ease":"in_out_sine","face":"terrified","set":{"leg_upper_r":{"rot":-11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-28.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.0,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":42,"pose":"b_duck_cover","ease":"in_out_sine","face":"shock","set":{"head":{"rot":-14},"leg_upper_r":{"rot":-11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-28.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.0,"rot":0.0,"sx":1.0,"sy":1.0}}},
+{"f":48,"pose":"b_duck_cover","ease":"in_out_sine","face":"huh","set":{"head":{"rot":6},"leg_upper_r":{"rot":-11.0},"leg_lower_r":{"rot":0.0},"foot_r":{"rot":-6.0},"leg_upper_l":{"rot":-28.0},"leg_lower_l":{"rot":0.0},"foot_l":{"rot":8.0},"root":{"x":0.2,"y":-2.0,"rot":0.0,"sx":1.0,"sy":1.0}}}
+],
+"events":[
+{"f":8,"type":"voice","id":"vo_bellows_yow"},
+{"f":8,"type":"sfx","id":"sting_alert"},
+{"f":8,"type":"spring","part":"bouffant","kick":44.0},
+{"f":8,"type":"shake","trauma":0.5},
+{"f":9,"type":"smear","part":"head","frames":2,"stretch":1.6},
+{"f":34,"type":"sfx","id":"cupboard_door","vol_db":-4.0}
+]}

@@ -51,5 +51,33 @@
     "loop": false
   },
   "reaction_fallback": "",
-  "stand_in": "_mannequin"
+  "stand_in": "_mannequin",
+  "state:bowing": "hush/act_bow",
+  "flavour:glance": "hush/act_glance",
+  "flavour:pickup": "hush/act_pickup",
+  "flavour:shrug": "hush/st_shrug",
+  "state:rummage": {
+    "clip": "hush/act_rummage",
+    "loop": true
+  },
+  "state:pick_window": {
+    "clip": "hush/act_rummage",
+    "loop": true
+  },
+  "freeze_midjob": {
+    "clip": "hush/freeze_midjob",
+    "loop": true
+  },
+  "door": "hush/loco_door",
+  "oneshot:wink": "hush/act_wink",
+  "oneshot:wheeze": {
+    "clip": "hush/act_wheeze",
+    "loop": true
+  },
+  "oneshot:near_miss": "hush/st_near_miss",
+  "oneshot:yanked": "hush/st_yanked",
+  "state:caught": "hush/st_busted",
+  "oneshot:caught:busted": "hush/st_busted",
+  "oneshot:caught:lecture": "hush/lec_dangled",
+  "oneshot:caught:doorstep": "hush/st_doorstep"
 }

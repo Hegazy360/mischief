@@ -1,0 +1,33 @@
+{
+  "clip": "Death_A",
+  "character": "Knight.glb",
+  "amount": 1.3,
+  "sigma": 2.5,
+  "loop": false,
+  "angle": 70.0,
+  "res": 256,
+  "max_deg": 45.0,
+  "source_frames": 20,
+  "frames": 13,
+  "accent": 1,
+  "kept": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    7,
+    9,
+    10,
+    12,
+    14,
+    16,
+    17,
+    19
+  ],
+  "sheet": "flat.png",
+  "frame_w": 184,
+  "frame_h": 188,
+  "count": 13,
+  "ink": 2
+}

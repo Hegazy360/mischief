@@ -35,7 +35,7 @@ const SLOW_REFRESH_TICKS := 6
 ## Events that refresh hotspot states immediately.
 const HOTSPOT_EVENTS: PackedStringArray = ["rigged", "rig_step_done", "rig_start", "rig_pause", "pick", "rummage",
 	"pick_window", "hide", "pop_out", "restock", "item_home", "reaction_end", "prank_fire", "line_done",
-	"big_number_unsealed", "hush_room", "b_activity", "b_next", "fizzle"]
+	"big_number_unsealed", "hush_room", "b_activity", "b_next", "fizzle", "meddle_start", "meddled", "notice"]
 
 ## The SimWorld (TECH §3.4) or any object with the same accessors (FakeWorld). Typed loosely
 ## as a soft hook until Stage 2 (TECH §13).

@@ -364,6 +364,10 @@ func on_event(ev: Dictionary) -> void:
 				_ov_flavour_pending = "shrug"
 			"pick":
 				_ov_flavour_pending = "pickup"
+			"squeak":
+				# nobody heard (GDD §5.6): she glances at the Stalls — a squeak is never nothing
+				if not bool(ev.get("heard", true)):
+					_flavour_pending = "glance"
 	elif actor == "bellows":
 		match e:
 			"micro_gag":
@@ -525,6 +529,8 @@ func _update_ctx(cur: ViewSnapshot.Actor, vf: float) -> void:
 			_prep_step = cur.rig_step
 			_prep = info.step_prep(cur.rig_prank, cur.rig_step)
 		ctx.rig_tier = _prep
+	elif cur.state == "RIGGING" and cur.rig_prank == "":
+		ctx.rig_tier = "q"   # meddling (GDD §5.6): a Q hold on a prop with no prank tonight
 
 
 ## A key's clip length in frames (≥ 1; 1 when the clip is missing, so a flavour never waits).

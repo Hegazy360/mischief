@@ -19,6 +19,7 @@
 # missing route (with --baseline: on any new failure). Env: SANDBOX (default "solve").
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 SB_NAME="${SANDBOX:-solve}"
 # The sandbox import can crash intermittently on a busy asset tree: retry it, then run without it.
 import_sandbox() {
@@ -33,11 +34,11 @@ args=()
 for a in "$@"; do
   case "$a" in
     --write-auto) args+=("--write-auto" "--auto-dir=$ROOT/game/data/solutions/_auto") ;;
-    --report=*) args+=("--report=$(realpath -m "${a#--report=}")") ;;
-    --baseline=*) args+=("--baseline=$(realpath -m "${a#--baseline=}")") ;;
-    --timeline=*) args+=("--timeline=$(realpath -m "${a#--timeline=}")") ;;
-    --dump-cmds=*) args+=("--dump-cmds=$(realpath -m "${a#--dump-cmds=}")") ;;
-    --dump-events=*) args+=("--dump-events=$(realpath -m "${a#--dump-events=}")") ;;
+    --report=*) args+=("--report=$(mnd_abspath "${a#--report=}")") ;;
+    --baseline=*) args+=("--baseline=$(mnd_abspath "${a#--baseline=}")") ;;
+    --timeline=*) args+=("--timeline=$(mnd_abspath "${a#--timeline=}")") ;;
+    --dump-cmds=*) args+=("--dump-cmds=$(mnd_abspath "${a#--dump-cmds=}")") ;;
+    --dump-events=*) args+=("--dump-events=$(mnd_abspath "${a#--dump-events=}")") ;;
     *) args+=("$a") ;;
   esac
 done

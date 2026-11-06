@@ -173,7 +173,9 @@ func fill(m: HudModel, snap: ViewSnapshot, ctx: Dictionary, env: HudEnv) -> void
 		_fill_verb_fallback(m, snap)
 	# Clarence / ⏩ (⏩ only while hidden; she can never squeak from a hiding spot)
 	m.clarence_mode = HudModel.ClarenceMode.FF if h.state == "HIDDEN" else HudModel.ClarenceMode.SQUEAK
-	m.lure_grey = env.tick - _lure_ticks[0] < LURE_WINDOW_TICKS and _lure_ticks[0] > -100000
+	# Lure fatigue no longer greys the ring (GDD §5.6, P5): Clarence is a toy, and a toy never looks switched off —
+	# a tired third pip still gets his "PIPE DOWN!" shout, which is its own joke.
+	m.lure_grey = false
 	# Tray
 	if m.tray != h.carrying:
 		m.tray = h.carrying

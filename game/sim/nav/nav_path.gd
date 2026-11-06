@@ -19,6 +19,8 @@ const KIND_NAMES: Array[String] = ["WALK", "DOOR", "STAIRS", "PAUSE"]
 const AUX_LOOK_BACK := 1
 const AUX_DOORWAY_PAUSE := 2
 const AUX_BUMP := 3
+## A notice stop: he spotted a meddled prop and straightens it (SimConst.NOTICE_TICKS).
+const AUX_NOTICE := 4
 
 ## advance() flags.
 const F_ROOM := 1

@@ -1,0 +1,30 @@
+{
+  "clip": "Walking_A",
+  "character": "Knight.glb",
+  "amount": 1.0,
+  "sigma": 2.5,
+  "loop": true,
+  "angle": 70.0,
+  "res": 256,
+  "max_deg": 28.0,
+  "source_frames": 27,
+  "frames": 10,
+  "accent": 0,
+  "kept": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    14,
+    17,
+    20,
+    23,
+    26
+  ],
+  "sheet": "walk.png",
+  "frame_w": 107,
+  "frame_h": 214,
+  "count": 10,
+  "ink": 2
+}

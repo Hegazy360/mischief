@@ -61,6 +61,8 @@ var fixup_mask: int = -1
 var combo_ok: PackedByteArray = PackedByteArray()
 ## `rules.senses` (false: Bellows never starts a "?" by sight or hearing and never catches — the Gate-0 scene).
 var senses: bool = true
+## `rules.meddle` (default true): props that carry no prank tonight can be fiddled with (GDD §5.6).
+var meddle: bool = true
 ## Bellows' scripted exit (after an activity) and whether the loop repeats.
 var exit_after: String = ""
 var exit_room: int = -1
@@ -107,6 +109,7 @@ static func build(p_db: ContentDB, ep: EpisodeDef, config: Dictionary) -> SimCtx
 	for cb in p_db.combo_list:
 		c.combo_ok[cb.idx] = 1 if (ep.combos_all or ep.combos.has(cb.id)) else 0
 	c.senses = ep.senses
+	c.meddle = ep.meddle
 	var ds: Variant = h.entries.get("doorstep", null)
 	if typeof(ds) == TYPE_DICTIONARY:
 		c.doorstep_room = int(h.room_index.get(ContentUtil.s(ds, "room"), -1))

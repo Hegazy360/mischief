@@ -88,6 +88,24 @@ func test_lure_fatigue_after_two_lures_in_60s() -> void:
 	assert_false(w.bits.lure_ready(w))
 
 
+func test_head_turn_flavour_rotates() -> void:
+	# pickles has no squeak bit: every heard squeak is a head turn; Hush squeaks from the parlour, behind the doorway
+	var w := U.world_patched("fx_act1", U.loop_patch(["pickles"], "kitchen", 3130, "parlour", 2000))
+	U.run(w, 3)
+	var log: Array = []
+	for i in 2:
+		log.append_array(U.step(w, [SimCmd.squeak()]))
+		var os: Dictionary = w.bellows_oneshot()
+		assert_eq(str(os["id"]), "head_turn")
+		assert_eq(int(os["variant"]), i, "the view picks oneshot:head_turn[variant]")
+		log.append_array(U.run(w, SimConst.HEAD_TURN_TICKS + 1))
+	var hts := U.find(log, SimEvents.HEAD_TURN)
+	assert_eq(hts.size(), 2)
+	assert_eq([int(hts[0]["variant"]), int(hts[1]["variant"])], [0, 1])
+	assert_eq(w.bits.head_turns, 2)
+	assert_true(U.first(log, SimEvents.SQUEAK_BIT).is_empty())
+
+
 func test_asleep_only_the_nap_bit() -> void:
 	var w := U.world_patched("fx_act1", U.loop_patch(["nap"], "parlour", 2080, "parlour", 1600))
 	U.run_until(w, SimEvents.B_ACTIVITY, {"id": "nap"}, 60)

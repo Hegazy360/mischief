@@ -171,6 +171,12 @@ var rx_end_place: bool = false
 ## The reaction's last beat clip ("" none) and its frames (included in `rx_len`, at its end).
 var rx_last_beat: String = ""
 var rx_beat_len: int = 0
+## A notice stop (Meddle, GDD §5.6): the prop he is putting right, its view flavour and the way he faces it.
+var notice_hs: int = -1
+var notice_var: int = 0
+var notice_dir: int = 0
+## The head-turn flavour the view plays (`oneshot:head_turn[variant]`; Bits rotates it).
+var head_turn_var: int = 0
 # one-shot bookkeeping (SimOneshots reads these; all hashed)
 ## The squeak bit playing until `bit_until` and the tick it started.
 var bit_id: String = ""
@@ -229,6 +235,16 @@ func _insert_pause(at: int, t: int, aux: int) -> void:
 		warn_leg += 1
 
 
+## Meddle (GDD §5.6): stop where he stands for NOTICE_TICKS, facing hotspot `hs`, and put it right.
+## Called by Meddle.notice() during a WALK leg, before this tick's advance.
+func start_notice(_w: SimWorld, hs: int, variant: int, dir: int) -> void:
+	notice_hs = hs
+	notice_var = variant
+	notice_dir = dir
+	_insert_pause(path.cursor, SimConst.NOTICE_TICKS, NavPath.AUX_NOTICE)
+	facing = dir
+
+
 # --- per tick -------------------------------------------------------------------------------------
 
 ## Step 5 of the tick.
@@ -278,6 +294,9 @@ func _walk(w: SimWorld) -> void:
 	_entry_warning(w)
 	if bump_phase == BUMP_NONE and _check_bump(w):
 		return
+	var nh := w.meddle.find_notice(w)
+	if nh >= 0:
+		w.meddle.notice(w, nh)   # inserts the notice pause at the cursor; this tick's advance sits in it
 	var ox := x_sub
 	var oroom := room
 	var flags := path.advance()
@@ -299,6 +318,8 @@ func apply_path(w: SimWorld, flags: int, oroom: int, ox: int, chasing: bool) -> 
 	var pa := path.current_pause_aux()
 	if pa == NavPath.AUX_LOOK_BACK:
 		facing = -path.facing
+	elif pa == NavPath.AUX_NOTICE and notice_dir != 0:
+		facing = notice_dir
 	else:
 		facing = path.facing
 	last_step_px = Fx.div(absi(nx - ox), SimConst.SUB) if nroom == oroom else 0
@@ -1109,7 +1130,7 @@ const _PROPS: Array[String] = ["room", "floor", "x_sub", "facing", "state", "act
 	"rx_link", "rx_knock_from", "rx_has_travel", "rx_from_f", "rx_to_f", "rx_x0", "rx_x1", "rx_room0",
 	"rx_room1", "rx_room1_id", "rx_ease", "rx_end_place", "rx_last_beat", "rx_beat_len", "last_next_id",
 	"last_specs", "last_step_px", "visit_bits", "bit_id", "bit_t0", "specs_t0", "curious_t0", "fizzle_t0", "mg_last_t",
-	"mg_walk_i", "walk_t", "walk_len", "rx_count"]
+	"mg_walk_i", "walk_t", "walk_len", "rx_count", "notice_hs", "notice_var", "notice_dir", "head_turn_var"]
 
 
 ## Mix into a state hash.

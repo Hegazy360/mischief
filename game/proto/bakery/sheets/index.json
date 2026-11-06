@@ -1,0 +1,125 @@
+{
+  "character": "Knight.glb",
+  "clips": {
+    "idle": {
+      "sheet": "idle.png",
+      "frame_w": 113,
+      "frame_h": 214,
+      "count": 9,
+      "accent": 0,
+      "loop": true,
+      "clip": "Idle_A",
+      "amount": 0.6
+    },
+    "walk": {
+      "sheet": "walk.png",
+      "frame_w": 107,
+      "frame_h": 214,
+      "count": 10,
+      "accent": 0,
+      "loop": true,
+      "clip": "Walking_A",
+      "amount": 1.0
+    },
+    "run": {
+      "sheet": "run.png",
+      "frame_w": 131,
+      "frame_h": 214,
+      "count": 10,
+      "accent": 0,
+      "loop": true,
+      "clip": "Running_A",
+      "amount": 1.2
+    },
+    "sneak": {
+      "sheet": "sneak.png",
+      "frame_w": 154,
+      "frame_h": 214,
+      "count": 12,
+      "accent": 0,
+      "loop": true,
+      "clip": "Sneaking",
+      "amount": 1.0
+    },
+    "throw": {
+      "sheet": "throw.png",
+      "frame_w": 172,
+      "frame_h": 176,
+      "count": 13,
+      "accent": 6,
+      "loop": false,
+      "clip": "Throw",
+      "amount": 1.4
+    },
+    "hit": {
+      "sheet": "hit.png",
+      "frame_w": 169,
+      "frame_h": 214,
+      "count": 9,
+      "accent": 1,
+      "loop": false,
+      "clip": "Hit_A",
+      "amount": 1.4
+    },
+    "flat": {
+      "sheet": "flat.png",
+      "frame_w": 184,
+      "frame_h": 188,
+      "count": 13,
+      "accent": 1,
+      "loop": false,
+      "clip": "Death_A",
+      "amount": 1.3
+    },
+    "pickup": {
+      "sheet": "pickup.png",
+      "frame_w": 168,
+      "frame_h": 214,
+      "count": 11,
+      "accent": 2,
+      "loop": false,
+      "clip": "PickUp",
+      "amount": 1.1
+    },
+    "cheer": {
+      "sheet": "cheer.png",
+      "frame_w": 134,
+      "frame_h": 214,
+      "count": 12,
+      "accent": 0,
+      "loop": true,
+      "clip": "Cheering",
+      "amount": 1.1
+    },
+    "throw_flat": {
+      "sheet": "throw_flat.png",
+      "frame_w": 173,
+      "frame_h": 209,
+      "count": 13,
+      "accent": 6,
+      "loop": false,
+      "clip": "Throw",
+      "amount": 0.0
+    },
+    "hit_flat": {
+      "sheet": "hit_flat.png",
+      "frame_w": 140,
+      "frame_h": 214,
+      "count": 10,
+      "accent": 1,
+      "loop": false,
+      "clip": "Hit_A",
+      "amount": 0.0
+    },
+    "run_flat": {
+      "sheet": "run_flat.png",
+      "frame_w": 146,
+      "frame_h": 214,
+      "count": 10,
+      "accent": 0,
+      "loop": true,
+      "clip": "Running_A",
+      "amount": 0.0
+    }
+  }
+}

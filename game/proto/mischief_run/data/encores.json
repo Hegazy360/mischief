@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "doc": "Encores are the run-long rule changes drafted between rounds (the 'relic' slot). Each sets one flag read by Run.",
+  "encores": {
+    "running_gag": {
+      "name": "RUNNING GAG",
+      "glyph": "\u221e",
+      "text": "Chain multipliers start one step higher.",
+      "chain_step": 1
+    },
+    "stage_fright": {
+      "name": "STAGE FRIGHT",
+      "glyph": "\u26a1",
+      "text": "+1 Nerve every round.",
+      "nerve": 1
+    },
+    "tight_five": {
+      "name": "TIGHT FIVE",
+      "glyph": "\u270b",
+      "text": "Draw one more card every round.",
+      "draw": 1
+    },
+    "slow_clap": {
+      "name": "SLOW CLAP",
+      "glyph": "\u2261",
+      "text": "Every 3rd prank to fire in a round fires twice.",
+      "every_nth": 3
+    },
+    "full_house": {
+      "name": "FULL HOUSE",
+      "glyph": "\u25a3",
+      "text": "+20 Applause if all six stations fire.",
+      "full_house": 20
+    },
+    "second_banana": {
+      "name": "SECOND BANANA",
+      "glyph": "\u25c7",
+      "text": "The first prank you rig each round is free.",
+      "first_free": true
+    },
+    "tin_ear": {
+      "name": "TIN EAR",
+      "glyph": "\u25c8",
+      "text": "+4 Applause whenever a prank leaves a residue.",
+      "residue_fire": 4
+    },
+    "curtain_call": {
+      "name": "CURTAIN CALL",
+      "glyph": "\u25d4",
+      "text": "+6 Applause for each Nerve left unspent.",
+      "unspent": 6
+    },
+    "method_actor": {
+      "name": "METHOD ACTOR",
+      "glyph": "\u2663",
+      "text": "His temper bonus counts double.",
+      "tier_mult": 2
+    },
+    "clean_sweep": {
+      "name": "CLEAN SWEEP",
+      "glyph": "\u2713",
+      "text": "+12 Applause to end a round with no residues on him.",
+      "clean": 12
+    }
+  }
+}

@@ -337,7 +337,8 @@ func hotspot_state(w: SimWorld, id: String) -> Dictionary:
 		return {}
 	var enabled := w.ctx.hush_allowed(h.room_idx)
 	var d := {"kind": h.kind_name, "enabled": enabled, "stock": [], "occupant": w.hush.hidden_spot == h.idx,
-		"in_use_next": false, "spent": false, "rigged": false, "needs_item": "", "seen": w.hush_can_see(id)}
+		"in_use_next": false, "spent": false, "rigged": false, "needs_item": "", "seen": w.hush_can_see(id),
+		"meddle": false, "meddled": false}
 	match h.kind:
 		HotspotDef.CONTAINER:
 			d["stock"] = Array(container_stock(w, h.idx))
@@ -364,7 +365,10 @@ func hotspot_state(w: SimWorld, id: String) -> Dictionary:
 			var t := rig_target(w, h.idx)
 			if t >= 0:
 				d["needs_item"] = w.db.prank_list[t].steps[step[t]].needs
-			d["enabled"] = enabled and (t >= 0 or bool(d["rigged"]))
+			# meddling (GDD §5.6): a prop with no prank tonight can be fiddled with; askew until he notices
+			d["meddle"] = w.meddle.can_meddle(w, h.idx)
+			d["meddled"] = w.meddle.is_askew(h.idx)
+			d["enabled"] = enabled and (t >= 0 or bool(d["rigged"]) or bool(d["meddle"]) or bool(d["meddled"]))
 	return d
 
 

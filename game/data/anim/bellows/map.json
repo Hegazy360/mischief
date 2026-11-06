@@ -107,10 +107,14 @@
   "clip": "bellows/melt_exhausted",
   "loop": true
  },
- "oneshot:head_turn": "bellows/st_head_turn",
+ "oneshot:head_turn": ["bellows/st_head_turn", "bellows/st_look_back", "bellows/st_suspicious"],
  "oneshot:specs_on": "bellows/st_specs_on",
  "oneshot:doorway_pause": {
   "clip": "bellows/st_straighten_cravat",
+  "loop": true
+ },
+ "oneshot:notice": {
+  "clip": ["bellows/st_suspicious", "bellows/st_straighten_cravat", "bellows/st_look"],
   "loop": true
  },
  "oneshot:look_back": "bellows/st_look_back",

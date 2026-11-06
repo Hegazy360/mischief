@@ -248,14 +248,11 @@ func test_map_uses_the_schema_and_resolves() -> void:
 			fam = k.get_slice(":", 0) + ":*"
 		assert_true(ClipMap.SCHEMA_KEYS.has(fam) or ClipMap.SCHEMA_KEYS.has(k), "map key %s is in the s2-view schema" % k)
 		var e: Variant = m[k]
-		var clip := ""
-		if e is String:
-			clip = String(e)
-		elif e is Dictionary:
-			clip = String((e as Dictionary).get("clip", ""))
-		if clip == "" or clip == ClipMap.FROM_SIM:
-			continue
-		assert_true(_clip(clip) != null, "%s → %s exists" % [k, clip])
+		# every clip an entry can name (a string, a variant list, or a {clip: id | [ids]} entry), as ClipMap.clip_of picks
+		for clip: String in ClipMap.clips_of(e):
+			if clip == "" or clip == ClipMap.FROM_SIM:
+				continue
+			assert_true(_clip(clip) != null, "%s → %s exists" % [k, clip])
 	var walk: Dictionary = m.get("walk", {})
 	assert_eq(int(walk.get("speed_px_s", 0)), 240, "strut speed (GDD §4.1)")
 	var strut := _clip("bellows/loco_strut")

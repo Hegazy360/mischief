@@ -6,7 +6,8 @@
 ## pip (8 s window, ≤ 3). If his current activity has a squeak bit used < 3 times this visit it plays
 ## (over the activity clock — he doesn't leave before it ends; +5 temper, Applause +2 / +1 / 0 per bit
 ## per Night); otherwise he
-## turns his head toward the squeak for 1 s. The third pip within 8 s is a lure (Curious at the squeak's
+## turns his head toward the squeak for 1 s (`head_turn {variant}`: the flavour rotates — a toy is never the same
+## twice). The third pip within 8 s is a lure (Curious at the squeak's
 ## spot, specs on, 3 s look) unless two lures already happened in the last 60 s (lure_fatigue: a shout).
 ## Noises (running, big rigs) within 500 px on his floor make him Curious too.
 ##
@@ -20,6 +21,8 @@ extends RefCounted
 var pips: PackedInt32Array = PackedInt32Array()
 var lures: PackedInt32Array = PackedInt32Array()
 var first_squeak_tick: int = -1
+## Head turns this Night (the flavour rotates on it).
+var head_turns: int = 0
 var mirror_active: bool = false
 var mirror_prank: int = -1
 var mirror_round: int = 0
@@ -63,7 +66,9 @@ func on_squeak(w: SimWorld, room: int, x: int, heard: bool) -> void:
 		b.head_turn_until = w.tick + SimConst.HEAD_TURN_TICKS
 		var d := Fx.signi(x - b.x_sub) if room == b.room else -b.facing
 		b.head_turn_dir = d if d != 0 else b.facing
-		w.emit(SimEvents.HEAD_TURN)
+		b.head_turn_var = head_turns % SimConst.HEAD_TURN_VARIANTS
+		head_turns += 1
+		w.emit(SimEvents.HEAD_TURN, {"variant": b.head_turn_var})
 	if pips.size() >= SimConst.EAR_PIPS_MAX and w.ctx.senses:
 		pips = PackedInt32Array()
 		b.ear_pips = 0
@@ -206,6 +211,7 @@ func copy() -> Bits:
 	o.pips = pips.duplicate()
 	o.lures = lures.duplicate()
 	o.first_squeak_tick = first_squeak_tick
+	o.head_turns = head_turns
 	o.mirror_active = mirror_active
 	o.mirror_prank = mirror_prank
 	o.mirror_round = mirror_round
@@ -218,6 +224,7 @@ func hash_into(h: int) -> int:
 	h = StateHash.mix_arr(h, pips)
 	h = StateHash.mix_arr(h, lures)
 	h = StateHash.mix(h, first_squeak_tick)
+	h = StateHash.mix(h, head_turns)
 	h = StateHash.mix_bool(h, mirror_active)
 	h = StateHash.mix(h, mirror_prank)
 	h = StateHash.mix(h, mirror_round)

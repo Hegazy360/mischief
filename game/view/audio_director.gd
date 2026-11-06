@@ -39,7 +39,7 @@ const TIER_KINDS: PackedStringArray = ["t0", "t1", "t2", "t3", "t4"]
 ## No sound id twice within this long (real seconds).
 const REPEAT_GUARD_S := 0.1
 const BELLOWS_EVENTS: PackedStringArray = ["b_activity", "b_activity_end", "b_next", "b_detour", "b_room", "entry_warning",
-	"doorway_pause", "specs", "glyph", "look_back", "ear_pip", "squeak_bit", "head_turn", "lure", "lure_fatigue",
+	"doorway_pause", "specs", "glyph", "look_back", "ear_pip", "squeak_bit", "head_turn", "lure", "lure_fatigue", "notice",
 	"door_slam", "wheeze", "meltdown_stomp", "bump", "prank_fire", "reaction_start", "reaction_accent", "reaction_end",
 	"fizzle", "combo", "temper_tier", "meltdown_start", "exhausted", "search", "spotted", "lecture"]
 ## Built-in cues (same schema) for when cues.json is absent.

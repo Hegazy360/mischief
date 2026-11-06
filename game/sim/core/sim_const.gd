@@ -265,6 +265,21 @@ const LURE_FATIGUE_COUNT := 2
 const LURE_FATIGUE_WINDOW := 3600
 ## Curious from a noise or near miss: look 3 s. GDD §4.4.
 const CURIOUS_LOOK_TICKS := 180
+## Head-turn flavours ("…the pipes?"): the view picks `oneshot:head_turn[variant]`; the sim rotates them.
+const HEAD_TURN_VARIANTS := 3
+
+# --- meddling (GDD §5.6 "the house is a toybox") -------------------------------------------------
+## A prop that carries no prank tonight can still be fiddled with (a Q hold): it sits askew until Bellows
+## walks past and notices. The notice is a path pause: he stops, tuts / straightens / double-takes.
+const NOTICE_TICKS := 60
+## He notices an askew prop this far ahead of him (px) in his room while walking.
+const NOTICE_PX := 220
+## Notice flavours (the view picks `oneshot:notice[variant]`; the sim rotates them).
+const NOTICE_VARIANTS := 3
+## Temper per notice (q): a fiddled prop is a small annoyance (a squeak bit is 5).
+const GAIN_NOTICE := 3
+## Applause for the first notice of each prop per Night (tenths: +1).
+const NOTICE_SCORE := 10
 
 # --- Mirror, Mirror (GDD §5.7 #15) ---------------------------------------------------------------
 ## Round lengths: preen 1.2 s, squint 1.2 s, specs tell 1.0 s.
@@ -303,7 +318,7 @@ const BOW_TICKS := 1
 ## `combos`: the combo ids this Night allows (absent = all, [] = none; ruling L4). `senses: false`: Bellows
 ## never starts a "?" and never catches (the Gate-0 scene).
 const RULE_KEYS: Array[String] = ["spot_fill_s", "tomatoes", "cant_fail", "nerves", "nerves_temper", "curtain_calls",
-	"loop_repeat", "max_minutes", "combos", "senses"]
+	"loop_repeat", "max_minutes", "combos", "senses", "meddle"]
 
 
 ## Walk speed at a temper tier (0..3), sub-px per tick. TECH §3.7.1.

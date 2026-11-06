@@ -24,6 +24,9 @@ const FREEZE := "freeze"                    ## {on}
 const NOISE := "noise"                      ## {kind, room, x, r}
 const SQUEAK := "squeak"                    ## {room, x, heard}
 const PIN := "pin"                          ## {room, x}
+## Meddling (GDD §5.6): a Q hold on a rig point that carries no prank tonight.
+const MEDDLE_START := "meddle_start"        ## {hotspot}
+const MEDDLED := "meddled"                  ## {hotspot} (the prop sits askew until he notices)
 # --- Bellows ---
 const B_ACTIVITY := "b_activity"            ## {id}
 const B_ACTIVITY_END := "b_activity_end"    ## {id}
@@ -40,6 +43,9 @@ const SQUEAK_BIT := "squeak_bit"            ## {bit, score}
 const HEAD_TURN := "head_turn"
 const LURE := "lure"                        ## {room, x}
 const LURE_FATIGUE := "lure_fatigue"
+## He walked past a meddled prop and stopped to put it right: {hotspot, variant, len, vis, score}. `vis` as a
+## micro-gag's (it counts as a visible beat for dead air); `score` = tenths of Applause it paid (first per prop).
+const NOTICE := "notice"
 ## A micro-gag beat (GDD §2.1 "a micro-gag every 5–8 s"): {id, activity, room, x, len, emote, vis}.
 ## `activity` = the activity or detour id ("walk" for a walk beat), `len` = clip frames, `emote` ∈
 ## `EMOTES` or "" (none), `vis` = `SimVisibility.beat_vis()` at emission: "room" | "pip" | "edge" | "".
@@ -112,9 +118,9 @@ const EMBARRASSED := "embarrassed"          ## {prank}
 
 ## Every event name (for tools and tests).
 const ALL: Array[String] = [HUSH_GO, HUSH_ARRIVE, HUSH_ROOM, RUMMAGE, PICK_WINDOW, PICK, ITEM_HOME, RESTOCK,
-	RIG_START, RIG_PAUSE, RIG_STEP_DONE, RIGGED, HIDE, POP_OUT, FREEZE, NOISE, SQUEAK, PIN,
+	RIG_START, RIG_PAUSE, RIG_STEP_DONE, RIGGED, HIDE, POP_OUT, FREEZE, NOISE, SQUEAK, PIN, MEDDLE_START, MEDDLED,
 	B_ACTIVITY, B_ACTIVITY_END, B_NEXT, B_DETOUR, B_ROOM, ENTRY_WARNING, DOORWAY_PAUSE, SPECS, GLYPH,
-	LOOK_BACK, EAR_PIP, SQUEAK_BIT, HEAD_TURN, LURE, LURE_FATIGUE, MICRO_GAG,
+	LOOK_BACK, EAR_PIP, SQUEAK_BIT, HEAD_TURN, LURE, LURE_FATIGUE, MICRO_GAG, NOTICE,
 	SPOT_START, NEAR_MISS, SPOTTED, CHASE_START, WHEEZE, DOOR_SLAM, CHASE_END, SEARCH, ON_GUARD, BUMP,
 	FACE_TO_FACE, CAUGHT, BUSTED_CAM, LECTURE, DOORSTEP, TOMATO, HOOK,
 	PRANK_FIRE, REACTION_START, REACTION_ACCENT, REACTION_END, KNOCK_ON, FIZZLE, RESIDUE_ADD, RESIDUE_CLEAR,
@@ -137,7 +143,8 @@ static func is_beat(ev: Dictionary) -> bool:
 ## True for a micro-gag beat the player can see (`vis` != ""): in Hush's room, in the PiP, or as an
 ## emote on the HUD edge bubble (D1: only these count against dead air).
 static func is_visible_beat(ev: Dictionary) -> bool:
-	return str(ev.get("e", "")) == MICRO_GAG and str(ev.get("vis", "")) != ""
+	var e := str(ev.get("e", ""))
+	return (e == MICRO_GAG or e == NOTICE) and str(ev.get("vis", "")) != ""
 
 
 ## True for events that are laughs (TECH §3.8): reaction accents, squeak bits, panto rounds and bits,

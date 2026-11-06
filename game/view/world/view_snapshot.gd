@@ -256,6 +256,8 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 		hush.rig_pm = 0
 		if hush.rig_prank != "" and world.has_method("rig_progress_pm"):
 			hush.rig_pm = int(world.call("rig_progress_pm", hush.rig_prank))
+		elif hush.state == "RIGGING" and world.has_method("meddle_progress_pm"):
+			hush.rig_pm = int(world.call("meddle_progress_pm"))   # meddling (GDD §5.6)
 	var bb: Object = _g(world, "bellows", null)
 	if bb != null:
 		_fill_bellows(bb, ids, world)

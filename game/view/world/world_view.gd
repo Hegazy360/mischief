@@ -635,6 +635,7 @@ func _update_props(snap: ViewSnapshot, delta: float) -> void:
 		var at_container := pv.hotspot.kind == "container" and (snap.hush.state == "RUMMAGE" or snap.hush.state == "PICK_WINDOW") \
 				and absf(snap.hush.x - pv.hotspot.use_x) < 120.0
 		pv.set_state_from(st, at_container or _door_open.has(id), ViewKit.s(st.get("rigged_prank", _rigged.get(id, ""))))
+		pv.set_meddled(bool(st.get("meddled", false)))
 		fx.badge(id, PropView.badge_kind(pv.hotspot.kind, st, snap.hush.carrying) if not pv.locked and not st.is_empty() else "")
 	_update_doors(snap)
 

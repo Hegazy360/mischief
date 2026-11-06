@@ -39,6 +39,9 @@ var carrying: PackedStringArray = PackedStringArray()
 var carry_uses: PackedInt32Array = PackedInt32Array()
 var rig_prank: int = -1
 var rig_step: int = 0
+## Meddling (GDD §5.6): the hotspot she is fiddling with (−1 none; `rig_prank` is −1 then) and her hold's ticks.
+var meddle_hs: int = -1
+var meddle_prog: int = 0
 var queued: Dictionary = {}
 var last_input_tick: int = 0
 var arm_moving_until: int = 0
@@ -360,7 +363,7 @@ func _cmd_rig(w: SimWorld, on: bool) -> void:
 	if not on:
 		rig_held = false
 		if state == RIGGING:
-			w.emit(SimEvents.RIG_PAUSE, {"prank": w.db.prank_list[rig_prank].id})
+			w.emit(SimEvents.RIG_PAUSE, {"prank": _rig_id(w)})
 			state = IDLE
 			_run_queued(w)
 		elif state == FROZEN and frozen_by_rig:
@@ -379,7 +382,10 @@ func _cmd_rig(w: SimWorld, on: bool) -> void:
 		return
 	var pi := w.pranks.rig_target(w, at_hotspot)
 	if pi < 0:
-		_reject(w, SimCmd.RIG, "nothing_to_rig")
+		if w.meddle.can_meddle(w, at_hotspot):
+			_start_meddle(w, at_hotspot)
+		else:
+			_reject(w, SimCmd.RIG, "already_meddled" if w.meddle.is_askew(at_hotspot) else "nothing_to_rig")
 		return
 	var p := w.db.prank_list[pi]
 	var si: int = w.pranks.step[pi]
@@ -393,6 +399,8 @@ func _cmd_rig(w: SimWorld, on: bool) -> void:
 	rig_held = true
 	rig_prank = pi
 	rig_step = si
+	meddle_hs = -1
+	meddle_prog = 0
 	state = RIGGING
 	pick_container = -1
 	w.pranks.begin_rig(w, pi)
@@ -414,7 +422,7 @@ func _cmd_freeze(w: SimWorld, on: bool) -> void:
 		return
 	freeze_held = true
 	if state == RIGGING:
-		w.emit(SimEvents.RIG_PAUSE, {"prank": w.db.prank_list[rig_prank].id})
+		w.emit(SimEvents.RIG_PAUSE, {"prank": _rig_id(w)})
 		rig_held = false
 	var was := state
 	_try_freeze(w)
@@ -699,7 +707,43 @@ func _dive_done(w: SimWorld) -> void:
 	w.bellows.on_hush_hidden(w, hidden_spot)
 
 
+## The prank id of the current rig hold ("" while meddling).
+func _rig_id(w: SimWorld) -> String:
+	return w.db.prank_list[rig_prank].id if rig_prank >= 0 else ""
+
+
+## Meddling (GDD §5.6): a Q hold on a prop that carries no prank tonight; `rig_prank` stays −1.
+func _start_meddle(w: SimWorld, hs: int) -> void:
+	rig_held = true
+	rig_prank = -1
+	rig_step = 0
+	meddle_hs = hs
+	meddle_prog = 0
+	state = RIGGING
+	pick_container = -1
+	w.emit(SimEvents.MEDDLE_START, {"hotspot": w.db.house.hotspots[hs].id})
+
+
+func _update_meddle(w: SimWorld) -> void:
+	if w.senses.visible:
+		w.emit(SimEvents.RIG_PAUSE, {"prank": ""})
+		frozen_by_rig = true
+		_enter_frozen(w)
+		return
+	meddle_prog += 1
+	if meddle_prog >= SimConst.PREP_Q:
+		w.meddle.set_askew(w, meddle_hs)
+		meddle_hs = -1
+		meddle_prog = 0
+		rig_held = false
+		state = IDLE
+		_run_queued(w)
+
+
 func _update_rig(w: SimWorld) -> void:
+	if rig_prank < 0:
+		_update_meddle(w)
+		return
 	var p := w.db.prank_list[rig_prank]
 	if w.senses.visible:
 		w.emit(SimEvents.RIG_PAUSE, {"prank": p.id})
@@ -737,6 +781,8 @@ func on_caught(w: SimWorld) -> void:
 	rig_held = false
 	freeze_held = false
 	frozen_by_rig = false
+	meddle_hs = -1
+	meddle_prog = 0
 	wheezing = false
 	pin_room = -1
 	pin_hs = -1
@@ -799,6 +845,8 @@ func copy() -> SimHush:
 	o.carry_uses = carry_uses.duplicate()
 	o.rig_prank = rig_prank
 	o.rig_step = rig_step
+	o.meddle_hs = meddle_hs
+	o.meddle_prog = meddle_prog
 	o.queued = queued.duplicate(true)
 	o.last_input_tick = last_input_tick
 	o.arm_moving_until = arm_moving_until
@@ -834,7 +882,7 @@ func hash_into(h: int) -> int:
 			rig_prank, rig_step, last_input_tick, arm_moving_until, at_hotspot, int(run), visited_mask,
 			pin_room, pin_x, pin_hs, path_serial, target_hs, timer, int(rig_held), int(freeze_held),
 			int(frozen_by_rig), int(wheezing), wheeze_t, noise_t, pick_container, int(go_from_inside), int(entering),
-			yank_t0, near_miss_t0, wink_t0]:
+			yank_t0, near_miss_t0, wink_t0, meddle_hs, meddle_prog]:
 		h = StateHash.mix(h, v)
 	for s in carrying:
 		h = StateHash.mix_str(h, s)

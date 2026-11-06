@@ -12,17 +12,17 @@ with `open <file>`.
 ## 1. The fastest look: play it
 
 ```bash
-tools/scripts/sandbox.sh play
-godot --path /tmp/mnd_sandbox/play/game
+tools/scripts/play.sh res://scenes/boot/Boot.tscn
 ```
 
-This opens the real game in a window. It runs from a private copy, so nothing you do can disturb
-the repository. Close the window when you are done.
+This syncs the repository into a private copy and opens the real game in a window, so nothing you
+do can disturb the repository — and you always see the current code. (Running `godot --path
+/tmp/mnd_sandbox/play/game` by hand shows whatever the copy held the last time it was synced.) Close the window when you are done.
 
 To jump straight into a Night instead of the front end:
 
 ```bash
-godot --path /tmp/mnd_sandbox/play/game res://scenes/night/NightScene.tscn -- --episode=n01_throat_tea
+tools/scripts/play.sh res://scenes/night/NightScene.tscn -- --episode=n01_throat_tea
 ```
 
 Episodes: `p00_curtain_up` (Prologue), `g0_sneeze` (the sneeze gag), `n01_throat_tea`, `n02_something_fishy`,

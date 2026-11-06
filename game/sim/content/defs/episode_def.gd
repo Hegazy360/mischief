@@ -72,6 +72,8 @@ var combos_all: bool = true
 var combos: PackedStringArray = PackedStringArray()
 ## `rules.senses` (default true): false = Bellows never starts a "?" (sight or hearing) and never catches.
 var senses: bool = true
+## `rules.meddle` (default true): false = props without a prank tonight cannot be fiddled with.
+var meddle: bool = true
 ## Scripted end: a condition and its reason (director.end / director.end_when).
 var end_when: Variant = null
 var end_reason: String = "prologue_done"
@@ -107,6 +109,7 @@ static func from_dict(d: Dictionary) -> EpisodeDef:
 		e.combos_all = false
 		e.combos = ContentUtil.strs(e.rules, "combos")
 	e.senses = ContentUtil.b(e.rules, "senses", true)
+	e.meddle = ContentUtil.b(e.rules, "meddle", true)
 	e.new_rule = ContentUtil.s(d, "new_rule")
 	e.card = ContentUtil.dict(d, "card")
 	e.cold_open = ContentUtil.dict(d, "cold_open")

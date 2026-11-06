@@ -25,13 +25,13 @@ SCEN="${1:?scenario}"; shift
 REPORT=""; PERF=""; STRICT=""; REALTIME=""; HEADLESS=""; MAXS=""; SEQ=(); EXTRA=()
 while [ $# -gt 0 ]; do
   case "$1" in
-    --report=*) REPORT="$(realpath -m "${1#--report=}")" ;;
+    --report=*) REPORT="$(mnd_abspath "${1#--report=}")" ;;
     --perf-log) PERF="--perf-log" ;;
     --strict) STRICT="--e2e-strict" ;;
     --realtime) REALTIME=1 ;;
     --headless) HEADLESS=1 ;;
     --max-s=*) MAXS="${1#--max-s=}" ;;
-    --shot-seq=*) SEQ+=("--shot-seq=$(realpath -m "${1#--shot-seq=}")") ;;
+    --shot-seq=*) SEQ+=("--shot-seq=$(mnd_abspath "${1#--shot-seq=}")") ;;
     --every=*|--count=*|--seq-from=*) SEQ+=("$1") ;;
     --) shift; EXTRA=("$@"); break ;;
     *) EXTRA+=("$1") ;;

@@ -114,7 +114,8 @@ static func _s(ticks: int) -> float:
 
 ## The micro-gag kind of an event: "" (not a beat), "room" | "pip" | "edge" (visible) or "hidden".
 static func beat_kind(ev: Dictionary) -> String:
-	if SolverData.sv(ev.get("e", "")) != "micro_gag":
+	var e := SolverData.sv(ev.get("e", ""))
+	if e != "micro_gag" and e != "notice":
 		return ""
 	var v := SolverData.sv(ev.get("vis", ""))
 	return v if BEAT_KINDS.has(v) else "hidden"

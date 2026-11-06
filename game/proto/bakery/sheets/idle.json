@@ -1,0 +1,29 @@
+{
+  "clip": "Idle_A",
+  "character": "Knight.glb",
+  "amount": 0.6,
+  "sigma": 2.5,
+  "loop": true,
+  "angle": 70.0,
+  "res": 256,
+  "max_deg": 28.0,
+  "source_frames": 27,
+  "frames": 9,
+  "accent": 0,
+  "kept": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    17,
+    20,
+    23,
+    26
+  ],
+  "sheet": "idle.png",
+  "frame_w": 113,
+  "frame_h": 214,
+  "count": 9,
+  "ink": 2
+}

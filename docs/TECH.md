@@ -198,7 +198,9 @@ func applause_tenths() -> int ; func stars() -> Array  ## [bool, bool, bool]
 func link() -> int ; func fuse_ticks() -> int  ## Running Gag link count and time left
 func tomatoes() -> int ; func tomatoes_max() -> int    ## max −1 = unlimited
 func hotspot_state(id: String) -> Dictionary  ## {kind, enabled, stock:[items], occupant:bool, in_use_next:bool,
-                                              ##  spent:bool, rigged:bool, needs_item:String, seen:bool}
+                                              ##  spent:bool, rigged:bool, needs_item:String, seen:bool,
+                                              ##  meddle:bool (can be fiddled with now), meddled:bool (sits askew)}
+func meddle_progress_pm() -> int              ## Hush's meddle hold, per mille (0 when not meddling)
 func bubble() -> Dictionary                   ## {next: activity|detour id, icon, ring_ticks, glyph, ear_pips}
 func bellows_path_preview(ticks: int) -> PackedInt32Array  ## [room, x_sub, ...] samples every 10 ticks
 func hush_can_see(hotspot_id: String) -> bool ## for "???" line reveal (visited room)
@@ -349,8 +351,8 @@ Every event is `{"e": String, "t": int, ...}`. Payload fields are ints/strings/b
 
 | Group | Events (payload) |
 |---|---|
-| Hush | `hush_go {target, run}`, `hush_arrive {hotspot}`, `hush_room {room}`, `rummage {container}`, `pick_window {container, items}`, `pick {item}`, `item_home {item}`, `restock {item, container}`, `rig_start {prank, step}`, `rig_pause {prank}`, `rig_step_done {prank, step}`, `rigged {prank}`, `hide {spot, watched}`, `pop_out {spot}`, `freeze {on}`, `noise {kind, room, x, r}`, `squeak {room, x, heard}`, `pin {room, x}` |
-| Bellows | `b_activity {id}`, `b_activity_end {id}`, `b_next {id, detour}`, `b_detour {kind, station, why}`, `b_room {room}`, `entry_warning {room, eta}`, `doorway_pause {ticks}`, `specs {on}`, `glyph {id}`, `look_back`, `ear_pip {n}`, `squeak_bit {bit, score}`, `head_turn`, `lure {room, x}`, `lure_fatigue` |
+| Hush | `hush_go {target, run}`, `hush_arrive {hotspot}`, `hush_room {room}`, `rummage {container}`, `pick_window {container, items}`, `pick {item}`, `item_home {item}`, `restock {item, container}`, `rig_start {prank, step}`, `rig_pause {prank}` (`prank` "" for a meddle hold), `rig_step_done {prank, step}`, `rigged {prank}`, `hide {spot, watched}`, `pop_out {spot}`, `freeze {on}`, `noise {kind, room, x, r}`, `squeak {room, x, heard}`, `pin {room, x}`, `meddle_start {hotspot}`, `meddled {hotspot}` (GDD §5.6 meddling: a Q hold on a rig point with no prank tonight; the prop sits askew) |
+| Bellows | `b_activity {id}`, `b_activity_end {id}`, `b_next {id, detour}`, `b_detour {kind, station, why}`, `b_room {room}`, `entry_warning {room, eta}`, `doorway_pause {ticks}`, `specs {on}`, `glyph {id}`, `look_back`, `ear_pip {n}`, `squeak_bit {bit, score}`, `head_turn {variant}` (the view picks `oneshot:head_turn[variant]`), `lure {room, x}`, `lure_fatigue`, `notice {hotspot, variant, len, vis, score}` (he stopped to put a meddled prop right: a `NOTICE_TICKS` path pause, `AUX_NOTICE`; `vis` as a micro-gag's — a visible beat for dead air; `score` tenths, the first notice per prop) |
 | Danger | `spot_start {by}`, `near_miss {by}`, `spotted {by}`, `chase_start`, `wheeze`, `door_slam`, `chase_end {why}`, `search`, `on_guard`, `bump {first}`, `face_to_face {spot}`, `caught {cause, spotted_tick, by}`, `busted_cam`, `lecture {variant}`, `doorstep`, `tomato {n}`, `hook` |
 | Comedy | `prank_fire {prank, trigger, link, tier, witnessed}`, `reaction_start {prank, archetype, variant, tier, suppressed, len, entry}`, `reaction_accent {prank}`, `reaction_end {prank}`, `knock_on {a, b}`, `fizzle {prank}`, `residue_add {kind}`, `residue_clear {kind}`, `combo {id}`, `temper_tier {tier}`, `running_gag {link, mult}`, `running_gag_end`, `meltdown_start`, `meltdown_stomp {n}`, `exhausted`, `panto_round {round, phase}`, `panto_bit`, `mirror_round {round}`, `wink {round}`, `headbutt {target, landing}` |
 | Score | `applause {delta, total, kind, label}`, `bonus {kind, amount}`, `line_done {line}`, `big_number_unsealed`, `all_lines_done`, `star {n}` |

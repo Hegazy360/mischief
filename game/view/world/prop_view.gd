@@ -23,6 +23,12 @@ const STATES: PackedStringArray = ["idle", "open", "rigged", "spent", "occupied"
 
 ## The art states a prop in the unlit set can show (s2-fix G #7).
 const LOCKED_STATES: PackedStringArray = ["idle", "open", "front"]
+## Meddled (GDD §5.6): the prop sits askew — tilted this much about its foot — until Bellows puts it right.
+const MEDDLE_TILT := 0.13
+const MEDDLE_TILT_S := 0.28
+## True while the sim says the prop sits askew (`hotspot_state.meddled`).
+var meddled: bool = false
+var _tilt: Tween = null
 var hotspot: HouseLayout.Hotspot = null
 var layout: HouseLayout = null
 var locked: bool = false
@@ -143,6 +149,39 @@ func set_state_from(hs_state: Dictionary, open: bool, rigged_prank: String = "")
 	_set_state(PropView.state_for(hs_state, open, rigged_prank, _tex))
 
 
+## Meddled (GDD §5.6): tilt the prop about its foot (a Back ease, so it wobbles into place), or straighten it.
+## The sprite is re-pivoted to its bottom centre while askew; `badge_anchor()` reads the pivot-corrected rect.
+func set_meddled(on: bool) -> void:
+	if on == meddled:
+		return
+	meddled = on
+	if sprite == null or sprite.texture == null:
+		queue_redraw()
+		return
+	var sz := sprite.texture.get_size()
+	var tl := sprite.position + sprite.offset
+	sprite.position = tl + Vector2(sz.x * 0.5, sz.y)
+	sprite.offset = -Vector2(sz.x * 0.5, sz.y)
+	var side := 1.0 if (hotspot.id.hash() & 1) == 0 else -1.0
+	var target := MEDDLE_TILT * side if on else 0.0
+	if _tilt != null and _tilt.is_valid():
+		_tilt.kill()
+	_tilt = create_tween()
+	_tilt.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_tilt.tween_property(sprite, "rotation", target, MEDDLE_TILT_S)
+	if not on:
+		_tilt.tween_callback(_reset_pivot)
+
+
+## Back to the plain top-left placement once the prop stands straight again.
+func _reset_pivot() -> void:
+	if sprite == null or meddled:
+		return
+	sprite.rotation = 0.0
+	sprite.position = sprite.position + sprite.offset
+	sprite.offset = Vector2.ZERO
+
+
 ## Force the `open` look (a door being traversed, the kitchen window at the entry).
 func show_open(on: bool) -> void:
 	if on and _tex.has("open") and state != "open":
@@ -180,7 +219,7 @@ static func badge_kind(kind: String, hs_state: Dictionary, carrying: PackedStrin
 				return ""
 			return "red" if bool(hs_state.get("in_use_next", false)) else "blue"
 		"rig_point":
-			if bool(hs_state.get("rigged", false)):
+			if bool(hs_state.get("rigged", false)) or bool(hs_state.get("meddled", false)):
 				return ""
 			var need := ViewKit.s(hs_state.get("needs_item", ""))
 			if need != "" and not carrying.has(need):
@@ -196,7 +235,7 @@ static func badge_kind(kind: String, hs_state: Dictionary, carrying: PackedStrin
 
 ## World point above the prop where its badge sits.
 func badge_anchor() -> Vector2:
-	var r := Rect2(sprite.position, sprite.texture.get_size()) if sprite != null else _grey_rect
+	var r := Rect2(sprite.position + sprite.offset, sprite.texture.get_size()) if sprite != null else _grey_rect
 	return Vector2(r.get_center().x, r.position.y - 44.0)
 
 

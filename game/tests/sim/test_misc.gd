@@ -39,7 +39,7 @@ func test_bubble_and_snapshot_getters() -> void:
 func test_hotspot_state_fields() -> void:
 	var w := U.world_patched("fx_act1", U.loop_patch(["clock", "tea"], "hall", 900, "kitchen", 3800))
 	var hs := w.hotspot_state("kitchen_honey")
-	for k in ["kind", "enabled", "stock", "occupant", "in_use_next", "spent", "rigged", "needs_item", "seen"]:
+	for k in ["kind", "enabled", "stock", "occupant", "in_use_next", "spent", "rigged", "needs_item", "seen", "meddle", "meddled"]:
 		assert_true(hs.has(k), k)
 	assert_eq(hs["kind"], "rig_point")
 	assert_true(hs["enabled"])

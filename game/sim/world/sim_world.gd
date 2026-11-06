@@ -51,6 +51,7 @@ var residue: Residue = null
 var scoring: Scoring = null
 var goals: ScriptGoals = null
 var bits: Bits = null
+var meddle: Meddle = null
 var chase: Chase = null
 var director: Director = null
 
@@ -111,6 +112,7 @@ func _init_state() -> void:
 	scoring = Scoring.new()
 	goals = ScriptGoals.new()
 	bits = Bits.new()
+	meddle = Meddle.new()
 	chase = Chase.new()
 	director = Director.new()
 	hush = SimHush.new()
@@ -118,6 +120,7 @@ func _init_state() -> void:
 	beryl = null
 	delphine = null
 	pranks.setup(self)
+	meddle.setup(self)
 	goals.setup(self)
 	director.setup(self)
 	hush.setup(self)
@@ -219,6 +222,13 @@ func rig_progress_pm(id: String) -> int:
 	return pranks.progress_pm(self, i) if i >= 0 else 0
 
 
+## Per-mille progress of Hush's meddle hold (0 when she isn't meddling; GDD §5.6).
+func meddle_progress_pm() -> int:
+	if hush.meddle_hs < 0:
+		return 0
+	return mini(1000, Fx.div(hush.meddle_prog * 1000, SimConst.PREP_Q))
+
+
 ## [{id, done, req, big_number, sealed, candle}] in Script order.
 func line_states() -> Array:
 	return goals.line_states(self)
@@ -293,6 +303,7 @@ func action_context() -> Dictionary:
 	var ring := 0
 	var tier_t := 0
 	var cont := ""
+	var meddling := false
 	var hu := hush
 	var hst := hu.state
 	if not (ended or hu.entering or hst == SimHush.CAUGHT or hst == SimHush.BOWING):
@@ -326,8 +337,17 @@ func action_context() -> Dictionary:
 						else:
 							verb = "rig_dim"
 							cont = st.needs_src
+				elif (by_rig and hu.meddle_hs == hs) or (not by_rig and meddle.can_meddle(self, hs)):
+					# meddling (GDD §5.6): a free Q hold on a prop that carries no prank tonight
+					meddling = true
+					have = true
+					icon = db.hs_icon[hs]
+					tier_t = SimConst.PREP_Q
+					ring = meddle_progress_pm() if by_rig else 0
+					verb = "rig"
 	var o := _ac
 	o["verb"] = verb
+	o["meddle"] = meddling
 	o["prank"] = prank
 	o["step"] = step_i
 	o["item_needed"] = needs
@@ -454,6 +474,7 @@ func state_hash() -> int:
 	h = scoring.hash_into(h)
 	h = goals.hash_into(h)
 	h = bits.hash_into(h)
+	h = meddle.hash_into(h)
 	h = chase.hash_into(h)
 	h = director.hash_into(h)
 	return h
@@ -489,6 +510,7 @@ func clone() -> SimWorld:
 	w.scoring = scoring.copy()
 	w.goals = goals.copy()
 	w.bits = bits.copy()
+	w.meddle = meddle.copy()
 	w.chase = chase.copy()
 	w.director = director.copy()
 	w._last_hush_room_for_inv = _last_hush_room_for_inv

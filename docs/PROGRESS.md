@@ -279,3 +279,164 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   clips' sounds are placed on their contact frames but not yet published in the s2-sound table (only the four T3
   beats, which were already published, are matched exactly); a PropSim launch at reaction speeds drifts, so
   LIFT-OFF hides the paper instead of throwing it. Review: `docs/review/w0-anim/index.md`.
+- 2026-11-02 — Owner: the gameplay is too basic and not engaging; review it and the process that produced it.
+  Measured review in `docs/review/depth/index.md`. (1) **Tooling bug fixed:** `e2e.sh`, `fuzz.sh` and `solve.sh`
+  called GNU `realpath -m` while `lib.sh` has exported the portable `mnd_abspath` since 2026-10-30, so all three
+  died at argument parsing on macOS — the owner's end-to-end review, fuzzer and solver reports had been broken
+  (the newest e2e report on this machine was a stale 31 Oct file). `fuzz.sh` and `solve.sh` now source `lib.sh`.
+  Verified: `e2e.sh n01_ideal` + `--shot-seq` writes frames, `solve.sh` 3/3 routes, `fuzz.sh` 8/8 runs. CI is
+  ubuntu-only, so nothing caught it. (2) **Measured the ideal route of Night 1** (the best possible play): 138.2 s,
+  37 inputs, 6.4 s total rig-button time, **76.9 s (56 %) on fast-forward**, longest no-input gap 27.1 s, 5 live
+  pranks of which all 5 are Script lines. `alive_by` shows the dead-air gate is 56 % satisfied by things the player
+  watches, so a Night with zero inputs could pass it — the gates measure presentation, not agency, which is why
+  every gate is green and the game is dull. (3) Root cause is the authored-one-off content model: one rig point and
+  one trigger per prank, 24 of 32 pranks with a single reaction variant, chaining as a 6-entry lookup table, and
+  ~28 of 33 rig points inert per Night answering with `ui_nuh_uh`. (4) Seven ranked gameplay changes (P1 default
+  world reaction, P2 two ways per station, P3 more pranks than required, P4 feed the Running Gag fuse, P5 un-nerf
+  Clarence, P6 three reaction variants, P7 Rehearsal) and six process changes (Q1 agency metrics as gates incl.
+  `route_diversity` from the existing Planner beam search, Q2 run the never-run Fun Gate before more content,
+  Q3 macOS CI, Q4 demote the BINDING GDD + a design-spike lane, Q5 captures not stills, Q6 brief by goal+metric).
+  No gameplay code or content changed.
+- 2026-11-02 — Owner: start with P1 + P5 (`docs/review/depth/index.md`) and judge whether they move the needle before
+  anything bigger. **P1 — Meddle, "the house is a toybox" (GDD §5.6).** Every rig point that carries no prank tonight
+  takes a Q hold (`meddle_start` → `meddled`): the prop sits askew (PropView tilts it 0.13 rad about its foot; the
+  gold badge goes out) until Bellows walks toward it in its room (≤ 220 px, ROUTINE / DETOUR walk, not blinded) and
+  stops for 1.0 s to put it right — a path pause (`NavPath.AUX_NOTICE`, `notice {hotspot, variant, len, vis, score}`),
+  three rotating flavours (`oneshot:notice`: suspicious / straighten / peer), his "hmph" + a titter, +3 temper, and
+  **+1 Applause the first time per prop** (a bit, label `notice`). New `sim/systems/meddle.gd` (state in the hash and
+  the clone), `rules.meddle` (default true), `hotspot_state.meddle / .meddled`, `meddle_progress_pm()`,
+  `action_context.meddle`; tonight's props stay the Script's (`nothing_to_rig` as before); a notice counts as a visible
+  beat for dead air (`SimEvents.is_visible_beat`, `Metrics.beat_kind`). Night 1 now has **12 props that answer** in
+  its three rooms where it had 5. **P5 — Clarence is a toy.** The head turn rotates three flavours (`head_turn
+  {variant}` → st_head_turn / st_look_back / st_suspicious, each with its own grunt), the Clarence ring no longer greys
+  under lure fatigue (the "PIPE DOWN!" shout is the joke), and an unheard squeak makes Hush glance at the Stalls.
+  **Verified:** suite 1,113 green (test_meddle ×7, head-turn rotation, golden regenerated with a reason: new hashed
+  state only), `lint.sh --strict` 144 clips / 0 / 0, solver 21 / 21 unchanged to the decimal (no route meddles),
+  fuzz 72 / 72 with the random bots now meddling (every fairness invariant held), import meta OK; captured in the
+  real Night 1 (`/tmp/mnd_meddle2`): Applause 1 → 2 as he fixes the chandelier then the fan, "+1" stamps, the fan
+  visibly askew on its hook. **Open:** `st_double_take` (18 f, no loop) cannot serve a 60-tick notice — a 60 f
+  double-take would be the best third flavour; the meddle hold shows the generic HOLD tag (a "FIDDLE" tag is a
+  strings.json + action-button change); the fridge shelf has no visible idle art, so its askew state is invisible.
+  QA guide: `docs/review/depth/qa_p1_p5.md`.
+- 2026-11-04 — Owner: P1/P5 is better but still the same game; wants completely different animations and
+  mechanics, a redesign from scratch before more complexity; look at the options first (redesign, new engine, or
+  bigger improvements). Wrote `docs/review/pivot/index.md`: the test a pivot must pass (the player causes the comedy
+  with their hands; animation that is not hand-keyed; judgeable in a week on a phone), a reuse table per module, five
+  options with keep-% and a one-week spike each — A Physics Toybox (Goose/Octodad lineage, ~35 % kept, highest
+  ceiling and highest tuning risk), B Set the Stage (rehearsal → performance contraption builder, ~55 %, keeps the
+  deterministic sim and solver, makes the chain fantasy the core verb), C The Chase (pursuit with real-time traps,
+  ~50 %, cheapest to feel), D Board Farce (turn-based, ~75 %, the safe fallback, fails the brief), E stay-and-deepen
+  (the baseline the spikes are judged against). Engine: stay on Godot — the diagnosis is design, every option is
+  buildable in Godot 4 (Rapier2D for joint chains), and the review toolchain is the owner's only instrument.
+  Recommendation: spike B and C in parallel in `game/spikes/` on a shared procedural ragdoll/spring cast, two weeks,
+  decide on the phone with a five-question gate. P1/P5 stay on the tree, uncommitted, as the proposed last change on
+  the current design.
+- 2026-11-05 — Owner: build spikes A and C as samples before choosing a direction. Built in `game/spikes/`
+  (throwaway: no tests, no lints, no content JSON; the shipping game untouched — suite 1,113 green, all lints
+  green, `solve.sh n01 ideal` identical to the decimal, import meta OK). **Shared procedural cast**
+  (`spikes/common/rag_cast.gd`, ~320 lines): rebuilds both characters from the real rig.json and the real SVG
+  parts, then drives them with **no keyframed clips at all** — an active ragdoll (every joint an angular spring
+  behind one `muscle` number; `hit()` drops it to 0, the body tumbles, settles, and the muscle ramps back for a
+  scramble-up), a procedural sine walk that works at any speed, and jiggle springs on the bouffant, cravat, coat
+  tails and beret. Bench `spikes/common/CastTest.tscn`: **jitter 0.07, pops 0, smooth 97** (library band
+  0.14–0.25; the retired 3D cast scored 0.42). **Spike A** `spikes/toybox/` — eight rigid-body props in the real
+  parlour and kitchen, drag to haul and fling, anything over 520 px/s knocks him flat, then he gets up, notices
+  the mess, carries it home and resumes (the Goose tidy-up loop). **Spike C** `spikes/chase/` — three real rooms,
+  he pursues and never stops, four trap kinds, and setting a trap costs 0.42 s crouched while he closes; the
+  house has two ends. Chase reports **no frozen frames and no pops** across a 9 s run; the toybox's one 1.3 s
+  frozen stretch is him lying on the floor. Both take `--demo` for a scripted capture. **Three bugs the spikes
+  found and fixed** (all in the ragdoll, all the kind only play reveals): limp limbs with only gravity torque
+  collapse into an unreadable heap and need residual tone; settling on a per-frame ground flag never fires
+  because the contact point moves as the body rotates (0.18 s coyote window); spin needs air drag or a thrown
+  body pirouettes onto its head. Notes `docs/review/pivot/spikes.md`, artefacts `docs/review/pivot/spikes/`,
+  QA guide `docs/review/pivot/qa_spikes.md` (five questions, and how to read each answer).
+- 2026-11-05 — Owner: the spikes are the same animations and style and play worse; a complete pivot; research
+  the best options for a one-owner, AI-agent team to make a great mobile game in 2026. Wrote
+  `docs/review/pivot/2026_options.md`. Diagnosis: every round kept the cast, the house and hand-keyed comedy
+  animation fixed, and hand-authored comedy animation is the worst-fit medium for an agent team (agents cannot
+  see motion or judge timing; this repo's effort went exactly there). Market: mobile mature (+1–3 %), paid
+  downloads tiny, premium lives on Apple Arcade / Netflix and on Steam-first indies; every small-team game that
+  reached phones (Balatro, StS, Luck be a Landlord, Peglin, Backpack Hero, Mini Metro, Thronefall, Ball x Pit)
+  is systems-dense, art-light, simple-input, synergy-driven, short-session — the only shape two people finish
+  and the shape agents are best at (content as data, balance by simulation, LLM playtesters now track human
+  difficulty r≈0.87, art that is code or curated stills). Options: 1 systems roguelike (1a theme preserved
+  as a prank-chaining run, 1b clean slate), 2 minimalist systems strategy, 3 low-poly 3D toy sandbox on
+  library assets, 4 hybrid-casual F2P (wrong business), 5 narrative/puzzle (low fit). Engine: Godot unless
+  3 or 4. Recommendation: Option 1, Steam + mobile from day one, no animator anywhere in the pipeline;
+  prototype 1a and 1b in parallel over two weeks (verb hunt → paper + simulated → playable portrait →
+  art-direction contact sheet → owner plays), five-question gate. Nothing built; no code changed.
+- 2026-11-06 — Owner: start with Option 1, build a prototype to try, and prepare the next options in case it is
+  not good enough. Built **Prototype 1a "MISCHIEF RUN"** in `game/proto/mischief_run/` — the Mischief theme as a
+  systems roguelike. Bellows walks a six-station routine; you rig prank cards onto stations; CURTAIN UP resolves
+  it left to right with a chain multiplier on adjacent firings, residues that stick for the Night and feed later
+  cards, and temper tiers that pay a bonus per hit; between rounds you draft one of three (prank or Encore);
+  three Nights, four rounds each. One tap picks a card, one places it, one raises the curtain. **No sprites, no
+  cast, no house, no animation frame anywhere** — the whole screen is primitives, two OFL fonts and a palette.
+  `run.gd` is a pure deterministic engine (no nodes), so `sim.gd` plays it headlessly: balance was tuned before
+  the UI existed and the report is 22 % full clears on random drafts / 52 % greedy, Night 1 100 % → Night 3 26 %.
+  The simulator found two dead cards pre-play (THE BIG NUMBER could never fire on 3 Nerve; GOAD scores only
+  indirectly). Content: 24 cards + 10 Encores in JSON, tunable without touching code. Verified: suite 1,113 green,
+  lints green, import meta OK, no class-name collisions; the loop captured end to end with `--demo` (rig →
+  resolve → chain → draft → next round → Night end). Known gaps: no sound, no save, no meta between runs, glyph
+  art depends on system font fallback. Notes `docs/review/pivot/proto1_mischief_run.md`, QA + five-question gate
+  `docs/review/pivot/qa_proto1.md`, and the prepared fallbacks — deepen 1a / new fiction 1b / minimalist strategy /
+  low-poly 3D toy / verb hunt — routed by objection in `docs/review/pivot/next_options.md`.
+- 2026-11-06 — Owner: the prototype did not respond to clicks — only "Rig at least one prank". **Fixed.** Cause:
+  `project.godot` sets `pointing/emulate_touch_from_mouse=true`, so one click arrives as BOTH an
+  `InputEventMouseButton` and an `InputEventScreenTouch` in the same frame. Every handler accepted both, so each
+  tap fired twice: selecting a card and instantly deselecting it, which left nothing selected and produced
+  exactly the reported message. All four input handlers (prototype card + root, and both spikes, which had the
+  same latent bug) now ignore a second press in the same `Engine.get_process_frames()`.
+  **Also added `--clicktest`**: a self-test that pushes synthetic clicks through the real input path and asserts
+  card select / deselect / rig / take-back / CURTAIN UP, printing PASS or FAIL —
+  `tools/scripts/shot.sh res://proto/mischief_run/MischiefRun.tscn /tmp/x.png 160 proto -- --clicktest`.
+  Worth recording: the first version of that harness used `Input.parse_input_event()`, which treats the position
+  as window pixels and then applies the stretch, so every synthetic click landed off-screen and the test
+  "reproduced" a bug that was not there; `get_viewport().push_input(ev, true)` pushes in viewport coordinates and
+  gives the true answer. Now 5/5 PASS, the scene renders, and both spikes still run.
+- 2026-11-07 — Owner: the card prototype is repetitive and not fun; cards are not the path; proceed with Option 3.
+  Built **Prototype 3 "THE KEEP"** in `game/proto/toyhouse/`: a low-poly 3D toy sandbox on **library assets used
+  exactly as shipped**. The KayKit Adventurers Knight and Rogue (CC0, recovered from commit 1cd74f3, untouched) are
+  animated **only** by the KayKit Character Animations library — six .glb files merged onto each character by bone
+  name (`kay_actor.gd`); **not one animation frame is ours**. A stone hall of primitives with 35 physics props
+  (crates, barrels, buckets, books, plates, a ball). Tap the floor to run, tap a prop to pick it up, tap the Knight
+  while holding to throw at him. He keeps a four-station routine (sits, works, waves, patrols); a hard-enough hit
+  plays `Hit_A` → `Death_A` → `Lie_Idle` → `Lie_StandUp` → `Idle_B`, then he chases if he sees you (`Running_A`,
+  `Cheering` on a catch) or tidies what you moved (`PickUp` → carry → `Interact`) — the Goose loop. Walking into
+  props shoves them. **Three bugs found by trace / self-test, not by eye:** (1) a frozen carried crate is a static
+  collider and shoved the Rogue out of the hall in a feedback loop → held props leave every collision layer;
+  (2) the chair's seat collider kept the Knight 0.4 m short of a 0.3 m arrival radius, so he never sat → visual-only
+  seat + wider radius + a stall-equals-arrived rule for both actors; (3) the invisible front fence intercepted every
+  tap, so nothing was ever grabbable by touch (the scripted demo masked it; `--clicktest` caught it) → the tap ray
+  excludes the fence. **Verified:** `--clicktest` PASS 3/3 through the real input path; `--demo --trace` shows the
+  whole loop in one run (sitting → throw → HIT → DOWN → GETUP → ALERT → TIDY_PICK → TIDY_CARRY); suite 1,113 green;
+  lints green; import meta OK. Stills in `docs/review/pivot/spikes/keep_*.png`. Notes
+  `docs/review/pivot/proto3_the_keep.md`; QA + gate `docs/review/pivot/qa_proto3.md`. Known gaps: one room, one NPC,
+  no sound, no goals, no sight occlusion, native 2.2–2.6 m KayKit scale.
+- 2026-11-08 — Owner: the 3D toy is still not enjoyable; not after a complex animation system but not a basic
+  one either; consider building our own animation engine that works well with AI agents and produces accurate
+  results; cartoonish like classic Neighbours from Hell if not harder; use open-source assets, do not design our
+  own. Built **"the Bakery"** (`tools/bakery/`, output `game/proto/bakery/`): an animation engine whose entire
+  authoring surface is one line of JSON per clip. Core is the **Cartoon Animation Filter** (Wang et al.,
+  SIGGRAPH 2006) — convolving a motion curve with an inverted Laplacian-of-Gaussian yields anticipation,
+  follow-through, overshoot and squash-and-stretch as arithmetic, with one `amount` knob. Pipeline: CC0 KayKit
+  character + CC0 clip library → filter (pure numpy, **13 self-tests, no Blender**) → headless Blender EEVEE
+  render (`--factory-startup`, deterministic) → silhouette-based frame prune → sprite strip + alpha-dilation ink
+  outline → six objective validators on the rendered PNGs. Runtime is a PNG region blit, which is how the real
+  Neighbours from Hell shipped (its gfxdata.bnd is RLE .tga sheets) — so every runtime rig bug this project has
+  hit becomes structurally impossible. **Measured:** the filter raises silhouette change at 48 px from 31.9 % to
+  42.6 %; twelve clips bake, prune, pack and validate in 34 s, all PASS. **Five bugs the harness caught that the
+  eye would not:** Blender 4.4 slotted actions silently play nothing when an action is assigned across rigs; the
+  clip library's own mannequin stands in every shot; `Rogue.glb` ships a stray unskinned Icosphere; world-axis
+  framing clips a body lying along the camera axis (must be measured on the film plane); unbounded quaternion
+  exaggeration flips the character horizontal, now capped by a hard angular ceiling proven to hold at amount 8.
+  Also fixed: my own patch helper silently no-ops on an anchor miss, which hid two edits. Godot viewer
+  `res://proto/bakery/Bakery.tscn` plays flat-vs-cartoon pairs. Suite 1,113 green, lints green, import meta OK.
+  Design `docs/review/pivot/animation_engine.md` (incl. honest gaps: one angle, no faces, no hand props, global
+  rather than per-joint filtering, fantasy cast); QA + gate `docs/review/pivot/qa_bakery.md`.
+- 2026-11-08 — Owner: `godot --path /tmp/mnd_sandbox/play/game res://proto/bakery/Bakery.tscn` fails with "Cannot
+  open file". Cause: the `play` sandbox is a private copy that only updates when `tools/scripts/sandbox.sh play` is
+  run first, and it had last been synced on **30 Oct** — before every prototype. Not a bug in the scene; a two-step
+  launch that is easy to miss. Fixed twice over: the sandbox is re-synced, and `tools/scripts/play.sh <scene>` now
+  syncs and launches in one command (verified end to end with `--quit-after`). Every QA guide and
+  `TESTING_ON_MAC.md` point at it instead of the two-step.

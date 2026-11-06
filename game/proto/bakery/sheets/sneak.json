@@ -1,0 +1,32 @@
+{
+  "clip": "Sneaking",
+  "character": "Knight.glb",
+  "amount": 1.0,
+  "sigma": 2.5,
+  "loop": true,
+  "angle": 70.0,
+  "res": 256,
+  "max_deg": 28.0,
+  "source_frames": 52,
+  "frames": 12,
+  "accent": 0,
+  "kept": [
+    0,
+    5,
+    9,
+    14,
+    19,
+    23,
+    28,
+    32,
+    37,
+    42,
+    46,
+    51
+  ],
+  "sheet": "sneak.png",
+  "frame_w": 154,
+  "frame_h": 214,
+  "count": 12,
+  "ink": 2
+}

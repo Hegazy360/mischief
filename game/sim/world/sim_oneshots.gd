@@ -14,6 +14,8 @@ extends RefCounted
 const HEAD_TURN := "head_turn"
 const SPECS_ON := "specs_on"
 const DOORWAY_PAUSE := "doorway_pause"
+## He stopped to put a meddled prop right (Meddle, GDD §5.6; variant = the flavour).
+const NOTICE := "notice"
 const LOOK_BACK := "look_back"
 const BUMP := "bump"
 const BUMP_LOOK := "bump_look"
@@ -42,6 +44,7 @@ const DURATIONS := {
 	"head_turn": SimConst.HEAD_TURN_TICKS,
 	"specs_on": SimConst.SPECS_ON_TICKS,
 	"doorway_pause": -1,
+	"notice": SimConst.NOTICE_TICKS,
 	"look_back": SimConst.LOOK_BACK_TICKS,
 	"bump": SimConst.BUMP_PAT_TICKS + SimConst.BUMP_WALK_ON_TICKS + SimConst.BUMP_TURN_TICKS,
 	"bump_look": SimConst.BUMP_LOOK_MAX,
@@ -65,7 +68,7 @@ const DURATIONS := {
 }
 ## Bellows' ids in priority order (the accessor reports the first that applies).
 const BELLOWS_IDS: Array[String] = ["caught:grab", "caught:lecture", "caught:wipe", "caught:doorstep", "face_to_face",
-	"stun", "chase_wheeze", "bit:*", "bump", "bump_look", "curious_stop", "curious_look", "doorway_pause", "look_back",
+	"stun", "chase_wheeze", "bit:*", "bump", "bump_look", "curious_stop", "curious_look", "doorway_pause", "notice", "look_back",
 	"head_turn", "specs_on", "fizzle"]
 ## Hush's ids in priority order.
 const HUSH_IDS: Array[String] = ["caught:busted", "caught:lecture", "caught:wipe", "caught:doorstep", "enter", "yanked",
@@ -164,8 +167,11 @@ static func fill_bellows(w: SimWorld, out: Dictionary) -> void:
 		if aux == NavPath.AUX_LOOK_BACK:
 			set_to(out, LOOK_BACK, b.path.leg_t, pl, 0)
 			return
+		if aux == NavPath.AUX_NOTICE:
+			set_to(out, NOTICE, b.path.leg_t, pl, b.notice_var)
+			return
 	if tk < b.head_turn_until:
-		set_to(out, HEAD_TURN, tk - (b.head_turn_until - SimConst.HEAD_TURN_TICKS), SimConst.HEAD_TURN_TICKS, 0)
+		set_to(out, HEAD_TURN, tk - (b.head_turn_until - SimConst.HEAD_TURN_TICKS), SimConst.HEAD_TURN_TICKS, b.head_turn_var)
 		return
 	var se := tk - b.specs_t0
 	if b.specs_on and se >= 0 and se < SimConst.SPECS_ON_TICKS:

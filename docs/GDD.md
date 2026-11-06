@@ -741,12 +741,27 @@ When he hears one:
 2. Else he gains an **ear pip** (shown under the glyph, fades 8 s after the last squeak) and, if his current
    activity has a **squeak bit** that hasn't been used 3 times this activity, it plays (a 1–2 s micro-reaction,
    +5 temper; Applause +2 the first time that bit plays this Night, +1 the second, 0 after). Otherwise he turns
-   his head: "…the pipes?" (1.0 s).
+   his head: "…the pipes?" (1.0 s) — **never the same way twice:** the head turn rotates through three flavours
+   (a glance, a look over the shoulder, a squint; `head_turn {variant}`), each with its own grunt.
 3. The **third ear pip** within 8 s is a **lure**: he goes Curious — walks to the squeak's spot, specs on, looks
-   3 s (shown in the bubble at once). **Lure fatigue:** after two lures within 60 s the Clarence ring greys; a
-   further third pip only gets a "PIPE DOWN!" shouted from where he stands.
+   3 s (shown in the bubble at once). **Lure fatigue:** after two lures within 60 s a further third pip only
+   gets a "PIPE DOWN!" shouted from where he stands. The Clarence ring never greys: Clarence is a toy, and a toy
+   never looks switched off — the shout is the joke.
 - Squeaks while he's asleep only trigger the nap bit; while he's reacting they're ignored. Squeaking is
   *moving* for 0.3 s, so squeak behind his back, not in his face.
+- **A squeak is never nothing.** When nobody hears it (he is out of earshot, or reacting) Hush glances at the
+  Stalls — the squeak still happened, and the player saw that it did.
+
+**Meddling — the house is a toybox.** Every rig point that carries **no prank tonight** (not a Script line's,
+not a Double Act's, not in the prank's `nights`) can still be fiddled with: Hush holds the action button for a
+**Q prep (0.8 s)** and the prop sits **askew** (tilted a few degrees; the gold badge goes out). The next time he
+walks toward it in its room (within 220 px, on a routine or fix-up walk, not blinded) he **stops for 1.0 s**, tuts,
+straightens it or double-takes (three flavours, rotating), and it is right again — a titter from the Stalls, a
+little temper (+3, where a squeak bit is +5), and **+1 Applause the first time per prop per Night** (a bit, never
+multiplied). It never changes his route, his senses or the loop order, so every §4.7 fairness rule holds; tonight's
+props stay the Script's (fiddling with them is still "nothing to rig"). Meddling exists so that **tapping a prop
+never answers "nothing happened"** (`docs/research/market.md` §4.20) and so the player has mischief to do while he
+walks his loop. A Night turns it off with `rules.meddle: false`.
 
 **The panto bit — "BEHIND YOU!"** (from Night 6). Conditions: he is at an activity tagged `panto` (warmup,
 piano, rehearse), specs off, below Livid, not reacting; Hush is in his room, **behind him**, within 600 px, not

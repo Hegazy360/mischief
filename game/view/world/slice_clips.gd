@@ -79,6 +79,7 @@ static func sim_durations(episodes: Dictionary) -> Dictionary:
 		"head_turn": int(c.get("HEAD_TURN_TICKS", 60)),
 		"specs_on": int(c.get("SPECS_ON_TICKS", 12)),
 		"doorway_pause": -1,
+		"notice": int(c.get("NOTICE_TICKS", 60)),
 		"look_back": int(c.get("LOOK_BACK_TICKS", 60)),
 		"bump": int(c.get("BUMP_PAT_TICKS", 30)) + int(c.get("BUMP_WALK_ON_TICKS", 40)) + int(c.get("BUMP_TURN_TICKS", 12)),
 		"bump_look": -1,

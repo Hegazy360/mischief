@@ -1,0 +1,106 @@
+{
+  "doc": "The whole animation authoring surface. One line per clip: which CC0 library clip to start from, and how hard to push it. No keyframes, no curves, no poses \u2014 an agent edits these numbers, runs tools/bakery/run.py, and reads the validator's verdict.",
+  "character": "game/proto/toyhouse/assets/kaykit/Knight.glb",
+  "lib_dir": "game/proto/toyhouse/assets/kaykit",
+  "out": "game/proto/bakery/sheets",
+  "defaults": {
+    "res": 256,
+    "angle": 70,
+    "frames": 12,
+    "sigma": 2.5,
+    "ink": 2,
+    "min_span": 0.08,
+    "max_deg": 28
+  },
+  "clips": [
+    {
+      "name": "idle",
+      "lib": "General",
+      "clip": "Idle_A",
+      "loop": true,
+      "amount": 0.6,
+      "frames": 10,
+      "min_span": 0.02
+    },
+    {
+      "name": "walk",
+      "lib": "MovementBasic",
+      "clip": "Walking_A",
+      "loop": true,
+      "amount": 1.0,
+      "frames": 10
+    },
+    {
+      "name": "run",
+      "lib": "MovementBasic",
+      "clip": "Running_A",
+      "loop": true,
+      "amount": 1.2,
+      "frames": 10
+    },
+    {
+      "name": "sneak",
+      "lib": "MovementAdvanced",
+      "clip": "Sneaking",
+      "loop": true,
+      "amount": 1.0,
+      "frames": 12,
+      "min_span": 0.05
+    },
+    {
+      "name": "throw",
+      "lib": "General",
+      "clip": "Throw",
+      "amount": 1.4
+    },
+    {
+      "name": "hit",
+      "lib": "General",
+      "clip": "Hit_A",
+      "amount": 1.4,
+      "frames": 10
+    },
+    {
+      "name": "flat",
+      "lib": "General",
+      "clip": "Death_A",
+      "amount": 1.3,
+      "max_deg": 45
+    },
+    {
+      "name": "pickup",
+      "lib": "General",
+      "clip": "PickUp",
+      "amount": 1.1
+    },
+    {
+      "name": "cheer",
+      "lib": "Simulation",
+      "clip": "Cheering",
+      "loop": true,
+      "amount": 1.1,
+      "frames": 12
+    },
+    {
+      "name": "throw_flat",
+      "lib": "General",
+      "clip": "Throw",
+      "amount": 0.0
+    },
+    {
+      "name": "hit_flat",
+      "lib": "General",
+      "clip": "Hit_A",
+      "amount": 0.0,
+      "frames": 10
+    },
+    {
+      "name": "run_flat",
+      "lib": "MovementBasic",
+      "clip": "Running_A",
+      "loop": true,
+      "amount": 0.0,
+      "frames": 10
+    }
+  ]
+}

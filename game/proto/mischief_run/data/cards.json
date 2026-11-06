@@ -1,0 +1,311 @@
+{
+  "version": 1,
+  "doc": "Prototype prank cards. base = Applause before bonuses and the chain multiplier; cost = Nerve; temper = temper added when it fires; residue = what it leaves on him; bonus = a list of conditional adds evaluated in Run._value(); special = fires / retrigger_next / copy_left / needs_full_board.",
+  "starter": [
+    "pepper",
+    "pepper",
+    "tap",
+    "tap",
+    "flour",
+    "domino",
+    "domino",
+    "tin_tack"
+  ],
+  "cards": {
+    "pepper": {
+      "name": "PEPPER POT",
+      "glyph": "\u25c9",
+      "base": 4,
+      "cost": 1,
+      "temper": 4,
+      "residue": "FRAZZLED",
+      "text": "Leaves FRAZZLED."
+    },
+    "tap": {
+      "name": "SPRAY TAP",
+      "glyph": "\u2248",
+      "base": 3,
+      "cost": 1,
+      "temper": 3,
+      "residue": "SOAKED",
+      "text": "Leaves SOAKED."
+    },
+    "flour": {
+      "name": "FLOUR BAG",
+      "glyph": "\u2744",
+      "base": 3,
+      "cost": 1,
+      "temper": 3,
+      "residue": "FLOURY",
+      "text": "Leaves FLOURY."
+    },
+    "treacle": {
+      "name": "TREACLE TIN",
+      "glyph": "\u25cf",
+      "base": 3,
+      "cost": 1,
+      "temper": 3,
+      "residue": "STICKY",
+      "text": "Leaves STICKY."
+    },
+    "domino": {
+      "name": "DOMINO",
+      "glyph": "\u25a0",
+      "base": 3,
+      "cost": 1,
+      "temper": 3,
+      "text": "+5 if the station before it fired.",
+      "bonus": [
+        {
+          "if": "prev_fired",
+          "add": 5
+        }
+      ]
+    },
+    "tin_tack": {
+      "name": "TIN TACK",
+      "glyph": "\u2726",
+      "base": 2,
+      "cost": 1,
+      "temper": 3,
+      "text": "+2 for each prank already fired this round.",
+      "bonus": [
+        {
+          "if": "fired_before",
+          "per": 2
+        }
+      ]
+    },
+    "pile_on": {
+      "name": "PILE-ON",
+      "glyph": "\u25b2",
+      "base": 2,
+      "cost": 1,
+      "temper": 2,
+      "text": "+4 for each residue on him.",
+      "bonus": [
+        {
+          "if": "residue_count",
+          "per": 4
+        }
+      ]
+    },
+    "dough": {
+      "name": "DOUGH MAN",
+      "glyph": "\u2601",
+      "base": 4,
+      "cost": 1,
+      "temper": 4,
+      "text": "+10 if he is SOAKED and FLOURY.",
+      "bonus": [
+        {
+          "if": "residues_all",
+          "kinds": [
+            "SOAKED",
+            "FLOURY"
+          ],
+          "add": 10
+        }
+      ]
+    },
+    "slip": {
+      "name": "SLIPPERY FLOOR",
+      "glyph": "\u25bc",
+      "base": 4,
+      "cost": 1,
+      "temper": 3,
+      "text": "+6 if he is SOAKED.",
+      "bonus": [
+        {
+          "if": "residue",
+          "kind": "SOAKED",
+          "add": 6
+        }
+      ]
+    },
+    "dust_up": {
+      "name": "DUST-UP",
+      "glyph": "\u25c6",
+      "base": 4,
+      "cost": 1,
+      "temper": 3,
+      "text": "+6 if he is FLOURY.",
+      "bonus": [
+        {
+          "if": "residue",
+          "kind": "FLOURY",
+          "add": 6
+        }
+      ]
+    },
+    "hair_raising": {
+      "name": "HAIR-RAISING",
+      "glyph": "\u2727",
+      "base": 4,
+      "cost": 1,
+      "temper": 3,
+      "text": "+6 if he is FRAZZLED.",
+      "bonus": [
+        {
+          "if": "residue",
+          "kind": "FRAZZLED",
+          "add": 6
+        }
+      ]
+    },
+    "take_a_bow": {
+      "name": "TAKE A BOW",
+      "glyph": "\u2665",
+      "base": 1,
+      "cost": 1,
+      "temper": 1,
+      "text": "+4 for each link already in the chain.",
+      "bonus": [
+        {
+          "if": "chain_len",
+          "per": 4
+        }
+      ]
+    },
+    "knock_on": {
+      "name": "KNOCK-ON",
+      "glyph": "\u2794",
+      "base": 4,
+      "cost": 2,
+      "temper": 4,
+      "text": "The next prank that fires, fires twice.",
+      "retrigger_next": true
+    },
+    "double_take": {
+      "name": "DOUBLE TAKE",
+      "glyph": "\u27f3",
+      "base": 3,
+      "cost": 2,
+      "temper": 3,
+      "text": "Fires twice.",
+      "fires": 2
+    },
+    "goad": {
+      "name": "GOAD",
+      "glyph": "!",
+      "base": 2,
+      "cost": 1,
+      "temper": 10,
+      "text": "+10 temper."
+    },
+    "rage_aria": {
+      "name": "RAGE ARIA",
+      "glyph": "\u266b",
+      "base": 2,
+      "cost": 1,
+      "temper": 3,
+      "text": "+5 for each temper tier.",
+      "bonus": [
+        {
+          "if": "temper_tier",
+          "per": 5
+        }
+      ]
+    },
+    "last_straw": {
+      "name": "THE LAST STRAW",
+      "glyph": "\u2620",
+      "base": 5,
+      "cost": 2,
+      "temper": 5,
+      "text": "+14 if he is LIVID.",
+      "bonus": [
+        {
+          "if": "tier_min",
+          "tier": 3,
+          "add": 14
+        }
+      ]
+    },
+    "everything_but": {
+      "name": "EVERYTHING BUT",
+      "glyph": "\u2666",
+      "base": 3,
+      "cost": 1,
+      "temper": 3,
+      "text": "+5 for each other Kitchen station rigged.",
+      "bonus": [
+        {
+          "if": "room_count",
+          "room": "kitchen",
+          "per": 5
+        }
+      ]
+    },
+    "parlour_trick": {
+      "name": "PARLOUR TRICK",
+      "glyph": "\u2660",
+      "base": 4,
+      "cost": 1,
+      "temper": 3,
+      "text": "+7 in the Parlour.",
+      "bonus": [
+        {
+          "if": "room",
+          "room": "parlour",
+          "add": 7
+        }
+      ]
+    },
+    "hall_pass": {
+      "name": "HALL PASS",
+      "glyph": "\u2302",
+      "base": 5,
+      "cost": 1,
+      "temper": 3,
+      "text": "+8 if he has no residues.",
+      "bonus": [
+        {
+          "if": "no_residue",
+          "add": 8
+        }
+      ]
+    },
+    "big_number": {
+      "name": "THE BIG NUMBER",
+      "glyph": "\u2605",
+      "base": 10,
+      "cost": 2,
+      "temper": 6,
+      "text": "Only fires if at least four stations are rigged.",
+      "needs_rigged": 4
+    },
+    "damp_squib": {
+      "name": "DAMP SQUIB",
+      "glyph": "\u2602",
+      "base": 9,
+      "cost": 1,
+      "temper": 4,
+      "text": "-6 if any residue is on him.",
+      "bonus": [
+        {
+          "if": "any_residue",
+          "add": -6
+        }
+      ]
+    },
+    "understudy": {
+      "name": "UNDERSTUDY",
+      "glyph": "\u25d0",
+      "base": 0,
+      "cost": 1,
+      "temper": 2,
+      "text": "Scores the same as the prank on its left.",
+      "copy_left": true
+    },
+    "slow_burn": {
+      "name": "SLOW BURN",
+      "glyph": "\u271a",
+      "base": 3,
+      "cost": 1,
+      "temper": 2,
+      "text": "+3 temper for each prank rigged this round.",
+      "temper_per_rigged": 3
+    }
+  }
+}

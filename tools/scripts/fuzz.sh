@@ -8,6 +8,7 @@
 # Exit 1 on any violation. Env: SANDBOX (default "fuzz").
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+. "$ROOT/tools/scripts/lib.sh"
 SB_NAME="${SANDBOX:-fuzz}"
 # The sandbox import can crash intermittently on a busy asset tree: retry it, then run without it.
 import_sandbox() {
@@ -21,8 +22,8 @@ import_sandbox() {
 args=()
 for a in "$@"; do
   case "$a" in
-    --report=*) args+=("--report=$(realpath -m "${a#--report=}")") ;;
-    --dump-cmds=*) args+=("--dump-cmds=$(realpath -m "${a#--dump-cmds=}")") ;;
+    --report=*) args+=("--report=$(mnd_abspath "${a#--report=}")") ;;
+    --dump-cmds=*) args+=("--dump-cmds=$(mnd_abspath "${a#--dump-cmds=}")") ;;
     *) args+=("$a") ;;
   esac
 done

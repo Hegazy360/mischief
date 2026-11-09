@@ -28,16 +28,19 @@ def alpha_stack(d: str) -> tuple[np.ndarray, list[str]]:
     return np.stack(arrs), [os.path.basename(p) for p in paths]
 
 
+def sil_one(alpha: np.ndarray, px: int) -> np.ndarray:
+    """Binary silhouette of one frame downsampled to `px` — what the shape reads as at game size.
+    prune.py uses this same function, so a frame prune keeps can never fail validation as dead."""
+    im = Image.fromarray((alpha > 96).astype(np.uint8) * 255).resize((px, px), Image.BILINEAR)
+    return np.array(im) > 96
+
+
 def silhouette(a: np.ndarray, px: int) -> np.ndarray:
-    """Binary silhouette downsampled to `px` tall — what the shape reads as at game size."""
-    out = []
-    for f in a:
-        im = Image.fromarray((f > 96).astype(np.uint8) * 255).resize((px, px), Image.BILINEAR)
-        out.append(np.array(im) > 96)
-    return np.stack(out)
+    return np.stack([sil_one(f, px) for f in a])
 
 
-def check(d: str, min_change: float, min_span: float, read_px: int, edge_tol: int) -> int:
+def check(d: str, min_change: float, min_span: float, read_px: int, edge_tol: int,
+          floor_tol: float = 4.0) -> int:
     a, names = alpha_stack(d)
     meta = {}
     mp = os.path.join(d, "meta.json")
@@ -83,6 +86,34 @@ def check(d: str, min_change: float, min_span: float, read_px: int, edge_tol: in
     dup = sum(1 for i in range(1, n) if np.array_equal(a[i], a[i - 1]))
     add("no duplicate frames", dup == 0, f"{dup} repeated frame(s)")
 
+    if meta.get("loop") and n > 2:
+        # the last frame is shown next to the first; if they match, every cycle stutters
+        seam = float((sil[-1] ^ sil[0]).mean())
+        add("loop seam has no repeated pose", seam >= min_change, f"last->first step {seam * 100:.2f}%")
+
+    durs = meta.get("durations")
+    if durs is not None:
+        total = float(sum(durs))
+        want = float(meta.get("duration", total))
+        # pruning hands time to neighbours, so the clip must still last as long as the source does
+        add("plays at the source clip's speed", len(durs) == n and abs(total - want) < 0.02,
+            f"{total:.2f}s over {len(durs)} frames vs source {want:.2f}s")
+
+    anc = meta.get("anchor")
+    if anc is not None and floor_tol >= 0:
+        # the lowest opaque pixel over the clip must sit on the floor line: a character that floats
+        # or sinks into the floor is a framing or rig bug, and it is invisible in a cropped cell
+        rows_any = np.where((a > 96).any(axis=(0, 2)))[0]
+        lowest = int(rows_any.max()) if len(rows_any) else -1
+        gap = float(anc[1]) - lowest
+        add("feet touch the floor line", abs(gap) <= floor_tol, f"lowest pixel {gap:+.1f}px from the floor")
+        if meta.get("plant", False):
+            # per FRAME, not per clip: a clip whose lowest pose is grounded can still float in the
+            # middle (Gus's get-up hovered 30 px and passed the whole-clip check)
+            lows = [int(np.where(f.any(axis=1))[0].max()) if f.any() else -1 for f in (a > 96)]
+            worst = max(abs(float(anc[1]) - lo) for lo in lows)
+            add("planted in every frame", worst <= floor_tol, f"worst frame {worst:.1f}px off the floor")
+
     label = f"{meta.get('clip', os.path.basename(d))} amount={meta.get('amount', '?')}"
     print(f"\n[validate] {label}  ({n} frames, {w}x{h})")
     for name, ok, detail in rows:
@@ -98,10 +129,11 @@ def main() -> None:
     ap.add_argument("--min-span", type=float, default=0.08)
     ap.add_argument("--read-px", type=int, default=48)
     ap.add_argument("--edge-tol", type=int, default=2)
+    ap.add_argument("--floor-tol", type=float, default=4.0, help="-1 skips the floor check (sitting on a chair)")
     a = ap.parse_args()
     rc = 0
     for d in a.dirs:
-        rc |= check(d, a.min_change, a.min_span, a.read_px, a.edge_tol)
+        rc |= check(d, a.min_change, a.min_span, a.read_px, a.edge_tol, a.floor_tol)
     sys.exit(rc)
 
 

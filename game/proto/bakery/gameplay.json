@@ -1,0 +1,392 @@
+{
+ "doc": "A gameplay SAMPLE on the baked cast (res://proto/bakery/Gameplay.tscn): one scripted Act in the parlour, played with the real game's staging — hotspots, ghost-finger taps, RIG ring, FREEZE, Clarence, Gus's thought bubble, awareness '?' and stare strip, Stalls and Applause. The timeline is one list of events (seconds); the engine only knows the verbs. Positions are logical px at 2400x1080.",
+ "scale": 1.5,
+ "floor_y": 880,
+ "set": {
+  "entry_x": 180,
+  "plant_x": 330,
+  "gramophone_x": 620,
+  "mirror_x": 1300,
+  "door_x": 2250
+ },
+ "start": {
+  "hush": {
+   "x": 180,
+   "dir": 1,
+   "clip": "idle"
+  },
+  "gus": {
+   "x": 1480,
+   "dir": -1,
+   "clip": "use"
+  }
+ },
+ "loop_at": 37.0,
+ "events": [
+  {
+   "t": 0.2,
+   "do": "caption",
+   "text": "Night 1 · The Parlour"
+  },
+  {
+   "t": 0.2,
+   "do": "strip",
+   "on": true
+  },
+  {
+   "t": 1.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex"
+  },
+  {
+   "t": 1.2,
+   "do": "ghost",
+   "x": 620,
+   "y": 800,
+   "kind": "tap",
+   "label": "tap the gramophone"
+  },
+  {
+   "t": 1.5,
+   "do": "move",
+   "who": "hush",
+   "to": 560,
+   "clip": "sneak",
+   "k": 2.6
+  },
+  {
+   "t": 2.4,
+   "do": "caption",
+   "text": "Hush creeps in behind him"
+  },
+  {
+   "t": 4.6,
+   "do": "ghost",
+   "x": 2210,
+   "y": 915,
+   "kind": "hold",
+   "label": "hold RIG"
+  },
+  {
+   "t": 4.8,
+   "do": "ring",
+   "secs": 1.3,
+   "frac": 0.45
+  },
+  {
+   "t": 4.8,
+   "do": "clip",
+   "who": "hush",
+   "name": "saw"
+  },
+  {
+   "t": 5.4,
+   "do": "caption",
+   "text": "RIG: the gramophone (1 of 2)"
+  },
+  {
+   "t": 6.4,
+   "do": "bubble",
+   "icon": "gramophone"
+  },
+  {
+   "t": 6.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "idle"
+  },
+  {
+   "t": 7.0,
+   "do": "ghost",
+   "x": 1944,
+   "y": 915,
+   "kind": "hold",
+   "label": "hold FREEZE"
+  },
+  {
+   "t": 7.1,
+   "do": "button",
+   "name": "freeze",
+   "on": true
+  },
+  {
+   "t": 7.2,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_discus",
+   "hold": 60
+  },
+  {
+   "t": 7.6,
+   "do": "move",
+   "who": "gus",
+   "to": 800,
+   "clip": "walk",
+   "k": 2.0
+  },
+  {
+   "t": 8.2,
+   "do": "awareness",
+   "to": 0.55,
+   "secs": 1.6
+  },
+  {
+   "t": 8.4,
+   "do": "caption",
+   "text": "FREEZE — specs off, he only spots what moves"
+  },
+  {
+   "t": 10.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "search",
+   "hold": 0
+  },
+  {
+   "t": 11.0,
+   "do": "awareness",
+   "to": 0.0,
+   "secs": 2.0
+  },
+  {
+   "t": 11.4,
+   "do": "caption",
+   "text": "\"Hm. New statue. ...Tasteful.\""
+  },
+  {
+   "t": 14.4,
+   "do": "bubble",
+   "icon": "mirror"
+  },
+  {
+   "t": 14.6,
+   "do": "move",
+   "who": "gus",
+   "to": 1480,
+   "clip": "walk",
+   "k": 2.0
+  },
+  {
+   "t": 16.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex"
+  },
+  {
+   "t": 15.2,
+   "do": "button",
+   "name": "freeze",
+   "on": false
+  },
+  {
+   "t": 15.3,
+   "do": "clip",
+   "who": "hush",
+   "name": "hammer"
+  },
+  {
+   "t": 15.3,
+   "do": "ring",
+   "secs": 1.4,
+   "frac": 1.0
+  },
+  {
+   "t": 16.9,
+   "do": "rigged",
+   "on": true
+  },
+  {
+   "t": 16.9,
+   "do": "caption",
+   "text": "Rigged! Her beret stamp on the horn"
+  },
+  {
+   "t": 18.2,
+   "do": "ghost",
+   "x": 210,
+   "y": 915,
+   "kind": "tap",
+   "label": "tap Clarence"
+  },
+  {
+   "t": 18.4,
+   "do": "clip",
+   "who": "hush",
+   "name": "squeak",
+   "hold": 0.4
+  },
+  {
+   "t": 18.4,
+   "do": "button",
+   "name": "clarence",
+   "on": true
+  },
+  {
+   "t": 18.6,
+   "do": "caption",
+   "text": "SQUEAK!"
+  },
+  {
+   "t": 18.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "startle"
+  },
+  {
+   "t": 19.2,
+   "do": "bubble",
+   "icon": "query"
+  },
+  {
+   "t": 19.3,
+   "do": "button",
+   "name": "clarence",
+   "on": false
+  },
+  {
+   "t": 19.5,
+   "do": "ghost",
+   "x": 330,
+   "y": 800,
+   "kind": "tap",
+   "label": "tap the plant"
+  },
+  {
+   "t": 19.7,
+   "do": "move",
+   "who": "hush",
+   "to": 330,
+   "clip": "run",
+   "k": 1.6
+  },
+  {
+   "t": 20.3,
+   "do": "bubble",
+   "icon": "gramophone"
+  },
+  {
+   "t": 20.5,
+   "do": "move",
+   "who": "gus",
+   "to": 840,
+   "clip": "stomp",
+   "k": 1.6
+  },
+  {
+   "t": 20.9,
+   "do": "hide",
+   "who": "hush",
+   "on": true
+  },
+  {
+   "t": 21.1,
+   "do": "caption",
+   "text": "\"WHO SQUEAKED?!\""
+  },
+  {
+   "t": 24.6,
+   "do": "bubble",
+   "icon": "none"
+  },
+  {
+   "t": 24.7,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact"
+  },
+  {
+   "t": 25.9,
+   "do": "gag"
+  },
+  {
+   "t": 26.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "hit"
+  },
+  {
+   "t": 26.2,
+   "do": "stalls",
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 26.2,
+   "do": "applause",
+   "add": 0.45
+  },
+  {
+   "t": 26.4,
+   "do": "caption",
+   "text": "KETTLE DRUM lands · Applause!"
+  },
+  {
+   "t": 26.75,
+   "do": "clip",
+   "who": "gus",
+   "name": "knocked",
+   "hold": 1.0
+  },
+  {
+   "t": 29.5,
+   "do": "clip",
+   "who": "gus",
+   "name": "getup"
+  },
+  {
+   "t": 30.2,
+   "do": "hide",
+   "who": "hush",
+   "on": false
+  },
+  {
+   "t": 30.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "cheer"
+  },
+  {
+   "t": 30.8,
+   "do": "stalls",
+   "text": "BRAVO!"
+  },
+  {
+   "t": 30.8,
+   "do": "applause",
+   "add": 0.4
+  },
+  {
+   "t": 31.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume"
+  },
+  {
+   "t": 32.2,
+   "do": "caption",
+   "text": "\"PIPE DOWN!\" — but the Stalls want more"
+  },
+  {
+   "t": 34.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 34.6,
+   "do": "caption",
+   "text": "— CURTAIN —"
+  },
+  {
+   "t": 35.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume"
+  },
+  {
+   "t": 36.0,
+   "do": "rigged",
+   "on": false
+  }
+ ]
+}

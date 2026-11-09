@@ -10,7 +10,7 @@
 # Env: SANDBOX (default "play").
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SCENE="${1:?usage: play.sh <res://scene.tscn> [-- args]}"; shift || true
+SCENE="${1:-res://proto/act1/Act1.tscn}"; shift || true   # no argument: the current showcase (Act I)
 SB_NAME="${SANDBOX:-play}"
 "$ROOT/tools/scripts/sandbox.sh" "$SB_NAME" >/dev/null
 SB="${MND_SANDBOX_ROOT:-/tmp/mnd_sandbox}/$SB_NAME/game"

@@ -1,0 +1,146 @@
+{
+  "doc": "The stage scene in res://proto/bakery/Bakery.tscn. One timeline per actor; both restart together when the longer one ends (the shorter holds its last clip). Each step plays one baked clip: 'secs' runs a loop for that long, a one-shot plays once (+ optional 'hold' seconds on its last frame). 'dir' faces/moves the actor (+1 right, -1 left); locomotion clips travel at the ground speed measured from the planted foot. 'cue' is the caption shown while the step plays.",
+  "actors": {
+    "gus": {
+      "start_x": 0.56,
+      "dir": -1,
+      "steps": [
+        {
+          "clip": "use",
+          "cue": "Gus Thudd — on the clock"
+        },
+        {
+          "clip": "flex",
+          "cue": "Admires the mirror"
+        },
+        {
+          "clip": "walk",
+          "secs": 2.6,
+          "dir": 1
+        },
+        {
+          "clip": "pushups",
+          "secs": 3.1,
+          "dir": -1,
+          "cue": "Press-ups. Obviously."
+        },
+        {
+          "clip": "idle",
+          "secs": 0.6
+        },
+        {
+          "clip": "sit"
+        },
+        {
+          "clip": "sit_idle",
+          "secs": 2.6
+        },
+        {
+          "clip": "stand"
+        },
+        {
+          "clip": "startle"
+        },
+        {
+          "clip": "search",
+          "secs": 3.6
+        },
+        {
+          "clip": "stomp",
+          "secs": 1.2,
+          "dir": -1
+        },
+        {
+          "clip": "grab",
+          "cue": "…and lunges at a statue"
+        },
+        {
+          "clip": "hit",
+          "cue": "The gag lands"
+        },
+        {
+          "clip": "knocked",
+          "hold": 1.0
+        },
+        {
+          "clip": "getup"
+        },
+        {
+          "clip": "fume",
+          "secs": 2.5,
+          "cue": "Livid"
+        }
+      ]
+    },
+    "hush": {
+      "start_x": 0.3,
+      "dir": 1,
+      "steps": [
+        {
+          "clip": "idle",
+          "secs": 1.2
+        },
+        {
+          "clip": "sneak",
+          "secs": 3.6,
+          "cue": "Hush creeps in"
+        },
+        {
+          "clip": "crouch",
+          "secs": 1.6
+        },
+        {
+          "clip": "sneak",
+          "secs": 1.4
+        },
+        {
+          "clip": "interact",
+          "cue": "Rig the gag"
+        },
+        {
+          "clip": "saw",
+          "secs": 1.2
+        },
+        {
+          "clip": "hammer",
+          "secs": 1.1
+        },
+        {
+          "clip": "squeak",
+          "secs": 2.1,
+          "cue": "A squeak from Clarence"
+        },
+        {
+          "clip": "crouch",
+          "secs": 1.6,
+          "dir": -1
+        },
+        {
+          "clip": "sneak",
+          "secs": 1.6
+        },
+        {
+          "clip": "freeze_tada",
+          "hold": 5.3,
+          "dir": 1,
+          "cue": "FREEZE! A statue in plain sight"
+        },
+        {
+          "clip": "run",
+          "secs": 1.4,
+          "dir": -1
+        },
+        {
+          "clip": "idle",
+          "secs": 1.0,
+          "dir": 1
+        },
+        {
+          "clip": "cheer",
+          "secs": 3.4,
+          "cue": "Bravo!"
+        }
+      ]
+    }
+  }
+}

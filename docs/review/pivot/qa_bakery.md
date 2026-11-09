@@ -1,68 +1,73 @@
-# QA guide — the Bakery (agent-facing animation engine)
+# QA guide — the Bakery: the cast (Hush and Gus Thudd)
 
-## 1. The maths, with no renderer (2 seconds)
+Round 7: **Hush has expressions too** (shock / daze / grin over her painted neutral — startle,
+knocked, get-up, cheer, squeak and two statues use them), and there is a **gameplay sample**:
+one scripted Act in the parlour with the GDD's staging (RIG ring, FREEZE in plain sight, Clarence
+lure, awareness "?", stare strip, hiding spot, the gag, Stalls + Applause). Round 6 gave Gus his
+face and put props in hands (`animation_engine.md` §11–12).
 
-```bash
-python3 tools/bakery/cartoon_filter.py --selftest     # expect: OK: 13/13 checks
-```
-
-This is the claim "produces accurate results", tested directly: a still pose stays still, constant
-speed is untouched, a sharp move gains anticipation *before* and overshoot *after*, the knob is
-monotonic, loops keep their seam, quaternions survive a sign flip, the angular ceiling holds even at
-amount 8, squash preserves volume.
-
-## 2. Bake everything (35 seconds)
+## 1. Bake the cast (~90 seconds, from nothing)
 
 ```bash
 python3 tools/bakery/run.py --contact
 ```
 
-Expect twelve clips, each `=> PASS (6/6)`, and `[run] 12 clip(s) baked in ~35s`. It writes sprite
-sheets + JSON to `game/proto/bakery/sheets/` and a contact sheet at `sheets/_contact.png`.
+Expect `[cast] hush built`, `[cast] gus built`, 44 clips each `=> PASS` (including "planted in
+every frame"), and the chain lines (`getup follows knocked` ×2, `sit_idle follows sit`,
+`stand follows sit_idle`). Contact sheets: `game/proto/bakery/sheets/{hush,gus}/_contact.png`.
+Re-bake one character or clip: `--who gus`, `--only flex,walk`.
 
-**Now change something.** Open `tools/bakery/clips.json`, change `"amount"` on `hit` from 1.4 to 0.2,
-re-run with `--only hit --contact`, and compare. That edit — one number — is the entire authoring
-interface an agent uses. There is no curve, no pose, no keyframe anywhere in this system.
-
-## 3. Watch it move (the only way to judge animation)
+## 2. Watch them
 
 ```bash
-tools/scripts/play.sh res://proto/bakery/Bakery.tscn
+tools/scripts/play.sh res://proto/bakery/Bakery.tscn     # the cast on stage + gallery
+tools/scripts/play.sh                                    # Act I — the full scene (67 s, loops)
 ```
 
-Top row is three **pairs**: the same KayKit clip baked flat (left, grey label) and filtered (right,
-gold label). That comparison is the whole proposal. Bottom row is the rest of the set.
+Top: Gus checks his stopwatch, flexes at the mirror, lumbers off, does press-ups, sits; Hush creeps in behind him,
+rigs a gag (saw, then mallet) and squeaks Clarence at the Stalls. Gus hears something — Hush snaps into a **ta-da statue** in plain
+sight while he looks around, stomps over and lunges at her; she scarpers, the gag lands, he goes flat,
+gets up and fumes. Bottom: every clip of both (statues in ice-blue).
 
-What to look for: on the cartoon side the wind-up goes further before the action and the body carries
-past the end of it before settling. On the flat side the motion starts and stops where it is told.
+What to look for:
+* **Is Gus a character you want as the neighbour?** Silhouette, colours, size next to Hush.
+* Does his motion carry **weight** (lumbering walk, heavy fall) and suit him (flex, press-ups)?
+* Feet never slide or float; fall → get up stays one continuous body.
+* **Statues:** does each snap read as a mime freezing (fast, no wobble, then dead still)? Which of
+  the eight are funny, which should go? (punch / discus / tiptoe are the closest trio.)
+* **Faces:** does Gus read smug → suspicious → shocked → dazed → angry as the scene goes? Is the
+  moustache him? Does Hush's shock/daze/grin read as panto, and does her painted neutral stay her?
+* **Props:** can you name each item at phone size (Clarence, saw, mallet, stopwatch, apple, kipper)?
+  Does Clarence in the braces read as a chicken?
+* **Gus's reactions:** does `search` read as looking around, `fume` as livid, `stomp` as angry,
+  `grab` as a lunge for her?
 
-## 4. See a single clip as frames
+## 3. Change Gus
 
-```bash
-open docs/review/pivot/spikes/bakery_filter_compare.png   # one clip at amount 0.0 / 0.8 / 1.6
-open game/proto/bakery/sheets/_contact.png                # every clip, accent frame boxed in gold
-```
+* Colours and costume: `LOOK` and `colour_for` in `tools/bakery/cast/neighbour.py`.
+* Shape extras (hair): `add_hair` in the same file.
+* Motion: his block in `tools/bakery/clips.json` (`Large_*` = his own library, others = Medium).
+* Gus's face / expressions: `add_face` in `tools/bakery/cast/neighbour.py`; which clip shows which: `face` in clips.json.
+* A new prop: one builder in `tools/bakery/props.py`; hold it with `"props": [{"item": …, "bone": "handslot.l"}]`
+  (`from` / `until` seconds, `rot` / `off` to place it — handslot.l is the hand nearer the camera).
+* A new statue: one line in Hush's block — `{"name": "freeze_x", "pose": {"lib": …, "clip": …, "at": secs}}`;
+  re-bake with `--who hush --only freeze_x`. Body-axis `tweak`s push a pose further.
 
-## 5. Check nothing in the old build broke
+## 4. Check nothing in the old build broke
 
 ```bash
 tools/scripts/test_game.sh mine        # expect 1113 passed, 0 failed
-tools/scripts/lint.sh --strict         # expect [lint] OK, 144 clips 0 errors
-tools/ci/check_import_meta.sh          # expect [import-meta] OK
+tools/scripts/lint.sh --strict
+tools/ci/check_import_meta.sh
 ```
 
-## 6. The gate
+## 5. The gate
 
-This is infrastructure, not a game, so the questions are different from the prototype gates:
-
-1. **Does the cartoon side of a pair read as funnier than the flat side?** If not, the filter is not
-   earning its place and the approach fails here.
-2. **Is this look — CC0 low-poly baked to sprites — one you would ship?** It is close to the NfH
-   architecture but the *cast* is fantasy knights; imagine it with civilians.
-3. **Could you direct this?** Reading `clips.json`, can you see yourself saying "push the flinch to
-   1.8, pull the idle back to 0.3" and trusting the result?
-4. **Is 35 seconds for twelve clips fast enough** that you would ask for twenty variations of a gag?
-5. **What is missing before it is enjoyable?** Faces, props, more angles, a civilian cast — ranked.
-
-If (1) and (3) are yes, the next week is in `animation_engine.md` §6, and it ends with a page of
-twenty comedy takes for you to mark funny or not.
+1. Is **Gus** the neighbour — or what should change (age, build, costume, personality)?
+2. Does each of them **move like themselves**? Any clip to swap?
+3. Should the GDD be rewritten around Gus (it still describes the old neighbour)?
+4. Which **statues** stay (GDD wants 8, picked per room/prop)? Any to swap?
+5. Faces: any expression to change on either of them?
+6. **The gameplay sample:** does the Act's rhythm feel like the game you want (creep → rig → freeze →
+   lure → hide → gag → applause)? What should the next sample show — a catch (Busted Cam), a chase,
+   the Meltdown, a second room?

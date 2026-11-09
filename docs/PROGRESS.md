@@ -440,3 +440,112 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   launch that is easy to miss. Fixed twice over: the sandbox is re-synced, and `tools/scripts/play.sh <scene>` now
   syncs and launches in one command (verified end to end with `--quit-after`). Every QA guide and
   `TESTING_ON_MAC.md` point at it instead of the two-step.
+- 2026-11-06 — Owner: continue the headless-Blender Bakery; prefers the **flat** takes, the cartoon
+  filter is too wobbly and unnatural. Filter is now opt-in (`amount` 0 by default); cartoon/flat pairs
+  removed. Fixed what made flat takes play wrong as sprites: real-time sampling at the library's own
+  speed with per-frame durations (was fixed 12 fps), seamless loops (first==last frame hitch), one
+  pixels-per-metre per character with a recorded feet **anchor** (knocked-down knight was a third the
+  size), per-pose floor contact (library sank a lying body 43 cm into the floor), foot-measured
+  locomotion speed (`ground_speed_px`, no moonwalking) and `follows` chain offsets (knocked→getup
+  jumped 34 px). Validator gained speed / seam / floor checks; prune and validate share one silhouette
+  measure. 15 clips (added startle, interact, tinker, knocked, getup, sit, sit_idle) bake + PASS in
+  ~80 s. `Bakery.tscn` is now a stage rehearsal from `game/proto/bakery/routine.json` plus a timed
+  gallery; looked at still + 62-frame sequence. Suite 1,113 green, lints green, import meta OK.
+  Notes `animation_engine.md` §7; QA `qa_bakery.md`. Open: civilian cast, props in hand, faces,
+  shadow that follows a lying body.
+- 2026-11-07 — Owner: round 2 good; now the actual characters, characters + movement only (props in
+  hand and faces later, separately). Restored the October KayKit re-dress tools from git (`8d7c654^`;
+  that cast was dropped only for runtime 3D glitches, which the Bakery removes) into
+  `tools/bakery/cast/` (`build.sh`, `recolour.py`, `redress.py`; models are build output, git-ignored,
+  built automatically by `run.py`). Fixed: AgX view transform washing the palette out (→ Standard +
+  lower exposure); Bellows' hair curtains hiding his face (trim below the brow); no barrel (robe
+  bulged on its own vertices); cravat sampling a Hush-only cell; jagged Breton stripes (tunic bisected
+  at band edges before painting); camera 70°→50° so faces read; cast-wide ppm so relative size holds;
+  Hush's idle pruned to 3 frames (per-clip prune floor). Manifest is now per character; `run.py`
+  rewritten for a cast (`--who`, `--only`, 3 parallel Blender jobs). Hush 15 clips (walk=Walking_C,
+  sneak, crouch, run, interact, tinker, pickup, throw, startle, hit, knocked, getup, wave, cheer),
+  Bellows 13 (idle=Idle_B, strut=Walking_B, potter, run, interact, use, sit/sit_idle/stand, startle,
+  hit, knocked, getup); all 28 PASS in 100 s from a clean checkout. Knight retired. `Bakery.tscn` is a
+  two-actor scene (`routine.json`) + both galleries; looked at stills, close-ups and a 48-frame
+  sequence. Suite 1,113 green, lints green, import meta OK. Notes `animation_engine.md` §8, QA
+  `qa_bakery.md`. Open: Bellows' robe opening when lying down, shadow on a lying body, no library
+  "freeze"/"angry" clip.
+- 2026-11-07 — Owner: still too influenced by the first version's designs; keep the prankster,
+  replace the other character completely. Bellows removed from the cast tools, manifest and sheets.
+  New neighbour **Gus Thudd** (concept for approval: ex-strongman lawn inspector, green singlet,
+  tangerine shorts, flat-top) built from scratch on KayKit's blank **Large mannequin** (CC0, from
+  `1cd74f3`, now `tools/bakery/cast/src/`) by new `tools/bakery/cast/neighbour.py`, which colours
+  each face by its dominant bone (the mannequin atlas shares cells across parts). Large and Medium
+  clip libraries both drive him (same bone names). Fixes: per-character camera angle (Gus 65°) and
+  ppm (~1.3× Hush); shorts stripe off the knees; sheets wrapped to ≤ 4096 px grids (flex was 11,648
+  px — would not load on many phones) with `cols` in the json, viewer reads frames by row/col; clips
+  planted per frame (Gus floated 30 px mid get-up) + per-frame validator. 29 clips PASS (Hush 15, Gus
+  14) in ~90 s from clean. Long Godot captures went stale mid-session (window stopped drawing; logic
+  proven by a step log); knocked→getup join verified offline (0.5 px). Suite 1,113 green, lints
+  green, import meta OK. Notes `animation_engine.md` §9, QA `qa_bakery.md`. Open: GDD still
+  describes Bellows (owner's call), Gus has no face yet (faces round).
+
+- 2026-11-08 — Owner: keep improving the headless-Blender Bakery; flat takes preferred, the cartoon
+  filter was too wobbly (still off everywhere, `amount` 0). Added the motion the core loop needs and
+  the CC0 library lacks, **composed** from library poses (no hand keys, no filter): `bake.py` recipe
+  fields `pose` (eased snap into one library frame, held dead still), `layer` (bones from a second
+  clip, time-fitted to the loop), `tweak` (eased body-axis bone turns) and `repeat`; `run.py` passes
+  them and labels them. Hush: 8 **FREEZE statues** (bow, kick, punch, tiptoe, discus, hurrah, ta-da,
+  boulder; weak first picks wave/cast replaced after probing + ranking frames by silhouette reach).
+  Gus: `search`, `fume`, `stomp`, `grab`. Fixes: re-imported library actions come back `.001`;
+  cubic snap left a dead last frame (→ quadratic). 41 clips PASS in ~113 s from clean. Rehearsal now
+  has Hush freeze in plain sight while Gus searches, stomps and lunges; gallery labels statues in
+  ice-blue. Looked at stills, statue/reaction close-ups and a 31-frame sequence. Suite 1,113 green,
+  lints green, import meta OK (12 new sidecars). Notes `animation_engine.md` §10, QA `qa_bakery.md`.
+  Open: punch/discus/tiptoe the least distinct statues; statue-by-room is runtime work; faces, props.
+- 2026-11-08 — Owner: keep the characters as they are; next, faces and props in hand. **Gus's face**
+  (`neighbour.py` `add_face`): brows, bulb nose, handlebar moustache, ray-cast onto the blank Large
+  head and skinned to `head`, in five expression sets (neutral, suspicious, angry with temper flush,
+  shock, daze) named `Gus_Face.<expr>.<part>`; `bake.py` shows one per frame from `face` in clips.json,
+  with timed switches (startle neutral→shock, knocked shock→daze, getup daze→angry). Hush keeps her
+  painted face. **Props**: new `tools/bakery/props.py` (apple, kipper, duster, Clarence, saw, mallet,
+  spanner, stopwatch, debug stick) parented to bones with `from`/`until` visibility, per-character
+  scale and a character `wear` list (Clarence at Hush's chest). New Hush clips `saw`, `hammer`,
+  `squeak`; props on tinker/pickup/throw/freeze_hurrah and Gus's `use`. Fixes: right hand is the far
+  hand (props placed by debug-stick renders + side-by-side rotations); build.sh passed a failed Gus
+  build on a stale .glb (now deleted first). 44 clips PASS in ~125 s from clean; rehearsal uses the
+  props; looked at close-ups, game-size renders, stage still and sequence. Suite 1,113 green, lints
+  green, import meta OK. Notes `animation_engine.md` §11, QA `qa_bakery.md`. Open: "suspicious" is
+  subtle at ¾ view; no Hush expressions; remaining GDD items.
+- 2026-11-08 — Owner: Gus fine; Hush gets expressions too; props grow per story; show a **gameplay
+  sample**. Hush: shock / daze / grin overlays (shared `facekit.py`, used by both cast builders) over
+  her painted neutral, placed by measuring the painted eyes off the atlas ink cell (±0.19, z 1.60);
+  wired into startle/hit/knocked/getup/cheer/squeak/freeze_tada/freeze_hurrah; bake treats a missing
+  "neutral" set as the bare face. **Gameplay sample** `Gameplay.tscn` + `gameplay.gd` +
+  `gameplay.json`: one scripted 37 s Act in the parlour on the baked sheets with GDD staging — ghost
+  taps, RIG ring (partial progress kept), FREEZE statue inspected up close ("Hm. New statue.
+  …Tasteful."), awareness "?" + stare strip, Clarence squeak lure, hide (ghosted sprite + breathing
+  badge), gramophone gag (spring glove + confetti), knocked→getup→fume vs cheer, Stalls + Applause;
+  engine knows only verbs, timeline is one JSON event list; locomotion uses k-multiplied clip time so
+  feet stay planted at game pace. Fixed two instabilities: shared `/tmp/bakery_frames` raced parallel
+  worktree sessions (now keyed by checkout); unthrottled virtual display made real-time timelines
+  crawl on camera (demo caps 60 fps). 44 clips PASS ~133 s clean; suite 1,113 green; lints green;
+  import meta OK. Notes `animation_engine.md` §12; QA `qa_bakery.md`; evidence
+  `spikes/bakery_hush_faces.png`, `bakery_hush_expr_clips.png`, `bakery_gameplay_{freeze,gag,seq}.png`.
+  Open: sample is scripted (no touch input); knocked Gus nicks the table; next prop batch per story.
+- 2026-11-08 — Owner: sample too basic; one full scene, from scratch in Blender, visually appealing,
+  nothing else on screen (visual cleanup only). New `tools/stage/act1_set.py` (Blender, primitives
+  only) models Gus's front room + proscenium/curtains/footlights/Stalls + moving props with pivots +
+  HUD icons; `tools/stage/build.py` renders (~25 s), crops and writes `game/proto/act1/art/` +
+  `layout.json`. New `res://proto/act1/Act1.tscn` (`act1.gd` + `act1.json` timeline): a 67 s looping
+  Act — curtain, three rigs (gramophone, pedestal, butter), FREEZE inspected up close, Clarence lure,
+  slip → pedestal → trophy bonk, gramophone glove → weight rack → dumbbells, bow, Curtain Call card;
+  clean game HUD only. `play.sh` defaults to it. Looked at a 66-frame sequence and key stills. Suite
+  1,113 green, lints green, import meta OK. Notes `animation_engine.md` §13; evidence
+  `spikes/act1_*.png`. Open: sound, RIG button over the rack corner on 20:9.
+- 2026-11-09 — Owner: Act I is the path; push its quality, same pranks and story. Set now renders in
+  Cycles (GPU, denoised, relit for path tracing) with richer dressing (wallpaper motif, pendant,
+  sconces, coat stand + tracksuit, shaker, LAWN INSPECTOR certificate, cactus, window light shaft).
+  Moving props are baked as 3D frame sequences in Blender (door, pedestal topple, trophy tumble,
+  dumbbells, spring glove, curtain gather, dust) instead of 2D-rotated sprites; `build.py` groups them
+  (`seqs`), ~7 min full / `--engine eevee` ~1 min. Scene: eased camera direction (push-ins, punch-ins,
+  wide finale), shake, dust, flight smear, landing squash, plant rustle, bow spotlight, motes, typed
+  speech, layered shadows, warm cast tint, smaller HUD; capture flags `--fixed-step` / `--start=`.
+  Looked at full-act sequences and beat stills. Suite 1,113 green, lints green, import meta OK. Notes
+  `animation_engine.md` §14, evidence `spikes/act1v2_*.png`. Open: 22 MB art (atlas before phone),
+  sound, re-bake cast under set lights.

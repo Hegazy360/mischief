@@ -1,0 +1,912 @@
+{
+ "doc": "Act I — The Front Room. One complete scene: curtain up, three rigs (gramophone, trophy pedestal, butter), a FREEZE in plain sight, a Clarence lure, the slip-and-bonk chain, the gramophone finale, the bow, curtain down, the Applause card. Times in seconds; x in stage px or @marks from art/layout.json. Verbs: see act1.gd _apply().",
+ "loop_at": 67.0,
+ "start": {
+  "gus": {
+   "x": 1251,
+   "dir": 1,
+   "clip": "pushups"
+  },
+  "hush": {
+   "x": "@door",
+   "dir": 1,
+   "clip": "idle",
+   "visible": false
+  }
+ },
+ "events": [
+  {
+   "t": 1.6,
+   "do": "curtain",
+   "open": true,
+   "secs": 2.6
+  },
+  {
+   "t": 2.4,
+   "do": "laugh",
+   "amp": 0.5,
+   "add": 0.0
+  },
+  {
+   "t": 3.0,
+   "do": "hud",
+   "on": true
+  },
+  {
+   "t": 3.0,
+   "do": "say",
+   "who": "gus",
+   "text": "…ninety-seven…",
+   "secs": 1.6
+  },
+  {
+   "t": 4.25,
+   "do": "seq",
+   "name": "door",
+   "to": 5,
+   "secs": 0.4,
+   "ease": "out"
+  },
+  {
+   "t": 4.4,
+   "do": "show",
+   "who": "hush",
+   "on": true,
+   "x": "@door"
+  },
+  {
+   "t": 4.6,
+   "do": "tap",
+   "x": 640,
+   "y": 860
+  },
+  {
+   "t": 4.7,
+   "do": "move",
+   "who": "hush",
+   "to": 585,
+   "clip": "sneak",
+   "k": 2.4
+  },
+  {
+   "t": 5.1,
+   "do": "say",
+   "who": "gus",
+   "text": "…ninety-eight…",
+   "secs": 1.6
+  },
+  {
+   "t": 7.4,
+   "do": "cam",
+   "zoom": 1.14,
+   "x": 820,
+   "y": 620,
+   "secs": 1.4
+  },
+  {
+   "t": 7.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "tinker",
+   "dir": 1
+  },
+  {
+   "t": 7.6,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.9
+  },
+  {
+   "t": 7.6,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.9
+  },
+  {
+   "t": 7.8,
+   "do": "say",
+   "who": "gus",
+   "text": "…NINETY-NINE…",
+   "secs": 1.6
+  },
+  {
+   "t": 8.2,
+   "do": "seq",
+   "name": "door",
+   "to": 0,
+   "secs": 0.45,
+   "ease": "inout"
+  },
+  {
+   "t": 9.5,
+   "do": "stamp",
+   "at": "gramophone",
+   "dx": 0,
+   "dy": -250
+  },
+  {
+   "t": 9.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 9.9,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 9.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "idle"
+  },
+  {
+   "t": 9.9,
+   "do": "say",
+   "who": "gus",
+   "text": "ONE HUNDRED!",
+   "secs": 1.3
+  },
+  {
+   "t": 10.3,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.4
+  },
+  {
+   "t": 10.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 11.0,
+   "do": "say",
+   "who": "gus",
+   "text": "New record. Obviously.",
+   "secs": 1.6
+  },
+  {
+   "t": 12.6,
+   "do": "move",
+   "who": "gus",
+   "to": "@mirror-20",
+   "clip": "walk",
+   "k": 1.6
+  },
+  {
+   "t": 12.8,
+   "do": "say",
+   "who": "gus",
+   "text": "Mirror time.",
+   "secs": 1.4
+  },
+  {
+   "t": 12.9,
+   "do": "tap",
+   "x": 1390,
+   "y": 880
+  },
+  {
+   "t": 13.0,
+   "do": "move",
+   "who": "hush",
+   "to": 1385,
+   "clip": "sneak",
+   "k": 3.0
+  },
+  {
+   "t": 15.1,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex",
+   "dir": 1
+  },
+  {
+   "t": 18.0,
+   "do": "clip",
+   "who": "hush",
+   "name": "saw",
+   "dir": 1
+  },
+  {
+   "t": 18.0,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.8
+  },
+  {
+   "t": 18.0,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.8
+  },
+  {
+   "t": 19.8,
+   "do": "stamp",
+   "at": "pedestal",
+   "dx": 0,
+   "dy": -130
+  },
+  {
+   "t": 19.8,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 19.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 20.0,
+   "do": "face",
+   "who": "gus",
+   "dir": -1
+  },
+  {
+   "t": 20.0,
+   "do": "pop",
+   "who": "gus",
+   "text": "?",
+   "kind": "q",
+   "dy": -460,
+   "secs": 1.0
+  },
+  {
+   "t": 20.05,
+   "do": "cam",
+   "zoom": 1.32,
+   "x": 1560,
+   "y": 600,
+   "secs": 0.45,
+   "ease": "out"
+  },
+  {
+   "t": 20.1,
+   "do": "press",
+   "button": "freeze",
+   "secs": 0.3
+  },
+  {
+   "t": 20.1,
+   "do": "freeze",
+   "on": true
+  },
+  {
+   "t": 20.1,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_hurrah",
+   "hold": true,
+   "dir": 1
+  },
+  {
+   "t": 20.4,
+   "do": "aware",
+   "to": 0.65,
+   "secs": 1.6
+  },
+  {
+   "t": 20.8,
+   "do": "move",
+   "who": "gus",
+   "to": 1650,
+   "clip": "walk",
+   "k": 1.3
+  },
+  {
+   "t": 21.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "search",
+   "dir": -1
+  },
+  {
+   "t": 22.0,
+   "do": "aware",
+   "to": 0.0,
+   "secs": 3.4
+  },
+  {
+   "t": 22.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Since when do I own a statue?",
+   "secs": 2.6
+  },
+  {
+   "t": 25.1,
+   "do": "say",
+   "who": "gus",
+   "text": "…Tasteful.",
+   "secs": 1.6
+  },
+  {
+   "t": 26.3,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 26.4,
+   "do": "move",
+   "who": "gus",
+   "to": "@mirror-20",
+   "clip": "walk",
+   "k": 1.3
+  },
+  {
+   "t": 26.8,
+   "do": "laugh",
+   "amp": 0.6,
+   "add": 0.08,
+   "text": "hee hee…",
+   "dx": -200
+  },
+  {
+   "t": 27.0,
+   "do": "freeze",
+   "on": false
+  },
+  {
+   "t": 27.0,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 27.3,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex",
+   "dir": 1
+  },
+  {
+   "t": 27.5,
+   "do": "tap",
+   "x": 1600,
+   "y": 880
+  },
+  {
+   "t": 27.6,
+   "do": "move",
+   "who": "hush",
+   "to": 1610,
+   "clip": "sneak",
+   "k": 3.0
+  },
+  {
+   "t": 29.0,
+   "do": "cam",
+   "zoom": 1.1,
+   "x": 1700,
+   "y": 620,
+   "secs": 1.0
+  },
+  {
+   "t": 29.2,
+   "do": "clip",
+   "who": "hush",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 29.2,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.3
+  },
+  {
+   "t": 29.2,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.3
+  },
+  {
+   "t": 29.7,
+   "do": "prop",
+   "name": "butter",
+   "vis": true
+  },
+  {
+   "t": 29.8,
+   "do": "say",
+   "who": "gus",
+   "text": "Gorgeous.",
+   "secs": 1.4
+  },
+  {
+   "t": 30.5,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 30.6,
+   "do": "tap",
+   "x": 432,
+   "y": 860
+  },
+  {
+   "t": 30.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 30.7,
+   "do": "move",
+   "who": "hush",
+   "to": "@plant",
+   "clip": "run",
+   "k": 1.6
+  },
+  {
+   "t": 34.2,
+   "do": "rustle"
+  },
+  {
+   "t": 34.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "squeak",
+   "dir": 1
+  },
+  {
+   "t": 34.6,
+   "do": "press",
+   "button": "clarence",
+   "secs": 0.4
+  },
+  {
+   "t": 34.65,
+   "do": "rustle"
+  },
+  {
+   "t": 34.7,
+   "do": "pop",
+   "at": "plant",
+   "dy": -420,
+   "text": "SQUEAK!",
+   "secs": 1.0
+  },
+  {
+   "t": 34.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "startle",
+   "dir": -1
+  },
+  {
+   "t": 35.0,
+   "do": "pop",
+   "who": "gus",
+   "text": "!",
+   "kind": "q",
+   "dy": -470,
+   "secs": 0.8
+  },
+  {
+   "t": 35.3,
+   "do": "say",
+   "who": "gus",
+   "text": "WHO'S THERE?!",
+   "secs": 1.3
+  },
+  {
+   "t": 35.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 35.9,
+   "do": "move",
+   "who": "gus",
+   "to": 900,
+   "clip": "stomp",
+   "k": 1.4
+  },
+  {
+   "t": 36.3,
+   "do": "cam",
+   "zoom": 1.22,
+   "x": 1560,
+   "y": 650,
+   "secs": 0.35,
+   "ease": "out"
+  },
+  {
+   "t": 36.35,
+   "do": "clip",
+   "who": "gus",
+   "name": "knocked",
+   "hold": true
+  },
+  {
+   "t": 36.35,
+   "do": "path",
+   "who": "gus",
+   "to": 1575,
+   "secs": 0.75
+  },
+  {
+   "t": 36.38,
+   "do": "dust",
+   "x": 1730,
+   "y": 880,
+   "s": 0.6
+  },
+  {
+   "t": 36.4,
+   "do": "pop",
+   "who": "gus",
+   "text": "WHOA!",
+   "dy": -380,
+   "secs": 0.8
+  },
+  {
+   "t": 37.0,
+   "do": "unstamp"
+  },
+  {
+   "t": 37.0,
+   "do": "seq",
+   "name": "pedestal",
+   "to": 8,
+   "secs": 0.62,
+   "ease": "in"
+  },
+  {
+   "t": 37.05,
+   "do": "seq",
+   "name": "trophy",
+   "to": 11,
+   "secs": 0.85
+  },
+  {
+   "t": 37.5,
+   "do": "dust",
+   "x": 1320,
+   "y": 880,
+   "s": 1.0
+  },
+  {
+   "t": 37.65,
+   "do": "pop",
+   "x": 1660,
+   "y": 760,
+   "text": "BONK!",
+   "secs": 1.0
+  },
+  {
+   "t": 37.65,
+   "do": "shake",
+   "amp": 18,
+   "secs": 0.45
+  },
+  {
+   "t": 37.7,
+   "do": "stars",
+   "who": "gus",
+   "secs": 3.0
+  },
+  {
+   "t": 37.8,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.35,
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 37.95,
+   "do": "dust",
+   "x": 1725,
+   "y": 880,
+   "s": 0.5
+  },
+  {
+   "t": 38.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "wave",
+   "dir": 1
+  },
+  {
+   "t": 39.8,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.3
+  },
+  {
+   "t": 40.4,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 40.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "getup"
+  },
+  {
+   "t": 42.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume",
+   "dir": -1
+  },
+  {
+   "t": 43.0,
+   "do": "say",
+   "who": "gus",
+   "text": "That's IT.",
+   "secs": 1.5
+  },
+  {
+   "t": 44.6,
+   "do": "say",
+   "who": "gus",
+   "text": "Calming. Music.",
+   "secs": 1.6
+  },
+  {
+   "t": 45.2,
+   "do": "move",
+   "who": "gus",
+   "to": 1150,
+   "clip": "stomp",
+   "k": 1.2
+  },
+  {
+   "t": 46.9,
+   "do": "cam",
+   "zoom": 1.28,
+   "x": 980,
+   "y": 560,
+   "secs": 0.9
+  },
+  {
+   "t": 47.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": -1
+  },
+  {
+   "t": 47.9,
+   "do": "pop",
+   "at": "horn",
+   "dx": 30,
+   "dy": -40,
+   "text": "♪",
+   "kind": "q",
+   "secs": 0.5
+  },
+  {
+   "t": 48.3,
+   "do": "seq",
+   "name": "glove",
+   "vis": true,
+   "from": 0,
+   "to": 5,
+   "secs": 0.09,
+   "ease": "out"
+  },
+  {
+   "t": 48.36,
+   "do": "pop",
+   "x": 1120,
+   "y": 470,
+   "text": "POW!",
+   "secs": 1.0
+  },
+  {
+   "t": 48.36,
+   "do": "shake",
+   "amp": 22,
+   "secs": 0.5
+  },
+  {
+   "t": 48.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "knocked",
+   "hold": true
+  },
+  {
+   "t": 48.4,
+   "do": "path",
+   "who": "gus",
+   "to": 1885,
+   "arc": 300,
+   "secs": 1.0
+  },
+  {
+   "t": 48.42,
+   "do": "seq",
+   "name": "glove",
+   "to": 6,
+   "secs": 0.1
+  },
+  {
+   "t": 48.45,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 0.9,
+   "ease": "out"
+  },
+  {
+   "t": 48.75,
+   "do": "seq",
+   "name": "glove",
+   "to": 0,
+   "secs": 0.9,
+   "ease": "inout"
+  },
+  {
+   "t": 49.4,
+   "do": "shake",
+   "amp": 26,
+   "secs": 0.5
+  },
+  {
+   "t": 49.4,
+   "do": "dust",
+   "x": 1900,
+   "y": 880,
+   "s": 1.1
+  },
+  {
+   "t": 49.4,
+   "do": "squash",
+   "who": "gus",
+   "amount": 0.22
+  },
+  {
+   "t": 49.45,
+   "do": "seq",
+   "name": "dumbbells",
+   "to": 11,
+   "secs": 0.8
+  },
+  {
+   "t": 49.7,
+   "do": "seq",
+   "name": "glove",
+   "vis": false,
+   "to": 0,
+   "secs": 0.01
+  },
+  {
+   "t": 50.1,
+   "do": "dust",
+   "x": 1990,
+   "y": 880,
+   "s": 0.7
+  },
+  {
+   "t": 50.25,
+   "do": "pop",
+   "x": 1910,
+   "y": 760,
+   "text": "CLANG!",
+   "secs": 1.0
+  },
+  {
+   "t": 50.3,
+   "do": "stars",
+   "who": "gus",
+   "secs": 8.0
+  },
+  {
+   "t": 50.3,
+   "do": "laugh",
+   "amp": 1.5,
+   "add": 0.6,
+   "text": "BRAVO!!"
+  },
+  {
+   "t": 50.3,
+   "do": "confetti"
+  },
+  {
+   "t": 51.0,
+   "do": "move",
+   "who": "hush",
+   "to": 1180,
+   "clip": "run",
+   "k": 1.4
+  },
+  {
+   "t": 53.6,
+   "do": "spot",
+   "who": "hush",
+   "to": 1.0,
+   "secs": 0.8
+  },
+  {
+   "t": 53.6,
+   "do": "cam",
+   "zoom": 1.12,
+   "x": 1180,
+   "y": 640,
+   "secs": 1.6
+  },
+  {
+   "t": 53.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "cheer",
+   "dir": 1
+  },
+  {
+   "t": 54.2,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "ENCORE!",
+   "dx": 260
+  },
+  {
+   "t": 56.0,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_bow",
+   "hold": true,
+   "dir": -1
+  },
+  {
+   "t": 56.4,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "BRAVO!",
+   "dx": -240
+  },
+  {
+   "t": 57.5,
+   "do": "spot",
+   "to": 0.0,
+   "secs": 0.6
+  },
+  {
+   "t": 57.5,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.0
+  },
+  {
+   "t": 57.6,
+   "do": "hud",
+   "on": false
+  },
+  {
+   "t": 57.6,
+   "do": "curtain",
+   "open": false,
+   "secs": 2.0
+  },
+  {
+   "t": 59.6,
+   "do": "card"
+  },
+  {
+   "t": 59.8,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.0
+  },
+  {
+   "t": 66.6,
+   "do": "uncard"
+  }
+ ]
+}

@@ -1,106 +1,657 @@
 {
-  "doc": "The whole animation authoring surface. One line per clip: which CC0 library clip to start from, and how hard to push it. No keyframes, no curves, no poses \u2014 an agent edits these numbers, runs tools/bakery/run.py, and reads the validator's verdict.",
-  "character": "game/proto/toyhouse/assets/kaykit/Knight.glb",
+  "doc": "The cast's whole animation authoring surface. Per character: which built model (tools/bakery/cast/build.sh) and one line per clip \u2014 which CC0 KayKit library clip, whether it loops, whether it is locomotion (ground speed is then measured from the planted foot so the sprite travels without sliding), and `follows` for a clip that continues another (the body offset at the switch is measured and stored). Clips play at the library's own speed. The cartoon filter is opt-in per clip via `amount` (default 0 = the motion exactly as captured). `ppm` and `angle` are cast-wide defaults a character may override (its own scale on stage, and the camera angle that shows it the same way as the others). `lib`: 'General' = KayKit Rig_Medium_General; 'Large_General' = the Large-body library in tools/bakery/cast/src (same bone names, so either drives either body). Composed clips (no library clip does these): `pose` = a statue that eases from the character's `rest` stance into one frame of any clip in `secs` and holds it `hold` seconds dead still; `layer` = some bones (with their children) taken from a second clip, time-fitted to the base loop; `tweak` = eased extra turns per bone, [[t, pitch, roll, yaw], ...] in degrees in BODY axes (+pitch bows forward, +roll leans to its own left, +yaw turns to its own left = toward the camera); `repeat` = play the base loop N times so a tweak can be longer than it. `face` = which expression set a model shows (default 'neutral'), or timed switches [[secs, expr], ...]. `props` = what a clip holds: [{item (tools/bakery/props.py), bone (handslot.l = the hand nearer the camera), from/until secs, off (bone axes, model units), rot (deg), scale}]; a character's `wear` is added to every clip unless the clip sets \"wear\": false.",
   "lib_dir": "game/proto/toyhouse/assets/kaykit",
   "out": "game/proto/bakery/sheets",
   "defaults": {
-    "res": 256,
-    "angle": 70,
-    "frames": 12,
+    "ppm": 80,
+    "angle": 50,
+    "fps": 15,
+    "amount": 0.0,
     "sigma": 2.5,
     "ink": 2,
-    "min_span": 0.08,
+    "min_span": 0.05,
     "max_deg": 28
   },
-  "clips": [
-    {
-      "name": "idle",
-      "lib": "General",
-      "clip": "Idle_A",
-      "loop": true,
-      "amount": 0.6,
-      "frames": 10,
-      "min_span": 0.02
+  "cast": {
+    "hush": {
+      "label": "Hush \u2014 the mime (player)",
+      "character": "tools/bakery/cast/out/hush.glb",
+      "clips": [
+        {
+          "name": "idle",
+          "lib": "General",
+          "clip": "Idle_A",
+          "loop": true,
+          "min_span": 0.006,
+          "min_change": 0.0015
+        },
+        {
+          "name": "walk",
+          "lib": "MovementBasic",
+          "clip": "Walking_C",
+          "loop": true,
+          "locomotion": true
+        },
+        {
+          "name": "sneak",
+          "lib": "MovementAdvanced",
+          "clip": "Sneaking",
+          "loop": true,
+          "locomotion": true
+        },
+        {
+          "name": "crouch",
+          "lib": "MovementAdvanced",
+          "clip": "Crouching",
+          "loop": true,
+          "locomotion": true
+        },
+        {
+          "name": "run",
+          "lib": "MovementBasic",
+          "clip": "Running_A",
+          "loop": true,
+          "locomotion": true,
+          "fps": 20
+        },
+        {
+          "name": "interact",
+          "lib": "General",
+          "clip": "Interact"
+        },
+        {
+          "name": "tinker",
+          "lib": "Tools",
+          "clip": "Lockpicking",
+          "loop": true,
+          "min_span": 0.03,
+          "props": [
+            {
+              "item": "spanner",
+              "bone": "handslot.l",
+              "scale": 1.7
+            }
+          ]
+        },
+        {
+          "name": "saw",
+          "lib": "Tools",
+          "clip": "Sawing",
+          "loop": true,
+          "min_span": 0.02,
+          "props": [
+            {
+              "item": "saw",
+              "bone": "handslot.r",
+              "rot": [
+                120,
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hammer",
+          "lib": "Tools",
+          "clip": "Hammering",
+          "loop": true,
+          "props": [
+            {
+              "item": "mallet",
+              "bone": "handslot.r"
+            }
+          ]
+        },
+        {
+          "name": "squeak",
+          "lib": "Tools",
+          "clip": "Holding_A",
+          "loop": true,
+          "wear": false,
+          "min_span": 0.006,
+          "min_change": 0.0015,
+          "props": [
+            {
+              "item": "clarence",
+              "bone": "handslot.r",
+              "scale": 1.4
+            }
+          ],
+          "face": "grin"
+        },
+        {
+          "name": "pickup",
+          "lib": "General",
+          "clip": "PickUp",
+          "props": [
+            {
+              "item": "kipper",
+              "bone": "handslot.l",
+              "from": 0.5,
+              "rot": [
+                180,
+                0,
+                0
+              ],
+              "scale": 1.4
+            }
+          ]
+        },
+        {
+          "name": "throw",
+          "lib": "General",
+          "clip": "Throw",
+          "props": [
+            {
+              "item": "apple",
+              "bone": "handslot.r",
+              "until": 0.82,
+              "scale": 1.6
+            }
+          ]
+        },
+        {
+          "name": "startle",
+          "lib": "MovementAdvanced",
+          "clip": "Dodge_Backward",
+          "fps": 20,
+          "face": [
+            [
+              0,
+              "neutral"
+            ],
+            [
+              0.07,
+              "shock"
+            ]
+          ]
+        },
+        {
+          "name": "hit",
+          "lib": "General",
+          "clip": "Hit_A",
+          "fps": 20,
+          "face": "shock"
+        },
+        {
+          "name": "knocked",
+          "lib": "General",
+          "clip": "Death_A",
+          "face": [
+            [
+              0,
+              "shock"
+            ],
+            [
+              0.45,
+              "daze"
+            ]
+          ]
+        },
+        {
+          "name": "getup",
+          "lib": "Simulation",
+          "clip": "Lie_StandUp",
+          "follows": "knocked",
+          "face": [
+            [
+              0,
+              "daze"
+            ],
+            [
+              1.7,
+              "neutral"
+            ]
+          ]
+        },
+        {
+          "name": "wave",
+          "lib": "Simulation",
+          "clip": "Waving",
+          "loop": true,
+          "min_span": 0.03
+        },
+        {
+          "name": "cheer",
+          "lib": "Simulation",
+          "clip": "Cheering",
+          "loop": true,
+          "face": "grin"
+        },
+        {
+          "name": "freeze_discus",
+          "pose": {
+            "lib": "General",
+            "clip": "Throw",
+            "at": 0.78
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        },
+        {
+          "name": "freeze_kick",
+          "pose": {
+            "lib": "CombatMelee",
+            "clip": "Melee_Unarmed_Attack_Kick",
+            "at": 0.37
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        },
+        {
+          "name": "freeze_tiptoe",
+          "pose": {
+            "lib": "MovementAdvanced",
+            "clip": "Sneaking",
+            "at": 1.55
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        },
+        {
+          "name": "freeze_punch",
+          "pose": {
+            "lib": "CombatMelee",
+            "clip": "Melee_Unarmed_Attack_Punch_A",
+            "at": 0.58
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        },
+        {
+          "name": "freeze_bow",
+          "pose": {
+            "lib": "General",
+            "clip": "PickUp",
+            "at": 0.43
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        },
+        {
+          "name": "freeze_hurrah",
+          "pose": {
+            "lib": "Simulation",
+            "clip": "Cheering",
+            "at": 0.33
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20,
+          "tweak": {
+            "chest": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0.2,
+                -10,
+                0,
+                0
+              ]
+            ]
+          },
+          "props": [
+            {
+              "item": "duster",
+              "bone": "handslot.r",
+              "scale": 1.4,
+              "rot": [
+                90,
+                0,
+                0
+              ]
+            }
+          ],
+          "face": "grin"
+        },
+        {
+          "name": "freeze_tada",
+          "pose": {
+            "lib": "General",
+            "clip": "Spawn_Air",
+            "at": 0.49
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20,
+          "face": "grin"
+        },
+        {
+          "name": "freeze_boulder",
+          "pose": {
+            "lib": "General",
+            "clip": "Spawn_Air",
+            "at": 0.89
+          },
+          "secs": 0.2,
+          "hold": 0.6,
+          "fps": 20
+        }
+      ],
+      "defaults": {
+        "rest": {
+          "lib": "General",
+          "clip": "Idle_A",
+          "at": 0.0
+        }
+      },
+      "wear": [
+        {
+          "item": "clarence",
+          "bone": "chest",
+          "off": [
+            0.2,
+            0.12,
+            0.27
+          ],
+          "rot": [
+            0,
+            -90,
+            0
+          ],
+          "scale": 1.3
+        }
+      ]
     },
-    {
-      "name": "walk",
-      "lib": "MovementBasic",
-      "clip": "Walking_A",
-      "loop": true,
-      "amount": 1.0,
-      "frames": 10
-    },
-    {
-      "name": "run",
-      "lib": "MovementBasic",
-      "clip": "Running_A",
-      "loop": true,
-      "amount": 1.2,
-      "frames": 10
-    },
-    {
-      "name": "sneak",
-      "lib": "MovementAdvanced",
-      "clip": "Sneaking",
-      "loop": true,
-      "amount": 1.0,
-      "frames": 12,
-      "min_span": 0.05
-    },
-    {
-      "name": "throw",
-      "lib": "General",
-      "clip": "Throw",
-      "amount": 1.4
-    },
-    {
-      "name": "hit",
-      "lib": "General",
-      "clip": "Hit_A",
-      "amount": 1.4,
-      "frames": 10
-    },
-    {
-      "name": "flat",
-      "lib": "General",
-      "clip": "Death_A",
-      "amount": 1.3,
-      "max_deg": 45
-    },
-    {
-      "name": "pickup",
-      "lib": "General",
-      "clip": "PickUp",
-      "amount": 1.1
-    },
-    {
-      "name": "cheer",
-      "lib": "Simulation",
-      "clip": "Cheering",
-      "loop": true,
-      "amount": 1.1,
-      "frames": 12
-    },
-    {
-      "name": "throw_flat",
-      "lib": "General",
-      "clip": "Throw",
-      "amount": 0.0
-    },
-    {
-      "name": "hit_flat",
-      "lib": "General",
-      "clip": "Hit_A",
-      "amount": 0.0,
-      "frames": 10
-    },
-    {
-      "name": "run_flat",
-      "lib": "MovementBasic",
-      "clip": "Running_A",
-      "loop": true,
-      "amount": 0.0,
-      "frames": 10
+    "gus": {
+      "label": "Gus Thudd \u2014 the neighbour",
+      "character": "tools/bakery/cast/out/gus.glb",
+      "defaults": {
+        "ppm": 60,
+        "angle": 65,
+        "rest": {
+          "lib": "Large_General",
+          "clip": "Idle_A",
+          "at": 0.0
+        }
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "lib": "Large_General",
+          "clip": "Idle_A",
+          "loop": true,
+          "min_span": 0.006,
+          "min_change": 0.0015
+        },
+        {
+          "name": "walk",
+          "lib": "Large_MovementBasic",
+          "clip": "Walking_A",
+          "loop": true,
+          "locomotion": true
+        },
+        {
+          "name": "run",
+          "lib": "Large_MovementBasic",
+          "clip": "Running_A",
+          "loop": true,
+          "locomotion": true,
+          "fps": 20,
+          "face": "angry"
+        },
+        {
+          "name": "flex",
+          "lib": "Large_Simulation",
+          "clip": "Flexing"
+        },
+        {
+          "name": "pushups",
+          "lib": "Simulation",
+          "clip": "Push_Ups",
+          "loop": true,
+          "min_span": 0.03
+        },
+        {
+          "name": "interact",
+          "lib": "General",
+          "clip": "Interact"
+        },
+        {
+          "name": "use",
+          "lib": "General",
+          "clip": "Use_Item",
+          "props": [
+            {
+              "item": "stopwatch",
+              "bone": "handslot.r",
+              "off": [
+                0,
+                0.1,
+                0.2
+              ],
+              "scale": 2.0,
+              "rot": [
+                0,
+                90,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sit",
+          "lib": "Simulation",
+          "clip": "Sit_Chair_Down"
+        },
+        {
+          "name": "sit_idle",
+          "lib": "Simulation",
+          "clip": "Sit_Chair_Idle",
+          "loop": true,
+          "follows": "sit",
+          "fps": 10,
+          "min_span": 0.006,
+          "min_change": 0.0015
+        },
+        {
+          "name": "stand",
+          "lib": "Simulation",
+          "clip": "Sit_Chair_StandUp",
+          "follows": "sit_idle"
+        },
+        {
+          "name": "startle",
+          "lib": "MovementAdvanced",
+          "clip": "Dodge_Backward",
+          "fps": 20,
+          "face": [
+            [
+              0,
+              "neutral"
+            ],
+            [
+              0.05,
+              "shock"
+            ]
+          ]
+        },
+        {
+          "name": "hit",
+          "lib": "Large_General",
+          "clip": "Hit_A",
+          "fps": 20,
+          "face": "shock"
+        },
+        {
+          "name": "knocked",
+          "lib": "Large_General",
+          "clip": "Death_A",
+          "face": [
+            [
+              0,
+              "shock"
+            ],
+            [
+              0.6,
+              "daze"
+            ]
+          ]
+        },
+        {
+          "name": "getup",
+          "lib": "Simulation",
+          "clip": "Lie_StandUp",
+          "follows": "knocked",
+          "face": [
+            [
+              0,
+              "daze"
+            ],
+            [
+              1.6,
+              "angry"
+            ]
+          ]
+        },
+        {
+          "name": "search",
+          "lib": "Large_General",
+          "clip": "Idle_A",
+          "loop": true,
+          "repeat": 2,
+          "min_span": 0.03,
+          "min_change": 0.0015,
+          "tweak": {
+            "chest": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0.6,
+                0,
+                0,
+                18
+              ],
+              [
+                1.4,
+                0,
+                0,
+                18
+              ],
+              [
+                2.3,
+                0,
+                0,
+                -18
+              ],
+              [
+                3.1,
+                0,
+                0,
+                -18
+              ],
+              [
+                3.6,
+                0,
+                0,
+                0
+              ]
+            ],
+            "head": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0.5,
+                8,
+                0,
+                45
+              ],
+              [
+                1.4,
+                8,
+                0,
+                45
+              ],
+              [
+                2.2,
+                8,
+                0,
+                -45
+              ],
+              [
+                3.1,
+                8,
+                0,
+                -45
+              ],
+              [
+                3.6,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "face": "suspicious"
+        },
+        {
+          "name": "fume",
+          "lib": "CombatMelee",
+          "clip": "Melee_Unarmed_Idle",
+          "loop": true,
+          "min_span": 0.01,
+          "min_change": 0.0015,
+          "face": "angry"
+        },
+        {
+          "name": "stomp",
+          "lib": "Large_MovementBasic",
+          "clip": "Walking_A",
+          "loop": true,
+          "locomotion": true,
+          "layer": {
+            "lib": "CombatMelee",
+            "clip": "Melee_Unarmed_Idle",
+            "bones": [
+              "upperarm.l",
+              "upperarm.r"
+            ]
+          },
+          "tweak": {
+            "chest": [
+              [
+                0,
+                10,
+                0,
+                0
+              ]
+            ],
+            "head": [
+              [
+                0,
+                -6,
+                0,
+                0
+              ]
+            ]
+          },
+          "face": "angry"
+        },
+        {
+          "name": "grab",
+          "lib": "CombatMelee",
+          "clip": "Melee_Unarmed_Attack_Punch_A",
+          "face": "angry"
+        }
+      ]
     }
-  ]
+  }
 }

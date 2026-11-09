@@ -1,0 +1,97 @@
+{
+  "clip": "Cheering@0.33s",
+  "character": "hush.glb",
+  "amount": 0.0,
+  "sigma": 2.5,
+  "loop": false,
+  "angle": 50.0,
+  "fps": 20.0,
+  "duration": 0.8,
+  "source_duration": 0.8,
+  "max_lift_cm": 0.3,
+  "plant": true,
+  "ppm": 80.0,
+  "anchor": [
+    98.9,
+    191.0
+  ],
+  "durations": [
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.6
+  ],
+  "faces": 1,
+  "ground_speed": 0.0,
+  "ground_speed_px": 0.0,
+  "source_frames": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "frames": 5,
+  "accent": 4,
+  "recipe": {
+    "pose": {
+      "clip": "Cheering",
+      "at": 0.33
+    },
+    "from_at": 0.0,
+    "secs": 0.2,
+    "hold": 0.6,
+    "tweak": {
+      "chest": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0.2,
+          -10,
+          0,
+          0
+        ]
+      ]
+    },
+    "face": "grin",
+    "props": [
+      {
+        "item": "duster",
+        "bone": "handslot.r",
+        "scale": 1.4,
+        "rot": [
+          90,
+          0,
+          0
+        ]
+      },
+      {
+        "item": "clarence",
+        "bone": "chest",
+        "off": [
+          0.2,
+          0.12,
+          0.27
+        ],
+        "rot": [
+          0,
+          -90,
+          0
+        ],
+        "scale": 1.3
+      }
+    ],
+    "prop_scale": 1.0
+  },
+  "sheet": "freeze_hurrah.png",
+  "frame_w": 189,
+  "frame_h": 198,
+  "count": 5,
+  "ink": 2,
+  "cols": 5
+}

@@ -1,0 +1,101 @@
+{
+  "clip": "Walking_A",
+  "character": "gus.glb",
+  "amount": 0.0,
+  "sigma": 2.5,
+  "loop": true,
+  "angle": 65.0,
+  "fps": 15.0,
+  "duration": 1.0667,
+  "source_duration": 1.0667,
+  "max_lift_cm": 4.3,
+  "plant": true,
+  "ppm": 60.0,
+  "anchor": [
+    114.91,
+    246.0
+  ],
+  "durations": [
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667,
+    0.0667
+  ],
+  "faces": -1,
+  "ground_speed": 1.6305,
+  "ground_speed_px": 97.83,
+  "source_frames": [
+    0.0,
+    1.6,
+    3.2,
+    4.8,
+    6.4,
+    8.0,
+    9.6,
+    11.2,
+    12.8,
+    14.4,
+    16.0,
+    17.6,
+    19.2,
+    20.8,
+    22.4,
+    24.0
+  ],
+  "frames": 16,
+  "accent": 0,
+  "recipe": {
+    "layer": {
+      "clip": "Melee_Unarmed_Idle",
+      "bones": [
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "lowerarm.l",
+        "lowerarm.r",
+        "upperarm.l",
+        "upperarm.r",
+        "wrist.l",
+        "wrist.r"
+      ]
+    },
+    "tweak": {
+      "chest": [
+        [
+          0,
+          10,
+          0,
+          0
+        ]
+      ],
+      "head": [
+        [
+          0,
+          -6,
+          0,
+          0
+        ]
+      ]
+    },
+    "face": "angry"
+  },
+  "sheet": "stomp.png",
+  "frame_w": 182,
+  "frame_h": 253,
+  "count": 16,
+  "ink": 2,
+  "cols": 16
+}

@@ -1,0 +1,61 @@
+{
+  "clip": "Holding_A",
+  "character": "hush.glb",
+  "amount": 0.0,
+  "sigma": 2.5,
+  "loop": true,
+  "angle": 50.0,
+  "fps": 15.0,
+  "duration": 1.0,
+  "source_duration": 1.0,
+  "max_lift_cm": 0.2,
+  "plant": true,
+  "ppm": 80.0,
+  "anchor": [
+    87.91,
+    191.0
+  ],
+  "durations": [
+    0.1334,
+    0.0667,
+    0.0667,
+    0.1334,
+    0.3335,
+    0.0667,
+    0.0667,
+    0.1334
+  ],
+  "faces": 1,
+  "ground_speed": 0.0,
+  "ground_speed_px": 0.0,
+  "source_frames": [
+    0.0,
+    3.2,
+    4.8,
+    6.4,
+    9.6,
+    17.6,
+    19.2,
+    20.8
+  ],
+  "frames": 8,
+  "accent": 0,
+  "recipe": {
+    "face": "grin",
+    "props": [
+      {
+        "item": "clarence",
+        "bone": "handslot.r",
+        "scale": 1.4
+      }
+    ],
+    "prop_scale": 1.0
+  },
+  "pruned": 7,
+  "sheet": "squeak.png",
+  "frame_w": 150,
+  "frame_h": 198,
+  "count": 8,
+  "ink": 2,
+  "cols": 8
+}

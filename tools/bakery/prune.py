@@ -3,7 +3,10 @@
 
 Pose-space distance is a poor proxy for what the player sees: a finger moving 2 cm changes the pose
 numbers and changes nothing on screen. So the dedupe happens here, on the rendered silhouette at the
-size the sprite will actually be drawn. Frame 0 and the accent are never dropped.
+size the sprite will actually be drawn. Frame 0 and the accent are never dropped. A dropped frame's
+screen time is handed to the frame before it, so pruning never changes how long a clip takes — it
+only stops the atlas paying for poses nobody can see. On a loop the last frame is also compared with
+the first, because that is the frame it is shown next to.
 
     python3 tools/bakery/prune.py /tmp/bakery_frames/idle [--min-change 0.004] [--read-px 48]
 """
@@ -16,6 +19,8 @@ import os
 
 import numpy as np
 from PIL import Image
+
+from validate import sil_one
 
 
 def main() -> None:
@@ -32,15 +37,25 @@ def main() -> None:
     meta = json.load(open(mp)) if os.path.exists(mp) else {}
     accent = int(meta.get("accent", 0))
 
-    def sil(p: str) -> np.ndarray:
-        al = Image.open(p).convert("RGBA").getchannel("A")
-        return np.array(al.resize((a.read_px, a.read_px), Image.BILINEAR)) > 96
-
-    sils = [sil(p) for p in paths]
+    sils = [sil_one(np.array(Image.open(p).convert("RGBA"))[:, :, 3], a.read_px) for p in paths]
+    durs = list(meta.get("durations", [0.0] * len(paths)))
     keep = [0]
+    kdur = [durs[0]]
     for i in range(1, len(paths)):
-        if i == accent or float((sils[i] ^ sils[keep[-1]]).mean()) >= a.min_change:
+        seam_dup = (bool(meta.get("loop")) and i == len(paths) - 1 and i != accent
+                    and float((sils[i] ^ sils[0]).mean()) < a.min_change)
+        if not seam_dup and (i == accent or float((sils[i] ^ sils[keep[-1]]).mean()) >= a.min_change):
             keep.append(i)
+            kdur.append(durs[i])
+        else:
+            kdur[-1] += durs[i]
+    # a loop's last frame sits next to its first: keep folding it back while the two are the same
+    # pose, or every cycle stutters on a held frame
+    while (meta.get("loop") and len(keep) > 2 and keep[-1] != accent
+           and float((sils[keep[-1]] ^ sils[0]).mean()) < a.min_change):
+        keep.pop()
+        d = kdur.pop()
+        kdur[-1] += d
     if len(keep) == len(paths):
         return
 
@@ -50,6 +65,9 @@ def main() -> None:
     for new_i, old_i in enumerate(keep):
         imgs[old_i].save(os.path.join(a.dir, f"f{new_i:03d}.png"))
     meta["frames"] = len(keep)
+    meta["durations"] = [round(d, 4) for d in kdur]
+    if "source_frames" in meta:
+        meta["source_frames"] = [meta["source_frames"][i] for i in keep]
     meta["accent"] = keep.index(accent) if accent in keep else 0
     meta["pruned"] = len(paths) - len(keep)
     with open(mp, "w") as fh:

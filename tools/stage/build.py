@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""build — render Act I's set in headless Blender and pack it for the game.
+"""build — render an Act's set in headless Blender and pack it for the game.
 
-    python3 tools/stage/build.py [--only bg,prop_glove]
+    python3 tools/stage/build.py [--act act2] [--only bg,prop_glove] [--engine eevee]
 
-Runs tools/stage/act1_set.py (the room, props, proscenium, audience and HUD icons, all modelled
-from primitives there), crops every layer to its pixels, and writes game/proto/act1/art/ + layout.json:
+Runs tools/stage/<act>_set.py (the room, props, proscenium, audience and HUD icons, all modelled
+from primitives there), crops every layer to its pixels, and writes game/proto/<act>/art/ + layout.json:
 for each layer its PNG, its top-left in the 2400x1080 stage, and (for props) the pivot it turns or
 falls about. The game only ever draws these PNGs at those positions.
 """
@@ -21,18 +21,19 @@ import tempfile
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SET = os.path.join(ROOT, "tools", "stage", "act1_set.py")
-OUT = os.path.join(ROOT, "game", "proto", "act1", "art")
 FULL = ("bg",)          # drawn whole, never cropped
 
 
 def main() -> int:
 	ap = argparse.ArgumentParser()
+	ap.add_argument("--act", default="act1", help="act1 (The Front Room), act2 (The Kitchen) or act3 (The Back Garden)")
 	ap.add_argument("--only", default="")
 	ap.add_argument("--engine", default="cycles", help="cycles (final) or eevee (fast preview)")
 	ap.add_argument("--samples", type=int, default=128)
 	a = ap.parse_args()
-	raw = tempfile.mkdtemp(prefix="act1_set_")
+	SET = os.path.join(ROOT, "tools", "stage", f"{a.act}_set.py")
+	OUT = os.path.join(ROOT, "game", "proto", a.act, "art")
+	raw = tempfile.mkdtemp(prefix=f"{a.act}_set_")
 	cmd = ["blender", "-b", "--factory-startup", "--python-exit-code", "1", "-P", SET, "--", "--out", raw,
 		   "--engine", a.engine, "--samples", str(a.samples)]
 	if a.only:
@@ -65,7 +66,7 @@ def main() -> int:
 			if name.startswith(pre) and name[-3] == "_" and name[-2:].isdigit():
 				seqs.setdefault(name[:-3], []).append(name)
 	layout["seqs"] = {k: sorted(v) for k, v in seqs.items()}
-	layout["doc"] = ("Act I set, rendered by tools/stage/build.py from tools/stage/act1_set.py. Positions are "
+	layout["doc"] = (f"{a.act} set, rendered by tools/stage/build.py from tools/stage/{a.act}_set.py. Positions are "
 					 "logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected "
 					 "by the same camera.")
 	with open(lay_path, "w") as fh:

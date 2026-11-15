@@ -549,3 +549,196 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   Looked at full-act sequences and beat stills. Suite 1,113 green, lints green, import meta OK. Notes
   `animation_engine.md` §14, evidence `spikes/act1v2_*.png`. Open: 22 MB art (atlas before phone),
   sound, re-bake cast under set lights.
+- 2026-11-09 — Owner: keep the stage-and-Stalls format; build the next scene with new pranks. **Act II
+  · The Kitchen ("Breakfast of Champions")**, `res://proto/act2/Act2.tscn` (`act2.json`, 188 events,
+  84 s loop): Gus flips pancakes (the last onto the table stack, "Nailed it."); Hush in by the back door
+  winds the **toaster** to MAX, tiptoes behind him while his head is in the **fridge** ("…eleven. There
+  were TWELVE."), saws the **chair**; FREEZE (ta-da) by the fridge ("Did the fridge come with that? …Free
+  gift. Lovely."); she knocks the **pantry** shelves loose behind his back and hides behind the BULK
+  boxes; toast TWANG → the frying pan off its hook → BONG; he sits to eat, the chair collapses and he
+  vanishes behind the tablecloth, the pancake flips onto his head and he rises back over the edge under
+  it ("…Breakfast."); a Clarence squeak ("In the CUPBOARD, are we?!") pops the pancake back onto the
+  plate, he yanks the pantry: tin avalanche, the BULK tub lands on his head; the toast finally comes
+  down ("plip." "…Toast."); bow, Curtain Call. Set `tools/stage/act2_set.py` (new kitchen; reuses
+  act1_set's primitives, proscenium, Stalls, icons) via `build.py --act act2`; baked sequences back door,
+  fridge door, chair collapse, pantry doors + 16 tins + tub; 2D props pancake, pan, two toasts; fg
+  tablecloth and BOXES. **Engine shared**: `proto/act1/act1.gd` → `proto/stage/show.gd`; a timeline
+  now names its `art`, `title`, `hidden` seqs, `props`/`props_visible` and `draw` order (Act I keeps
+  its old values as defaults — pixel-identical at 6 beats against HEAD's script); new verbs `lift`
+  (sink/raise an actor, cropped at the floor line), prop `ride` (carried by an actor) and `at`, named
+  `rustle`, `stars` dx/dy; `--act=` overrides the timeline. New test `tests/stage/test_stage_acts.gd`
+  (every verb/actor/clip/seq/prop/mark/layer resolves; both Acts play through headless with no
+  errors; verified it fails on a broken clip/seq name). Looked at 36 beat stills + close-ups; fixed
+  Gus's back showing past the tablecloth, Hush overlapping him at the saw, the syrup hiding his peek,
+  the fridge reading as a white box (hollow shells for fridge + pantry). Note: `/tmp/mnd_sandbox` is
+  shared by every worktree — use a unique sandbox name (another session's `act2shots` overwrote ours).
+  Open: sound; Act II art ~20 MB like Act I (atlas before phone); scripted, not yet player-driven.
+- 2026-11-11 — Owner: add the garden scene. **Act III · The Back Garden ("Judging Day")**,
+  `res://proto/act3/Act3.tscn` (`act3.json`, 169 events, 84 s loop): Gus mows his stripes and clips the
+  topiary; Hush in through the gate jams the **mower** throttle and saws the **shed**'s corner posts;
+  FREEZE as the fourth garden gnome ("One. Two. Three. …Four? I don't remember buying a TALL one. …Nice
+  hat."); the mower bolts and drags him through his own stripes (a churned track appears) into the
+  hedge; a Clarence squeak from the water butt — "The SHED. Obviously." — the shed's front wall falls
+  flat toward the Stalls and he stands in the door hole ("…Ha."), then the walls fold and the roof comes
+  down on his head; the mower putters home and dies at his feet ("…Immaculate."). Set
+  `tools/stage/act3_set.py`; the render loop moved to `tools/stage/stagekit.py` (Act II re-run through
+  it: marks, pivots and layers identical). Engine: draw kinds `seq0:`/`seq1:` (a set piece behind the
+  cast at rest, in front once it moves); fixed a prop leaving a `ride` mid-tween snapping back to its old
+  offset. Test covers all three Acts. Suite 1,115 green, import meta OK; looked at 28 beat stills.
+  Open: the between-scene flow (Playbill, interval, curtain call buttons) is designed in GDD §6.2/§8 but
+  the proto Acts still play standalone; naming — the protos call each scene an "Act", the GDD calls a
+  scene a "Night" and a group of Nights an "Act".
+- 2026-11-11 — Owner: show an MVP of the flow between scenes. `res://proto/season/Season.tscn`
+  (`season.gd` + `season.json`): the **Playbill** wall (three posters on the house curtain — set
+  thumbnail, Act, title, tagline, stars, PLAY; later Acts LOCKED until the one before has had its
+  Curtain Call) → a 2.4 s **"TONIGHT · Act II · The Kitchen"** card on the closed curtain (tap skips)
+  that hands straight to the Act's own curtain-up → the Act (show.gd unchanged in behaviour; new
+  `loop` flag, `curtain_call` signal, `skip_to_card()`; it holds on its card when hosted) → **Curtain
+  Call** with RETRY / **NEXT ▶** / PLAYBILL and a teaser line ("Tomorrow: Gus makes breakfast…") →
+  after Act III "To be continued…" → Playbill. Dev: SKIP ▸▸ during an Act; `--season=playbill|
+  tonight:<id>|act:<id>|call:<id>`, `--season-unlock`. Progress in memory only. Looked at stills of
+  each state. Open (for the full version): saved progress and real stars, the GDD's results steps
+  (Applause count-up, Gag Reel, why-missed line), a curtain fall/rise between states instead of a
+  fade, the teaser as a prop silhouette, the panel covering the card's "STANDING OVATION!" line.
+- 2026-11-11 — Owner: no menu — straight into the scenes; the curtain opening feels laggy and slow.
+  **No menu:** Season now opens straight on Act I's closed curtain (title + tagline), which rises into
+  the scene; Next ▶ goes straight to the next Act's curtain (the separate "Tonight" card is gone); the
+  Playbill is reachable only from a Curtain Call (or `--season=playbill`). `play.sh` with no argument
+  now runs the Season. **Curtain:** the lag was the animation, not the frame rate (measured 16.7 ms
+  avg before and after on desktop) — the opening stepped through 9 baked frames (~3 fps of motion over
+  2.6 s, after 1.6 s of closed curtain). Now show.gd draws one texture (the closed curtain) as two
+  halves gathering into the pillars every frame, with a small hem lift; open at 1.2 s over 1.3 s (fully
+  open at 2.5 s, was 4.2 s), close 1.3 s (was 2.0 s); the other 8 frames are no longer loaded (first
+  frame ~700 ms, was ~1,030 ms; no frame over 17.6 ms during the opening in any Act, was one 46 ms).
+  Titles carry a tagline line. Suite 1,115 green, import meta OK; looked at a 12-frame opening sequence.
+  Open: measure on a mid-range Android; build.py still renders the 8 unused curtain frames.
+- 2026-11-11 — Owner: correction — they DO want a menu (a typical game front end where the player
+  chooses what to do). Season now opens on a **title screen**: the logo on a marquee with chasing bulbs,
+  Hush and Gus idling on the apron, **PLAY** (→ Act I) / **CONTINUE** (once anything is seen; → the
+  next unseen Act, named under the button), **SCENES** (the Playbill wall, "CHOOSE A SCENE", with
+  BACK), **SETTINGS** (sound / music toggles — stored, no audio yet — and RESET PROGRESS with a
+  confirming second tap), **QUIT** (desktop only). During an Act: a ⏸ button and Esc / Android back
+  open a **pause menu** (Resume / Restart scene / Scenes / Main menu; the Act stops processing). Curtain
+  Call: Retry / Next ▶ / **Menu**. Progress + settings saved to `user://season_save.json`. The curtain
+  fix from the previous entry stays. Dev args `--season=title|playbill|settings|act:<id>|paused:<id>|
+  call:<id>`, `--season-unlock`, `--season-fresh`. New test `tests/stage/test_season_menu.gd`
+  (navigation, pause, unlock on Curtain Call). Suite green, import meta OK; looked at every screen.
+- 2026-11-11 — Owner: two more scenes (feedback on all five to follow after their tests).
+  **Act IV · The Garage ("Leg Day")** `res://proto/act4/Act4.tscn` (120 events, 61 s): Gus skips leg
+  day ("Leg day. …Nah. Chest day. Again.") for push-ups; Hush in by the side door winds the
+  **treadmill** to MAX and saws the **heavy bag**'s strap; FREEZE mid-punch beside the bag ("A new
+  sparring dummy? …Looks soft."); she hides behind the lockers; BEEP… BEEP BEEP… MAX!! fires him off
+  the back into the bag (BOFF), it swings, creaks, snaps and lands on him (THUD); "…Leg day."; the
+  treadmill is still beeping. **Act V · The Bedroom ("Lights Out")** `res://proto/act5/Act5.tscn` (124
+  events, 64 s): he sets the alarm for the judges and takes his silk gown from the wardrobe; Hush
+  moves the **alarm clock** into his pillow (set to NOW) and winds the **bed spring**; FREEZE as a
+  second coat stand — he hangs his gown on her ("…Handy."); lights out; "…Pardon." to the real coat
+  stand; flomp, Zzz; RIIIING — the bed catapults him through the window (a Gus-shaped hole in the
+  glass); "…I'M FINE!" "…the TULIPS."; Hush bows in his gown. Sets `tools/stage/act4_set.py`,
+  `act5_set.py`; stagekit gained `curtain()` / `lights()` and renders any `fx_*` glow layer. Engine:
+  `dark` verb + `dark` draw pass (lights out; layers drawn after it stay bright — the moonlit window).
+  Season lists five Acts (posters scale to fit). Tests cover all five Acts.
+- 2026-11-14 — Owner: during the scenes the assets are not good enough; improve them scene by scene.
+  Audit of all five Acts at 4–5 beats each (`SHOT_SIZE` 1200x540): Act I is the bar (patterned paper,
+  wainscot, rug, lamp shaft, layered props); Act II close behind (fridge still a white box, no shaft);
+  Act III's trees/bush are blobs over a flat white sky band; **Acts IV and V are furthest off** (one flat
+  slab floor, bare walls, almost no dressing, flat white light, 5–6 MB of art vs 17–20 MB). Shared
+  defect: the beret "stamps" float as stray red discs. **Act IV · The Garage redone** in
+  `tools/stage/act4_set.py` (same marks, pivots, layer names and X positions, so `act4.json` plays
+  unchanged): procedural block wall with recessed mortar + grime and a painted teal lower band; concrete
+  slab with saw-cut joints; interlocking rubber gym tiles under the workout corner; a sectional garage
+  door with raised panels and a glazed top row; the banner moved onto the wall above it with grommets;
+  a high window (sky, clouds, hedge) whose **light shaft** (`fx_shaft`, `K.build_shaft` now takes
+  window/landing/colour args — Acts I/II call it with the old defaults, byte-identical geometry) falls
+  across the treadmill; two fluorescent tubes on chains; conduit + light switch; red rolling tool chest
+  with a radio; a LEG DAY calendar with every day crossed out; real pegboard tools (hammer, spanner,
+  screwdrivers, skipping rope, bands, tape); treadmill with motor hood, side rails, rear roller,
+  speed dial, safety key, water bottle; the heavy bag as glossy vinyl (bevelled, seams, bands, D-ring
+  + straps, THUDD patch); poster of Gus "1998"; squat rack with hooks/feet, kettlebells with handles,
+  hex dumbbells on a stand; the mirror ringed with dressing-room bulbs, a cool gradient glass and
+  readable "LOOKING GOOD"; lockers with inset panels, number plates, a padlock, a star sticker and a
+  gym bag on top; the side door with kick plate and inset panel. Lighting: warm sun + window pool,
+  cool tubes, mirror bulbs, less world fill. The old oil "holes" are gone. **Engine (all Acts):**
+  stamps now pop in, bob, cast a contact shadow and pulse a gold ring (`_draw_stamps`). Suite 1,117
+  green, import meta OK (new `fx_shaft.png.import`); looked at 7 beat stills. Render tip: `build.py
+  --only bg` then `--only prop_bag,fg_lockers,fx_shaft` then `--only seq_sdoor` keeps each run under
+  3 min (a full run in one go is ~10 min). Open: Act V (bedroom) next — bed is tiny beside Gus, flat
+  carpet, bare striped wall, no pre-dark warm lamp light; then III (trees, sky), II (fridge, shaft), I
+  polish. Act IV art is 6.9 MB.
+- 2026-11-14 — Owner: Act IV results are good; continue with Act V. Also noticed Gus walks in place in
+  places, and Hush "hiding behind what looks like a shirt" is hard to read. **Act V · The Bedroom
+  redone** in `tools/stage/act5_set.py` (marks/pivots/layers unchanged): striped paper with a diamond
+  motif (`K.mat_wallpaper` now takes colour keys/name/freq — Act I calls it with the old defaults) over
+  a painted, panelled dado; carpet with pile (noise + bump) and an oval rug; a ceiling pendant (lit; the
+  dark pass puts it out); wardrobe with panelled door, long mirror, feet, hat box; laundry basket, sock,
+  trophy shelf; coat stand with hat band, scarf and feet; **the bed sized to Gus** (he is 3 units tall:
+  mattress at 1.0, 3.6 long, upholstered tufted headboard, rail, two pillows, folded duvet, blanket,
+  four springs); taller bedside table with books and a glass; window with pelmet, wider drapes,
+  tiebacks, a cactus on the sill, rooftops and more stars in `fx_moon`; photo "MR. LAWN" readable, two
+  rosettes and a CHAMP pennant; slippers and a dumbbell by the bed; the armchair (fg) with tufts, arm
+  rolls, skirt and a striped throw; the door with a towel on a hook; the gown as sheened silk with gold
+  trim, ties and "G.T."; the alarm clock with a hammer and two hands. A **moon shaft** (`fx_shaft`
+  from the window pooling by the chair) is drawn after the `dark` pass; `_draw_shaft` keeps it faint
+  while the lights are on in any Act with a `dark` pass; the dark overlay eased 0.74 → 0.66 so the room
+  still reads. **Timeline (`act5.json`)**: the walk-in-place was a bare `walk` clip at 32.45 s (it
+  clears the target, so he trod air for 3.9 s) — now he walks INTO the coat stand (move to 950 meets the
+  "bonk" pop), `startle` + "…Pardon.", then walks to the bed (1080) and flomps (lift 122 for the taller
+  mattress); the gown now hangs on Hush's outstretched upstage arm (ride offset 423/262) so her face
+  stays visible instead of the gown covering her like a shirt; while he snores she **peeks out** from
+  behind the chair (crouch to 1905 at 37.6 s, back behind it at 41.3 s before the alarm); the clock's
+  hop into the pillow re-aimed for the new bed. **Test isolation fix**: `season.gd` no longer reads
+  `user://season_save.json` when `_save_enabled` is false — the season test had started failing because
+  the Owner's real save (all five Acts seen) was being loaded. Suite green, import meta OK (new
+  `act5/art/fx_shaft.png.import`); looked at 10 beat stills. Act V art 7.5 MB. Render in chunks:
+  `--only bg` (~1.5 min), `--only prop_clock,prop_gown,prop_glass,prop_glasshole,fg_chair,fx_moon,
+  fx_shaft`, `--only seq_door,seq_bed`. Next: Act III (trees, sky band, bush), then Act II (fridge,
+  shaft), then an Act I polish pass.
+- 2026-11-15 — Owner: the floating gown in Act V is awkward (no grab animation; the props are not
+  cloth-like) — remove it and simplify. **Gown removed** from Act V: the 5 `prop` gown events, `props`,
+  `props_visible`, `prop:gown` in `draw`, the doc text; the baked `prop_gown.png` (+ `.import`) and its
+  layout layer/pivot; its model, `mat_silk` and the `gown_trim` colour in `act5_set.py` (the window drape
+  colours renamed `drape`/`drape_dk`, same values — no re-render). Beats rewritten so nothing is carried:
+  at the wardrobe he checks himself in its long mirror ("Mirror check." / "…Still got it." / flex /
+  "…Magnificent."); at the FREEZE he pats the "second coat stand" (`interact` 23.3 s) — "…Sturdy." —
+  and the HA HA HA lands on that ("There." cut). Hush runs, peeks and bows as herself. Suite green,
+  import meta OK; looked at 4 beat stills (11.3, 23.8, 31, 54 s). Rule of thumb for later Acts: no
+  carried/hung soft props until the cast has grab poses — rigid props that fall, swing or get knocked
+  are fine.
+- 2026-11-15 — Owner: continue with Act III; make the improved assets (trees, clouds, …) reusable — they
+  will recur across scenes. **New shared kit `tools/stage/scenery.py`** (documented in TECH §11 "Stage
+  sets"): an organic `blob` primitive (noise-displaced icosphere, optional flat base) and builders `tree`
+  (oak / poplar / pine / birch, optional `fruit`), `bush` (optional flowers), `hedge` (clipped),
+  `topiary_ball`, `topiary_tiers`, `cloud` (cumulus puffs on a flat belly), `sky` (gradient), `sun` (disc +
+  halos), `hills`, `picket_fence` (with gaps), `flower_bed` (tulips with leaves, skips), `grass_tufts`,
+  `stepping_stones`; materials `mat_foliage` (shade → base → sunlit by height, noisy edge, leaf-clump bump),
+  `mat_cloud`, `mat_sky`, `mat_lawn` (stripes + mottle + grass bump), `mat_bark`, `mat_birch_bark`,
+  `mat_boards` (timber with grain and recessed gaps), `mat_shingles` (staggered roof tiles), `mat_flat`.
+  All take a name prefix, scale, seed and target layer, plus `haze` (aerial perspective — the camera is
+  orthographic, so depth is overlap + haze); palette keys are `sc_*` so no Act clashes. Running the module
+  in Blender renders a catalogue sheet of every piece. **Act III · The Back Garden** rebuilt on it (marks,
+  pivots, layers and timeline unchanged): gradient sky, sun, four clouds and two rows of hills (the old
+  pale "haze" band is gone — the sky over the fence lives at z ≈ 0.6–4); the neighbours' oak, poplar,
+  birch, apple tree and pine beyond the fence with bushes peeking over it; striped lawn with mottling and
+  grass bump; grass tufts along the front edge and the fence; the shared fence, flower bed and stepping
+  stones up from the gate; the prize hedge clipped, with a three-tier topiary (the "cockerel" read as a
+  cactus). The shed's walls are `mat_boards` and its roof `mat_shingles` (shed sequences re-rendered).
+  Tuning found on the way: trunks take half the foliage's haze; clusters pack enough blobs that no puff
+  floats; bushes get a ground-hugging foot row. Suite green, import meta OK; looked at the catalogue and
+  8 beat stills. Next: Act II (fridge, a shaft), Act I polish; the window views in Acts I/IV/V could swap
+  to `SC.cloud`/`SC.bush`/`SC.hills` at their next re-render.
+- 2026-11-15 — Owner: do Acts II and I together, one review. **Kit: `scenery.window_view`** — the garden seen
+  through any back-wall window (gradient sky, sun with halos, hazy hills, a bush row, striped lawn, clouds,
+  optional pickets), sized to a (centre x, z, width, height) rectangle and kept inside the ~0.3 units
+  between the wall and the frame so a 0.18-wide frame hides the edges; pieces glow a little (a window is
+  brighter than the room). Supporting options added: `bush(depth, glow, z0)`, `mat_foliage/mat_lawn(glow)`,
+  `sun(spread)`, `picket_fence(z0)`; the catalogue shows a window on a wall stub. Found on the way: builders
+  that assume ground level (bushes, pickets) put window scenery on the room floor — hence `z0`. **Act I**: the
+  window view rebuilt on the kit (the old sphere clouds/hedges and hand-placed pickets removed); nothing
+  else touched. **Act II**: lemon wall now `K.mat_wallpaper` stripes with a pale diamond motif; the window
+  view from the kit (no fence — the cafe curtain covers the lower half); the fridge in a new `mat_enamel`
+  (vertical gradient + glossy coat, so the big flat door reads as a curved shiny panel) with a freezer split
+  groove, chrome kick strip, two handles and a FROSTEE badge; the shell and plinth to match; lino gets a
+  wear mottle; the light shaft now built straight onto Act II's window (`K.build_shaft(win=WIN, …)`, same
+  geometry as the old vertex-moving wrapper). Re-rendered: Act I `bg`; Act II `bg`, `fx_shaft`,
+  `seq_fridge`. Suite green, import meta OK; looked at 5 beat stills + the catalogue. Acts IV/V windows
+  could move to `window_view` at their next re-render. All five Acts have now had their pass.

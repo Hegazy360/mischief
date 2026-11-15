@@ -1,0 +1,902 @@
+{
+ "layers": {
+  "audience": {
+   "png": "audience.png",
+   "pos": [
+    328,
+    942
+   ],
+   "size": [
+    1745,
+    138
+   ]
+  },
+  "bg": {
+   "png": "bg.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fg_boxes": {
+   "png": "fg_boxes.png",
+   "pos": [
+    2123,
+    521
+   ],
+   "size": [
+    183,
+    385
+   ]
+  },
+  "fg_table": {
+   "png": "fg_table.png",
+   "pos": [
+    900,
+    646
+   ],
+   "size": [
+    447,
+    256
+   ]
+  },
+  "frame": {
+   "png": "frame.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fx_shaft": {
+   "png": "fx_shaft.png",
+   "pos": [
+    984,
+    169
+   ],
+   "size": [
+    383,
+    677
+   ]
+  },
+  "fxs_dust_00": {
+   "png": "fxs_dust_00.png",
+   "pos": [
+    85,
+    143
+   ],
+   "size": [
+    84,
+    46
+   ]
+  },
+  "fxs_dust_01": {
+   "png": "fxs_dust_01.png",
+   "pos": [
+    66,
+    130
+   ],
+   "size": [
+    122,
+    59
+   ]
+  },
+  "fxs_dust_02": {
+   "png": "fxs_dust_02.png",
+   "pos": [
+    47,
+    118
+   ],
+   "size": [
+    160,
+    71
+   ]
+  },
+  "fxs_dust_03": {
+   "png": "fxs_dust_03.png",
+   "pos": [
+    31,
+    106
+   ],
+   "size": [
+    194,
+    82
+   ]
+  },
+  "fxs_dust_04": {
+   "png": "fxs_dust_04.png",
+   "pos": [
+    15,
+    97
+   ],
+   "size": [
+    225,
+    89
+   ]
+  },
+  "fxs_dust_05": {
+   "png": "fxs_dust_05.png",
+   "pos": [
+    2,
+    90
+   ],
+   "size": [
+    252,
+    91
+   ]
+  },
+  "icon_burst": {
+   "png": "icon_burst.png",
+   "pos": [
+    13,
+    13
+   ],
+   "size": [
+    230,
+    230
+   ]
+  },
+  "icon_clarence": {
+   "png": "icon_clarence.png",
+   "pos": [
+    59,
+    13
+   ],
+   "size": [
+    138,
+    230
+   ]
+  },
+  "icon_freeze": {
+   "png": "icon_freeze.png",
+   "pos": [
+    25,
+    13
+   ],
+   "size": [
+    206,
+    230
+   ]
+  },
+  "icon_rig": {
+   "png": "icon_rig.png",
+   "pos": [
+    49,
+    17
+   ],
+   "size": [
+    164,
+    221
+   ]
+  },
+  "icon_stamp": {
+   "png": "icon_stamp.png",
+   "pos": [
+    20,
+    78
+   ],
+   "size": [
+    217,
+    90
+   ]
+  },
+  "icon_star": {
+   "png": "icon_star.png",
+   "pos": [
+    13,
+    18
+   ],
+   "size": [
+    230,
+    219
+   ]
+  },
+  "prop_pan": {
+   "png": "prop_pan.png",
+   "pos": [
+    527,
+    199
+   ],
+   "size": [
+    130,
+    226
+   ]
+  },
+  "prop_pancake": {
+   "png": "prop_pancake.png",
+   "pos": [
+    871,
+    611
+   ],
+   "size": [
+    89,
+    28
+   ]
+  },
+  "prop_toast": {
+   "png": "prop_toast.png",
+   "pos": [
+    468,
+    518
+   ],
+   "size": [
+    66,
+    68
+   ]
+  },
+  "prop_toast2": {
+   "png": "prop_toast2.png",
+   "pos": [
+    483,
+    511
+   ],
+   "size": [
+    67,
+    69
+   ]
+  },
+  "seq_backdoor_00": {
+   "png": "seq_backdoor_00.png",
+   "pos": [
+    85,
+    278
+   ],
+   "size": [
+    208,
+    546
+   ]
+  },
+  "seq_backdoor_01": {
+   "png": "seq_backdoor_01.png",
+   "pos": [
+    84,
+    279
+   ],
+   "size": [
+    204,
+    554
+   ]
+  },
+  "seq_backdoor_02": {
+   "png": "seq_backdoor_02.png",
+   "pos": [
+    82,
+    279
+   ],
+   "size": [
+    186,
+    562
+   ]
+  },
+  "seq_backdoor_03": {
+   "png": "seq_backdoor_03.png",
+   "pos": [
+    81,
+    279
+   ],
+   "size": [
+    153,
+    570
+   ]
+  },
+  "seq_backdoor_04": {
+   "png": "seq_backdoor_04.png",
+   "pos": [
+    79,
+    279
+   ],
+   "size": [
+    110,
+    576
+   ]
+  },
+  "seq_backdoor_05": {
+   "png": "seq_backdoor_05.png",
+   "pos": [
+    78,
+    280
+   ],
+   "size": [
+    59,
+    578
+   ]
+  },
+  "seq_chair_00": {
+   "png": "seq_chair_00.png",
+   "pos": [
+    1231,
+    566
+   ],
+   "size": [
+    132,
+    319
+   ]
+  },
+  "seq_chair_01": {
+   "png": "seq_chair_01.png",
+   "pos": [
+    1230,
+    574
+   ],
+   "size": [
+    133,
+    317
+   ]
+  },
+  "seq_chair_02": {
+   "png": "seq_chair_02.png",
+   "pos": [
+    1218,
+    597
+   ],
+   "size": [
+    156,
+    309
+   ]
+  },
+  "seq_chair_03": {
+   "png": "seq_chair_03.png",
+   "pos": [
+    1194,
+    638
+   ],
+   "size": [
+    207,
+    275
+   ]
+  },
+  "seq_chair_04": {
+   "png": "seq_chair_04.png",
+   "pos": [
+    1161,
+    708
+   ],
+   "size": [
+    285,
+    186
+   ]
+  },
+  "seq_chair_05": {
+   "png": "seq_chair_05.png",
+   "pos": [
+    1161,
+    753
+   ],
+   "size": [
+    334,
+    141
+   ]
+  },
+  "seq_chair_06": {
+   "png": "seq_chair_06.png",
+   "pos": [
+    1161,
+    828
+   ],
+   "size": [
+    361,
+    66
+   ]
+  },
+  "seq_curtain_00": {
+   "png": "seq_curtain_00.png",
+   "pos": [
+    41,
+    0
+   ],
+   "size": [
+    2318,
+    1080
+   ]
+  },
+  "seq_curtain_01": {
+   "png": "seq_curtain_01.png",
+   "pos": [
+    38,
+    0
+   ],
+   "size": [
+    2324,
+    1080
+   ]
+  },
+  "seq_curtain_02": {
+   "png": "seq_curtain_02.png",
+   "pos": [
+    32,
+    0
+   ],
+   "size": [
+    2336,
+    1080
+   ]
+  },
+  "seq_curtain_03": {
+   "png": "seq_curtain_03.png",
+   "pos": [
+    24,
+    0
+   ],
+   "size": [
+    2352,
+    1080
+   ]
+  },
+  "seq_curtain_04": {
+   "png": "seq_curtain_04.png",
+   "pos": [
+    17,
+    0
+   ],
+   "size": [
+    2366,
+    1080
+   ]
+  },
+  "seq_curtain_05": {
+   "png": "seq_curtain_05.png",
+   "pos": [
+    10,
+    0
+   ],
+   "size": [
+    2380,
+    1080
+   ]
+  },
+  "seq_curtain_06": {
+   "png": "seq_curtain_06.png",
+   "pos": [
+    5,
+    0
+   ],
+   "size": [
+    2390,
+    1080
+   ]
+  },
+  "seq_curtain_07": {
+   "png": "seq_curtain_07.png",
+   "pos": [
+    1,
+    0
+   ],
+   "size": [
+    2398,
+    1080
+   ]
+  },
+  "seq_curtain_08": {
+   "png": "seq_curtain_08.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "seq_fridge_00": {
+   "png": "seq_fridge_00.png",
+   "pos": [
+    1615,
+    388
+   ],
+   "size": [
+    194,
+    450
+   ]
+  },
+  "seq_fridge_01": {
+   "png": "seq_fridge_01.png",
+   "pos": [
+    1631,
+    389
+   ],
+   "size": [
+    182,
+    461
+   ]
+  },
+  "seq_fridge_02": {
+   "png": "seq_fridge_02.png",
+   "pos": [
+    1681,
+    389
+   ],
+   "size": [
+    137,
+    472
+   ]
+  },
+  "seq_fridge_03": {
+   "png": "seq_fridge_03.png",
+   "pos": [
+    1754,
+    389
+   ],
+   "size": [
+    71,
+    478
+   ]
+  },
+  "seq_fridge_04": {
+   "png": "seq_fridge_04.png",
+   "pos": [
+    1805,
+    389
+   ],
+   "size": [
+    54,
+    478
+   ]
+  },
+  "seq_fridge_05": {
+   "png": "seq_fridge_05.png",
+   "pos": [
+    1807,
+    388
+   ],
+   "size": [
+    95,
+    477
+   ]
+  },
+  "seq_pantry_00": {
+   "png": "seq_pantry_00.png",
+   "pos": [
+    1847,
+    232
+   ],
+   "size": [
+    242,
+    602
+   ]
+  },
+  "seq_pantry_01": {
+   "png": "seq_pantry_01.png",
+   "pos": [
+    1825,
+    233
+   ],
+   "size": [
+    286,
+    621
+   ]
+  },
+  "seq_pantry_02": {
+   "png": "seq_pantry_02.png",
+   "pos": [
+    1759,
+    233
+   ],
+   "size": [
+    418,
+    618
+   ]
+  },
+  "seq_pantry_03": {
+   "png": "seq_pantry_03.png",
+   "pos": [
+    1740,
+    177
+   ],
+   "size": [
+    437,
+    674
+   ]
+  },
+  "seq_pantry_04": {
+   "png": "seq_pantry_04.png",
+   "pos": [
+    1623,
+    192
+   ],
+   "size": [
+    554,
+    659
+   ]
+  },
+  "seq_pantry_05": {
+   "png": "seq_pantry_05.png",
+   "pos": [
+    1512,
+    233
+   ],
+   "size": [
+    665,
+    618
+   ]
+  },
+  "seq_pantry_06": {
+   "png": "seq_pantry_06.png",
+   "pos": [
+    1395,
+    233
+   ],
+   "size": [
+    782,
+    618
+   ]
+  },
+  "seq_pantry_07": {
+   "png": "seq_pantry_07.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    665
+   ]
+  },
+  "seq_pantry_08": {
+   "png": "seq_pantry_08.png",
+   "pos": [
+    1337,
+    174
+   ],
+   "size": [
+    840,
+    724
+   ]
+  },
+  "seq_pantry_09": {
+   "png": "seq_pantry_09.png",
+   "pos": [
+    1337,
+    181
+   ],
+   "size": [
+    840,
+    717
+   ]
+  },
+  "seq_pantry_10": {
+   "png": "seq_pantry_10.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  },
+  "seq_pantry_11": {
+   "png": "seq_pantry_11.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  },
+  "seq_pantry_12": {
+   "png": "seq_pantry_12.png",
+   "pos": [
+    1337,
+    203
+   ],
+   "size": [
+    840,
+    697
+   ]
+  },
+  "seq_pantry_13": {
+   "png": "seq_pantry_13.png",
+   "pos": [
+    1337,
+    187
+   ],
+   "size": [
+    840,
+    713
+   ]
+  },
+  "seq_pantry_14": {
+   "png": "seq_pantry_14.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  },
+  "seq_pantry_15": {
+   "png": "seq_pantry_15.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  },
+  "seq_pantry_16": {
+   "png": "seq_pantry_16.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  },
+  "seq_pantry_17": {
+   "png": "seq_pantry_17.png",
+   "pos": [
+    1337,
+    233
+   ],
+   "size": [
+    840,
+    667
+   ]
+  }
+ },
+ "size": [
+  2400,
+  1080
+ ],
+ "px_per_unit": 128.0,
+ "floor_px": 880.0,
+ "tilt_deg": 10.0,
+ "marks": {
+  "door": [
+   227.2,
+   880.0
+  ],
+  "window": [
+   1148.8,
+   296.9
+  ],
+  "toaster": [
+   508.8,
+   568.6
+  ],
+  "pan_hook": [
+   592.0,
+   205.6
+  ],
+  "stove": [
+   867.2,
+   880.0
+  ],
+  "pendant": [
+   1123.2,
+   204.5
+  ],
+  "fridge": [
+   1712.0,
+   880.0
+  ],
+  "pantry": [
+   1968.0,
+   880.0
+  ]
+ },
+ "pivots": {
+  "stack_top": [
+   1014.4,
+   677.1
+  ],
+  "table": [
+   1123.2,
+   709.8
+  ],
+  "boxes": [
+   2217.6,
+   880.0
+  ],
+  "pancake": [
+   915.8,
+   629.9
+  ],
+  "toast": [
+   501.1,
+   554.5
+  ],
+  "toast2": [
+   516.5,
+   547.8
+  ],
+  "pan": [
+   592.0,
+   211.2
+  ],
+  "pan_c": [
+   592.0,
+   362.5
+  ],
+  "chair": [
+   1296.0,
+   874.4
+  ],
+  "heap": [
+   1513.6,
+   647.2
+  ]
+ },
+ "seqs": {
+  "fxs_dust": [
+   "fxs_dust_00",
+   "fxs_dust_01",
+   "fxs_dust_02",
+   "fxs_dust_03",
+   "fxs_dust_04",
+   "fxs_dust_05"
+  ],
+  "seq_backdoor": [
+   "seq_backdoor_00",
+   "seq_backdoor_01",
+   "seq_backdoor_02",
+   "seq_backdoor_03",
+   "seq_backdoor_04",
+   "seq_backdoor_05"
+  ],
+  "seq_chair": [
+   "seq_chair_00",
+   "seq_chair_01",
+   "seq_chair_02",
+   "seq_chair_03",
+   "seq_chair_04",
+   "seq_chair_05",
+   "seq_chair_06"
+  ],
+  "seq_curtain": [
+   "seq_curtain_00",
+   "seq_curtain_01",
+   "seq_curtain_02",
+   "seq_curtain_03",
+   "seq_curtain_04",
+   "seq_curtain_05",
+   "seq_curtain_06",
+   "seq_curtain_07",
+   "seq_curtain_08"
+  ],
+  "seq_fridge": [
+   "seq_fridge_00",
+   "seq_fridge_01",
+   "seq_fridge_02",
+   "seq_fridge_03",
+   "seq_fridge_04",
+   "seq_fridge_05"
+  ],
+  "seq_pantry": [
+   "seq_pantry_00",
+   "seq_pantry_01",
+   "seq_pantry_02",
+   "seq_pantry_03",
+   "seq_pantry_04",
+   "seq_pantry_05",
+   "seq_pantry_06",
+   "seq_pantry_07",
+   "seq_pantry_08",
+   "seq_pantry_09",
+   "seq_pantry_10",
+   "seq_pantry_11",
+   "seq_pantry_12",
+   "seq_pantry_13",
+   "seq_pantry_14",
+   "seq_pantry_15",
+   "seq_pantry_16",
+   "seq_pantry_17"
+  ]
+ },
+ "doc": "act2 set, rendered by tools/stage/build.py from tools/stage/act2_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
+}

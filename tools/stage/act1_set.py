@@ -125,9 +125,9 @@ def mat_bands(a: str, b: str, freq: float, axis: int = 0, name: str = "bands", e
 	return m
 
 
-def mat_wallpaper():
+def mat_wallpaper(a: str = "paper", b: str = "paper2", dot_key: str = "paper_dot", name: str = "wallpaper", freq: float = 1.6):
 	"""Regency stripes with a small diamond motif in the light stripe, in OBJECT space."""
-	m = bpy.data.materials.new("wallpaper")
+	m = bpy.data.materials.new(name)
 	m.use_nodes = True
 	nt = m.node_tree
 	bs = nt.nodes["Principled BSDF"]
@@ -148,9 +148,9 @@ def mat_wallpaper():
 				nt.links.new(v, n.inputs[i])
 		return n.outputs[0]
 	x, z = sep.outputs[0], sep.outputs[2]
-	stripe = math_node("GREATER_THAN", math_node("FLOORED_MODULO", math_node("MULTIPLY", x, 1.6), 1.0), 0.5)
+	stripe = math_node("GREATER_THAN", math_node("FLOORED_MODULO", math_node("MULTIPLY", x, freq), 1.0), 0.5)
 	# motif: a diamond (|u| + |v| < r) centred in every light stripe, staggered rows
-	u = math_node("SUBTRACT", math_node("FLOORED_MODULO", math_node("MULTIPLY", x, 1.6), 1.0), 0.25)
+	u = math_node("SUBTRACT", math_node("FLOORED_MODULO", math_node("MULTIPLY", x, freq), 1.0), 0.25)
 	row = math_node("FLOORED_MODULO", math_node("MULTIPLY", z, 1.25), 1.0)
 	v = math_node("SUBTRACT", row, 0.5)
 	dia = math_node("LESS_THAN", math_node("ADD", math_node("ABSOLUTE", math_node("MULTIPLY", u, 1.0)),
@@ -158,13 +158,13 @@ def mat_wallpaper():
 	dot = math_node("MULTIPLY", dia, math_node("SUBTRACT", 1.0, stripe))
 	mix1 = nt.nodes.new("ShaderNodeMix")
 	mix1.data_type = "RGBA"
-	mix1.inputs[6].default_value = lin(C["paper"])
-	mix1.inputs[7].default_value = lin(C["paper2"])
+	mix1.inputs[6].default_value = lin(C[a])
+	mix1.inputs[7].default_value = lin(C[b])
 	nt.links.new(stripe, mix1.inputs[0])
 	mix2 = nt.nodes.new("ShaderNodeMix")
 	mix2.data_type = "RGBA"
 	nt.links.new(mix1.outputs[2], mix2.inputs[6])
-	mix2.inputs[7].default_value = lin(C["paper_dot"])
+	mix2.inputs[7].default_value = lin(C[dot_key])
 	nt.links.new(dot, mix2.inputs[0])
 	nt.links.new(mix2.outputs[2], bs.inputs["Base Color"])
 	return m
@@ -335,18 +335,12 @@ def build_room() -> dict:
 
 	# --- window with the lawn outside (he inspects it; it is immaculate) ---
 	wx, wz, ww, wh = 2.5, 3.6, 3.2, 2.6
-	box("win_sky", (ww, 0.04, wh), (wx, WALL_Y - 0.02, wz), mat("sky", 0.9, 0.55), bevel=0)
-	sph("win_sun", 0.32, (wx + 0.9, WALL_Y - 0.05, wz + 0.8), mat("butter_hi", 0.9, 1.4), scale=(1, 0.2, 1))
-	for i, (cx, cz, s) in enumerate([(-0.9, 0.85, 0.36), (-0.55, 0.9, 0.3), (-1.15, 0.8, 0.26), (0.3, 1.05, 0.24)]):
-		sph(f"cloud{i}", s, (wx + cx, WALL_Y - 0.05, wz + cz), mat("white", 0.9, 0.7), scale=(1.4, 0.2, 0.8))
-	box("win_lawn", (ww, 0.06, 0.9), (wx, WALL_Y - 0.06, wz - wh / 2 + 0.45), mat_bands("lawn", "lawn2", 2.2, 0, "lawn", 0.3), bevel=0)
-	for i in range(7):
-		sph(f"hedge{i}", 0.36, (wx - 1.4 + i * 0.47, WALL_Y - 0.08, wz - 0.25), mat("hedge", 0.9, 0.25), scale=(1, 0.25, 0.85))
-	for i in range(11):
-		x = wx - 1.5 + i * 0.3
-		prism(f"picket{i}", [(-0.06, 0), (0.06, 0), (0.06, 0.42), (0, 0.5), (-0.06, 0.42)], 0.03,
-			  (x, WALL_Y - 0.1, wz - wh / 2 + 0.55), mat("white", 0.8, 0.3))
-	box("fence_rail", (ww, 0.03, 0.06), (wx, WALL_Y - 0.12, wz - wh / 2 + 0.78), mat("white", 0.8, 0.3), bevel=0)
+	# the garden outside, from the shared kit (sky, sun, hills, bushes, striped lawn, clouds, pickets)
+	if HERE not in sys.path:
+		sys.path.insert(0, HERE)
+	import scenery as SC  # noqa: E402  (lazy: scenery imports this module)
+	SC.window_view("winview", (wx, wz, ww, wh), fence=True, seed=1, sun_at=(0.28, 0.3),
+				   clouds=((-0.28, 0.33, 0.3), (0.12, 0.42, 0.2), (-0.05, 0.2, 0.16)))
 	# frame, mullions, sill
 	fm = mat("cream", 0.6)
 	box("win_top", (ww + 0.36, 0.26, 0.18), (wx, WALL_Y - 0.18, wz + wh / 2 + 0.09), fm)
@@ -744,8 +738,9 @@ def build_fx_local():
 	return {"dust": (6, dust_frame)}
 
 
-def build_shaft():
-	"""Window daylight falling into the room: a soft emissive wedge, rendered as its own layer."""
+def build_shaft(win=(2.5, 3.6, 3.2, 2.6), dx: float = -0.9, y1: float = 1.4, colour: str = "#FFF1C8", alpha: float = 0.42):
+	"""Window daylight falling into the room: a soft emissive wedge, rendered as its own layer.
+	`win` = the window's centre x, centre z, width, height; the beam lands `dx` across at depth `y1`."""
 	m = bpy.data.materials.new("shaft")
 	m.use_nodes = True
 	nt = m.node_tree
@@ -755,7 +750,7 @@ def build_shaft():
 	mix = nt.nodes.new("ShaderNodeMixShader")
 	tr = nt.nodes.new("ShaderNodeBsdfTransparent")
 	em = nt.nodes.new("ShaderNodeEmission")
-	em.inputs["Color"].default_value = lin("#FFF1C8")
+	em.inputs["Color"].default_value = lin(colour)
 	em.inputs["Strength"].default_value = 1.0
 	tc = nt.nodes.new("ShaderNodeTexCoord")
 	sep = nt.nodes.new("ShaderNodeSeparateXYZ")
@@ -771,17 +766,17 @@ def build_shaft():
 	nt.links.new(sep.outputs[1], m2.inputs[1])
 	m3 = nt.nodes.new("ShaderNodeMath")
 	m3.operation = "MULTIPLY"
-	m3.inputs[1].default_value = 0.42
+	m3.inputs[1].default_value = alpha
 	nt.links.new(m2.outputs[0], m3.inputs[0])
 	nt.links.new(m3.outputs[0], mix.inputs[0])
 	nt.links.new(tr.outputs[0], mix.inputs[1])
 	nt.links.new(em.outputs[0], mix.inputs[2])
 	nt.links.new(mix.outputs[0], out.inputs["Surface"])
 	# the beam: a quad from the window (top) down and forward onto the floor
-	wx, wz, ww, wh = 2.5, 3.6, 3.2, 2.6
+	wx, wz, ww, wh = win
 	bm = bmesh.new()
 	vs = [bm.verts.new(v) for v in ((wx - ww / 2 + 0.1, WALL_Y - 0.5, wz + wh / 2), (wx + ww / 2 - 0.1, WALL_Y - 0.5, wz + wh / 2),
-									 (wx + ww / 2 - 0.9, 1.4, 0.02), (wx - ww / 2 - 0.9, 1.4, 0.02))]
+									 (wx + ww / 2 + dx, y1, 0.02), (wx - ww / 2 + dx, y1, 0.02))]
 	f = bm.faces.new(vs)
 	uvl = bm.loops.layers.uv.new("UVMap")
 	for loop, uv in zip(f.loops, ((0, 1), (1, 1), (1, 0), (0, 0))):

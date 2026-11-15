@@ -1,0 +1,1254 @@
+{
+ "doc": "Act III — The Back Garden ('Judging Day'). Gus mows his stripes and clips the topiary; Hush in through the gate jams the mower's throttle and saws the shed's corner posts; FREEZE as the fourth garden gnome ('I don't remember buying a TALL one'); the mower bolts and drags him through his stripes into the hedge; a Clarence squeak from the water butt sends him to the shed: the front wall falls flat around him (he stands in the door hole), then the roof comes down on his head; the mower putters home. Times in seconds; x in stage px or @marks from art/layout.json. Verbs: see proto/stage/show.gd _apply().",
+ "title": [
+  "MISCHIEF NEXT DOOR",
+  "Act III  ·  The Back Garden",
+  "Judging day."
+ ],
+ "art": "res://proto/act3/art/",
+ "loop_at": 84.0,
+ "hidden": [
+  "fxs_dust"
+ ],
+ "props": [
+  "mower",
+  "track1",
+  "track2",
+  "track3"
+ ],
+ "props_visible": [
+  "mower"
+ ],
+ "draw": [
+  "bg",
+  "seq:seq_gate",
+  "prop:track1",
+  "prop:track2",
+  "prop:track3",
+  "seq:seq_shedbox",
+  "seq0:seq_shedfront",
+  "shadows",
+  "stamps",
+  "actor:gus",
+  "seq1:seq_shedfront",
+  "prop:mower",
+  "actor:hush",
+  "fg:fg_butt",
+  "dust",
+  "spot",
+  "fx",
+  "bubbles",
+  "aware",
+  "audience",
+  "curtains",
+  "frame",
+  "card"
+ ],
+ "start": {
+  "gus": {
+   "x": 380,
+   "dir": 1,
+   "clip": "idle"
+  },
+  "hush": {
+   "x": "@gate",
+   "dir": 1,
+   "clip": "idle",
+   "visible": false
+  }
+ },
+ "events": [
+  {
+   "t": 0.0,
+   "do": "prop",
+   "name": "mower",
+   "at": [
+    -420,
+    0
+   ]
+  },
+  {
+   "t": 0.0,
+   "do": "prop",
+   "name": "mower",
+   "ride": "gus"
+  },
+  {
+   "t": 1.2,
+   "do": "curtain",
+   "open": true,
+   "secs": 1.3
+  },
+  {
+   "t": 2.4,
+   "do": "laugh",
+   "amp": 0.5,
+   "add": 0.0
+  },
+  {
+   "t": 3.0,
+   "do": "hud",
+   "on": true
+  },
+  {
+   "t": 3.0,
+   "do": "move",
+   "who": "gus",
+   "to": 800,
+   "clip": "walk",
+   "k": 1.2
+  },
+  {
+   "t": 3.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Judging day.",
+   "secs": 1.4
+  },
+  {
+   "t": 3.4,
+   "do": "prop",
+   "name": "mower",
+   "rot": 3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 3.7,
+   "do": "prop",
+   "name": "mower",
+   "rot": -3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 4.0,
+   "do": "prop",
+   "name": "mower",
+   "rot": 3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 4.3,
+   "do": "prop",
+   "name": "mower",
+   "rot": -3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 4.6,
+   "do": "prop",
+   "name": "mower",
+   "rot": 3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 4.9,
+   "do": "prop",
+   "name": "mower",
+   "rot": -3,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 5.0,
+   "do": "say",
+   "who": "gus",
+   "text": "Every blade: regulation height.",
+   "secs": 2.0
+  },
+  {
+   "t": 5.2,
+   "do": "prop",
+   "name": "mower",
+   "rot": 0,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 5.4,
+   "do": "prop",
+   "name": "mower",
+   "ride": ""
+  },
+  {
+   "t": 5.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex",
+   "dir": 1
+  },
+  {
+   "t": 7.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Stripes: immaculate.",
+   "secs": 1.6
+  },
+  {
+   "t": 7.4,
+   "do": "laugh",
+   "amp": 0.4,
+   "add": 0.03,
+   "text": "ooh…",
+   "dx": -260
+  },
+  {
+   "t": 8.9,
+   "do": "say",
+   "who": "gus",
+   "text": "Now. The topiary.",
+   "secs": 1.4
+  },
+  {
+   "t": 9.0,
+   "do": "move",
+   "who": "gus",
+   "to": 1990,
+   "clip": "walk",
+   "k": 1.6
+  },
+  {
+   "t": 10.2,
+   "do": "seq",
+   "name": "gate",
+   "to": 5,
+   "secs": 0.45,
+   "ease": "out"
+  },
+  {
+   "t": 10.4,
+   "do": "show",
+   "who": "hush",
+   "on": true,
+   "x": "@gate"
+  },
+  {
+   "t": 10.6,
+   "do": "tap",
+   "x": 960,
+   "y": 870
+  },
+  {
+   "t": 10.7,
+   "do": "move",
+   "who": "hush",
+   "to": 960,
+   "clip": "sneak",
+   "k": 3.2
+  },
+  {
+   "t": 11.6,
+   "do": "seq",
+   "name": "gate",
+   "to": 0,
+   "secs": 0.5,
+   "ease": "inout"
+  },
+  {
+   "t": 13.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 14.4,
+   "do": "say",
+   "who": "gus",
+   "text": "Snip.",
+   "secs": 0.9
+  },
+  {
+   "t": 14.7,
+   "do": "clip",
+   "who": "hush",
+   "name": "tinker",
+   "dir": 1
+  },
+  {
+   "t": 14.7,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.8
+  },
+  {
+   "t": 14.7,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.8
+  },
+  {
+   "t": 14.9,
+   "do": "cam",
+   "zoom": 1.15,
+   "x": 1000,
+   "y": 640,
+   "secs": 1.0
+  },
+  {
+   "t": 15.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 16.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Snip.",
+   "secs": 0.9
+  },
+  {
+   "t": 16.5,
+   "do": "stamp",
+   "at": "mower",
+   "dx": 0,
+   "dy": -190
+  },
+  {
+   "t": 16.5,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 16.55,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 16.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 16.7,
+   "do": "tap",
+   "x": 1785,
+   "y": 880
+  },
+  {
+   "t": 16.8,
+   "do": "move",
+   "who": "hush",
+   "to": 1785,
+   "clip": "sneak",
+   "k": 3.6
+  },
+  {
+   "t": 17.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 18.0,
+   "do": "say",
+   "who": "gus",
+   "text": "Sniiip.",
+   "secs": 1.0
+  },
+  {
+   "t": 19.2,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 20.4,
+   "do": "cam",
+   "zoom": 1.15,
+   "x": 1820,
+   "y": 620,
+   "secs": 1.0
+  },
+  {
+   "t": 20.8,
+   "do": "clip",
+   "who": "hush",
+   "name": "saw",
+   "dir": -1
+  },
+  {
+   "t": 20.8,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.8
+  },
+  {
+   "t": 20.8,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.8
+  },
+  {
+   "t": 21.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 21.4,
+   "do": "say",
+   "who": "gus",
+   "text": "…Perfect. Like me.",
+   "secs": 1.6
+  },
+  {
+   "t": 22.6,
+   "do": "stamp",
+   "at": "shed",
+   "dx": 180,
+   "dy": -330
+  },
+  {
+   "t": 22.6,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 22.65,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 22.7,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 22.8,
+   "do": "tap",
+   "x": 662,
+   "y": 880
+  },
+  {
+   "t": 22.9,
+   "do": "move",
+   "who": "hush",
+   "to": "@gnomes",
+   "clip": "run",
+   "k": 1.7
+  },
+  {
+   "t": 26.4,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle",
+   "dir": 1
+  },
+  {
+   "t": 26.6,
+   "do": "press",
+   "button": "freeze",
+   "secs": 0.3
+  },
+  {
+   "t": 26.6,
+   "do": "freeze",
+   "on": true
+  },
+  {
+   "t": 26.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_boulder",
+   "hold": true,
+   "dir": 1
+  },
+  {
+   "t": 26.7,
+   "do": "face",
+   "who": "gus",
+   "dir": -1
+  },
+  {
+   "t": 26.7,
+   "do": "say",
+   "who": "gus",
+   "text": "Now. The gnomes.",
+   "secs": 1.4
+  },
+  {
+   "t": 27.4,
+   "do": "move",
+   "who": "gus",
+   "to": 770,
+   "clip": "walk",
+   "k": 1.6
+  },
+  {
+   "t": 31.0,
+   "do": "cam",
+   "zoom": 1.3,
+   "x": 720,
+   "y": 620,
+   "secs": 0.6,
+   "ease": "out"
+  },
+  {
+   "t": 31.1,
+   "do": "clip",
+   "who": "gus",
+   "name": "search",
+   "dir": -1
+  },
+  {
+   "t": 31.2,
+   "do": "aware",
+   "to": 0.6,
+   "secs": 1.2
+  },
+  {
+   "t": 31.4,
+   "do": "say",
+   "who": "gus",
+   "text": "One. Two. Three.",
+   "secs": 1.8
+  },
+  {
+   "t": 32.6,
+   "do": "aware",
+   "to": 0.0,
+   "secs": 3.6
+  },
+  {
+   "t": 33.5,
+   "do": "say",
+   "who": "gus",
+   "text": "…Four?",
+   "secs": 1.3
+  },
+  {
+   "t": 33.6,
+   "do": "pop",
+   "who": "gus",
+   "text": "?",
+   "kind": "q",
+   "dy": -470,
+   "secs": 1.0
+  },
+  {
+   "t": 35.1,
+   "do": "say",
+   "who": "gus",
+   "text": "I don't remember buying a TALL one.",
+   "secs": 2.4
+  },
+  {
+   "t": 37.8,
+   "do": "say",
+   "who": "gus",
+   "text": "…Nice hat.",
+   "secs": 1.5
+  },
+  {
+   "t": 38.2,
+   "do": "laugh",
+   "amp": 0.8,
+   "add": 0.1,
+   "text": "hee hee…",
+   "dx": -200
+  },
+  {
+   "t": 39.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 39.6,
+   "do": "say",
+   "who": "gus",
+   "text": "Right. Final pass.",
+   "secs": 1.5
+  },
+  {
+   "t": 40.0,
+   "do": "move",
+   "who": "gus",
+   "to": 800,
+   "clip": "walk",
+   "k": 1.0
+  },
+  {
+   "t": 40.5,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 41.1,
+   "do": "pop",
+   "at": "mower",
+   "dx": 40,
+   "dy": -170,
+   "text": "VROOM!",
+   "secs": 0.9
+  },
+  {
+   "t": 41.1,
+   "do": "shake",
+   "amp": 8,
+   "secs": 0.3
+  },
+  {
+   "t": 41.15,
+   "do": "prop",
+   "name": "mower",
+   "ride": "gus"
+  },
+  {
+   "t": 41.2,
+   "do": "clip",
+   "who": "gus",
+   "name": "run",
+   "k": 2.6,
+   "dir": 1
+  },
+  {
+   "t": 41.2,
+   "do": "path",
+   "who": "gus",
+   "to": 1950,
+   "secs": 1.6
+  },
+  {
+   "t": 41.2,
+   "do": "prop",
+   "name": "mower",
+   "rot": 10,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 41.3,
+   "do": "say",
+   "who": "gus",
+   "text": "WHOA-OA-OA!",
+   "secs": 1.4
+  },
+  {
+   "t": 41.3,
+   "do": "prop",
+   "name": "track1",
+   "vis": true
+  },
+  {
+   "t": 41.4,
+   "do": "prop",
+   "name": "mower",
+   "rot": -8,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 41.6,
+   "do": "prop",
+   "name": "mower",
+   "rot": 9,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 41.6,
+   "do": "freeze",
+   "on": false
+  },
+  {
+   "t": 41.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 41.7,
+   "do": "move",
+   "who": "hush",
+   "to": "@butt",
+   "clip": "run",
+   "k": 1.6
+  },
+  {
+   "t": 41.75,
+   "do": "prop",
+   "name": "track2",
+   "vis": true
+  },
+  {
+   "t": 41.8,
+   "do": "prop",
+   "name": "mower",
+   "rot": -10,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 42.0,
+   "do": "prop",
+   "name": "mower",
+   "rot": 8,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 42.2,
+   "do": "prop",
+   "name": "mower",
+   "rot": -9,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 42.25,
+   "do": "prop",
+   "name": "track3",
+   "vis": true
+  },
+  {
+   "t": 42.4,
+   "do": "prop",
+   "name": "mower",
+   "rot": 7,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 42.6,
+   "do": "prop",
+   "name": "mower",
+   "rot": -6,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 42.8,
+   "do": "prop",
+   "name": "mower",
+   "ride": ""
+  },
+  {
+   "t": 42.8,
+   "do": "prop",
+   "name": "mower",
+   "dx": 1210,
+   "dy": -24,
+   "rot": -22,
+   "secs": 0.25,
+   "ease": "out"
+  },
+  {
+   "t": 42.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "knocked",
+   "hold": true,
+   "dir": 1
+  },
+  {
+   "t": 42.8,
+   "do": "path",
+   "who": "gus",
+   "to": 1900,
+   "secs": 0.35
+  },
+  {
+   "t": 42.85,
+   "do": "pop",
+   "x": 2180,
+   "y": 700,
+   "text": "CRUNCH!",
+   "secs": 1.0
+  },
+  {
+   "t": 42.85,
+   "do": "shake",
+   "amp": 20,
+   "secs": 0.5
+  },
+  {
+   "t": 42.9,
+   "do": "dust",
+   "x": 2160,
+   "y": 880,
+   "s": 1.0
+  },
+  {
+   "t": 43.0,
+   "do": "stars",
+   "who": "gus",
+   "secs": 2.5,
+   "dx": -185,
+   "dy": 0
+  },
+  {
+   "t": 43.1,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.3,
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 43.2,
+   "do": "dust",
+   "x": 1750,
+   "y": 880,
+   "s": 0.6
+  },
+  {
+   "t": 45.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "getup"
+  },
+  {
+   "t": 47.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume",
+   "dir": -1
+  },
+  {
+   "t": 48.0,
+   "do": "cam",
+   "zoom": 1.12,
+   "x": 1500,
+   "y": 640,
+   "secs": 1.2
+  },
+  {
+   "t": 48.1,
+   "do": "say",
+   "who": "gus",
+   "text": "My. STRIPES.",
+   "secs": 1.6
+  },
+  {
+   "t": 49.9,
+   "do": "say",
+   "who": "gus",
+   "text": "Somebody is going to PAY.",
+   "secs": 1.8
+  },
+  {
+   "t": 51.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "squeak",
+   "dir": -1
+  },
+  {
+   "t": 51.9,
+   "do": "press",
+   "button": "clarence",
+   "secs": 0.4
+  },
+  {
+   "t": 51.9,
+   "do": "rustle",
+   "name": "fg_butt"
+  },
+  {
+   "t": 52.0,
+   "do": "pop",
+   "at": "butt",
+   "dy": -420,
+   "text": "SQUEAK!",
+   "secs": 1.0
+  },
+  {
+   "t": 52.2,
+   "do": "rustle",
+   "name": "fg_butt"
+  },
+  {
+   "t": 52.3,
+   "do": "clip",
+   "who": "gus",
+   "name": "startle",
+   "dir": -1
+  },
+  {
+   "t": 52.4,
+   "do": "pop",
+   "who": "gus",
+   "text": "!",
+   "kind": "q",
+   "dy": -470,
+   "secs": 0.8
+  },
+  {
+   "t": 52.8,
+   "do": "say",
+   "who": "gus",
+   "text": "The SHED. Obviously.",
+   "secs": 1.6
+  },
+  {
+   "t": 53.0,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 53.2,
+   "do": "move",
+   "who": "gus",
+   "to": "@shed",
+   "clip": "stomp",
+   "k": 1.3
+  },
+  {
+   "t": 55.6,
+   "do": "cam",
+   "zoom": 1.2,
+   "x": 1533,
+   "y": 620,
+   "secs": 0.8
+  },
+  {
+   "t": 55.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "grab",
+   "dir": -1
+  },
+  {
+   "t": 55.8,
+   "do": "say",
+   "who": "gus",
+   "text": "Got you n—",
+   "secs": 0.8
+  },
+  {
+   "t": 56.2,
+   "do": "seq",
+   "name": "shedfront",
+   "to": 6,
+   "secs": 0.6,
+   "ease": "lin"
+  },
+  {
+   "t": 56.2,
+   "do": "seq",
+   "name": "shedbox",
+   "to": 6,
+   "secs": 0.6,
+   "ease": "lin"
+  },
+  {
+   "t": 56.85,
+   "do": "pop",
+   "x": 1533,
+   "y": 830,
+   "text": "WHUMP!",
+   "secs": 0.9
+  },
+  {
+   "t": 56.85,
+   "do": "shake",
+   "amp": 18,
+   "secs": 0.45
+  },
+  {
+   "t": 56.85,
+   "do": "dust",
+   "x": 1400,
+   "y": 900,
+   "s": 1.2
+  },
+  {
+   "t": 56.9,
+   "do": "dust",
+   "x": 1660,
+   "y": 900,
+   "s": 1.2
+  },
+  {
+   "t": 57.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "idle",
+   "dir": -1
+  },
+  {
+   "t": 57.3,
+   "do": "laugh",
+   "amp": 0.9,
+   "add": 0.1,
+   "text": "OOOH!"
+  },
+  {
+   "t": 58.4,
+   "do": "say",
+   "who": "gus",
+   "text": "…",
+   "secs": 1.0
+  },
+  {
+   "t": 59.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex",
+   "dir": -1
+  },
+  {
+   "t": 59.5,
+   "do": "say",
+   "who": "gus",
+   "text": "…Ha.",
+   "secs": 1.3
+  },
+  {
+   "t": 60.9,
+   "do": "clip",
+   "who": "gus",
+   "name": "idle",
+   "dir": -1
+  },
+  {
+   "t": 61.0,
+   "do": "seq",
+   "name": "shedfront",
+   "to": 12,
+   "secs": 0.9,
+   "ease": "lin"
+  },
+  {
+   "t": 61.0,
+   "do": "seq",
+   "name": "shedbox",
+   "to": 12,
+   "secs": 0.9,
+   "ease": "lin"
+  },
+  {
+   "t": 61.1,
+   "do": "pop",
+   "x": 1300,
+   "y": 700,
+   "text": "creak…",
+   "secs": 0.8
+  },
+  {
+   "t": 61.7,
+   "do": "pop",
+   "x": 1533,
+   "y": 420,
+   "text": "BONK!",
+   "secs": 1.0
+  },
+  {
+   "t": 61.7,
+   "do": "shake",
+   "amp": 22,
+   "secs": 0.5
+  },
+  {
+   "t": 61.7,
+   "do": "squash",
+   "who": "gus",
+   "amount": 0.2
+  },
+  {
+   "t": 61.75,
+   "do": "stars",
+   "who": "gus",
+   "secs": 7.0,
+   "dx": 0,
+   "dy": -20
+  },
+  {
+   "t": 61.8,
+   "do": "dust",
+   "x": 1533,
+   "y": 880,
+   "s": 1.0
+  },
+  {
+   "t": 61.8,
+   "do": "laugh",
+   "amp": 1.5,
+   "add": 0.55,
+   "text": "BRAVO!!"
+  },
+  {
+   "t": 61.9,
+   "do": "confetti"
+  },
+  {
+   "t": 63.0,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 64.0,
+   "do": "prop",
+   "name": "mower",
+   "rot": 0,
+   "dy": 0,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 64.3,
+   "do": "prop",
+   "name": "mower",
+   "dx": 688,
+   "secs": 3.2,
+   "ease": "out"
+  },
+  {
+   "t": 64.4,
+   "do": "pop",
+   "x": 2050,
+   "y": 720,
+   "text": "putt…",
+   "secs": 0.8
+  },
+  {
+   "t": 65.4,
+   "do": "pop",
+   "x": 1900,
+   "y": 720,
+   "text": "putt…",
+   "secs": 0.8
+  },
+  {
+   "t": 66.6,
+   "do": "pop",
+   "x": 1790,
+   "y": 730,
+   "text": "…pfft.",
+   "secs": 0.9
+  },
+  {
+   "t": 67.6,
+   "do": "say",
+   "who": "gus",
+   "text": "…Immaculate.",
+   "secs": 1.8
+  },
+  {
+   "t": 68.0,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 68.6,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "ENCORE!",
+   "dx": 260
+  },
+  {
+   "t": 69.6,
+   "do": "move",
+   "who": "hush",
+   "to": 1000,
+   "clip": "run",
+   "k": 1.4
+  },
+  {
+   "t": 70.6,
+   "do": "spot",
+   "who": "hush",
+   "to": 1.0,
+   "secs": 0.8
+  },
+  {
+   "t": 70.6,
+   "do": "cam",
+   "zoom": 1.12,
+   "x": 1000,
+   "y": 640,
+   "secs": 1.6
+  },
+  {
+   "t": 70.8,
+   "do": "clip",
+   "who": "hush",
+   "name": "cheer",
+   "dir": 1
+  },
+  {
+   "t": 71.2,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "ENCORE!",
+   "dx": 260
+  },
+  {
+   "t": 72.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_bow",
+   "hold": true,
+   "dir": -1
+  },
+  {
+   "t": 73.3,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "BRAVO!",
+   "dx": -240
+  },
+  {
+   "t": 74.4,
+   "do": "spot",
+   "to": 0.0,
+   "secs": 0.6
+  },
+  {
+   "t": 74.4,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.0
+  },
+  {
+   "t": 74.5,
+   "do": "hud",
+   "on": false
+  },
+  {
+   "t": 74.5,
+   "do": "curtain",
+   "open": false,
+   "secs": 1.3
+  },
+  {
+   "t": 76.5,
+   "do": "card"
+  },
+  {
+   "t": 76.7,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.0
+  },
+  {
+   "t": 83.4,
+   "do": "uncard"
+  }
+ ]
+}

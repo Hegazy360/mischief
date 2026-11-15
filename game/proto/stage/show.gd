@@ -1,16 +1,30 @@
-## Act1 — one complete scene of the game, staged on a set rendered in headless Blender.
+## Show — plays one Act of the stage farce from its timeline JSON, on a set rendered in headless Blender.
 ##
-## Gus Thudd's front room (tools/stage/act1_set.py -> art/), the baked cast (Hush, Gus), and one full
-## Act scripted in act1.json: curtain up, three rigs (gramophone, trophy pedestal, butter), a FREEZE
-## in plain sight, a Clarence lure, the slip-and-bonk chain, the gramophone finale, the bow, curtain
-## down and the Applause card. Nothing on screen but the show and the game's own HUD.
+## Each Act is data: `timeline` (e.g. res://proto/act1/act1.json) names its art folder (built by
+## tools/stage/build.py from tools/stage/<act>_set.py), its title card, which baked sequences start
+## hidden, its moving props, and the draw order of the set's layers around the cast. The baked cast
+## (Hush, Gus) comes from the Bakery sheets. Act I (The Front Room) and Act II (The Kitchen) both run
+## on this script; a timeline that leaves a key out gets Act I's value.
 ##
 ## The runtime stays what the Bakery promised: advance a clock, pick frames, blit PNG regions.
 extends Control
 
-const ART := "res://proto/act1/art/"
 const SHEETS := "res://proto/bakery/sheets/"
-const TIMELINE := "res://proto/act1/act1.json"
+## Act I's draw order: the default for a timeline without "draw". Entries: a layer name, "seq:<name>",
+## "prop:<name>", "actor:<who>", "fg:<layer>" (a foreground layer that rustles), "seq0:"/"seq1:<name>"
+## (that sequence only at rest / only once it has moved), or a pass name.
+const DRAW_ACT1 := ["bg", "shaft", "seq:seq_door", "prop:butter", "shadows", "seq:seq_pedestal", "stamps",
+	"actor:gus", "seq:seq_trophy", "actor:hush", "seq:seq_dumbbells", "seq:seq_glove", "fg:fg_plant", "dust",
+	"spot", "fx", "bubbles", "aware", "audience", "curtains", "frame", "card"]
+
+## Emitted when the Act's Curtain Call card comes up (a host shows Next / Retry / Playbill over it).
+signal curtain_call
+
+## Loop the Act forever (the standalone showcase); a host (the Season) sets false to hold on the card.
+@export var loop: bool = true
+## The Act to play (a timeline JSON); `--act=res://...json` on the command line overrides it.
+@export_file("*.json") var timeline: String = "res://proto/act1/act1.json"
+var ART := "res://proto/act1/art/"
 ## Baked sheets are drawn at this scale; the set was rendered to match (1 model unit = 128 px).
 const CAST_SCALE := 1.6
 const STAGE := Vector2(2400, 1080)
@@ -38,6 +52,7 @@ class Actor:
 	var tween: Dictionary = {}      # scripted path: {x0, x1, arc, t, secs}
 	var trail: Array = []           # recent positions while flying (motion smear)
 	var squash: float = 0.0         # landing squash, decays
+	var lift: Tw = null             # scripted height off the floor (negative = sunk behind the set)
 
 
 ## A tweened value: from -> to over secs with an ease; read with _tv().
@@ -75,12 +90,13 @@ var _press: Dictionary = {}          # button -> seconds left lit
 var _ring: Tw = Tw.new()             # RIG progress
 var _freeze: bool = false
 var _aware: Tw = Tw.new()
-var _stamps: Array = []              # [x, y]
+var _stamps: Array = []              # [x, y, t placed]
 var _props: Dictionary = {}          # name -> {x, y, rot, vis, path}
 var _laugh_t: float = -10.0
 var _laugh_amp: float = 0.0
 var _shake: Tw = Tw.new()
 var _stars: Dictionary = {}          # who -> seconds left
+var _stars_at: Dictionary = {}       # who -> Vector2 offset of the head the stars circle
 var _confetti_t: float = -10.0
 var _seq: Dictionary = {}            # name -> {f: Tw, vis: bool}
 var _dust: Array = []                # {x, y, s, t}
@@ -88,8 +104,12 @@ var _cam_z: Tw = Tw.new()            # camera zoom (1 = the whole proscenium)
 var _cam_x: Tw = Tw.new()            # camera focus, stage px
 var _cam_y: Tw = Tw.new()
 var _spot: Tw = Tw.new()             # bow spotlight strength 0..1
+var _dark: Tw = Tw.new()             # lights out: 0 lit .. 1 night (the "dark" pass dims what is drawn before it)
 var _spot_who: String = "hush"
-var _rustle_t: float = -10.0
+var _rustle: Dictionary = {}         # fg layer -> time it was last rustled
+var _draw_list: Array = []
+var _hidden: Array = []
+var _prop_names: Array = []
 ## Captures pass --fixed-step: every rendered frame advances the show exactly 1/60 s, so frame N
 ## is always second N/60 whatever the capture machine's frame rate.
 var _fixed_step: bool = false
@@ -103,13 +123,22 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_font_d = load("res://ui/theme/fonts/LilitaOne-Regular.ttf")
 	_font_b = load("res://ui/theme/fonts/Nunito-Bold.ttf")
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--act="):
+			timeline = arg.substr(6)
+	_tl = _load_json(timeline)
+	ART = str(_tl.get("art", ART))
+	_draw_list = _tl.get("draw", DRAW_ACT1)
+	_hidden = _tl.get("hidden", ["seq_glove", "fxs_dust"])
+	_prop_names = _tl.get("props", ["butter"])
 	_layout = _load_json(ART + "layout.json")
 	_index = _load_json(SHEETS + "index.json")
-	_tl = _load_json(TIMELINE)
 	if _layout.is_empty() or _index.is_empty() or _tl.is_empty():
-		push_error("act1: missing art/sheets — run tools/stage/build.py and tools/bakery/run.py")
+		push_error("show: missing timeline/art/sheets for %s — run tools/stage/build.py and tools/bakery/run.py" % timeline)
 		return
 	for name: String in (_layout["layers"] as Dictionary):
+		if name.begins_with("seq_curtain_") and name != "seq_curtain_00":
+			continue        # only the closed frame is drawn (_draw_curtains); saves ~8 full-screen textures
 		var p := ART + str(_layout["layers"][name]["png"])
 		if ResourceLoader.exists(p):
 			_art[name] = load(p)
@@ -134,6 +163,17 @@ func _ready() -> void:
 				_process(1.0 / 60.0)
 
 
+## Jump to just before the Curtain Call (the host's skip button): every event is applied in order.
+func skip_to_card() -> void:
+	var at := float(_tl.get("loop_at", 70.0))
+	for e: Dictionary in _events:
+		if str(e["do"]) == "card":
+			at = float(e["t"]) - 2.2
+			break
+	while _t < at:
+		_process(1.0 / 60.0)
+
+
 func _restart() -> void:
 	_t = 0.0
 	_ei = 0
@@ -147,11 +187,12 @@ func _restart() -> void:
 	_cam_x = _tw(STAGE.x * 0.5)
 	_cam_y = _tw(STAGE.y * 0.5)
 	_spot = _tw(0.0)
-	_rustle_t = -10.0
+	_dark = _tw(float(_tl.get("dark", 0.0)))
+	_rustle.clear()
 	_dust.clear()
 	_seq.clear()
 	for name: String in (_layout.get("seqs", {}) as Dictionary):
-		_seq[name] = {"f": _tw(0.0), "vis": not name in ["seq_glove", "fxs_dust"]}
+		_seq[name] = {"f": _tw(0.0), "vis": not name in _hidden}
 	_card = 0.0
 	_freeze = false
 	_say.clear()
@@ -160,11 +201,13 @@ func _restart() -> void:
 	_press.clear()
 	_stamps.clear()
 	_stars.clear()
+	_stars_at.clear()
 	_laugh_t = -10.0
 	_confetti_t = -10.0
 	_props.clear()
-	for name: String in ["butter"]:
-		_props[name] = {"dx": 0.0, "dy": 0.0, "rot": 0.0, "vis": false, "path": {}}
+	for name: String in _prop_names:
+		_props[name] = {"dx": 0.0, "dy": 0.0, "rot": 0.0, "vis": name in (_tl.get("props_visible", []) as Array),
+			"path": {}, "ride": "", "rx": 0.0, "ry": 0.0}
 	_actors.clear()
 	for who: String in (_tl.get("start", {}) as Dictionary):
 		var st: Dictionary = _tl["start"][who]
@@ -174,6 +217,7 @@ func _restart() -> void:
 		a.dir = int(st.get("dir", 1))
 		a.clip = str(st.get("clip", "idle"))
 		a.visible = bool(st.get("visible", true))
+		a.lift = _tw(float(st.get("lift", 0.0)))
 		_actors[who] = a
 
 
@@ -285,9 +329,14 @@ func _process(delta: float) -> void:
 		_apply(_events[_ei])
 		_ei += 1
 	if _t >= float(_tl.get("loop_at", 70.0)):
+		if not loop:
+			_t = float(_tl.get("loop_at", 70.0))
+			_card_t += delta
+			queue_redraw()
+			return
 		_restart()
 		return
-	for w: Tw in [_curtain, _hud, _applause, _ring, _aware, _shake, _cam_z, _cam_x, _cam_y, _spot]:
+	for w: Tw in [_curtain, _hud, _applause, _ring, _aware, _shake, _cam_z, _cam_x, _cam_y, _spot, _dark]:
 		w.t += delta
 	for sq: Dictionary in _seq.values():
 		(sq["f"] as Tw).t += delta
@@ -295,6 +344,7 @@ func _process(delta: float) -> void:
 		d["t"] = float(d["t"]) + delta
 	_dust = _dust.filter(func(d: Dictionary) -> bool: return float(d["t"]) < 0.6)
 	for who: String in _actors:
+		(_actors[who] as Actor).lift.t += delta
 		_advance(_actors[who], delta)
 	for name: String in _props:
 		_advance_prop(_props[name], delta)
@@ -362,13 +412,28 @@ func _apply(e: Dictionary) -> void:
 			_go(_aware, float(e.get("to", 0.0)), float(e.get("secs", 1.0)), "lin")
 		"stamp":
 			var p := _pop_at(e)
-			_stamps.append([p.x, p.y])
+			_stamps.append([p.x, p.y, _t])
 		"unstamp":
 			_stamps.clear()
 		"prop":
 			var pr: Dictionary = _props[str(e["name"])]
 			if e.has("vis"):
 				pr["vis"] = bool(e["vis"])
+			if e.has("ride"):
+				# ride an actor: from now on the prop moves with them (a pancake on a head)
+				_settle_ride(pr)
+				pr["ride"] = str(e["ride"])
+				if pr["ride"] != "":
+					var ra: Actor = _actors[pr["ride"]]
+					pr["rx"] = ra.x
+					pr["ry"] = _ay(ra)
+			if e.has("at"):
+				# jump to a place first (no travel): stage px, relative to the prop's pivot
+				pr["path"] = {}
+				pr["dx"] = float(e["at"][0])
+				pr["dy"] = float(e["at"][1])
+				if e.has("rot0"):
+					pr["rot"] = float(e["rot0"])
 			if e.has("rot") or e.has("dx") or e.has("dy"):
 				pr["path"] = {"r0": float(pr["rot"]), "r1": float(e.get("rot", pr["rot"])),
 					"x0": float(pr["dx"]), "x1": float(e.get("dx", pr["dx"])),
@@ -379,7 +444,7 @@ func _apply(e: Dictionary) -> void:
 			# play a Blender-baked sequence toward frame `to` (frames stay in place on the stage)
 			var sq: Dictionary = _seq.get("seq_" + str(e["name"]), {})
 			if sq.is_empty():
-				push_warning("act1: no sequence %s" % e["name"])
+				push_warning("show: no sequence %s" % e["name"])
 				return
 			if e.has("vis"):
 				sq["vis"] = bool(e["vis"])
@@ -396,13 +461,19 @@ func _apply(e: Dictionary) -> void:
 			var f := _pop_at(e) if (e.has("who") or e.has("at") or e.has("x")) else STAGE * 0.5
 			_go(_cam_x, f.x, secs, ez)
 			_go(_cam_y, f.y, secs, ez)
+		"dark":
+			# the light switch: snaps by default (secs 0.12), or a slow dusk
+			_go(_dark, float(e.get("to", 1.0)), float(e.get("secs", 0.12)), "out")
 		"spot":
 			_spot_who = str(e.get("who", _spot_who))
 			_go(_spot, float(e.get("to", 0.0)), float(e.get("secs", 0.6)), "inout")
 		"squash":
 			a.squash = float(e.get("amount", 0.2))
+		"lift":
+			# raise or sink an actor (sinking crops them at the floor line: behind a tablecloth, in a hole)
+			_go(a.lift, float(e.get("to", 0.0)), float(e.get("secs", 0.5)), str(e.get("ease", "out")))
 		"rustle":
-			_rustle_t = _t
+			_rustle[str(e.get("name", "fg_plant"))] = _t
 		"laugh":
 			_laugh_t = _t
 			_laugh_amp = float(e.get("amp", 1.0))
@@ -415,19 +486,22 @@ func _apply(e: Dictionary) -> void:
 			_go(_shake, 0.0, float(e.get("secs", 0.4)), "out")
 		"stars":
 			_stars[str(e["who"])] = float(e.get("secs", 3.0))
+			_stars_at[str(e["who"])] = Vector2(float(e.get("dx", 0.0)), float(e.get("dy", 0.0)))
 		"confetti":
 			_confetti_t = _t
 		"card":
 			_card = 1.0
 			_card_t = 0.0
+			curtain_call.emit()
 		"uncard":
-			_card = 0.0
+			if loop:
+				_card = 0.0
 
 
 func _pop_at(e: Dictionary) -> Vector2:
 	if e.has("who"):
 		var a: Actor = _actors[str(e["who"])]
-		return Vector2(a.x + float(e.get("dx", 0.0)), _floor() - a.y + float(e.get("dy", -330.0)))
+		return Vector2(a.x + float(e.get("dx", 0.0)), _floor() - _ay(a) + float(e.get("dy", -330.0)))
 	if e.has("at"):
 		var name := str(e["at"])
 		var p := _mark(name) if (_layout.get("marks", {}) as Dictionary).has(name) else _piv(name)
@@ -439,9 +513,38 @@ func _floor() -> float:
 	return float(_layout.get("floor_px", 880.0))
 
 
+## An actor's height off the floor: the flight arc plus the scripted lift.
+func _ay(a: Actor) -> float:
+	return a.y + _tv(a.lift)
+
+
+## Where a riding prop has been carried to, relative to its pivot.
+func _ride_off(pr: Dictionary) -> Vector2:
+	var who := str(pr.get("ride", ""))
+	if who == "":
+		return Vector2.ZERO
+	var a: Actor = _actors[who]
+	return Vector2(a.x - float(pr["rx"]), -(_ay(a) - float(pr["ry"])))
+
+
+## Fold the carried offset into the prop's own offset (when it stops riding or starts a new ride).
+func _settle_ride(pr: Dictionary) -> void:
+	var o := _ride_off(pr)
+	pr["dx"] = float(pr["dx"]) + o.x
+	pr["dy"] = float(pr["dy"]) + o.y
+	# a tween still running (a wobble) moves on from where the prop now is, not from the old offset
+	var p: Dictionary = pr["path"]
+	if not p.is_empty():
+		p["x0"] = float(p["x0"]) + o.x
+		p["x1"] = float(p["x1"]) + o.x
+		p["y0"] = float(p["y0"]) + o.y
+		p["y1"] = float(p["y1"]) + o.y
+	pr["ride"] = ""
+
+
 func _set_clip(a: Actor, name: String, k: float) -> void:
 	if a == null or not _clips(a.who).has(name):
-		push_warning("act1: no clip %s/%s" % [a.who if a else "?", name])
+		push_warning("show: no clip %s/%s" % [a.who if a else "?", name])
 		return
 	var info := _clip(a.who, name)
 	if str(info.get("follows", "")) == a.clip:
@@ -508,37 +611,64 @@ func _advance_prop(pr: Dictionary, delta: float) -> void:
 # --- drawing --------------------------------------------------------------------------------------
 func _draw() -> void:
 	if _layout.is_empty():
-		draw_string(_font_b, Vector2(40, 80), "act1: run tools/stage/build.py", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_GOLD)
+		draw_string(_font_b, Vector2(40, 80), "show: run tools/stage/build.py", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_GOLD)
 		return
 	var vs := get_viewport_rect().size
 	_unxform()
-	_layer("bg")
-	_draw_shaft()
-	_draw_seq("seq_door")
-	_draw_prop("butter")
-	_draw_shadows()
-	_draw_seq("seq_pedestal")
-	for st: Array in _stamps:
-		_icon("icon_stamp", Vector2(float(st[0]), float(st[1])), 0.32, 0.0)
-	var gus: Actor = _actors["gus"]
-	var hush: Actor = _actors["hush"]
-	_draw_actor(gus)
-	_draw_seq("seq_trophy")
-	_draw_actor(hush)
-	_draw_seq("seq_dumbbells")
-	_draw_seq("seq_glove")
-	_draw_plant()
-	_draw_dust()
-	_draw_spot()
-	_draw_fx()
-	_draw_bubbles()
-	_draw_aware(hush)
-	_layer("audience", Vector2(0, _crowd_bob()))
-	_draw_curtains()
-	_layer("frame")
-	_draw_card()
+	for item: String in _draw_list:
+		var colon := item.find(":")
+		var kind := item.substr(0, colon) if colon > 0 else ""
+		var arg := item.substr(colon + 1) if colon > 0 else item
+		match kind:
+			"seq":
+				_draw_seq(arg)
+			"seq0", "seq1":
+				# a set piece drawn behind the cast while at rest and in front once it moves (a collapse)
+				if (_seq_frame(arg) == 0) == (kind == "seq0"):
+					_draw_seq(arg)
+			"prop":
+				_draw_prop(arg)
+			"actor":
+				_draw_actor(_actors[arg])
+			"fg":
+				_draw_fg(arg)
+			_:
+				match arg:
+					"shaft":
+						_draw_shaft()
+					"shadows":
+						_draw_shadows()
+					"stamps":
+						_draw_stamps()
+					"dust":
+						_draw_dust()
+					"spot":
+						_draw_spot()
+					"dark":
+						var dv := _tv(_dark)
+						if dv > 0.01:
+							draw_rect(Rect2(Vector2(-200, -200), STAGE + Vector2(400, 400)), Color(0.03, 0.04, 0.14, 0.66 * dv))
+					"fx":
+						_draw_fx()
+					"bubbles":
+						_draw_bubbles()
+					"aware":
+						_draw_aware(_actors["hush"])
+					"audience":
+						_layer("audience", Vector2(0, _crowd_bob()))
+					"curtains":
+						_draw_curtains()
+					"card":
+						_draw_card()
+					_:
+						_layer(arg)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_hud(vs, get_viewport_rect().size.y / STAGE.y)
+
+
+func _seq_frame(name: String) -> int:
+	var sq: Dictionary = _seq.get(name, {})
+	return 0 if sq.is_empty() else int(round(_tv(sq["f"])))
 
 
 func _draw_seq(name: String) -> void:
@@ -550,6 +680,23 @@ func _draw_seq(name: String) -> void:
 	_layer(str(frames[i]))
 
 
+## Hush's calling card where a rig is armed: the beret pops on, bobs, and a gold ring pulses out
+## from it so it reads as "something is set here" rather than a stray red shape.
+func _draw_stamps() -> void:
+	for st: Array in _stamps:
+		var at := Vector2(float(st[0]), float(st[1]))
+		var age := _t - float(st[2])
+		var pop := clampf(age / 0.35, 0.0, 1.0)
+		var s := 0.4 * (1.0 + 0.35 * sin(pop * PI)) * pop
+		if s <= 0.01:
+			continue
+		var bob := sin(_t * 2.6 + at.x * 0.013) * 6.0
+		var ph := fposmod(age, 1.8) / 1.8
+		draw_arc(at, 34.0 + 70.0 * ph, 0.0, TAU, 40, Color(COL_GOLD, 0.55 * (1.0 - ph) * pop), 5.0, true)
+		_ellipse(at + Vector2(0, 34), 30.0 * pop, 7.0 * pop, Color(0, 0, 0, 0.22))
+		_icon("icon_stamp", at + Vector2(0, bob - 8.0 * (1.0 - pop)), s, sin(_t * 1.9 + at.x) * 0.08)
+
+
 func _draw_shaft() -> void:
 	var tex: Texture2D = _art.get("fx_shaft")
 	if tex == null:
@@ -557,6 +704,9 @@ func _draw_shaft() -> void:
 	var L: Dictionary = _layout["layers"]["fx_shaft"]
 	var pos := Vector2(float(L["pos"][0]), float(L["pos"][1]))
 	var breathe := 0.85 + 0.15 * sin(_t * 0.7)
+	if _draw_list.has("dark"):
+		# a moon shaft: faint while the room lights are on, full once they go out
+		breathe *= 0.25 + 0.75 * _tv(_dark)
 	draw_texture(tex, pos, Color(1, 1, 1, breathe))
 	# dust motes drifting in the light
 	var sz := Vector2(float(L["size"][0]), float(L["size"][1]))
@@ -573,14 +723,15 @@ func _draw_shaft() -> void:
 		draw_circle(p, 2.0 + 1.5 * fmod(float(i) * 0.37, 1.0), Color(1.0, 0.97, 0.85, 0.55 * breathe))
 
 
-func _draw_plant() -> void:
-	var tex: Texture2D = _art.get("fg_plant")
+## A foreground layer in front of the cast; a "rustle" shakes it about its base (someone behind it).
+func _draw_fg(name: String) -> void:
+	var tex: Texture2D = _art.get(name)
 	if tex == null:
 		return
-	var L: Dictionary = _layout["layers"]["fg_plant"]
+	var L: Dictionary = _layout["layers"][name]
 	var pos := Vector2(float(L["pos"][0]), float(L["pos"][1]))
 	var base := pos + Vector2(float(L["size"][0]) * 0.5, float(L["size"][1]))
-	var rt := _t - _rustle_t
+	var rt := _t - float(_rustle.get(name, -10.0))
 	var sway := 0.0
 	if rt < 0.9:
 		sway = sin(rt * 28.0) * 0.035 * (1.0 - rt / 0.9)
@@ -653,7 +804,7 @@ func _draw_prop(name: String) -> void:
 	var L: Dictionary = _layout["layers"][lname]
 	var pos := Vector2(float(L["pos"][0]), float(L["pos"][1]))
 	var piv := _piv(name)
-	var at := piv + Vector2(float(pr["dx"]), float(pr["dy"]))
+	var at := piv + Vector2(float(pr["dx"]), float(pr["dy"])) + _ride_off(pr)
 	_xform(at, deg_to_rad(float(pr["rot"])), 1.0)
 	draw_texture(tex, pos - piv)
 	_unxform()
@@ -663,9 +814,9 @@ func _draw_shadows() -> void:
 	var fy := _floor()
 	for who: String in _actors:
 		var a: Actor = _actors[who]
-		if not a.visible:
+		if not a.visible or _ay(a) < -20.0:
 			continue
-		var w := (62.0 if who == "gus" else 46.0) * (1.0 - clampf(a.y / 600.0, 0.0, 0.6))
+		var w := (62.0 if who == "gus" else 46.0) * (1.0 - clampf(_ay(a) / 600.0, 0.0, 0.6))
 		var lying := a.clip in ["knocked", "getup"] and a.t > 0.5
 		var wx := w * (2.4 if lying else 1.6)
 		for k in 3:
@@ -689,12 +840,18 @@ func _draw_actor(a: Actor) -> void:
 	var flip := a.dir * int((_cast()[a.who] as Dictionary).get("faces", 1)) < 0
 	var src := Rect2(cell, Vector2(fw, fh))
 	var dst := Rect2(Vector2(-float(anc[0]), -float(anc[1])), Vector2(fw, fh))
+	var lift := _tv(a.lift)
+	if lift < 0.0:
+		# sunk: nothing below the floor line is drawn
+		var keep := maxf(0.0, float(anc[1]) + lift / CAST_SCALE)
+		src.size.y = keep
+		dst.size.y = keep
 	# motion smear while flying: fading copies along the path
 	for i in range(a.trail.size() - 1, 0, -1):
 		var p: Vector2 = a.trail[i]
 		draw_set_transform(_off() + Vector2(p.x, _floor() - p.y) * _u(), 0.0, Vector2(-1.0 if flip else 1.0, 1.0) * CAST_SCALE * _u())
 		draw_texture_rect_region(tex, dst, src, Color(1, 0.95, 0.85, 0.22 * (1.0 - float(i) / 6.0)))
-	var foot := Vector2(a.x, _floor() - a.y)
+	var foot := Vector2(a.x, _floor() - _ay(a))
 	# landing squash: wider and shorter for a beat, about the feet
 	var sq := 1.0 + a.squash * sin(minf(1.0, a.squash * 5.0) * PI * 0.5)
 	draw_set_transform(_off() + foot * _u(), 0.0, Vector2((-1.0 if flip else 1.0) * sq, 1.0 / sq) * CAST_SCALE * _u())
@@ -727,7 +884,7 @@ func _draw_fx() -> void:
 		if float(_stars[who]) <= 0.0:
 			continue
 		var a: Actor = _actors[who]
-		var head := Vector2(a.x, _floor() - a.y - (110.0 if a.clip in ["knocked"] else 330.0))
+		var head: Vector2 = Vector2(a.x, _floor() - _ay(a) - (110.0 if a.clip in ["knocked"] else 330.0)) + (_stars_at.get(who, Vector2.ZERO) as Vector2)
 		for i in 4:
 			var ang := _t * 5.0 + TAU * float(i) / 4.0
 			_icon("icon_star", head + Vector2(cos(ang) * 80.0, sin(ang) * 22.0), 0.18, ang)
@@ -760,7 +917,7 @@ func _draw_bubbles() -> void:
 		var fs := 34
 		var tw := _font_b.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var pop := clampf(t * 8.0, 0.0, 1.0) * (1.0 - clampf((t - secs + 0.2) * 5.0, 0.0, 1.0))
-		var head := Vector2(clampf(a.x, 300.0, 2100.0), _floor() - a.y - (430.0 if who == "gus" else 330.0))
+		var head := Vector2(clampf(a.x, 300.0, 2100.0), _floor() - _ay(a) - (430.0 if who == "gus" else 330.0))
 		var r := Rect2(head - Vector2(tw * 0.5 + 30.0, 78.0), Vector2(tw + 60.0, 70.0))
 		_xform(head, 0.0, pop)
 		var rr := Rect2(r.position - head, r.size)
@@ -789,11 +946,28 @@ func _draw_curtains() -> void:
 	if frames.is_empty():
 		return
 	if open < 0.999:
-		_layer(str(frames[clampi(int(round(open * float(frames.size() - 1))), 0, frames.size() - 1)]))
+		# One texture, every frame: the closed curtain split down the middle, each half gathering
+		# toward its pillar (the baked in-between frames stepped at ~3 fps and read as lag).
+		var tex: Texture2D = _art.get(str(frames[0]))
+		if tex != null:
+			var L: Dictionary = _layout["layers"][str(frames[0])]
+			var x0 := float(L["pos"][0])
+			var sz := tex.get_size()
+			var half := STAGE.x * 0.5 - x0                       # each half's closed width on stage
+			var g := 1.0 - open                                   # 1 closed .. 0 gathered into the pillars
+			var w := half * g
+			# the hem lifts a little as the drapes gather, like a tab curtain
+			var lift := 26.0 * sin(open * PI)
+			_unxform()
+			draw_texture_rect_region(tex, Rect2(x0, -lift, w, sz.y), Rect2(0, 0, half, sz.y))
+			draw_texture_rect_region(tex, Rect2(STAGE.x - x0 - w, -lift, w, sz.y), Rect2(sz.x - half, 0, half, sz.y))
 	if open < 0.05 and _card <= 0.0 and _t < 10.0:
 		var a := 1.0 - open * 20.0
-		_text_c("MISCHIEF NEXT DOOR", Vector2(STAGE.x * 0.5, 470), 104, Color(COL_GOLD, a), Color(COL_INK, a))
-		_text_c("Act I  ·  The Front Room", Vector2(STAGE.x * 0.5, 560), 46, Color(COL_CREAM, a), Color(COL_INK, a))
+		var title: Array = _tl.get("title", ["MISCHIEF NEXT DOOR", "Act I  ·  The Front Room"])
+		_text_c(str(title[0]), Vector2(STAGE.x * 0.5, 470), 104, Color(COL_GOLD, a), Color(COL_INK, a))
+		_text_c(str(title[1]), Vector2(STAGE.x * 0.5, 560), 46, Color(COL_CREAM, a), Color(COL_INK, a))
+		if title.size() > 2:
+			_text_c(str(title[2]), Vector2(STAGE.x * 0.5, 630), 34, Color(COL_CREAM, a * 0.85), Color(COL_INK, a))
 
 
 func _draw_card() -> void:

@@ -1,0 +1,491 @@
+{
+ "layers": {
+  "audience": {
+   "png": "audience.png",
+   "pos": [
+    328,
+    942
+   ],
+   "size": [
+    1745,
+    138
+   ]
+  },
+  "bg": {
+   "png": "bg.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fg_chair": {
+   "png": "fg_chair.png",
+   "pos": [
+    1882,
+    537
+   ],
+   "size": [
+    274,
+    372
+   ]
+  },
+  "frame": {
+   "png": "frame.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fx_moon": {
+   "png": "fx_moon.png",
+   "pos": [
+    1691,
+    314
+   ],
+   "size": [
+    259,
+    297
+   ]
+  },
+  "fxs_dust_00": {
+   "png": "fxs_dust_00.png",
+   "pos": [
+    85,
+    143
+   ],
+   "size": [
+    84,
+    46
+   ]
+  },
+  "fxs_dust_01": {
+   "png": "fxs_dust_01.png",
+   "pos": [
+    66,
+    130
+   ],
+   "size": [
+    122,
+    59
+   ]
+  },
+  "fxs_dust_02": {
+   "png": "fxs_dust_02.png",
+   "pos": [
+    47,
+    118
+   ],
+   "size": [
+    160,
+    71
+   ]
+  },
+  "fxs_dust_03": {
+   "png": "fxs_dust_03.png",
+   "pos": [
+    31,
+    106
+   ],
+   "size": [
+    194,
+    82
+   ]
+  },
+  "fxs_dust_04": {
+   "png": "fxs_dust_04.png",
+   "pos": [
+    15,
+    97
+   ],
+   "size": [
+    225,
+    89
+   ]
+  },
+  "fxs_dust_05": {
+   "png": "fxs_dust_05.png",
+   "pos": [
+    2,
+    90
+   ],
+   "size": [
+    252,
+    91
+   ]
+  },
+  "icon_burst": {
+   "png": "icon_burst.png",
+   "pos": [
+    13,
+    13
+   ],
+   "size": [
+    230,
+    230
+   ]
+  },
+  "icon_clarence": {
+   "png": "icon_clarence.png",
+   "pos": [
+    59,
+    13
+   ],
+   "size": [
+    138,
+    230
+   ]
+  },
+  "icon_freeze": {
+   "png": "icon_freeze.png",
+   "pos": [
+    25,
+    13
+   ],
+   "size": [
+    206,
+    230
+   ]
+  },
+  "icon_rig": {
+   "png": "icon_rig.png",
+   "pos": [
+    49,
+    17
+   ],
+   "size": [
+    164,
+    221
+   ]
+  },
+  "icon_stamp": {
+   "png": "icon_stamp.png",
+   "pos": [
+    20,
+    78
+   ],
+   "size": [
+    217,
+    90
+   ]
+  },
+  "icon_star": {
+   "png": "icon_star.png",
+   "pos": [
+    13,
+    18
+   ],
+   "size": [
+    230,
+    219
+   ]
+  },
+  "prop_clock": {
+   "png": "prop_clock.png",
+   "pos": [
+    1458,
+    643
+   ],
+   "size": [
+    60,
+    85
+   ]
+  },
+  "prop_glass": {
+   "png": "prop_glass.png",
+   "pos": [
+    1691,
+    321
+   ],
+   "size": [
+    246,
+    293
+   ]
+  },
+  "prop_glasshole": {
+   "png": "prop_glasshole.png",
+   "pos": [
+    1691,
+    321
+   ],
+   "size": [
+    246,
+    512
+   ]
+  },
+  "seq_bed_00": {
+   "png": "seq_bed_00.png",
+   "pos": [
+    1022,
+    565
+   ],
+   "size": [
+    516,
+    325
+   ]
+  },
+  "seq_bed_01": {
+   "png": "seq_bed_01.png",
+   "pos": [
+    1022,
+    537
+   ],
+   "size": [
+    516,
+    353
+   ]
+  },
+  "seq_bed_02": {
+   "png": "seq_bed_02.png",
+   "pos": [
+    999,
+    393
+   ],
+   "size": [
+    539,
+    497
+   ]
+  },
+  "seq_bed_03": {
+   "png": "seq_bed_03.png",
+   "pos": [
+    989,
+    362
+   ],
+   "size": [
+    549,
+    528
+   ]
+  },
+  "seq_bed_04": {
+   "png": "seq_bed_04.png",
+   "pos": [
+    1016,
+    456
+   ],
+   "size": [
+    522,
+    434
+   ]
+  },
+  "seq_bed_05": {
+   "png": "seq_bed_05.png",
+   "pos": [
+    1022,
+    565
+   ],
+   "size": [
+    516,
+    325
+   ]
+  },
+  "seq_bed_06": {
+   "png": "seq_bed_06.png",
+   "pos": [
+    1022,
+    565
+   ],
+   "size": [
+    516,
+    325
+   ]
+  },
+  "seq_bed_07": {
+   "png": "seq_bed_07.png",
+   "pos": [
+    1022,
+    565
+   ],
+   "size": [
+    516,
+    325
+   ]
+  },
+  "seq_curtain_00": {
+   "png": "seq_curtain_00.png",
+   "pos": [
+    41,
+    0
+   ],
+   "size": [
+    2318,
+    1080
+   ]
+  },
+  "seq_door_00": {
+   "png": "seq_door_00.png",
+   "pos": [
+    2069,
+    278
+   ],
+   "size": [
+    208,
+    546
+   ]
+  },
+  "seq_door_01": {
+   "png": "seq_door_01.png",
+   "pos": [
+    2076,
+    279
+   ],
+   "size": [
+    202,
+    554
+   ]
+  },
+  "seq_door_02": {
+   "png": "seq_door_02.png",
+   "pos": [
+    2097,
+    279
+   ],
+   "size": [
+    182,
+    563
+   ]
+  },
+  "seq_door_03": {
+   "png": "seq_door_03.png",
+   "pos": [
+    2133,
+    279
+   ],
+   "size": [
+    148,
+    571
+   ]
+  },
+  "seq_door_04": {
+   "png": "seq_door_04.png",
+   "pos": [
+    2178,
+    280
+   ],
+   "size": [
+    104,
+    575
+   ]
+  },
+  "seq_door_05": {
+   "png": "seq_door_05.png",
+   "pos": [
+    2231,
+    280
+   ],
+   "size": [
+    56,
+    578
+   ]
+  },
+  "fx_shaft": {
+   "png": "fx_shaft.png",
+   "pos": [
+    1708,
+    326
+   ],
+   "size": [
+    307,
+    541
+   ]
+  }
+ },
+ "size": [
+  2400,
+  1080
+ ],
+ "px_per_unit": 128.0,
+ "floor_px": 880.0,
+ "tilt_deg": 10.0,
+ "marks": {
+  "switch": [
+   470.4,
+   880.0
+  ],
+  "wardrobe": [
+   700.8,
+   880.0
+  ],
+  "stand": [
+   944.0,
+   880.0
+  ],
+  "table": [
+   1507.2,
+   880.0
+  ],
+  "window": [
+   1814.4,
+   520.7
+  ],
+  "door": [
+   2134.4,
+   880.0
+  ]
+ },
+ "pivots": {
+  "chair": [
+   2019.2,
+   880.0
+  ],
+  "clock": [
+   1488.0,
+   686.3
+  ],
+  "pillow": [
+   1449.6,
+   732.8
+  ],
+  "glass": [
+   1814.4,
+   467.4
+  ],
+  "glasshole": [
+   1814.4,
+   467.4
+  ],
+  "bed_head": [
+   1449.6,
+   753.9
+  ]
+ },
+ "seqs": {
+  "fxs_dust": [
+   "fxs_dust_00",
+   "fxs_dust_01",
+   "fxs_dust_02",
+   "fxs_dust_03",
+   "fxs_dust_04",
+   "fxs_dust_05"
+  ],
+  "seq_bed": [
+   "seq_bed_00",
+   "seq_bed_01",
+   "seq_bed_02",
+   "seq_bed_03",
+   "seq_bed_04",
+   "seq_bed_05",
+   "seq_bed_06",
+   "seq_bed_07"
+  ],
+  "seq_curtain": [
+   "seq_curtain_00"
+  ],
+  "seq_door": [
+   "seq_door_00",
+   "seq_door_01",
+   "seq_door_02",
+   "seq_door_03",
+   "seq_door_04",
+   "seq_door_05"
+  ]
+ },
+ "doc": "act5 set, rendered by tools/stage/build.py from tools/stage/act5_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
+}

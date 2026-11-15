@@ -1,0 +1,348 @@
+{
+ "layers": {
+  "audience": {
+   "png": "audience.png",
+   "pos": [
+    328,
+    942
+   ],
+   "size": [
+    1745,
+    138
+   ]
+  },
+  "bg": {
+   "png": "bg.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fg_lockers": {
+   "png": "fg_lockers.png",
+   "pos": [
+    1891,
+    493
+   ],
+   "size": [
+    205,
+    411
+   ]
+  },
+  "frame": {
+   "png": "frame.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fxs_dust_00": {
+   "png": "fxs_dust_00.png",
+   "pos": [
+    85,
+    143
+   ],
+   "size": [
+    84,
+    46
+   ]
+  },
+  "fxs_dust_01": {
+   "png": "fxs_dust_01.png",
+   "pos": [
+    66,
+    130
+   ],
+   "size": [
+    122,
+    59
+   ]
+  },
+  "fxs_dust_02": {
+   "png": "fxs_dust_02.png",
+   "pos": [
+    47,
+    118
+   ],
+   "size": [
+    160,
+    71
+   ]
+  },
+  "fxs_dust_03": {
+   "png": "fxs_dust_03.png",
+   "pos": [
+    31,
+    106
+   ],
+   "size": [
+    194,
+    82
+   ]
+  },
+  "fxs_dust_04": {
+   "png": "fxs_dust_04.png",
+   "pos": [
+    15,
+    97
+   ],
+   "size": [
+    225,
+    89
+   ]
+  },
+  "fxs_dust_05": {
+   "png": "fxs_dust_05.png",
+   "pos": [
+    2,
+    90
+   ],
+   "size": [
+    252,
+    91
+   ]
+  },
+  "icon_burst": {
+   "png": "icon_burst.png",
+   "pos": [
+    13,
+    13
+   ],
+   "size": [
+    230,
+    230
+   ]
+  },
+  "icon_clarence": {
+   "png": "icon_clarence.png",
+   "pos": [
+    59,
+    13
+   ],
+   "size": [
+    138,
+    230
+   ]
+  },
+  "icon_freeze": {
+   "png": "icon_freeze.png",
+   "pos": [
+    25,
+    13
+   ],
+   "size": [
+    206,
+    230
+   ]
+  },
+  "icon_rig": {
+   "png": "icon_rig.png",
+   "pos": [
+    49,
+    17
+   ],
+   "size": [
+    164,
+    221
+   ]
+  },
+  "icon_stamp": {
+   "png": "icon_stamp.png",
+   "pos": [
+    20,
+    78
+   ],
+   "size": [
+    217,
+    90
+   ]
+  },
+  "icon_star": {
+   "png": "icon_star.png",
+   "pos": [
+    13,
+    18
+   ],
+   "size": [
+    230,
+    219
+   ]
+  },
+  "prop_bag": {
+   "png": "prop_bag.png",
+   "pos": [
+    1289,
+    328
+   ],
+   "size": [
+    129,
+    356
+   ]
+  },
+  "seq_curtain_00": {
+   "png": "seq_curtain_00.png",
+   "pos": [
+    41,
+    0
+   ],
+   "size": [
+    2318,
+    1080
+   ]
+  },
+  "seq_sdoor_00": {
+   "png": "seq_sdoor_00.png",
+   "pos": [
+    123,
+    278
+   ],
+   "size": [
+    208,
+    546
+   ]
+  },
+  "seq_sdoor_01": {
+   "png": "seq_sdoor_01.png",
+   "pos": [
+    122,
+    278
+   ],
+   "size": [
+    202,
+    555
+   ]
+  },
+  "seq_sdoor_02": {
+   "png": "seq_sdoor_02.png",
+   "pos": [
+    121,
+    279
+   ],
+   "size": [
+    182,
+    563
+   ]
+  },
+  "seq_sdoor_03": {
+   "png": "seq_sdoor_03.png",
+   "pos": [
+    119,
+    279
+   ],
+   "size": [
+    148,
+    571
+   ]
+  },
+  "seq_sdoor_04": {
+   "png": "seq_sdoor_04.png",
+   "pos": [
+    116,
+    280
+   ],
+   "size": [
+    106,
+    575
+   ]
+  },
+  "seq_sdoor_05": {
+   "png": "seq_sdoor_05.png",
+   "pos": [
+    112,
+    280
+   ],
+   "size": [
+    57,
+    578
+   ]
+  },
+  "fx_shaft": {
+   "png": "fx_shaft.png",
+   "pos": [
+    592,
+    121
+   ],
+   "size": [
+    457,
+    727
+   ]
+  }
+ },
+ "size": [
+  2400,
+  1080
+ ],
+ "px_per_unit": 128.0,
+ "floor_px": 880.0,
+ "tilt_deg": 10.0,
+ "marks": {
+  "window": [
+   739.2,
+   208.6
+  ],
+  "door": [
+   265.6,
+   880.0
+  ],
+  "console": [
+   579.2,
+   640.5
+  ],
+  "tread": [
+   816.0,
+   880.0
+  ],
+  "mat": [
+   1635.2,
+   880.0
+  ],
+  "bag": [
+   1353.6,
+   880.0
+  ]
+ },
+ "pivots": {
+  "bag": [
+   1353.6,
+   340.9
+  ],
+  "bag_c": [
+   1353.6,
+   555.2
+  ],
+  "lockers": [
+   1993.6,
+   880.0
+  ]
+ },
+ "seqs": {
+  "fxs_dust": [
+   "fxs_dust_00",
+   "fxs_dust_01",
+   "fxs_dust_02",
+   "fxs_dust_03",
+   "fxs_dust_04",
+   "fxs_dust_05"
+  ],
+  "seq_curtain": [
+   "seq_curtain_00"
+  ],
+  "seq_sdoor": [
+   "seq_sdoor_00",
+   "seq_sdoor_01",
+   "seq_sdoor_02",
+   "seq_sdoor_03",
+   "seq_sdoor_04",
+   "seq_sdoor_05"
+  ]
+ },
+ "doc": "act4 set, rendered by tools/stage/build.py from tools/stage/act4_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
+}

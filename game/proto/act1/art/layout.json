@@ -957,5 +957,5 @@
    "seq_trophy_11"
   ]
  },
- "doc": "Act I set, rendered by tools/stage/build.py from tools/stage/act1_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
+ "doc": "act1 set, rendered by tools/stage/build.py from tools/stage/act1_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
 }

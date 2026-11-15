@@ -1,0 +1,1414 @@
+{
+ "doc": "Act II — The Kitchen ('Breakfast of Champions'). Gus flips pancakes; Hush winds the toaster to MAX, saws the chair, loosens the pantry shelves; a FREEZE by the fridge; toast -> frying pan BONG; the chair collapses behind the tablecloth and the pancake lands on his head; a Clarence squeak from the BULK boxes sends him into the pantry avalanche; the toast comes back down. Times in seconds; x in stage px or @marks from art/layout.json. Verbs: see proto/stage/show.gd _apply().",
+ "title": [
+  "MISCHIEF NEXT DOOR",
+  "Act II  ·  The Kitchen",
+  "Breakfast of champions."
+ ],
+ "art": "res://proto/act2/art/",
+ "loop_at": 84.0,
+ "hidden": [
+  "fxs_dust"
+ ],
+ "props": [
+  "pancake",
+  "pan",
+  "toast",
+  "toast2"
+ ],
+ "draw": [
+  "bg",
+  "shaft",
+  "seq:seq_backdoor",
+  "seq:seq_chair",
+  "seq:seq_fridge",
+  "shadows",
+  "stamps",
+  "actor:gus",
+  "seq:seq_pantry",
+  "prop:pan",
+  "prop:toast",
+  "prop:toast2",
+  "prop:pancake",
+  "fg:fg_table",
+  "actor:hush",
+  "fg:fg_boxes",
+  "dust",
+  "spot",
+  "fx",
+  "bubbles",
+  "aware",
+  "audience",
+  "curtains",
+  "frame",
+  "card"
+ ],
+ "start": {
+  "gus": {
+   "x": 778,
+   "dir": 1,
+   "clip": "idle"
+  },
+  "hush": {
+   "x": "@door",
+   "dir": 1,
+   "clip": "idle",
+   "visible": false
+  }
+ },
+ "events": [
+  {
+   "t": 1.2,
+   "do": "curtain",
+   "open": true,
+   "secs": 1.3
+  },
+  {
+   "t": 2.4,
+   "do": "laugh",
+   "amp": 0.5,
+   "add": 0.0
+  },
+  {
+   "t": 3.0,
+   "do": "hud",
+   "on": true
+  },
+  {
+   "t": 3.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 3.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Pancake o'clock.",
+   "secs": 1.6
+  },
+  {
+   "t": 3.3,
+   "do": "prop",
+   "name": "pancake",
+   "arc": 170,
+   "rot": 360,
+   "secs": 0.75,
+   "ease": "out"
+  },
+  {
+   "t": 4.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 4.9,
+   "do": "say",
+   "who": "gus",
+   "text": "Flip.",
+   "secs": 1.0
+  },
+  {
+   "t": 5.1,
+   "do": "prop",
+   "name": "pancake",
+   "arc": 250,
+   "rot": 1080,
+   "secs": 0.85,
+   "ease": "out"
+  },
+  {
+   "t": 5.6,
+   "do": "laugh",
+   "amp": 0.3,
+   "add": 0.02
+  },
+  {
+   "t": 6.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "use",
+   "dir": 1
+  },
+  {
+   "t": 6.6,
+   "do": "say",
+   "who": "gus",
+   "text": "Aaand… PLATE.",
+   "secs": 1.5
+  },
+  {
+   "t": 6.85,
+   "do": "prop",
+   "name": "pancake",
+   "dx": 98,
+   "dy": 48,
+   "arc": 380,
+   "rot": 1440,
+   "secs": 1.1,
+   "ease": "out"
+  },
+  {
+   "t": 7.95,
+   "do": "pop",
+   "x": 1014,
+   "y": 600,
+   "text": "PLOP!",
+   "secs": 0.8
+  },
+  {
+   "t": 8.0,
+   "do": "laugh",
+   "amp": 0.6,
+   "add": 0.06,
+   "text": "ooh!",
+   "dx": -220
+  },
+  {
+   "t": 8.1,
+   "do": "clip",
+   "who": "gus",
+   "name": "flex",
+   "dir": 1
+  },
+  {
+   "t": 8.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Nailed it.",
+   "secs": 1.4
+  },
+  {
+   "t": 9.7,
+   "do": "say",
+   "who": "gus",
+   "text": "Now. Eggs.",
+   "secs": 1.3
+  },
+  {
+   "t": 9.8,
+   "do": "move",
+   "who": "gus",
+   "to": 1565,
+   "clip": "walk",
+   "k": 1.6
+  },
+  {
+   "t": 10.2,
+   "do": "seq",
+   "name": "backdoor",
+   "to": 5,
+   "secs": 0.4,
+   "ease": "out"
+  },
+  {
+   "t": 10.4,
+   "do": "show",
+   "who": "hush",
+   "on": true,
+   "x": "@door"
+  },
+  {
+   "t": 10.6,
+   "do": "tap",
+   "x": 600,
+   "y": 860
+  },
+  {
+   "t": 10.7,
+   "do": "move",
+   "who": "hush",
+   "to": 600,
+   "clip": "sneak",
+   "k": 2.6
+  },
+  {
+   "t": 11.3,
+   "do": "seq",
+   "name": "backdoor",
+   "to": 0,
+   "secs": 0.45,
+   "ease": "inout"
+  },
+  {
+   "t": 12.85,
+   "do": "face",
+   "who": "gus",
+   "dir": 1
+  },
+  {
+   "t": 12.9,
+   "do": "seq",
+   "name": "fridge",
+   "to": 5,
+   "secs": 0.5,
+   "ease": "out"
+  },
+  {
+   "t": 13.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 13.2,
+   "do": "cam",
+   "zoom": 1.14,
+   "x": 600,
+   "y": 620,
+   "secs": 1.2
+  },
+  {
+   "t": 13.4,
+   "do": "clip",
+   "who": "hush",
+   "name": "tinker",
+   "dir": -1
+  },
+  {
+   "t": 13.4,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.8
+  },
+  {
+   "t": 13.4,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.8
+  },
+  {
+   "t": 13.6,
+   "do": "say",
+   "who": "gus",
+   "text": "Eggs… eggs…",
+   "secs": 1.6
+  },
+  {
+   "t": 14.4,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 15.2,
+   "do": "stamp",
+   "at": "toaster",
+   "dx": 0,
+   "dy": -120
+  },
+  {
+   "t": 15.2,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 15.3,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 15.5,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.4
+  },
+  {
+   "t": 15.6,
+   "do": "tap",
+   "x": 1150,
+   "y": 880
+  },
+  {
+   "t": 15.7,
+   "do": "move",
+   "who": "hush",
+   "to": 1150,
+   "clip": "run",
+   "k": 1.2
+  },
+  {
+   "t": 15.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 16.2,
+   "do": "say",
+   "who": "gus",
+   "text": "One… two… …eleven.",
+   "secs": 2.0
+  },
+  {
+   "t": 17.2,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 17.95,
+   "do": "move",
+   "who": "hush",
+   "to": 1335,
+   "clip": "sneak",
+   "k": 3.0
+  },
+  {
+   "t": 18.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 19.3,
+   "do": "cam",
+   "zoom": 1.15,
+   "x": 1440,
+   "y": 620,
+   "secs": 1.0
+  },
+  {
+   "t": 19.4,
+   "do": "clip",
+   "who": "hush",
+   "name": "saw",
+   "dir": -1
+  },
+  {
+   "t": 19.4,
+   "do": "press",
+   "button": "rig",
+   "secs": 1.8
+  },
+  {
+   "t": 19.4,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 1.8
+  },
+  {
+   "t": 19.6,
+   "do": "say",
+   "who": "gus",
+   "text": "There were TWELVE.",
+   "secs": 1.6
+  },
+  {
+   "t": 20.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": 1
+  },
+  {
+   "t": 21.2,
+   "do": "stamp",
+   "at": "chair",
+   "dx": 60,
+   "dy": -300
+  },
+  {
+   "t": 21.2,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 21.25,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 21.5,
+   "do": "seq",
+   "name": "fridge",
+   "to": 0,
+   "secs": 0.3,
+   "ease": "inout"
+  },
+  {
+   "t": 21.8,
+   "do": "face",
+   "who": "gus",
+   "dir": -1
+  },
+  {
+   "t": 21.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "idle"
+  },
+  {
+   "t": 21.8,
+   "do": "pop",
+   "who": "gus",
+   "text": "?",
+   "kind": "q",
+   "dy": -470,
+   "secs": 1.0
+  },
+  {
+   "t": 21.85,
+   "do": "cam",
+   "zoom": 1.32,
+   "x": 1450,
+   "y": 600,
+   "secs": 0.45,
+   "ease": "out"
+  },
+  {
+   "t": 21.9,
+   "do": "press",
+   "button": "freeze",
+   "secs": 0.3
+  },
+  {
+   "t": 21.9,
+   "do": "freeze",
+   "on": true
+  },
+  {
+   "t": 21.9,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_tada",
+   "hold": true,
+   "dir": 1
+  },
+  {
+   "t": 22.2,
+   "do": "aware",
+   "to": 0.65,
+   "secs": 1.4
+  },
+  {
+   "t": 22.7,
+   "do": "clip",
+   "who": "gus",
+   "name": "search",
+   "dir": -1
+  },
+  {
+   "t": 23.0,
+   "do": "say",
+   "who": "gus",
+   "text": "Hm.",
+   "secs": 1.0
+  },
+  {
+   "t": 23.7,
+   "do": "aware",
+   "to": 0.0,
+   "secs": 3.4
+  },
+  {
+   "t": 24.3,
+   "do": "say",
+   "who": "gus",
+   "text": "Did the fridge come with that?",
+   "secs": 2.4
+  },
+  {
+   "t": 26.9,
+   "do": "say",
+   "who": "gus",
+   "text": "…Free gift. Lovely.",
+   "secs": 2.0
+  },
+  {
+   "t": 27.4,
+   "do": "laugh",
+   "amp": 0.6,
+   "add": 0.08,
+   "text": "hee hee…",
+   "dx": -200
+  },
+  {
+   "t": 28.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 28.6,
+   "do": "say",
+   "who": "gus",
+   "text": "Toast.",
+   "secs": 1.2
+  },
+  {
+   "t": 28.7,
+   "do": "move",
+   "who": "gus",
+   "to": 640,
+   "clip": "walk",
+   "k": 1.6
+  },
+  {
+   "t": 29.7,
+   "do": "freeze",
+   "on": false
+  },
+  {
+   "t": 29.7,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 29.8,
+   "do": "tap",
+   "x": 1800,
+   "y": 880
+  },
+  {
+   "t": 29.9,
+   "do": "move",
+   "who": "hush",
+   "to": 1800,
+   "clip": "run",
+   "k": 1.4
+  },
+  {
+   "t": 31.5,
+   "do": "clip",
+   "who": "hush",
+   "name": "hammer",
+   "dir": 1
+  },
+  {
+   "t": 31.5,
+   "do": "press",
+   "button": "rig",
+   "secs": 2.0
+  },
+  {
+   "t": 31.5,
+   "do": "ring",
+   "to": 1.0,
+   "secs": 2.0
+  },
+  {
+   "t": 32.3,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": -1
+  },
+  {
+   "t": 32.5,
+   "do": "say",
+   "who": "gus",
+   "text": "Two slices. Golden.",
+   "secs": 1.6
+  },
+  {
+   "t": 33.5,
+   "do": "stamp",
+   "at": "pantry",
+   "dx": 0,
+   "dy": -560
+  },
+  {
+   "t": 33.5,
+   "do": "ring",
+   "to": 0.0,
+   "secs": 0.3
+  },
+  {
+   "t": 33.55,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 33.6,
+   "do": "tap",
+   "x": 2218,
+   "y": 880
+  },
+  {
+   "t": 33.7,
+   "do": "move",
+   "who": "hush",
+   "to": "@boxes",
+   "clip": "run",
+   "k": 1.4
+  },
+  {
+   "t": 33.7,
+   "do": "clip",
+   "who": "gus",
+   "name": "interact",
+   "dir": -1
+  },
+  {
+   "t": 34.25,
+   "do": "unstamp"
+  },
+  {
+   "t": 34.3,
+   "do": "prop",
+   "name": "toast",
+   "vis": true,
+   "dx": 40,
+   "dy": -760,
+   "rot": 220,
+   "secs": 0.55,
+   "ease": "out"
+  },
+  {
+   "t": 34.3,
+   "do": "pop",
+   "at": "toaster",
+   "dy": -80,
+   "text": "TWANG!",
+   "secs": 0.8
+  },
+  {
+   "t": 34.3,
+   "do": "shake",
+   "amp": 10,
+   "secs": 0.3
+  },
+  {
+   "t": 34.32,
+   "do": "prop",
+   "name": "toast2",
+   "vis": true,
+   "dx": 20,
+   "dy": -780,
+   "rot": -160,
+   "secs": 0.6,
+   "ease": "out"
+  },
+  {
+   "t": 34.35,
+   "do": "clip",
+   "who": "gus",
+   "name": "startle",
+   "dir": -1
+  },
+  {
+   "t": 34.45,
+   "do": "prop",
+   "name": "pan",
+   "rot": 16,
+   "secs": 0.12,
+   "ease": "out"
+  },
+  {
+   "t": 34.57,
+   "do": "prop",
+   "name": "pan",
+   "rot": -11,
+   "secs": 0.16,
+   "ease": "out"
+  },
+  {
+   "t": 34.73,
+   "do": "prop",
+   "name": "pan",
+   "rot": 7,
+   "secs": 0.16,
+   "ease": "out"
+  },
+  {
+   "t": 34.89,
+   "do": "prop",
+   "name": "pan",
+   "rot": 0,
+   "secs": 0.2,
+   "ease": "out"
+  },
+  {
+   "t": 35.0,
+   "do": "say",
+   "who": "gus",
+   "text": "…?",
+   "secs": 1.0
+  },
+  {
+   "t": 35.7,
+   "do": "cam",
+   "zoom": 1.25,
+   "x": 640,
+   "y": 520,
+   "secs": 0.5,
+   "ease": "out"
+  },
+  {
+   "t": 36.0,
+   "do": "prop",
+   "name": "pan",
+   "dx": 21,
+   "dy": 75,
+   "secs": 0.28,
+   "ease": "in"
+  },
+  {
+   "t": 36.28,
+   "do": "pop",
+   "x": 613,
+   "y": 470,
+   "text": "BONG!",
+   "secs": 1.0
+  },
+  {
+   "t": 36.28,
+   "do": "shake",
+   "amp": 18,
+   "secs": 0.45
+  },
+  {
+   "t": 36.3,
+   "do": "stars",
+   "who": "gus",
+   "secs": 3.0,
+   "dx": -27,
+   "dy": -40
+  },
+  {
+   "t": 36.3,
+   "do": "clip",
+   "who": "gus",
+   "name": "hit",
+   "dir": -1
+  },
+  {
+   "t": 36.3,
+   "do": "squash",
+   "who": "gus",
+   "amount": 0.18
+  },
+  {
+   "t": 36.4,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.3,
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 36.4,
+   "do": "prop",
+   "name": "pan",
+   "dx": 419,
+   "dy": 605,
+   "arc": 200,
+   "rot": 450,
+   "secs": 0.8,
+   "ease": "in",
+   "bounce": 30
+  },
+  {
+   "t": 37.2,
+   "do": "dust",
+   "x": 870,
+   "y": 880,
+   "s": 0.5
+  },
+  {
+   "t": 37.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 38.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume",
+   "dir": -1
+  },
+  {
+   "t": 38.2,
+   "do": "say",
+   "who": "gus",
+   "text": "Right.",
+   "secs": 1.0
+  },
+  {
+   "t": 39.4,
+   "do": "say",
+   "who": "gus",
+   "text": "I am SITTING DOWN. I am EATING.",
+   "secs": 1.9
+  },
+  {
+   "t": 41.4,
+   "do": "move",
+   "who": "gus",
+   "to": 1206,
+   "clip": "stomp",
+   "k": 1.4
+  },
+  {
+   "t": 44.0,
+   "do": "clip",
+   "who": "gus",
+   "name": "sit",
+   "dir": -1
+  },
+  {
+   "t": 44.4,
+   "do": "cam",
+   "zoom": 1.18,
+   "x": 1180,
+   "y": 640,
+   "secs": 1.0
+  },
+  {
+   "t": 44.87,
+   "do": "clip",
+   "who": "gus",
+   "name": "sit_idle",
+   "dir": -1
+  },
+  {
+   "t": 45.1,
+   "do": "say",
+   "who": "gus",
+   "text": "Aaaah.",
+   "secs": 1.3
+  },
+  {
+   "t": 46.4,
+   "do": "seq",
+   "name": "chair",
+   "to": 6,
+   "secs": 0.45,
+   "ease": "lin"
+  },
+  {
+   "t": 46.42,
+   "do": "lift",
+   "who": "gus",
+   "to": -200,
+   "secs": 0.2,
+   "ease": "lin"
+  },
+  {
+   "t": 46.45,
+   "do": "pop",
+   "at": "chair",
+   "dy": -240,
+   "text": "CRACK!",
+   "secs": 0.9
+  },
+  {
+   "t": 46.45,
+   "do": "shake",
+   "amp": 16,
+   "secs": 0.4
+  },
+  {
+   "t": 46.5,
+   "do": "dust",
+   "x": 1296,
+   "y": 880,
+   "s": 0.9
+  },
+  {
+   "t": 46.5,
+   "do": "prop",
+   "name": "pancake",
+   "dx": 306,
+   "dy": 97,
+   "arc": 330,
+   "rot": 2160,
+   "secs": 0.95,
+   "ease": "out"
+  },
+  {
+   "t": 47.45,
+   "do": "prop",
+   "name": "pancake",
+   "ride": "gus"
+  },
+  {
+   "t": 47.45,
+   "do": "pop",
+   "x": 1230,
+   "y": 660,
+   "text": "FLOP!",
+   "secs": 0.8
+  },
+  {
+   "t": 47.6,
+   "do": "laugh",
+   "amp": 1.3,
+   "add": 0.35,
+   "text": "BRAVO!"
+  },
+  {
+   "t": 48.6,
+   "do": "lift",
+   "who": "gus",
+   "to": -92,
+   "secs": 1.8,
+   "ease": "inout"
+  },
+  {
+   "t": 50.6,
+   "do": "say",
+   "who": "gus",
+   "text": "…",
+   "secs": 1.1
+  },
+  {
+   "t": 51.9,
+   "do": "say",
+   "who": "gus",
+   "text": "…Breakfast.",
+   "secs": 1.6
+  },
+  {
+   "t": 52.3,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.1,
+   "text": "HA HA!",
+   "dx": 240
+  },
+  {
+   "t": 53.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.4
+  },
+  {
+   "t": 53.8,
+   "do": "clip",
+   "who": "gus",
+   "name": "stand",
+   "dir": -1
+  },
+  {
+   "t": 53.8,
+   "do": "lift",
+   "who": "gus",
+   "to": 0,
+   "secs": 0.87,
+   "ease": "out"
+  },
+  {
+   "t": 53.8,
+   "do": "prop",
+   "name": "pancake",
+   "dx": 261,
+   "dy": 55,
+   "secs": 0.87,
+   "ease": "out"
+  },
+  {
+   "t": 54.7,
+   "do": "clip",
+   "who": "gus",
+   "name": "fume",
+   "dir": -1
+  },
+  {
+   "t": 54.7,
+   "do": "prop",
+   "name": "pancake",
+   "dx": 236,
+   "dy": 78,
+   "secs": 0.3,
+   "ease": "out"
+  },
+  {
+   "t": 55.2,
+   "do": "say",
+   "who": "gus",
+   "text": "WHO. DID. THIS.",
+   "secs": 1.8
+  },
+  {
+   "t": 57.2,
+   "do": "clip",
+   "who": "hush",
+   "name": "squeak",
+   "dir": -1
+  },
+  {
+   "t": 57.2,
+   "do": "press",
+   "button": "clarence",
+   "secs": 0.4
+  },
+  {
+   "t": 57.2,
+   "do": "rustle",
+   "name": "fg_boxes"
+  },
+  {
+   "t": 57.3,
+   "do": "pop",
+   "at": "boxes",
+   "dy": -440,
+   "text": "SQUEAK!",
+   "secs": 1.0
+  },
+  {
+   "t": 57.5,
+   "do": "rustle",
+   "name": "fg_boxes"
+  },
+  {
+   "t": 57.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "startle",
+   "dir": 1
+  },
+  {
+   "t": 57.6,
+   "do": "prop",
+   "name": "pancake",
+   "ride": ""
+  },
+  {
+   "t": 57.62,
+   "do": "prop",
+   "name": "pancake",
+   "dx": 98,
+   "dy": 48,
+   "arc": 300,
+   "rot": -1080,
+   "secs": 0.9,
+   "ease": "out"
+  },
+  {
+   "t": 57.7,
+   "do": "pop",
+   "who": "gus",
+   "text": "!",
+   "kind": "q",
+   "dy": -470,
+   "secs": 0.8
+  },
+  {
+   "t": 58.0,
+   "do": "say",
+   "who": "gus",
+   "text": "In the CUPBOARD, are we?!",
+   "secs": 1.8
+  },
+  {
+   "t": 58.5,
+   "do": "pop",
+   "x": 1014,
+   "y": 600,
+   "text": "plop.",
+   "secs": 0.7
+  },
+  {
+   "t": 58.5,
+   "do": "laugh",
+   "amp": 0.6,
+   "add": 0.05,
+   "text": "ha!",
+   "dx": -300
+  },
+  {
+   "t": 58.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "idle"
+  },
+  {
+   "t": 58.7,
+   "do": "move",
+   "who": "gus",
+   "to": 1760,
+   "clip": "stomp",
+   "k": 1.5
+  },
+  {
+   "t": 60.0,
+   "do": "cam",
+   "zoom": 1.15,
+   "x": 1700,
+   "y": 600,
+   "secs": 1.0
+  },
+  {
+   "t": 61.1,
+   "do": "clip",
+   "who": "gus",
+   "name": "grab",
+   "dir": 1
+  },
+  {
+   "t": 61.5,
+   "do": "seq",
+   "name": "pantry",
+   "to": 17,
+   "secs": 1.6,
+   "ease": "lin",
+   "from": 0
+  },
+  {
+   "t": 61.55,
+   "do": "shake",
+   "amp": 20,
+   "secs": 0.5
+  },
+  {
+   "t": 61.6,
+   "do": "clip",
+   "who": "gus",
+   "name": "knocked",
+   "hold": true
+  },
+  {
+   "t": 61.6,
+   "do": "path",
+   "who": "gus",
+   "to": 1700,
+   "secs": 0.45
+  },
+  {
+   "t": 61.6,
+   "do": "pop",
+   "who": "gus",
+   "text": "WHOA!",
+   "dy": -380,
+   "secs": 0.8
+  },
+  {
+   "t": 62.05,
+   "do": "pop",
+   "x": 1470,
+   "y": 720,
+   "text": "CLONK!",
+   "secs": 0.8
+  },
+  {
+   "t": 62.4,
+   "do": "pop",
+   "x": 1680,
+   "y": 760,
+   "text": "CLANK!",
+   "secs": 0.8
+  },
+  {
+   "t": 62.45,
+   "do": "dust",
+   "x": 1560,
+   "y": 880,
+   "s": 0.8
+  },
+  {
+   "t": 62.75,
+   "do": "pop",
+   "x": 1380,
+   "y": 780,
+   "text": "TONK!",
+   "secs": 0.8
+  },
+  {
+   "t": 63.0,
+   "do": "pop",
+   "x": 1515,
+   "y": 560,
+   "text": "BONK!",
+   "secs": 1.0
+  },
+  {
+   "t": 63.0,
+   "do": "shake",
+   "amp": 22,
+   "secs": 0.5
+  },
+  {
+   "t": 63.0,
+   "do": "stars",
+   "who": "gus",
+   "secs": 8.0,
+   "dx": -185,
+   "dy": -130
+  },
+  {
+   "t": 63.05,
+   "do": "laugh",
+   "amp": 1.5,
+   "add": 0.6,
+   "text": "BRAVO!!"
+  },
+  {
+   "t": 63.1,
+   "do": "confetti"
+  },
+  {
+   "t": 63.1,
+   "do": "dust",
+   "x": 1450,
+   "y": 880,
+   "s": 1.1
+  },
+  {
+   "t": 64.6,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.2
+  },
+  {
+   "t": 65.0,
+   "do": "prop",
+   "name": "toast",
+   "at": [
+    1012,
+    -700
+   ],
+   "rot0": 0
+  },
+  {
+   "t": 65.02,
+   "do": "prop",
+   "name": "toast",
+   "dy": 63,
+   "rot": -10,
+   "secs": 0.55,
+   "ease": "in",
+   "bounce": 14
+  },
+  {
+   "t": 65.57,
+   "do": "pop",
+   "x": 1515,
+   "y": 600,
+   "text": "plip.",
+   "secs": 0.8
+  },
+  {
+   "t": 65.7,
+   "do": "laugh",
+   "amp": 1.1,
+   "add": 0.0,
+   "text": "HA HA HA!"
+  },
+  {
+   "t": 66.4,
+   "do": "say",
+   "who": "gus",
+   "text": "…Toast.",
+   "secs": 1.6
+  },
+  {
+   "t": 66.9,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "ENCORE!",
+   "dx": 260
+  },
+  {
+   "t": 67.6,
+   "do": "move",
+   "who": "hush",
+   "to": 1250,
+   "clip": "run",
+   "k": 1.8
+  },
+  {
+   "t": 70.3,
+   "do": "spot",
+   "who": "hush",
+   "to": 1.0,
+   "secs": 0.8
+  },
+  {
+   "t": 70.3,
+   "do": "cam",
+   "zoom": 1.12,
+   "x": 1250,
+   "y": 640,
+   "secs": 1.6
+  },
+  {
+   "t": 70.5,
+   "do": "clip",
+   "who": "hush",
+   "name": "cheer",
+   "dir": 1
+  },
+  {
+   "t": 70.8,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "ENCORE!",
+   "dx": 260
+  },
+  {
+   "t": 72.6,
+   "do": "clip",
+   "who": "hush",
+   "name": "freeze_bow",
+   "hold": true,
+   "dir": -1
+  },
+  {
+   "t": 73.0,
+   "do": "laugh",
+   "amp": 1.2,
+   "add": 0.0,
+   "text": "BRAVO!",
+   "dx": -240
+  },
+  {
+   "t": 74.1,
+   "do": "spot",
+   "to": 0.0,
+   "secs": 0.6
+  },
+  {
+   "t": 74.1,
+   "do": "cam",
+   "zoom": 1.0,
+   "secs": 1.0
+  },
+  {
+   "t": 74.2,
+   "do": "hud",
+   "on": false
+  },
+  {
+   "t": 74.2,
+   "do": "curtain",
+   "open": false,
+   "secs": 1.3
+  },
+  {
+   "t": 76.2,
+   "do": "card"
+  },
+  {
+   "t": 76.4,
+   "do": "laugh",
+   "amp": 1.0,
+   "add": 0.0
+  },
+  {
+   "t": 83.2,
+   "do": "uncard"
+  }
+ ],
+ "props_visible": [
+  "pancake",
+  "pan"
+ ]
+}

@@ -110,6 +110,9 @@ tools/ (repo root)
   anim/                   gif.py curves.py contact.py                           [rig]
   content/                catalogue export + data checks                        [content]
   art/hush/ art/bellows/ art/house/   SVG generator helpers                    [art-*]
+  stage/                  Blender set builders for the stage Acts: build.py (render + pack),
+                          stagekit.py (render loop), act1..5_set.py (one per Act), scenery.py
+                          (the shared outdoor kit — see §11 "Stage sets")                [stage]
   scripts/  (exist) + solve.sh fuzz.sh lint.sh                                 [solver]
             anim_sheet.sh capture.sh                                            [rig]
             gen_audio.sh                                                        [audio]
@@ -1004,6 +1007,17 @@ length; 60 fps with PiP + gag burst; launch → first laugh ≤ 10 s.
   - `<clip>_onion.png` (per beat, frames tinted blue → red, spacing dots on head top, hands and root);
   - `<clip>_curves.json` → `tools/anim/curves.py` → `<clip>_curves.png` (value + velocity per channel, key markers);
   - `<clip>_lint.txt`.
+- **Stage sets:** `python3 tools/stage/build.py --act actN [--only layer,...]` renders an Act's set in headless
+  Blender into `game/proto/actN/art/` (+ `layout.json`); `--only` merges into the existing layout, so render in
+  chunks (`bg`, then props/fg/fx, then `seq_*`) to keep each run a few minutes. **Reuse before you model:**
+  `tools/stage/scenery.py` is the shared outdoor kit — `tree` (oak/poplar/pine/birch, optional `fruit`), `bush`,
+  `hedge`, `topiary_ball`, `topiary_tiers`, `cloud`, `sky`, `sun`, `hills`, `picket_fence`, `flower_bed`,
+  `grass_tufts`, `stepping_stones`, the `blob` primitive, and materials `mat_foliage`, `mat_cloud`, `mat_sky`,
+  `mat_lawn`, `mat_bark`, `mat_birch_bark`, `mat_boards` (timber), `mat_shingles` (roofs), `mat_flat`. Every
+  builder takes a unique name prefix, a scale `s`, a `seed` and `where` (the layer collection), and a `haze` for
+  far pieces (the camera is orthographic: distance is sold by overlap and haze, not size). Review the kit with
+  `blender -b --factory-startup --python-exit-code 1 -P tools/stage/scenery.py -- --out DIR` (a catalogue PNG).
+  Sky pieces seen over a garden fence sit at z ≈ 0.6–4 at y ≈ 13 (higher is above the frame).
 - **Capture:** `tools/scripts/capture.sh <res://scene.tscn> <frames> <out.gif> [-- args]` uses Movie Maker
   (`--write-movie f.png --fixed-fps 60`) and `tools/anim/gif.py` (Pillow, 30 fps GIF + a mute copy); the WAV is
   kept for sync checks (numpy onset detection vs `mark` frames).

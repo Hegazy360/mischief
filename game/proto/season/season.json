@@ -1,0 +1,52 @@
+{
+ "doc": "The season flow prototype (res://proto/season/Season.tscn). No menu before play: it opens straight on the first Act; Next goes straight to the next Act's curtain; the Playbill wall is reached only from a Curtain Call. One entry per scene, in running order; a poster unlocks when the scene before it has had its Curtain Call.",
+ "backdrop": "res://proto/act1/art/seq_curtain_00.png",
+ "frame": "res://proto/act1/art/frame.png",
+ "acts": [
+  {
+   "id": "act1",
+   "scene": "res://proto/act1/Act1.tscn",
+   "art": "res://proto/act1/art/bg.png",
+   "number": "Act I",
+   "title": "The Front Room",
+   "tagline": "Gus breaks his push-up record.",
+   "teaser": "Tomorrow: Gus makes breakfast…"
+  },
+  {
+   "id": "act2",
+   "scene": "res://proto/act2/Act2.tscn",
+   "art": "res://proto/act2/art/bg.png",
+   "number": "Act II",
+   "title": "The Kitchen",
+   "tagline": "Breakfast of champions.",
+   "teaser": "Tomorrow: the lawn is judged…"
+  },
+  {
+   "id": "act3",
+   "scene": "res://proto/act3/Act3.tscn",
+   "art": "res://proto/act3/art/bg.png",
+   "number": "Act III",
+   "title": "The Back Garden",
+   "tagline": "Judging day.",
+   "teaser": "Tomorrow: Gus hits the gym…"
+  },
+  {
+   "id": "act4",
+   "scene": "res://proto/act4/Act4.tscn",
+   "art": "res://proto/act4/art/bg.png",
+   "number": "Act IV",
+   "title": "The Garage",
+   "tagline": "Leg day.",
+   "teaser": "Tomorrow: lights out…"
+  },
+  {
+   "id": "act5",
+   "scene": "res://proto/act5/Act5.tscn",
+   "art": "res://proto/act5/art/bg.png",
+   "number": "Act V",
+   "title": "The Bedroom",
+   "tagline": "Lights out.",
+   "teaser": "To be continued…"
+  }
+ ]
+}

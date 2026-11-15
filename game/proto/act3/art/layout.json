@@ -1,0 +1,790 @@
+{
+ "layers": {
+  "audience": {
+   "png": "audience.png",
+   "pos": [
+    329,
+    942
+   ],
+   "size": [
+    1744,
+    138
+   ]
+  },
+  "bg": {
+   "png": "bg.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fg_butt": {
+   "png": "fg_butt.png",
+   "pos": [
+    1109,
+    533
+   ],
+   "size": [
+    236,
+    379
+   ]
+  },
+  "frame": {
+   "png": "frame.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "fxs_dust_00": {
+   "png": "fxs_dust_00.png",
+   "pos": [
+    85,
+    143
+   ],
+   "size": [
+    84,
+    46
+   ]
+  },
+  "fxs_dust_01": {
+   "png": "fxs_dust_01.png",
+   "pos": [
+    66,
+    130
+   ],
+   "size": [
+    122,
+    59
+   ]
+  },
+  "fxs_dust_02": {
+   "png": "fxs_dust_02.png",
+   "pos": [
+    47,
+    118
+   ],
+   "size": [
+    160,
+    71
+   ]
+  },
+  "fxs_dust_03": {
+   "png": "fxs_dust_03.png",
+   "pos": [
+    31,
+    106
+   ],
+   "size": [
+    194,
+    82
+   ]
+  },
+  "fxs_dust_04": {
+   "png": "fxs_dust_04.png",
+   "pos": [
+    15,
+    97
+   ],
+   "size": [
+    225,
+    89
+   ]
+  },
+  "fxs_dust_05": {
+   "png": "fxs_dust_05.png",
+   "pos": [
+    2,
+    90
+   ],
+   "size": [
+    252,
+    91
+   ]
+  },
+  "icon_burst": {
+   "png": "icon_burst.png",
+   "pos": [
+    13,
+    13
+   ],
+   "size": [
+    230,
+    230
+   ]
+  },
+  "icon_clarence": {
+   "png": "icon_clarence.png",
+   "pos": [
+    59,
+    13
+   ],
+   "size": [
+    138,
+    230
+   ]
+  },
+  "icon_freeze": {
+   "png": "icon_freeze.png",
+   "pos": [
+    25,
+    13
+   ],
+   "size": [
+    206,
+    230
+   ]
+  },
+  "icon_rig": {
+   "png": "icon_rig.png",
+   "pos": [
+    49,
+    17
+   ],
+   "size": [
+    164,
+    221
+   ]
+  },
+  "icon_stamp": {
+   "png": "icon_stamp.png",
+   "pos": [
+    20,
+    78
+   ],
+   "size": [
+    217,
+    90
+   ]
+  },
+  "icon_star": {
+   "png": "icon_star.png",
+   "pos": [
+    13,
+    18
+   ],
+   "size": [
+    230,
+    219
+   ]
+  },
+  "prop_mower": {
+   "png": "prop_mower.png",
+   "pos": [
+    860,
+    709
+   ],
+   "size": [
+    281,
+    183
+   ]
+  },
+  "prop_track1": {
+   "png": "prop_track1.png",
+   "pos": [
+    1088,
+    865
+   ],
+   "size": [
+    358,
+    31
+   ]
+  },
+  "prop_track2": {
+   "png": "prop_track2.png",
+   "pos": [
+    1416,
+    855
+   ],
+   "size": [
+    399,
+    41
+   ]
+  },
+  "prop_track3": {
+   "png": "prop_track3.png",
+   "pos": [
+    1792,
+    857
+   ],
+   "size": [
+    311,
+    39
+   ]
+  },
+  "seq_curtain_00": {
+   "png": "seq_curtain_00.png",
+   "pos": [
+    41,
+    0
+   ],
+   "size": [
+    2318,
+    1080
+   ]
+  },
+  "seq_curtain_01": {
+   "png": "seq_curtain_01.png",
+   "pos": [
+    38,
+    0
+   ],
+   "size": [
+    2324,
+    1080
+   ]
+  },
+  "seq_curtain_02": {
+   "png": "seq_curtain_02.png",
+   "pos": [
+    32,
+    0
+   ],
+   "size": [
+    2336,
+    1080
+   ]
+  },
+  "seq_curtain_03": {
+   "png": "seq_curtain_03.png",
+   "pos": [
+    24,
+    0
+   ],
+   "size": [
+    2352,
+    1080
+   ]
+  },
+  "seq_curtain_04": {
+   "png": "seq_curtain_04.png",
+   "pos": [
+    17,
+    0
+   ],
+   "size": [
+    2366,
+    1080
+   ]
+  },
+  "seq_curtain_05": {
+   "png": "seq_curtain_05.png",
+   "pos": [
+    10,
+    0
+   ],
+   "size": [
+    2380,
+    1080
+   ]
+  },
+  "seq_curtain_06": {
+   "png": "seq_curtain_06.png",
+   "pos": [
+    5,
+    0
+   ],
+   "size": [
+    2390,
+    1080
+   ]
+  },
+  "seq_curtain_07": {
+   "png": "seq_curtain_07.png",
+   "pos": [
+    1,
+    0
+   ],
+   "size": [
+    2398,
+    1080
+   ]
+  },
+  "seq_curtain_08": {
+   "png": "seq_curtain_08.png",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    2400,
+    1080
+   ]
+  },
+  "seq_gate_00": {
+   "png": "seq_gate_00.png",
+   "pos": [
+    155,
+    543
+   ],
+   "size": [
+    195,
+    262
+   ]
+  },
+  "seq_gate_01": {
+   "png": "seq_gate_01.png",
+   "pos": [
+    153,
+    544
+   ],
+   "size": [
+    188,
+    270
+   ]
+  },
+  "seq_gate_02": {
+   "png": "seq_gate_02.png",
+   "pos": [
+    150,
+    545
+   ],
+   "size": [
+    164,
+    278
+   ]
+  },
+  "seq_gate_03": {
+   "png": "seq_gate_03.png",
+   "pos": [
+    148,
+    546
+   ],
+   "size": [
+    125,
+    284
+   ]
+  },
+  "seq_gate_04": {
+   "png": "seq_gate_04.png",
+   "pos": [
+    145,
+    546
+   ],
+   "size": [
+    77,
+    288
+   ]
+  },
+  "seq_gate_05": {
+   "png": "seq_gate_05.png",
+   "pos": [
+    144,
+    546
+   ],
+   "size": [
+    27,
+    290
+   ]
+  },
+  "seq_shedbox_00": {
+   "png": "seq_shedbox_00.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_01": {
+   "png": "seq_shedbox_01.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_02": {
+   "png": "seq_shedbox_02.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_03": {
+   "png": "seq_shedbox_03.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_04": {
+   "png": "seq_shedbox_04.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_05": {
+   "png": "seq_shedbox_05.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_06": {
+   "png": "seq_shedbox_06.png",
+   "pos": [
+    1333,
+    369
+   ],
+   "size": [
+    403,
+    497
+   ]
+  },
+  "seq_shedbox_07": {
+   "png": "seq_shedbox_07.png",
+   "pos": [
+    1254,
+    362
+   ],
+   "size": [
+    558,
+    504
+   ]
+  },
+  "seq_shedbox_08": {
+   "png": "seq_shedbox_08.png",
+   "pos": [
+    1039,
+    422
+   ],
+   "size": [
+    987,
+    446
+   ]
+  },
+  "seq_shedbox_09": {
+   "png": "seq_shedbox_09.png",
+   "pos": [
+    879,
+    706
+   ],
+   "size": [
+    1308,
+    166
+   ]
+  },
+  "seq_shedbox_10": {
+   "png": "seq_shedbox_10.png",
+   "pos": [
+    879,
+    706
+   ],
+   "size": [
+    1308,
+    166
+   ]
+  },
+  "seq_shedbox_11": {
+   "png": "seq_shedbox_11.png",
+   "pos": [
+    879,
+    706
+   ],
+   "size": [
+    1308,
+    166
+   ]
+  },
+  "seq_shedbox_12": {
+   "png": "seq_shedbox_12.png",
+   "pos": [
+    879,
+    706
+   ],
+   "size": [
+    1308,
+    166
+   ]
+  },
+  "seq_shedfront_00": {
+   "png": "seq_shedfront_00.png",
+   "pos": [
+    1301,
+    255
+   ],
+   "size": [
+    463,
+    613
+   ]
+  },
+  "seq_shedfront_01": {
+   "png": "seq_shedfront_01.png",
+   "pos": [
+    1301,
+    255
+   ],
+   "size": [
+    463,
+    649
+   ]
+  },
+  "seq_shedfront_02": {
+   "png": "seq_shedfront_02.png",
+   "pos": [
+    1301,
+    255
+   ],
+   "size": [
+    463,
+    664
+   ]
+  },
+  "seq_shedfront_03": {
+   "png": "seq_shedfront_03.png",
+   "pos": [
+    1256,
+    255
+   ],
+   "size": [
+    508,
+    688
+   ]
+  },
+  "seq_shedfront_04": {
+   "png": "seq_shedfront_04.png",
+   "pos": [
+    1195,
+    255
+   ],
+   "size": [
+    569,
+    688
+   ]
+  },
+  "seq_shedfront_05": {
+   "png": "seq_shedfront_05.png",
+   "pos": [
+    1171,
+    255
+   ],
+   "size": [
+    593,
+    632
+   ]
+  },
+  "seq_shedfront_06": {
+   "png": "seq_shedfront_06.png",
+   "pos": [
+    1171,
+    255
+   ],
+   "size": [
+    593,
+    674
+   ]
+  },
+  "seq_shedfront_07": {
+   "png": "seq_shedfront_07.png",
+   "pos": [
+    1171,
+    255
+   ],
+   "size": [
+    593,
+    703
+   ]
+  },
+  "seq_shedfront_08": {
+   "png": "seq_shedfront_08.png",
+   "pos": [
+    1171,
+    255
+   ],
+   "size": [
+    593,
+    703
+   ]
+  },
+  "seq_shedfront_09": {
+   "png": "seq_shedfront_09.png",
+   "pos": [
+    1171,
+    255
+   ],
+   "size": [
+    593,
+    703
+   ]
+  },
+  "seq_shedfront_10": {
+   "png": "seq_shedfront_10.png",
+   "pos": [
+    1171,
+    261
+   ],
+   "size": [
+    586,
+    697
+   ]
+  },
+  "seq_shedfront_11": {
+   "png": "seq_shedfront_11.png",
+   "pos": [
+    1171,
+    295
+   ],
+   "size": [
+    586,
+    663
+   ]
+  },
+  "seq_shedfront_12": {
+   "png": "seq_shedfront_12.png",
+   "pos": [
+    1171,
+    305
+   ],
+   "size": [
+    585,
+    653
+   ]
+  }
+ },
+ "size": [
+  2400,
+  1080
+ ],
+ "px_per_unit": 128.0,
+ "floor_px": 880.0,
+ "tilt_deg": 10.0,
+ "marks": {
+  "gate": [
+   291.2,
+   880.0
+  ],
+  "gnomes": [
+   662.4,
+   880.0
+  ],
+  "hedge": [
+   2172.8,
+   880.0
+  ],
+  "shed": [
+   1532.8,
+   880.0
+  ]
+ },
+ "pivots": {
+  "butt": [
+   1251.2,
+   880.0
+  ],
+  "mower": [
+   1072.0,
+   880.0
+  ],
+  "track1": [
+   1110.4,
+   880.0
+  ],
+  "track2": [
+   1443.2,
+   880.0
+  ],
+  "track3": [
+   1814.4,
+   880.0
+  ],
+  "shed_door": [
+   1532.8,
+   880.0
+  ],
+  "shed_roof": [
+   1532.8,
+   423.2
+  ]
+ },
+ "seqs": {
+  "fxs_dust": [
+   "fxs_dust_00",
+   "fxs_dust_01",
+   "fxs_dust_02",
+   "fxs_dust_03",
+   "fxs_dust_04",
+   "fxs_dust_05"
+  ],
+  "seq_curtain": [
+   "seq_curtain_00",
+   "seq_curtain_01",
+   "seq_curtain_02",
+   "seq_curtain_03",
+   "seq_curtain_04",
+   "seq_curtain_05",
+   "seq_curtain_06",
+   "seq_curtain_07",
+   "seq_curtain_08"
+  ],
+  "seq_gate": [
+   "seq_gate_00",
+   "seq_gate_01",
+   "seq_gate_02",
+   "seq_gate_03",
+   "seq_gate_04",
+   "seq_gate_05"
+  ],
+  "seq_shedbox": [
+   "seq_shedbox_00",
+   "seq_shedbox_01",
+   "seq_shedbox_02",
+   "seq_shedbox_03",
+   "seq_shedbox_04",
+   "seq_shedbox_05",
+   "seq_shedbox_06",
+   "seq_shedbox_07",
+   "seq_shedbox_08",
+   "seq_shedbox_09",
+   "seq_shedbox_10",
+   "seq_shedbox_11",
+   "seq_shedbox_12"
+  ],
+  "seq_shedfront": [
+   "seq_shedfront_00",
+   "seq_shedfront_01",
+   "seq_shedfront_02",
+   "seq_shedfront_03",
+   "seq_shedfront_04",
+   "seq_shedfront_05",
+   "seq_shedfront_06",
+   "seq_shedfront_07",
+   "seq_shedfront_08",
+   "seq_shedfront_09",
+   "seq_shedfront_10",
+   "seq_shedfront_11",
+   "seq_shedfront_12"
+  ]
+ },
+ "doc": "act3 set, rendered by tools/stage/build.py from tools/stage/act3_set.py. Positions are logical px in the 2400x1080 stage; `marks` and `pivots` are named world points projected by the same camera."
+}

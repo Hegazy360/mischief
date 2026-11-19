@@ -3,11 +3,14 @@
 ## looks, tint, and watch the clip with an emulated camera punch, shake and hit-stop (so a
 ## take feels like it will in game) — in the REAL room (`--room`), on the Pip skin, with a
 ## micro-gag overlay over a base loop, and with a second rig (the HOT & COLD hand-off, the
-## Lecture dangle). JSON (rigs, poses, faces, clips, reactions) and the rigs' SVGs hot-reload
-## by mtime every 0.5 s. `--help` prints every flag.
+## Lecture dangle), and with limb goals (`--goal`: 2-bone IK reaching for a crosshair, which can
+## sweep and toggle so a capture shows tracking and the blend in / out). JSON (rigs, poses,
+## faces, clips, reactions) and the rigs' SVGs hot-reload by mtime every 0.5 s. `--help` prints
+## every flag.
 ##
 ## Screenshot: tools/scripts/shot.sh res://scenes/dev/AnimViewer.tscn out.png 60 <sb> -- --rig=bellows --clip=rx_sneeze_blast_a --room=kitchen
 ## GIF:        CAPTURE_SANDBOX=<sb> tools/scripts/capture.sh res://scenes/dev/AnimViewer.tscn 180 out.gif -- --rig=bellows --clip=<base> --overlay=<mg> --sound
+## Reach:      tools/scripts/shot.sh res://scenes/dev/AnimViewer.tscn out.png 30 <sb> -- --rig=hush --clip=loco_idle --goal=arm_r:70,-250
 extends Node2D
 
 const USAGE := """AnimViewer — user args (after `--`):
@@ -35,6 +38,17 @@ const USAGE := """AnimViewer — user args (after `--`):
   --attach2=<part:socket>[,<part:socket>]  pin rig 2 so its socket (default: its root) sits on rig 1's
                            socket every frame (the Lecture dangle: hand_r:grip,braces_loop:grab)
   --zoom=<z>               camera zoom (1.0 = the game's framing)
+  --goal=<limb>:<x>,<y>[;…] limb goals on rig 1 (2-bone IK, RigPlayer.set_goal): the limb's grip
+                           reaches a point x px IN FRONT of the feet (follows --facing) and y px
+                           down from the floor (negative = up). arm_r:70,-250 = a high shelf.
+  --goal-stretch=<f>       rubber-hose stretch allowed past the arm's length (default 1 = rigid)
+  --goal-blend=<f>         frames to blend a goal in / out (default 8)
+  --goal-follow=<1/s>      target smoothing (0 = exact, the default)
+  --goal-sweep=<f>[:<r>]   the target circles its point every f frames, radius r px (default 40)
+  --goal-cycle=<f>         goals on for f frames, then released for f frames, repeating
+  --hotspot=<id>           stand rig 1 at a house.json hotspot (its room, use_x and facing) and give
+                           clips with a `reach` block its `grab` point (kitchen_kettle, hall_confiscated_box…)
+  --no-reach               with --hotspot: play the clip as authored (before / after comparisons)
   --once                   no auto-replay
   --clean                  character + set only (mute GIFs, cast sheets)
   --sound                  play clip sfx / voice / laugh events through the game's Audio
@@ -117,6 +131,12 @@ var _rig_x: float = 0.0
 var _vf: float = 0.0           ## viewer frames since the clip (re)started (overlay schedule)
 var _ov_next: float = -1.0     ## viewer frame of the next overlay start (-1 = none pending)
 var _files: Dictionary = {}    ## clip id → source file for clips loaded from res:// paths
+## --goal: per goal [limb, offset (x in front of the feet, y down)]; the goal clock (frames).
+var _goal_specs: Array = []
+var _goal_t: float = 0.0
+var _goal_live: bool = false
+## --hotspot: the grab point (world; INF = none) fed to clip reach blocks as target "grab".
+var _grab: Vector2 = Vector2.INF
 
 
 ## Parse the viewer's user args (pure; tests call it). Unknown flags land in `unknown`.
@@ -127,6 +147,8 @@ static func parse_args(args: PackedStringArray) -> Dictionary:
 		"rig2": "", "clip2": "", "pose2": "", "x2": 260.0, "facing2": -1, "skin2": "", "looks2": PackedStringArray(),
 		"attach2": PackedStringArray(), "zoom": 1.0, "once": false, "clean": false, "sound": false, "blips": false,
 		"juice": true, "help": false, "props": PackedStringArray(), "part_tex": PackedStringArray(),
+		"goals": PackedStringArray(), "goal_stretch": 1.0, "goal_blend": 8.0, "goal_follow": 0.0,
+		"goal_sweep": 0.0, "goal_sweep_r": 40.0, "goal_cycle": 0.0, "hotspot": "", "reach": true,
 		"unknown": PackedStringArray()}
 	for a in args:
 		var k := a
@@ -199,6 +221,26 @@ static func parse_args(args: PackedStringArray) -> Dictionary:
 				o["attach2"] = v.split(",", false)
 			"--zoom":
 				o["zoom"] = clampf(float(v), 0.2, 4.0)
+			"--goal":
+				var gl: PackedStringArray = o["goals"]
+				gl.append_array(v.split(";", false))
+				o["goals"] = gl
+			"--goal-stretch":
+				o["goal_stretch"] = maxf(1.0, float(v))
+			"--goal-blend":
+				o["goal_blend"] = maxf(0.0, float(v))
+			"--goal-follow":
+				o["goal_follow"] = maxf(0.0, float(v))
+			"--goal-sweep":
+				o["goal_sweep"] = maxf(0.0, float(v.get_slice(":", 0)))
+				if v.contains(":"):
+					o["goal_sweep_r"] = absf(float(v.get_slice(":", 1)))
+			"--goal-cycle":
+				o["goal_cycle"] = maxf(0.0, float(v))
+			"--hotspot":
+				o["hotspot"] = v
+			"--no-reach":
+				o["reach"] = false
 			"--once":
 				o["once"] = true
 			"--clean":
@@ -268,6 +310,8 @@ func _ready() -> void:
 	juice = bool(cfg["juice"])
 	_paused = bool(cfg["paused"])
 	walk_speed = float(cfg["speed"])
+	_goal_specs = parse_goals(cfg["goals"])
+	_apply_hotspot_arg()
 	RenderingServer.set_default_clear_color(BG_TOP)
 	_painter = _Painter.new()
 	_painter.viewer = self
@@ -290,6 +334,10 @@ func _ready() -> void:
 	add_child(_stage)
 	if backdrop_front != null:
 		add_child(backdrop_front)
+	if (not _goal_specs.is_empty() or _grab != Vector2.INF) and not clean:
+		var gm := _GoalMarker.new()
+		gm.viewer = self
+		add_child(gm)
 	player = _new_player()
 	player.clip_finished.connect(_on_finished)
 	if String(cfg["rig2"]) != "":
@@ -475,6 +523,9 @@ func _tick(dt: float) -> void:
 	if overlay_id != "" and _ov_next >= 0.0 and _vf >= _ov_next and not _paused:
 		player.play(overlay_id, {"layer": "overlay"})
 		_ov_next = -1.0
+	_drive_goals(dt)
+	if _grab != Vector2.INF and player.rig != null and bool(cfg["reach"]):
+		player.set_target("grab", _grab)
 	player.advance(dt)
 	if player2 != null:
 		player2.advance(dt)
@@ -490,6 +541,86 @@ func _attach2() -> void:
 	if at.size() >= 2:
 		own = player2.socket_global_transform(at[1]).origin
 	player2.global_position += target - own
+
+
+## --hotspot=<id>: the room, x and facing of a house.json hotspot (explicit --room / --x / --facing
+## still win), and its grab point for that facing (`grab` / `grab_l`) for clip reach blocks.
+func _apply_hotspot_arg() -> void:
+	var hid := String(cfg["hotspot"])
+	if hid == "":
+		return
+	var rb: Script = load("res://scenes/dev/room_backdrop.gd")
+	var house: Dictionary = rb.call("load_house")
+	for hv in house.get("hotspots", []):
+		var hd: Dictionary = hv
+		if String(hd.get("id", "")) != hid:
+			continue
+		if String(cfg["room"]) == "":
+			cfg["room"] = String(hd.get("room", ""))
+		var at_station := String(cfg["station"]) != ""
+		if is_nan(float(cfg["x"])) and not at_station:
+			cfg["x"] = float(hd.get("use_x", 0))
+		if not _has_arg("--facing=") and not at_station:
+			facing = -1 if int(hd.get("facing", 1)) < 0 else 1
+		var g: Variant = hd.get("grab_l" if facing < 0 and hd.has("grab_l") else "grab", null)
+		if String(cfg["rig"]) != "hush" and hd.has("grab") and hd.has("grab_l"):
+			# Other rigs stand beside the prop (stations): the prop's centre, as CharacterView does.
+			var gr: Array = hd["grab"]
+			var gl: Array = hd["grab_l"]
+			g = [(float(gr[0]) + float(gl[0])) * 0.5, (float(gr[1]) + float(gl[1])) * 0.5]
+		if g is Array and (g as Array).size() >= 2:
+			_grab = Vector2(float(g[0]), float(g[1]))
+		else:
+			push_warning("AnimViewer: hotspot %s has no grab point" % hid)
+		return
+	push_warning("AnimViewer: hotspot '%s' is not in house.json" % hid)
+
+
+## --goal specs → [[limb, Vector2 offset], …] (pure; tests call it). Bad entries are skipped
+## with a warning.
+static func parse_goals(specs: PackedStringArray) -> Array:
+	var out: Array = []
+	for sp in specs:
+		var limb := sp.get_slice(":", 0)
+		var xy := sp.substr(limb.length() + 1).split(",", false)
+		if limb == "" or xy.size() != 2 or not xy[0].is_valid_float() or not xy[1].is_valid_float():
+			push_warning("AnimViewer: --goal entry '%s' is not <limb>:<x>,<y>" % sp)
+			continue
+		out.append([limb, Vector2(float(xy[0]), float(xy[1]))])
+	return out
+
+
+## The world point goal `i` reaches for this frame (the sweep circles it).
+func goal_point(i: int) -> Vector2:
+	var off: Vector2 = _goal_specs[i][1]
+	var pt := Vector2(player.global_position.x + off.x * float(player.facing()), off.y)
+	var per := float(cfg["goal_sweep"])
+	if per > 0.0:
+		var a := TAU * _goal_t / per
+		pt += Vector2(cos(a), sin(a)) * float(cfg["goal_sweep_r"])
+	return pt
+
+
+## Set / move / release rig 1's goals for this frame (--goal, --goal-sweep, --goal-cycle).
+func _drive_goals(dt: float) -> void:
+	if _goal_specs.is_empty() or player.rig == null:
+		return
+	if not _paused:
+		_goal_t += dt * 60.0
+	var cyc := float(cfg["goal_cycle"])
+	var on := cyc <= 0.0 or int(floor(_goal_t / cyc)) % 2 == 0
+	for i in _goal_specs.size():
+		var limb: String = _goal_specs[i][0]
+		if not on:
+			player.clear_goal(limb, float(cfg["goal_blend"]))
+			continue
+		if _goal_live and player.has_goal(limb):
+			player.move_goal(limb, goal_point(i))
+		elif not player.set_goal(limb, goal_point(i), {"stretch": float(cfg["goal_stretch"]),
+				"blend_f": float(cfg["goal_blend"]), "follow": float(cfg["goal_follow"])}):
+			if Engine.get_process_frames() % 120 == 0:
+				push_warning("AnimViewer: rig %s has no 2-bone limb '%s' (has %s)" % [rig_id, limb, player.goal_limbs()])
+	_goal_live = on
 
 
 # --- per frame -------------------------------------------------------------------------------
@@ -951,6 +1082,27 @@ func _update_info() -> void:
 	var looks := player.active_residues()
 	if not looks.is_empty():
 		lines.append("looks %s" % ", ".join(looks))
+	if _grab != Vector2.INF:
+		if not bool(cfg["reach"]):
+			lines.append("reach: off (--no-reach)")
+		elif c.has_reach():
+			var rl := PackedStringArray()
+			for lm in c.reach_limbs:
+				var ri := player.reach_info(lm)
+				rl.append("%s w %.2f · %.1f px%s" % [lm, ri.x, ri.y, (" · ×%.2f" % ri.z) if ri.z > 1.001 else ""])
+			var why := player.reach_skipped()
+			lines.append("reach %s (%s): %s" % [String(cfg["hotspot"]), c.reach_target, ("skipped: " + why) if why != "" else ", ".join(rl)])
+		else:
+			lines.append("reach: %s has no reach block" % c.id.get_file())
+	var pi4 := player.posture_info()
+	if pi4.x > 0.01 or absf(pi4.w) > 0.5 or player.crouch_weight() > 0.01:
+		lines.append("posture %.2f · step back %.0f px · hop %.0f px · head %+.0f° · crouch %.2f" % [pi4.x, pi4.y, pi4.z, pi4.w, player.crouch_weight()])
+	for gs in _goal_specs:
+		var gl: String = gs[0]
+		if player.has_goal(gl):
+			lines.append("goal %s: error %.1f px · stretch %.2f · weight %.2f" % [gl, player.goal_error(gl), player.goal_stretch(gl), player.goal_weight(gl)])
+		else:
+			lines.append("goal %s: released" % gl)
 	_info.text = "\n".join(lines)
 	_ticker.text = "events\n" + "\n".join(_ticker_lines)
 
@@ -988,6 +1140,62 @@ class _Painter extends Node2D:
 			draw_line(Vector2(big.position.x, 0), Vector2(big.end.x, 0), INK, 4.0)
 		else:
 			draw_rect(big, Color("#221C33"))
+
+
+## The --goal crosshairs over everything: the target (ring + cross), a line from the grip to it
+## while it is not reached, and the error in px. Green within 2 px, amber while blending,
+## red when the goal cannot be reached (out of reach / limits).
+class _GoalMarker extends Node2D:
+	var viewer: Node2D
+
+	func _init() -> void:
+		z_index = 100
+
+	func _process(_d: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		var pl: RigPlayer = viewer.player
+		if pl == null or pl.rig == null:
+			return
+		var font := ThemeDB.fallback_font
+		var gp: Vector2 = viewer._grab
+		if gp != Vector2.INF:
+			var on: bool = pl.is_reaching()
+			var gc := Color("#46D27A") if on else Color("#9A8FB0")
+			draw_arc(gp, 12.0, 0.0, TAU, 32, Color(0, 0, 0, 0.6), 6.0)
+			draw_arc(gp, 12.0, 0.0, TAU, 32, gc, 2.5)
+			draw_line(gp + Vector2(-20, 0), gp + Vector2(20, 0), gc, 2.0)
+			draw_line(gp + Vector2(0, -20), gp + Vector2(0, 20), gc, 2.0)
+			var lbl := "grab" if on else ("grab (%s)" % pl.reach_skipped() if pl.reach_skipped() != "" else "grab (not reaching)")
+			draw_string(font, gp + Vector2(16, -16), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, gc)
+		for i in viewer._goal_specs.size():
+			var limb: String = viewer._goal_specs[i][0]
+			var t: Vector2 = viewer.goal_point(i)
+			var col := Color("#9A8FB0")
+			var label := "%s released" % limb
+			if pl.has_goal(limb):
+				var err := pl.goal_error(limb)
+				var w := pl.goal_weight(limb)
+				col = Color("#46D27A") if err <= 2.0 else (Color("#F2B33D") if w < 0.999 else Color("#F0524F"))
+				label = "%s %.1f px" % [limb, err]
+				if pl.goal_stretch(limb) > 1.001:
+					label += "  ×%.2f" % pl.goal_stretch(limb)
+				var sock := "%s:grip" % _end_name(pl, limb)
+				var grip := pl.socket_global_transform(sock).origin if pl.rig.socket_index(sock) >= 0 else pl.part_global_position(_end_name(pl, limb))
+				if err > 2.0:
+					draw_line(grip, t, Color(col, 0.8), 3.0)
+			draw_arc(t, 14.0, 0.0, TAU, 32, Color(0, 0, 0, 0.6), 7.0)
+			draw_arc(t, 14.0, 0.0, TAU, 32, col, 3.0)
+			draw_line(t + Vector2(-24, 0), t + Vector2(24, 0), col, 2.0)
+			draw_line(t + Vector2(0, -24), t + Vector2(0, 24), col, 2.0)
+			draw_string(font, t + Vector2(20, -20), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, col)
+
+	func _end_name(pl: RigPlayer, limb: String) -> String:
+		for l in pl.rig.limbs:
+			if l.id == limb and l.joints.size() >= 3:
+				return pl.rig.names[l.joints[l.joints.size() - 1]]
+		return ""
 
 
 ## Contact shadows under the rigs (between the backdrop and the rigs).

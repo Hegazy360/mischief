@@ -832,5 +832,37 @@
   "smear": {
     "auto": false
   },
-  "plant": true
+  "plant": true,
+  "reach": {
+    "target": "grab",
+    "limbs": [
+      "arm_r",
+      "arm_l"
+    ],
+    "ref_f": 28,
+    "stretch": 1.25,
+    "max_px": 420,
+    "weight": [
+      [
+        0,
+        1
+      ],
+      [
+        96,
+        1
+      ],
+      [
+        104,
+        0
+      ],
+      [
+        138,
+        0
+      ],
+      [
+        146,
+        1
+      ]
+    ]
+  }
 }

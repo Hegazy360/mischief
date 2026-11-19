@@ -517,6 +517,8 @@
       "facing": 1,
       "rect": [704, -236, 144, 256],
       "in_use_by": null,
+      "grab": [837, -135],
+      "grab_l": [717, -181],
       "art_pos": [666, -346],
       "art_size": [189, 346],
       "art": {
@@ -535,6 +537,8 @@
       "rect": [872, -360, 144, 170],
       "in_use_by": null,
       "station": "st_phone",
+      "grab": [985, -276],
+      "grab_l": [913, -265],
       "art_pos": [842, -342],
       "art_size": [155, 140],
       "art": {
@@ -552,6 +556,8 @@
       "facing": 1,
       "rect": [872, -166, 144, 186],
       "in_use_by": null,
+      "grab": [995, -114],
+      "grab_l": [915, -115],
       "art_pos": [896, -159],
       "art_size": [107, 85],
       "art": {
@@ -570,6 +576,8 @@
       "in_use_by": null,
       "station": "st_hall_mirror",
       "z": 1,
+      "grab": [1174, -188],
+      "grab_l": [1046, -183],
       "art_pos": [1011, -453],
       "art_size": [202, 454],
       "art": {
@@ -590,6 +598,8 @@
       "rect": [1208, -552, 144, 180],
       "in_use_by": null,
       "station": "st_clock",
+      "grab": [1345, -534],
+      "grab_l": [1217, -465],
       "art_pos": [1179, -611],
       "art_size": [175, 235],
       "art": {
@@ -626,6 +636,8 @@
       "facing": -1,
       "rect": [1376, -178, 144, 198],
       "in_use_by": null,
+      "grab": [1392, -123],
+      "grab_l": [1392, -123],
       "art_pos": [1357, -159],
       "art_size": [97, 120],
       "art": {
@@ -659,6 +671,8 @@
       "rect": [1566, -448, 148, 468],
       "in_use_by": null,
       "station": "st_gramophone",
+      "grab": [1702, -247],
+      "grab_l": [1582, -130],
       "art_pos": [1563, -450],
       "art_size": [167, 451],
       "art": {
@@ -696,6 +710,8 @@
       "rect": [1790, -150, 150, 170],
       "in_use_by": null,
       "station": "st_piano",
+      "grab": [1945, -15],
+      "grab_l": [1937, -14],
       "art_pos": [1895, -63],
       "art_size": [55, 65],
       "art": {
@@ -713,6 +729,8 @@
       "rect": [2004, -228, 152, 248],
       "in_use_by": null,
       "station": "st_recliner",
+      "grab": [2105, -92],
+      "grab_l": [1993, -233],
       "art_pos": [1982, -316],
       "art_size": [191, 318],
       "art": {
@@ -731,6 +749,8 @@
       "rect": [2004, -416, 152, 164],
       "in_use_by": null,
       "station": "st_recliner",
+      "grab": [2071, -320],
+      "grab_l": [2015, -311],
       "art_pos": [1953, -389],
       "art_size": [133, 123],
       "art": {
@@ -748,6 +768,8 @@
       "facing": 1,
       "rect": [2250, -632, 160, 196],
       "in_use_by": null,
+      "grab": [2388, -529],
+      "grab_l": [2268, -527],
       "art_pos": [2211, -633],
       "art_size": [224, 168],
       "art": {
@@ -767,6 +789,8 @@
       "rect": [2180, -350, 144, 184],
       "in_use_by": null,
       "station": "st_fireplace",
+      "grab": [2267, -246],
+      "grab_l": [2195, -244],
       "art_pos": [2184, -311],
       "art_size": [92, 163],
       "art": {
@@ -803,6 +827,8 @@
       "rect": [2656, -308, 144, 188],
       "in_use_by": null,
       "station": "st_chaise",
+      "grab": [2783, -166],
+      "grab_l": [2671, -176],
       "art_pos": [2660, -236],
       "art_size": [134, 87],
       "art": {
@@ -821,6 +847,8 @@
       "rect": [2656, -508, 144, 176],
       "in_use_by": null,
       "station": "st_chaise",
+      "grab": [2777, -403],
+      "grab_l": [2673, -399],
       "art_pos": [2643, -486],
       "art_size": [151, 127],
       "art": {
@@ -840,6 +868,8 @@
       "rect": [2868, -334, 144, 164],
       "in_use_by": null,
       "station": "st_tea",
+      "grab": [3000, -240],
+      "grab_l": [2888, -224],
       "art_pos": [2877, -337],
       "art_size": [161, 144],
       "art": {
@@ -857,6 +887,8 @@
       "rect": [2868, -530, 144, 172],
       "in_use_by": null,
       "station": "st_tea",
+      "grab": [2998, -378],
+      "grab_l": [2894, -399],
       "art_pos": [2859, -525],
       "art_size": [147, 179],
       "art": {
@@ -874,6 +906,8 @@
       "rect": [3038, -520, 144, 180],
       "in_use_by": null,
       "station": "st_pickles",
+      "grab": [3154, -390],
+      "grab_l": [3074, -391],
       "art_pos": [3040, -507],
       "art_size": [121, 177],
       "art": {
@@ -892,6 +926,8 @@
       "rect": [3208, -474, 144, 180],
       "in_use_by": null,
       "station": "st_fridge",
+      "grab": [3345, -376],
+      "grab_l": [3217, -378],
       "art_pos": [3185, -519],
       "art_size": [169, 233],
       "art": {
@@ -908,6 +944,8 @@
       "facing": 1,
       "rect": [3208, -270, 144, 290],
       "in_use_by": null,
+      "grab": [3340, -164],
+      "grab_l": [3220, -164],
       "art_pos": [3172, -298],
       "art_size": [195, 300],
       "art": {
@@ -943,6 +981,8 @@
       "facing": 1,
       "rect": [3548, -560, 144, 204],
       "in_use_by": null,
+      "grab": [3683, -459],
+      "grab_l": [3555, -459],
       "art_pos": [3522, -572],
       "art_size": [174, 226],
       "art": {
@@ -979,6 +1019,8 @@
       "rect": [3716, -336, 144, 170],
       "in_use_by": null,
       "station": "st_sink",
+      "grab": [3851, -225],
+      "grab_l": [3723, -225],
       "art_pos": [3712, -393],
       "art_size": [152, 199],
       "art": {
@@ -1033,6 +1075,8 @@
       "rect": [3950, -250, 144, 270],
       "in_use_by": null,
       "station": "st_feed_bin",
+      "grab": [4077, -160],
+      "grab_l": [3965, -160],
       "art_pos": [3954, -214],
       "art_size": [136, 217],
       "art": {
@@ -1067,6 +1111,8 @@
       "facing": 1,
       "rect": [4548, -300, 144, 320],
       "in_use_by": null,
+      "grab": [4674, -157],
+      "grab_l": [4562, -157],
       "art_pos": [4543, -254],
       "art_size": [154, 257],
       "art": {
@@ -1084,6 +1130,8 @@
       "rect": [4748, -268, 144, 288],
       "in_use_by": null,
       "station": "st_hose",
+      "grab": [4856, -131],
+      "grab_l": [4784, -131],
       "art_pos": [4743, -287],
       "art_size": [140, 290],
       "art": {
@@ -1101,6 +1149,8 @@
       "rect": [5068, -170, 144, 190],
       "in_use_by": null,
       "station": "st_marrow",
+      "grab": [5202, -45],
+      "grab_l": [5074, -45],
       "art_pos": [5071, -167],
       "art_size": [138, 152],
       "art": {
@@ -1118,6 +1168,8 @@
       "rect": [5236, -150, 144, 170],
       "in_use_by": null,
       "station": "st_path",
+      "grab": [5312, -19],
+      "grab_l": [5304, -19],
       "art_pos": [5277, -73],
       "art_size": [62, 69],
       "art": {
@@ -1135,6 +1187,8 @@
       "rect": [5320, -344, 144, 170],
       "in_use_by": null,
       "station": "st_path",
+      "grab": [5396, -19],
+      "grab_l": [5388, -19],
       "art_pos": [5361, -73],
       "art_size": [62, 69],
       "art": {
@@ -1152,6 +1206,8 @@
       "rect": [5404, -150, 144, 170],
       "in_use_by": null,
       "station": "st_path",
+      "grab": [5480, -19],
+      "grab_l": [5472, -19],
       "art_pos": [5445, -73],
       "art_size": [62, 69],
       "art": {
@@ -1186,6 +1242,8 @@
       "rect": [5800, -630, 150, 176],
       "in_use_by": null,
       "station": "st_stage",
+      "grab": [5916, -561],
+      "grab_l": [5836, -551],
       "art_pos": [5825, -617],
       "art_size": [100, 363],
       "art": {
@@ -1236,6 +1294,8 @@
       "rect": [1176, -520, 150, 180],
       "in_use_by": null,
       "station": "st_radiator",
+      "grab": [1305, -419],
+      "grab_l": [1193, -418],
       "art_pos": [1190, -548],
       "art_size": [122, 219],
       "art": {
@@ -1271,6 +1331,8 @@
       "rect": [1858, -348, 144, 166],
       "in_use_by": null,
       "station": "st_basin",
+      "grab": [1943, -249],
+      "grab_l": [1911, -239],
       "art_pos": [1908, -372],
       "art_size": [53, 168],
       "art": {
@@ -1287,6 +1349,8 @@
       "facing": 1,
       "rect": [2038, -540, 144, 180],
       "in_use_by": null,
+      "grab": [2171, -451],
+      "grab_l": [2051, -450],
       "art_pos": [2014, -534],
       "art_size": [166, 168],
       "art": {
@@ -1304,6 +1368,8 @@
       "rect": [2296, -394, 144, 164],
       "in_use_by": null,
       "station": "st_bath",
+      "grab": [2392, -288],
+      "grab_l": [2328, -315],
       "art_pos": [2314, -370],
       "art_size": [90, 186],
       "art": {
@@ -1321,6 +1387,8 @@
       "rect": [2464, -394, 144, 164],
       "in_use_by": null,
       "station": "st_bath",
+      "grab": [2597, -233],
+      "grab_l": [2525, -214],
       "art_pos": [2452, -296],
       "art_size": [169, 104],
       "art": {
@@ -1392,6 +1460,8 @@
       "rect": [3012, -338, 144, 170],
       "in_use_by": null,
       "station": "st_bed",
+      "grab": [3126, -219],
+      "grab_l": [3054, -221],
       "art_pos": [3043, -290],
       "art_size": [92, 94],
       "art": {
@@ -1409,6 +1479,8 @@
       "rect": [3180, -338, 144, 170],
       "in_use_by": null,
       "station": "st_bed",
+      "grab": [3315, -140],
+      "grab_l": [3187, -183],
       "art_pos": [3008, -356],
       "art_size": [322, 332],
       "art": {
@@ -1444,6 +1516,8 @@
       "rect": [3348, -300, 144, 190],
       "in_use_by": null,
       "station": "st_bed",
+      "grab": [3470, -192],
+      "grab_l": [3382, -95],
       "art_pos": [3355, -273],
       "art_size": [122, 275],
       "art": {
@@ -1460,6 +1534,8 @@
       "facing": 1,
       "rect": [3728, -240, 144, 260],
       "in_use_by": null,
+      "grab": [3863, -137],
+      "grab_l": [3735, -137],
       "art_pos": [3724, -230],
       "art_size": [152, 233],
       "art": {
@@ -1495,6 +1571,8 @@
       "rect": [4228, -566, 144, 182],
       "in_use_by": null,
       "station": "st_trophy",
+      "grab": [4353, -401],
+      "grab_l": [4241, -447],
       "art_pos": [4229, -558],
       "art_size": [141, 185],
       "art": {
@@ -1512,6 +1590,8 @@
       "rect": [4348, -360, 144, 380],
       "in_use_by": null,
       "station": "st_dummy",
+      "grab": [4479, -191],
+      "grab_l": [4359, -188],
       "art_pos": [4348, -370],
       "art_size": [144, 356],
       "art": {

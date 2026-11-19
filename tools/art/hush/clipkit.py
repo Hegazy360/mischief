@@ -333,7 +333,8 @@ def sine(u):
 
 
 def clip(cid, length, keys, loop=False, events=None, tags=None, blend_in=None, blend_out=None, plant=False,
-		 stride_px=None, beats=None, layer="base", mask=None, doc=None, jitter=0.0, rot_jitter=0.0, smear=False):
+		 stride_px=None, beats=None, layer="base", mask=None, doc=None, jitter=0.0, rot_jitter=0.0, smear=False,
+		 reach=None):
 	d = {"version": 1, "clip": "hush/" + cid, "rig": "hush", "loop": bool(loop), "length": int(length),
 		 "layer": layer, "mask": mask}
 	if doc:
@@ -353,7 +354,26 @@ def clip(cid, length, keys, loop=False, events=None, tags=None, blend_in=None, b
 	d["smear"] = {"auto": bool(smear)}
 	if plant:
 		d["plant"] = True
+	if reach:
+		d["reach"] = reach
 	return d
+
+
+def reach(limbs, ref_f, weight=None, stretch=1.25, ref_root=True, target="grab", max_height=None, max_px=420):
+	"""A clip `reach` block (ClipDef.reach_*, docs/research/animation.md): the view carries the listed
+	gloves onto the hotspot's grab point, shifted by the same offset so the clip's own motion survives;
+	`ref_f` = the contact frame the offset is measured at; `weight` = [[f, 0..1], ...] (smoothstep);
+	`max_height` = targets higher than this (px above the feet) keep the authored motion (None = no limit:
+	the rig's reach_posture adapts the body for high props); `max_px` = the longest offset tried."""
+	r = {"target": target, "limbs": list(limbs), "ref_f": int(ref_f), "stretch": stretch}
+	if max_height:
+		r["max_height"] = max_height
+	r["max_px"] = max_px
+	if weight:
+		r["weight"] = [[int(f), w] for f, w in weight]
+	if not ref_root:
+		r["ref_root"] = False
+	return r
 
 
 def sfx(f, sid, **kw):

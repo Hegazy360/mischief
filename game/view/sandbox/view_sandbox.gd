@@ -20,6 +20,7 @@
 ##   --cmds=/abs.json   (with --sim) replay a `solve.sh --dump-cmds` command dump
 ##   --seek=<tick>      (with --sim) step the sim to that tick (muted) before the first frame
 ##   --fallbacks        print WorldView.fallback_counts() every 60 frames and at exit
+##   --no-reach         Hush's clips play as authored (no grab targets): the before / after A/B
 ## It wires exactly what a NightScene will: SimDriver → WorldView (+ FxLayer) → GagStager →
 ## CameraDirector → PipView (+ the ui's PipFrame when present) → AudioDirector → StallsView.
 class_name ViewSandbox
@@ -83,6 +84,8 @@ func _ready() -> void:
 			seek_tick = int(a.substr(7))
 		elif a == "--fallbacks":
 			print_fallbacks = true
+		elif a == "--no-reach":
+			CharacterView.reach_enabled = false
 	RenderingServer.set_default_clear_color(Color("#1E1830"))
 	if fixtures:
 		install_fixtures()

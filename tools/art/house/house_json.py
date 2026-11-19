@@ -60,6 +60,9 @@ def build(reg):
         for k in ("kind", "room", "use_x", "facing", "rect", "in_use_by", "station", "link", "tappable", "entry", "z"):
             if k in h:
                 d[k] = h[k]
+        if hid in geo.GRAB:
+            d["grab"] = list(geo.GRAB[hid][0])
+            d["grab_l"] = list(geo.GRAB[hid][1])
         a = reg.hotspot_art.get(hid)
         if a:
             d["art_pos"] = a["pos"]
@@ -107,3 +110,37 @@ def dump(house, path):
     with open(path, "w") as fh:
         fh.write(txt + "\n")
     return path
+
+
+GEO_KEYS = ("kind", "room", "use_x", "facing", "rect", "in_use_by", "station", "link", "tappable", "entry", "z")
+
+
+def apply_grab(house):
+    """Rewrite every hotspot's `grab` from geo.GRAB in place, in build()'s key order (after the geo keys,
+    before the art fields) -- the same file build_all.py writes, without re-rendering any art."""
+    out = []
+    for hs in house["hotspots"]:
+        hs = dict(hs)
+        hs.pop("grab", None)
+        hs.pop("grab_l", None)
+        d = {k: v for k, v in hs.items() if k == "id" or k in GEO_KEYS}
+        if hs["id"] in geo.GRAB:
+            d["grab"] = list(geo.GRAB[hs["id"]][0])
+            d["grab_l"] = list(geo.GRAB[hs["id"]][1])
+        d.update({k: v for k, v in hs.items() if k not in d})
+        out.append(d)
+    house["hotspots"] = out
+    return house
+
+
+if __name__ == "__main__":
+    import sys
+    if "--grab-only" in sys.argv:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "game", "data", "house",
+                            "house.json")
+        h = apply_grab(json.load(open(path)))
+        dump(h, path)
+        print("house_json: grab points from geo.GRAB -> %s (%d hotspots with one)" % (
+            os.path.normpath(path), sum(1 for x in h["hotspots"] if "grab" in x)))
+    else:
+        print("usage: house_json.py --grab-only   (the full build is build_all.py)")

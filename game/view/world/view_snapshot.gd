@@ -42,6 +42,8 @@ class Actor:
 	var speed_px_s: float = 0.0
 	# Hush (§3.7.2)
 	var hidden_spot: String = ""
+	## Hotspot Hush stands at / works at (sim `at_hotspot`; "" = none): the view reaches for its grab point.
+	var at_hotspot: String = ""
 	var watched_spot: String = ""
 	var frozen: bool = false
 	var freeze_pose_seed: int = 0
@@ -125,6 +127,7 @@ class Actor:
 		running = o.running
 		speed_px_s = o.speed_px_s
 		hidden_spot = o.hidden_spot
+		at_hotspot = o.at_hotspot
 		watched_spot = o.watched_spot
 		frozen = o.frozen
 		freeze_pose_seed = o.freeze_pose_seed
@@ -246,6 +249,7 @@ func fill(world: Object, prev: ViewSnapshot) -> void:
 	var hb: Object = _g(world, "hush", null)
 	if hb != null:
 		hush.hidden_spot = ViewKit.id_of(_g(hb, "hidden_spot", ""), ids.hotspots)
+		hush.at_hotspot = ViewKit.id_of(_g(hb, "at_hotspot", ""), ids.hotspots)
 		hush.entering = bool(_g(hb, "entering", false))
 		hush.watched_spot = ViewKit.id_of(_g(hb, "watched_spot", ""), ids.hotspots)
 		hush.frozen = bool(_g(hb, "frozen", hush.state == "FROZEN"))

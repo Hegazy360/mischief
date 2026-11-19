@@ -192,6 +192,13 @@ def rig(base_files, pip_files):
 	r["feet"] = ["foot_l", "foot_r"]
 	r["breath"] = {"part": "torso", "amp": 0.015, "period_s": 3.2}
 	r["look"] = {"part": "head", "max_deg": 20}
+	# Reach posture (docs/research/animation.md phase 3): her work clips hunch her head over her gloves, so for a
+	# prop above her chin the body adapts -- a shuffle back, straighten and lean back, look up (eyes lead), tiptoe,
+	# a rubber-hose stretch, and little hops for what is still out of reach (the honey jar, the pickle jar).
+	r["reach_posture"] = {"chin": 200, "span": 60, "clear_fwd": 80, "step_back": 60, "lean_back": -14,
+						  "look_max": 35, "look_lag": 0.12, "tiptoe": 14, "toe_deg": 22, "toe_tex": "tiptoe",
+						  "stretch": 1.3, "hop_max": 85, "hop_hz": 1.7, "pinch_px": 8, "pinch_tex": "pinch",
+						  "ease_s": 0.2, "low": 90, "low_span": 60, "crouch": 50, "crouch_lean": 20}
 	r["masks"] = {"upper": ["torso*"], "arms": ["arm_upper_l*", "arm_upper_r*"], "arm_r": ["arm_upper_r*"],
 				  "legs": ["leg_upper_l*", "leg_upper_r*"], "head": ["head*"]}
 	r["mirror_pairs"] = [["_l", "_r"]]

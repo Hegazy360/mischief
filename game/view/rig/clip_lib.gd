@@ -191,7 +191,83 @@ static func from_dict(d: Dictionary, clip_id: String = "", rig_def: RigDef = nul
 		c.length = 1
 	_parse_beats(c, d, where)
 	_parse_events(c, d, where)
+	_parse_reach(c, d, where)
 	return c
+
+
+## `reach` block (ClipDef.reach_*): validates the limbs (2-bone rig limbs), the contact frame and
+## the weight keys, and samples the clip at `ref_f` for the reference grip.
+static func _parse_reach(c: ClipDef, d: Dictionary, where: String) -> void:
+	var rv: Variant = d.get("reach", null)
+	if rv == null:
+		return
+	if not (rv is Dictionary):
+		c.errors.append("%s: reach must be an object" % where)
+		return
+	var r: Dictionary = rv
+	var tgt := String(r.get("target", ""))
+	if tgt == "":
+		c.errors.append("%s: reach.target must name a target (e.g. \"grab\")" % where)
+		return
+	var lv: Variant = r.get("limbs", [])
+	if not (lv is Array) or (lv as Array).is_empty():
+		c.errors.append("%s: reach.limbs must list limbs (e.g. [\"arm_r\"])" % where)
+		return
+	for ln in lv:
+		var lid := String(ln)
+		var end := -1
+		for l in c.rig.limbs:
+			if l.id == lid and l.joints.size() == 3 and RigIK.chain_of(c.rig, l.joints[2]).x == l.joints[0]:
+				end = l.joints[2]
+		if end < 0:
+			c.errors.append("%s: reach limb '%s' is not a 2-bone limb of rig %s" % [where, lid, c.rig.id])
+			continue
+		c.reach_limbs.append(lid)
+		c.reach_ends.append(end)
+		c.reach_tips.append(RigIK.socket_tip(c.rig, c.rig.socket_index("%s:grip" % c.rig.names[end])))
+	c.reach_ref_f = int(r.get("ref_f", 0))
+	if c.reach_ref_f < 0 or c.reach_ref_f > c.length:
+		c.errors.append("%s: reach.ref_f %d is outside the clip (0..%d)" % [where, c.reach_ref_f, c.length])
+		c.reach_ref_f = clampi(c.reach_ref_f, 0, c.length)
+	c.reach_stretch = maxf(1.0, float(r.get("stretch", 1.0)))
+	c.reach_max_px = maxf(0.0, float(r.get("max_px", 260.0)))
+	c.reach_max_height = maxf(0.0, float(r.get("max_height", 0.0)))
+	var wv: Variant = r.get("weight", [])
+	if wv is Array:
+		var last := -1.0
+		for e in wv:
+			if not (e is Array) or (e as Array).size() != 2:
+				c.errors.append("%s: reach.weight entries are [frame, weight]" % where)
+				continue
+			var f := float(e[0])
+			if f <= last:
+				c.errors.append("%s: reach.weight frames must increase (%s after %s)" % [where, f, last])
+			if f < 0.0 or f > float(c.length):
+				c.errors.append("%s: reach.weight frame %s is outside the clip" % [where, f])
+			last = f
+			c.reach_w_f.append(f)
+			c.reach_w.append(clampf(float(e[1]), 0.0, 1.0))
+	else:
+		c.errors.append("%s: reach.weight must be a list of [frame, weight]" % where)
+	if c.reach_ends.is_empty() or c.key_f.is_empty():
+		return
+	c.reach_target = tgt
+	# Reference grip: the clip's own pose at the contact frame (FK, no runtime layers).
+	var pose := c.rig.rest.duplicate()
+	RigSampler.sample(c, float(c.reach_ref_f), pose)
+	if not bool(r.get("ref_root", true)):
+		for ch in RigDef.ROOT_CH:
+			pose[ch] = c.rig.rest[ch]
+		for p in c.rig.names.size():
+			if c.rig.locomotion[p] == 1:
+				for k in RigDef.STRIDE:
+					pose[RigDef.ch(p, k)] = c.rig.rest[RigDef.ch(p, k)]
+	var xf: Array[Transform2D] = []
+	RigSampler.solve(c.rig, pose, xf)
+	var sum := Vector2.ZERO
+	for i in c.reach_ends.size():
+		sum += xf[c.reach_ends[i]] * c.reach_tips[i]
+	c.reach_ref = sum / float(c.reach_ends.size())
 
 
 static func _parse_keys(c: ClipDef, d: Dictionary, where: String) -> void:

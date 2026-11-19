@@ -45,7 +45,8 @@ def E(f, type_, **kw):
 
 
 def clip(name, length, keys, events=(), *, loop=False, layer="base", mask=None, blend_in=None, blend_out=None,
-		 beats=None, tags=(), plant=False, stride=None, doc="", variation=None, smear=False, touch_legs=False):
+		 beats=None, tags=(), plant=False, stride=None, doc="", variation=None, smear=False, touch_legs=False,
+		 reach=None):
 	d = {"version": 1, "clip": "bellows/" + name, "rig": "bellows", "loop": loop, "length": length, "layer": layer,
 		 "mask": mask}
 	if doc:
@@ -67,8 +68,19 @@ def clip(name, length, keys, events=(), *, loop=False, layer="base", mask=None, 
 	d["smear"] = {"auto": bool(smear)}
 	d["keys"] = keys
 	d["events"] = sorted(events, key=lambda e: e["f"])
+	if reach:
+		d["reach"] = reach
 	CLIPS[name] = d
 	return d
+
+
+def reach(limbs, ref_f, weight=None, stretch=1.3, target="grab", max_px=420):
+	"""A clip `reach` block (ClipDef.reach_*, docs/research/animation.md): the view carries the listed hands onto
+	the prop he works at, shifted by one offset so the clip's own motion survives; `ref_f` = the contact frame."""
+	r = {"target": target, "limbs": list(limbs), "ref_f": int(ref_f), "stretch": stretch, "max_px": max_px}
+	if weight:
+		r["weight"] = [[int(f), w] for f, w in weight]
+	return r
 
 
 # ============================================================================ geometry from the built rig

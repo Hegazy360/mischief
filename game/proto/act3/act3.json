@@ -266,7 +266,7 @@
    "t": 14.7,
    "do": "clip",
    "who": "hush",
-   "name": "tinker",
+   "name": "tinker_mower",
    "dir": 1
   },
   {
@@ -375,7 +375,7 @@
    "t": 20.8,
    "do": "clip",
    "who": "hush",
-   "name": "saw",
+   "name": "saw_shed",
    "dir": -1
   },
   {

@@ -653,6 +653,21 @@ frame-locked to sim ticks (`frame = world.tick − reaction.start + alpha`), so 
   substeps), `FaceState` (slot variants, pupils, blinks every 2–6 s with a seeded RNG, suppressed during takes),
   `PropSim` (sockets, attach/detach, deterministic ballistic launch with spin).
 - `ClipEvents.between(clip, f0, f1) -> Array` — events crossed this frame (for audio/FX/camera).
+- `RigIK.two_bone(rig, pose, up, lo, end, target, end_deg, bend, weight, stretch_max, tip, limits) -> Vector2`
+  — analytic 2-bone IK in the chain parent's frame (effector = end joint + `tip`, e.g. the grip socket; weight
+  blends the effector; ±360° picked inside limits; optional rubber-hose stretch). Used by the plant lock and by
+  RigPlayer limb goals, which run after the procedural layers and before springs / limits / FK
+  (`docs/research/animation.md`).
+- Clip `reach` block (ClipDef.reach_*): `{target, limbs, ref_f, weight [[f, w]…], stretch, max_height, ref_root}`
+  — the listed gloves move by (target − the clip's own grip at `ref_f`) × weight and RigIK re-solves them; no
+  target = the clip as authored. house.json hotspots carry `grab` / `grab_l` (world px, facing right / left);
+  CharacterView sets Hush's "grab" target from the hotspot she stands at (`ViewSnapshot.Actor.at_hotspot`).
+- rig.json `reach_posture` (optional): the body adapts to a reach target above the chin / below the knees —
+  step back, lean back, look (eyes lead), tiptoe, stretch, hop, crouch (feet re-planted by RigIK), contact pinch;
+  eased over `ease_s`. RigPlayer `posture_info()`, `crouch_weight()`.
+- `ReachMatrix.run(rig_id, parent)` (`view/rig/reach_matrix.gd`, `tools/scripts/reach_matrix.sh`): every container /
+  rig point × facing through the real RigPlayer — glove error, hop, crouch, worst joint jump vs the authored clip;
+  `tests/rig/test_reach_matrix.gd` pins the contract (no pops, ≥ 62/80 reached or touched, the short list).
 
 **Node layer:**
 ```gdscript
@@ -667,6 +682,10 @@ func set_face(preset: String) -> void ; func set_slot(slot: String, variant: Str
 func set_residue(kind: String, on: bool) -> void ; func set_tint_tier(tier: int) -> void
 func set_prop_state(prop: String, state: String) -> void
 func look_at(world_pos: Vector2, weight: float) -> void  ## additive head/pupil look
+func set_goal(limb: String, world_pos: Vector2, opts := {}) -> bool  ## 2-bone IK limb goal (grip on target)
+func move_goal(limb: String, world_pos: Vector2) -> void ; func clear_goal(limb: String, blend_f := -1.0) -> void
+func goal_error(limb: String) -> float                   ## px from the target last frame (0 = reached)
+func set_target(name: String, world_pos: Vector2) -> void  ## a named point for clip `reach` blocks ("grab")
 func current_clip() -> String ; func current_frame() -> float
 ```
 - **Rendering:** one atlas per rig (all part, face, residue and prop textures), rasterised by `AtlasBuilder`.
@@ -1007,6 +1026,12 @@ length; 60 fps with PiP + gag burst; launch → first laugh ≤ 10 s.
   - `<clip>_onion.png` (per beat, frames tinted blue → red, spacing dots on head top, hands and root);
   - `<clip>_curves.json` → `tools/anim/curves.py` → `<clip>_curves.png` (value + velocity per channel, key markers);
   - `<clip>_lint.txt`.
+- **Stage reaches (baked):** a clips.json clip with `reach` (`hands`, `ref_at` secs | forward | lowest | highest |
+  mean, `weight`, `posture` {lean, look, tiptoe, stretch}, `stage` {act, at | mark, stand, dir}) is IK-solved in
+  the Bakery onto that stage point; every sheet carries per-frame `hands`; show.gd `hand_point()` and prop
+  `"hand"` rides. Pick targets with `python3 tools/stage/reach_map.py actN out.png --stand who:x`; add clips with
+  `tools/bakery/add_reach.py tools/bakery/reach_spec.json`; swap a beat with `tools/stage/swap_clip.py`;
+  `tests/stage/test_stage_reach.gd` measures every reach beat on the real stage (docs/research/animation.md §11).
 - **Stage sets:** `python3 tools/stage/build.py --act actN [--only layer,...]` renders an Act's set in headless
   Blender into `game/proto/actN/art/` (+ `layout.json`); `--only` merges into the existing layout, so render in
   chunks (`bg`, then props/fg/fx, then `seq_*`) to keep each run a few minutes. **Reuse before you model:**

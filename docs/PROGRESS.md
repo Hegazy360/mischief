@@ -742,3 +742,52 @@ Acceptance checklist per stage (docs/PLAN.md). Tick a box only when its evidence
   geometry as the old vertex-moving wrapper). Re-rendered: Act I `bg`; Act II `bg`, `fx_shaft`,
   `seq_fridge`. Suite green, import meta OK; looked at 5 beat stills + the catalogue. Acts IV/V windows
   could move to `window_view` at their next re-render. All five Acts have now had their pass.
+- 2026-11-16 — Owner: make limbs reach the world (grab, reach) programmatically and testably. Research +
+  plan in `docs/research/animation.md` (12 of 40 hotspots sit above Hush's reach; one tinker clip serves all).
+  **Phase 1 built:** `view/rig/rig_ik.gd` (analytic 2-bone IK, grip-socket effector, effector-space weight,
+  limit-aware ±360°, rubber-hose stretch); the plant lock now uses it; RigPlayer limb goals
+  (`set_goal` / `move_goal` / `clear_goal`, a layer before springs); AnimViewer `--goal`, `--goal-sweep`,
+  `--goal-cycle` + crosshair. `tests/rig/test_ik.gd` (14 tests, independent FK): grip < 0.5 px on 3 rigs,
+  < 1 px in world space both facings, elbow never flips, blend has no snap. 6.5 µs / solve desktop (device
+  cost estimated, not measured). Found: Bellows' near arm crosses his face on face-height reaches (staging
+  rule for phase 2–3). Suite green, lints green, import meta OK; looked at 4 stills + a 240 f capture.
+- 2026-11-16 — Owner: phase 1 showed no difference in play (correct: nothing in the game called it). **Phase 2
+  built** (`docs/research/animation.md` §7): clip `reach` blocks (offset retargeting that keeps the authored
+  motion), `grab` / `grab_l` on all 40 containers / rig points (measured from the props' visible pixels by
+  `tools/anim/prop_spans.gd` + `grab_points.py`; `house_json.py --grab-only`), `ViewSnapshot.at_hotspot` →
+  CharacterView → RigPlayer `set_target`; tinker Q/S/B, rummage and pickup ported through the generator.
+  Tools: AnimViewer `--hotspot` / `--no-reach`, ViewSandbox `--no-reach`, `tools/scripts/reach_sheet.sh`.
+  Limit: props above her chin keep the authored motion (`max_height: 205`) because her work clips lean her
+  head over her hands; Night 1's kitchen props are all up there, so in Night 1 the visible change is the
+  confiscated-box rummage — body staging is phase 3. `tests/rig/test_reach.gd` (11). Seen: the 40-hotspot
+  sheet, Night 1 real-sim A/B (box, recliner). Found: `e2e.sh --shot-seq` with a late `--seq-from` captures
+  a frozen early frame (not investigated).
+- 2026-11-17 — Owner: phase 2 still hard to see. **Phase 3 built** (`docs/research/animation.md` §8): a reach
+  posture (rig.json `reach_posture`, Hush) — step back, straighten, look up (eyes lead), tiptoe, 1.3× stretch,
+  hops for what is still out of reach, a crouch with the feet re-planted for low props, a pinch on contact;
+  the clips' `max_height` stopgap removed. Night 1's kitchen work now reads: tiptoe-and-hop to the honey and
+  pickle jars, an upright reach to the sink tap and the kettle. `tests/rig/test_posture.gd` (6);
+  `tools/scripts/reach_ab.sh` (before / after strips of every moment Hush works in a real route). Suite 1148
+  green, lints green, import meta OK. Open: kettle / sink / basin grab points, prop hand-off, device perf of
+  the reach (~32 µs desktop per reaching frame, unmeasured on a phone).
+- 2026-11-17 — Owner: phase 3 visible but not in every scene; continue. **Phase 4 built** (`docs/research/
+  animation.md` §9–10): Bellows reaches the pickle jar with his own `reach_posture` (tiptoe + a 75 px hop; no
+  step back) — CharacterView feeds the prop at his activity's station; the ReachMatrix instrument
+  (`tools/scripts/reach_matrix.sh`, `tests/rig/test_reach_matrix.gd`: 80 cells, 0 pops, 49 reached, 18 touched,
+  13 short pinned) which found and forced the no-pop fixes (RigIK soft reach limits near extension and fold, a
+  24°/f joint rate limit in the reach, rummage weights off during the tosses); the Bellows map generator back in
+  sync with the committed map. Dropped after looking: a real `st_grab` (hidden by the Busted Cam replay), his
+  sink / fridge reaches (wrong targets), a deeper step back for Hush's kettle / sink / basin (cost the honey hop,
+  helped nothing). What is left: §10 of the research doc (device perf first).
+- 2026-11-18 — Owner: the reach work was tested on the older game (cutout cast in house.json), not the five
+  stage Acts — focus there. Correct: the Acts' cast is BAKED (tools/bakery), so none of phases 1–4 reached
+  them. **Reaches moved into the Bakery** (`docs/research/animation.md` §11): a `reach` recipe (3D 2-bone IK
+  onto a stage point, offset-retargeting the library motion, rubber-hose arm stretch, lean / look / tiptoe,
+  contact modes, one-shot weights), per-frame `hands` in every sheet, show.gd `hand_point()` + props riding a
+  hand. 14 clips on 19 beats in all five Acts (console, toaster, gramophone, mower, bed, three saws, pantry
+  hammer, butter, alarm clock carried in the hand; Gus at the fridge, wardrobe, switch). Tools:
+  `tools/stage/reach_map.py`, `tools/bakery/add_reach.py` (+ `reach_spec.json`), `tools/stage/swap_clip.py`.
+  New `tests/stage/test_stage_reach.gd` (every reach beat within 12 stage px on the real stage; held props at
+  the hand) — it found Hush standing elsewhere than the timeline's `move to` for two beats and sliding into
+  the Act V pick-up. Older-game items parked (§10). Left: the Act IV bag strap (out of reach), held props
+  drawing behind the holder, marks for handles, more grabs (the gown), contact sheets.

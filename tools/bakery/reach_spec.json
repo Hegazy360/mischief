@@ -1,0 +1,384 @@
+{
+ "hush": [
+  {
+   "name": "tinker_console",
+   "from": "tinker",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "l",
+     "r"
+    ],
+    "ref_at": 1.0,
+    "posture": {
+     "look": true,
+     "lean": -8,
+     "tiptoe": 25,
+     "stretch": 2.0
+    },
+    "stage": {
+     "act": "act4",
+     "mark": "console",
+     "stand": 509,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "tinker_toaster",
+   "from": "tinker",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "l"
+    ],
+    "ref_at": 1.0,
+    "posture": {
+     "look": true,
+     "lean": -6,
+     "tiptoe": 28,
+     "stretch": 2.6
+    },
+    "stage": {
+     "act": "act2",
+     "at": [
+      532,
+      630
+     ],
+     "stand": 600,
+     "dir": -1
+    }
+   }
+  },
+  {
+   "name": "tinker_gramophone",
+   "from": "tinker",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "l",
+     "r"
+    ],
+    "ref_at": 1.0,
+    "posture": {
+     "look": true,
+     "stretch": 1.8
+    },
+    "stage": {
+     "act": "act1",
+     "at": [
+      630,
+      650
+     ],
+     "stand": 585,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "tinker_mower",
+   "from": "tinker",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "l",
+     "r"
+    ],
+    "ref_at": 1.0,
+    "posture": {
+     "look": true,
+     "lean": 12,
+     "stretch": 2.0
+    },
+    "stage": {
+     "act": "act3",
+     "at": [
+      1078,
+      770
+     ],
+     "stand": 960,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "tinker_bed",
+   "from": "tinker",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "l",
+     "r"
+    ],
+    "ref_at": 1.0,
+    "posture": {
+     "look": true,
+     "lean": 14,
+     "stretch": 2.0
+    },
+    "stage": {
+     "act": "act5",
+     "at": [
+      1090,
+      800
+     ],
+     "stand": 1020,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "saw_pedestal",
+   "from": "saw",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "mean",
+    "posture": {
+     "look": true,
+     "lean": 6,
+     "stretch": 1.8
+    },
+    "stage": {
+     "act": "act1",
+     "at": [
+      1455,
+      760
+     ],
+     "stand": 1385,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "saw_chair",
+   "from": "saw",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "mean",
+    "posture": {
+     "look": true,
+     "lean": 10,
+     "stretch": 1.8
+    },
+    "stage": {
+     "act": "act2",
+     "at": [
+      1255,
+      770
+     ],
+     "stand": 1335,
+     "dir": -1
+    }
+   }
+  },
+  {
+   "name": "saw_shed",
+   "from": "saw",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "mean",
+    "posture": {
+     "look": true,
+     "lean": 6,
+     "stretch": 1.8
+    },
+    "stage": {
+     "act": "act3",
+     "at": [
+      1728,
+      760
+     ],
+     "stand": 1753,
+     "dir": -1
+    }
+   }
+  },
+  {
+   "name": "hammer_pantry",
+   "from": "hammer",
+   "min_span": 0.02,
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": 0.27,
+    "posture": {
+     "look": true,
+     "stretch": 2.0
+    },
+    "stage": {
+     "act": "act2",
+     "at": [
+      1880,
+      680
+     ],
+     "stand": 1791,
+     "dir": 1
+    }
+   }
+  },
+  {
+   "name": "pickup_clock",
+   "from": "pickup",
+   "props": [],
+   "reach": {
+    "hands": [
+     "l"
+    ],
+    "ref_at": 0.4,
+    "posture": {
+     "look": true,
+     "lean": 12,
+     "stretch": 2.2
+    },
+    "stage": {
+     "act": "act5",
+     "at": [
+      1512,
+      695
+     ],
+     "stand": 1642,
+     "dir": -1
+    },
+    "weight": {
+     "around": {
+      "in": 0.3,
+      "hold": 0.35,
+      "out": 0.4
+     }
+    }
+   }
+  },
+  {
+   "name": "interact_butter",
+   "from": "interact",
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "forward",
+    "posture": {
+     "look": true,
+     "stretch": 1.6
+    },
+    "stage": {
+     "act": "act1",
+     "at": [
+      1680,
+      860
+     ],
+     "stand": 1610,
+     "dir": 1
+    },
+    "weight": {
+     "around": {
+      "in": 0.35,
+      "hold": 0.3,
+      "out": 0.4
+     }
+    }
+   }
+  }
+ ],
+ "gus": [
+  {
+   "name": "interact_fridge",
+   "from": "interact",
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "forward",
+    "posture": {
+     "look": true,
+     "stretch": 1.5
+    },
+    "stage": {
+     "act": "act2",
+     "at": [
+      1690,
+      580
+     ],
+     "stand": 1565,
+     "dir": 1
+    },
+    "weight": {
+     "around": {
+      "in": 0.35,
+      "hold": 0.3,
+      "out": 0.4
+     }
+    }
+   }
+  },
+  {
+   "name": "interact_wardrobe",
+   "from": "interact",
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "forward",
+    "posture": {
+     "look": true,
+     "stretch": 1.5
+    },
+    "stage": {
+     "act": "act5",
+     "at": [
+      625,
+      570
+     ],
+     "stand": 760,
+     "dir": -1
+    },
+    "weight": {
+     "around": {
+      "in": 0.35,
+      "hold": 0.3,
+      "out": 0.4
+     }
+    }
+   }
+  },
+  {
+   "name": "interact_switch",
+   "from": "interact",
+   "reach": {
+    "hands": [
+     "r"
+    ],
+    "ref_at": "forward",
+    "posture": {
+     "look": true,
+     "stretch": 1.5
+    },
+    "stage": {
+     "act": "act5",
+     "at": [
+      405,
+      530
+     ],
+     "stand": 470,
+     "dir": -1
+    },
+    "weight": {
+     "around": {
+      "in": 0.35,
+      "hold": 0.3,
+      "out": 0.4
+     }
+    }
+   }
+  }
+ ]
+}

@@ -95,6 +95,12 @@ def strip(d: str, out_path: str, ink: int) -> dict:
         # the root-on-the-floor pixel, moved into the cropped cell: the runtime pins THIS to the
         # character's position, so every clip lands with its feet in the same place
         info["anchor"] = [round(meta["anchor"][0] - box[0], 2), round(meta["anchor"][1] - box[1], 2)]
+    if "hands" in meta:
+        info["hands"] = {h: [[round(p[0] - box[0], 2), round(p[1] - box[1], 2)] for p in pts] for h, pts in meta["hands"].items()}
+    if "reach" in meta:
+        r = dict(meta["reach"])
+        r["to_px"] = [round(r["to_px"][0] - box[0], 2), round(r["to_px"][1] - box[1], 2)]
+        info["reach"] = r
     with open(os.path.splitext(out_path)[0] + ".json", "w") as fh:
         json.dump(info, fh, indent=2)
     return info

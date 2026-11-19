@@ -134,6 +134,15 @@ class Hotspot:
 	## Hidden-eyes point (world; Vector2.INF = none), draw order among props (`z`: 1 = above
 	## the other props), and the atlas raster hint (1.0 / 1.5 / 2.0; 0 = default).
 	var eyes: Vector2 = Vector2.INF
+	## Reach grab points (world, absolute y; Vector2.INF = none): where a hand goes on the prop when
+	## Hush faces right (`grab`) / left (`grab_l`) — house.json, docs/research/animation.md.
+	var grab: Vector2 = Vector2.INF
+	var grab_l: Vector2 = Vector2.INF
+
+
+	## The grab point for facing `f` (±1; INF when the prop has none).
+	func grab_for(f: int) -> Vector2:
+		return grab_l if f < 0 and grab_l != Vector2.INF else grab
 	var z: int = 0
 	var raster: float = 0.0
 	## house.json `tappable` (false: the kitchen window — the sim's entry prop).
@@ -304,6 +313,12 @@ static func from_json(d: Dictionary) -> HouseLayout:
 		var ev: Variant = hd.get("eyes", null)
 		if ev is Array and (ev as Array).size() >= 2:
 			hs.eyes = Vector2(float(ev[0]), float(ev[1]) + fy)
+		var gv: Variant = hd.get("grab", null)
+		if gv is Array and (gv as Array).size() >= 2:
+			hs.grab = Vector2(float(gv[0]), float(gv[1]) + fy)
+		var glv: Variant = hd.get("grab_l", null)
+		if glv is Array and (glv as Array).size() >= 2:
+			hs.grab_l = Vector2(float(glv[0]), float(glv[1]) + fy)
 		hs.z = int(hd.get("z", 0))
 		hs.raster = float(hd.get("raster", 0.0)) if hd.get("raster", null) != null else 0.0
 		hs.tappable = bool(hd.get("tappable", true))

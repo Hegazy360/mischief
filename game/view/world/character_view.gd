@@ -62,6 +62,13 @@ var rig_id: String = ""
 var skin: String = ""
 var info: ContentInfo = null
 var layout: HouseLayout = null
+## Dev A/B switch (ViewSandbox / AnimViewer `--no-reach`): false = clips play as authored, no grab
+## targets (docs/research/animation.md). Always true in the game.
+static var reach_enabled: bool = true
+var _reach_on: bool = false
+## Bellows' hand height (px above the floor) used to pick which prop at a station he handles.
+const ACT_HAND_HEIGHT := 250.0
+var _act_prop: Dictionary = {}
 ## The FX layer (micro-gag fallback notes); set by WorldView.
 var fx: FxLayer = null
 var map: Dictionary = {}
@@ -195,7 +202,7 @@ func _try_rig() -> void:
 		return
 	for m in ["set_external_frame", "set_speed", "set_facing", "set_tint_tier", "set_prop_state", "set_residue",
 			"set_face", "look_toward", "stop_layer", "set_static_pose", "set_part_texture", "socket_global_transform",
-			"layer_clip", "layer_frame", "current_frame", "reset_layers"]:
+			"layer_clip", "layer_frame", "current_frame", "reset_layers", "set_target", "clear_target"]:
 		_has[m] = rig.has_method(m)
 	rig.set("self_hitstop", false)
 	# Combos appear only when the sim forms one (`combo` event): L4 forbids them in N01 / N02.
@@ -347,6 +354,9 @@ func reset() -> void:
 	_tier = -1
 	_specs = ""
 	_looks_key = "#"
+	if _reach_on and uses_rig and bool(_has.get("clear_target", false)):
+		rig.call("clear_target", "grab")
+	_reach_on = false
 	if uses_rig and bool(_has.get("reset_layers", false)):
 		rig.call("reset_layers")
 
@@ -566,6 +576,7 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 	rig.set("time_scale", clampf(_view_dt / real, 0.0, 4.0) if real > 0.0 else 1.0)
 	_play_base(cur)
 	_play_overlay()
+	_drive_reach(cur)
 	if bool(_has.get("set_facing", false)):
 		if actor == "hush" and cur.entering:
 			rig.call("set_facing", 1, false)   # the climb-in is authored facing +1: never flipped (s2-fix G #14)
@@ -577,6 +588,60 @@ func _drive_rig(cur: ViewSnapshot.Actor, hidden: bool) -> void:
 		_apply_meter(cur)
 	else:
 		_apply_hush_looks(cur)
+
+
+## Reach (docs/research/animation.md): while Hush stands at a hotspot with grab points, the one for the
+## way she faces is the rig's "grab" target, so any clip with a `reach` block (tinker, rummage, pickup) carries her
+## gloves onto the prop. Clips without one ignore it; away from a hotspot it is cleared.
+func _drive_reach(cur: ViewSnapshot.Actor) -> void:
+	if not bool(_has.get("set_target", false)):
+		return
+	if not reach_enabled:
+		if _reach_on:
+			rig.call("clear_target", "grab")
+			_reach_on = false
+		return
+	var g := Vector2.INF
+	if actor == "hush":
+		if cur.at_hotspot != "" and layout != null and not cur.moving:
+			var h := layout.hotspot(cur.at_hotspot)
+			if h != null:
+				g = h.grab_for(cur.facing)
+	elif cur.activity != "" and not cur.moving and not cur.reacting:
+		# Bellows works at his activity's station: the prop there (its centre — he stands beside it).
+		var h2 := _activity_prop(cur.activity)
+		if h2 != null and h2.grab != Vector2.INF and h2.grab_l != Vector2.INF:
+			g = (h2.grab + h2.grab_l) * 0.5
+	if g != Vector2.INF:
+		var par := get_parent() as Node2D
+		rig.call("set_target", "grab", par.to_global(g) if par != null else g)
+		_reach_on = true
+	elif _reach_on:
+		rig.call("clear_target", "grab")
+		_reach_on = false
+
+
+## The hotspot Bellows handles during `activity` (cached): the rig point / container at the activity's
+## station nearest shoulder height (st_tea has both the kettle and the honey jar); null when none.
+func _activity_prop(activity: String) -> HouseLayout.Hotspot:
+	if _act_prop.has(activity):
+		return _act_prop[activity]
+	var best: HouseLayout.Hotspot = null
+	if layout != null and info != null and info.db != null:
+		var acts: Variant = info.db.get("activities")
+		var ad: Variant = acts.get(activity, null) if acts is Dictionary else null
+		var st := String(ad.get("station")) if ad != null and ad is Object else ""
+		var score := INF
+		if st != "":
+			for h in layout.hotspots:
+				if h.station != st or (h.kind != "rig_point" and h.kind != "container") or h.grab == Vector2.INF:
+					continue
+				var d := absf((h.grab.y - layout.room_floor_y(h.room)) + ACT_HAND_HEIGHT)
+				if d < score:
+					score = d
+					best = h
+	_act_prop[activity] = best
+	return best
 
 
 ## Hush's TOMATO look: on from the doorstep splat until 4 s after control returns.

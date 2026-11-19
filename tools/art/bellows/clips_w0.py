@@ -464,7 +464,9 @@ def pickles():
 	events = [E(60, "sfx", id="jar"), E(84, "sfx", id="lid", vol_db=-4.0), E(108, "sfx", id="lid", vol_db=-6.0),
 			  E(170, "sfx", id="lid", vol_db=-4.0), E(200, "sfx", id="jar", vol_db=-3.0)]
 	return clip("act_pickles", 300, keys, events, loop=True, blend_in=6, blend_out=6, tags=["activity", "pickles"],
-				doc=pickles.__doc__)
+				doc=pickles.__doc__,
+				# both hands on the jar from the reach-up to the screw-back (the view lifts them onto the real jar)
+				reach=C.reach(["arm_r", "arm_l"], 72, weight=[(0, 0), (24, 0), (54, 1), (190, 1), (222, 0), (300, 0)]))
 
 
 def rinse():

@@ -81,6 +81,32 @@ var plant: bool = false
 var plant_on: PackedByteArray = PackedByteArray()
 var plant_pos: PackedVector2Array = PackedVector2Array()
 var plant_rot: PackedFloat32Array = PackedFloat32Array()
+## Reach (`"reach"`, docs/research/animation.md): at play time the clip's hands are carried onto a
+## named world point (RigPlayer.set_target). Each listed limb's effector (its `grip` socket, else
+## the end joint) is moved by the SAME offset — target minus `reach_ref`, the limbs' mean grip at
+## `reach_ref_f` sampled from this clip at load — scaled by the weight curve, then re-solved by
+## RigIK. So the animator's motion survives (the tinker jiggle, both gloves' spacing) and lands
+## on the object at the contact frame. No target set = the clip plays exactly as authored.
+##   "reach": {"target": "grab", "limbs": ["arm_r"], "ref_f": 14,
+##             "weight": [[0, 0], [8, 1], [40, 1], [48, 0]], "stretch": 1.25, "max_px": 260}
+## `weight` keys are [frame, 0..1] (smoothstep between keys; loops wrap; default 1 throughout).
+## `max_height` (px above the feet, default 0 = no limit): a target higher than this is left to the
+## authored motion (the reach is skipped) — Hush's work clips lean her head over her hands, so a glove
+## lifted to head height would land on her face until the body adapts too (docs/research/animation.md).
+## `"ref_root": false` computes the reference without the clip's root and leg (locomotion) channels:
+## for clips the view plays as masked overlays, which never write those (the pickup's crouch).
+var reach_target: String = ""
+var reach_limbs: PackedStringArray = PackedStringArray()
+var reach_ends: PackedInt32Array = PackedInt32Array()
+var reach_tips: PackedVector2Array = PackedVector2Array()
+var reach_ref_f: int = 0
+var reach_ref: Vector2 = Vector2.ZERO
+var reach_w_f: PackedFloat32Array = PackedFloat32Array()
+var reach_w: PackedFloat32Array = PackedFloat32Array()
+var reach_stretch: float = 1.0
+## Offsets longer than this (px) are ignored (bad data / a stale target): the clip plays as is.
+var reach_max_px: float = 260.0
+var reach_max_height: float = 0.0
 var errors: PackedStringArray = PackedStringArray()
 var warnings: PackedStringArray = PackedStringArray()
 
@@ -89,6 +115,38 @@ var _keyed: PackedByteArray = PackedByteArray()
 var _live: PackedInt32Array = PackedInt32Array()
 var _live_done: bool = false
 var _live_alpha: int = -1
+
+
+## True when the clip carries a reach block.
+func has_reach() -> bool:
+	return reach_target != "" and not reach_ends.is_empty()
+
+
+## Reach weight at clip frame `f` (0..1): smoothstep between the `weight` keys, wrapping on loops.
+func reach_weight(f: float) -> float:
+	var n := reach_w_f.size()
+	if n == 0:
+		return 1.0
+	var ln := float(maxi(1, length))
+	var ff := fposmod(f, ln) if loop else clampf(f, 0.0, ln)
+	if n == 1:
+		return reach_w[0]
+	if ff < reach_w_f[0] or ff >= reach_w_f[n - 1]:
+		if not loop:
+			return reach_w[0] if ff < reach_w_f[0] else reach_w[n - 1]
+		var span := reach_w_f[0] + ln - reach_w_f[n - 1]
+		var tw := ((ff - reach_w_f[n - 1]) if ff >= reach_w_f[n - 1] else (ff + ln - reach_w_f[n - 1])) / maxf(span, 0.0001)
+		return _smooth(reach_w[n - 1], reach_w[0], tw)
+	var k := 0
+	while k < n - 2 and ff >= reach_w_f[k + 1]:
+		k += 1
+	var t := (ff - reach_w_f[k]) / maxf(reach_w_f[k + 1] - reach_w_f[k], 0.0001)
+	return _smooth(reach_w[k], reach_w[k + 1], t)
+
+
+static func _smooth(a: float, b: float, t: float) -> float:
+	var u := clampf(t, 0.0, 1.0)
+	return a + (b - a) * u * u * (3.0 - 2.0 * u)
 
 
 ## True when some part's alpha animates between keys (visibility can change mid-segment).

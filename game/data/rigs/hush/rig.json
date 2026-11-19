@@ -814,6 +814,28 @@
     "part": "head",
     "max_deg": 20
   },
+  "reach_posture": {
+    "chin": 200,
+    "span": 60,
+    "clear_fwd": 80,
+    "step_back": 60,
+    "lean_back": -14,
+    "look_max": 35,
+    "look_lag": 0.12,
+    "tiptoe": 14,
+    "toe_deg": 22,
+    "toe_tex": "tiptoe",
+    "stretch": 1.3,
+    "hop_max": 85,
+    "hop_hz": 1.7,
+    "pinch_px": 8,
+    "pinch_tex": "pinch",
+    "ease_s": 0.2,
+    "low": 90,
+    "low_span": 60,
+    "crouch": 50,
+    "crouch_lean": 20
+  },
   "masks": {
     "upper": [
       "torso*"

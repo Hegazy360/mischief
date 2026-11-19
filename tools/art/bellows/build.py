@@ -215,6 +215,7 @@ def main():
 	rig["no_mirror"] = []
 	rig["breath"] = dict(R.BREATH)
 	rig["look"] = dict(R.LOOK)
+	rig["reach_posture"] = dict(R.REACH_POSTURE)
 	rig["masks"] = {k: list(v) for k, v in R.MASKS.items()}
 
 	os.makedirs(DATA, exist_ok=True)

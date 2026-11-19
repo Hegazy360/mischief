@@ -355,6 +355,10 @@ def show_face(sets: dict, expr: str) -> None:
 #   pose   — ease from a stance into one frame of any clip and hold it dead still (FREEZE statues)
 #   layer  — some bones (with their children) from a second clip, time-fitted to the base loop
 #   tweak  — eased extra turns on a few bones, in BODY axes, keyed in seconds
+#   reach  — the clip's hands carried onto a point on the stage (docs/research/animation.md): the hand path
+#            is shifted by one film-plane offset (target minus where the clip has the hand at `ref_at`) and
+#            each arm re-solved by 2-bone IK, so the library motion survives and lands on the prop; optional
+#            posture (lean back, look at it, tiptoe). Per-frame contact error is measured and stored.
 # Everything stays a library pose or a smooth blend between library poses.
 
 _ACTION_CACHE: dict = {}
@@ -496,6 +500,133 @@ def apply_tweaks(arm, tweaks: dict, t: float, dur: float, loop: bool) -> None:
         bpy.context.view_layer.update()
 
 
+# --- reach (IK onto a stage point) ----------------------------------------------------------------
+ARM_BONES = {"r": ("upperarm.r", "lowerarm.r", "handslot.r"), "l": ("upperarm.l", "lowerarm.l", "handslot.l")}
+
+
+def effector(arm, side: str) -> "Vector":
+    """Where a held prop sits (attach_prop puts it at the handslot bone's HEAD), in world space."""
+    return arm.matrix_world @ arm.pose.bones[ARM_BONES[side][2]].head
+
+
+def turn_bone(arm, name: str, q_world: "Quaternion") -> None:
+    """Turn a pose bone about its own head by a WORLD rotation (children follow)."""
+    mw = arm.matrix_world.to_3x3().normalized()
+    ra = mw.inverted() @ q_world.to_matrix() @ mw
+    pb = arm.pose.bones[name]
+    m = pb.matrix.copy()
+    new = (ra @ m.to_3x3()).to_4x4()
+    new.translation = m.translation
+    pb.matrix = new
+    bpy.context.view_layer.update()
+
+
+def stretch_arm(arm, side: str, k: float) -> None:
+    """Cartoon stretch: the upper and lower arm grow along their length by `k` (the glove keeps its size —
+    the hand bones stop inheriting scale, see prepare_stretch)."""
+    up_n, lo_n, _ = ARM_BONES[side]
+    for nm in (up_n, lo_n):
+        pb = arm.pose.bones[nm]
+        pb.scale = Vector((pb.scale.x, pb.scale.y * k, pb.scale.z))
+    bpy.context.view_layer.update()
+
+
+def prepare_stretch(arm, sides: list) -> None:
+    """Rubber-hose arms for reaches: the forearm takes its own scale (not the upper arm's) and the hand
+    none, so stretching the arm never fattens the forearm or the glove."""
+    for side in sides:
+        up_n, lo_n, slot_n = ARM_BONES[side]
+        for b in arm.data.bones:
+            if b.name == lo_n:
+                b.inherit_scale = "NONE"
+            elif b.parent is not None and b.parent.name == lo_n:
+                b.inherit_scale = "NONE"
+
+
+def solve_arm(arm, side: str, target: "Vector", soft: float = 0.08, stretch_max: float = 1.0) -> None:
+    """Analytic 2-bone IK (shoulder -> elbow -> handslot) toward a world point. The hand keeps its angle
+    to the forearm (the handslot rides the forearm rigidly); the elbow stays in the plane the clip already
+    bends it in; the last `soft` of the reach near full extension and near the fold is eased so a target
+    sweeping past arm's length never snaps the elbow. Same maths as game/view/rig/rig_ik.gd."""
+    up_n, lo_n, _ = ARM_BONES[side]
+    mw = arm.matrix_world
+    s_ = mw @ arm.pose.bones[up_n].head
+    e_ = mw @ arm.pose.bones[lo_n].head
+    p_ = effector(arm, side)
+    l1, l2 = (e_ - s_).length, (p_ - e_).length
+    dv = target - s_
+    d = dv.length
+    if d < 1e-6 or l1 < 1e-6 or l2 < 1e-6:
+        return
+    n = dv / d
+    total = 1.0
+    for _k in range(4):
+        # past (nearly) full reach: grow the arm so the eased solve still lands (rubber hose). The grip sits
+        # a little past the forearm's end and that bit does not grow, so top the stretch up until the
+        # target lands before the eased zone (or the cap is reached).
+        if stretch_max <= 1.0 or d <= (l1 + l2) * (1.0 - soft) or total >= stretch_max - 1e-4:
+            break
+        k = min(stretch_max / total, d / ((l1 + l2) * (1.0 - soft)) * 1.001)
+        if k <= 1.0001:
+            break
+        stretch_arm(arm, side, k)
+        total *= k
+        e_ = mw @ arm.pose.bones[lo_n].head
+        p_ = effector(arm, side)
+        l1, l2 = (e_ - s_).length, (p_ - e_).length
+    reach, fold = l1 + l2, abs(l1 - l2)
+    room = reach * soft
+    if d > reach - room:
+        k = reach - room
+        d = k + room * (1.0 - math.exp(-(d - k) / room))
+    elif d < fold + room:
+        k = fold + room
+        d = k - room * (1.0 - math.exp(-(k - d) / room))
+    d = min(max(d, fold + 1e-5), reach - 1e-5)
+    m = (e_ - s_) - n * (e_ - s_).dot(n)
+    if m.length < 1e-6:
+        m = n.cross(Vector((0.0, 0.0, 1.0)))
+        if m.length < 1e-6:
+            m = n.cross(Vector((1.0, 0.0, 0.0)))
+    m.normalize()
+    ca = (l1 * l1 + d * d - l2 * l2) / (2.0 * l1 * d)
+    ang = math.acos(max(-1.0, min(1.0, ca)))
+    e2 = s_ + (n * math.cos(ang) + m * math.sin(ang)) * l1
+    turn_bone(arm, up_n, (e_ - s_).rotation_difference(e2 - s_))
+    e_now = mw @ arm.pose.bones[lo_n].head
+    p_now = effector(arm, side)
+    turn_bone(arm, lo_n, (p_now - e_now).rotation_difference(s_ + n * d - e_now))
+
+
+def smooth_keys(keys: list, t: float, dur: float, loop: bool) -> float:
+    """[[secs, value], ...] smoothstepped; loops wrap; no keys = 1."""
+    if not keys:
+        return 1.0
+    if len(keys) == 1:
+        return float(keys[0][1])
+    tt = (t % dur) if loop and dur > 0 else t
+    ks = sorted(keys)
+    if tt <= ks[0][0] or tt >= ks[-1][0]:
+        if not loop:
+            return float(ks[0][1] if tt <= ks[0][0] else ks[-1][1])
+        span = ks[0][0] + dur - ks[-1][0]
+        u = ((tt - ks[-1][0]) if tt >= ks[-1][0] else (tt + dur - ks[-1][0])) / max(span, 1e-6)
+        a0, a1 = float(ks[-1][1]), float(ks[0][1])
+    else:
+        j = max(i for i in range(len(ks)) if ks[i][0] <= tt)
+        u = (tt - ks[j][0]) / max(ks[j + 1][0] - ks[j][0], 1e-6)
+        a0, a1 = float(ks[j][1]), float(ks[j + 1][1])
+    u = max(0.0, min(1.0, u))
+    return a0 + (a1 - a0) * u * u * (3.0 - 2.0 * u)
+
+
+def body_turn(arm, name: str, pitch_deg: float) -> None:
+    """Pitch a bone in BODY axes (bodies face -Y: + bows forward), like a tweak."""
+    if abs(pitch_deg) < 1e-3 or name not in arm.pose.bones:
+        return
+    turn_bone(arm, name, Euler((math.radians(pitch_deg), 0.0, 0.0), "XYZ").to_quaternion())
+
+
 def main() -> int:
     a = argv()
     char_path = a["char"]
@@ -618,8 +749,55 @@ def main() -> int:
     arm.animation_data.action = None          # we drive the pose ourselves, frame by frame
 
     lift = np.zeros(n)
+    lift0 = np.zeros(n)                     # the clip's own planted lift (no reach): the stage frame
+    reach = recipe.get("reach")
+    hands_of = [h for h in ("r", "l") if ARM_BONES[h][2] in arm.pose.bones]
+    if reach:
+        for h in reach["hands"]:
+            if h not in hands_of:
+                print(f"[bake] reach hand '{h}' has no {ARM_BONES[h]} chain in this rig")
+                return 1
+    if reach:
+        prepare_stretch(arm, reach["hands"])
+    reach_d = Vector((0.0, 0.0, 0.0))       # film-plane offset (world) from the clip's hands to the target
+    reach_w = np.zeros(n)
+    reach_keys: list = []
+    reach_err = {h: np.zeros(n) for h in (reach["hands"] if reach else [])}
+    reach_tgt = {h: [None] * n for h in (reach["hands"] if reach else [])}
 
-    def apply_pose(i: int) -> None:
+    def posture(w: float, tgt: "Vector") -> None:
+        po = reach.get("posture") or {}
+        if not po or w <= 0.0:
+            return
+        body_turn(arm, "chest", float(po.get("lean", 0.0)) * w)
+        if po.get("look") and "head" in arm.pose.bones:
+            hd = arm.matrix_world @ arm.pose.bones["head"].head
+            dz = tgt.z - hd.z
+            flat = math.hypot(tgt.x - hd.x, tgt.y - hd.y)
+            pitch = -math.degrees(math.atan2(dz, max(flat, 0.15)))
+            body_turn(arm, "head", max(-40.0, min(40.0, pitch)) * w)
+        tip = float(po.get("tiptoe", 0.0)) * w
+        for f in ("foot.l", "foot.r"):
+            body_turn(arm, f, tip)
+
+    def apply_reach(i: int) -> None:
+        w = smooth_keys(reach_keys, times[i], dur, loop)
+        reach_w[i] = w
+        if w <= 0.0:
+            return
+        off = reach_d * w
+        # where the hand would be ON STAGE without the reach (the clip's own planted lift), plus the offset:
+        # the target is fixed in the stage frame, whatever lift the reach posture (tiptoe) ends up needing
+        lz = Vector((0.0, 0.0, float(lift0[i]) - float(lift[i])))
+        goals = {h: effector(arm, h) + lz + off for h in reach["hands"]}
+        mid = sum(goals.values(), Vector()) / len(goals)
+        posture(w, mid)
+        stretch = 1.0 + (float((reach.get("posture") or {}).get("stretch", 1.0)) - 1.0) * w
+        for h in reach["hands"]:
+            solve_arm(arm, h, goals[h], stretch_max=stretch)
+            reach_tgt[h][i] = goals[h]
+
+    def apply_pose(i: int, with_reach: bool = True) -> None:
         arm.location.z = float(lift[i])
         for b, name in enumerate(bones):
             pb = arm.pose.bones[name]
@@ -635,6 +813,54 @@ def main() -> int:
             show_face(faces_by_expr, face_at(face, times[i]))
         if props:
             show_props(props, times[i])
+        if reach and with_reach:
+            apply_reach(i)
+
+    if reach:
+        # 1. The clip's own floor contact without the reach (library clips sink into or float above the
+        #    floor on our bodies; the bake plants them) -> lift0, the stage frame the target lives in; and
+        #    where the clip puts the hands in every frame (planted).
+        clip_hand = []
+        for i in range(n):
+            apply_pose(i, with_reach=False)
+            low = min(p.z for p in mesh_points(meshes))
+            lift0[i] = -low if plant else max(0.0, -low)
+            lz0 = Vector((0.0, 0.0, float(lift0[i])))
+            clip_hand.append(sum((effector(arm, h) for h in reach["hands"]), Vector()) / len(reach["hands"]) + lz0)
+        # 2. The reference: where the CLIP has the hands at its contact -> one offset that carries them onto
+        #    the target in the film plane (depth untouched: the camera cannot see it). `ref_at`: seconds, or
+        #    "forward" (furthest toward where the body faces: a press / interact), "lowest" (a strike, a
+        #    pick-up), "highest", "mean" (centre the whole stroke on the target: sawing).
+        mode = reach.get("ref_at", 0.0)
+        if mode == "mean":
+            ref = sum(clip_hand, Vector()) / n
+            ref_i = min(range(n), key=lambda k: (clip_hand[k] - ref).length)
+        else:
+            if mode == "forward":
+                ref_i = min(range(n), key=lambda k: clip_hand[k].y)          # bodies face -Y
+            elif mode == "lowest":
+                ref_i = min(range(n), key=lambda k: clip_hand[k].z)
+            elif mode == "highest":
+                ref_i = max(range(n), key=lambda k: clip_hand[k].z)
+            else:
+                ref_i = min(range(n), key=lambda k: abs(times[k] - float(mode)))
+            ref = clip_hand[ref_i]
+        reach["ref_at"] = round(times[ref_i], 3) if mode != "mean" else "mean"
+        reach["_ref_i"] = ref_i
+        # weight: [[secs, w], ...], or {"around": {"in": s, "hold": s, "out": s}} — on only around the
+        # contact (a one-shot's wind-up and follow-through stay the library's)
+        wk = reach.get("weight", [])
+        if isinstance(wk, dict) and "around" in wk:
+            ar, tc = wk["around"], times[ref_i]
+            hi, ho = float(ar.get("hold", 0.2)) * 0.5, float(ar.get("hold", 0.2)) * 0.5
+            reach_keys[:] = [[tc - hi - float(ar.get("in", 0.3)), 0.0], [tc - hi, 1.0], [tc + ho, 1.0],
+                             [tc + ho + float(ar.get("out", 0.3)), 0.0]]
+        else:
+            reach_keys[:] = list(wk)
+        tu, tv = float(reach["to"][0]), float(reach["to"][1])
+        reach_d = right * (tu - ref.dot(right)) + up * (tv - ref.dot(up))
+        print(f"[bake] reach {reach['hands']} -> film ({tu:.3f}, {tv:.3f}) m from the clip's "
+              f"({ref.dot(right):.3f}, {ref.dot(up):.3f}) at {times[ref_i]:.2f}s")
 
     # The film window covers every pose in the clip — measured ON THE FILM, so a body lying along the
     # view axis still fits — and always includes the root on the floor, which becomes the anchor.
@@ -664,8 +890,19 @@ def main() -> int:
     print(f"[bake] {clip}: {n} frames @ {fps:g} fps over {dur:.2f}s, cell {w_px}x{h_px}, "
           f"anchor ({anchor[0]:.1f}, {anchor[1]:.1f}), {ppm:.1f} px/m")
 
+    def film_px(p: "Vector") -> list:
+        return [round((p.dot(right) - u0) * ppm, 2), round(h_px - (p.dot(up) - v0) * ppm, 2)]
+
+    hands_px = {h: [] for h in hands_of}
     for i in range(n):
         apply_pose(i)
+        for h in hands_of:
+            hands_px[h].append(film_px(effector(arm, h)))
+        for h in reach_err:
+            tg = reach_tgt[h][i]
+            if tg is not None:
+                dv = effector(arm, h) - tg                        # the target is world-fixed (lift-free)
+                reach_err[h][i] = math.hypot(dv.dot(right), dv.dot(up)) * ppm
         bpy.context.scene.render.filepath = os.path.join(out_dir, f"f{i:03d}.png")
         bpy.ops.render.render(write_still=True)
 
@@ -679,7 +916,24 @@ def main() -> int:
         "source_frames": [round(f, 3) for f in frames], "frames": n, "accent": accent,
         "recipe": {k: ({kk: vv for kk, vv in v.items() if kk not in ("action", "lib")} if isinstance(v, dict) and k != "tweak" else v)
                    for k, v in recipe.items()} if recipe else None,
+        # per-frame hand points (where a held prop sits), in cell pixels like `anchor`: the stage can put
+        # a prop IN a hand (show.gd prop `hand`)
+        "hands": hands_px,
     }
+    if reach:
+        full = [i for i in range(n) if reach_w[i] >= 0.99]
+        ref_i = int(reach.pop("_ref_i"))
+        meta["reach"] = {
+            "hands": reach["hands"], "to": reach["to"], "ref_at": reach.get("ref_at", 0.0),
+            "stage": reach.get("stage"),
+            "to_px": [round((float(reach["to"][0]) - u0) * ppm, 2), round(h_px - (float(reach["to"][1]) - v0) * ppm, 2)],
+            "w": [round(float(x), 3) for x in reach_w],
+            "err_px": {h: [round(float(x), 2) for x in reach_err[h]] for h in reach_err},
+            "contact_err_px": round(max(float(reach_err[h][ref_i]) for h in reach_err), 2),
+            "hold_max_err_px": round(max((float(reach_err[h][i]) for h in reach_err for i in full), default=0.0), 2),
+        }
+        print(f"[bake] reach: contact error {meta['reach']['contact_err_px']} px, worst while fully on "
+              f"{meta['reach']['hold_max_err_px']} px")
     with open(os.path.join(out_dir, "meta.json"), "w") as fh:
         json.dump(meta, fh, indent=2)
     print(f"[bake] {clip} -> {n} frames (accent {accent}, speed {speed:.2f} m/s) in {out_dir}")

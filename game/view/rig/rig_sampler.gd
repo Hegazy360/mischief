@@ -67,7 +67,8 @@ static func sample(clip: ClipDef, frame: float, out: PackedFloat32Array) -> void
 ## Plant lock between keys `ka` → `kb` at eased progress `e`: every foot planted at both
 ## keys gets its leg re-solved (2-bone IK in its chain parent's space, so root squash is
 ## handled) to put the ankle at the lerp of the two keyed ankles and the foot at the lerp of
-## their rotations. The knee bends the way the sampled lower bone does. Allocation-free.
+## their rotations (RigIK.two_bone). The knee bends the way the sampled lower bone does.
+## Allocation-free.
 static func plant(clip: ClipDef, ka: int, kb: int, e: float, out: PackedFloat32Array) -> void:
 	var rig := clip.rig
 	var nf := rig.feet.size()
@@ -79,30 +80,9 @@ static func plant(clip: ClipDef, ka: int, kb: int, e: float, out: PackedFloat32A
 		var ft := rig.feet[j]
 		var target := clip.plant_pos[ka * nf + j].lerp(clip.plant_pos[kb * nf + j], e)
 		var rot := lerp_angle(clip.plant_rot[ka * nf + j], clip.plant_rot[kb * nf + j], e)
-		var par := _world_of(rig, out, rig.parent[up])
-		var inv := par.affine_inverse()
-		var t := inv * target
-		var bu := RC + up * ST
-		var bl := RC + lo * ST
-		var h := rig.offset[up] + Vector2(out[bu + RigDef.C_X], out[bu + RigDef.C_Y])
-		var l1 := rig.offset[lo].length()
-		var l2 := rig.offset[ft].length()
-		var d := t - h
-		var dist := clampf(d.length(), absf(l1 - l2) + 0.001, l1 + l2 - 0.001)
-		var base := atan2(-d.x, d.y)
-		var a := acos(clampf((l1 * l1 + dist * dist - l2 * l2) / (2.0 * l1 * dist), -1.0, 1.0))
-		var g := acos(clampf((l1 * l1 + l2 * l2 - dist * dist) / (2.0 * l1 * l2), -1.0, 1.0))
-		var bend := 1.0 if out[bl + RigDef.C_ROT] >= 0.0 else -1.0
-		var upper := base - a * bend
-		var lower := (PI - g) * bend
-		var u0 := atan2(-rig.offset[lo].x, rig.offset[lo].y)
-		var l0 := atan2(-rig.offset[ft].x, rig.offset[ft].y)
-		var ur := upper - u0
-		var lr := lower + u0 - l0
-		out[bu + RigDef.C_ROT] = rad_to_deg(ur)
-		out[bl + RigDef.C_ROT] = rad_to_deg(lr)
-		var dirp := inv.basis_xform(Vector2(cos(rot), sin(rot)))
-		out[RC + ft * ST + RigDef.C_ROT] = rad_to_deg(wrapf(dirp.angle() - ur - lr, -PI, PI))
+		# The knee bends the way the sampled lower bone does.
+		var bend := 1.0 if out[RC + lo * ST + RigDef.C_ROT] >= 0.0 else -1.0
+		RigIK.two_bone(rig, out, up, lo, ft, target, rad_to_deg(rot), bend, 1.0, 1.0, Vector2.ZERO, false)
 
 
 ## World (character-space) transform of part `p` in `pose` (recursive walk up the parent

@@ -168,6 +168,20 @@ var breath_amp: float = 0.015
 var breath_period: float = 3.2
 var look_part: int = -1
 var look_max_deg: float = 20.0
+## Reach posture (rig.json `reach_posture`, docs/research/animation.md phase 3): how the body adapts when a
+## clip reach targets something high — RigPlayer step back / lean back / look / tiptoe / hop. Empty = none.
+##   chin        px above the feet where "high" starts (posture weight 0 → 1 over `span` px above it)
+##   span        px over which the posture ramps to full
+##   clear_fwd   px in front of the feet a high target should be (the body steps back up to `step_back`)
+##   step_back   px max step back       lean_back  torso degrees at full posture (negative = back)
+##   look_max    head degrees max (also the rig's head limits)   look_lag  s the head trails the eyes
+##   tiptoe      px the body rises on its toes   toe_deg  foot degrees (toes down)   toe_tex  foot texture
+##   stretch     arm stretch allowed when high   hop_max  px max hop for what tiptoe + stretch miss
+##   hop_hz      hops per second       pinch_px  glove within this of its goal → `pinch_tex`
+##   ease_s      seconds the posture eases in / out (the shuffle back, the straighten)
+##   low         px above the feet where "low" starts (crouch weight 0 → 1 over `low_span` px below it)
+##   crouch      px the hips drop at full crouch (knees bend, feet stay planted)   crouch_lean  torso degrees forward
+var reach_posture: Dictionary = {}
 var masks: Dictionary = {}             ## name → PackedStringArray
 ## Locomotion parts (1 = in): the root part, every foot and every ancestor of a foot. An
 ## overlay clip never writes them (RigPlayer), so a micro-gag over a walk keeps the walk's
@@ -1084,6 +1098,19 @@ func _parse_misc(d: Dictionary) -> void:
 	var ld: Dictionary = lv if lv is Dictionary else {}
 	look_part = idx(String(ld.get("part", "head")))
 	look_max_deg = float(ld.get("max_deg", 20.0))
+	var rpv: Variant = d.get("reach_posture", {})
+	if rpv is Dictionary and not (rpv as Dictionary).is_empty():
+		var rp: Dictionary = rpv
+		const DEFAULTS := {"chin": 200.0, "span": 120.0, "clear_fwd": 80.0, "step_back": 60.0, "lean_back": -14.0,
+			"look_max": 35.0, "look_lag": 0.12, "tiptoe": 14.0, "toe_deg": 22.0, "toe_tex": "tiptoe",
+			"stretch": 1.3, "hop_max": 70.0, "hop_hz": 1.7, "pinch_px": 8.0, "pinch_tex": "pinch", "ease_s": 0.25,
+			"low": 90.0, "low_span": 60.0, "crouch": 50.0, "crouch_lean": 20.0}
+		for k in rp:
+			if not DEFAULTS.has(String(k)):
+				errors.append("%s: reach_posture: unknown key '%s'" % [_where(), k])
+		for k2 in DEFAULTS:
+			var dv: Variant = DEFAULTS[k2]
+			reach_posture[k2] = String(rp.get(k2, dv)) if dv is String else float(rp.get(k2, dv))
 	var mv: Variant = d.get("masks", {})
 	if mv is Dictionary:
 		for mn in mv:

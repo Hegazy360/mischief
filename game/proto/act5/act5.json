@@ -151,7 +151,7 @@
    "t": 9.1,
    "do": "clip",
    "who": "gus",
-   "name": "interact",
+   "name": "interact_wardrobe",
    "dir": -1
   },
   {
@@ -165,7 +165,7 @@
    "t": 10.4,
    "do": "clip",
    "who": "hush",
-   "name": "pickup",
+   "name": "pickup_clock",
    "dir": -1
   },
   {
@@ -192,11 +192,18 @@
    "t": 10.5,
    "do": "clip",
    "who": "gus",
-   "name": "interact",
+   "name": "interact_wardrobe",
    "dir": -1
   },
   {
    "t": 10.8,
+   "do": "prop",
+   "name": "clock",
+   "ride": "hush",
+   "hand": "l"
+  },
+  {
+   "t": 11.15,
    "do": "prop",
    "name": "clock",
    "dx": -32,
@@ -204,7 +211,8 @@
    "arc": 60,
    "rot": -20,
    "secs": 0.5,
-   "ease": "out"
+   "ease": "out",
+   "ride": ""
   },
   {
    "t": 11.0,
@@ -214,7 +222,7 @@
    "secs": 1.8
   },
   {
-   "t": 11.35,
+   "t": 11.6,
    "do": "prop",
    "name": "clock",
    "vis": false
@@ -291,7 +299,7 @@
    "t": 15.8,
    "do": "clip",
    "who": "hush",
-   "name": "tinker",
+   "name": "tinker_bed",
    "dir": 1
   },
   {
@@ -482,7 +490,7 @@
    "t": 28.45,
    "do": "clip",
    "who": "gus",
-   "name": "interact",
+   "name": "interact_switch",
    "dir": -1
   },
   {

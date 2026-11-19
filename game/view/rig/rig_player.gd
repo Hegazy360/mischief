@@ -12,8 +12,10 @@
 ##
 ## Layers, evaluated every frame (comedy.md §5.3): base clip (crossfaded, default 6 f;
 ## `blend_in: 0` = pose pop) → masked overlay clip → additive clip → procedural additive
-## (breathing, shiver, look-at, rot jitter) → face (keyed presets, runtime overrides, seeded
-## blinks, pupils) → residue textures → springs → joint limits → FK → props → smears.
+## (breathing, shiver, look-at, rot jitter) → clip reach (`set_target`) → limb goals (2-bone IK:
+## `set_goal`) → face (keyed
+## presets, runtime overrides, seeded blinks, pupils) → residue textures → springs → joint limits
+## → FK → props → smears.
 ##
 ##   var p := RigPlayer.new(); add_child(p); p.setup("_mannequin")
 ##   p.play("_mannequin/loco_walk", {"speed": 225.0})
@@ -52,6 +54,13 @@ const GHOST_ALPHA_2 := 0.25
 const TURN_FRAMES := 6.0
 const TURN_MIN := 0.15
 const LOOK_RATE := 12.0
+## Clip reach: the elbow keeps its last side while the clip's own bend is within this of straight.
+const BEND_DEAD_DEG := 12.0
+## Clip reach: the last fraction of the arm's reach is eased (RigIK `soft`), so a toss that sweeps past
+## arm's length never snaps the elbow straight.
+const REACH_SOFT := 0.12
+## Clip reach: solved joints may outpace the clip's own joints by this many degrees per frame.
+const REACH_RATE_DEG := 24.0
 const HITSTOP_SHAKE_PX := 3.0
 
 const RC := RigDef.ROOT_CH
@@ -127,6 +136,28 @@ var _clip_df: float = 0.0
 var _ov: _Layer = _Layer.new()
 var _ov_prev: _Layer = _Layer.new()
 var _ad: _Layer = _Layer.new()
+## Limb goals, one per 2-bone limb in rig.json `limbs` (built in setup()).
+var _goals: Array[_Goal] = []
+var _goals_live: int = 0
+var _reach_live: bool = false
+## Why the last frame's clip reach was skipped ("" = it ran or there was none): viewer / tests.
+var _reach_skip: String = ""
+## Reach posture state (eased): weight 0..1, step back px, look weight, hop px, head degrees, hop clock,
+## the target it follows (character space) and the pupils' pull toward it.
+var _po_w: float = 0.0
+var _po_back: float = 0.0
+var _po_look: float = 0.0
+var _po_hop: float = 0.0
+var _po_head: float = 0.0
+var _hop_t: float = 0.0
+var _po_tc: Vector2 = Vector2.ZERO
+var _reach_pupil: Vector2 = Vector2.ZERO
+var _po_low: float = 0.0
+## Crouch scratch: each foot's position / rotation before the hips drop (sized in setup).
+var _feet_pos: PackedVector2Array = PackedVector2Array()
+var _feet_rot: PackedFloat32Array = PackedFloat32Array()
+## Named world points for clip `reach` blocks (set_target): name → global position.
+var _targets: Dictionary = {}
 
 var _time_s: float = 0.0
 var _shiver_f: float = 0.0
@@ -289,6 +320,45 @@ class _Layer extends RefCounted:
 		return w * w * (3.0 - 2.0 * w)
 
 
+## One limb goal (set_goal): a 2-bone chain whose effector (the end part's joint or a socket on
+## it) is pulled to a world-space target by RigIK, blended in / out over `bi` / `bo` frames.
+class _Goal extends RefCounted:
+	var limb: String = ""
+	var up: int = -1
+	var lo: int = -1
+	var end: int = -1
+	var tip: Vector2 = Vector2.ZERO
+	var target: Vector2 = Vector2.ZERO       ## world (global) position asked for
+	var cur: Vector2 = Vector2.INF           ## world position being reached (follow smoothing)
+	var follow: float = 0.0                  ## 1/s smoothing toward `target` (0 = exact)
+	var end_deg: float = NAN                 ## world rotation of the end part (NAN = keep local)
+	var bend: float = 0.0                    ## 0 = auto (RigIK.two_bone)
+	var stretch: float = 1.0
+	var limits: bool = true
+	var w: float = 0.0                       ## linear blend 0..1 (applied smoothstepped × w_max)
+	var w_max: float = 1.0
+	var on: bool = false
+	var bi: float = 8.0
+	var bo: float = 8.0
+	var err: float = 0.0                     ## px (character space) at the last update
+	var reach_w: float = 0.0                 ## clip reach weight applied last frame (0 = none)
+	var reach_err: float = 0.0               ## clip reach: px from the shifted grip last frame
+	var reach_stretch: float = 1.0
+	var pre_eff: Vector2 = Vector2.ZERO        ## clip reach: the effector BEFORE the posture moved the body
+	var bend_last: float = 0.0                 ## clip reach: the elbow side last used (hysteresis; 0 = none yet)
+	## Clip reach rate limit: last frame's solved upper / lower angles and the clip's own (pre-IK) angles.
+	var prev_ok: bool = false
+	var rate_seen: bool = false                ## touched by a reach this frame (else prev_ok resets)
+	var prev_up: float = 0.0
+	var prev_lo: float = 0.0
+	var clip_up: float = 0.0
+	var clip_lo: float = 0.0
+	var used_stretch: float = 1.0
+
+	func weight() -> float:
+		return w * w * (3.0 - 2.0 * w) * w_max
+
+
 ## One triangle-array run: consecutive limbs + limb-end parts on one page.
 class _Run extends RefCounted:
 	var page: int = -1
@@ -402,6 +472,18 @@ func setup(p_rig_id: String, p_skin: String = "") -> void:
 	_facing = 1
 	_fsx = 1.0
 	_turn_t = -1.0
+	_setup_goals()
+	_targets.clear()
+	_po_w = 0.0
+	_po_back = 0.0
+	_po_look = 0.0
+	_po_hop = 0.0
+	_po_head = 0.0
+	_hop_t = 0.0
+	_reach_pupil = Vector2.ZERO
+	_po_low = 0.0
+	_feet_pos.resize(rig.feet.size())
+	_feet_rot.resize(rig.feet.size())
 	_build_draw_cache()
 	_register_set(atlas)
 	RigSampler.solve(rig, _pose, _xf)
@@ -847,6 +929,442 @@ func look_toward(world_pos: Vector2, weight: float) -> void:
 	_look_on = _look_w > 0.0
 
 
+# --- limb goals (IK) ---------------------------------------------------------------------------
+
+## Pull limb `limb` (a rig.json `limbs` id with 3 joints: "arm_r", "leg_l"…) so its effector
+## reaches `world_pos` (global). The goal blends in over `blend_f` frames from wherever the clip
+## has the limb, and keeps tracking every frame (move_goal() to retarget without allocating).
+## Options:
+##   socket   "part:socket" on the end part used as the effector (default "<end>:grip" when the
+##            rig has it, else the end joint); "" = the end joint.
+##   weight   max blend weight 0..1 (1).          blend_f   frames to blend in (8).
+##   end_deg  world rotation of the end part in degrees (default: keeps its clip rotation).
+##   bend     +1 / −1 elbow side (default: from the joint limits / the clip pose).
+##   stretch  rubber-hose stretch allowed past the limb's length (1 = rigid; 1.3 = cartoon).
+##   follow   1/s smoothing of the target (0 = exact; 12 ≈ a quick reach toward a moving point).
+##   limits   respect rig.json joint limits (true).
+## Returns false when the rig has no such 2-bone limb.
+func set_goal(limb: String, world_pos: Vector2, opts: Dictionary = {}) -> bool:
+	var g := _goal(limb)
+	if g == null:
+		return false
+	var sock := String(opts.get("socket", "%s:grip" % rig.names[g.end]))
+	var si := rig.socket_index(sock) if sock != "" else -1
+	g.tip = RigIK.socket_tip(rig, si) if si >= 0 and rig.socket_part[si] == g.end else Vector2.ZERO
+	g.target = world_pos
+	g.follow = maxf(0.0, float(opts.get("follow", 0.0)))
+	if not g.on or g.follow <= 0.0:
+		g.cur = Vector2.INF
+	g.end_deg = float(opts.get("end_deg", NAN))
+	g.bend = signf(float(opts.get("bend", 0.0)))
+	g.stretch = maxf(1.0, float(opts.get("stretch", 1.0)))
+	g.limits = bool(opts.get("limits", true))
+	g.w_max = clampf(float(opts.get("weight", 1.0)), 0.0, 1.0)
+	g.bi = maxf(0.0, float(opts.get("blend_f", 8.0)))
+	if g.bi <= 0.0:
+		g.w = 1.0
+	g.on = true
+	_count_goals()
+	return true
+
+
+## Name a world point (global) for clip `reach` blocks: every playing clip whose reach targets
+## `name` carries its hands there (ClipDef.reach_*). Call every frame to follow a moving point;
+## re-setting an existing name allocates nothing.
+func set_target(name: String, world_pos: Vector2) -> void:
+	_targets[name] = world_pos
+
+
+## Forget a reach target: clips reaching for it play as authored again (their reach weight curve
+## still blends, so a release mid-reach eases back over the clip's own frames).
+func clear_target(name: String) -> void:
+	_targets.erase(name)
+
+
+## The world point set for `name` (Vector2.INF when none).
+func target_of(name: String) -> Vector2:
+	return _targets.get(name, Vector2.INF)
+
+
+## Clip reach on `limb` last frame: Vector3(weight applied 0..1, px from the shifted grip, stretch).
+func reach_info(limb: String) -> Vector3:
+	var g := _goal(limb)
+	if g == null:
+		return Vector3(0.0, 0.0, 1.0)
+	return Vector3(g.reach_w, g.reach_err, g.reach_stretch)
+
+
+## True when some clip reach moved a limb last frame.
+func is_reaching() -> bool:
+	return _reach_live
+
+
+## The crouch weight last frame (0..1; low targets).
+func crouch_weight() -> float:
+	return _po_low
+
+
+## The reach posture last frame: (weight 0..1, step back px, hop px, head degrees) — 0 = none.
+func posture_info() -> Vector4:
+	return Vector4(_po_w, _po_back, _po_hop, _po_head * _po_look)
+
+
+## Why the clip reach did nothing last frame ("" = it ran, or no clip reaches for a set target).
+func reach_skipped() -> String:
+	return _reach_skip
+
+
+## Retarget an active goal (allocation-free; call every frame to track a moving point).
+func move_goal(limb: String, world_pos: Vector2) -> void:
+	var g := _goal(limb)
+	if g != null:
+		g.target = world_pos
+
+
+## Release a goal: the limb blends back to the clip over `blend_f` frames (-1 = 8).
+func clear_goal(limb: String, blend_f: float = -1.0) -> void:
+	var g := _goal(limb)
+	if g == null or not g.on:
+		return
+	g.on = false
+	g.bo = 8.0 if blend_f < 0.0 else blend_f
+	if g.bo <= 0.0:
+		g.w = 0.0
+	_count_goals()
+
+
+## Release every goal at once (no blend).
+func clear_goals() -> void:
+	for g in _goals:
+		g.on = false
+		g.w = 0.0
+	_goals_live = 0
+
+
+## True while a goal on `limb` is on or still blending out.
+func has_goal(limb: String) -> bool:
+	var g := _goal(limb)
+	return g != null and (g.on or g.w > 0.0)
+
+
+## The goal's applied weight this frame (0..1).
+func goal_weight(limb: String) -> float:
+	var g := _goal(limb)
+	return g.weight() if g != null else 0.0
+
+
+## How far (px, character space) the effector ended from the goal last frame — 0 when reached;
+## > 0 when the target is out of reach, the joint limits stop it, or the goal is blending.
+func goal_error(limb: String) -> float:
+	var g := _goal(limb)
+	return g.err if g != null else 0.0
+
+
+## The stretch factor the goal used last frame (1 = none).
+func goal_stretch(limb: String) -> float:
+	var g := _goal(limb)
+	return g.used_stretch if g != null else 1.0
+
+
+## The world position the goal is currently reaching for (the smoothed target).
+func goal_target(limb: String) -> Vector2:
+	var g := _goal(limb)
+	if g == null:
+		return Vector2.INF
+	return g.cur if g.cur != Vector2.INF else g.target
+
+
+## Limb ids that can take a goal on this rig.
+func goal_limbs() -> PackedStringArray:
+	var out := PackedStringArray()
+	for g in _goals:
+		out.append(g.limb)
+	return out
+
+
+func _goal(limb: String) -> _Goal:
+	for g in _goals:
+		if g.limb == limb:
+			return g
+	return null
+
+
+func _count_goals() -> void:
+	_goals_live = 0
+	for g in _goals:
+		if g.on or g.w > 0.0:
+			_goals_live += 1
+
+
+func _setup_goals() -> void:
+	_goals.clear()
+	_goals_live = 0
+	for l in rig.limbs:
+		if l.joints.size() != 3:
+			continue
+		var ch := RigIK.chain_of(rig, l.joints[2])
+		if ch.x < 0 or ch.x != l.joints[0] or ch.y != l.joints[1]:
+			continue
+		var g := _Goal.new()
+		g.limb = l.id
+		g.up = ch.x
+		g.lo = ch.y
+		g.end = ch.z
+		_goals.append(g)
+
+
+func _apply_reaches(vdt: float) -> void:
+	_reach_skip = ""
+	for g in _goals:
+		g.reach_w = 0.0
+		g.reach_err = 0.0
+		g.reach_stretch = 1.0
+		g.rate_seen = false
+	var node := global_transform if is_inside_tree() else transform
+	var to_char := (node * _char_xf()).affine_inverse()
+	var bc: ClipDef = null
+	var bf := 0.0
+	var oc: ClipDef = null
+	var of := 0.0
+	if _plan != null:
+		var c := _plan.clip_at(_frame)
+		if c.has_reach() and _targets.has(c.reach_target):
+			bc = c
+			bf = _plan.src_frame(_frame) if not _plan.in_tail(_frame) else _frame - float(_plan.tail_start)
+	if _ov.plan != null and _ov.w > 0.0:
+		var c2 := _ov.plan.clip_at(_ov.frame)
+		if c2.has_reach() and _targets.has(c2.reach_target):
+			oc = c2
+			of = _ov.plan.src_frame(_ov.frame) if not _ov.plan.in_tail(_ov.frame) else _ov.frame - float(_ov.plan.tail_start)
+	# Where the clips put the gloves before the posture moves the body: the reach offset is measured from
+	# there, so stepping back / tiptoe / a hop never carries the glove past the target.
+	_note_pre_eff(bc)
+	_note_pre_eff(oc)
+	# The posture follows one driving reach (the base clip's, else the overlay's).
+	if not rig.reach_posture.is_empty():
+		var dc := bc if bc != null else oc
+		var dw := 0.0
+		var tc := Vector2.ZERO
+		if dc != null:
+			dw = dc.reach_weight(bf if dc == bc else of) * (_fade_w if dc == bc else _ov.weight())
+			tc = to_char * (_targets[dc.reach_target] as Vector2)
+		_posture(dc, tc, dw, vdt)
+	if bc != null:
+		_apply_reach(bc, bf, _fade_w, to_char)
+	if oc != null:
+		_apply_reach(oc, of, _ov.weight(), to_char)
+	for g in _goals:
+		if not g.rate_seen:
+			g.prev_ok = false
+
+
+func _note_pre_eff(c: ClipDef) -> void:
+	if c == null:
+		return
+	for i in c.reach_ends.size():
+		var g := _goal(c.reach_limbs[i])
+		if g != null:
+			g.pre_eff = RigIK.effector(rig, _pose, g.end, c.reach_tips[i])
+
+
+## Reach posture (rig.json `reach_posture`): when the driving reach's target is above the chin line,
+## the body adapts — eased in and out over `ease_s` so arriving reads as a shuffle and leaving as a
+## straighten: step back (root x) until the target is `clear_fwd` in front, straighten / lean the torso
+## back, tiptoe (root up, feet toes-down + their tiptoe texture), look at it (pupils at once, the head
+## `look_lag` behind), and hop for what tiptoe + stretch still miss. Runs on its own while easing out.
+func _posture(dc: ClipDef, tc: Vector2, w: float, vdt: float) -> void:
+	var P := rig.reach_posture
+	var active := dc != null and w > 0.0
+	var up := 0.0
+	var low := 0.0
+	var back := 0.0
+	var look := 0.0
+	if active:
+		if dc.reach_max_height > 0.0 and -tc.y > dc.reach_max_height:
+			active = false
+		else:
+			up = clampf((-tc.y - float(P["chin"])) / maxf(1.0, float(P["span"])), 0.0, 1.0) * clampf(w, 0.0, 1.0)
+			back = clampf(float(P["clear_fwd"]) - tc.x, 0.0, float(P["step_back"])) * up
+			low = clampf((float(P["low"]) + tc.y) / maxf(1.0, float(P["low_span"])), 0.0, 1.0) * clampf(w, 0.0, 1.0)
+			look = maxf(maxf(up, low), 0.6 * clampf(w, 0.0, 1.0))
+			_po_tc = tc
+	var k := 1.0 - exp(-vdt / maxf(0.01, float(P["ease_s"])))
+	_po_w = lerpf(_po_w, up, k)
+	_po_back = lerpf(_po_back, back, k)
+	_po_look = lerpf(_po_look, look, k)
+	_po_low = lerpf(_po_low, low, k)
+	if not active and _po_w < 0.002 and _po_look < 0.002 and _po_low < 0.002:
+		_po_w = 0.0
+		_po_low = 0.0
+		_po_back = 0.0
+		_po_look = 0.0
+		_po_hop = 0.0
+		_po_head = 0.0
+		_hop_t = 0.0
+		_reach_pupil = Vector2.ZERO
+		return
+	var pw := _po_w
+	# Step back and rise on the toes.
+	_pose[RigDef.R_X] -= _po_back
+	_pose[RigDef.R_Y] -= float(P["tiptoe"]) * pw
+	var toe_deg := float(P["toe_deg"]) * pw
+	for ft in rig.feet:
+		var fb := RC + ft * ST
+		_pose[fb + RigDef.C_ROT] += toe_deg
+		if pw > 0.5:
+			var ti := rig.tex_index(ft, String(P["toe_tex"]))
+			if ti >= 0:
+				_pose[fb + RigDef.C_TEX] = float(ti)
+	# Straighten up: the torso leans back instead of hunching over the work.
+	var torso := rig.parent[rig.look_part] if rig.look_part >= 0 else -1
+	if torso >= 0:
+		var tb := RC + torso * ST
+		_pose[tb] = lerpf(_pose[tb], float(P["lean_back"]), pw)
+	# Crouch for low targets: the hips drop, the torso leans in, and the legs are re-solved so the
+	# feet stay exactly where they were (knees bend the way they already do).
+	if _po_low > 0.002:
+		var nf := rig.feet.size()
+		for j in nf:
+			if rig.foot_upper[j] >= 0:
+				var fx := RigSampler._world_of(rig, _pose, rig.feet[j])
+				_feet_pos[j] = fx.origin
+				_feet_rot[j] = rad_to_deg(fx.get_rotation())
+		_pose[RigDef.R_Y] += float(P["crouch"]) * _po_low
+		if torso >= 0:
+			_pose[RC + torso * ST] += float(P["crouch_lean"]) * _po_low
+		for j in nf:
+			var up_i := rig.foot_upper[j]
+			if up_i >= 0:
+				var lo_i := rig.foot_lower[j]
+				var bend := 1.0 if _pose[RC + lo_i * ST + RigDef.C_ROT] >= 0.0 else -1.0
+				RigIK.two_bone(rig, _pose, up_i, lo_i, rig.feet[j], _feet_pos[j], _feet_rot[j], bend, 1.0, 1.0, Vector2.ZERO, true)
+	# Hop for what tiptoe + stretch still miss (the arm the driving clip lists first).
+	var hop_want := 0.0
+	if active and pw > 0.3:
+		var g := _goal(dc.reach_limbs[0])
+		if g != null:
+			var sh := RigSampler._world_of(rig, _pose, g.up).origin
+			var v1 := rig.offset[g.lo].length()
+			var v2 := (rig.offset[g.end] + dc.reach_tips[0]).length()
+			var cap := (v1 + v2) * float(P["stretch"])
+			hop_want = clampf(sh.distance_to(tc) - cap + 16.0, 0.0, float(P["hop_max"]))
+	_po_hop = lerpf(_po_hop, hop_want, k)
+	if _po_hop > 0.5:
+		_hop_t += vdt
+		# A hop spends its time near the floor and touches at the top (sin^1.6: a quick tap, not a hang).
+		_pose[RigDef.R_Y] -= _po_hop * pow(absf(sin(PI * float(P["hop_hz"]) * _hop_t)), 1.6)
+	else:
+		_hop_t = 0.0
+	# Look: the pupils go straight to the target, the head follows `look_lag` later.
+	if rig.look_part >= 0:
+		var head := RigSampler._world_of(rig, _pose, rig.look_part)
+		var d := _po_tc - head.origin
+		var world_deg := rad_to_deg(atan2(d.y, maxf(d.x, 30.0)))
+		var torso_deg := rad_to_deg(RigSampler._world_of(rig, _pose, torso).get_rotation()) if torso >= 0 else 0.0
+		var lm := float(P["look_max"])
+		var want := clampf(world_deg - torso_deg, -lm, lm)
+		_po_head = lerpf(_po_head, want, 1.0 - exp(-vdt / maxf(0.01, float(P["look_lag"]))))
+		var hb := RC + rig.look_part * ST
+		_pose[hb] = lerpf(_pose[hb], _po_head, _po_look)
+		_reach_pupil = d.normalized() * _po_look if d.length() > 1.0 else Vector2.ZERO
+
+
+## One clip's reach at clip frame `f` × layer weight `lw`: every listed limb's grip moves by the
+## same offset (target − the clip's reference grip) × weight, re-solved by RigIK (stretching further
+## while the reach posture is on, and pinching the glove on contact).
+func _apply_reach(c: ClipDef, f: float, lw: float, to_char: Transform2D) -> void:
+	var w := c.reach_weight(f) * clampf(lw, 0.0, 1.0)
+	if w <= 0.0:
+		return
+	var tc: Vector2 = to_char * (_targets[c.reach_target] as Vector2)
+	if c.reach_max_height > 0.0 and -tc.y > c.reach_max_height:
+		_reach_skip = "above max_height"
+		return
+	var d: Vector2 = tc - c.reach_ref
+	if d.length() > c.reach_max_px:
+		_reach_skip = "beyond max_px"
+		return
+	var P := rig.reach_posture
+	var stretch := c.reach_stretch
+	var pinch := -1
+	if not P.is_empty():
+		stretch = maxf(stretch, 1.0 + (float(P["stretch"]) - 1.0) * _po_w)
+	for i in c.reach_ends.size():
+		var g := _goal(c.reach_limbs[i])
+		if g == null:
+			continue
+		var tip := c.reach_tips[i]
+		var want := g.pre_eff + d * w
+		# Elbow side with hysteresis: follow the clip's own bend, but an arm passing through straight
+		# (|turn| < BEND_DEAD_DEG) keeps the side it had, so the solution never flips mid-swing.
+		var turn := RigIK.bend_turn(rig, _pose, g.up, g.lo, g.end, tip)
+		var bend := g.bend_last
+		if absf(turn) >= BEND_DEAD_DEG or bend == 0.0:
+			bend = 1.0 if turn >= 0.0 else -1.0
+		g.bend_last = bend
+		var bu := RC + g.up * ST + RigDef.C_ROT
+		var bl := RC + g.lo * ST + RigDef.C_ROT
+		var cu := _pose[bu]
+		var cl := _pose[bl]
+		var res := RigIK.two_bone(rig, _pose, g.up, g.lo, g.end, want, NAN, bend, 1.0, stretch, tip, true, REACH_SOFT)
+		# Rate limit: the solved joints may turn at most REACH_RATE_DEG per frame faster than the clip's own
+		# joints do this frame — a target that sweeps past arm's length lags for a frame or two instead of
+		# snapping (the matrix measures this as "pop").
+		if g.prev_ok:
+			var allow_u := absf(wrapf(cu - g.clip_up, -180.0, 180.0)) + REACH_RATE_DEG
+			var allow_l := absf(wrapf(cl - g.clip_lo, -180.0, 180.0)) + REACH_RATE_DEG
+			var du := wrapf(_pose[bu] - g.prev_up, -180.0, 180.0)
+			var dl := wrapf(_pose[bl] - g.prev_lo, -180.0, 180.0)
+			if absf(du) > allow_u:
+				_pose[bu] = g.prev_up + signf(du) * allow_u
+			if absf(dl) > allow_l:
+				_pose[bl] = g.prev_lo + signf(dl) * allow_l
+		g.prev_ok = true
+		g.rate_seen = true
+		g.prev_up = _pose[bu]
+		g.prev_lo = _pose[bl]
+		g.clip_up = cu
+		g.clip_lo = cl
+		g.reach_w = w
+		g.reach_err = res.x
+		g.reach_stretch = res.y
+		_reach_live = true
+		if not P.is_empty() and _po_w > 0.3 and res.x <= float(P["pinch_px"]):
+			pinch = rig.tex_index(g.end, String(P["pinch_tex"]))
+			if pinch >= 0:
+				_pose[RC + g.end * ST + RigDef.C_TEX] = float(pinch)
+
+
+func _update_goals(vdt: float) -> void:
+	var frames := vdt * 60.0
+	var node := global_transform if is_inside_tree() else transform
+	var to_char := (node * _char_xf()).affine_inverse()
+	var live := 0
+	for g in _goals:
+		if g.on:
+			g.w = minf(1.0, g.w + (frames / g.bi if g.bi > 0.0 else 1.0))
+		elif g.w > 0.0:
+			g.w = maxf(0.0, g.w - (frames / g.bo if g.bo > 0.0 else 1.0))
+		if not g.on and g.w <= 0.0:
+			g.err = 0.0
+			g.used_stretch = 1.0
+			continue
+		live += 1
+		if g.follow > 0.0 and g.cur != Vector2.INF:
+			g.cur = g.cur.lerp(g.target, 1.0 - exp(-g.follow * vdt))
+		else:
+			g.cur = g.target
+		var t := to_char * g.cur
+		var ed := NAN
+		if not is_nan(g.end_deg):
+			var r := deg_to_rad(g.end_deg)
+			ed = rad_to_deg(to_char.basis_xform(Vector2(cos(r), sin(r))).angle())
+		var res := RigIK.two_bone(rig, _pose, g.up, g.lo, g.end, t, ed, g.bend, g.weight(), g.stretch, g.tip, g.limits)
+		g.used_stretch = res.y
+		g.err = res.x
+	_goals_live = live
+
+
 ## Show a fixed pose (no clip): tools, pose sheets, AnimViewer's pose mode. Layers on top
 ## (breathing, springs, face, props) still apply.
 func set_static_pose(pose: PackedFloat32Array) -> void:
@@ -1265,8 +1783,15 @@ func _update_pose(vdt: float) -> void:
 	_update_look(vdt)
 	if _look_head != 0.0:
 		RigSampler.look(rig, _pose, _look_head, Vector2.ZERO)
+	# 4b. clip reach (the clip's hands carried onto set_target points), then code goals (IK over
+	#     everything above: the clip's arc, the overlay, the look)
+	_reach_live = false
+	if not _targets.is_empty() or _po_w > 0.0 or _po_look > 0.0:
+		_apply_reaches(vdt)
+	if _goals_live > 0:
+		_update_goals(vdt)
 	# 5. face
-	face.look = _look_pupil
+	face.look = (_look_pupil + _reach_pupil).limit_length(1.0) if _reach_pupil != Vector2.ZERO else _look_pupil
 	face.apply(_pose)
 	# 6. part texture overrides (set_part_texture), then residue textures — each only over a
 	#    part's default texture (a clip's explicit swap wins) — and face overlays (sweat,

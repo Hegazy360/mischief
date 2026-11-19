@@ -207,7 +207,7 @@ func _restart() -> void:
 	_props.clear()
 	for name: String in _prop_names:
 		_props[name] = {"dx": 0.0, "dy": 0.0, "rot": 0.0, "vis": name in (_tl.get("props_visible", []) as Array),
-			"path": {}, "ride": "", "rx": 0.0, "ry": 0.0}
+			"path": {}, "ride": "", "rx": 0.0, "ry": 0.0, "hand": "", "hoff": Vector2.ZERO, "name": name}
 	_actors.clear()
 	for who: String in (_tl.get("start", {}) as Dictionary):
 		var st: Dictionary = _tl["start"][who]
@@ -420,9 +420,13 @@ func _apply(e: Dictionary) -> void:
 			if e.has("vis"):
 				pr["vis"] = bool(e["vis"])
 			if e.has("ride"):
-				# ride an actor: from now on the prop moves with them (a pancake on a head)
+				# ride an actor: from now on the prop moves with them (a pancake on a head); with "hand"
+				# ("r" / "l") it sits IN that hand, frame by frame (the baked hand points), offset by "hoff"
 				_settle_ride(pr)
 				pr["ride"] = str(e["ride"])
+				pr["hand"] = str(e.get("hand", ""))
+				var ho: Array = e.get("hoff", [0, 0])
+				pr["hoff"] = Vector2(float(ho[0]), float(ho[1]))
 				if pr["ride"] != "":
 					var ra: Actor = _actors[pr["ride"]]
 					pr["rx"] = ra.x
@@ -518,10 +522,45 @@ func _ay(a: Actor) -> float:
 	return a.y + _tv(a.lift)
 
 
+## Where `who`'s hand is on the stage right now (stage px; Vector2.INF when the clip has no hand
+## data): the baked hand point of the current frame — where a held prop sits — placed exactly as
+## _draw_actor places the sprite (anchor on the feet, CAST_SCALE, mirrored when facing the other way).
+## Props ride it (prop `hand`); tests/stage/test_stage_reach.gd measures reaches with it.
+func hand_point(who: String, side: String = "r") -> Vector2:
+	var a: Actor = _actors.get(who)
+	if a == null:
+		return Vector2.INF
+	var info := _clip(a.who, a.clip)
+	var hands: Dictionary = info.get("hands", {})
+	if not hands.has(side):
+		return Vector2.INF
+	var pts: Array = hands[side]
+	var fr := _frame_at(info, a.t)
+	if fr < 0 or fr >= pts.size():
+		return Vector2.INF
+	var anc: Array = info.get("anchor", [0.0, 0.0])
+	var flip := a.dir * int((_cast()[a.who] as Dictionary).get("faces", 1)) < 0
+	var d := Vector2(float(pts[fr][0]) - float(anc[0]), float(pts[fr][1]) - float(anc[1])) * CAST_SCALE
+	if flip:
+		d.x = -d.x
+	return Vector2(a.x, _floor() - _ay(a)) + d
+
+
+## A prop riding a hand: where it is drawn (INF when it is not riding a hand).
+func _hand_prop_at(pr: Dictionary) -> Vector2:
+	var side := str(pr.get("hand", ""))
+	if side == "" or str(pr.get("ride", "")) == "":
+		return Vector2.INF
+	var hp := hand_point(str(pr["ride"]), side)
+	if hp == Vector2.INF:
+		return Vector2.INF
+	return hp + (pr.get("hoff", Vector2.ZERO) as Vector2)
+
+
 ## Where a riding prop has been carried to, relative to its pivot.
 func _ride_off(pr: Dictionary) -> Vector2:
 	var who := str(pr.get("ride", ""))
-	if who == "":
+	if who == "" or str(pr.get("hand", "")) != "":
 		return Vector2.ZERO
 	var a: Actor = _actors[who]
 	return Vector2(a.x - float(pr["rx"]), -(_ay(a) - float(pr["ry"])))
@@ -529,6 +568,16 @@ func _ride_off(pr: Dictionary) -> Vector2:
 
 ## Fold the carried offset into the prop's own offset (when it stops riding or starts a new ride).
 func _settle_ride(pr: Dictionary) -> void:
+	if str(pr.get("hand", "")) != "":
+		var at := _hand_prop_at(pr)
+		pr["hand"] = ""
+		pr["ride"] = ""
+		if at != Vector2.INF:
+			var piv := _piv(str(pr.get("name", "")))
+			pr["dx"] = at.x - piv.x
+			pr["dy"] = at.y - piv.y
+			pr["path"] = {}
+		return
 	var o := _ride_off(pr)
 	pr["dx"] = float(pr["dx"]) + o.x
 	pr["dy"] = float(pr["dy"]) + o.y
@@ -805,6 +854,9 @@ func _draw_prop(name: String) -> void:
 	var pos := Vector2(float(L["pos"][0]), float(L["pos"][1]))
 	var piv := _piv(name)
 	var at := piv + Vector2(float(pr["dx"]), float(pr["dy"])) + _ride_off(pr)
+	var held := _hand_prop_at(pr)
+	if held != Vector2.INF:
+		at = held
 	_xform(at, deg_to_rad(float(pr["rot"])), 1.0)
 	draw_texture(tex, pos - piv)
 	_unxform()

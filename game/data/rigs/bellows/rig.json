@@ -1486,6 +1486,28 @@
     "part": "head",
     "max_deg": 20
   },
+  "reach_posture": {
+    "chin": 240,
+    "span": 70,
+    "clear_fwd": 0,
+    "step_back": 0,
+    "lean_back": -6,
+    "look_max": 25,
+    "look_lag": 0.14,
+    "tiptoe": 10,
+    "toe_deg": 16,
+    "toe_tex": "tiptoe",
+    "stretch": 1.35,
+    "hop_max": 75,
+    "hop_hz": 1.4,
+    "pinch_px": 8,
+    "pinch_tex": "grip",
+    "ease_s": 0.25,
+    "low": 0,
+    "low_span": 60,
+    "crouch": 0,
+    "crouch_lean": 0
+  },
   "masks": {
     "upper": [
       "head",

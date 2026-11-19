@@ -194,5 +194,15 @@
   "smear": {
     "auto": false
   },
-  "plant": true
+  "plant": true,
+  "reach": {
+    "target": "grab",
+    "limbs": [
+      "arm_r",
+      "arm_l"
+    ],
+    "ref_f": 0,
+    "stretch": 1.25,
+    "max_px": 420
+  }
 }

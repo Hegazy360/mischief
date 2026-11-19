@@ -21,7 +21,7 @@ import math
 
 import clipkit as K
 import fk
-from clipkit import clip, sfx, prop, clarence_home, sine, smooth
+from clipkit import clip, sfx, prop, clarence_home, sine, smooth, reach
 
 TIPTOE_PX_S = 400.0
 RUN_PX_S = 720.0
@@ -428,7 +428,8 @@ def tinker_q(kit):
 		seq.key(f, p, "in_out_sine", "determined" if f == 0 else None)
 	ev = clarence_home() + [sfx(6, "tinker"), sfx(22, "tinker"), sfx(38, "tinker")]
 	return clip("act_tinker_q", PREP_Q, seq.keys, loop=True, events=ev, tags=["act", "tinker", "rig"], blend_in=4,
-				blend_out=4, plant=True, doc="Rig tier Q (0.8 s): a quick fiddle, 48 f loop.")
+				blend_out=4, plant=True, doc="Rig tier Q (0.8 s): a quick fiddle, 48 f loop.",
+				reach=reach(["arm_r", "arm_l"], 0))
 
 
 def tinker_s(kit):
@@ -451,7 +452,8 @@ def tinker_s(kit):
 		seq.key(f, p, "out_quad" if i % 2 else "in_out_sine", face)
 	ev = clarence_home() + [sfx(4, "tinker_frantic"), sfx(48, "tinker_frantic", vol_db=-2.0)]
 	return clip("act_tinker_s", PREP_S, seq.keys, loop=True, events=ev, tags=["act", "tinker", "rig"], blend_in=4,
-				blend_out=4, plant=True, doc="Rig tier S (1.5 s): frantic, 90 f loop, a glance back at f40.")
+				blend_out=4, plant=True, doc="Rig tier S (1.5 s): frantic, 90 f loop, a glance back at f40.",
+				reach=reach(["arm_r", "arm_l"], 0))
 
 
 def _wipe(kit, head_pt, aim, head=-12.0):
@@ -513,7 +515,9 @@ def tinker_b(kit):
 							sfx(118, "hush_phew")]
 	return clip("act_tinker_b", PREP_B, seq.keys, loop=True, events=ev, tags=["act", "tinker", "rig"], blend_in=4,
 				blend_out=4, plant=True,
-				doc="Rig tier B (2.5 s): hammering (6 slams), a flurry, the brow wipe at f112-128, 150 f loop.")
+				doc="Rig tier B (2.5 s): hammering (6 slams), a flurry, the brow wipe at f112-128, 150 f loop.",
+				# the slams land on the prop; the gloves leave it for the brow wipe (f100-146)
+				reach=reach(["arm_r", "arm_l"], 28, weight=[(0, 1), (96, 1), (104, 0), (138, 0), (146, 1)]))
 
 
 # ================================================================================================ SNICKER (flavour take)

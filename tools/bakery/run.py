@@ -33,7 +33,33 @@ VALIDATE = os.path.join(TOOLS, "validate.py")
 # or they silently rmtree each other's clips mid-bake (seen as validate reading half a clip).
 TMP_ROOT = os.path.join("/tmp", "bakery_frames_" + hashlib.md5(ROOT.encode()).hexdigest()[:8])
 INDEX_KEYS = ("sheet", "frame_w", "frame_h", "count", "accent", "loop", "clip", "amount", "anchor",
-              "durations", "duration", "faces", "ground_speed_px", "ppm", "cols")
+              "durations", "duration", "faces", "ground_speed_px", "ppm", "cols", "hands", "reach")
+# The stage draws the baked cast at this scale (game/proto/stage/show.gd CAST_SCALE): 1 m = ppm x 1.6 stage px.
+STAGE_CAST_SCALE = 1.6
+# A reach clip fails when its hand misses the target by more than this many sprite px at the contact frame
+# (x 1.6 on stage: ~5 stage px, a glove is ~30 across), or by more than REACH_HOLD_TOL (~10 stage px) on any
+# frame while its weight is fully on (the clip's own fiddle carries the hand round the target).
+REACH_TOL = 3.0
+REACH_HOLD_TOL = 6.0
+
+
+def resolve_reach(r: dict, ppm: float, faces: int) -> dict:
+    """A clips.json `reach` in STAGE terms -> the bake's film-plane target `to` (metres from the root on the
+    floor, + = the sprite's right / up). `stage`: {"act": "act4", "at": [x, y] | "mark": name,
+    "stand": x, "dir": +-1} — the point on the 2400x1080 stage, where the actor stands and which way they
+    face (as in the timeline). A plain `to` passes through."""
+    out = {k: v for k, v in r.items() if k != "stage"}
+    st = r.get("stage")
+    if st:
+        lay = json.load(open(os.path.join(ROOT, "game", "proto", st["act"], "art", "layout.json")))
+        at = st.get("at") or lay["marks"][st["mark"]]
+        k = STAGE_CAST_SCALE * ppm
+        out["to"] = [round((float(at[0]) - float(st["stand"])) * float(st.get("dir", 1)) * faces / k, 4),
+                     round((float(lay["floor_px"]) - float(at[1])) / k, 4)]
+        out["stage"] = st
+    if "to" not in out:
+        raise SystemExit(f"[run] reach needs `to` or `stage`: {r}")
+    return out
 
 
 def _length(info: dict) -> float:
@@ -82,6 +108,11 @@ def bake_one(who: str, char: str, lib_dir: str, out_dir: str, c: dict, d: dict) 
         recipe["repeat"] = c["repeat"]
     if "face" in c:
         recipe["face"] = c["face"]
+    if "reach" in c:
+        faces = int(d.get("faces") or 0)
+        if c["reach"].get("stage") and faces == 0:
+            return name, False, f"[run] {who}/{name}: a stage reach needs the character's native facing — bake its locomotion clips first", None
+        recipe["reach"] = resolve_reach(c["reach"], float(d.get("ppm") or 80), faces)
     # props: what this clip holds, plus what the character always wears (Clarence in Hush's braces)
     # unless the clip says "wear": false; scaled so an item is the same size on stage in any hand
     held = list(c.get("props", [])) + (list(d.get("wear", [])) if c.get("wear", True) else [])
@@ -103,7 +134,7 @@ def bake_one(who: str, char: str, lib_dir: str, out_dir: str, c: dict, d: dict) 
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         return name, False, f"[run] {who}/{name}: BAKE FAILED\n{r.stdout[-1500:]}\n{r.stderr[-800:]}", None
-    log = []
+    log = [ln for ln in r.stdout.splitlines() if ln.startswith("[bake] reach")]
     min_change = str(opt(c, d, "min_change", 0.004))
     pr = subprocess.run([sys.executable, PRUNE, frames_dir, "--min-change", min_change],
                         capture_output=True, text=True)
@@ -121,6 +152,13 @@ def bake_one(who: str, char: str, lib_dir: str, out_dir: str, c: dict, d: dict) 
     log.append(v.stdout.rstrip().replace("[validate] ", f"[validate] {who}/{name}: "))
     info = json.load(open(os.path.splitext(sheet_png)[0] + ".json"))
     info["sheet"] = f"{who}/{info['sheet']}"
+    rc = info.get("reach")
+    if rc:
+        ok_r = rc["contact_err_px"] <= REACH_TOL and rc["hold_max_err_px"] <= REACH_HOLD_TOL
+        log.append(f"[reach] {who}/{name}: contact {rc['contact_err_px']} px, worst while on {rc['hold_max_err_px']} px "
+                   f"(tol {REACH_TOL} / {REACH_HOLD_TOL}) {'OK' if ok_r else 'FAIL'}")
+        if not ok_r:
+            return name, False, "\n".join(log), info
     return name, v.returncode == 0, "\n".join(log), info
 
 
@@ -181,7 +219,9 @@ def main() -> int:
         todo = [c for c in spec["clips"] if not clip_wanted or c["name"] in clip_wanted]
         # a character may override cast defaults: its own pixels-per-metre (relative height on
         # stage) and camera angle (KayKit bodies do not all face the same way at rest)
-        dd = {**d, **spec.get("defaults", {}), "cast_ppm": d.get("ppm"), "wear": spec.get("wear", [])}
+        dd = {**d, **spec.get("defaults", {}), "cast_ppm": d.get("ppm"), "wear": spec.get("wear", []),
+              "faces": entry.get("faces") or json.load(open(index_path)).get("cast", {}).get(who, {}).get("faces", 0)
+              if os.path.exists(index_path) else entry.get("faces", 0)}
         entry["ppm"] = dd.get("ppm")
         with ThreadPoolExecutor(max_workers=max(1, a.jobs)) as pool:
             results = list(pool.map(lambda c: bake_one(who, char, lib_dir, out_dir, c, dd), todo))

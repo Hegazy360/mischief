@@ -83,6 +83,12 @@ STOOL_SEAT_H = 150
 # overlay masks micro-gags use (`upper` never touches the feet, the root or the torso).
 BREATH = {"part": "belly", "amp": 0.025, "period_s": 4.0}
 LOOK = {"part": "head", "max_deg": 20}
+# Reach posture (docs/research/animation.md phase 3-4): he stands beside his props (stations stand him off them),
+# so no step back and no crouch -- but a high jar gets a straighten, a look, tiptoe and a pompous little hop.
+REACH_POSTURE = {"chin": 240, "span": 70, "clear_fwd": 0, "step_back": 0, "lean_back": -6, "look_max": 25,
+				 "look_lag": 0.14, "tiptoe": 10, "toe_deg": 16, "toe_tex": "tiptoe", "stretch": 1.35, "hop_max": 75,
+				 "hop_hz": 1.4, "pinch_px": 8, "pinch_tex": "grip", "ease_s": 0.25, "low": 0, "low_span": 60,
+				 "crouch": 0, "crouch_lean": 0}
 FACE_SLOT_PARTS = ["face_eyes", "face_pupils", "face_lids", "face_brows", "face_mouth", "face_blush", "face_sweat",
 				   "face_vein", "face_steam_l", "face_steam_r", "face_singe", "face_pinch", "face_hiccup"]
 ARMS = ["arm_upper_r", "arm_lower_r", "hand_r", "arm_upper_l", "arm_lower_l", "hand_l"]

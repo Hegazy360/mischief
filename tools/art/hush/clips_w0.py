@@ -76,7 +76,9 @@ def pickup(kit):
 	seq.key(48, _plant(kit, kit.pose("h_stand"), ref), "in_out_sine", "grin")
 	return clip("act_pickup", 48, seq.keys, events=clarence_home() + [sfx(8, "rustle", vol_db=-10.0)],
 				tags=["flavour", "pickup"], blend_in=4, blend_out=4, plant=True,
-				doc="Picking something up (48 f): a quick scoop, into the tray, and a proud little straighten.")
+				doc="Picking something up (48 f): a quick scoop, into the tray, and a proud little straighten.",
+				# the scoop reaches into the container; played as an upper-body overlay (no crouch in game)
+				reach=K.reach(["arm_r"], 12, weight=[(0, 0), (6, 1), (18, 1), (26, 0)], ref_root=False))
 
 
 def shrug(kit):
@@ -126,7 +128,11 @@ def rummage(kit):
 				events=clarence_home() + [sfx(12, "rustle", vol_db=-8.0), sfx(44, "rustle", vol_db=-10.0)],
 				tags=["activity", "rummage"], blend_in=4, blend_out=4, plant=True,
 				doc="Rummaging in a container (68 f, loops): both gloves deep in the box, elbows working — the "
-					"pick window plays the same loop.")
+					"pick window plays the same loop.",
+				# full weight while both gloves are in the box (f0 / 24 / 44 / 68), eased off for the right
+				# glove's tosses over her head (a lowered toss path would sweep past the shoulder and snap)
+				reach=K.reach(["arm_r", "arm_l"], 0, weight=[(0, 1), (6, 0.35), (18, 0.35), (24, 1), (30, 0.35),
+															(38, 0.35), (44, 1), (50, 0.35), (62, 0.35), (68, 1)]))
 
 
 def freeze_midjob(kit):

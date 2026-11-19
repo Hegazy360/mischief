@@ -223,6 +223,56 @@ RASTER = {
     "hall_front_door_glow": 1.0, "hall_coat_stand": 1.5,
 }
 
+# Reach grab points (docs/research/animation.md): where a hand goes on each container / rig point, world px
+# (x, y; y up = negative from the floor line), as ((facing right), (facing left)) -- Hush faces whichever way she
+# walked in, and the part of a prop visible in front of her differs per side. Props are drawn centred over their use_x, so Hush's body hides
+# most of each one; these aim at the part VISIBLE in front of her (measured from the real textures by
+# game/tools/anim/prop_spans.gd) -- just under the top for containers (the hand goes in), the middle of that
+# column for rig points. First pass from tools/anim/grab_points.py (`--check` lists hand edits and flags);
+# tune here after the review shots, then `python3 tools/art/house/house_json.py --grab-only`.
+GRAB = {
+    "bathroom_basin_spray": ((1943, -249), (1911, -239)),  # right: nothing solid in front (most forward column at +13); left: nothing solid in front (most forward column at +19)
+    "bathroom_bath_taps": ((2392, -288), (2328, -315)),  # right: nothing solid in front (most forward column at +24)
+    "bathroom_cabinet": ((2171, -451), (2051, -450)),
+    "bathroom_duck": ((2597, -233), (2525, -214)),  # left: nothing solid in front (most forward column at +11)
+    "bedroom_bed": ((3315, -140), (3187, -183)),
+    "bedroom_bedside": ((3470, -192), (3382, -95)),  # left: nothing solid in front (most forward column at +38)
+    "bedroom_pillow": ((3126, -219), (3054, -221)),  # left: nothing solid in front (most forward column at +30)
+    "conservatory_feed_bin": ((4077, -160), (3965, -160)),
+    "conservatory_potting_bench": ((4674, -157), (4562, -157)),
+    "dressing_costume_trunk": ((3863, -137), (3735, -137)),
+    "dressing_dummy": ((4479, -191), (4359, -188)),
+    "dressing_trophy_shelf": ((4353, -401), (4241, -447)),
+    "garden_coin_1": ((5312, -19), (5304, -19)),  # right: nothing solid in front (most forward column at +4); left: nothing solid in front (most forward column at +4)
+    "garden_coin_2": ((5396, -19), (5388, -19)),  # right: nothing solid in front (most forward column at +4); left: nothing solid in front (most forward column at +4)
+    "garden_coin_3": ((5480, -19), (5472, -19)),  # right: nothing solid in front (most forward column at +4); left: nothing solid in front (most forward column at +4)
+    "garden_hose": ((4856, -131), (4784, -131)),  # right: nothing solid in front (most forward column at +36); left: nothing solid in front (most forward column at +36)
+    "garden_marrow": ((5202, -45), (5074, -45)),
+    "garden_spotlight": ((5916, -561), (5836, -551)),  # left: nothing solid in front (most forward column at +39)
+    "hall_clock": ((1345, -534), (1217, -465)),
+    "hall_confiscated_box": ((837, -135), (717, -181)),
+    "hall_mirror": ((1174, -188), (1046, -183)),
+    "hall_phone": ((985, -276), (913, -265)),  # left: nothing solid in front (most forward column at +31)
+    "hall_piggy_bank": ((995, -114), (915, -115)),  # left: nothing solid in front (most forward column at +29)
+    "kitchen_fridge": ((3340, -164), (3220, -164)),
+    "kitchen_fridge_shelf": ((3345, -376), (3217, -378)),
+    "kitchen_honey": ((2998, -378), (2894, -399)),
+    "kitchen_kettle": ((3000, -240), (2888, -224)),
+    "kitchen_pantry_shelf": ((3683, -459), (3555, -459)),
+    "kitchen_pickle_jar": ((3154, -390), (3074, -391)),  # left: nothing solid in front (most forward column at +36)
+    "kitchen_sink_tap": ((3851, -225), (3723, -225)),
+    "landing_boiler_valve": ((1305, -419), (1193, -418)),
+    "parlour_bellows": ((2267, -246), (2195, -244)),  # right: nothing solid in front (most forward column at +17)
+    "parlour_chandelier": ((2388, -529), (2268, -527)),
+    "parlour_fan": ((2777, -403), (2673, -399)),
+    "parlour_gramophone": ((1702, -247), (1582, -130)),
+    "parlour_newspaper": ((2071, -320), (2015, -311)),  # right: nothing solid in front (most forward column at -9)
+    "parlour_piano_wedge": ((1945, -15), (1937, -14)),  # left: nothing solid in front (most forward column at -57)
+    "parlour_recliner": ((2105, -92), (1993, -233)),
+    "parlour_tea_tray": ((2783, -166), (2671, -176)),
+    "stairs_rods": ((1392, -123), (1392, -123)),  # right: nothing solid in front (most forward column at -38); left: nothing solid in front (most forward column at +38)
+}
+
 # Reaction landing targets per room (x only; GDD §4.8 / §5.7)
 LANDINGS = {
     "kitchen": {"sink": 3760, "table": 3450},

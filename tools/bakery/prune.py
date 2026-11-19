@@ -68,6 +68,12 @@ def main() -> None:
     meta["durations"] = [round(d, 4) for d in kdur]
     if "source_frames" in meta:
         meta["source_frames"] = [meta["source_frames"][i] for i in keep]
+    if "hands" in meta:
+        meta["hands"] = {h: [pts[i] for i in keep] for h, pts in meta["hands"].items()}
+    if "reach" in meta:
+        r = meta["reach"]
+        r["w"] = [r["w"][i] for i in keep]
+        r["err_px"] = {h: [e[i] for i in keep] for h, e in r["err_px"].items()}
     meta["accent"] = keep.index(accent) if accent in keep else 0
     meta["pruned"] = len(paths) - len(keep)
     with open(mp, "w") as fh:

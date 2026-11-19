@@ -87,7 +87,7 @@
    "t": 7.6,
    "do": "clip",
    "who": "hush",
-   "name": "tinker",
+   "name": "tinker_gramophone",
    "dir": 1
   },
   {
@@ -209,7 +209,7 @@
    "t": 18.0,
    "do": "clip",
    "who": "hush",
-   "name": "saw",
+   "name": "saw_pedestal",
    "dir": 1
   },
   {
@@ -393,7 +393,7 @@
    "t": 29.2,
    "do": "clip",
    "who": "hush",
-   "name": "interact",
+   "name": "interact_butter",
    "dir": 1
   },
   {
